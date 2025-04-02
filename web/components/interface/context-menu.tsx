@@ -24,7 +24,9 @@ export default function ContextMenu({
     >
       <Popover
         onClose={() => {
-          console.log("Popover closed");
+          if (process.env.NODE_ENV === 'development') {
+            console.log("Popover closed");
+          }
           setState({ isOpen: false, x: 0, y: 0 });
         }}
         isOpen={state.isOpen}
