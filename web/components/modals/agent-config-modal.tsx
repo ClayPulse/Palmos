@@ -27,7 +27,7 @@ function AgentConfigs({
           <div className="flex h-8 w-8 items-center justify-center">
             <Icon
               name="smart_toy"
-              className="!text-[28px]"
+              className="text-[28px]!"
               variant="outlined"
             />
           </div>

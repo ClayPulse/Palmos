@@ -76,7 +76,7 @@ export default function Tabs({
       >
         <AnimatePresence>
           <motion.div
-            className="absolute z-10 h-8 rounded-lg bg-content4 shadow-sm"
+            className="absolute z-10 h-8 rounded-lg bg-content4 shadow-xs"
             animate={{ x: targetLocation, width: targetWidth }} // Only animate x
             transition={{
               type: "spring",

@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createRoot, Root } from "react-dom/client";
-import { loadRemote } from "@module-federation/runtime";
+import { loadRemote, preloadRemote } from "@module-federation/runtime";
 import React from "react";
 
 export default function ExtensionLoader({
@@ -41,16 +41,20 @@ export default function ExtensionLoader({
 
     let isMounted = true;
 
-    loadRemote(`${moduleId}/main`).then((mod) => {
-      // Prevent state updates if component is unmounted
-      if (!isMounted) return;
+    loadRemote(`${moduleId}/main`)
+      .then((module) => {
+        // Prevent state updates if component is unmounted
+        if (!isMounted) return;
 
-      // @ts-expect-error Types are not available since @module-federation/enhanced
-      // cannot work in Nextjs App router. Hence types are not generated.
-      const { default: LoadedExtension, Config } = mod;
+        // @ts-expect-error Types are not available since @module-federation/enhanced
+        // cannot work in Nextjs App router. Hence types are not generated.
+        const { default: LoadedExtension, Config } = module;
 
-      renderExtension(LoadedExtension);
-    });
+        renderExtension(LoadedExtension);
+      })
+      .catch((error) => {
+        console.error("Error loading remote module:", error);
+      });
 
     return () => {
       // Unmount React module inside the iframe.

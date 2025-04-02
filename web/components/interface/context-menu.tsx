@@ -2,7 +2,7 @@
 
 import { ContextMenuState } from "@/lib/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
-import { JSX, useEffect, useState } from "react";
+import { JSX } from "react";
 
 export default function ContextMenu({
   children,
@@ -13,9 +13,6 @@ export default function ContextMenu({
   state: ContextMenuState;
   setState: (state: ContextMenuState) => void;
 }) {
-  useEffect(() => {
-    console.log("State changed:", state);
-  }, [state]);
 
   return (
     <div

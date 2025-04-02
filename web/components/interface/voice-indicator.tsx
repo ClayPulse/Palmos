@@ -34,7 +34,7 @@ export default function VoiceIndicator() {
                 <PuffLoader color={colors.green["300"]} size={24} />
               ) : (
                 <ClockLoader
-                  className="!shadow-[0px_0px_0px_2px_inset] !shadow-content2-foreground [&>span]:!bg-content2-foreground"
+                  className="shadow-[0px_0px_0px_2px_inset]! shadow-content2-foreground! [&>span]:bg-content2-foreground!"
                   size={24}
                 />
               )}

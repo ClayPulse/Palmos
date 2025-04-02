@@ -105,7 +105,7 @@ export default function ViewDisplayArea() {
   return (
     <div className="flex h-full w-full flex-col p-1">
       <div className="flex h-full w-full flex-col items-start justify-between gap-1.5 overflow-hidden rounded-xl bg-default p-2">
-        <div className={`min-h-0 w-full flex-grow`}>
+        <div className={`min-h-0 w-full grow`}>
           {!activeFileView ? (
             <div className="flex h-full w-full flex-col items-center justify-center gap-y-1 pb-12 text-default-foreground">
               <h1 className="text-center text-2xl font-bold">
@@ -128,7 +128,7 @@ export default function ViewDisplayArea() {
         <AnimatePresence>
           {editorContext?.editorStates?.isChatViewOpen && (
             <motion.div
-              className="h-[60%] w-full flex-shrink-0"
+              className="h-[60%] w-full shrink-0"
               // Enter from bottom and exit to bottom
               initial={{ y: "100%" }}
               animate={{ y: 0 }}

@@ -11,7 +11,7 @@ function MenuPanel({ children }: { children?: React.ReactNode }) {
     <>
       {isLandscape ? (
         <motion.div
-          className="z-30 hidden h-full w-[400px] flex-shrink-0 md:block"
+          className="z-30 hidden h-full w-[400px] shrink-0 md:block"
           initial={{
             x: -400,
           }}

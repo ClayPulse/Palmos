@@ -32,10 +32,8 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "build/next/types/**/*.ts",
     "next-env.d.ts",
-    "../build/next/types/**/*.ts",
-    "../npm-packages/react-api/src/hooks/use-orc.ts"
+    "../build/next/types/**/*.ts"
   ],
   "exclude": [
     "node_modules",

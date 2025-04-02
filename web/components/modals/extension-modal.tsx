@@ -63,10 +63,10 @@ function EnableCheckBox({
           isSelected ? (
             <Icon
               name="check_circle_outline"
-              className="!text-success-300 dark:!text-success-400"
+              className="text-success-300! dark:text-success-400!"
             />
           ) : (
-            <Icon name="block" className="!text-danger" />
+            <Icon name="block" className="text-danger!" />
           )
         }
         variant="faded"
