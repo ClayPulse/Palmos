@@ -54,19 +54,21 @@ export default function RemoteExtensionProvider({
   // }, []);
 
   useEffect(() => {
-    const pattern = /__federation_expose_main\.globals\.css/;
+    // Modify the href to point to an empty CSS file
+    // to prevent federation module's css from loading
+    // into the main app.
+    //
+    // This is a workaround for the issue where
+    // the CSS from the federated module is loaded
+    // into the main app and overrides the main app's CSS.
+
+    // TODO: Use mf-manifest.json to get the css file name
+    const pattern = /\.css/;
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (node instanceof HTMLLinkElement && pattern.test(node.href)) {
             console.warn("Removing federated CSS before it loads:", node.href);
-            // Modify the href to point to an empty CSS file
-            // to prevent federation module's css from loading
-            // into the main app.
-            //
-            // This is a workaround for the issue where
-            // the CSS from the federated module is loaded
-            // into the main app and overrides the main app's CSS.
             node.href = "/empty.css";
           }
         });
