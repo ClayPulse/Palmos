@@ -10,10 +10,10 @@ export function WrappedHeroUIProvider({
   children: React.ReactNode;
 }) {
   return (
-    <HeroUIProvider className="h-full w-full">
-      <ThemeProvider attribute="class">
+    <ThemeProvider attribute={["class", "data-theme"]}>
+      <HeroUIProvider className="h-full w-full">
         <div className="h-full w-full bg-white dark:bg-black">{children}</div>
-      </ThemeProvider>
-    </HeroUIProvider>
+      </HeroUIProvider>
+    </ThemeProvider>
   );
 }

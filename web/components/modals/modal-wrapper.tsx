@@ -55,7 +55,7 @@ export default function ModalWrapper({
               size="sm"
               variant="light"
             >
-              <Icon name="arrow_back" className="!text-[18px]" />
+              <Icon name="arrow_back" className="text-[18px]!" />
             </Button>
           )}
 

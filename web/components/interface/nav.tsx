@@ -57,14 +57,14 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
 
   return (
-    <div className="flex h-screen w-full flex-col overflow-x-hidden">
+    <div className="grid grid-rows-[max-content_auto] h-screen w-full flex-col overflow-x-hidden">
       <PasswordScreen
         isOpen={isPasswordScreenOpen}
         setIsOpen={setIsPasswordScreenOpen}
       />
 
       {isShowNavbar && (
-        <div className="fixed z-40 h-12 w-full">
+        <div className="z-40 h-12 w-full">
           <div
             className={
               "grid h-12 w-full grid-cols-3 grid-rows-1  px-2 py-1 text-default-foreground"
@@ -113,13 +113,13 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       )}
 
       <div
-        className={`relative flex h-full w-full overflow-hidden ${isShowNavbar ? "pt-[48px]" : ""}`}
+        className={`relative flex h-full w-full overflow-hidden`}
       >
         {isShowNavbar && (
           <NavMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
         )}
 
-        <div className="min-w-0 flex-grow">{children}</div>
+        <div className="min-w-0 grow">{children}</div>
       </div>
     </div>
   );

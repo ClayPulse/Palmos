@@ -92,7 +92,7 @@ export default function PasswordInput({
               onPress={onDelete}
               size="sm"
             >
-              <Icon name="delete" className="!text-red-500" />
+              <Icon name="delete" className="text-red-500!" />
             </Button>
           )}
           <Button

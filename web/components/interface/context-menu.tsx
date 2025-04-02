@@ -1,11 +1,7 @@
 "use client";
 
 import { ContextMenuState } from "@/lib/types";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@heroui/react";
+import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { JSX } from "react";
 
 export default function ContextMenu({
@@ -28,6 +24,9 @@ export default function ContextMenu({
     >
       <Popover
         onClose={() => {
+          if (process.env.NODE_ENV === 'development') {
+            console.log("Popover closed");
+          }
           setState({ isOpen: false, x: 0, y: 0 });
         }}
         isOpen={state.isOpen}

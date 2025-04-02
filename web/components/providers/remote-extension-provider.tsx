@@ -4,30 +4,28 @@ import { init, registerRemotes } from "@module-federation/runtime";
 import React, { useContext, useEffect } from "react";
 import { ReactNode } from "react";
 import ReactDOM from "react-dom";
-import { Workbox } from "workbox-window";
 import { EditorContext } from "./editor-context-provider";
-import { Extension } from "@/lib/types";
 
 init({
   name: "pulse_editor",
   remotes: [],
   shared: {
     react: {
-      version: "19.0.0-rc-65e06cb7-20241218",
+      version: "19.1.0",
       scope: "default",
       lib: () => React,
       shareConfig: {
         singleton: true,
-        requiredVersion: "19.0.0-rc-65e06cb7-20241218",
+        requiredVersion: "19.1.0",
       },
     },
     "react-dom": {
-      version: "19.0.0-rc-65e06cb7-20241218",
+      version: "19.1.0",
       scope: "default",
       lib: () => ReactDOM,
       shareConfig: {
         singleton: true,
-        requiredVersion: "19.0.0-rc-65e06cb7-20241218",
+        requiredVersion: "19.1.0",
       },
     },
     // Share Workbox configuration as a module
@@ -47,13 +45,40 @@ export default function RemoteExtensionProvider({
 }) {
   const editorContext = useContext(EditorContext);
 
+  /* Add service worker to allow offline access to extensions */
   // useEffect(() => {
-  //   // Add service worker to allow offline access to extensions
   //   if ("serviceWorker" in navigator) {
   //     const wb = new Workbox("/service-worker.js");
   //     wb.register();
   //   }
   // }, []);
+
+  useEffect(() => {
+    // Modify the href to point to an empty CSS file
+    // to prevent federation module's css from loading
+    // into the main app.
+    //
+    // This is a workaround for the issue where
+    // the CSS from the federated module is loaded
+    // into the main app and overrides the main app's CSS.
+
+    // TODO: Use mf-manifest.json to get the css file name
+    const pattern = /\.css/;
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        mutation.addedNodes.forEach((node) => {
+          if (node instanceof HTMLLinkElement && pattern.test(node.href)) {
+            console.warn("Removing federated CSS before it loads:", node.href);
+            node.href = "/empty.css";
+          }
+        });
+      });
+    });
+
+    observer.observe(document.head, { childList: true, subtree: false });
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     // Register all extensions

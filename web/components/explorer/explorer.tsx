@@ -26,7 +26,7 @@ export default function Explorer({
   const { platformApi } = usePlatformApi();
   const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
     useState(false);
-  const { openFileView} = useViewManager();
+  const { openFileView } = useViewManager();
 
   const rootGroupRef = useRef<TreeViewGroupRef | null>(null);
 
@@ -123,7 +123,7 @@ export default function Explorer({
   // Choose project home path
   if (!editorContext?.persistSettings?.projectHomePath) {
     return (
-      <div className="h-full w-full space-y-2 bg-content2 p-4">
+      <div className="bg-content2 h-full w-full space-y-2 p-4">
         <p>
           You have not set a project home path yet. Please set a project home
           path to continue. All your projects will be saved in this directory.
@@ -143,14 +143,14 @@ export default function Explorer({
   // Browse inside a project
   if (editorContext?.editorStates.project) {
     return (
-      <div className="relative h-full w-full bg-content2 px-4 py-2">
+      <div className="bg-content2 relative h-full w-full px-4 py-2">
         {editorContext.editorStates.projectContent?.length === 0 && (
-          <div className="pointer-events-none absolute left-0 top-0 m-0 flex h-full w-full flex-col items-center justify-center pb-16">
+          <div className="pointer-events-none absolute top-0 left-0 m-0 flex h-full w-full flex-col items-center justify-center pb-16">
             <p>Empty content. Create a new file to get started.</p>
           </div>
         )}
         <div className="flex h-full w-full flex-col space-y-2">
-          <div className="flex h-10 w-full items-center rounded-xl bg-default px-3 text-default-foreground">
+          <div className="bg-default text-default-foreground flex h-10 w-full items-center rounded-xl px-3">
             <div className="flex w-full">
               <Button
                 isIconOnly
@@ -166,7 +166,11 @@ export default function Explorer({
                 size="sm"
                 onPress={startCreatingNewFile}
               >
-                <Icon uri="/icons/add-file" className="-translate-x-0.5" />
+                <Icon
+                  uri="/icons/add-file"
+                  className="-translate-x-0.5"
+                  isThemed
+                />
               </Button>
             </div>
             <div className="flex">
@@ -201,7 +205,7 @@ export default function Explorer({
   // Pick project
   else {
     return (
-      <div className="h-full w-full space-y-2 overflow-y-auto bg-content2 p-4">
+      <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto p-4">
         <Button
           className="w-full"
           onPress={() => {

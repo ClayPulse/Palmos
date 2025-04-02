@@ -33,7 +33,7 @@ function ConsoleNavBar({
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   return (
-    <div className="flex h-10 w-full flex-shrink-0 items-center bg-content2 text-content2-foreground">
+    <div className="flex h-10 w-full shrink-0 items-center bg-content2 text-content2-foreground">
       <Tabs
         tabItems={
           consoles?.map((extension) => {
@@ -80,7 +80,7 @@ function ConsoleNavBar({
         </Tooltip>
         <AgentConfigModal isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
-      <div className="flex flex-grow justify-end pr-2">
+      <div className="flex grow justify-end pr-2">
         {/* <Tooltip content="Refresh agent instance">
           <Button
             isIconOnly
@@ -256,7 +256,7 @@ export default function AgenticConsolePanel() {
   //       <div className="pt-0.5">
   //         <Avatar />
   //       </div>
-  //       <div className="flex w-full min-w-0 flex-grow flex-col space-y-1.5">
+  //       <div className="flex w-full min-w-0 grow flex-col space-y-1.5">
   //         <div className="flex h-4 space-x-3">
   //           <p className="font-bold">
   //             {message.from === "User" ? "You" : message.from}
@@ -287,14 +287,14 @@ export default function AgenticConsolePanel() {
 
         {/* <div
           ref={chatListRef}
-          className="min-h-0 w-full flex-grow space-y-2 overflow-y-auto px-4 py-1"
+          className="min-h-0 w-full grow space-y-2 overflow-y-auto px-4 py-1"
         >
           {currentChatHistory.map((message, index) => (
             <MessageBlock key={index} message={message} />
           ))}
           {isThinking && (
             <div className="flex w-full justify-center">
-              <BeatLoader className="[&>span]:!bg-content1-foreground" />
+              <BeatLoader className="[&>span]:bg-content1-foreground!" />
             </div>
           )}
         </div> */}

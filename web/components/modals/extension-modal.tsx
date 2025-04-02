@@ -16,7 +16,6 @@ import toast from "react-hot-toast";
 import { useContext, useEffect, useState } from "react";
 import ContextMenu from "../interface/context-menu";
 import Tabs from "../misc/tabs";
-import Loading from "../interface/loading";
 import { EditorContext } from "../providers/editor-context-provider";
 
 function EnableCheckBox({
@@ -64,10 +63,10 @@ function EnableCheckBox({
           isSelected ? (
             <Icon
               name="check_circle_outline"
-              className="!text-success-300 dark:!text-success-400"
+              className="text-success-300! dark:text-success-400!"
             />
           ) : (
-            <Icon name="block" className="!text-danger" />
+            <Icon name="block" className="text-danger!" />
           )
         }
         variant="faded"
@@ -130,11 +129,11 @@ function ExtensionPreview({ extension }: { extension: Extension }) {
             const parent = current.parentElement as HTMLElement;
             const parentRect = parent.getBoundingClientRect();
 
-            setContextMenuState({
+            setContextMenuState(() => ({
               x: e.clientX - parentRect.left,
               y: e.clientY - parentRect.top,
               isOpen: true,
-            });
+            }));
           }}
         ></Button>
         <ContextMenu state={contextMenuState} setState={setContextMenuState}>
