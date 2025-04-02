@@ -1,12 +1,8 @@
 "use client";
 
 import { ContextMenuState } from "@/lib/types";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@heroui/react";
-import { JSX } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { JSX, useEffect, useState } from "react";
 
 export default function ContextMenu({
   children,
@@ -17,6 +13,9 @@ export default function ContextMenu({
   state: ContextMenuState;
   setState: (state: ContextMenuState) => void;
 }) {
+  useEffect(() => {
+    console.log("State changed:", state);
+  }, [state]);
 
   return (
     <div
@@ -28,6 +27,7 @@ export default function ContextMenu({
     >
       <Popover
         onClose={() => {
+          console.log("Popover closed");
           setState({ isOpen: false, x: 0, y: 0 });
         }}
         isOpen={state.isOpen}
