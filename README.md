@@ -97,9 +97,9 @@ Then you can rebuild native dependencies in `desktop/` using.
 # For Linux
 ./node_modules/.bin/electron-rebuild -m desktop -v electron_version
 ```
-For example, Electron may warn you need NODE_MODULE_VERSION 128. The corresponding Electron version to NODE_MODULE_VERSION 128 is 32.x.x. If you have electron@32.3.3 installed (check desktop/package.json), you can run:
+For example, Electron may warn you need NODE_MODULE_VERSION xxx. If you have electron@35.0.2 installed (check desktop/package.json), you can run:
 ```
-./node_modules/.bin/electron-rebuild -m desktop -v 32.3.3
+./node_modules/.bin/electron-rebuild -m desktop -v 35.0.2
 ```
 
 
