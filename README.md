@@ -1,9 +1,14 @@
-# Pulse Editor
+<p align="center" style="font-size: 32px;">
+Pulse Editor
+</p>
+
 > [!IMPORTANT]
 > Pulse Editor is still in its early development stage, with a BETA release planned for the end of Q2 2025. Until then, there is no official stable support for extension marketplaces. However, you can explore the platform by developing your own extensions or running our official extensions locally. This is a great opportunity to get an early look at Pulse Editor and start experimenting with its capabilities! See [Extension Development](#pulse-editor-extension-development) below.
 
+
+
 <p align="center">
-  <img alt="Pulse Editor" src="shared-assets/icons/pulse_logo.svg">
+  <img alt="Pulse Editor" src="shared-assets/icons/pulse_logo.svg"/>
 </p>
 
 <div align="center">
@@ -15,7 +20,6 @@
 # Table of Contents
 <span style="font-size: 16px;">
 
-- [Pulse Editor](#pulse-editor)
 - [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
 - [Documentation](#documentation)
@@ -39,9 +43,9 @@
 </span>
 
 # Introduction
-Pulse Editor is an editor designed to develop and create with AI naturally and fluently on cross-platform devices. 
+Pulse Editor is a cross-platform tool built to make AI-powered creation and development feel intuitive and seamless.
 # Documentation
-The documentation will be available at https://docs.pulse-ediotr.com (WIP). You can find documentation repository [here](https://github.com/ClayPulse/docs).
+The documentation will be available at https://docs.pulse-ediotr.com. You can find documentation repository [here](https://github.com/ClayPulse/docs).
 
 # Getting Started -- User Guide
 ## Web Client

@@ -28,7 +28,7 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
   return (
     <>
       <div>
-        <p className="pb-2 text-medium font-bold">Editor Settings</p>
+        <p className="text-medium pb-2 font-bold">Editor Settings</p>
         <div className="w-full space-y-2">
           {editorContext?.persistSettings?.projectHomePath ? (
             <Input
@@ -59,7 +59,7 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             />
           ) : (
             <div className="space-y-1">
-              <p className="text-sm text-content4-foreground">
+              <p className="text-content4-foreground text-sm">
                 All your projects will be saved in this folder.
               </p>
               <Button
@@ -75,7 +75,7 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
         </div>
       </div>
       <div>
-        <p className="pb-2 text-medium font-bold">STT</p>
+        <p className="text-medium pb-2 font-bold">STT</p>
         <div className="w-full space-y-2">
           <Select
             items={sttProviderOptions}
@@ -183,7 +183,7 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
       </div>
       <Divider />
       <div>
-        <p className="pb-2 text-medium font-bold">LLM</p>
+        <p className="text-medium pb-2 font-bold">LLM</p>
         <div className="w-full space-y-2">
           <Select
             items={llmProviderOptions}
@@ -291,7 +291,7 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
       </div>
       <Divider />
       <div>
-        <p className="pb-2 text-medium font-bold">TTS</p>
+        <p className="text-medium pb-2 font-bold">TTS</p>
         <div className="w-full space-y-2">
           <Select
             items={ttsProviderOptions}
@@ -427,7 +427,7 @@ function SecuritySettings({
 
   return (
     <div>
-      <p className="pb-2 text-medium font-bold">Security</p>
+      <p className="text-medium pb-2 font-bold">Security</p>
       <p className="text-small">
         Use a password to encrypt the API tokens. You will need to re-enter all
         API tokens if you forget the password.
@@ -546,13 +546,13 @@ function DevExtensionSettings({
 
   return (
     <div>
-      <p className="pb-2 text-medium font-bold">Dev Extension Settings</p>
+      <p className="text-medium pb-2 font-bold">Dev Extension Settings</p>
       <div className="w-full space-y-2">
         <div>
           <p className="text-small font-bold">
             File Type Default Extension Mapping
           </p>
-          <div className="mb-4 mt-1 space-y-2">
+          <div className="mt-1 mb-4 space-y-2">
             {fileTypeEntries.length === 0 ? (
               <p className="text-small">
                 No file types found. Please install extensions that support file
@@ -562,7 +562,7 @@ function DevExtensionSettings({
               fileTypeEntries.map(([fileType, extensions]) => {
                 return (
                   <div key={fileType} className="grid grid-cols-2">
-                    <p className="self-center text-medium">{"." + fileType}</p>
+                    <p className="text-medium self-center">{"." + fileType}</p>
                     <Select
                       aria-label="Select default extension"
                       size="sm"
@@ -640,9 +640,7 @@ function DevExtensionSettings({
             size="md"
             isRequired
             value={devExtensionRemoteOrigin}
-            onValueChange={(value) => {
-              setDevExtensionRemoteOrigin(value);
-            }}
+            onValueChange={setDevExtensionRemoteOrigin}
           />
           <Input
             label="Extension ID"
@@ -650,9 +648,7 @@ function DevExtensionSettings({
             isRequired
             placeholder={"(extension_id)"}
             value={devExtensionId}
-            onValueChange={(value) => {
-              setDevExtensionId(value);
-            }}
+            onValueChange={setDevExtensionId}
           />
           <Input
             label="Extension Version"
@@ -660,9 +656,7 @@ function DevExtensionSettings({
             isRequired
             placeholder={"(version)"}
             value={devExtensionVersion}
-            onValueChange={(value) => {
-              setDevExtensionVersion(value);
-            }}
+            onValueChange={setDevExtensionVersion}
           />
           <Button
             onPress={() => {
@@ -701,7 +695,7 @@ function ExtensionDefinedSettings({
 }) {
   return (
     <div>
-      <p className="pb-2 text-medium font-bold">Extension Defined Settings</p>
+      <p className="text-medium pb-2 font-bold">Extension Defined Settings</p>
       <p className="text-small font-bold">Pulse Editor Terminal</p>
       <div className="w-full space-y-2">
         <Input
