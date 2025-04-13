@@ -19,8 +19,13 @@
 		"dist"
 	],
 	"dependencies": {
+		"execa": "^9.5.2",
 		"ink": "^5.2.0",
+		"ink-select-input": "^6.0.0",
+		"ink-spinner": "^5.0.0",
+		"ink-text-input": "^6.0.0",
 		"meow": "^13.2.0",
+		"openid-client": "^6.4.2",
 		"react": "^18.0.32"
 	},
 	"devDependencies": {
