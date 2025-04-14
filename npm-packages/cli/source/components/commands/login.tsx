@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Box, Newline, Text, useApp} from 'ink';
 import SelectInput from 'ink-select-input';
-import {Flags} from '../flags.js';
+import {Flags} from '../../lib/cli-flags.js';
 import {Result} from 'meow';
 import TextInput, {UncontrolledTextInput} from 'ink-text-input';
 import Spinner from 'ink-spinner';

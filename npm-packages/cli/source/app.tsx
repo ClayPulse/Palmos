@@ -1,9 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {Text} from 'ink';
 import {Result} from 'meow';
-import {commandsManual} from './manual.js';
-import Login from './components/login.js';
-import {Flags} from './flags.js';
+import Login from './components/commands/login.js';
+import {Flags} from './lib/cli-flags.js';
+import Publish from './components/commands/publish.js';
+import Help from './components/commands/help.js';
+import Chat from './components/commands/chat.js';
+import Logout from './components/commands/logout.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
@@ -13,35 +15,13 @@ export default function App({cli}: {cli: Result<Flags>}) {
 		setCommand(cmd);
 	}, [cli.input]);
 
-	if (!command) return null;
-	else if (command === 'help') {
-		const subCommand = cli.input[1];
-		if (!subCommand) {
-			return <Text>{cli.help}</Text>;
-		} else {
-			return <Text>{commandsManual[subCommand]}</Text>;
-		}
-	} else if (command === 'chat') {
-		const message = cli.input[1];
-		return (
-			<>
-				<Text>
-					Hello, <Text color="green">{message}</Text>
-				</Text>
-			</>
-		);
-	} else if (command === 'login') {
-		return <Login cli={cli} />;
-	} else if (command === 'logout') {
-		return <Text>Logout from the Pulse Editor Platform</Text>;
-	} else if (command === 'publish') {
-		return (
-			<Text>
-				Publish Pulse Editor Extension in current directory to the Pulse Editor
-				Platform
-			</Text>
-		);
-	}
-
-	return <Text>{cli.help}</Text>;
+	return (
+		<>
+			{command === 'help' && <Help cli={cli} />}
+			{command === 'chat' && <Chat cli={cli} />}
+			{command === 'login' && <Login cli={cli} />}
+			{command === 'logout' && <Logout cli={cli} />}
+			{command === 'publish' && <Publish cli={cli} />}
+		</>
+	);
 }
