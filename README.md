@@ -45,7 +45,7 @@ Pulse Editor
 # Introduction
 Pulse Editor is a cross-platform tool built to make AI-powered creation and development feel intuitive and seamless.
 # Documentation
-The documentation will be available at https://docs.pulse-ediotr.com. You can find documentation repository [here](https://github.com/ClayPulse/docs).
+The documentation will be available at https://docs.pulse-editor.com. You can find documentation repository [here](https://github.com/ClayPulse/docs).
 
 # Getting Started -- User Guide
 ## Web Client
