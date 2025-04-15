@@ -31,10 +31,20 @@ const publish = `\
   publish         Publish Pulse Editor Extension in current directory to the Pulse Editor Platform.
 `;
 
+const create = `\
+  create          Create a new Pulse App using the starter template.
+                  Flags:
+                    --framework, -f [framework]
+                      The framework to use for the new app.
+                      Currently available options: react.
+                      Future options: vue, angular, etc.
+`;
+
 export const commandsManual: Record<string, string> = {
 	help,
 	chat,
 	login,
 	logout,
 	publish,
+	create,
 };

@@ -18,6 +18,10 @@ export const flags = defineFlags({
 	flow: {
 		type: 'boolean',
 	},
+	framework: {
+		type: 'string',
+		shortFlag: 'f',
+	},
 });
 
 export type Flags = typeof flags;

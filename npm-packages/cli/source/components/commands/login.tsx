@@ -3,34 +3,31 @@ import {Box, Newline, Text, useApp} from 'ink';
 import SelectInput from 'ink-select-input';
 import {Flags} from '../../lib/cli-flags.js';
 import {Result} from 'meow';
-import TextInput, {UncontrolledTextInput} from 'ink-text-input';
+import TextInput from 'ink-text-input';
 import Spinner from 'ink-spinner';
 import os from 'os';
 import path from 'path';
-import fs from 'fs';
+import {getToken, isTokenInEnv, saveToken} from '../../lib/token.js';
+import {Item} from '../../lib/types.js';
 
-type Item<V> = {
-	key?: string;
-	label: string;
-	value: V;
-};
+type LoginMethod = 'token' | 'flow';
 
 export default function Login({cli}: {cli: Result<Flags>}) {
-	const [loginMethod, setLoginMethod] = useState<string | undefined>(undefined);
-	const [isShowingSelect, setIsShowingSelect] = useState(false);
-	const [isShowingInput, setIsShowingInput] = useState(false);
+	const [loginMethod, setLoginMethod] = useState<LoginMethod | undefined>(
+		undefined,
+	);
 
+	const [isMethodSelected, setIsMethodSelected] = useState(false);
 	const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [token, setToken] = useState<string>('');
 
-	const [isTokenInEnv, setIsTokenInEnv] = useState(false);
 	const [isTokenSaved, setIsTokenSaved] = useState(false);
 
 	const [tokenInput, setTokenInput] = useState<string>('');
 	const [saveTokenInput, setSaveTokenInput] = useState<string>('');
 
-	const loginMethodItems: Item<string>[] = [
+	const loginMethodItems: Item<LoginMethod>[] = [
 		{
 			label: 'Login using access token',
 			value: 'token',
@@ -56,14 +53,6 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 			setLoginMethod('flow');
 		}
 	}, [cli]);
-
-	useEffect(() => {
-		setIsShowingSelect(loginMethod === undefined);
-	}, [loginMethod]);
-
-	useEffect(() => {
-		setIsShowingInput(!isShowingSelect);
-	}, [isShowingSelect]);
 
 	// Check token validity
 	useEffect(() => {
@@ -92,44 +81,15 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 		}
 	}, [token, loginMethod]);
 
-	function saveToken(token: string) {
-		// Save the token to .pulse-editor/config.json in user home directory
-		const configDir = path.join(os.homedir(), '.pulse-editor');
-		const configFile = path.join(configDir, 'config.json');
-		const config = {
-			accessToken: token,
-		};
-		if (!fs.existsSync(configDir)) {
-			fs.mkdirSync(configDir, {recursive: true});
-		}
-		fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
-	}
-
-	function getToken() {
-		// First try to get the token from the environment variable
-		const tokenEnv = process.env['PE_ACCESS_TOKEN'];
-		if (tokenEnv) {
-			setIsTokenInEnv(true);
-			return tokenEnv;
-		}
-
-		// If not found, try to get the token from the config file
-		const configDir = path.join(os.homedir(), '.pulse-editor');
-		const configFile = path.join(configDir, 'config.json');
-		if (fs.existsSync(configFile)) {
-			const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-			if (config.accessToken) {
-				return config.accessToken as string;
-			}
-		}
-
-		// If not found, return undefined
-		return undefined;
-	}
+	useEffect(() => {
+		setTimeout(() => {
+			setIsMethodSelected(loginMethod !== undefined);
+		}, 0);
+	}, [loginMethod]);
 
 	return (
 		<>
-			{isShowingSelect && (
+			{!cli.flags.token && !cli.flags.flow && (
 				<>
 					<Text>Login to the Pulse Editor Platform</Text>
 					<SelectInput
@@ -137,11 +97,14 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 						onSelect={item => {
 							setLoginMethod(item.value);
 						}}
+						isFocused={loginMethod === undefined}
 					/>
+
+					<Text> </Text>
 				</>
 			)}
 
-			{isShowingInput &&
+			{isMethodSelected &&
 				loginMethod === 'token' &&
 				(token.length === 0 ? (
 					<>
@@ -166,7 +129,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 				) : isAuthenticated ? (
 					<>
 						<Text>✅ You are signed in successfully.</Text>
-						{!isTokenInEnv && getToken() !== token && (
+						{!isTokenInEnv() && getToken() !== token && (
 							<>
 								<Text>
 									🟢 It is recommended to save your access token as an
@@ -189,7 +152,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 												setIsTokenSaved(true);
 												setTimeout(() => {
 													exit();
-												}, 100);
+												}, 0);
 											} else {
 												exit();
 											}
@@ -207,7 +170,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 				) : (
 					<Text>Authentication error: please enter valid credentials.</Text>
 				))}
-			{isShowingInput && loginMethod === 'flow' && (
+			{isMethodSelected && loginMethod === 'flow' && (
 				<>
 					<Text>(WIP) Open the following URL in your browser:</Text>
 					<Text>https://pulse-editor.com/login</Text>

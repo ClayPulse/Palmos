@@ -6,6 +6,7 @@ import Publish from './components/commands/publish.js';
 import Help from './components/commands/help.js';
 import Chat from './components/commands/chat.js';
 import Logout from './components/commands/logout.js';
+import Create from './components/commands/create.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
@@ -22,6 +23,7 @@ export default function App({cli}: {cli: Result<Flags>}) {
 			{command === 'login' && <Login cli={cli} />}
 			{command === 'logout' && <Logout cli={cli} />}
 			{command === 'publish' && <Publish cli={cli} />}
+			{command === 'create' && <Create cli={cli} />}
 		</>
 	);
 }
