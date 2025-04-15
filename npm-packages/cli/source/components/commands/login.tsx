@@ -7,7 +7,12 @@ import TextInput from 'ink-text-input';
 import Spinner from 'ink-spinner';
 import os from 'os';
 import path from 'path';
-import {getToken, isTokenInEnv, saveToken} from '../../lib/token.js';
+import {
+	checkToken,
+	getToken,
+	isTokenInEnv,
+	saveToken,
+} from '../../lib/token.js';
 import {Item} from '../../lib/types.js';
 
 type LoginMethod = 'token' | 'flow';
@@ -17,6 +22,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 		undefined,
 	);
 
+	const [isShowLoginMethod, setIsShowLoginMethod] = useState(false);
 	const [isMethodSelected, setIsMethodSelected] = useState(false);
 	const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -43,6 +49,8 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 	// Check login method
 	useEffect(() => {
 		const savedToken = getToken();
+		setIsShowLoginMethod(!savedToken && !cli.flags.token && !cli.flags.flow);
+
 		if (savedToken) {
 			setLoginMethod('token');
 			setToken(savedToken);
@@ -56,22 +64,6 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 
 	// Check token validity
 	useEffect(() => {
-		async function checkToken(token: string) {
-			const res = await fetch('https://pulse-editor.com/api/api-keys/check', {
-				body: JSON.stringify({token}),
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				method: 'POST',
-			});
-
-			if (res.status === 200) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-
 		// Only check token validity when it is set
 		if (loginMethod === 'token' && token.length > 0) {
 			checkToken(token).then(isValid => {
@@ -89,7 +81,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 
 	return (
 		<>
-			{!cli.flags.token && !cli.flags.flow && (
+			{isShowLoginMethod && (
 				<>
 					<Text>Login to the Pulse Editor Platform</Text>
 					<SelectInput

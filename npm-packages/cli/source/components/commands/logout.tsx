@@ -9,7 +9,7 @@ export default function Logout({cli}: {cli: Result<Flags>}) {
 	const [isLoggedOut, setIsLoggedOut] = useState(false);
 
 	useEffect(() => {
-		saveToken('');
+		saveToken(undefined);
 		setIsLoggedOut(true);
 	}, []);
 

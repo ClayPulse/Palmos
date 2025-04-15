@@ -9,7 +9,7 @@ import { flags } from './lib/cli-flags.js';
 const cli = meow(
 	`\
 Usage
-  pulse [commands] [flags]
+  pulse [command] [flags]
 
 Commands
 ${Object.entries(commandsManual)

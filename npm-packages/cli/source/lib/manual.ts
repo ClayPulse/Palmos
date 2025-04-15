@@ -3,7 +3,7 @@ const help = `\
 `;
 
 const chat = `\
-  chat [message]  Chat with the Pulse Editor AI assistant.
+  chat [message]  (WIP) Chat with the Pulse Editor AI assistant.
 
                   Flags:
                     --interactive, -i

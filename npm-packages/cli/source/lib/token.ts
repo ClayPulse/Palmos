@@ -2,7 +2,7 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-export function saveToken(token: string) {
+export function saveToken(token: string | undefined) {
 	// Save the token to .pulse-editor/config.json in user home directory
 	const configDir = path.join(os.homedir(), '.pulse-editor');
 	const configFile = path.join(configDir, 'config.json');
@@ -43,4 +43,20 @@ export function isTokenInEnv() {
 		return true;
 	}
 	return false;
+}
+
+export async function checkToken(token: string) {
+	const res = await fetch('https://pulse-editor.com/api/api-keys/check', {
+		body: JSON.stringify({token}),
+		headers: {
+			'Content-Type': 'application/json',
+		},
+		method: 'POST',
+	});
+
+	if (res.status === 200) {
+		return true;
+	} else {
+		return false;
+	}
 }
