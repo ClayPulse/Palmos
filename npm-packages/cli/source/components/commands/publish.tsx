@@ -73,10 +73,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 				const blob = new Blob([buffer], {
 					type: 'application/zip',
 				});
-				const file = new File([blob], 'dist.zip', {
-					type: 'application/zip',
-				});
-				formData.append('file', file, 'dist.zip');
+				formData.append('file', blob, 'dist.zip');
 
 				// Send the file to the server
 				const res = await fetch(
