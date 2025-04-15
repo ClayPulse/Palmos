@@ -1,6 +1,6 @@
-<p align="center" style="font-size: 32px;">
+<h1 align="center">
 Pulse Editor
-</p>
+</h1>
 
 > [!IMPORTANT]
 > Pulse Editor is still in its early development stage, with a BETA release planned for the end of Q2 2025. Until then, there is no official stable support for extension marketplaces. However, you can explore the platform by developing your own extensions or running our official extensions locally. This is a great opportunity to get an early look at Pulse Editor and start experimenting with its capabilities! See [Extension Development](#pulse-editor-extension-development) below.
