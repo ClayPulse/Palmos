@@ -35,6 +35,7 @@ export function getToken() {
 			console.error('Failed to parse config.json:', error);
 			// Return undefined if JSON parsing fails
 			return undefined;
+		}
 	}
 
 	// If not found, return undefined
