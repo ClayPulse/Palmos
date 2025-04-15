@@ -26,10 +26,15 @@ export function getToken() {
 	const configDir = path.join(os.homedir(), '.pulse-editor');
 	const configFile = path.join(configDir, 'config.json');
 	if (fs.existsSync(configFile)) {
-		const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-		if (config.accessToken) {
-			return config.accessToken as string;
-		}
+		try {
+			const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
+			if (config.accessToken) {
+				return config.accessToken as string;
+			}
+		} catch (error) {
+			console.error('Failed to parse config.json:', error);
+			// Return undefined if JSON parsing fails
+			return undefined;
 	}
 
 	// If not found, return undefined
