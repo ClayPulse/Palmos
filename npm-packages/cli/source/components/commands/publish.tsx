@@ -6,7 +6,6 @@ import {checkToken, getToken} from '../../lib/token.js';
 import Spinner from 'ink-spinner';
 import fs from 'fs';
 import {$} from 'execa';
-import {cwd} from 'process';
 
 export default function Publish({cli}: {cli: Result<Flags>}) {
 	const [isInProjectDir, setIsInProjectDir] = useState(false);
@@ -17,6 +16,10 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 	const [isPublishing, setIsPublishing] = useState(false);
 	const [isPublishingError, setIsPublishingError] = useState(false);
 	const [isPublished, setIsPublished] = useState(false);
+
+	const [failureMessage, setFailureMessage] = useState<string | undefined>(
+		undefined,
+	);
 
 	useEffect(() => {
 		// Check if the current dir contains pulse.config.ts
@@ -32,7 +35,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		async function checkAuth() {
 			const token = getToken();
 			if (token) {
-				const isValid = await checkToken(token);
+				const isValid = await checkToken(token, cli.flags.dev);
 				if (isValid) {
 					setIsAuthenticated(true);
 				}
@@ -77,7 +80,9 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 
 				// Send the file to the server
 				const res = await fetch(
-					'https://pulse-editor.com/api/extension/publish',
+					cli.flags.dev
+						? 'http://localhost:3000/api/extension/publish'
+						: 'https://pulse-editor.com/api/extension/publish',
 					{
 						method: 'POST',
 						headers: {
@@ -91,6 +96,12 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 					setIsPublished(true);
 				} else {
 					setIsPublishingError(true);
+					const msg = await res.json();
+					if (msg.error) {
+						setFailureMessage(msg.error);
+					} else {
+						setFailureMessage('Unknown error occurred while publishing.');
+					}
 				}
 			} catch (error) {
 				console.error('Error uploading the file:', error);
@@ -138,7 +149,12 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 						</Box>
 					)}
 					{isPublishingError && (
-						<Text color={'redBright'}>❌ Failed to publish extension.</Text>
+						<>
+							<Text color={'redBright'}>❌ Failed to publish extension.</Text>
+							{failureMessage && (
+								<Text color={'redBright'}>Error: {failureMessage}</Text>
+							)}
+						</>
 					)}
 					{isPublished && (
 						<Text color={'greenBright'}>

@@ -51,14 +51,19 @@ export function isTokenInEnv() {
 	return false;
 }
 
-export async function checkToken(token: string) {
-	const res = await fetch('https://pulse-editor.com/api/api-keys/check', {
-		body: JSON.stringify({token}),
-		headers: {
-			'Content-Type': 'application/json',
+export async function checkToken(token: string, devMode: boolean) {
+	const res = await fetch(
+		devMode
+			? 'http://localhost:3000/api/api-keys/check'
+			: 'https://pulse-editor.com/api/api-keys/check',
+		{
+			body: JSON.stringify({token}),
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			method: 'POST',
 		},
-		method: 'POST',
-	});
+	);
 
 	if (res.status === 200) {
 		return true;
