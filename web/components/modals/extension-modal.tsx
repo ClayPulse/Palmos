@@ -18,6 +18,121 @@ import ContextMenu from "../interface/context-menu";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
 
+export default function ExtensionModal({
+  isOpen,
+  setIsOpen,
+}: {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}) {
+  const {} = useExtensions();
+  const { platformApi } = usePlatformApi();
+
+  const [recommendedExtensions, setRecommendedExtensions] = useState<
+    Extension[]
+  >([]);
+  const [marketplaceExtensions, setMarketplaceExtensions] = useState<
+    Extension[]
+  >([]);
+  const [installedExtensions, setInstalledExtensions] = useState<Extension[]>(
+    [],
+  );
+
+  const extensionCategories: TabItem[] = [
+    {
+      name: "Recommended",
+      description: "Recommended extensions",
+    },
+    {
+      name: "Marketplace",
+      description: "Browse the marketplace",
+    },
+    {
+      name: "Installed",
+      description: "Installed extensions",
+    },
+  ];
+
+  const [selectedCategory, setSelectedCategory] = useState<TabItem | undefined>(
+    extensionCategories[1],
+  );
+
+  const editorContext = useContext(EditorContext);
+
+  useEffect(() => {
+    if (isOpen) {
+      setInstalledExtensions(editorContext?.persistSettings?.extensions ?? []);
+    }
+  }, [isOpen, editorContext?.persistSettings?.extensions]);
+
+  useEffect(() => {
+    if (selectedCategory?.name === "Marketplace") {
+      console.log("Fetching marketplace extensions...");
+      fetch("https://pulse-editor.com/api/extension/list")
+        .then((res) => res.json())
+        .then((data) => {
+          const fechtedExts: {
+            name: string;
+            version: string;
+            user: {
+              name: string;
+            };
+            org: {
+              name: string;
+            };
+          }[] = data;
+
+          const extensions: Extension[] = fechtedExts.map((ext) => {
+            return {
+              config: {
+                id: ext.name,
+                version: ext.version,
+                author: ext.user ? ext.user.name : ext.org.name,
+              },
+              isEnabled: false,
+              remoteOrigin: `https://cdn.pulse-editor.com/extension`,
+            };
+          });
+          setMarketplaceExtensions(extensions);
+        });
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
+    console.log("Fetched extensions: ", marketplaceExtensions);
+  }, [marketplaceExtensions]);
+
+  return (
+    <ModalWrapper
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      title={"Extension Marketplace"}
+    >
+      <div className="h-full w-full space-y-2 overflow-y-auto px-2">
+        <div className="flex justify-center">
+          {isOpen && (
+            <Tabs
+              tabItems={extensionCategories}
+              selectedItem={selectedCategory}
+              setSelectedItem={setSelectedCategory}
+            />
+          )}
+        </div>
+
+        <ExtensionListView
+          extensions={
+            selectedCategory?.name === "Recommended"
+              ? recommendedExtensions
+              : selectedCategory?.name === "Marketplace"
+                ? marketplaceExtensions
+                : installedExtensions
+          }
+        />
+      </div>
+    </ModalWrapper>
+  );
+}
+
 function EnableCheckBox({
   isEnabled,
   toggleExtension,
@@ -114,7 +229,7 @@ function ExtensionPreview({ extension }: { extension: Extension }) {
   return (
     <div className="w-full">
       <div className="relative h-28 w-full">
-        <div className="absolute right-0.5 top-0 z-10">
+        <div className="absolute top-0 right-0.5 z-10">
           <EnableCheckBox
             isEnabled={isEnabled}
             toggleExtension={toggleExtension}
@@ -139,7 +254,7 @@ function ExtensionPreview({ extension }: { extension: Extension }) {
         <ContextMenu state={contextMenuState} setState={setContextMenuState}>
           <div className="flex flex-col">
             <Button
-              className="h-12 text-medium sm:h-8 sm:text-sm"
+              className="text-medium h-12 sm:h-8 sm:text-sm"
               variant="light"
               onPress={(e) => {
                 uninstallExtension(extension.config.id).then(() => {
@@ -177,81 +292,5 @@ function ExtensionListView({ extensions }: { extensions: Extension[] }) {
         </div>
       )}
     </>
-  );
-}
-
-export default function ExtensionModal({
-  isOpen,
-  setIsOpen,
-}: {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-}) {
-  const {} = useExtensions();
-  const { platformApi } = usePlatformApi();
-
-  const [recommendedExtensions, setRecommendedExtensions] = useState<
-    Extension[]
-  >([]);
-  const [allExtensions, setAllExtensions] = useState<Extension[]>([]);
-  const [installedExtensions, setInstalledExtensions] = useState<Extension[]>(
-    [],
-  );
-
-  const extensionCategories: TabItem[] = [
-    {
-      name: "Recommended",
-      description: "Recommended extensions",
-    },
-    {
-      name: "All",
-      description: "All extensions",
-    },
-    {
-      name: "Installed",
-      description: "Installed extensions",
-    },
-  ];
-
-  const [selectedCategory, setSelectedCategory] = useState<TabItem | undefined>(
-    extensionCategories[2],
-  );
-
-  const editorContext = useContext(EditorContext);
-
-  useEffect(() => {
-    if (isOpen) {
-      setInstalledExtensions(editorContext?.persistSettings?.extensions ?? []);
-    }
-  }, [isOpen, editorContext?.persistSettings?.extensions]);
-
-  return (
-    <ModalWrapper
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      title={"Extension Marketplace"}
-    >
-      <div className="h-full w-full space-y-2 overflow-y-auto px-2">
-        <div className="flex justify-center">
-          {isOpen && (
-            <Tabs
-              tabItems={extensionCategories}
-              selectedItem={selectedCategory}
-              setSelectedItem={setSelectedCategory}
-            />
-          )}
-        </div>
-
-        <ExtensionListView
-          extensions={
-            selectedCategory?.name === "Recommended"
-              ? recommendedExtensions
-              : selectedCategory?.name === "All"
-                ? allExtensions
-                : installedExtensions
-          }
-        />
-      </div>
-    </ModalWrapper>
   );
 }
