@@ -22,6 +22,10 @@ export const flags = defineFlags({
 		type: 'string',
 		shortFlag: 'f',
 	},
+	dev: {
+		type: 'boolean',
+		default: false,
+	},
 });
 
 export type Flags = typeof flags;

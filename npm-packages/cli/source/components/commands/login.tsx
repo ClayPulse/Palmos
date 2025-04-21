@@ -66,7 +66,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 	useEffect(() => {
 		// Only check token validity when it is set
 		if (loginMethod === 'token' && token.length > 0) {
-			checkToken(token).then(isValid => {
+			checkToken(token, cli.flags.dev).then(isValid => {
 				setIsAuthenticated(isValid);
 				setIsCheckingAuth(false);
 			});
