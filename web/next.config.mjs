@@ -1,5 +1,5 @@
 /** @type {import('next').NextConfig} */
-import { GenerateSW } from "workbox-webpack-plugin";
+// import { GenerateSW } from "workbox-webpack-plugin";
 
 const nextConfig = {
   reactStrictMode: true,
@@ -19,15 +19,16 @@ const nextConfig = {
       },
     ];
 
-    config.plugins.push(
-      new GenerateSW({
-        // Configurations specific to your Module Federation setup
-        // these options encourage the ServiceWorkers to get in there fast
-        // and not allow any straggling "old" SWs to hang around
-        clientsClaim: true,
-        skipWaiting: true,
-      }),
-    );
+    config.plugins
+      .push
+      // new GenerateSW({
+      //   // Configurations specific to your Module Federation setup
+      //   // these options encourage the ServiceWorkers to get in there fast
+      //   // and not allow any straggling "old" SWs to hang around
+      //   clientsClaim: true,
+      //   skipWaiting: true,
+      // }),
+      ();
 
     return config;
   },

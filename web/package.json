@@ -38,6 +38,7 @@
       "react-hot-toast": "^2.5.2",
       "react-responsive": "^10.0.1",
       "react-spinners": "^0.16.1",
+      "swr": "^2.3.3",
       "tesseract.js": "^6.0.1"
    },
    "devDependencies": {

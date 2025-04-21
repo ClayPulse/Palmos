@@ -64,10 +64,15 @@ export default function RemoteExtensionProvider({
 
     // TODO: Use mf-manifest.json to get the css file name
     const pattern = /\.css/;
+    const trustedOrigins = ["http://localhost:3000"];
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          if (node instanceof HTMLLinkElement && pattern.test(node.href)) {
+          if (
+            node instanceof HTMLLinkElement &&
+            !trustedOrigins.some((origin) => node.href.startsWith(origin)) &&
+            pattern.test(node.href)
+          ) {
             console.warn("Removing federated CSS before it loads:", node.href);
             node.href = "/empty.css";
           }
