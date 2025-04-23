@@ -37,12 +37,12 @@
       "react-dom": "^19.1.0",
       "react-hot-toast": "^2.5.2",
       "react-responsive": "^10.0.1",
-      "react-spinners": "^0.16.1",
+      "react-spinners": "^0.17.0",
       "swr": "^2.3.3",
       "tesseract.js": "^6.0.1"
    },
    "devDependencies": {
-      "@module-federation/runtime": "^0.12.0",
+      "@module-federation/runtime": "^0.13.0",
       "@tailwindcss/postcss": "^4.1.4",
       "@types/node": "^22",
       "@types/react": "^19",

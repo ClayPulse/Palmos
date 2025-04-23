@@ -365,6 +365,7 @@ function ExtensionPreview({
         </ContextMenu>
       </div>
       <p className="text-center">{extension.config.id}</p>
+      <p className="text-center">{extension.config.version}</p>
     </div>
   );
 }

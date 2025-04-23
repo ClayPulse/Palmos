@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 import ReactDOM from "react-dom";
 import { EditorContext } from "./editor-context-provider";
 
-init({
+const host = init({
   name: "pulse_editor",
   remotes: [],
   shared: {
@@ -64,6 +64,7 @@ export default function RemoteExtensionProvider({
 
     // TODO: Use mf-manifest.json to get the css file name
     const pattern = /\.css/;
+    // CSS from Pulse Editor itself
     const trustedOrigins = ["http://localhost:3000"];
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {

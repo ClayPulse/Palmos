@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createRoot, Root } from "react-dom/client";
-import { loadRemote, preloadRemote } from "@module-federation/runtime";
+import { loadRemote } from "@module-federation/runtime";
 import React from "react";
 
 export default function ExtensionLoader({
@@ -16,7 +16,7 @@ export default function ExtensionLoader({
   const rootRef = useRef<Root | null>(null);
 
   useEffect(() => {
-    function renderExtension(LoadedExtension: any) {
+    async function renderExtension(LoadedExtension: any) {
       if (iframeRef.current) {
         const iframe = iframeRef.current;
         const iframeDoc = iframe.contentWindow?.document;
@@ -29,10 +29,25 @@ export default function ExtensionLoader({
             const root = createRoot(rootElement, {});
             rootRef.current = root;
             // Inject extension global styles into iframe
-            const link = iframeDoc.createElement("link");
-            link.rel = "stylesheet";
-            link.href = `${remoteOrigin}/${moduleId}/${moduleVersion}/__federation_expose_main.globals.css`;
-            iframeDoc.head.appendChild(link);
+            // not always named this, especially in production build
+
+            const manifestUri = `${remoteOrigin}/${moduleId}/${moduleVersion}/mf-manifest.json`;
+            const manifest = await fetch(manifestUri).then((res) => res.json());
+            console.log("Manifest", manifest);
+            const cssFiles = manifest.exposes[0].assets.css.sync as string[];
+
+            for (const cssFile of cssFiles) {
+              if (cssFile.endsWith(".css")) {
+                // Need to make sure CDN returns the correct MIME type for CSS files (e.g. text/css);
+                // otherwise, the CSS file will not be loaded in the iframe.
+                // On local dev server, webpack dev handles MIME types automatically, so this is not an issue.
+                const link = iframeDoc.createElement("link");
+                link.rel = "stylesheet";
+                link.href = `${remoteOrigin}/${moduleId}/${moduleVersion}/${cssFile}`;
+                iframeDoc.head.appendChild(link);
+              }
+            }
+
             root.render(<LoadedExtension />);
           }
         }
