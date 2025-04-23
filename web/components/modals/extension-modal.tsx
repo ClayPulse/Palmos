@@ -2,7 +2,6 @@ import {
   Button,
   Chip,
   Skeleton,
-  Switch,
   tv,
   useCheckbox,
   VisuallyHidden,
@@ -11,12 +10,13 @@ import ModalWrapper from "./modal-wrapper";
 import Icon from "../misc/icon";
 import { ContextMenuState, Extension, TabItem } from "@/lib/types";
 import useExtensions from "@/lib/hooks/use-extensions";
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import toast from "react-hot-toast";
 import { useContext, useEffect, useState } from "react";
 import ContextMenu from "../interface/context-menu";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
+import useSWR from "swr";
+import Loading from "../interface/loading";
 
 export default function ExtensionModal({
   isOpen,
@@ -25,15 +25,6 @@ export default function ExtensionModal({
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }) {
-  const {} = useExtensions();
-  const { platformApi } = usePlatformApi();
-
-  const [recommendedExtensions, setRecommendedExtensions] = useState<
-    Extension[]
-  >([]);
-  const [marketplaceExtensions, setMarketplaceExtensions] = useState<
-    Extension[]
-  >([]);
   const [installedExtensions, setInstalledExtensions] = useState<Extension[]>(
     [],
   );
@@ -59,6 +50,45 @@ export default function ExtensionModal({
 
   const editorContext = useContext(EditorContext);
 
+  const {
+    data: marketplaceExtensions,
+    isLoading: isLoadingMarketplaceExtensions,
+    mutate: mutateMarketplaceExtensions,
+  } = useSWR<Extension[]>(
+    isOpen ? "https://pulse-editor.com/api/extension/list" : null,
+    (url: string) =>
+      fetch(url)
+        .then((res) => res.json())
+        .then((body) => {
+          const fetchedExts: {
+            name: string;
+            version: string;
+            description?: string;
+            displayName?: string;
+            user: {
+              name: string;
+            };
+            org: {
+              name: string;
+            };
+          }[] = body;
+          const extensions: Extension[] = fetchedExts.map((ext) => {
+            return {
+              config: {
+                id: ext.name,
+                version: ext.version,
+                author: ext.user ? ext.user.name : ext.org.name,
+                description: ext.description ?? "No description available",
+                displayName: ext.displayName ?? ext.name,
+              },
+              isEnabled: true,
+              remoteOrigin: `https://cdn.pulse-editor.com/extension`,
+            };
+          });
+          return extensions;
+        }),
+  );
+
   useEffect(() => {
     if (isOpen) {
       setInstalledExtensions(editorContext?.persistSettings?.extensions ?? []);
@@ -66,41 +96,10 @@ export default function ExtensionModal({
   }, [isOpen, editorContext?.persistSettings?.extensions]);
 
   useEffect(() => {
-    if (selectedCategory?.name === "Marketplace") {
-      console.log("Fetching marketplace extensions...");
-      fetch("https://pulse-editor.com/api/extension/list")
-        .then((res) => res.json())
-        .then((data) => {
-          const fechtedExts: {
-            name: string;
-            version: string;
-            user: {
-              name: string;
-            };
-            org: {
-              name: string;
-            };
-          }[] = data;
-
-          const extensions: Extension[] = fechtedExts.map((ext) => {
-            return {
-              config: {
-                id: ext.name,
-                version: ext.version,
-                author: ext.user ? ext.user.name : ext.org.name,
-              },
-              isEnabled: false,
-              remoteOrigin: `https://cdn.pulse-editor.com/extension`,
-            };
-          });
-          setMarketplaceExtensions(extensions);
-        });
+    if (isOpen) {
+      mutateMarketplaceExtensions();
     }
-  }, [selectedCategory]);
-
-  useEffect(() => {
-    console.log("Fetched extensions: ", marketplaceExtensions);
-  }, [marketplaceExtensions]);
+  }, [isOpen]);
 
   return (
     <ModalWrapper
@@ -122,11 +121,19 @@ export default function ExtensionModal({
         <ExtensionListView
           extensions={
             selectedCategory?.name === "Recommended"
-              ? recommendedExtensions
+              ? (marketplaceExtensions ?? [])
               : selectedCategory?.name === "Marketplace"
-                ? marketplaceExtensions
+                ? (marketplaceExtensions ?? [])
                 : installedExtensions
           }
+          isLoading={
+            selectedCategory?.name === "Recommended"
+              ? isLoadingMarketplaceExtensions
+              : selectedCategory?.name === "Marketplace"
+                ? isLoadingMarketplaceExtensions
+                : false
+          }
+          showInstalledChip={selectedCategory?.name !== "Installed"}
         />
       </div>
     </ModalWrapper>
@@ -134,16 +141,18 @@ export default function ExtensionModal({
 }
 
 function EnableCheckBox({
-  isEnabled,
-  toggleExtension,
+  isActive,
+  onPress,
 }: {
-  isEnabled: boolean;
-  toggleExtension: () => void;
+  isActive: boolean;
+  onPress: () => void;
+  activeText?: string;
+  inactiveText?: string;
 }) {
   const { children, isSelected, getBaseProps, getLabelProps, getInputProps } =
     useCheckbox({
-      onValueChange: toggleExtension,
-      isSelected: isEnabled,
+      onValueChange: onPress,
+      isSelected: isActive,
     });
 
   const checkbox = tv({
@@ -193,21 +202,41 @@ function EnableCheckBox({
   );
 }
 
-function ExtensionPreview({ extension }: { extension: Extension }) {
+function ExtensionPreview({
+  extension,
+  showInstalledChip,
+}: {
+  extension: Extension;
+  showInstalledChip: boolean;
+}) {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
     x: 0,
     y: 0,
     isOpen: false,
   });
-  const { disableExtension, enableExtension, uninstallExtension } =
-    useExtensions();
+  const {
+    disableExtension,
+    enableExtension,
+    uninstallExtension,
+    installExtension,
+  } = useExtensions();
+
+  const editorContext = useContext(EditorContext);
+
+  const [isShowInfo, setIsShowInfo] = useState(false);
 
   useEffect(() => {
-    setIsEnabled(extension.isEnabled);
     setIsLoaded(true);
+
+    const foundExt = editorContext?.persistSettings?.extensions?.find(
+      (ext) => ext.config.id === extension.config.id,
+    );
+    setIsInstalled(foundExt !== undefined);
+    setIsEnabled(foundExt?.isEnabled ?? false);
   }, [extension]);
 
   function toggleExtension() {
@@ -228,15 +257,30 @@ function ExtensionPreview({ extension }: { extension: Extension }) {
 
   return (
     <div className="w-full">
-      <div className="relative h-28 w-full">
+      <div
+        className="relative h-28 w-full"
+        onMouseEnter={() => {
+          setIsShowInfo(true);
+        }}
+        // Hide show info when user taps outside of the modal
+        onMouseLeave={() => {
+          setIsShowInfo(false);
+        }}
+      >
         <div className="absolute top-0 right-0.5 z-10">
-          <EnableCheckBox
-            isEnabled={isEnabled}
-            toggleExtension={toggleExtension}
-          />
+          <div className="flex flex-col">
+            {showInstalledChip && isInstalled && (
+              <Chip startContent={<Icon name="save_alt" />} variant="faded">
+                Installed
+              </Chip>
+            )}
+            {isInstalled && (
+              <EnableCheckBox isActive={isEnabled} onPress={toggleExtension} />
+            )}
+          </div>
         </div>
         <Button
-          className="m-0 h-full w-full rounded-md p-0"
+          className="relative m-0 h-full w-full rounded-md p-0"
           onContextMenu={(e) => {
             e.preventDefault();
             // Get parent element position
@@ -251,32 +295,95 @@ function ExtensionPreview({ extension }: { extension: Extension }) {
             }));
           }}
         ></Button>
+        {isShowInfo && (
+          <div className="absolute bottom-0.5 left-1/2 flex w-full -translate-x-1/2 justify-center gap-x-0.5">
+            <Button color="secondary" size="sm">
+              Details
+            </Button>
+            {!isInstalled ? (
+              <Button
+                color="primary"
+                size="sm"
+                onPress={(e) => {
+                  installExtension(extension).then(() => {
+                    toast.success("Extension installed");
+                    setIsInstalled(true);
+                    setIsEnabled(extension.isEnabled);
+                  });
+                }}
+              >
+                Install
+              </Button>
+            ) : (
+              <Button
+                color="danger"
+                size="sm"
+                onPress={(e) => {
+                  uninstallExtension(extension.config.id).then(() => {
+                    toast.success("Extension uninstalled");
+                    setIsInstalled(false);
+                  });
+                }}
+              >
+                Uninstall
+              </Button>
+            )}
+          </div>
+        )}
         <ContextMenu state={contextMenuState} setState={setContextMenuState}>
           <div className="flex flex-col">
-            <Button
-              className="text-medium h-12 sm:h-8 sm:text-sm"
-              variant="light"
-              onPress={(e) => {
-                uninstallExtension(extension.config.id).then(() => {
-                  toast.success("Extension uninstalled");
-                });
-                setContextMenuState({ x: 0, y: 0, isOpen: false });
-              }}
-            >
-              <p className="w-full text-start">Uninstall</p>
-            </Button>
+            {isInstalled ? (
+              <Button
+                className="text-medium h-12 sm:h-8 sm:text-sm"
+                variant="light"
+                onPress={(e) => {
+                  uninstallExtension(extension.config.id).then(() => {
+                    toast.success("Extension uninstalled");
+                  });
+                  setContextMenuState({ x: 0, y: 0, isOpen: false });
+                }}
+              >
+                <p className="w-full text-start">Uninstall</p>
+              </Button>
+            ) : (
+              <Button
+                className="text-medium h-12 sm:h-8 sm:text-sm"
+                variant="light"
+                onPress={(e) => {
+                  installExtension(extension).then(() => {
+                    toast.success("Extension installed");
+                    setIsInstalled(true);
+                    setIsEnabled(extension.isEnabled);
+                  });
+                  setContextMenuState({ x: 0, y: 0, isOpen: false });
+                }}
+              >
+                <p className="w-full text-start">Install</p>
+              </Button>
+            )}
           </div>
         </ContextMenu>
       </div>
       <p className="text-center">{extension.config.id}</p>
+      <p className="text-center">{extension.config.version}</p>
     </div>
   );
 }
 
-function ExtensionListView({ extensions }: { extensions: Extension[] }) {
+function ExtensionListView({
+  extensions,
+  isLoading,
+  showInstalledChip,
+}: {
+  extensions: Extension[];
+  isLoading: boolean;
+  showInstalledChip: boolean;
+}) {
   return (
     <>
-      {extensions.length === 0 ? (
+      {isLoading ? (
+        <Loading />
+      ) : extensions.length === 0 ? (
         <div className="w-full space-y-2">
           <p className="text-center text-lg">No extensions found</p>
           <p>
@@ -287,7 +394,11 @@ function ExtensionListView({ extensions }: { extensions: Extension[] }) {
       ) : (
         <div className="grid grid-cols-2 gap-1">
           {extensions.map((ext) => (
-            <ExtensionPreview extension={ext} key={ext.config.id} />
+            <ExtensionPreview
+              extension={ext}
+              key={ext.config.id}
+              showInstalledChip={showInstalledChip}
+            />
           ))}
         </div>
       )}

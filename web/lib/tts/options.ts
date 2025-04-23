@@ -16,6 +16,14 @@ export const ttsProviderOptions: TTSProviderOption[] = [
         model: "tts-1",
         isSupported: true,
       },
+      {
+        model: "tts-1-hd",
+        isSupported: true,
+      },
+      {
+        model: "gpt-4o-mini-tts",
+        isSupported: true,
+      },
     ],
   },
   {

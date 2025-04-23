@@ -16,6 +16,14 @@ export const sttProviderOptions: STTProviderOption[] = [
         model: "whisper-1",
         isSupported: true,
       },
+      {
+        model: "gpt-4o-transcribe",
+        isSupported: true,
+      },
+      {
+        model: "gpt-4o-mini-transcribe",
+        isSupported: true,
+      },
     ],
   },
 ];

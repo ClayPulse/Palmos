@@ -6,7 +6,7 @@ import { ReactNode } from "react";
 import ReactDOM from "react-dom";
 import { EditorContext } from "./editor-context-provider";
 
-init({
+const host = init({
   name: "pulse_editor",
   remotes: [],
   shared: {
@@ -64,10 +64,16 @@ export default function RemoteExtensionProvider({
 
     // TODO: Use mf-manifest.json to get the css file name
     const pattern = /\.css/;
+    // CSS from Pulse Editor itself
+    const trustedOrigins = ["http://localhost:3000"];
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
-          if (node instanceof HTMLLinkElement && pattern.test(node.href)) {
+          if (
+            node instanceof HTMLLinkElement &&
+            !trustedOrigins.some((origin) => node.href.startsWith(origin)) &&
+            pattern.test(node.href)
+          ) {
             console.warn("Removing federated CSS before it loads:", node.href);
             node.href = "/empty.css";
           }
