@@ -81,7 +81,7 @@ export default function ExtensionModal({
                 description: ext.description ?? "No description available",
                 displayName: ext.displayName ?? ext.name,
               },
-              isEnabled: false,
+              isEnabled: true,
               remoteOrigin: `https://cdn.pulse-editor.com/extension`,
             };
           });
@@ -227,14 +227,16 @@ function ExtensionPreview({
 
   const editorContext = useContext(EditorContext);
 
+  const [isShowInfo, setIsShowInfo] = useState(false);
+
   useEffect(() => {
-    setIsEnabled(extension.isEnabled);
     setIsLoaded(true);
-    setIsInstalled(
-      editorContext?.persistSettings?.extensions?.some(
-        (ext) => ext.config.id === extension.config.id,
-      ) ?? false,
+
+    const foundExt = editorContext?.persistSettings?.extensions?.find(
+      (ext) => ext.config.id === extension.config.id,
     );
+    setIsInstalled(foundExt !== undefined);
+    setIsEnabled(foundExt?.isEnabled ?? false);
   }, [extension]);
 
   function toggleExtension() {
@@ -255,7 +257,16 @@ function ExtensionPreview({
 
   return (
     <div className="w-full">
-      <div className="relative h-28 w-full">
+      <div
+        className="relative h-28 w-full"
+        onMouseEnter={() => {
+          setIsShowInfo(true);
+        }}
+        // Hide show info when user taps outside of the modal
+        onMouseLeave={() => {
+          setIsShowInfo(false);
+        }}
+      >
         <div className="absolute top-0 right-0.5 z-10">
           <div className="flex flex-col">
             {showInstalledChip && isInstalled && (
@@ -269,7 +280,7 @@ function ExtensionPreview({
           </div>
         </div>
         <Button
-          className="m-0 h-full w-full rounded-md p-0"
+          className="relative m-0 h-full w-full rounded-md p-0"
           onContextMenu={(e) => {
             e.preventDefault();
             // Get parent element position
@@ -284,6 +295,41 @@ function ExtensionPreview({
             }));
           }}
         ></Button>
+        {isShowInfo && (
+          <div className="absolute bottom-0.5 left-1/2 flex w-full -translate-x-1/2 justify-center gap-x-0.5">
+            <Button color="secondary" size="sm">
+              Details
+            </Button>
+            {!isInstalled ? (
+              <Button
+                color="primary"
+                size="sm"
+                onPress={(e) => {
+                  installExtension(extension).then(() => {
+                    toast.success("Extension installed");
+                    setIsInstalled(true);
+                    setIsEnabled(extension.isEnabled);
+                  });
+                }}
+              >
+                Install
+              </Button>
+            ) : (
+              <Button
+                color="danger"
+                size="sm"
+                onPress={(e) => {
+                  uninstallExtension(extension.config.id).then(() => {
+                    toast.success("Extension uninstalled");
+                    setIsInstalled(false);
+                  });
+                }}
+              >
+                Uninstall
+              </Button>
+            )}
+          </div>
+        )}
         <ContextMenu state={contextMenuState} setState={setContextMenuState}>
           <div className="flex flex-col">
             {isInstalled ? (
@@ -307,6 +353,7 @@ function ExtensionPreview({
                   installExtension(extension).then(() => {
                     toast.success("Extension installed");
                     setIsInstalled(true);
+                    setIsEnabled(extension.isEnabled);
                   });
                   setContextMenuState({ x: 0, y: 0, isOpen: false });
                 }}
