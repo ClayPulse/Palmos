@@ -28,7 +28,7 @@ jobs:
         run: npm i -D changesets
 
       - name: Check for changesets
-        run: changeset status --since=main
+        run: npx changeset status --since=main
 
       - name: Install dependencies
         run: npm i --workspace=npm-packages/shared-utils && npm i --workspace=npm-packages/react-api
