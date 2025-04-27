@@ -1,5 +1,45 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.6
+
+### Patch Changes
+
+- Update rollup settings
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.6
+
+## 0.1.1-alpha.5
+
+### Patch Changes
+
+- Update rollup settings
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.5
+
+## 0.1.1-alpha.4
+
+### Patch Changes
+
+- Configure rollup settings
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.4
+
+## 0.1.1-alpha.3
+
+### Patch Changes
+
+- Revert preserveModules settings
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.3
+
+## 0.1.1-alpha.2
+
+### Patch Changes
+
+- Add both CJS and ESM build
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.2
+
 ## 0.1.1-beta.1
 
 ### Patch Changes

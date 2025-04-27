@@ -396,7 +396,7 @@ function ExtensionListView({
           {extensions.map((ext) => (
             <ExtensionPreview
               extension={ext}
-              key={ext.config.id}
+              key={ext.config.id + ext.config.version}
               showInstalledChip={showInstalledChip}
             />
           ))}

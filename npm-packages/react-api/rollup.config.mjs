@@ -10,10 +10,6 @@ export default {
   output: [
     {
       file: "dist/main.js",
-      format: "cjs",
-    },
-    {
-      file: "dist/main.es.js",
       format: "es",
       exports: "named",
     },
@@ -29,7 +25,7 @@ export default {
     }),
     typescript({
       declaration: true,
-      declarationDir: "dist",
+      outDir: "dist",
       rootDir: "src",
       exclude: ["node_modules/**"],
     }),

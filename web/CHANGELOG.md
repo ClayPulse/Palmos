@@ -1,5 +1,12 @@
 # pulse-editor-web
 
+## 0.1.1-alpha.2
+
+### Patch Changes
+
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.2
+
 ## 0.1.1-beta.1
 
 ### Patch Changes

@@ -8,17 +8,10 @@ export default {
   input: "src/main.ts",
   output: [
     {
-      dir: "dist",
+      file: "dist/main.js",
       format: "es",
       exports: "named",
-      // For some reason, without this, the output misses
-      // some exports necessary for shared types/utils to work.
-      // (Nextjs won't work but @pulse-editor/react-api works?)
-      // This might have something to do with the way Rollup
-      // tree-shakes the code, or the d.ts files are not properly
-      // linked by importing apps.
-      preserveModules: true,
-    }
+    },
   ],
   plugins: [
     resolve({
@@ -30,7 +23,7 @@ export default {
     }),
     typescript({
       declaration: true,
-      declarationDir: "dist",
+      outDir: "dist",
       rootDir: "src",
       exclude: ["node_modules/**"],
     }),
