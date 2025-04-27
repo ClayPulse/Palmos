@@ -2,7 +2,7 @@ import {
   IMCMessage,
   IMCMessageTypeEnum,
   ReceiverHandlerMap,
-} from "@pulse-editor/types";
+} from "../types/types";
 
 export class MessageReceiver {
   private handlerMap: ReceiverHandlerMap;

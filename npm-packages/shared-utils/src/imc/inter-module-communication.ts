@@ -1,9 +1,9 @@
 import {
-  messageTimeout,
   IMCMessage,
   IMCMessageTypeEnum,
   ReceiverHandlerMap,
-} from "@pulse-editor/types";
+} from "../types/types";
+import { messageTimeout } from "../types/constants";
 import { MessageReceiver } from "./message-receiver";
 import { MessageSender } from "./message-sender";
 

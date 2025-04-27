@@ -4,7 +4,7 @@ import {render} from 'ink';
 import meow from 'meow';
 import App from './app.js';
 import {commandsManual} from './lib/manual.js';
-import { flags } from './lib/cli-flags.js';
+import {flags} from './lib/cli-flags.js';
 
 const cli = meow(
 	`\

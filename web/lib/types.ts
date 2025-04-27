@@ -1,6 +1,6 @@
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { AIModelConfig } from "./ai-model-config";
-import { Agent, ExtensionConfig, TextFileSelection } from "@pulse-editor/types";
+import { Agent, ExtensionConfig, TextFileSelection } from "@pulse-editor/shared-utils";
 
 // #region Context
 export type EditorStates = {

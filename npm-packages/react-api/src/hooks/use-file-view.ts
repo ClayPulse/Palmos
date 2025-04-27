@@ -2,7 +2,7 @@ import {
   IMCMessage,
   IMCMessageTypeEnum,
   FileViewModel,
-} from "@pulse-editor/types";
+} from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
 import useIMC from "../lib/hooks/use-imc";
 

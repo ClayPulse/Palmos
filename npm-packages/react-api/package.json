@@ -1,8 +1,14 @@
 {
   "name": "@pulse-editor/react-api",
-  "version": "0.0.1",
-  "main": "src/main.ts",
+  "version": "0.1.1-alpha.0",
+  "main": "dist/main.js",
   "type": "module",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "rollup -c",
     "lint": "eslint ."
@@ -16,7 +22,6 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/react": "^19.1.2",
-    "autoprefixer": "^10.4.21",
     "eslint": "^9.25.0",
     "eslint-plugin-react": "^7.37.5",
     "globals": "^16.0.0",
@@ -30,9 +35,8 @@
     "typescript-eslint": "^8.30.1"
   },
   "peerDependencies": {
+    "@pulse-editor/shared-utils": "0.1.1-alpha.0",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "@pulse-editor/types": "*",
-    "@pulse-editor/shared-utils": "*"
+    "react-dom": "^19.0.0"
   }
 }

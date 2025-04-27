@@ -3,7 +3,7 @@ import {
   IMCMessage,
   IMCMessageTypeEnum,
   ReceiverHandlerMap,
-} from "@pulse-editor/types";
+} from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
 
 export default function useIMC(

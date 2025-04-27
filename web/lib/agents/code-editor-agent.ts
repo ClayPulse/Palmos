@@ -6,7 +6,7 @@ import {
 import { BaseLLM } from "../llm/llm";
 import { BaseSTT } from "../stt/stt";
 import { BaseTTS } from "../tts/tts";
-import { TextFileSelection } from "@pulse-editor/types";
+import { TextFileSelection } from "@pulse-editor/shared-utils";
 
 export class CodeEditorAgent {
   stt: BaseSTT | undefined;

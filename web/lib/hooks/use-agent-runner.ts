@@ -1,4 +1,4 @@
-import { Agent, AgentMethod, LLMConfig } from "@pulse-editor/types";
+import { Agent, AgentMethod, LLMConfig } from "@pulse-editor/shared-utils";
 import { getModelLLM } from "../llm/llm";
 import { useContext } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";

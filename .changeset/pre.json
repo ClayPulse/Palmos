@@ -1,0 +1,15 @@
+{
+  "mode": "pre",
+  "tag": "alpha",
+  "initialVersions": {
+    "pulse-editor-desktop": "0.0.1",
+    "pulse-editor-mobile": "0.0.1",
+    "@pulse-editor/react-api": "0.1.0",
+    "@pulse-editor/shared-utils": "0.1.0",
+    "pulse-editor-vscode": "0.0.3",
+    "pulse-editor-web": "0.0.2"
+  },
+  "changesets": [
+    "mighty-ghosts-crash"
+  ]
+}

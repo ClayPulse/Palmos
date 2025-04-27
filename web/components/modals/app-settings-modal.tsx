@@ -19,7 +19,7 @@ import useExplorer from "@/lib/hooks/use-explorer";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
 import useExtensions from "@/lib/hooks/use-extensions";
-import { ExtensionTypeEnum } from "@pulse-editor/types";
+import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
 import { llmProviderOptions } from "@/lib/llm/options";
 
 function AISettings({ editorContext }: { editorContext?: EditorContextType }) {

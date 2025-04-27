@@ -1,0 +1,51 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+
+name: Release NPM Package
+
+permissions:
+  contents: write
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install changesets
+        run: npm i -D changesets
+
+      - name: Check for changesets
+        run: npx changeset status --since=main
+
+      - name: Install dependencies
+        run: npm i --workspace=npm-packages/shared-utils && npm i --workspace=npm-packages/react-api
+
+      - name: Build @pulse-editor/shared-utils
+        run: npm run build --workspace=npm-packages/shared-utils
+
+      - name: Build @pulse-editor/react-api
+        run: npm run build --workspace=npm-packages/react-api
+
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: npx changeset version
+          # This expects you to have a script called release which does a build for your packages and calls changeset publish
+          publish: npx changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_ACCESS_TOKEN }}

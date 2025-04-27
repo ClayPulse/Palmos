@@ -1,5 +1,6 @@
 {
   "name": "pulse-editor-vscode",
+  "private": true,
   "displayName": "Pulse Editor",
   "description": "Pulse Editor is an editor designed to build and work with AI more naturally on cross-platform devices.",
   "icon": "pulse_logo_round_128_128.png",

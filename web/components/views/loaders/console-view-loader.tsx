@@ -2,7 +2,11 @@ import { Extension, InstalledAgent } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ExtensionLoader from "../../misc/extension-loader";
-import { Agent, IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/types";
+import {
+  Agent,
+  IMCMessage,
+  IMCMessageTypeEnum,
+} from "@pulse-editor/shared-utils";
 import Loading from "../../interface/loading";
 import useAgentRunner from "@/lib/hooks/use-agent-runner";
 import { useTheme } from "next-themes";
@@ -222,7 +226,7 @@ export default function ConsoleViewLoader({
       {usedExtension ? (
         <div className="relative h-full w-full">
           {!isExtensionLoaded && (
-            <div className="absolute left-0 top-0 h-full w-full">
+            <div className="absolute top-0 left-0 h-full w-full">
               <Loading />
             </div>
           )}
@@ -236,7 +240,7 @@ export default function ConsoleViewLoader({
           )}
         </div>
       ) : hasExtension ? (
-        <div className="absolute left-0 top-0 h-full w-full">
+        <div className="absolute top-0 left-0 h-full w-full">
           <Loading />
         </div>
       ) : (

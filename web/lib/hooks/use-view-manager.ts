@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { FileViewModel } from "@pulse-editor/types";
+import { FileViewModel } from "@pulse-editor/shared-utils";
 import { usePlatformApi } from "./use-platform-api";
 
 export function useViewManager() {

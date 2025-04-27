@@ -1,28 +1,12 @@
 {
     "compilerOptions": {
         "target": "ES2020",
-        "outDir": "./dist",
         "module": "ESNext",
         "moduleResolution": "bundler",
         "strict": true,
-        "declaration": true,
-        "types": [
-            "react",
-            "node"
-        ],
-        "baseUrl": ".",
-        "paths": {
-            "*": [
-                "node_modules/*",
-                "dist/*"
-            ]
-        }
+        "declaration": true
     },
     "include": [
         "src/**/*"
     ],
-    "exclude": [
-        "node_modules",
-        "dist",
-    ]
 }

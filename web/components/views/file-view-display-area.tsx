@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import AgenticConsolePanel from "./agentic-console-panel";
 import { useViewManager } from "@/lib/hooks/use-view-manager";
 import FileViewLoader from "./loaders/file-view-loader";
-import { FileViewModel } from "@pulse-editor/types";
+import { FileViewModel } from "@pulse-editor/shared-utils";
 
 export default function ViewDisplayArea() {
   const editorContext = useContext(EditorContext);

@@ -1,4 +1,4 @@
-import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/types";
+import { IMCMessage, IMCMessageTypeEnum } from "../types/types";
 
 export class MessageSender {
   private targetWindow: Window;
