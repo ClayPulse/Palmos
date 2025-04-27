@@ -1,15 +1,16 @@
 {
   "mode": "pre",
-  "tag": "alpha",
+  "tag": "beta",
   "initialVersions": {
     "pulse-editor-desktop": "0.0.1",
     "pulse-editor-mobile": "0.0.1",
-    "@pulse-editor/react-api": "0.1.0",
-    "@pulse-editor/shared-utils": "0.1.0",
+    "@pulse-editor/react-api": "0.1.1-alpha.0",
+    "@pulse-editor/shared-utils": "0.1.1-alpha.0",
     "pulse-editor-vscode": "0.0.3",
-    "pulse-editor-web": "0.0.2"
+    "pulse-editor-web": "0.1.1-alpha.0"
   },
   "changesets": [
+    "chatty-trains-beam",
     "mighty-ghosts-crash"
   ]
 }
