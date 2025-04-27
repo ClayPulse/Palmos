@@ -1,6 +1,6 @@
 {
 	"name": "@pulse-editor/cli",
-	"version": "0.0.1",
+	"version": "0.1.0-beta.0",
 	"license": "MIT",
 	"bin": {
 		"pulse": "./dist/cli.js"
