@@ -3,6 +3,9 @@
 
 name: Release NPM Package
 
+permissions:
+  contents: write
+
 on:
   push:
     branches: ["dev"]
