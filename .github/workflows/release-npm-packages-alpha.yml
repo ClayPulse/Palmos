@@ -6,6 +6,8 @@ name: Release NPM Package (Alpha)
 on:
   push:
     branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
 
 env:
   RELEASE_TAG: alpha
