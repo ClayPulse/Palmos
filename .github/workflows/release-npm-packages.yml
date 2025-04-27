@@ -5,9 +5,9 @@ name: Release NPM Package
 
 on:
   push:
-    branches: ["dev"]
+    branches: ["main"]
   pull_request:
-    branches: ["dev"]
+    branches: ["main"]
 
 jobs:
   release:
@@ -21,6 +21,12 @@ jobs:
         with:
           node-version: 20
 
+      - name: Install changesets
+        run: npm i -D changesets
+
+      - name: Check for changesets
+        run: changeset status --since=main
+
       - name: Install dependencies
         run: npm i --workspace=npm-packages/shared-utils && npm i --workspace=npm-packages/react-api
 
@@ -29,9 +35,6 @@ jobs:
 
       - name: Build @pulse-editor/react-api
         run: npm run build --workspace=npm-packages/react-api
-
-      - name: Install changesets
-        run: npm i -D changesets
 
       - name: Create Release Pull Request or Publish to npm
         id: changesets
