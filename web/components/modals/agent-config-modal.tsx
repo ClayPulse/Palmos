@@ -4,12 +4,12 @@ import { useContext, useEffect, useState } from "react";
 import ModalWrapper from "./modal-wrapper";
 import { EditorContext } from "../providers/editor-context-provider";
 import Icon from "../misc/icon";
-import { Button, Divider, Input, Link, Textarea } from "@heroui/react";
+import { Button, Divider, Input, Textarea } from "@heroui/react";
 import { InstalledAgent, LLMUsage, TabItem } from "@/lib/types";
 import Tabs from "../misc/tabs";
 import PasswordInput from "../misc/password-input";
-import { AgentMethod } from "@pulse-editor/types";
 import toast from "react-hot-toast";
+import { AgentMethod } from "@pulse-editor/shared-utils";
 
 function AgentConfigs({
   setIsCreatingNewAgent,
@@ -34,17 +34,17 @@ function AgentConfigs({
 
           <div className="flex flex-col">
             <div className="flex gap-x-2">
-              <p className="font-semibold leading-5">{agent.name}</p>
-              <p className="text-small leading-5 text-foreground-600">
+              <p className="leading-5 font-semibold">{agent.name}</p>
+              <p className="text-small text-foreground-600 leading-5">
                 {agent.version}
               </p>
             </div>
             {agent.author.type === "user" ? (
-              <p className="text-small leading-4 text-foreground-600">
+              <p className="text-small text-foreground-600 leading-4">
                 Installed by user {agent.author.publisher}
               </p>
             ) : (
-              <p className="text-small leading-4 text-foreground-600">
+              <p className="text-small text-foreground-600 leading-4">
                 Installed by extension {agent.author.extension} from{" "}
                 {agent.author.publisher}
               </p>
@@ -356,7 +356,7 @@ export default function AgentConfigModal({
       }}
     >
       <div className="flex justify-center">
-        <div className="rounded-md bg-content2 py-2">
+        <div className="bg-content2 rounded-md py-2">
           <Tabs
             tabItems={tabItems}
             selectedItem={selectedTab}

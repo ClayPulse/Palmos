@@ -2,7 +2,7 @@ import {
   NotificationTypeEnum,
   IMCMessage,
   IMCMessageTypeEnum,
-} from "@pulse-editor/types";
+} from "@pulse-editor/shared-utils";
 
 import useIMC from "../lib/hooks/use-imc";
 

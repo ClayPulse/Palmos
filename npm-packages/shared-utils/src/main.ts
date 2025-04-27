@@ -1,5 +1,6 @@
-import { InterModuleCommunication } from "./inter-module-communication";
-import { MessageReceiver } from "./message-receiver";
-import { MessageSender } from "./message-sender";
+export * from "./imc/inter-module-communication";
+export * from "./imc/message-sender";
+export * from "./imc/message-receiver";
 
-export { MessageReceiver, MessageSender, InterModuleCommunication };
+export * from "./types/types";
+export * from "./types/constants";

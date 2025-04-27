@@ -1,4 +1,4 @@
-import { AgentTool, IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/types";
+import { AgentTool, IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import useIMC from "../lib/hooks/use-imc";
 
 export default function useAgentTools(moduleName: string) {

@@ -3,7 +3,7 @@ import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
 import FileViewLayout from "../layout";
 import ExtensionLoader from "../../misc/extension-loader";
-import { Agent, IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/types";
+import { Agent, IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import Loading from "../../interface/loading";
 import useAgentRunner from "@/lib/hooks/use-agent-runner";
 import { useTheme } from "next-themes";

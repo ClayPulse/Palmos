@@ -16,7 +16,7 @@ import AgentConfigModal from "../modals/agent-config-modal";
 import { EditorContext } from "../providers/editor-context-provider";
 import Tabs from "@/components/misc/tabs";
 import Icon from "../misc/icon";
-import { ExtensionTypeEnum } from "@pulse-editor/types";
+import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
 import ConsoleViewLoader from "./loaders/console-view-loader";
 
 function ConsoleNavBar({

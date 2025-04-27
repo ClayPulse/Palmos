@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { Extension } from "../types";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { loadRemote, registerRemotes } from "@module-federation/runtime";
-import { ExtensionConfig } from "@pulse-editor/types";
+import { ExtensionConfig } from "@pulse-editor/shared-utils";
 
 export default function useExtensions() {
   const editorContext = useContext(EditorContext);

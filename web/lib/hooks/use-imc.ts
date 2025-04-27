@@ -1,6 +1,6 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { InterModuleCommunication } from "@pulse-editor/shared-utils";
-import { ReceiverHandlerMap } from "@pulse-editor/types";
+import { ReceiverHandlerMap } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 
 export default function useIMC(

@@ -8,7 +8,6 @@
         "mobile",
         "vscode-extension",
         "npm-packages/react-api",
-        "npm-packages/types",
         "npm-packages/shared-utils"
     ],
     "scripts": {
@@ -18,6 +17,12 @@
         "desktop-build": "npm run web-build && npm run build --workspace=desktop",
         "android-dev": "npm run web-build && npm run android-dev --workspace=mobile",
         "android-build": "npm run web-build && npm run android-build --workspace=mobile",
-        "packages-build": "npm run build --workspace=npm-packages/react-api"
+        "react-api-build": "npm run build --workspace=npm-packages/react-api",
+        "shared-utils-build": "npm run build --workspace=npm-packages/shared-utils",
+        "cli-dev": "npm run dev --workspace=cli",
+        "cli-build": "npm run build --workspace=cli"
+    },
+    "devDependencies": {
+        "@changesets/cli": "^2.29.2"
     }
 }
