@@ -1,6 +1,10 @@
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { AIModelConfig } from "./ai-model-config";
-import { Agent, ExtensionConfig, TextFileSelection } from "@pulse-editor/shared-utils";
+import {
+  Agent,
+  ExtensionConfig,
+  FileViewModel,
+} from "@pulse-editor/shared-utils";
 
 // #region Context
 export type EditorStates = {
@@ -37,6 +41,11 @@ export type EditorStates = {
   password?: string;
 
   openedViewModels: FileViewModel[];
+
+  // Keep track of unique ids of each view
+  // to make sure that the view is not duplicated
+  // and not interfered with each other
+  viewIds: string[];
 };
 
 export type PersistentSettings = {
@@ -70,18 +79,7 @@ export type PersistentSettings = {
     [key: string]: string;
   };
 
-
   mobileHost?: string;
-};
-// #endregion
-
-// #region View Models
-export type FileViewModel = {
-  fileContent: string;
-  filePath: string;
-  selections?: TextFileSelection[];
-  suggestedLines?: LineChange[];
-  isActive: boolean;
 };
 // #endregion
 

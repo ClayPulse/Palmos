@@ -32,6 +32,7 @@ const defaultEditorStates: EditorStates = {
   explorerSelectedNodeRefs: [],
   pressedKeys: [],
   openedViewModels: [],
+  viewIds: [],
 };
 
 export default function EditorContextProvider({

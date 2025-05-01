@@ -35,14 +35,26 @@ export class InterModuleCommunication {
   private receiver: MessageReceiver | undefined;
   private sender: MessageSender | undefined;
 
-  private moduleName: string;
+  private id: string;
 
   private receiverHandlerMap: ReceiverHandlerMap | undefined;
 
   private listener: ((event: MessageEvent) => void) | undefined;
 
-  constructor(moduleName: string) {
-    this.moduleName = moduleName;
+  constructor(id?: string) {
+    if (!id) {
+      // @ts-expect-error viewId is injected by the browser
+      const windowId = window.viewId as string | undefined;
+      // @ts-expect-error viewId is injected by the browser
+      console.log("Window ID: " + window.viewId);
+
+      if (!windowId) {
+        throw new Error("View ID is not defined.");
+      }
+
+      id = windowId;
+    }
+    this.id = id;
   }
 
   /* Initialize a receiver to receive message. */
@@ -54,15 +66,13 @@ export class InterModuleCommunication {
     const receiver = new MessageReceiver(
       this.receiverHandlerMap,
       this.thisPendingTasks,
-      this.moduleName
+      this.id
     );
     this.receiver = receiver;
 
     this.listener = (event: MessageEvent<IMCMessage>) => {
       if (!receiver) {
-        throw new Error(
-          "Receiver not initialized at module " + this.moduleName
-        );
+        throw new Error("Receiver not initialized at module " + this.id);
       }
 
       const message = event.data;
@@ -70,7 +80,7 @@ export class InterModuleCommunication {
       receiver.receiveMessage(win, message);
     };
     window.addEventListener("message", this.listener);
-    console.log("Adding IMC listener in " + this.moduleName);
+    console.log("Adding IMC listener in " + this.id);
   }
 
   /* Initialize a sender to send message ot the other window. */
@@ -82,7 +92,7 @@ export class InterModuleCommunication {
       window,
       messageTimeout,
       this.otherPendingMessages,
-      this.moduleName
+      this.id
     );
     this.sender = sender;
 

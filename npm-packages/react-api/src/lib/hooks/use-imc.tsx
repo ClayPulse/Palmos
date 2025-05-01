@@ -1,15 +1,11 @@
 import { InterModuleCommunication } from "@pulse-editor/shared-utils";
 import {
-  IMCMessage,
   IMCMessageTypeEnum,
   ReceiverHandlerMap,
 } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
 
-export default function useIMC(
-  moduleName: string,
-  handlerMap: ReceiverHandlerMap
-) {
+export default function useIMC(handlerMap: ReceiverHandlerMap) {
   const [imc, setImc] = useState<InterModuleCommunication | undefined>(
     undefined
   );
@@ -18,7 +14,7 @@ export default function useIMC(
   const targetWindow = window.parent;
 
   useEffect(() => {
-    const imc = new InterModuleCommunication(moduleName);
+    const imc = new InterModuleCommunication();
     imc.initThisWindow(window);
     imc.updateReceiverHandlerMap(handlerMap);
     imc.initOtherWindow(targetWindow);

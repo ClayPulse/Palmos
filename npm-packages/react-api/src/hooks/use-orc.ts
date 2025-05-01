@@ -2,13 +2,13 @@ import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 
 import useIMC from "../lib/hooks/use-imc";
 
-export default function useOCR(moduleName: string) {
+export default function useOCR() {
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc } = useIMC(moduleName, receiverHandlerMap);
+  const { imc } = useIMC(receiverHandlerMap);
 
   async function recognizeText(uri: string): Promise<string> {
     if (!imc) {

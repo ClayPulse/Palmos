@@ -1,14 +1,13 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import { AnimatePresence, motion } from "framer-motion";
 import AgenticConsolePanel from "./agentic-console-panel";
 import { useViewManager } from "@/lib/hooks/use-view-manager";
 import FileViewLoader from "./loaders/file-view-loader";
-import { FileViewModel } from "@pulse-editor/shared-utils";
 
 export default function ViewDisplayArea() {
   const editorContext = useContext(EditorContext);
-  const { updateFileView, openFileView, activeFileView } = useViewManager();
+  const { updateFileView, activeFileView } = useViewManager();
 
   // #region VSCode Extension
   // // Initialize view manager

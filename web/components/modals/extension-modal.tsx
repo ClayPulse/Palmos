@@ -99,7 +99,7 @@ export default function ExtensionModal({
     if (isOpen) {
       mutateMarketplaceExtensions();
     }
-  }, [isOpen]);
+  }, [isOpen, mutateMarketplaceExtensions]);
 
   return (
     <ModalWrapper

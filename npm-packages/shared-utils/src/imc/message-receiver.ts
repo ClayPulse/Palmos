@@ -22,11 +22,11 @@ export class MessageReceiver {
         controller: AbortController;
       }
     >,
-    moduleInfo: string
+    moduleName: string
   ) {
     this.handlerMap = listenerMap;
     this.pendingTasks = pendingTasks;
-    this.moduleName = moduleInfo;
+    this.moduleName = moduleName;
   }
 
   public receiveMessage(senderWindow: Window, message: IMCMessage) {

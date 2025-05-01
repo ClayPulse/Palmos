@@ -2,13 +2,13 @@ import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import useIMC from "../lib/hooks/use-imc";
 import { useEffect, useState } from "react";
 
-export default function useTerminal(moduleName: string) {
+export default function useTerminal() {
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(moduleName, receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap);
   const [websocketUrl, setWebsocketUrl] = useState<string | undefined>(
     undefined
   );

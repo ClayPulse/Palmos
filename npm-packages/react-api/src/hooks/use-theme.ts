@@ -2,7 +2,7 @@ import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import { useState } from "react";
 import useIMC from "../lib/hooks/use-imc";
 
-export default function useTheme(moduleName: string) {
+export default function useTheme() {
   const [theme, setTheme] = useState<string>("light");
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
@@ -17,7 +17,7 @@ export default function useTheme(moduleName: string) {
     }
   );
 
-  const { imc } = useIMC(moduleName, receiverHandlerMap);
+  const { imc } = useIMC(receiverHandlerMap);
 
   return {
     theme,

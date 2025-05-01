@@ -1,6 +1,6 @@
 "use client";
 
-import { TreeViewGroupRef, FileViewModel } from "@/lib/types";
+import { TreeViewGroupRef } from "@/lib/types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/types";

@@ -6,13 +6,13 @@ import {
 
 import useIMC from "../lib/hooks/use-imc";
 
-export default function useNotification(moduleName: string) {
+export default function useNotification() {
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc } = useIMC(moduleName, receiverHandlerMap);
+  const { imc } = useIMC(receiverHandlerMap);
 
   function openNotification(text: string, type: NotificationTypeEnum) {
     if (!imc) {

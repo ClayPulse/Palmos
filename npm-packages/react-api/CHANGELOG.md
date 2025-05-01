@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.7
+
+### Patch Changes
+
+- Simplify imc hooks
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.7
+
 ## 0.1.1-alpha.6
 
 ### Patch Changes

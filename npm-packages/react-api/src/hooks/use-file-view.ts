@@ -6,7 +6,7 @@ import {
 import { useEffect, useState } from "react";
 import useIMC from "../lib/hooks/use-imc";
 
-export default function useFileView(moduleName: string) {
+export default function useFileView() {
   const [viewFile, setViewFile] = useState<FileViewModel | undefined>(
     undefined
   );
@@ -17,7 +17,7 @@ export default function useFileView(moduleName: string) {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(moduleName, receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap);
 
   useEffect(() => {
     if (isReady) {
