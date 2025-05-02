@@ -54,39 +54,6 @@ export default function RemoteExtensionProvider({
   // }, []);
 
   useEffect(() => {
-    // Modify the href to point to an empty CSS file
-    // to prevent federation module's css from loading
-    // into the main app.
-    //
-    // This is a workaround for the issue where
-    // the CSS from the federated module is loaded
-    // into the main app and overrides the main app's CSS.
-
-    // TODO: Use mf-manifest.json to get the css file name
-    const pattern = /\.css/;
-    // CSS from Pulse Editor itself
-    const trustedOrigins = ["http://localhost:3000"];
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        mutation.addedNodes.forEach((node) => {
-          if (
-            node instanceof HTMLLinkElement &&
-            !trustedOrigins.some((origin) => node.href.startsWith(origin)) &&
-            pattern.test(node.href)
-          ) {
-            console.warn("Removing federated CSS before it loads:", node.href);
-            node.href = "/empty.css";
-          }
-        });
-      });
-    });
-
-    observer.observe(document.head, { childList: true, subtree: false });
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
     // Register all extensions
     const extensions = editorContext?.persistSettings?.extensions ?? [];
     if (extensions.length > 0) {
