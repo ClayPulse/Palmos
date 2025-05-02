@@ -4,6 +4,8 @@ import { loadRemote } from "@module-federation/runtime";
 import React from "react";
 import { v4 } from "uuid";
 import { EditorContext } from "../providers/editor-context-provider";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { PlatformEnum } from "@/lib/types";
 
 export default function ExtensionLoader({
   remoteOrigin,
@@ -14,7 +16,6 @@ export default function ExtensionLoader({
   moduleId: string;
   moduleVersion: string;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   // const rootRef = useRef<Root | null>(null);
 
   // const [viewId, setViewId] = React.useState<string | null>(null);
@@ -125,10 +126,14 @@ export default function ExtensionLoader({
   //     }
   //   };
   // }, []);
-
+  const iframeRef = useRef<HTMLIFrameElement | null>(null);
   const [viewId, setViewId] = useState<string | null>(null);
+
+  const platform = getPlatform();
+
   useEffect(() => {
-    const viewId = v4();
+    const viewId =
+      remoteOrigin + "-" + moduleId + "-" + moduleVersion + "-" + v4();
     setViewId(viewId);
   }, []);
 
@@ -136,7 +141,12 @@ export default function ExtensionLoader({
     <iframe
       ref={iframeRef}
       className="h-full w-full"
-      src={`/extension?remoteOrigin=${remoteOrigin}&moduleId=${moduleId}&moduleVersion=${moduleVersion}&viewId=${viewId}`}
+      src={
+        platform === PlatformEnum.Electron &&
+        process.env.NODE_ENV === "production"
+          ? `extension://-/?remoteOrigin=${remoteOrigin}&moduleId=${moduleId}&moduleVersion=${moduleVersion}&viewId=${viewId}`
+          : `/extension?remoteOrigin=${remoteOrigin}&moduleId=${moduleId}&moduleVersion=${moduleVersion}&viewId=${viewId}`
+      }
     />
   );
 }

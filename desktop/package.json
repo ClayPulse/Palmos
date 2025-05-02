@@ -1,5 +1,5 @@
 {
-  "name": "pulse-editor-desktop",
+  "name": "@pulse-editor/desktop",
   "version": "0.0.1",
   "private": true,
   "main": "./main.mjs",
@@ -10,12 +10,15 @@
   },
   "dependencies": {
     "electron-serve": "^2.1.1",
-    "node-pty": "^1.1.0-beta30"
+    "node-addon-api": "^7.1.1",
+    "node-pty": "^1.1.0-beta34"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.7.0",
-    "@electron/rebuild": "^3.7.1",
+    "@electron-forge/cli": "^7.8.0",
+    "@electron/rebuild": "^3.7.2",
     "@types/node": "^22",
-    "electron": "^35.0.2"
+    "electron": "^36.1.0",
+    "esbuild": "^0.25.3",
+    "esbuild-register": "^3.6.0"
   }
 }

@@ -45,8 +45,6 @@ export class InterModuleCommunication {
     if (!id) {
       // @ts-expect-error viewId is injected by the browser
       const windowId = window.viewId as string | undefined;
-      // @ts-expect-error viewId is injected by the browser
-      console.log("Window ID: " + window.viewId);
 
       if (!windowId) {
         throw new Error("View ID is not defined.");

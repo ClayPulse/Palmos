@@ -27,6 +27,12 @@ const appServe = serve({
   directory: path.join(process.resourcesPath, "next"),
 });
 
+serve({
+  directory: path.join(process.resourcesPath, "next"),
+  file: "extension",
+  scheme: "extension",
+});
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 960,
@@ -38,10 +44,7 @@ function createWindow() {
       color: "#00000000",
       symbolColor: "#74b1be",
     },
-    icon: path.join(
-      __dirname,
-      "../shared-assets/icons/electron/pulse_editor"
-    ),
+    icon: path.join(__dirname, "../shared-assets/icons/electron/pulse_editor"),
   });
 
   win.menuBarVisible = false;

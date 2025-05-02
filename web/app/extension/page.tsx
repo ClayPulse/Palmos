@@ -1,6 +1,5 @@
 "use client";
 
-import RemoteExtensionProvider from "@/components/providers/remote-extension-provider";
 import { loadRemote, registerRemotes } from "@module-federation/runtime";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";

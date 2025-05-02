@@ -13,6 +13,7 @@
     "scripts": {
         "web-dev": "npm run dev --workspace=web",
         "web-build": "npm run build --workspace=web",
+        "web-start": "npm run start --workspace=web",
         "desktop-dev": "npm run dev --workspace=desktop",
         "desktop-build": "npm run web-build && npm run build --workspace=desktop",
         "android-dev": "npm run web-build && npm run android-dev --workspace=mobile",
