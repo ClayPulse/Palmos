@@ -7,7 +7,9 @@
     "@pulse-editor/react-api": "0.1.1-beta.1",
     "@pulse-editor/shared-utils": "0.1.1-beta.1",
     "pulse-editor-vscode": "0.0.3",
-    "pulse-editor-web": "0.1.1-beta.1"
+    "@pulse-editor/web": "0.1.1-beta.1",
+    "@pulse-editor/desktop": "0.0.1",
+    "@pulse-editor/mobile": "0.0.1"
   },
   "changesets": [
     "beige-pandas-rhyme",

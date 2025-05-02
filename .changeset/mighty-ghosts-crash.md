@@ -1,5 +1,5 @@
 ---
-"pulse-editor-web": minor
+"@pulse-editor/web": minor
 "@pulse-editor/shared-utils": patch
 "@pulse-editor/react-api": patch
 ---
