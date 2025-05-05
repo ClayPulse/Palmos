@@ -91,15 +91,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
   });
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(object.name);
-  const [isShowingNameInput, setIsShowingNameInput] = useState(false);
-
   const childGroupRef = useRef<TreeViewGroupRef | null>(null);
-
-  useEffect(() => {
-    if (isRenaming && !contextMenuState.isOpen) {
-      setIsShowingNameInput(true);
-    }
-  }, [isRenaming, contextMenuState]);
 
   // Unselect self if self is not in the selected nodes
   useEffect(() => {
@@ -247,7 +239,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                     selectNode();
                   } else {
                     unSelectNode();
-                  }
+                  } 
                   // Only toggle folder collapsed state if Ctrl is not pressed
                   setIsFolderCollapsed(!isFolderCollapsed);
                 }
@@ -257,9 +249,11 @@ const TreeViewNode = forwardRef(function TreeViewNode(
               <div className="flex w-full">
                 <p>{object.name}</p>
                 <div className="flex w-full justify-end">
-                  <Icon
-                    name={isFolderCollapsed ? "expand_more" : "expand_less"}
-                  />
+                  <div>
+                    <Icon
+                      name={isFolderCollapsed ? "expand_more" : "expand_less"}
+                    />
+                  </div>
                 </div>
               </div>
             </Button>
@@ -298,7 +292,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
           <ContextMenu state={contextMenuState} setState={setContextMenuState}>
             <div className="flex flex-col">
               <Button
-                className="h-12 text-medium sm:h-8 sm:text-sm"
+                className="text-medium h-12 sm:h-8 sm:text-sm"
                 variant="light"
                 onPress={(e) => {
                   setIsRenaming(true);
@@ -308,7 +302,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 <p className="w-full text-start">Rename</p>
               </Button>
               <Button
-                className="h-12 text-medium sm:h-8 sm:text-sm"
+                className="text-medium h-12 sm:h-8 sm:text-sm"
                 variant="solid"
                 color="danger"
                 onPress={(e) => {

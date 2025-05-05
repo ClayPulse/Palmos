@@ -233,7 +233,7 @@ function ExtensionPreview({
     setIsLoaded(true);
 
     const foundExt = editorContext?.persistSettings?.extensions?.find(
-      (ext) => ext.config.id === extension.config.id,
+      (ext) => ext.config.id === extension.config.id && ext.config.version === extension.config.version,
     );
     setIsInstalled(foundExt !== undefined);
     setIsEnabled(foundExt?.isEnabled ?? false);

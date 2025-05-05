@@ -23,7 +23,7 @@ export default function RootLayout({
         <CapacitorProvider>
           <WrappedHeroUIProvider>
             <EditorContextProvider>
-              <RemoteExtensionProvider>
+              <RemoteExtensionProvider isPreventingCSS={true}>
                 <Toaster />
                 {children}
               </RemoteExtensionProvider>

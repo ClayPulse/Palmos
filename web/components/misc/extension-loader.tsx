@@ -132,8 +132,7 @@ export default function ExtensionLoader({
   const platform = getPlatform();
 
   useEffect(() => {
-    const viewId =
-      remoteOrigin + "-" + moduleId + "-" + moduleVersion + "-" + v4();
+    const viewId = moduleId + "-" + moduleVersion + "-" + v4();
     setViewId(viewId);
   }, []);
 
