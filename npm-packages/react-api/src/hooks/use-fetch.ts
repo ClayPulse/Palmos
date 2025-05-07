@@ -1,6 +1,6 @@
 import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 
-import useIMC from "../lib/hooks/use-imc";
+import useIMC from "../lib/use-imc";
 
 export default function useFetch() {
   const receiverHandlerMap = new Map<

@@ -5,6 +5,7 @@ import React, { useContext, useEffect } from "react";
 import { ReactNode } from "react";
 import ReactDOM from "react-dom";
 import { EditorContext } from "./editor-context-provider";
+import { InstalledAgent } from "@/lib/types";
 
 const host = init({
   name: "pulse_editor",
@@ -38,7 +39,7 @@ const host = init({
   },
 });
 
-export default function RemoteExtensionProvider({
+export default function RemoteModuleProvider({
   children,
   isPreventingCSS,
 }: {
@@ -103,6 +104,43 @@ export default function RemoteExtensionProvider({
 
       registerRemotes(remotes);
       console.log("Registered remotes", remotes);
+
+      const agents: InstalledAgent[] = extensions.flatMap(
+        (ext) =>
+          ext.config.agents?.map((agent) => {
+            const installedAgent: InstalledAgent = {
+              ...agent,
+              author: {
+                publisher: ext.config.author ?? "unknown",
+                type: "extension",
+                extension: ext.config.displayName,
+              },
+            };
+
+            return installedAgent;
+          }) ?? [],
+      );
+
+      const installedAgents =
+        editorContext?.persistSettings?.installedAgents ?? [];
+
+      // Merge the installed agents with the new ones
+      const mergedAgents = [
+        ...installedAgents,
+        ...agents.filter(
+          (newAgent) =>
+            !installedAgents.some(
+              (existingAgent) => existingAgent.name === newAgent.name,
+            ),
+        ),
+      ];
+
+      editorContext?.setPersistSettings((prev) => {
+        return {
+          ...prev,
+          installedAgents: mergedAgents,
+        };
+      });
     }
   }, [editorContext?.persistSettings?.extensions]);
 

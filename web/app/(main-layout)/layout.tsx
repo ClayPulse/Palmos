@@ -5,7 +5,7 @@ import EditorContextProvider from "@/components/providers/editor-context-provide
 import { Toaster } from "react-hot-toast";
 import "material-icons/iconfont/material-icons.css";
 import CapacitorProvider from "@/components/providers/capacitor-provider";
-import RemoteExtensionProvider from "@/components/providers/remote-extension-provider";
+import RemoteModuleProvider from "@/components/providers/remote-module-provider";
 
 export const metadata: Metadata = {
   title: "Pulse Editor",
@@ -23,10 +23,10 @@ export default function RootLayout({
         <CapacitorProvider>
           <WrappedHeroUIProvider>
             <EditorContextProvider>
-              <RemoteExtensionProvider isPreventingCSS={true}>
+              <RemoteModuleProvider isPreventingCSS={true}>
                 <Toaster />
                 {children}
-              </RemoteExtensionProvider>
+              </RemoteModuleProvider>
             </EditorContextProvider>
           </WrappedHeroUIProvider>
         </CapacitorProvider>

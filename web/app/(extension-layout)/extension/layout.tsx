@@ -1,4 +1,4 @@
-import RemoteExtensionProvider from "@/components/providers/remote-extension-provider";
+import RemoteModuleProvider from "@/components/providers/remote-module-provider";
 import { ReactNode, Suspense } from "react";
 
 export default function ExtensionLayout({ children }: { children: ReactNode }) {
@@ -10,9 +10,9 @@ export default function ExtensionLayout({ children }: { children: ReactNode }) {
           width: "100vw",
         }}
       >
-        <RemoteExtensionProvider isPreventingCSS={false}>
+        <RemoteModuleProvider isPreventingCSS={false}>
           <Suspense>{children}</Suspense>
-        </RemoteExtensionProvider>
+        </RemoteModuleProvider>
       </body>
     </html>
   );

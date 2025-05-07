@@ -3,6 +3,7 @@ import { getModelLLM } from "../llm/llm";
 import { useContext } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import toast from "react-hot-toast";
+import { getAPIKey } from "../settings/settings";
 
 export default function useAgentRunner() {
   const editorContext = useContext(EditorContext);
@@ -38,24 +39,12 @@ export default function useAgentRunner() {
     return returns;
   }
 
-  function getAPIKey(provider: string) {
-    if (!editorContext?.persistSettings?.apiKeys) {
-      return undefined;
-    }
-
-    const apiKey = editorContext?.persistSettings?.apiKeys[provider];
-
-    if (!apiKey) {
-      return undefined;
-    }
-
-    return apiKey;
-  }
-
   function getLLM(llmConfig: LLMConfig, agentName: string) {
     const provider = llmConfig.provider;
 
-    const apiKey = getAPIKey(provider);
+    const apiKey = getAPIKey(editorContext, provider);
+    console.log("LLM Config", llmConfig);
+    console.log("API Key", apiKey);
 
     if (!apiKey) {
       toast.error(

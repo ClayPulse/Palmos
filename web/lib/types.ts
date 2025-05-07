@@ -1,12 +1,20 @@
 import { Dispatch, RefObject, SetStateAction } from "react";
-import { AIModelConfig } from "./ai-model-config";
+import { AIModelConfig } from "./agents/ai-model-config";
 import {
   Agent,
   ExtensionConfig,
   FileViewModel,
 } from "@pulse-editor/shared-utils";
 
-// #region Context
+// #region Editor Context
+export type EditorContextType = {
+  editorStates: EditorStates;
+  setEditorStates: Dispatch<SetStateAction<EditorStates>>;
+  persistSettings: PersistentSettings | undefined;
+  setPersistSettings: Dispatch<SetStateAction<PersistentSettings | undefined>>;
+  aiModelConfig: AIModelConfig;
+};
+
 export type EditorStates = {
   // Selection by drawing
   isDrawing: boolean;
@@ -57,10 +65,6 @@ export type PersistentSettings = {
   llmModel?: string;
   ttsModel?: string;
 
-  sttAPIKey?: string;
-  llmAPIKey?: string;
-  ttsAPIKey?: string;
-
   isUsePassword?: boolean;
   isPasswordSet?: boolean;
   ttl?: number;
@@ -83,45 +87,7 @@ export type PersistentSettings = {
 };
 // #endregion
 
-export type CodeCompletionInstruction = {
-  text?: string;
-  audio?: Blob;
-};
-
-export type CodeCompletionResult = {
-  text: {
-    codeCompletion: string;
-    explanation: string;
-  };
-  audio?: Blob;
-};
-
-export type InlineSuggestionResult = {
-  snippets: string[];
-};
-
-export type LineChange = {
-  // Index starts from 1
-  index: number;
-  content: string;
-  status: "added" | "deleted" | "modified";
-};
-
-export type ChatMessage = {
-  from: string;
-  content: string;
-  datetime: string;
-};
-
-export type EditorContextType = {
-  editorStates: EditorStates;
-  setEditorStates: Dispatch<SetStateAction<EditorStates>>;
-  persistSettings: PersistentSettings | undefined;
-  setPersistSettings: Dispatch<SetStateAction<PersistentSettings | undefined>>;
-  aiModelConfig: AIModelConfig;
-};
-
-/* File system */
+// #region Interface
 export type OpenFileDialogConfig = {
   isFolder?: boolean;
   isMultiple?: boolean;
@@ -172,13 +138,9 @@ export type TabItem = {
   icon?: string;
   description: string;
 };
+// #endregion
 
-export type Extension = {
-  config: ExtensionConfig;
-  isEnabled: boolean;
-  remoteOrigin: string;
-};
-
+// #region AI
 export type InstalledAgent = Agent & {
   author: {
     type: "user" | "extension";
@@ -196,9 +158,57 @@ export type LLMUsage = {
   totalUsageByAgents: number;
 };
 
+export type CodeCompletionInstruction = {
+  text?: string;
+  audio?: Blob;
+};
+
+export type CodeCompletionResult = {
+  text: {
+    codeCompletion: string;
+    explanation: string;
+  };
+  audio?: Blob;
+};
+
+export type InlineSuggestionResult = {
+  snippets: string[];
+};
+
+export type LineChange = {
+  // Index starts from 1
+  index: number;
+  content: string;
+  status: "added" | "deleted" | "modified";
+};
+
+export type ChatMessage = {
+  from: string;
+  content: string;
+  datetime: string;
+};
+// #endregion
+
+// #region Cross platform API
 export enum PlatformEnum {
   Capacitor = "capacitor",
   Electron = "electron",
   VSCode = "vscode",
   Web = "web",
 }
+// #endregion
+
+// #region Extension
+export type Extension = {
+  config: ExtensionConfig;
+  isEnabled: boolean;
+  remoteOrigin: string;
+};
+// #endregion
+
+// #region IMC Context
+export type IMCContextType = {
+  connectedModuleIds: string[];
+}
+
+// #endregion

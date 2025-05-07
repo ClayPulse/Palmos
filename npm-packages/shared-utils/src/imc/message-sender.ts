@@ -9,7 +9,7 @@ export class MessageSender {
     { resolve: (result: any) => void; reject: () => void }
   >;
 
-  private moduleName: string;
+  private moduleId: string;
 
   constructor(
     targetWindow: Window,
@@ -18,13 +18,13 @@ export class MessageSender {
       string,
       { resolve: (result: any) => void; reject: () => void }
     >,
-    moduleInfo: string
+    moduleId: string
   ) {
     this.targetWindow = targetWindow;
     this.timeout = timeout;
 
     this.pendingMessages = pendingMessages;
-    this.moduleName = moduleInfo;
+    this.moduleId = moduleId;
   }
 
   public async sendMessage(
@@ -38,7 +38,7 @@ export class MessageSender {
       id,
       type: handlingType,
       payload: payload,
-      from: this.moduleName,
+      from: this.moduleId,
     };
 
     return new Promise((resolve, reject) => {

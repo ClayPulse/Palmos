@@ -1,6 +1,6 @@
 "use client";
 
-import { AIModelConfig } from "@/lib/ai-model-config";
+import { AIModelConfig } from "@/lib/agents/ai-model-config";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getModelLLM } from "@/lib/llm/llm";
 import { decrypt } from "@/lib/security/simple-password";
@@ -113,12 +113,12 @@ export default function EditorContextProvider({
   useEffect(() => {
     if (
       !editorStates.password &&
-      settings?.sttAPIKey &&
       settings?.sttProvider &&
-      settings?.sttModel
+      settings?.sttModel &&
+      settings.apiKeys?.[settings?.sttProvider]
     ) {
       const model = getModelSTT(
-        settings.sttAPIKey,
+        settings.apiKeys?.[settings?.sttProvider],
         settings?.sttProvider,
         settings?.sttModel,
       );
@@ -126,7 +126,7 @@ export default function EditorContextProvider({
     }
   }, [
     editorStates.password,
-    settings?.sttAPIKey,
+    settings?.apiKeys,
     settings?.sttProvider,
     settings?.sttModel,
   ]);
@@ -135,12 +135,12 @@ export default function EditorContextProvider({
   useEffect(() => {
     if (
       !editorStates.password &&
-      settings?.llmAPIKey &&
       settings?.llmProvider &&
-      settings?.llmModel
+      settings?.llmModel &&
+      settings.apiKeys?.[settings?.llmProvider]
     ) {
       const model = getModelLLM(
-        settings.llmAPIKey,
+        settings.apiKeys?.[settings?.llmProvider],
         settings?.llmProvider,
         settings?.llmModel,
         0.85,
@@ -149,7 +149,7 @@ export default function EditorContextProvider({
     }
   }, [
     editorStates.password,
-    settings?.llmAPIKey,
+    settings?.apiKeys,
     settings?.llmProvider,
     settings?.llmModel,
   ]);
@@ -158,13 +158,13 @@ export default function EditorContextProvider({
   useEffect(() => {
     if (
       !editorStates.password &&
-      settings?.ttsAPIKey &&
       settings?.ttsProvider &&
       settings?.ttsModel &&
-      settings?.ttsVoice
+      settings?.ttsVoice &&
+      settings.apiKeys?.[settings?.ttsProvider]
     ) {
       const model = getModelTTS(
-        settings.ttsAPIKey,
+        settings.apiKeys?.[settings?.ttsProvider],
         settings?.ttsProvider,
         settings?.ttsModel,
         settings?.ttsVoice,
@@ -173,7 +173,7 @@ export default function EditorContextProvider({
     }
   }, [
     editorStates.password,
-    settings?.ttsAPIKey,
+    settings?.apiKeys,
     settings?.ttsProvider,
     settings?.ttsModel,
     settings?.ttsVoice,
@@ -182,9 +182,13 @@ export default function EditorContextProvider({
   // Load API keys when password is entered
   useEffect(() => {
     if (editorStates.password && settings?.isPasswordSet) {
-      if (settings?.sttAPIKey && settings?.sttProvider && settings?.sttModel) {
+      if (
+        settings?.sttProvider &&
+        settings?.sttModel &&
+        settings.apiKeys?.[settings?.sttProvider]
+      ) {
         const decryptedSTTAPIKey = decrypt(
-          settings.sttAPIKey,
+          settings.apiKeys?.[settings?.sttProvider],
           editorStates.password,
         );
 
@@ -198,9 +202,13 @@ export default function EditorContextProvider({
         console.log("decryptedSTTAPIKey", decryptedSTTAPIKey);
       }
 
-      if (settings?.llmAPIKey && settings?.llmProvider && settings?.llmModel) {
+      if (
+        settings?.llmProvider &&
+        settings?.llmModel &&
+        settings.apiKeys?.[settings?.llmProvider]
+      ) {
         const decryptedLLMAPIKey = decrypt(
-          settings.llmAPIKey,
+          settings.apiKeys?.[settings?.llmProvider],
           editorStates.password,
         );
 
@@ -216,13 +224,13 @@ export default function EditorContextProvider({
       }
 
       if (
-        settings?.ttsAPIKey &&
         settings?.ttsProvider &&
         settings?.ttsModel &&
-        settings?.ttsVoice
+        settings?.ttsVoice &&
+        settings.apiKeys?.[settings?.ttsProvider]
       ) {
         const decryptedTTSAPIKey = decrypt(
-          settings.ttsAPIKey,
+          settings.apiKeys?.[settings?.ttsProvider],
           editorStates.password,
         );
 
@@ -240,18 +248,17 @@ export default function EditorContextProvider({
   }, [
     editorStates.password,
 
-    settings?.sttAPIKey,
     settings?.sttProvider,
     settings?.sttModel,
 
-    settings?.llmAPIKey,
     settings?.llmProvider,
     settings?.llmModel,
 
-    settings?.ttsAPIKey,
     settings?.ttsProvider,
     settings?.ttsModel,
     settings?.ttsVoice,
+
+    settings?.apiKeys,
   ]);
 
   return (

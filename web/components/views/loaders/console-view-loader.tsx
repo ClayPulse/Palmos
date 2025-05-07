@@ -122,42 +122,6 @@ export default function ConsoleViewLoader({
         },
       ],
       [
-        IMCMessageTypeEnum.InstallAgent,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          if (!message.payload) {
-            throw new Error("No agent config provided.");
-          }
-
-          const agentConfig: Agent = message.payload;
-
-          // Install the agent
-          if (
-            !editorContext?.persistSettings?.installedAgents?.find(
-              (agent) => agent.name === agentConfig.name,
-            )
-          ) {
-            editorContext?.setPersistSettings((prev) => {
-              const newAgent: InstalledAgent = {
-                ...agentConfig,
-                author: {
-                  type: "extension",
-                  extension: usedExtension?.config.displayName,
-                  publisher: usedExtension?.config.author ?? "unknown",
-                },
-              };
-              return {
-                ...prev,
-                installedAgents: [...(prev?.installedAgents ?? []), newAgent],
-              };
-            });
-          }
-        },
-      ],
-      [
         IMCMessageTypeEnum.RunAgentMethod,
         async (
           senderWindow: Window,

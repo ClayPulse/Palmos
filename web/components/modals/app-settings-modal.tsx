@@ -21,6 +21,7 @@ import { PlatformEnum } from "@/lib/types";
 import useExtensions from "@/lib/hooks/use-extensions";
 import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
 import { llmProviderOptions } from "@/lib/llm/options";
+import { getAPIKey, setAPIKey } from "@/lib/settings/settings";
 
 function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
   const { selectAndSetProjectHome } = useExplorer();
@@ -90,7 +91,6 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                   ...prev,
                   sttProvider: e.target.value,
                   sttModel: undefined,
-                  sttAPIKey: undefined,
                 };
               });
             }}
@@ -165,15 +165,17 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               value={
                 editorContext?.persistSettings?.isPasswordSet
                   ? "API key is encrypted"
-                  : (editorContext?.persistSettings?.sttAPIKey ?? "")
+                  : (getAPIKey(
+                      editorContext,
+                      editorContext?.persistSettings?.sttProvider,
+                    ) ?? "")
               }
               onValueChange={(value) => {
-                editorContext?.setPersistSettings((prev) => {
-                  return {
-                    ...prev,
-                    sttAPIKey: value,
-                  };
-                });
+                setAPIKey(
+                  editorContext,
+                  editorContext?.persistSettings?.sttProvider,
+                  value,
+                );
               }}
               isDisabled={!editorContext?.persistSettings?.sttProvider}
               isReadOnly={editorContext?.persistSettings?.isUsePassword}
@@ -198,7 +200,6 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                   ...prev,
                   llmProvider: e.target.value,
                   llmModel: undefined,
-                  llmAPIKey: undefined,
                 };
               });
             }}
@@ -273,15 +274,17 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               value={
                 editorContext?.persistSettings?.isPasswordSet
                   ? "API key is encrypted"
-                  : (editorContext?.persistSettings?.llmAPIKey ?? "")
+                  : (getAPIKey(
+                      editorContext,
+                      editorContext?.persistSettings?.llmProvider,
+                    ) ?? "")
               }
               onValueChange={(value) => {
-                editorContext?.setPersistSettings((prev) => {
-                  return {
-                    ...prev,
-                    llmAPIKey: value,
-                  };
-                });
+                setAPIKey(
+                  editorContext,
+                  editorContext?.persistSettings?.llmProvider,
+                  value,
+                );
               }}
               isDisabled={!editorContext?.persistSettings?.llmProvider}
               isReadOnly={editorContext?.persistSettings?.isUsePassword}
@@ -306,7 +309,6 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                   ...prev,
                   ttsProvider: e.target.value,
                   ttsModel: undefined,
-                  ttsAPIKey: undefined,
                 };
               });
             }}
@@ -396,15 +398,17 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               value={
                 editorContext?.persistSettings?.isPasswordSet
                   ? "API key is encrypted"
-                  : (editorContext?.persistSettings?.ttsAPIKey ?? "")
+                  : (getAPIKey(
+                      editorContext,
+                      editorContext?.persistSettings?.ttsProvider,
+                    ) ?? "")
               }
               onValueChange={(value) => {
-                editorContext?.setPersistSettings((prev) => {
-                  return {
-                    ...prev,
-                    ttsAPIKey: value,
-                  };
-                });
+                setAPIKey(
+                  editorContext,
+                  editorContext?.persistSettings?.ttsProvider,
+                  value,
+                );
               }}
               isDisabled={!editorContext?.persistSettings?.ttsProvider}
               isReadOnly={editorContext?.persistSettings?.isUsePassword}

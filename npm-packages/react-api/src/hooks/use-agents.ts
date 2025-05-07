@@ -1,5 +1,5 @@
 import { Agent, IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
-import useIMC from "../lib/hooks/use-imc";
+import useIMC from "../lib/use-imc";
 
 export default function useAgents() {
   const receiverHandlerMap = new Map<
@@ -8,18 +8,6 @@ export default function useAgents() {
   >();
 
   const { imc, isReady } = useIMC(receiverHandlerMap);
-
-  async function installAgent(config: Agent) {
-    if (!imc) {
-      throw new Error("IMC not initialized.");
-    }
-
-    await imc
-      .sendMessage(IMCMessageTypeEnum.InstallAgent, config)
-      .catch((error) => {
-        throw new Error(error);
-      });
-  }
 
   async function runAgentMethod(
     agentName: string,
@@ -49,7 +37,6 @@ export default function useAgents() {
   }
 
   return {
-    installAgent,
     runAgentMethod,
     isReady,
   };

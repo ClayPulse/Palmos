@@ -5,6 +5,7 @@ import { encrypt } from "@/lib/security/simple-password";
 import Icon from "../misc/icon";
 import ModalWrapper from "./modal-wrapper";
 import { EditorContext } from "../providers/editor-context-provider";
+import { getAPIKey, setAPIKey } from "@/lib/settings/settings";
 
 export default function PasswordScreen({
   isOpen,
@@ -79,25 +80,46 @@ export default function PasswordScreen({
                   };
                 });
 
+                const sttAPIKey = getAPIKey(
+                  editorContext,
+                  settings.sttProvider,
+                );
+                const llmAPIKey = getAPIKey(
+                  editorContext,
+                  settings.llmProvider,
+                );
+                const ttsAPIKey = getAPIKey(
+                  editorContext,
+                  settings.ttsProvider,
+                );
+
                 // Encrypt API tokens
-                const encryptedSTTAPIKey = settings.sttAPIKey
-                  ? encrypt(settings.sttAPIKey, password)
+                const encryptedSTTAPIKey = sttAPIKey
+                  ? encrypt(sttAPIKey, password)
                   : undefined;
-                const encryptedLLMAPIKey = settings.llmAPIKey
-                  ? encrypt(settings.llmAPIKey, password)
+                const encryptedLLMAPIKey = llmAPIKey
+                  ? encrypt(llmAPIKey, password)
                   : undefined;
-                const encryptedTTSAPIKey = settings.ttsAPIKey
-                  ? encrypt(settings.ttsAPIKey, password)
+                const encryptedTTSAPIKey = ttsAPIKey
+                  ? encrypt(ttsAPIKey, password)
                   : undefined;
+
                 // Save to local storage
-                editorContext?.setPersistSettings((prev) => {
-                  return {
-                    ...prev,
-                    sttAPIKey: encryptedSTTAPIKey,
-                    llmAPIKey: encryptedLLMAPIKey,
-                    ttsAPIKey: encryptedTTSAPIKey,
-                  };
-                });
+                setAPIKey(
+                  editorContext,
+                  settings.sttProvider,
+                  encryptedSTTAPIKey ?? "",
+                );
+                setAPIKey(
+                  editorContext,
+                  settings.llmProvider,
+                  encryptedLLMAPIKey ?? "",
+                );
+                setAPIKey(
+                  editorContext,
+                  settings.ttsProvider,
+                  encryptedTTSAPIKey ?? "",
+                );
               } else {
                 // Set the password in memory
                 editorContext.setEditorStates((prev) => {

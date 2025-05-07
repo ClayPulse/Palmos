@@ -13,13 +13,8 @@ export enum IMCMessageTypeEnum {
   ThemeChange = "theme-change",
 
   /* Agents */
-  // Install agent
-  InstallAgent = "install-agent",
   // Execute agent method
   RunAgentMethod = "run-agent-method",
-
-  /* Tools */
-  InstallAgentTool = "install-agent-tool",
 
   /* Modality tools */
   OCR = "ocr",
@@ -106,6 +101,7 @@ export type ExtensionConfig = {
   fileTypes?: string[];
   preview?: string;
   enabledPlatforms?: Record<string, boolean>;
+  agents?: Agent[];
 };
 
 /* Agent config */

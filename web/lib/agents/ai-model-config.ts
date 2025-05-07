@@ -1,6 +1,6 @@
-import { BaseLLM } from "./llm/llm";
-import { BaseSTT } from "./stt/stt";
-import { BaseTTS } from "./tts/tts";
+import { BaseLLM } from "../llm/llm";
+import { BaseSTT } from "../stt/stt";
+import { BaseTTS } from "../tts/tts";
 
 export class AIModelConfig {
   // --- Speech-to-Text ---
