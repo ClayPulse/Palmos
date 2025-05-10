@@ -1,5 +1,5 @@
 import { AgentTool, IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
-import useIMC from "../lib/use-imc";
+import useIMC from "../../lib/use-imc";
 
 /**
  * Add or use agent tools in the editor.

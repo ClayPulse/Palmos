@@ -1,10 +1,12 @@
 import { Dispatch, RefObject, SetStateAction } from "react";
-import { AIModelConfig } from "./agents/ai-model-config";
 import {
   Agent,
   ExtensionConfig,
   FileViewModel,
 } from "@pulse-editor/shared-utils";
+import { BaseSTT } from "./stt/stt";
+import { BaseLLM } from "./llm/llm";
+import { BaseTTS } from "./tts/tts";
 
 // #region Editor Context
 export type EditorContextType = {
@@ -12,29 +14,39 @@ export type EditorContextType = {
   setEditorStates: Dispatch<SetStateAction<EditorStates>>;
   persistSettings: PersistentSettings | undefined;
   setPersistSettings: Dispatch<SetStateAction<PersistentSettings | undefined>>;
-  aiModelConfig: AIModelConfig;
 };
 
 export type EditorStates = {
-  // Selection by drawing
+  /* Selection by drawing */
   isDrawing: boolean;
   isDrawHulls: boolean;
   isDownloadClip: boolean;
 
-  // Inline/popover chat
+  /* Inline/popover chat */
   isInlineChatEnabled: boolean;
 
-  // Open chat view
+  /* Open chat view */
   isChatViewOpen: boolean;
 
-  // Voice agent
+  /* Voice agent */
+  isLoadingRecorder: boolean;
+  // Is the recorder on.
+  // The recorder might be on while the agent is thinking or speaking
   isRecording: boolean;
+  // Is the agent listening to the user input
   isListening: boolean;
+  // Is the agent thinking (processing the user input)
   isThinking: boolean;
+  // Is the agent speaking (reading the output)
   isSpeaking: boolean;
-  isMuted: boolean;
+  // Audio input stream
+  // This is consumed when recording is processed
+  inputAudioStream: ArrayBuffer | undefined;
+  // // Audio output stream
+  // // This is consumed when audio is played
+  // outputAudioStream: ReadableStream<Uint8Array> | undefined;
 
-  // Toolbar
+  /* Toolbar */
   isToolbarOpen: boolean;
 
   project?: string;
@@ -45,7 +57,7 @@ export type EditorStates = {
 
   pressedKeys: string[];
 
-  // Password to access the credentials
+  /* Password to access the credentials */
   password?: string;
 
   openedViewModels: FileViewModel[];
@@ -54,6 +66,8 @@ export type EditorStates = {
   // to make sure that the view is not duplicated
   // and not interfered with each other
   viewIds: string[];
+
+  aiModels?: AIModels;
 };
 
 export type PersistentSettings = {
@@ -141,6 +155,15 @@ export type TabItem = {
 // #endregion
 
 // #region AI
+export type AIModels = {
+  // --- Speech-to-Text ---
+  sttModel?: BaseSTT;
+  // --- Language Model ---
+  llmModel?: BaseLLM;
+  // --- Text-to-Speech ---
+  ttsModel?: BaseTTS;
+};
+
 export type InstalledAgent = Agent & {
   author: {
     type: "user" | "extension";
@@ -209,6 +232,6 @@ export type Extension = {
 // #region IMC Context
 export type IMCContextType = {
   connectedModuleIds: string[];
-}
+};
 
 // #endregion

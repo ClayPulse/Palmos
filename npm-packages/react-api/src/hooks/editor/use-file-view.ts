@@ -4,7 +4,7 @@ import {
   FileViewModel,
 } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
-import useIMC from "../lib/use-imc";
+import useIMC from "../../lib/use-imc";
 
 export default function useFileView() {
   const [viewFile, setViewFile] = useState<FileViewModel | undefined>(

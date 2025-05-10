@@ -17,7 +17,13 @@ export enum IMCMessageTypeEnum {
   RunAgentMethod = "run-agent-method",
 
   /* Modality tools */
-  OCR = "ocr",
+  UseVAD = "use-vad",
+  UseSTT = "use-stt",
+  UseLLM = "use-llm",
+  UseTTS = "use-tts",
+  UseDiffusion = "use-diffusion",
+  UseOCR = "use-ocr",
+  UseSpeech2Speech = "use-speech2speech",
 
   /* Terminal */
   RequestTerminal = "request-terminal",
@@ -102,9 +108,10 @@ export type ExtensionConfig = {
   preview?: string;
   enabledPlatforms?: Record<string, boolean>;
   agents?: Agent[];
+  agentHandlers?: AgentHandler;
 };
 
-/* Agent config */
+// #region Agent config
 export type Agent = {
   name: string;
   version: string;
@@ -144,15 +151,13 @@ type AgentVariableTypeArray = {
   size: number;
   elementType: AgentVariableType;
 };
+// #endregion
 
 /**
  * A tool that agent can use during method execution.
  *
- * This is linked to a callback function created by user,
- * tool developer, or extension.
  *
- * The tool may optionally return a value to running
- * agent method.
+ * The tool may optionally return a value to the agent.
  */
 export type AgentTool = {
   access: AccessEnum;
@@ -162,14 +167,39 @@ export type AgentTool = {
   returns: Record<string, AgentVariable>;
 };
 
-/* AI settings */
-export type LLMConfig = {
-  provider: string;
-  modelName: string;
-  temperature: number;
+/* Agent handler */
+export type AgentHandler = {
+  name: string;
+  description: string;
+  // Whether the handler must be called when
+  // the extension is opened in a view.
+  // Setting this to true requires the extension
+  // to be opened in a view in order to handle requests;
+  // setting it to false allows the request to be
+  // handled even if the extension is not opened in a view.
+  isRequiresOpenedInView: boolean;
+  handlerFunc: (params: Record<string, any>) => Promise<any>;
 };
 
 export enum AccessEnum {
   public = "public",
   private = "private",
 }
+
+/* AI settings */
+export type STTConfig = {
+  provider: string;
+  modelName: string;
+};
+
+export type LLMConfig = {
+  provider: string;
+  modelName: string;
+  temperature: number;
+};
+
+export type TTSConfig = {
+  provider: string;
+  modelName: string;
+  voice: string;
+};

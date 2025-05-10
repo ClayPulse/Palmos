@@ -8,7 +8,6 @@ import {
   IMCMessageTypeEnum,
 } from "@pulse-editor/shared-utils";
 import Loading from "../../interface/loading";
-import useAgentRunner from "@/lib/hooks/use-agent-runner";
 import { useTheme } from "next-themes";
 import { InterModuleCommunication } from "@pulse-editor/shared-utils";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
@@ -28,8 +27,6 @@ export default function ConsoleViewLoader({
 
   const [isExtensionWindowReady, setIsExtensionWindowReady] = useState(false);
   const [isExtensionLoaded, setIsExtensionLoaded] = useState(false);
-
-  const { runAgentMethod } = useAgentRunner();
 
   const [imc, setImc] = useState<InterModuleCommunication | undefined>(
     undefined,
@@ -121,45 +118,45 @@ export default function ConsoleViewLoader({
           setIsExtensionLoaded((prev) => true);
         },
       ],
-      [
-        IMCMessageTypeEnum.RunAgentMethod,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          if (!message.payload) {
-            throw new Error("No agent method config provided.");
-          }
+      // [
+      //   IMCMessageTypeEnum.RunAgentMethod,
+      //   async (
+      //     senderWindow: Window,
+      //     message: IMCMessage,
+      //     abortSignal?: AbortSignal,
+      //   ) => {
+      //     if (!message.payload) {
+      //       throw new Error("No agent method config provided.");
+      //     }
 
-          const {
-            agentName,
-            methodName,
-            parameters,
-          }: {
-            agentName: string;
-            methodName: string;
-            parameters: Record<string, any>;
-          } = message.payload;
+      //     const {
+      //       agentName,
+      //       methodName,
+      //       parameters,
+      //     }: {
+      //       agentName: string;
+      //       methodName: string;
+      //       parameters: Record<string, any>;
+      //     } = message.payload;
 
-          const agent = editorContext?.persistSettings?.installedAgents?.find(
-            (agent) => agent.name === agentName,
-          );
+      //     const agent = editorContext?.persistSettings?.installedAgents?.find(
+      //       (agent) => agent.name === agentName,
+      //     );
 
-          if (!agent) {
-            throw new Error("Agent not found.");
-          }
+      //     if (!agent) {
+      //       throw new Error("Agent not found.");
+      //     }
 
-          const result = await runAgentMethod(
-            agent,
-            methodName,
-            parameters,
-            abortSignal,
-          );
+      //     const result = await runAgentMethod(
+      //       agent,
+      //       methodName,
+      //       parameters,
+      //       abortSignal,
+      //     );
 
-          return result;
-        },
-      ],
+      //     return result;
+      //   },
+      // ],
       [
         IMCMessageTypeEnum.RequestTerminal,
         async (

@@ -188,8 +188,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
         <p className="text-medium pb-2 font-bold">LLM</p>
         <div className="w-full space-y-2">
           <Select
-            items={llmProviderOptions}
-            disabledKeys={llmProviderOptions
+            items={Object.values(llmProviderOptions)}
+            disabledKeys={Object.values(llmProviderOptions)
               .filter((provider) => !provider.isSupported)
               .map((provider) => provider.provider)}
             label="Provider"
@@ -219,14 +219,14 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
           <Select
             isDisabled={!editorContext?.persistSettings?.llmProvider}
             items={
-              llmProviderOptions.find(
+              Object.values(llmProviderOptions).find(
                 (provider) =>
                   provider.provider ===
                   editorContext?.persistSettings?.llmProvider,
               )?.models ?? []
             }
             disabledKeys={
-              llmProviderOptions
+              Object.values(llmProviderOptions)
                 .find(
                   (provider) =>
                     provider.provider ===

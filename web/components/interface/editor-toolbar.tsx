@@ -11,6 +11,7 @@ import { PlatformEnum } from "@/lib/types";
 import toast from "react-hot-toast";
 import ExtensionModal from "../modals/extension-modal";
 import AgentConfigModal from "../modals/agent-config-modal";
+import useSpeech2Speech from "@/lib/hooks/use-speech2speech";
 
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
@@ -18,6 +19,8 @@ export default function EditorToolbar() {
   const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
   const [isAppSettingsModalOpen, setAppIsSettingsModalOpen] = useState(false);
+
+  const { runSpeech2Speech, stopSpeech2Speech } = useSpeech2Speech();
 
   function setIsOpen(val: boolean) {
     if (editorContext) {
@@ -47,11 +50,11 @@ export default function EditorToolbar() {
               y: 80,
             }}
           >
-            <div className="relative flex h-10 w-fit items-center rounded-full bg-content2 px-2 py-1 shadow-md">
+            <div className="bg-content2 relative flex h-10 w-fit items-center rounded-full px-2 py-1 shadow-md">
               <Tooltip content={"Pen Tool"}>
                 <Button
                   isIconOnly
-                  className="h-8 w-8 min-w-8 px-1 py-1 text-default-foreground"
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
                     if (editorContext?.editorStates) {
                       editorContext?.setEditorStates((prev) => ({
@@ -71,7 +74,7 @@ export default function EditorToolbar() {
                 <Button
                   variant="light"
                   isIconOnly
-                  className="h-8 w-8 min-w-8 px-1 py-1 text-default-foreground"
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                 >
                   <Icon name="comment" variant="outlined" />
                 </Button>
@@ -86,7 +89,7 @@ export default function EditorToolbar() {
                       : "light"
                   }
                   isIconOnly
-                  className="h-8 w-8 min-w-8 px-1 py-1 text-default-foreground"
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
                     if (editorContext?.editorStates) {
                       editorContext?.setEditorStates((prev) => ({
@@ -104,7 +107,7 @@ export default function EditorToolbar() {
               <Tooltip content={"Voice Chat With Agent"}>
                 <Button
                   isIconOnly
-                  className="h-8 w-8 min-w-8 px-1 py-1 text-default-foreground"
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
                     if (getPlatform() === PlatformEnum.VSCode) {
                       toast.error(
@@ -113,11 +116,18 @@ export default function EditorToolbar() {
                       return;
                     }
 
-                    if (editorContext?.editorStates) {
-                      editorContext?.setEditorStates((prev) => ({
-                        ...prev,
-                        isRecording: !editorContext?.editorStates.isRecording,
-                      }));
+                    // if (editorContext?.editorStates) {
+                    //   editorContext?.setEditorStates((prev) => ({
+                    //     ...prev,
+                    //     isRecording: !editorContext?.editorStates.isRecording,
+                    //   }));
+                    // }
+                    if (!editorContext.editorStates.isRecording) {
+                      runSpeech2Speech(async (inputText: string) => {
+                        return inputText;
+                      });
+                    } else {
+                      stopSpeech2Speech();
                     }
                   }}
                   variant={
@@ -132,7 +142,7 @@ export default function EditorToolbar() {
                 <Button
                   variant="light"
                   isIconOnly
-                  className="h-8 w-8 min-w-8 px-1 py-1 text-default-foreground"
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                 >
                   <Icon name="volume_up" variant="outlined" />
                 </Button>
@@ -144,7 +154,7 @@ export default function EditorToolbar() {
                 <Button
                   variant="light"
                   isIconOnly
-                  className="h-8 w-8 min-w-8 px-1 py-1 text-default-foreground"
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
                     setIsAgentListModalOpen(true);
                   }}
@@ -161,7 +171,7 @@ export default function EditorToolbar() {
                 <Button
                   variant="light"
                   isIconOnly
-                  className="h-8 w-8 min-w-8 px-1 py-1 text-default-foreground"
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
                     setIsExtensionModalOpen(true);
                   }}
@@ -179,7 +189,7 @@ export default function EditorToolbar() {
                 <Button
                   variant="light"
                   isIconOnly
-                  className="h-8 w-8 min-w-8 px-1 py-1 text-default-foreground"
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => setAppIsSettingsModalOpen(true)}
                 >
                   <Icon name="settings" variant="outlined" />
@@ -197,7 +207,7 @@ export default function EditorToolbar() {
       {editorContext?.editorStates.isToolbarOpen ? (
         <Button
           isIconOnly
-          className="h-4 w-10 bg-content2"
+          className="bg-content2 h-4 w-10"
           onPress={() => {
             setIsOpen(false);
           }}
@@ -210,7 +220,7 @@ export default function EditorToolbar() {
       ) : (
         <Button
           isIconOnly
-          className="h-4 w-10 bg-content2"
+          className="bg-content2 h-4 w-10"
           onPress={() => {
             setIsOpen(true);
           }}

@@ -1,6 +1,6 @@
 import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import { useState } from "react";
-import useIMC from "../lib/use-imc";
+import useIMC from "../../lib/use-imc";
 
 export default function useTheme() {
   const [theme, setTheme] = useState<string>("light");

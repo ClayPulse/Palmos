@@ -25,7 +25,10 @@ export class BaseLLM {
     this.generateFunc = generateFunc;
   }
 
-  public async generate(prompt: string, signal?: AbortSignal): Promise<string> {
+  public async generate(
+    prompt: string,
+    signal?: AbortSignal,
+  ): Promise<string> {
     return await this.generateFunc(this.model, prompt, signal);
   }
 }

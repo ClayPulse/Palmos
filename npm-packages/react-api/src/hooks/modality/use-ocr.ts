@@ -1,6 +1,6 @@
 import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 
-import useIMC from "../lib/use-imc";
+import useIMC from "../../lib/use-imc";
 
 export default function useOCR() {
   const receiverHandlerMap = new Map<
@@ -10,13 +10,18 @@ export default function useOCR() {
 
   const { imc } = useIMC(receiverHandlerMap);
 
-  async function recognizeText(uri: string): Promise<string> {
+  /**
+   * 
+   * @param image The image to be recognized. This is a base64 encoded string.
+   * @returns 
+   */
+  async function recognizeText(image: string): Promise<string> {
     if (!imc) {
       throw new Error("IMC is not initialized.");
     }
 
     // Send the message to the extension
-    const result = await imc.sendMessage(IMCMessageTypeEnum.OCR, { uri });
+    const result = await imc.sendMessage(IMCMessageTypeEnum.UseOCR, { image });
 
     return result.payload.text;
   }

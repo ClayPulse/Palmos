@@ -1,6 +1,5 @@
 "use client";
 
-import { AIModelConfig } from "@/lib/agents/ai-model-config";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getModelLLM } from "@/lib/llm/llm";
 import { decrypt } from "@/lib/security/simple-password";
@@ -10,8 +9,9 @@ import {
   EditorStates,
   EditorContextType,
   PersistentSettings,
+  AIModels,
 } from "@/lib/types";
-import React, { createContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 export const EditorContext = createContext<EditorContextType | undefined>(
   undefined,
@@ -23,11 +23,12 @@ const defaultEditorStates: EditorStates = {
   isDownloadClip: false,
   isInlineChatEnabled: false,
   isChatViewOpen: false,
+  isLoadingRecorder: false,
   isRecording: false,
   isListening: false,
   isThinking: false,
   isSpeaking: false,
-  isMuted: false,
+  inputAudioStream: undefined,
   isToolbarOpen: true,
   explorerSelectedNodeRefs: [],
   pressedKeys: [],
@@ -50,9 +51,6 @@ export default function EditorContextProvider({
     undefined,
   );
   const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
-
-  // --- AI Model Management ---
-  const aiModelConfig = useRef<AIModelConfig>(new AIModelConfig());
 
   // --- Platform API ---
   const { platformApi } = usePlatformApi();
@@ -122,7 +120,16 @@ export default function EditorContextProvider({
         settings?.sttProvider,
         settings?.sttModel,
       );
-      aiModelConfig.current.setSTTModel(model);
+
+      const aiModels: AIModels = {
+        ...editorStates.aiModels,
+        sttModel: model,
+      };
+
+      setEditorStates((prev) => ({
+        ...prev,
+        aiModels: aiModels,
+      }));
     }
   }, [
     editorStates.password,
@@ -145,7 +152,16 @@ export default function EditorContextProvider({
         settings?.llmModel,
         0.85,
       );
-      aiModelConfig.current.setLLMModel(model);
+
+      const aiModels: AIModels = {
+        ...editorStates.aiModels,
+        llmModel: model,
+      };
+
+      setEditorStates((prev) => ({
+        ...prev,
+        aiModels: aiModels,
+      }));
     }
   }, [
     editorStates.password,
@@ -169,7 +185,16 @@ export default function EditorContextProvider({
         settings?.ttsModel,
         settings?.ttsVoice,
       );
-      aiModelConfig.current.setTTSModel(model);
+
+      const aiModels: AIModels = {
+        ...editorStates.aiModels,
+        ttsModel: model,
+      };
+
+      setEditorStates((prev) => ({
+        ...prev,
+        aiModels: aiModels,
+      }));
     }
   }, [
     editorStates.password,
@@ -197,9 +222,16 @@ export default function EditorContextProvider({
           settings?.sttProvider,
           settings?.sttModel,
         );
-        aiModelConfig.current.setSTTModel(model);
 
-        console.log("decryptedSTTAPIKey", decryptedSTTAPIKey);
+        const aiModels: AIModels = {
+          ...editorStates.aiModels,
+          sttModel: model,
+        };
+
+        setEditorStates((prev) => ({
+          ...prev,
+          aiModels: aiModels,
+        }));
       }
 
       if (
@@ -218,9 +250,16 @@ export default function EditorContextProvider({
           settings?.llmModel,
           0.85,
         );
-        aiModelConfig.current.setLLMModel(model);
 
-        console.log("decryptedLLMAPIKey", decryptedLLMAPIKey);
+        const aiModels: AIModels = {
+          ...editorStates.aiModels,
+          llmModel: model,
+        };
+
+        setEditorStates((prev) => ({
+          ...prev,
+          aiModels: aiModels,
+        }));
       }
 
       if (
@@ -240,9 +279,16 @@ export default function EditorContextProvider({
           settings?.ttsModel,
           settings?.ttsVoice,
         );
-        aiModelConfig.current.setTTSModel(model);
 
-        console.log("decryptedTTSAPIKey", decryptedTTSAPIKey);
+        const aiModels: AIModels = {
+          ...editorStates.aiModels,
+          ttsModel: model,
+        };
+
+        setEditorStates((prev) => ({
+          ...prev,
+          aiModels: aiModels,
+        }));
       }
     }
   }, [
@@ -268,7 +314,6 @@ export default function EditorContextProvider({
         setEditorStates,
         persistSettings: settings,
         setPersistSettings: setSettings,
-        aiModelConfig: aiModelConfig.current,
       }}
     >
       {children}

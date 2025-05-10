@@ -10,7 +10,6 @@ import {
   IMCMessageTypeEnum,
 } from "@pulse-editor/shared-utils";
 import Loading from "../../interface/loading";
-import useAgentRunner from "@/lib/hooks/use-agent-runner";
 import { useTheme } from "next-themes";
 import { InterModuleCommunication } from "@pulse-editor/shared-utils";
 
@@ -29,8 +28,6 @@ export default function FileViewLoader({
 
   const [isExtensionWindowReady, setIsExtensionWindowReady] = useState(false);
   const [isExtensionLoaded, setIsExtensionLoaded] = useState(false);
-
-  const { runAgentMethod } = useAgentRunner();
 
   const [imc, setImc] = useState<InterModuleCommunication | undefined>(
     undefined,
@@ -145,45 +142,6 @@ export default function FileViewLoader({
             const payload: FileViewModel = message.payload;
             updateFileView(payload);
           }
-        },
-      ],
-      [
-        IMCMessageTypeEnum.RunAgentMethod,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          if (!message.payload) {
-            throw new Error("No agent method config provided.");
-          }
-
-          const {
-            agentName,
-            methodName,
-            parameters,
-          }: {
-            agentName: string;
-            methodName: string;
-            parameters: Record<string, any>;
-          } = message.payload;
-
-          const agent = editorContext?.persistSettings?.installedAgents?.find(
-            (agent) => agent.name === agentName,
-          );
-
-          if (!agent) {
-            throw new Error("Agent not found.");
-          }
-
-          const result = await runAgentMethod(
-            agent,
-            methodName,
-            parameters,
-            abortSignal,
-          );
-
-          return result;
         },
       ],
       [
