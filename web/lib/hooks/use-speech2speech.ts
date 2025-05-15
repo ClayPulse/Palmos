@@ -14,7 +14,7 @@ export default function useSpeech2Speech() {
     ((inputText: string) => Promise<string>) | undefined
   >(undefined);
   const [textProcessStreamFunc, setTextProcessStreamFunc] = useState<
-    ((inputText: string) => ReadableStream<string>) | undefined
+    ((inputText: string) => Promise<ReadableStream<string>>) | undefined
   >(undefined);
 
   const [sttModel, setSttModel] = useState<BaseSTT | undefined>(undefined);
@@ -110,7 +110,7 @@ export default function useSpeech2Speech() {
 
       if (textProcessStreamFunc !== undefined) {
         // Process the transcript as the stream is being generated
-        const stream = textProcessStreamFunc(transcript);
+        const stream = await textProcessStreamFunc(transcript);
 
         const reader = stream.getReader();
         let result = "";
@@ -259,7 +259,9 @@ export default function useSpeech2Speech() {
    */
   async function runSpeech2Speech(
     textProcessFunc?: (inputText: string) => Promise<string>,
-    textProcessStreamFunc?: (inputText: string) => ReadableStream<string>,
+    textProcessStreamFunc?: (
+      inputText: string,
+    ) => Promise<ReadableStream<string>>,
   ) {
     if (!editorContext) {
       throw new Error("Editor context is not initialized.");

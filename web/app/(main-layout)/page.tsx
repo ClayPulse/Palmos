@@ -1,6 +1,7 @@
 "use client";
 
 import EditorToolbar from "@/components/interface/editor-toolbar";
+import ExtensionSuggestionOverlay from "@/components/interface/extension-suggestion-overlay";
 import Nav from "@/components/interface/nav";
 import Voice from "@/components/tools/voice";
 import ViewDisplayArea from "@/components/views/file-view-display-area";
@@ -13,6 +14,7 @@ export default function HomePage() {
         <ViewDisplayArea />
 
         <Voice />
+        {false && <ExtensionSuggestionOverlay />}
       </div>
     </Nav>
   );

@@ -12,6 +12,9 @@ import toast from "react-hot-toast";
 import ExtensionModal from "../modals/extension-modal";
 import AgentConfigModal from "../modals/agent-config-modal";
 import useSpeech2Speech from "@/lib/hooks/use-speech2speech";
+import { getAPIKey } from "@/lib/settings/settings";
+import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
+import { getAgentLLMConfig, runAgentMethod } from "@/lib/agent/agent-runner";
 
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
@@ -28,6 +31,75 @@ export default function EditorToolbar() {
         ...prev,
         isToolbarOpen: val,
       }));
+    }
+  }
+
+  function handleMic() {
+    if (!editorContext) {
+      return;
+    }
+
+    if (getPlatform() === PlatformEnum.VSCode) {
+      toast.error(
+        "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
+      );
+      return;
+    }
+
+    if (!editorContext.editorStates.isRecording) {
+      const llmProvider = editorContext.persistSettings?.llmProvider;
+      const llmModel = editorContext.persistSettings?.llmModel;
+
+      if (!llmProvider || !llmModel) {
+        toast.error("Please set your LLM provider and model in settings.");
+        return;
+      }
+      const llmKey = getAPIKey(
+        editorContext,
+        editorContext.persistSettings?.llmProvider,
+      );
+
+      if (!llmKey) {
+        toast.error("Please set your LLM API key in settings.");
+        return;
+      }
+
+      const agent = editorAssistantAgent;
+      const method = agent.availableMethods[0];
+
+      runSpeech2Speech(async (inputText: string) => {
+        // Pipe the LLM result to Speech2Speech
+        // const stream = await llm.generateStream(inputText);
+        const result = await runAgentMethod(
+          llmKey,
+          getAgentLLMConfig(agent, method),
+          agent,
+          method,
+          {
+            userMessage: inputText,
+            chatHistory: [],
+            availableAgents: [],
+          },
+        );
+
+        const {
+          agentSuggestions,
+          response,
+        }: {
+          agentSuggestions: {
+            agent: string;
+            method: string;
+            parameters: any;
+          }[];
+          response: string;
+        } = result;
+
+        console.log("Suggested agents: ", agentSuggestions);
+
+        return response;
+      });
+    } else {
+      stopSpeech2Speech();
     }
   }
 
@@ -109,26 +181,7 @@ export default function EditorToolbar() {
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
-                    if (getPlatform() === PlatformEnum.VSCode) {
-                      toast.error(
-                        "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
-                      );
-                      return;
-                    }
-
-                    // if (editorContext?.editorStates) {
-                    //   editorContext?.setEditorStates((prev) => ({
-                    //     ...prev,
-                    //     isRecording: !editorContext?.editorStates.isRecording,
-                    //   }));
-                    // }
-                    if (!editorContext.editorStates.isRecording) {
-                      runSpeech2Speech(async (inputText: string) => {
-                        return inputText;
-                      });
-                    } else {
-                      stopSpeech2Speech();
-                    }
+                    handleMic();
                   }}
                   variant={
                     editorContext?.editorStates?.isRecording ? "solid" : "light"

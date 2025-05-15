@@ -1,17 +1,18 @@
-import { Extension, InstalledAgent } from "@/lib/types";
+import { Extension } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
 import FileViewLayout from "../layout";
 import ExtensionLoader from "../../misc/extension-loader";
 import {
-  Agent,
+  ConnectionListener,
   FileViewModel,
   IMCMessage,
   IMCMessageTypeEnum,
+  InterModuleCommunication,
 } from "@pulse-editor/shared-utils";
 import Loading from "../../interface/loading";
 import { useTheme } from "next-themes";
-import { InterModuleCommunication } from "@pulse-editor/shared-utils";
+import { IMCContext } from "@/components/providers/imc-provider";
 
 export default function FileViewLoader({
   model,
@@ -21,6 +22,8 @@ export default function FileViewLoader({
   updateFileView: (model: FileViewModel) => void;
 }) {
   const editorContext = useContext(EditorContext);
+  const imcContext = useContext(IMCContext);
+
   const [usedExtension, setUsedExtension] = useState<Extension | undefined>(
     undefined,
   );
@@ -29,13 +32,17 @@ export default function FileViewLoader({
   const [isExtensionWindowReady, setIsExtensionWindowReady] = useState(false);
   const [isExtensionLoaded, setIsExtensionLoaded] = useState(false);
 
-  const [imc, setImc] = useState<InterModuleCommunication | undefined>(
-    undefined,
-  );
-
   const { resolvedTheme } = useTheme();
 
   const [fileUri, setFileUri] = useState<string | undefined>(undefined);
+
+  const [connectionListener, setConnectionListener] = useState<
+    ConnectionListener | undefined
+  >(undefined);
+
+  const [remoteModuleId, setRemoteModuleId] = useState<string | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (fileUri !== model.filePath) setFileUri(model.filePath);
@@ -58,23 +65,39 @@ export default function FileViewLoader({
           setUsedExtension(undefined);
           return;
         }
-
-        // Create IMC
-        const newImc = new InterModuleCommunication("Pulse Editor Main");
-        newImc.initThisWindow(window);
-        newImc.updateReceiverHandlerMap(getHandlerMap());
-        setImc(newImc);
-
         setUsedExtension(extension);
         setHasExtension(true);
+
+        // Create IMC channel
+        if (imcContext?.polyIMC) {
+          const cl = new ConnectionListener(
+            imcContext?.polyIMC,
+            getHandlerMap(),
+            (senderWindow: Window, message: IMCMessage) => {
+              setIsExtensionWindowReady((prev) => true);
+              setIsExtensionLoaded((prev) => false);
+
+              const moduleId = message.from;
+              setRemoteModuleId(moduleId);
+
+              // Close the listener when the extension is connected
+              if (connectionListener) {
+                connectionListener.close();
+                setConnectionListener(undefined);
+              }
+            },
+          );
+
+          setConnectionListener(cl);
+        }
       }
     }
 
     if (fileUri) {
       // Reset the extension and IMC when the file URI changes
-      if (imc) {
-        imc.close();
-        setImc(undefined);
+      if (imcContext?.polyIMC && remoteModuleId) {
+        // Remove the channel from the IMC provider
+        imcContext.polyIMC.removeChannel(remoteModuleId);
 
         setIsExtensionWindowReady(false);
         setIsExtensionLoaded(false);
@@ -86,14 +109,25 @@ export default function FileViewLoader({
 
   useEffect(() => {
     // Send theme update to the extension
-    if (isExtensionWindowReady && imc) {
-      imc.sendMessage(IMCMessageTypeEnum.ThemeChange, resolvedTheme);
+    if (isExtensionWindowReady && remoteModuleId) {
+      imcContext?.polyIMC?.sendMessage(
+        remoteModuleId,
+        IMCMessageTypeEnum.ThemeChange,
+        resolvedTheme,
+      );
     }
-  }, [isExtensionWindowReady, imc, resolvedTheme]);
+  }, [isExtensionWindowReady, remoteModuleId, resolvedTheme]);
 
+  // When the editor context changes, update the IMC receiver handler map
+  // to include the new handlers for the extension
   useEffect(() => {
-    imc?.updateReceiverHandlerMap(getHandlerMap());
-  }, [editorContext, imc]);
+    if (remoteModuleId) {
+      imcContext?.polyIMC?.updateChannelReceiverHandlerMap(
+        remoteModuleId,
+        getHandlerMap(),
+      );
+    }
+  }, [editorContext, imcContext]);
 
   function getHandlerMap() {
     const newMap = new Map<
@@ -106,21 +140,6 @@ export default function FileViewLoader({
         ): Promise<any>;
       }
     >([
-      [
-        IMCMessageTypeEnum.Ready,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          if (!imc) {
-            throw new Error("IMC not initialized.");
-          }
-          imc.initOtherWindow(senderWindow);
-          setIsExtensionWindowReady((prev) => true);
-          setIsExtensionLoaded((prev) => false);
-        },
-      ],
       [
         IMCMessageTypeEnum.Loaded,
         async (
@@ -167,7 +186,7 @@ export default function FileViewLoader({
               <Loading />
             </div>
           )}
-          {imc && (
+          {connectionListener && (
             <ExtensionLoader
               key={fileUri}
               remoteOrigin={usedExtension.remoteOrigin}

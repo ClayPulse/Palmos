@@ -25,12 +25,18 @@ export enum IMCMessageTypeEnum {
   UseOCR = "use-ocr",
   UseSpeech2Speech = "use-speech2speech",
 
+  /* Extension commands*/
+  RunExtCommand = "run-ext-command",
+
   /* Terminal */
   RequestTerminal = "request-terminal",
 
   /* Extension statuses */
   // Notify Pulse that extension window is available
-  Ready = "ready",
+  ExtReady = "ext-ready",
+  // Notify Pulse that extension is closing
+  ExtClose = "ext-close",
+
   // Notify Pulse that extension has finished loading
   Loaded = "loaded",
   // A message to notify sender that the message
@@ -49,17 +55,14 @@ export type IMCMessage = {
   payload?: any;
 };
 
+export type ReceiverHandler = (
+  senderWindow: Window,
+  message: IMCMessage,
+  abortSignal?: AbortSignal
+) => Promise<any>;
+
 // IMC receiver handler map
-export type ReceiverHandlerMap = Map<
-  IMCMessageTypeEnum,
-  {
-    (
-      senderWindow: Window,
-      message: IMCMessage,
-      abortSignal?: AbortSignal
-    ): Promise<any>;
-  }
->;
+export type ReceiverHandlerMap = Map<IMCMessageTypeEnum, ReceiverHandler>;
 
 /* File view */
 export type TextFileSelection = {
@@ -107,8 +110,11 @@ export type ExtensionConfig = {
   fileTypes?: string[];
   preview?: string;
   enabledPlatforms?: Record<string, boolean>;
+
+  // Extension or user installed agents
   agents?: Agent[];
-  agentHandlers?: AgentHandler;
+  // Exposed commands in the extension
+  commandsInfoList?: ExtensionCommandInfo[];
 };
 
 // #region Agent config
@@ -128,30 +134,38 @@ export type Agent = {
 export type AgentMethod = {
   access: AccessEnum;
   name: string;
-  parameters: Record<string, AgentVariable>;
+  parameters: Record<string, TypedVariable>;
   prompt: string;
-  returns: Record<string, AgentVariable>;
+  returns: Record<string, TypedVariable>;
   // If this config does not exist, use the class's LLMConfig
   LLMConfig?: LLMConfig;
 };
 
-export type AgentVariable = {
-  type: AgentVariableType;
+export type TypedVariable = {
+  type: TypedVariableType;
+  name: string;
   // Describe the variable for LLM to better understand it
   description: string;
+  optional?: boolean;
+  defaultValue?: any;
 };
 
-export type AgentVariableType =
+// #endregion
+export type TypedVariableType =
   | "string"
   | "number"
   | "boolean"
-  | AgentVariableTypeArray;
+  | TypedVariableObjectType
+  | TypedVariableArrayType;
 
-type AgentVariableTypeArray = {
-  size: number;
-  elementType: AgentVariableType;
+export type TypedVariableObjectType = {
+  [key: string]: TypedVariable;
 };
-// #endregion
+
+export type TypedVariableArrayType = {
+  size?: number;
+  elementType: TypedVariableType;
+};
 
 /**
  * A tool that agent can use during method execution.
@@ -163,22 +177,8 @@ export type AgentTool = {
   access: AccessEnum;
   name: string;
   description: string;
-  parameters: Record<string, AgentVariable>;
-  returns: Record<string, AgentVariable>;
-};
-
-/* Agent handler */
-export type AgentHandler = {
-  name: string;
-  description: string;
-  // Whether the handler must be called when
-  // the extension is opened in a view.
-  // Setting this to true requires the extension
-  // to be opened in a view in order to handle requests;
-  // setting it to false allows the request to be
-  // handled even if the extension is not opened in a view.
-  isRequiresOpenedInView: boolean;
-  handlerFunc: (params: Record<string, any>) => Promise<any>;
+  parameters: Record<string, TypedVariable>;
+  returns: Record<string, TypedVariable>;
 };
 
 export enum AccessEnum {
@@ -202,4 +202,15 @@ export type TTSConfig = {
   provider: string;
   modelName: string;
   voice: string;
+};
+
+export type ExtensionCommandInfo = {
+  name: string;
+  description: string;
+  parameters: Record<string, TypedVariable>;
+};
+
+export type ExtensionCommand = {
+  info: ExtensionCommandInfo;
+  handler: (args: any) => Promise<any>;
 };

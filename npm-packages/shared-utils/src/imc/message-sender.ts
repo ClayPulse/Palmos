@@ -11,19 +11,11 @@ export class MessageSender {
 
   private moduleId: string;
 
-  constructor(
-    targetWindow: Window,
-    timeout: number,
-    pendingMessages: Map<
-      string,
-      { resolve: (result: any) => void; reject: () => void }
-    >,
-    moduleId: string
-  ) {
+  constructor(targetWindow: Window, timeout: number, moduleId: string) {
     this.targetWindow = targetWindow;
     this.timeout = timeout;
 
-    this.pendingMessages = pendingMessages;
+    this.pendingMessages = new Map();
     this.moduleId = moduleId;
   }
 
@@ -96,5 +88,13 @@ export class MessageSender {
         };
       }
     });
+  }
+
+  public getPendingMessage(id: string) {
+    return this.pendingMessages.get(id);
+  }
+
+  public removePendingMessage(id: string) {
+    this.pendingMessages.delete(id);
   }
 }

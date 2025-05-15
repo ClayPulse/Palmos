@@ -12,6 +12,7 @@ import useFileView from "./hooks/editor/use-file-view";
 import useNotification from "./hooks/editor/use-notification";
 import useTheme from "./hooks/editor/use-theme";
 import useToolbar from "./hooks/editor/use-toolbar";
+import useExtCommand from "./hooks/extension/use-ext-command";
 import useDiffusion from "./hooks/modality/use-diffusion";
 import useLLM from "./hooks/modality/use-llm";
 import useOCR from "./hooks/modality/use-ocr";
@@ -31,4 +32,5 @@ export {
   useOCR,
   useSTT,
   useTTS,
+  useExtCommand,
 };

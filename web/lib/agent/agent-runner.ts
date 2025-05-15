@@ -2,6 +2,10 @@ import { Agent, AgentMethod, LLMConfig } from "@pulse-editor/shared-utils";
 import { getModelLLM } from "../llm/llm";
 import toast from "react-hot-toast";
 
+export function getAgentLLMConfig(agent: Agent, method: AgentMethod) {
+  return method.LLMConfig ? method.LLMConfig : agent.LLMConfig;
+}
+
 export async function runAgentMethod(
   apiKey: string,
   llmConfig: LLMConfig,
@@ -9,7 +13,7 @@ export async function runAgentMethod(
   method: AgentMethod,
   args: Record<string, any>,
   abortSignal?: AbortSignal,
-): Promise<Record<string, any>> {
+): Promise<any> {
   const llm = getLLM(llmConfig, agent.name, apiKey);
 
   if (!llm) {

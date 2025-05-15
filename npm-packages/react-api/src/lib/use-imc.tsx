@@ -34,7 +34,7 @@ export default function useIMC(handlerMap: ReceiverHandlerMap) {
     newImc.initOtherWindow(targetWindow);
     setImc(newImc);
 
-    newImc.sendMessage(IMCMessageTypeEnum.Ready).then(() => {
+    newImc.sendMessage(IMCMessageTypeEnum.ExtReady).then(() => {
       setIsReady(true);
     });
   }, [isMounted, imc]);

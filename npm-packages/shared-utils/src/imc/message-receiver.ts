@@ -14,18 +14,9 @@ export class MessageReceiver {
   >;
   private moduleId: string;
 
-  constructor(
-    listenerMap: ReceiverHandlerMap,
-    pendingTasks: Map<
-      string,
-      {
-        controller: AbortController;
-      }
-    >,
-    moduleId: string
-  ) {
+  constructor(listenerMap: ReceiverHandlerMap, moduleId: string) {
     this.handlerMap = listenerMap;
-    this.pendingTasks = pendingTasks;
+    this.pendingTasks = new Map();
     this.moduleId = moduleId;
   }
 
@@ -36,9 +27,9 @@ export class MessageReceiver {
     // Log the message in dev mode
     if (process.env.NODE_ENV === "development") {
       console.log(
-        `Module ${this.moduleId} received message from module ${message.from}:\n ${JSON.stringify(
-          message
-        )}`
+        `Module ${this.moduleId} received message from module ${
+          message.from
+        }:\n ${JSON.stringify(message)}`
       );
     }
 

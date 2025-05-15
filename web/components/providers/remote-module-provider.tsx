@@ -5,7 +5,7 @@ import React, { useContext, useEffect } from "react";
 import { ReactNode } from "react";
 import ReactDOM from "react-dom";
 import { EditorContext } from "./editor-context-provider";
-import { InstalledAgent } from "@/lib/types";
+import { Extension, InstalledAgent } from "@/lib/types";
 
 const host = init({
   name: "pulse_editor",
@@ -92,19 +92,7 @@ export default function RemoteModuleProvider({
   }, [isPreventingCSS]);
 
   useEffect(() => {
-    // Register all extensions
-    const extensions = editorContext?.persistSettings?.extensions ?? [];
-    if (extensions.length > 0) {
-      const remotes = extensions.map((ext) => {
-        return {
-          name: ext.config.id,
-          entry: `${ext.remoteOrigin}/${ext.config.id}/${ext.config.version}/mf-manifest.json`,
-        };
-      });
-
-      registerRemotes(remotes);
-      console.log("Registered remotes", remotes);
-
+    function getExtensionAgents(extensions: Extension[]) {
       const agents: InstalledAgent[] = extensions.flatMap(
         (ext) =>
           ext.config.agents?.map((agent) => {
@@ -121,6 +109,8 @@ export default function RemoteModuleProvider({
           }) ?? [],
       );
 
+      // Agents may be user defined, built-in, or extension defined
+      // So we need to merge the new agents with the existing ones
       const installedAgents =
         editorContext?.persistSettings?.installedAgents ?? [];
 
@@ -134,11 +124,54 @@ export default function RemoteModuleProvider({
             ),
         ),
       ];
+      return mergedAgents;
+    }
+
+    function getExtensionCommands(extensions: Extension[]) {
+      const commands = extensions.flatMap((ext) => {
+        return (
+          ext.config.commandsInfoList?.map((command) => {
+            return {
+              ...command,
+              // Add the extension id to the command
+              moduleId: ext.config.id,
+            };
+          }) ?? []
+        );
+      });
+
+      return commands;
+    }
+
+    if (!editorContext) {
+      return;
+    }
+
+    // Register all extensions
+    const extensions = editorContext?.persistSettings?.extensions ?? [];
+    if (extensions.length > 0) {
+      const remotes = extensions.map((ext) => {
+        return {
+          name: ext.config.id,
+          entry: `${ext.remoteOrigin}/${ext.config.id}/${ext.config.version}/mf-manifest.json`,
+        };
+      });
+
+      registerRemotes(remotes);
+      console.log("Registered remotes", remotes);
+
+      // For each extension, load their agents
+      const agents = getExtensionAgents(extensions);
+      // For each extension, load their exposed commands
+      const commands = getExtensionCommands(extensions);
+
+      console.log("Loaded commands", commands);
 
       editorContext?.setPersistSettings((prev) => {
         return {
           ...prev,
-          installedAgents: mergedAgents,
+          installedAgents: agents,
+          extensionCommands: commands,
         };
       });
     }

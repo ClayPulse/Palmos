@@ -4,6 +4,7 @@ import { EditorContext } from "../../providers/editor-context-provider";
 import ExtensionLoader from "../../misc/extension-loader";
 import {
   Agent,
+  ConnectionListener,
   IMCMessage,
   IMCMessageTypeEnum,
 } from "@pulse-editor/shared-utils";
@@ -13,6 +14,7 @@ import { InterModuleCommunication } from "@pulse-editor/shared-utils";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
+import { IMCContext } from "@/components/providers/imc-provider";
 
 export default function ConsoleViewLoader({
   consoleExt,
@@ -20,6 +22,8 @@ export default function ConsoleViewLoader({
   consoleExt: Extension | undefined;
 }) {
   const editorContext = useContext(EditorContext);
+  const imcContext = useContext(IMCContext);
+
   const [usedExtension, setUsedExtension] = useState<Extension | undefined>(
     undefined,
   );
@@ -28,13 +32,17 @@ export default function ConsoleViewLoader({
   const [isExtensionWindowReady, setIsExtensionWindowReady] = useState(false);
   const [isExtensionLoaded, setIsExtensionLoaded] = useState(false);
 
-  const [imc, setImc] = useState<InterModuleCommunication | undefined>(
-    undefined,
-  );
-
   const { resolvedTheme } = useTheme();
 
   const { platformApi } = usePlatformApi();
+
+  const [connectionListener, setConnectionListener] = useState<
+    ConnectionListener | undefined
+  >(undefined);
+
+  const [remoteModuleId, setRemoteModuleId] = useState<string | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     function getAndLoadExtension() {
@@ -44,22 +52,38 @@ export default function ConsoleViewLoader({
         setUsedExtension(undefined);
         return;
       }
-
-      // Create IMC
-      const newImc = new InterModuleCommunication("Pulse Editor Main");
-      newImc.initThisWindow(window);
-      newImc.updateReceiverHandlerMap(getHandlerMap());
-      setImc(newImc);
-
       setUsedExtension(extension);
       setHasExtension(true);
+
+      // Create IMC channel
+      if (imcContext?.polyIMC) {
+        const cl = new ConnectionListener(
+          imcContext.polyIMC,
+          getHandlerMap(),
+          (senderWindow: Window, message: IMCMessage) => {
+            console.log("Extension window ready.");
+            setIsExtensionWindowReady((prev) => true);
+            setIsExtensionLoaded((prev) => false);
+
+            const moduleId = message.from;
+            setRemoteModuleId(moduleId);
+
+            // Close the connection listener
+            if (connectionListener) {
+              connectionListener.close();
+              setConnectionListener(undefined);
+            }
+          },
+        );
+
+        setConnectionListener(cl);
+      }
     }
 
     if (consoleExt) {
       // Reset the extension and IMC
-      if (imc) {
-        imc.close();
-        setImc(undefined);
+      if (imcContext?.polyIMC && remoteModuleId) {
+        imcContext?.polyIMC.removeChannel(remoteModuleId);
 
         setIsExtensionWindowReady(false);
         setIsExtensionLoaded(false);
@@ -71,14 +95,25 @@ export default function ConsoleViewLoader({
 
   useEffect(() => {
     // Send theme update to the extension
-    if (isExtensionWindowReady && imc) {
-      imc.sendMessage(IMCMessageTypeEnum.ThemeChange, resolvedTheme);
+    if (isExtensionWindowReady && remoteModuleId) {
+      imcContext?.polyIMC?.sendMessage(
+        remoteModuleId,
+        IMCMessageTypeEnum.ThemeChange,
+        resolvedTheme,
+      );
     }
-  }, [isExtensionWindowReady, imc, resolvedTheme]);
+  }, [isExtensionWindowReady, remoteModuleId, resolvedTheme]);
 
+  // When the editor context changes, update the IMC receiver handler map
+  // to include the new handlers for the extension
   useEffect(() => {
-    imc?.updateReceiverHandlerMap(getHandlerMap());
-  }, [editorContext, imc]);
+    if (remoteModuleId) {
+      imcContext?.polyIMC?.updateChannelReceiverHandlerMap(
+        remoteModuleId,
+        getHandlerMap(),
+      );
+    }
+  }, [editorContext, imcContext]);
 
   function getHandlerMap() {
     const newMap = new Map<
@@ -92,22 +127,6 @@ export default function ConsoleViewLoader({
       }
     >([
       [
-        IMCMessageTypeEnum.Ready,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          console.log("Extension window ready.");
-          if (!imc) {
-            throw new Error("IMC not initialized.");
-          }
-          imc.initOtherWindow(senderWindow);
-          setIsExtensionWindowReady((prev) => true);
-          setIsExtensionLoaded((prev) => false);
-        },
-      ],
-      [
         IMCMessageTypeEnum.Loaded,
         async (
           senderWindow: Window,
@@ -118,45 +137,6 @@ export default function ConsoleViewLoader({
           setIsExtensionLoaded((prev) => true);
         },
       ],
-      // [
-      //   IMCMessageTypeEnum.RunAgentMethod,
-      //   async (
-      //     senderWindow: Window,
-      //     message: IMCMessage,
-      //     abortSignal?: AbortSignal,
-      //   ) => {
-      //     if (!message.payload) {
-      //       throw new Error("No agent method config provided.");
-      //     }
-
-      //     const {
-      //       agentName,
-      //       methodName,
-      //       parameters,
-      //     }: {
-      //       agentName: string;
-      //       methodName: string;
-      //       parameters: Record<string, any>;
-      //     } = message.payload;
-
-      //     const agent = editorContext?.persistSettings?.installedAgents?.find(
-      //       (agent) => agent.name === agentName,
-      //     );
-
-      //     if (!agent) {
-      //       throw new Error("Agent not found.");
-      //     }
-
-      //     const result = await runAgentMethod(
-      //       agent,
-      //       methodName,
-      //       parameters,
-      //       abortSignal,
-      //     );
-
-      //     return result;
-      //   },
-      // ],
       [
         IMCMessageTypeEnum.RequestTerminal,
         async (
@@ -191,7 +171,7 @@ export default function ConsoleViewLoader({
               <Loading />
             </div>
           )}
-          {imc && (
+          {connectionListener && (
             <ExtensionLoader
               key={usedExtension.config.id}
               remoteOrigin={usedExtension.remoteOrigin}

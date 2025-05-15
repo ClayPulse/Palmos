@@ -18,7 +18,7 @@ import Icon from "../misc/icon";
 import useExplorer from "@/lib/hooks/use-explorer";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
-import useExtensions from "@/lib/hooks/use-extensions";
+import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
 import { llmProviderOptions } from "@/lib/llm/options";
 import { getAPIKey, setAPIKey } from "@/lib/settings/settings";
@@ -517,7 +517,7 @@ function DevExtensionSettings({
   const [devExtensionId, setDevExtensionId] = useState<string>("");
   const [devExtensionVersion, setDevExtensionVersion] = useState<string>("");
 
-  const { installExtension } = useExtensions();
+  const { installExtension } = useExtensionManager();
 
   // Load installed extensions
   useEffect(() => {

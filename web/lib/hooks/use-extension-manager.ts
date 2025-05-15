@@ -4,7 +4,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { loadRemote, registerRemotes } from "@module-federation/runtime";
 import { ExtensionConfig } from "@pulse-editor/shared-utils";
 
-export default function useExtensions() {
+export default function useExtensionManager() {
   const editorContext = useContext(EditorContext);
 
   async function installExtension(extension: Extension): Promise<void> {
@@ -42,9 +42,11 @@ export default function useExtensions() {
 
     const updatedExtensions = [...extensions, newExtension];
 
-    editorContext?.setPersistSettings({
-      ...editorContext.persistSettings,
-      extensions: updatedExtensions,
+    editorContext?.setPersistSettings((prev) => {
+      return {
+        ...prev,
+        extensions: updatedExtensions,
+      };
     });
 
     // Try to set default extension for file types
@@ -60,10 +62,11 @@ export default function useExtensions() {
     const updatedExtensions = extensions.filter(
       (ext) => ext.config.id !== name,
     );
-    editorContext?.setPersistSettings({
-      ...editorContext.persistSettings,
+
+    editorContext?.setPersistSettings((prev) => ({
+      ...prev,
       extensions: updatedExtensions,
-    });
+    }));
 
     // Remove default extension for file types
     removeDefaultExtension(ext);
@@ -77,10 +80,11 @@ export default function useExtensions() {
       }
       return ext;
     });
-    editorContext?.setPersistSettings({
-      ...editorContext.persistSettings,
+
+    editorContext?.setPersistSettings((prev) => ({
+      ...prev,
       extensions: newExtensions,
-    });
+    }));
   }
 
   async function disableExtension(name: string): Promise<void> {
@@ -91,10 +95,11 @@ export default function useExtensions() {
       }
       return ext;
     });
-    editorContext?.setPersistSettings({
-      ...editorContext.persistSettings,
+
+    editorContext?.setPersistSettings((prev) => ({
+      ...prev,
       extensions: newExtensions,
-    });
+    }));
   }
 
   async function getExtension(name: string): Promise<Extension | undefined> {

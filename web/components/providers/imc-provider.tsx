@@ -4,8 +4,8 @@ import { IMCContextType, PlatformEnum } from "@/lib/types";
 import {
   IMCMessage,
   IMCMessageTypeEnum,
-  InterModuleCommunication,
   LLMConfig,
+  PolyIMC,
   STTConfig,
   TTSConfig,
 } from "@pulse-editor/shared-utils";
@@ -27,22 +27,33 @@ export default function InterModuleCommunicationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [imc, setImc] = useState<InterModuleCommunication | undefined>(
-    undefined,
-  );
-
-  const [connectedModuleIds, setConnectedModuleIds] = useState<string[]>([]);
+  const [polyIMC, setPolyIMC] = useState<PolyIMC | undefined>(undefined);
 
   const editorContext = useContext(EditorContext);
   const { platformApi } = usePlatformApi();
 
   useEffect(() => {
-    const newImc = new InterModuleCommunication("Pulse Editor Main");
-    newImc.initThisWindow(window);
-    newImc.updateReceiverHandlerMap(getHandlerMap());
-    setImc(newImc);
+    // @ts-expect-error set window viewId
+    window.viewId = "Pulse Editor Main";
   }, []);
 
+  useEffect(() => {
+    if (!polyIMC) {
+      const newPolyIMC = new PolyIMC(getHandlerMap());
+      setPolyIMC(newPolyIMC);
+    }
+  }, [polyIMC, setPolyIMC]);
+
+  // Update the base handler map as editor context changes
+  useEffect(() => {
+    if (polyIMC) {
+      polyIMC.updateBaseReceiverHandlerMap(getHandlerMap());
+    }
+  }, [polyIMC, editorContext]);
+
+  /**
+   * Provide a map of handlers for the IMC messages used for Pulse Editor APIs.
+   */
   function getHandlerMap() {
     const newMap = new Map<
       IMCMessageTypeEnum,
@@ -54,28 +65,6 @@ export default function InterModuleCommunicationProvider({
         ): Promise<any>;
       }
     >([
-      [
-        IMCMessageTypeEnum.Ready,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const moduleId = message.id;
-
-          if (connectedModuleIds.includes(moduleId)) {
-            console.warn(
-              `Module with id ${moduleId} is already connected. Ignoring duplicate connection.`,
-            );
-            return;
-          }
-
-          setConnectedModuleIds((prev) => [...prev, moduleId]);
-
-          // Handle the ready message
-          console.log("Received ready message from extension:", message);
-        },
-      ],
       [
         IMCMessageTypeEnum.RunAgentMethod,
         async (
@@ -177,6 +166,7 @@ export default function InterModuleCommunicationProvider({
         ) => {
           // Handle the use voice message
           console.log("Received use voice message from extension:", message);
+          throw new Error("Not implemented");
         },
       ],
       [
@@ -192,7 +182,7 @@ export default function InterModuleCommunicationProvider({
           const {
             audio,
             sttConfig,
-          }: { audio: Uint8Array; sttConfig?: STTConfig } = message.payload;
+          }: { audio: ArrayBuffer; sttConfig?: STTConfig } = message.payload;
 
           const config = sttConfig ? sttConfig : undefined; // TODO: use editor level default config -- getDefaultLLMConfig();
           if (!config) {
@@ -318,6 +308,8 @@ export default function InterModuleCommunicationProvider({
             "Received use diffusion message from extension:",
             message,
           );
+
+          throw new Error("Not implemented");
         },
       ],
       [
@@ -345,7 +337,7 @@ export default function InterModuleCommunicationProvider({
   return (
     <IMCContext.Provider
       value={{
-        connectedModuleIds: connectedModuleIds,
+        polyIMC,
       }}
     >
       {children}

@@ -7,29 +7,51 @@ export class BaseLLM {
   // The model object
   private model: BaseLanguageModel;
   // A function defines how to generate the output using the model
-  private generateFunc: (
+  private generateFunc?: (
     model: BaseLanguageModel,
     prompt: string,
     signal?: AbortSignal,
   ) => Promise<string>;
 
+  private generateStreamFunc?: (
+    model: BaseLanguageModel,
+    prompt: string,
+    signal?: AbortSignal,
+  ) => Promise<ReadableStream<string>>;
+
   constructor(
     model: BaseLanguageModel,
-    generateFunc: (
+    generateFunc?: (
       model: BaseLanguageModel,
       prompt: string,
       signal?: AbortSignal,
     ) => Promise<string>,
+    generateStreamFunc?: (
+      model: BaseLanguageModel,
+      prompt: string,
+      signal?: AbortSignal,
+    ) => Promise<ReadableStream<string>>,
   ) {
     this.model = model;
     this.generateFunc = generateFunc;
+    this.generateStreamFunc = generateStreamFunc;
   }
 
-  public async generate(
+  public async generate(prompt: string, signal?: AbortSignal): Promise<string> {
+    if (!this.generateFunc) {
+      throw new Error("Generate function is not defined.");
+    }
+    return await this.generateFunc(this.model, prompt, signal);
+  }
+
+  public async generateStream(
     prompt: string,
     signal?: AbortSignal,
-  ): Promise<string> {
-    return await this.generateFunc(this.model, prompt, signal);
+  ): Promise<ReadableStream<string>> {
+    if (!this.generateStreamFunc) {
+      throw new Error("Generate stream function is not defined.");
+    }
+    return await this.generateStreamFunc(this.model, prompt, signal);
   }
 }
 
@@ -73,20 +95,36 @@ export function getModelLLM(
       });
   }
 
-  const generateFunc: (
+  async function generateFunc(
     model: BaseLanguageModel,
     prompt: string,
     signal?: AbortSignal,
-  ) => Promise<string> = async (
-    model: BaseLanguageModel,
-    prompt: string,
-    signal?: AbortSignal,
-  ) => {
+  ): Promise<string> {
     const result = await model.invoke(prompt, {
       signal,
     });
     return result.content;
-  };
+  }
 
-  return new BaseLLM(model, generateFunc);
+  async function generateStreamFunc(
+    model: BaseLanguageModel,
+    prompt: string,
+    signal?: AbortSignal,
+  ): Promise<ReadableStream<string>> {
+    const stream = await model.stream(prompt, {
+      signal,
+    });
+
+    const rStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          controller.enqueue(chunk.content);
+        }
+        controller.close();
+      },
+    });
+    return rStream;
+  }
+
+  return new BaseLLM(model, generateFunc, generateStreamFunc);
 }

@@ -1,8 +1,12 @@
 import { Dispatch, RefObject, SetStateAction } from "react";
 import {
   Agent,
+  ExtensionCommandInfo,
   ExtensionConfig,
   FileViewModel,
+  IMCMessageTypeEnum,
+  PolyIMC,
+  ReceiverHandlerMap,
 } from "@pulse-editor/shared-utils";
 import { BaseSTT } from "./stt/stt";
 import { BaseLLM } from "./llm/llm";
@@ -93,6 +97,10 @@ export type PersistentSettings = {
 
   installedAgents?: InstalledAgent[];
 
+  extensionCommands?: (ExtensionCommandInfo & {
+    moduleId: string;
+  })[];
+
   apiKeys?: {
     [key: string]: string;
   };
@@ -181,30 +189,6 @@ export type LLMUsage = {
   totalUsageByAgents: number;
 };
 
-export type CodeCompletionInstruction = {
-  text?: string;
-  audio?: Blob;
-};
-
-export type CodeCompletionResult = {
-  text: {
-    codeCompletion: string;
-    explanation: string;
-  };
-  audio?: Blob;
-};
-
-export type InlineSuggestionResult = {
-  snippets: string[];
-};
-
-export type LineChange = {
-  // Index starts from 1
-  index: number;
-  content: string;
-  status: "added" | "deleted" | "modified";
-};
-
 export type ChatMessage = {
   from: string;
   content: string;
@@ -231,7 +215,7 @@ export type Extension = {
 
 // #region IMC Context
 export type IMCContextType = {
-  connectedModuleIds: string[];
+  polyIMC: PolyIMC | undefined;
 };
 
 // #endregion
