@@ -15,6 +15,7 @@ import useSpeech2Speech from "@/lib/hooks/use-speech2speech";
 import { getAPIKey } from "@/lib/settings/settings";
 import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
 import { getAgentLLMConfig, runAgentMethod } from "@/lib/agent/agent-runner";
+import useExtensionCommands from "@/lib/hooks/use-extension-commands";
 
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
@@ -24,6 +25,7 @@ export default function EditorToolbar() {
   const [isAppSettingsModalOpen, setAppIsSettingsModalOpen] = useState(false);
 
   const { runSpeech2Speech, stopSpeech2Speech } = useSpeech2Speech();
+  const { runCommand } = useExtensionCommands();
 
   function setIsOpen(val: boolean) {
     if (editorContext) {
@@ -34,7 +36,7 @@ export default function EditorToolbar() {
     }
   }
 
-  function handleMic() {
+  async function handleMic() {
     if (!editorContext) {
       return;
     }
@@ -65,36 +67,82 @@ export default function EditorToolbar() {
       }
 
       const agent = editorAssistantAgent;
-      const method = agent.availableMethods[0];
+      const methodName = "useExtensionCommands";
 
-      runSpeech2Speech(async (inputText: string) => {
+      await runSpeech2Speech(async (inputText: string) => {
         // Pipe the LLM result to Speech2Speech
         // const stream = await llm.generateStream(inputText);
         const result = await runAgentMethod(
           llmKey,
-          getAgentLLMConfig(agent, method),
+          getAgentLLMConfig(agent, methodName),
           agent,
-          method,
+          methodName,
           {
-            userMessage: inputText,
             chatHistory: [],
-            availableAgents: [],
+            userMessage: inputText,
+            openedViews: editorContext.editorStates.openedViewModels.map(
+              (view) => {
+                if (!view.extensionConfig) {
+                  throw new Error(
+                    "View is missing extension config. Are you sure this is a valid view?",
+                  );
+                }
+
+                const viewInfo = {
+                  viewId: view.viewId,
+                  isFocused: view.isFocused,
+                  file: view.file,
+
+                  extensionConfig: {
+                    id: view.extensionConfig?.id,
+                  },
+                };
+                return viewInfo;
+              },
+            ),
+            commands: editorContext.persistSettings?.extensionCommands?.map(
+              (command) => ({
+                cmd: command.name,
+                parameters: Object.entries(command.parameters).map(
+                  ([key, value]) => ({
+                    name: key,
+                    type: value.type,
+                    description: value.description,
+                  }),
+                ),
+                description: command.description,
+                moduleId: command.moduleId,
+              }),
+            ),
           },
         );
 
         const {
-          agentSuggestions,
+          suggestedCmd,
+          suggestedArgs,
+          suggestedViewId,
           response,
         }: {
-          agentSuggestions: {
-            agent: string;
-            method: string;
-            parameters: any;
+          suggestedCmd: string;
+          suggestedArgs: {
+            name: string;
+            value: any;
           }[];
+          suggestedViewId: string;
           response: string;
         } = result;
 
-        console.log("Suggested agents: ", agentSuggestions);
+        // TODO: The agent needs to confirm the command with the user
+        // TODO: before executing it.
+        const args = suggestedArgs.reduce(
+          (acc, arg) => {
+            acc[arg.name] = arg.value;
+            return acc;
+          },
+          {} as Record<string, any>,
+        );
+
+        runCommand(suggestedViewId, suggestedCmd, args);
 
         return response;
       });

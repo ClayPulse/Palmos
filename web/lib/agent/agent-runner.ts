@@ -1,30 +1,54 @@
-import { Agent, AgentMethod, LLMConfig } from "@pulse-editor/shared-utils";
+import {
+  Agent,
+  AgentMethod,
+  LLMConfig,
+  TypedVariable,
+  TypedVariableObjectType,
+  TypedVariableType,
+  isArrayType,
+  isObjectType,
+} from "@pulse-editor/shared-utils";
 import { getModelLLM } from "../llm/llm";
 import toast from "react-hot-toast";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 
-export function getAgentLLMConfig(agent: Agent, method: AgentMethod) {
-  return method.LLMConfig ? method.LLMConfig : agent.LLMConfig;
+export function getAgentLLMConfig(agent: Agent, methodName: string) {
+  const method = agent.availableMethods.find((m) => m.name === methodName);
+  return method?.LLMConfig ? method.LLMConfig : agent.LLMConfig;
 }
 
 export async function runAgentMethod(
   apiKey: string,
   llmConfig: LLMConfig,
   agent: Agent,
-  method: AgentMethod,
+  methodName: string,
   args: Record<string, any>,
   abortSignal?: AbortSignal,
 ): Promise<any> {
+  const method = agent.availableMethods.find((m) => m.name === methodName);
+  if (!method) {
+    throw new Error(`Method ${methodName} not found in agent ${agent.name}.`);
+  }
+
   const llm = getLLM(llmConfig, agent.name, apiKey);
 
   if (!llm) {
     throw new Error("LLM not found.");
   }
 
-  const prompt = getPrompt(agent, method, args);
+  const prompt = await getPrompt(agent, method, args);
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("Prompt: ", prompt);
+  }
 
   const llmResult = await llm.generate(prompt, abortSignal);
 
   const returns = extractReturns(llmResult);
+
+  if (process.env.NODE_ENV === "development") {
+    console.log("Result: ", returns);
+  }
 
   return returns;
 }
@@ -51,27 +75,36 @@ function getLLM(llmConfig: LLMConfig, agentName: string, apiKey: string) {
   return llm;
 }
 
-function getPrompt(
+async function getPrompt(
   agent: Agent,
   method: AgentMethod,
   args: Record<string, any>,
 ) {
-  const prompt = `\
-${agent.systemPrompt}
+  const userPromptTemplate = `\
+${method.prompt}
 
-${method.prompt.replace(/{(.*?)}/g, (match, key) => args[key])}
-
-Finally, you must return a JSON object. Each field in the object has a corresponding type, \
-format, and explanation (after //). Your response must match the following:
+Finally, you must return a JSON object. The requirements for the JSON object are as follows:
 \`\`\`
-{
+{{
   ${Array.from(Object.entries(method.returns)).map(
-    ([key, variable]) => `${key}: ${variable.type}, // ${variable.description}`,
+    ([key, variable]) => `${key}: ${getVariablePrompt(variable)}`,
   )}
-}
+}}
 \`\`\`
 `;
-  return prompt;
+  
+  console.log("User Prompt Template: ", userPromptTemplate);
+
+  const promptTemplate = ChatPromptTemplate.fromMessages([
+    ["system", agent.systemPrompt],
+    ["user", userPromptTemplate],
+  ]);
+
+  const prompt = await promptTemplate.invoke({
+    ...args,
+  });
+
+  return prompt.toString();
 }
 
 function extractReturns(result: string): Record<string, any> {
@@ -81,4 +114,38 @@ function extractReturns(result: string): Record<string, any> {
     .trim();
   const llmResultJson = JSON.parse(result);
   return llmResultJson;
+}
+
+function getVariablePrompt(variable: TypedVariable) {
+  const typePrompt = getVariableTypePrompt(variable.type);
+
+  return `(Return type: ${typePrompt}. Description: ${variable.description}.)`;
+}
+
+function getVariableTypePrompt(type: TypedVariableType): string {
+  if (isArrayType(type)) {
+    const innerType = type[0];
+
+    const typePrompt = getVariableTypePrompt(innerType);
+
+    return `An array of values, where each value is ${typePrompt}`;
+  } else if (isObjectType(type)) {
+    const objectType = type as TypedVariableObjectType;
+
+    const properties = Object.entries(objectType).map(
+      ([key, value]) => `${key}: ${getVariablePrompt(value)}`,
+    );
+
+    const typePrompt = `An object with the following properties: 
+\`\`\`
+{{
+  ${properties.join(", ")}
+}}
+\`\`\`
+`;
+
+    return typePrompt;
+  }
+
+  return `A ${type} value`;
 }

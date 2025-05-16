@@ -1,4 +1,4 @@
-import {  useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import React from "react";
 import { v4 } from "uuid";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
@@ -8,20 +8,16 @@ export default function ExtensionLoader({
   remoteOrigin,
   moduleId,
   moduleVersion,
+  viewId,
 }: {
   remoteOrigin: string;
   moduleId: string;
   moduleVersion: string;
+  viewId: string;
 }) {
   const iframeRef = useRef<HTMLIFrameElement | null>(null);
-  const [viewId, setViewId] = useState<string | null>(null);
 
   const platform = getPlatform();
-
-  useEffect(() => {
-    const viewId = moduleId + "-" + moduleVersion + "-" + v4();
-    setViewId(viewId);
-  }, []);
 
   return (
     <iframe

@@ -5,7 +5,7 @@ import React, { useContext, useEffect } from "react";
 import { ReactNode } from "react";
 import ReactDOM from "react-dom";
 import { EditorContext } from "./editor-context-provider";
-import { Extension, InstalledAgent } from "@/lib/types";
+import { Extension, ExtensionAgent, PEExtensionCommandInfo } from "@/lib/types";
 
 const host = init({
   name: "pulse_editor",
@@ -93,14 +93,13 @@ export default function RemoteModuleProvider({
 
   useEffect(() => {
     function getExtensionAgents(extensions: Extension[]) {
-      const agents: InstalledAgent[] = extensions.flatMap(
+      const agents: ExtensionAgent[] = extensions.flatMap(
         (ext) =>
           ext.config.agents?.map((agent) => {
-            const installedAgent: InstalledAgent = {
+            const installedAgent: ExtensionAgent = {
               ...agent,
               author: {
                 publisher: ext.config.author ?? "unknown",
-                type: "extension",
                 extension: ext.config.displayName,
               },
             };
@@ -109,33 +108,20 @@ export default function RemoteModuleProvider({
           }) ?? [],
       );
 
-      // Agents may be user defined, built-in, or extension defined
-      // So we need to merge the new agents with the existing ones
-      const installedAgents =
-        editorContext?.persistSettings?.installedAgents ?? [];
-
-      // Merge the installed agents with the new ones
-      const mergedAgents = [
-        ...installedAgents,
-        ...agents.filter(
-          (newAgent) =>
-            !installedAgents.some(
-              (existingAgent) => existingAgent.name === newAgent.name,
-            ),
-        ),
-      ];
-      return mergedAgents;
+      return agents;
     }
 
     function getExtensionCommands(extensions: Extension[]) {
-      const commands = extensions.flatMap((ext) => {
+      const commands: PEExtensionCommandInfo[] = extensions.flatMap((ext) => {
         return (
           ext.config.commandsInfoList?.map((command) => {
-            return {
+            const cmdInfo: PEExtensionCommandInfo = {
               ...command,
               // Add the extension id to the command
               moduleId: ext.config.id,
             };
+
+            return cmdInfo;
           }) ?? []
         );
       });
@@ -149,32 +135,32 @@ export default function RemoteModuleProvider({
 
     // Register all extensions
     const extensions = editorContext?.persistSettings?.extensions ?? [];
-    if (extensions.length > 0) {
-      const remotes = extensions.map((ext) => {
-        return {
-          name: ext.config.id,
-          entry: `${ext.remoteOrigin}/${ext.config.id}/${ext.config.version}/mf-manifest.json`,
-        };
-      });
 
-      registerRemotes(remotes);
-      console.log("Registered remotes", remotes);
+    const remotes = extensions.map((ext) => {
+      return {
+        name: ext.config.id,
+        entry: `${ext.remoteOrigin}/${ext.config.id}/${ext.config.version}/mf-manifest.json`,
+      };
+    });
 
-      // For each extension, load their agents
-      const agents = getExtensionAgents(extensions);
-      // For each extension, load their exposed commands
-      const commands = getExtensionCommands(extensions);
+    registerRemotes(remotes);
+    console.log("Registered remotes", remotes);
 
-      console.log("Loaded commands", commands);
+    // For each extension, load their agents
+    const agents = getExtensionAgents(extensions);
+    // For each extension, load their exposed commands
+    const commands = getExtensionCommands(extensions);
 
-      editorContext?.setPersistSettings((prev) => {
-        return {
-          ...prev,
-          installedAgents: agents,
-          extensionCommands: commands,
-        };
-      });
-    }
+    console.log("Loaded agents", agents);
+    console.log("Loaded commands", commands);
+
+    editorContext?.setPersistSettings((prev) => {
+      return {
+        ...prev,
+        extensionAgents: agents,
+        extensionCommands: commands,
+      };
+    });
   }, [editorContext?.persistSettings?.extensions]);
 
   return <>{children}</>;

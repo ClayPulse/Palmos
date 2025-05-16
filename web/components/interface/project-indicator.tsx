@@ -17,7 +17,7 @@ export default function ProjectIndicator() {
   const editorContext = useContext(EditorContext);
   const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
     useState(false);
-  const { closeAllFileViews } = useViewManager();
+  const { closeAllViews: closeAllFileViews } = useViewManager();
 
   function closeProject() {
     editorContext?.setEditorStates((prev) => {

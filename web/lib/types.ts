@@ -3,10 +3,8 @@ import {
   Agent,
   ExtensionCommandInfo,
   ExtensionConfig,
-  FileViewModel,
-  IMCMessageTypeEnum,
   PolyIMC,
-  ReceiverHandlerMap,
+  ViewModel,
 } from "@pulse-editor/shared-utils";
 import { BaseSTT } from "./stt/stt";
 import { BaseLLM } from "./llm/llm";
@@ -64,7 +62,7 @@ export type EditorStates = {
   /* Password to access the credentials */
   password?: string;
 
-  openedViewModels: FileViewModel[];
+  openedViewModels: ViewModel[];
 
   // Keep track of unique ids of each view
   // to make sure that the view is not duplicated
@@ -95,11 +93,10 @@ export type PersistentSettings = {
   defaultFileTypeExtensionMap?: { [key: string]: Extension };
   isExtensionDevMode?: boolean;
 
-  installedAgents?: InstalledAgent[];
+  extensionAgents?: ExtensionAgent[];
+  extensionCommands?: PEExtensionCommandInfo[];
 
-  extensionCommands?: (ExtensionCommandInfo & {
-    moduleId: string;
-  })[];
+  userAgents?: UserAgent[];
 
   apiKeys?: {
     [key: string]: string;
@@ -172,13 +169,18 @@ export type AIModels = {
   ttsModel?: BaseTTS;
 };
 
-export type InstalledAgent = Agent & {
+export type ExtensionAgent = Agent & {
   author: {
-    type: "user" | "extension";
     // Individual user or the author of a 3rd party extension
     publisher: string;
     // 3rd party extension name
     extension?: string;
+  };
+};
+
+export type UserAgent = Agent & {
+  author: {
+    publisher: string;
   };
 };
 
@@ -210,6 +212,10 @@ export type Extension = {
   config: ExtensionConfig;
   isEnabled: boolean;
   remoteOrigin: string;
+};
+
+export type PEExtensionCommandInfo = ExtensionCommandInfo & {
+  moduleId: string;
 };
 // #endregion
 

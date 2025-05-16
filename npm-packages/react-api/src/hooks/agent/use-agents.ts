@@ -1,4 +1,9 @@
-import { Agent, IMCMessage, IMCMessageTypeEnum, LLMConfig } from "@pulse-editor/shared-utils";
+import {
+  Agent,
+  IMCMessage,
+  IMCMessageTypeEnum,
+  LLMConfig,
+} from "@pulse-editor/shared-utils";
 import useIMC from "../../lib/use-imc";
 
 export default function useAgents() {
@@ -15,7 +20,7 @@ export default function useAgents() {
     parameters: Record<string, any>,
     abortSignal?: AbortSignal,
     llmConfig?: LLMConfig
-  ): Promise<Record<string, any>> {
+  ): Promise<any> {
     if (!imc) {
       throw new Error("IMC not initialized.");
     }
@@ -32,7 +37,7 @@ export default function useAgents() {
         abortSignal
       )
       .then((response) => {
-        return response as Record<string, any>;
+        return response as any;
       });
 
     return result;

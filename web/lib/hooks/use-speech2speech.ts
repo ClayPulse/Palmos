@@ -44,9 +44,6 @@ export default function useSpeech2Speech() {
         return;
       }
       if (!sttModel) {
-        console.error(
-          "STT model is not available. Cannot process input audio.",
-        );
         return;
       }
 
@@ -126,7 +123,6 @@ export default function useSpeech2Speech() {
           result += value; // Append the new chunk to the result
         }
       } else if (textProcessFunc !== undefined) {
-        console.log(textProcessFunc);
         // Process the transcript after the recording is stopped
         if (!editorContext?.editorStates.isRecording && transcript.length > 0) {
           const text = await textProcessFunc(transcript);
@@ -157,7 +153,6 @@ export default function useSpeech2Speech() {
         return;
       }
       if (!ttsModel) {
-        console.error("TTS model is not available. Cannot process text.");
         return;
       } else if (!isTextProcessingDone) {
         return;
@@ -212,9 +207,6 @@ export default function useSpeech2Speech() {
     const ttsVoice = editorContext?.persistSettings?.ttsVoice;
 
     if (!ttsKey || !ttsProvider || !ttsModel || !ttsVoice) {
-      console.error(
-        "TTS key, provider, model or voice is not set. TTS will not be available.",
-      );
       return;
     }
     const tts = getModelTTS(ttsKey, ttsProvider, ttsModel, ttsVoice);
@@ -239,9 +231,6 @@ export default function useSpeech2Speech() {
     const sttModel = editorContext?.persistSettings?.sttModel;
 
     if (!sttKey || !sttProvider || !sttModel) {
-      console.error(
-        "STT key, provider or model is not set. STT will not be available.",
-      );
       return;
     }
     const stt = getModelSTT(sttKey, sttProvider, sttModel);

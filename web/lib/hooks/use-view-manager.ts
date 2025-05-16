@@ -1,31 +1,35 @@
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { FileViewModel } from "@pulse-editor/shared-utils";
+import { ViewModel } from "@pulse-editor/shared-utils";
 import { usePlatformApi } from "./use-platform-api";
+import { v4 } from "uuid";
 
 export function useViewManager() {
   const editorContext = useContext(EditorContext);
   const { platformApi } = usePlatformApi();
-  const [activeFileView, setActiveFileView] = useState<
-    FileViewModel | undefined
-  >(undefined);
+  const [activeViewModel, setActiveView] = useState<ViewModel | undefined>(
+    undefined,
+  );
 
   useEffect(() => {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
     const activeView = editorContext.editorStates.openedViewModels.find(
-      (view) => view.isActive,
+      (view) => view.isFocused,
     );
-    setActiveFileView(activeView);
+    setActiveView(activeView);
   }, [editorContext?.editorStates.openedViewModels]);
 
-  async function openFileView(file: File) {
+  async function openFileInView(file: File) {
     const text = await file.text();
-    const model: FileViewModel = {
-      fileContent: text,
-      filePath: file.name,
-      isActive: true,
+    const model: ViewModel = {
+      viewId: v4(),
+      isFocused: true,
+      file: {
+        content: text,
+        path: file.name,
+      },
     };
 
     if (!editorContext) {
@@ -33,7 +37,7 @@ export function useViewManager() {
     }
 
     const isAlreadyOpened = editorContext.editorStates.openedViewModels.find(
-      (view) => view.filePath === model.filePath,
+      (view) => view.file?.path === model.file?.path,
     );
 
     if (!isAlreadyOpened) {
@@ -41,7 +45,7 @@ export function useViewManager() {
         editorContext.editorStates.openedViewModels.map((v) => {
           return {
             ...v,
-            isActive: false,
+            isFocused: false,
           };
         });
 
@@ -51,43 +55,43 @@ export function useViewManager() {
           openedViewModels: [...updatedOpenedViewModels, model],
         };
       });
-    } else {
-      const updatedOpenedViewModels =
-        editorContext.editorStates.openedViewModels.map((v) => {
-          if (v.filePath === model.filePath) {
-            return {
-              ...v,
-              isActive: true,
-            };
-          } else {
-            return {
-              ...v,
-              isActive: false,
-            };
-          }
-        });
 
-      editorContext.setEditorStates((prev) => {
-        return {
-          ...prev,
-          openedViewModels: [...updatedOpenedViewModels],
-        };
-      });
+      return;
     }
 
-    return;
+    const updatedOpenedViewModels =
+      editorContext.editorStates.openedViewModels.map((v) => {
+        if (v.file?.path === model.file?.path) {
+          return {
+            ...v,
+            isFocused: true,
+          };
+        } else {
+          return {
+            ...v,
+            isFocused: false,
+          };
+        }
+      });
+
+    editorContext.setEditorStates((prev) => {
+      return {
+        ...prev,
+        openedViewModels: [...updatedOpenedViewModels],
+      };
+    });
   }
 
-  function getFileViewByFilePath(uri: string): FileViewModel | undefined {
+  function getViewByFilePath(uri: string): ViewModel | undefined {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
     return editorContext.editorStates.openedViewModels.find(
-      (view) => view.filePath === uri,
+      (view) => view.file?.path === uri,
     );
   }
 
-  function closeFileView(view: FileViewModel) {
+  function closeView(view: ViewModel) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -95,20 +99,20 @@ export function useViewManager() {
       return {
         ...prev,
         openedViewModels: prev.openedViewModels.filter(
-          (v) => v.filePath !== view.filePath,
+          (v) => v.file?.path !== view.file?.path,
         ),
       };
     });
   }
 
-  function updateFileView(view: FileViewModel) {
+  function updateViewModel(view: ViewModel) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
 
     editorContext.setEditorStates((prev) => {
       const updatedViewModels = prev.openedViewModels.map((v) => {
-        if (v.filePath === view.filePath) {
+        if (v.file?.path === view.file?.path) {
           return {
             ...v,
             ...view,
@@ -124,15 +128,16 @@ export function useViewManager() {
     });
 
     // Update the file in file system
-
-    const updatedFile = new File([view.fileContent], view.filePath);
-    platformApi?.writeFile(updatedFile, view.filePath);
+    if (view.file) {
+      const updatedFile = new File([view.file.content], view.file.path);
+      platformApi?.writeFile(updatedFile, view.file.path);
+    }
   }
 
   /**
    * Clear all views
    */
-  function closeAllFileViews() {
+  function closeAllViews() {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -144,7 +149,7 @@ export function useViewManager() {
     });
   }
 
-  function fileViewCount(): number {
+  function viewCount(): number {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -152,12 +157,12 @@ export function useViewManager() {
   }
 
   return {
-    openFileView,
-    getFileViewByFilePath,
-    closeFileView,
-    updateFileView,
-    closeAllFileViews,
-    fileViewCount,
-    activeFileView,
+    openFileInView,
+    getViewByFilePath,
+    closeView,
+    updateViewModel,
+    closeAllViews,
+    viewCount,
+    activeViewModel
   };
 }

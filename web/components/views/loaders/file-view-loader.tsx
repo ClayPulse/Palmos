@@ -1,14 +1,13 @@
 import { Extension } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
-import FileViewLayout from "../layout";
+import ExtensionViewLayout from "../layout";
 import ExtensionLoader from "../../misc/extension-loader";
 import {
   ConnectionListener,
-  FileViewModel,
+  ViewModel,
   IMCMessage,
   IMCMessageTypeEnum,
-  InterModuleCommunication,
 } from "@pulse-editor/shared-utils";
 import Loading from "../../interface/loading";
 import { useTheme } from "next-themes";
@@ -16,10 +15,10 @@ import { IMCContext } from "@/components/providers/imc-provider";
 
 export default function FileViewLoader({
   model,
-  updateFileView,
+  updateViewModel,
 }: {
-  model: FileViewModel;
-  updateFileView: (model: FileViewModel) => void;
+  model: ViewModel;
+  updateViewModel: (model: ViewModel) => void;
 }) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
@@ -40,12 +39,14 @@ export default function FileViewLoader({
     ConnectionListener | undefined
   >(undefined);
 
-  const [remoteModuleId, setRemoteModuleId] = useState<string | undefined>(
+  const [remoteWindowId, setRemoteWindowId] = useState<string | undefined>(
     undefined,
   );
 
   useEffect(() => {
-    if (fileUri !== model.filePath) setFileUri(model.filePath);
+    if (fileUri !== model.file?.path) {
+      setFileUri(model.file?.path);
+    }
   }, [model]);
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function FileViewLoader({
               setIsExtensionLoaded((prev) => false);
 
               const moduleId = message.from;
-              setRemoteModuleId(moduleId);
+              setRemoteWindowId(moduleId);
 
               // Close the listener when the extension is connected
               if (connectionListener) {
@@ -95,9 +96,10 @@ export default function FileViewLoader({
 
     if (fileUri) {
       // Reset the extension and IMC when the file URI changes
-      if (imcContext?.polyIMC && remoteModuleId) {
+      if (imcContext?.polyIMC && remoteWindowId) {
         // Remove the channel from the IMC provider
-        imcContext.polyIMC.removeChannel(remoteModuleId);
+        imcContext.polyIMC.removeChannel(remoteWindowId);
+        setRemoteWindowId(undefined);
 
         setIsExtensionWindowReady(false);
         setIsExtensionLoaded(false);
@@ -109,25 +111,34 @@ export default function FileViewLoader({
 
   useEffect(() => {
     // Send theme update to the extension
-    if (isExtensionWindowReady && remoteModuleId) {
+    if (isExtensionWindowReady && remoteWindowId) {
       imcContext?.polyIMC?.sendMessage(
-        remoteModuleId,
+        remoteWindowId,
         IMCMessageTypeEnum.ThemeChange,
         resolvedTheme,
       );
     }
-  }, [isExtensionWindowReady, remoteModuleId, resolvedTheme]);
+  }, [isExtensionWindowReady, remoteWindowId, resolvedTheme]);
 
   // When the editor context changes, update the IMC receiver handler map
   // to include the new handlers for the extension
   useEffect(() => {
-    if (remoteModuleId) {
+    if (remoteWindowId) {
       imcContext?.polyIMC?.updateChannelReceiverHandlerMap(
-        remoteModuleId,
+        remoteWindowId,
         getHandlerMap(),
       );
     }
-  }, [editorContext, imcContext]);
+  }, [editorContext, imcContext, remoteWindowId]);
+
+  useEffect(() => {
+    if (usedExtension) {
+      updateViewModel({
+        ...model,
+        extensionConfig: usedExtension.config,
+      });
+    }
+  }, [usedExtension]);
 
   function getHandlerMap() {
     const newMap = new Map<
@@ -158,8 +169,8 @@ export default function FileViewLoader({
           abortSignal?: AbortSignal,
         ) => {
           if (message.payload) {
-            const payload: FileViewModel = message.payload;
-            updateFileView(payload);
+            const payload: ViewModel = message.payload;
+            updateViewModel(payload);
           }
         },
       ],
@@ -178,7 +189,7 @@ export default function FileViewLoader({
   }
 
   return (
-    <FileViewLayout height="100%" width="100%">
+    <ExtensionViewLayout height="100%" width="100%">
       {usedExtension ? (
         <div className="relative h-full w-full">
           {!isExtensionLoaded && (
@@ -189,6 +200,7 @@ export default function FileViewLoader({
           {connectionListener && (
             <ExtensionLoader
               key={fileUri}
+              viewId={model.viewId}
               remoteOrigin={usedExtension.remoteOrigin}
               moduleId={usedExtension.config.id}
               moduleVersion={usedExtension.config.version}
@@ -206,6 +218,6 @@ export default function FileViewLoader({
           open this file.
         </div>
       )}
-    </FileViewLayout>
+    </ExtensionViewLayout>
   );
 }

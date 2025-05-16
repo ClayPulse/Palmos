@@ -1,3 +1,4 @@
+// #region Inter-Module Communication
 /* Inter Module Communication messages */
 export enum IMCMessageTypeEnum {
   // Update view file
@@ -63,6 +64,7 @@ export type ReceiverHandler = (
 
 // IMC receiver handler map
 export type ReceiverHandlerMap = Map<IMCMessageTypeEnum, ReceiverHandler>;
+// #endregion
 
 /* File view */
 export type TextFileSelection = {
@@ -71,11 +73,17 @@ export type TextFileSelection = {
   text: string;
 };
 
-export type FileViewModel = {
-  fileContent: string;
-  filePath: string;
-  selections?: TextFileSelection[];
-  isActive: boolean;
+export type ViewModel = {
+  viewId: string;
+  isFocused: boolean;
+  // The file content and path.
+  // Optional, if the view is not a file view.
+  file?: {
+    content: string;
+    path: string;
+    selections?: TextFileSelection[];
+  };
+  extensionConfig?: ExtensionConfig;
 };
 
 /* Fetch API */
@@ -150,23 +158,6 @@ export type TypedVariable = {
   defaultValue?: any;
 };
 
-// #endregion
-export type TypedVariableType =
-  | "string"
-  | "number"
-  | "boolean"
-  | TypedVariableObjectType
-  | TypedVariableArrayType;
-
-export type TypedVariableObjectType = {
-  [key: string]: TypedVariable;
-};
-
-export type TypedVariableArrayType = {
-  size?: number;
-  elementType: TypedVariableType;
-};
-
 /**
  * A tool that agent can use during method execution.
  *
@@ -180,6 +171,32 @@ export type AgentTool = {
   parameters: Record<string, TypedVariable>;
   returns: Record<string, TypedVariable>;
 };
+// #endregion
+
+export type TypedVariableType =
+  | "string"
+  | "number"
+  | "boolean"
+  | TypedVariableObjectType
+  | TypedVariableArrayType;
+
+export type TypedVariableObjectType = {
+  [key: string]: TypedVariable;
+};
+
+export type TypedVariableArrayType = [TypedVariableType];
+
+export function isArrayType(
+  value: TypedVariableType
+): value is TypedVariableArrayType {
+  return Array.isArray(value) && value.length === 1;
+}
+
+export function isObjectType(
+  value: TypedVariableType
+): value is TypedVariableObjectType {
+  return typeof value === "object" && !Array.isArray(value);
+}
 
 export enum AccessEnum {
   public = "public",

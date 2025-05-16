@@ -1,15 +1,13 @@
 import {
   IMCMessage,
   IMCMessageTypeEnum,
-  FileViewModel,
+  ViewModel,
 } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
 import useIMC from "../../lib/use-imc";
 
 export default function useFileView() {
-  const [viewFile, setViewFile] = useState<FileViewModel | undefined>(
-    undefined
-  );
+  const [viewModel, setViewModel] = useState<ViewModel | undefined>(undefined);
   const [isLoaded, setIsLoaded] = useState(false);
 
   const receiverHandlerMap = new Map<
@@ -22,7 +20,7 @@ export default function useFileView() {
   useEffect(() => {
     if (isReady) {
       imc?.sendMessage(IMCMessageTypeEnum.RequestViewFile).then((model) => {
-        setViewFile(model);
+        setViewModel(model);
       });
     }
   }, [isReady]);
@@ -33,14 +31,14 @@ export default function useFileView() {
     }
   }, [isLoaded, imc]);
 
-  function updateViewFile(file: FileViewModel) {
+  function updateViewModel(viewModel: ViewModel) {
     // sender.sendMessage(ViewBoxMessageTypeEnum.ViewFile, JSON.stringify(file));
-    imc?.sendMessage(IMCMessageTypeEnum.WriteViewFile, file);
+    imc?.sendMessage(IMCMessageTypeEnum.WriteViewFile, viewModel);
   }
 
   return {
-    viewFile,
-    updateViewFile,
+    viewModel,
+    updateViewModel,
     setIsLoaded,
   };
 }

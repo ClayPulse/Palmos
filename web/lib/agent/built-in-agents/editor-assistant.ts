@@ -13,18 +13,26 @@ published by the community. In addition, Pulse Editor embeds many AI models to h
 users create and editor content in multiple modalities. The purpose of Pulse Editor
 is to use AI tools to better assist and accelerate users' creative process.
 
-You are a helpful platform-level assistant agent that can help users with the following tasks:
+You are a helpful platform-level assistant agent who can help users with the following tasks:
 1. Answer questions about the platform and its features.
-2. Provide information about the available extensions and AI models.
+2. Provide information about the available extensions, extension commands, and AI models.
 3. Suggest relevant workflows and tools for specific tasks.
 e.g. If a user wants to create a promotional video, you can suggest first using
 a script generator extension from community marketplace, then using a video
 editor extension to edit the video, and finally using a voice generator extension to add voiceover. 
-4. Assist users in troubleshooting common issues.
-\`\`\`
+4. Assist users in troubleshooting common issues for the editor itself. If a user asks anything
+about an extension, you should suggest the user to visit the extension's marketplace page and/or
+contact the extension developer.
+
+You will receive a message from user, which may contain a question or a request for assistance.
+Your task is to provide a helpful response based on the user's input.
+
+Remember, you will not directly assist the user in creating or editing content, as you are not
+an application-level assistant agent. Instead, you will provide information and guidance to help users
+to navigate the platform and its extensions.
 `,
-  description:
-    "A platform-level assistant agent that can help users with Pulse Editor and its features.",
+  description: `A platform-level assistant agent who can help users with Pulse Editor, \
+Pulse Editor extensions and its features.`,
   availableMethods: [
     {
       access: AccessEnum.public,
@@ -37,7 +45,7 @@ editor extension to edit the video, and finally using a voice generator extensio
             "The user's input or question about the platform or its features.",
         },
       },
-      prompt: "",
+      prompt: "(WIP)",
       returns: {
         task: {
           name: "task",
@@ -50,39 +58,149 @@ editor extension to edit the video, and finally using a voice generator extensio
     {
       access: AccessEnum.public,
       name: "useExtensionCommands",
-      parameters: {},
-      prompt: "",
-      returns: {},
-    },
-    {
-      access: AccessEnum.public,
-      name: "suggestExtensions",
       parameters: {
+        chatHistory: {
+          name: "chatHistory",
+          type: "string",
+          description: "The chat history between the user and you.",
+        },
         userMessage: {
           name: "userMessage",
           type: "string",
+          description: "The user's message.",
+        },
+        openedViews: {
+          name: "openedViews",
+          type: [
+            {
+              viewId: {
+                name: "viewId",
+                type: "string",
+                description: "The ID of an opened view visible to user.",
+              },
+              isFocused: {
+                name: "isFocused",
+                type: "boolean",
+                description:
+                  "Whether the view is currently focused by cursor or not.",
+              },
+              file: {
+                name: "file",
+                type: {
+                  content: {
+                    name: "content",
+                    type: "string",
+                    description: "The content of the file in this view.",
+                  },
+                  path: {
+                    name: "path",
+                    type: "string",
+                    description: "The path of the file in this view.",
+                  },
+                  selection: {
+                    name: "selection",
+                    type: [
+                      {
+                        lineStart: {
+                          name: "lineStart",
+                          type: "number",
+                          description:
+                            "The line number of the start of the selection.",
+                        },
+                        lineEnd: {
+                          name: "lineEnd",
+                          type: "number",
+                          description:
+                            "The line number of the end of the selection.",
+                        },
+                        text: {
+                          name: "text",
+                          type: "string",
+                          description:
+                            "The text of the selection in this view.",
+                        },
+                      },
+                    ],
+                    description:
+                      "The selection(s) of the file in this view. This is optional.",
+                  },
+                },
+                description:
+                  "The file that the view is currently opened on. This is optional. Undefined if the view does not open a file.",
+                optional: true,
+              },
+              extensionConfig: {
+                name: "extensionConfig",
+                type: {
+                  id: {
+                    name: "id",
+                    type: "string",
+                    description:
+                      "The module ID of the extension.",
+                  }
+                },
+                description:
+                  "The configuration of the extension/module that the view belongs to.",
+              }
+            },
+          ],
+          description: `The list of opened views that are visible to the user. \
+You will need to use these as the context to suggest the user to interact \
+with Pulse Editor and extension commands.`,
+        },
+        commands: {
+          name: "commands",
+          type: [
+            {
+              cmd: {
+                name: "cmd",
+                type: "string",
+                description:
+                  "The name of the command that the user is trying to use from the extension.",
+              },
+              parameters: {
+                name: "parameters",
+                type: [
+                  {
+                    name: {
+                      name: "name",
+                      type: "string",
+                      description:
+                        "The name of the parameter needed to run the command from the extension.",
+                    },
+                    type: {
+                      name: "type",
+                      type: "string",
+                      description:
+                        "The type of the parameter needed to run the command from the extension.",
+                    },
+                    description: {
+                      name: "description",
+                      type: "string",
+                      description:
+                        "The description of the parameter needed to run the command from the extension.",
+                    },
+                    moduleId: {
+                      name: "moduleId",
+                      type: "string",
+                      description: `The ID of the extension/module that the command belongs to. \
+This command can only be run on extension with this module ID.`,
+                    },
+                  },
+                ],
+                description:
+                  "The parameters needed to run the command from the extension.",
+              },
+            },
+          ],
           description:
-            "The user's input or question about the platform or its features.",
+            "The commands that the user is trying to use from the extension.",
         },
       },
       prompt: `\
-You will receive a user's message, which may contain a question or a request for assistance.
-Your task is to provide a helpful response based on the user's input.
+For this task, you will suggest extension commands that fit the user's needs.
+You are given the following information about the conversation and the available commands.
 
-Remember, you will not directly assist the user in creating or editing content, as you are not
-an application-level assistant agent. Instead, you will provide information and guidance to help users
-to navigate the platform and its extensions. However, you are able to call the application-level
-assistant agent to perform tasks on behalf of the user. These application-level assistant agents are exposed
-as part of an extension. You can call one of these assistant agents by outputting a message in the
-following format:
-\`\`\`
-{{
-  "agent": (a string representing the name of the agent),
-  "method": (a string representing the name of the method),
-  "parameters": (a JSON object representing the parameters to be passed to the method),
-}}
-
-You are given the following information about the conversation.
 Chat history:
 \`\`\`
 {chatHistory}
@@ -91,28 +209,130 @@ User message:
 \`\`\`
 {userMessage}
 \`\`\`
-Available application-level assistant agents:
+Opened views:
 \`\`\`
-{availableAgents}
+{openedViews}
 \`\`\`
-
-
-You will respond in the following format:
+Available commands:
 \`\`\`
-{{
-  "agentSuggestions": (an array of JSON objects representing the suggestions for application-level agents.
-Empty array if you cannot find any suitable agents. Each object should be in the following format:
-  {{
-    "agent": (a string representing the name of the agent),
-    "method": (a string representing the name of the method),
-    "parameters": (a JSON object representing the parameters to be passed to the method),
-  }}.
-  ),
-  "response": (a string representing the platform-level assistant agent's message to the user),
-}}
+{commands}
 \`\`\`
 `,
       returns: {
+        suggestedCmd: {
+          name: "suggestedCmd",
+          type: "string",
+          description:
+            "The command that you suggest the user to try for their needs.",
+        },
+        suggestedArgs: {
+          name: "suggestedArgs",
+          type: [
+            {
+              name: {
+                name: "name",
+                type: "string",
+                description:
+                  "The name of the argument needed to run the command from the extension.",
+              },
+              value: {
+                name: "value",
+                type: "string",
+                description:
+                  "The value that you suggest for the user to run the command from the extension.",
+              },
+            },
+          ],
+          description: `The arguments that you suggested for user to run the command from the extension. \
+This must match the command's parameters provided earlier.`,
+        },
+        suggestedViewId: {
+          name: "suggestedViewId",
+          type: "string",
+          description:
+            "The ID of the view (usually a uuid) that you suggest the user to run the command on. \
+Note, this is not the same as the module/extension ID (usually a named ID). In order to suggest a view ID, \
+you must match the commands' module ID (named ID) with the opened views' extensionConfig.id (named ID). \
+If a command and an opened view has the same extension/module ID (named ID), you can use that \
+opened view's ID (uuid) as the suggested view ID.",
+        },
+        response: {
+          name: "response",
+          type: "string",
+          description: `The platform-level assistant agent's response to the user's input or question. \
+Explain to the user that you will call the command for them, and explain the reasoning behind \
+picking the command and values of the arguments.`,
+        },
+      },
+    },
+    {
+      access: AccessEnum.public,
+      name: "suggestExtensions",
+      parameters: {
+        chatHistory: {
+          name: "chatHistory",
+          type: "string",
+          description: "The chat history between the user and you.",
+        },
+        userMessage: {
+          name: "userMessage",
+          type: "string",
+          description: "The user's message.",
+        },
+        relevantExtensions: {
+          name: "relevantExtensions",
+          type: {
+            name: {
+              name: "name",
+              type: "string",
+              description: "The name of the extension",
+            },
+            description: {
+              name: "description",
+              type: "string",
+              description: "The description of the extension",
+            },
+          },
+          description:
+            "The relevant extensions that are available in the marketplace.",
+        },
+      },
+      prompt: `\
+For this task, you will suggest extensions from marketplace that fit the user's needs.
+You are given the following information about the conversation and the available extensions.
+
+Chat history:
+\`\`\`
+{chatHistory}
+\`\`\`
+User message:
+\`\`\`
+{userMessage}
+\`\`\`
+Relevant extensions:
+\`\`\`
+{relevantExtensions}
+\`\`\`
+`,
+      returns: {
+        extensionSuggestions: {
+          name: "extensionSuggestions",
+          type: [
+            {
+              name: {
+                name: "name",
+                type: "string",
+                description: "The name of the extension",
+              },
+              description: {
+                name: "description",
+                type: "string",
+                description: "The description of the extension",
+              },
+            },
+          ],
+          description: `The extension suggestions.`,
+        },
         response: {
           name: "response",
           type: "string",

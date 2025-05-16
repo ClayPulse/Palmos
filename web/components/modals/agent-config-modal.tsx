@@ -5,11 +5,99 @@ import ModalWrapper from "./modal-wrapper";
 import { EditorContext } from "../providers/editor-context-provider";
 import Icon from "../misc/icon";
 import { Button, Divider, Input, Textarea } from "@heroui/react";
-import { InstalledAgent, LLMUsage, TabItem } from "@/lib/types";
+import { LLMUsage, TabItem, UserAgent } from "@/lib/types";
 import Tabs from "../misc/tabs";
 import PasswordInput from "../misc/password-input";
 import toast from "react-hot-toast";
 import { AgentMethod } from "@pulse-editor/shared-utils";
+
+export default function AgentConfigModal({
+  isOpen,
+  setIsOpen,
+}: {
+  isOpen: boolean;
+  setIsOpen: (isOpen: boolean) => void;
+}) {
+  const editorContext = useContext(EditorContext);
+
+  const tabItems: TabItem[] = [
+    {
+      name: "Agents",
+      description: "Manage installed agents",
+    },
+    {
+      name: "Providers",
+      description: "Manage AI providers",
+    },
+  ];
+  const [selectedTab, setSelectedTab] = useState<TabItem | undefined>(
+    tabItems[0],
+  );
+
+  const [isCreatingNewAgent, setIsCreatingNewAgent] = useState(false);
+
+  function getLLMUsageByAgents() {
+    const agents = editorContext?.persistSettings?.extensionAgents ?? [];
+
+    const usageList: LLMUsage[] = [];
+
+    for (const agent of agents) {
+      const provider = agent.LLMConfig.provider;
+      const modelName = agent.LLMConfig.modelName;
+
+      const existing = usageList.find((u) => u.provider === provider);
+
+      if (existing) {
+        if (!existing.usedModals.includes(modelName)) {
+          existing.usedModals.push(modelName);
+        }
+        existing.usedByAgents.push(agent.name);
+        existing.totalUsageByAgents += 1;
+      } else {
+        usageList.push({
+          provider,
+          usedModals: [modelName],
+          usedByAgents: [agent.name],
+          totalUsageByAgents: 1,
+        });
+      }
+    }
+
+    return usageList;
+  }
+
+  return (
+    <ModalWrapper
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      title="Agents Configuration"
+      isShowGoBack={isCreatingNewAgent}
+      goBackCallback={() => {
+        setIsCreatingNewAgent(false);
+      }}
+    >
+      <div className="flex justify-center pb-1">
+        <div className="bg-content2 rounded-md py-2">
+          <Tabs
+            tabItems={tabItems}
+            selectedItem={selectedTab}
+            setSelectedItem={setSelectedTab}
+          />
+        </div>
+      </div>
+
+      {selectedTab?.name === tabItems[0].name &&
+        (isCreatingNewAgent ? (
+          <AgentCreation setIsCreatingNewAgent={setIsCreatingNewAgent} />
+        ) : (
+          <AgentConfigs setIsCreatingNewAgent={setIsCreatingNewAgent} />
+        ))}
+      {selectedTab?.name === tabItems[1].name && (
+        <ProviderConfigs llmUsageList={getLLMUsageByAgents()} />
+      )}
+    </ModalWrapper>
+  );
+}
 
 function AgentConfigs({
   setIsCreatingNewAgent,
@@ -19,7 +107,7 @@ function AgentConfigs({
   const editorContext = useContext(EditorContext);
   return (
     <div className="flex flex-col space-y-2">
-      {editorContext?.persistSettings?.installedAgents?.map((agent) => (
+      {editorContext?.persistSettings?.extensionAgents?.map((agent) => (
         <div
           key={agent.name}
           className="grid w-full grid-cols-[32px_auto_max-content] gap-x-2 p-1"
@@ -39,16 +127,12 @@ function AgentConfigs({
                 {agent.version}
               </p>
             </div>
-            {agent.author.type === "user" ? (
-              <p className="text-small text-foreground-600 leading-4">
-                Installed by user {agent.author.publisher}
-              </p>
-            ) : (
+            {
               <p className="text-small text-foreground-600 leading-4">
                 Installed by extension {agent.author.extension} from{" "}
                 {agent.author.publisher}
               </p>
-            )}
+            }
             <p className="pt-2 leading-4">{agent.description}</p>
             <div className="flex gap-x-1 pt-2">
               <p>LLM config:</p>
@@ -64,14 +148,14 @@ function AgentConfigs({
                 onPress={() => {
                   // Remove the agent with name
                   const updatedAgents =
-                    editorContext?.persistSettings?.installedAgents?.filter(
+                    editorContext?.persistSettings?.extensionAgents?.filter(
                       (a) => a.name !== agent.name,
                     );
 
                   editorContext?.setPersistSettings((prev) => {
                     return {
                       ...prev,
-                      installedAgents: updatedAgents,
+                      extensionAgents: updatedAgents,
                     };
                   });
                   toast.success("Deleted agent");
@@ -171,14 +255,13 @@ function AgentCreation({
       <Button
         onPress={() => {
           // Add new agent
-          const agent: InstalledAgent = {
+          const agent: UserAgent = {
             name: name,
             description: description,
             version: version,
             availableMethods: methods,
             systemPrompt: systemPrompt,
             author: {
-              type: "user",
               publisher: "You",
             },
             LLMConfig: {
@@ -191,7 +274,7 @@ function AgentCreation({
           editorContext?.setPersistSettings((prev) => {
             return {
               ...prev,
-              installedAgents: [...(prev?.installedAgents ?? []), agent],
+              userAgents: [...(prev?.userAgents ?? []), agent],
             };
           });
 
@@ -287,93 +370,5 @@ function ProviderConfigs({ llmUsageList }: { llmUsageList: LLMUsage[] }) {
         ))}
       </div>
     </div>
-  );
-}
-
-export default function AgentConfigModal({
-  isOpen,
-  setIsOpen,
-}: {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-}) {
-  const editorContext = useContext(EditorContext);
-
-  const tabItems: TabItem[] = [
-    {
-      name: "Agents",
-      description: "Manage installed agents",
-    },
-    {
-      name: "Providers",
-      description: "Manage AI providers",
-    },
-  ];
-  const [selectedTab, setSelectedTab] = useState<TabItem | undefined>(
-    tabItems[0],
-  );
-
-  const [isCreatingNewAgent, setIsCreatingNewAgent] = useState(false);
-
-  function getLLMUsageByAgents() {
-    const agents = editorContext?.persistSettings?.installedAgents ?? [];
-
-    const usageList: LLMUsage[] = [];
-
-    for (const agent of agents) {
-      const provider = agent.LLMConfig.provider;
-      const modelName = agent.LLMConfig.modelName;
-
-      const existing = usageList.find((u) => u.provider === provider);
-
-      if (existing) {
-        if (!existing.usedModals.includes(modelName)) {
-          existing.usedModals.push(modelName);
-        }
-        existing.usedByAgents.push(agent.name);
-        existing.totalUsageByAgents += 1;
-      } else {
-        usageList.push({
-          provider,
-          usedModals: [modelName],
-          usedByAgents: [agent.name],
-          totalUsageByAgents: 1,
-        });
-      }
-    }
-
-    return usageList;
-  }
-
-  return (
-    <ModalWrapper
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      title="Agents Configuration"
-      isShowGoBack={isCreatingNewAgent}
-      goBackCallback={() => {
-        setIsCreatingNewAgent(false);
-      }}
-    >
-      <div className="flex justify-center">
-        <div className="bg-content2 rounded-md py-2">
-          <Tabs
-            tabItems={tabItems}
-            selectedItem={selectedTab}
-            setSelectedItem={setSelectedTab}
-          />
-        </div>
-      </div>
-
-      {selectedTab?.name === tabItems[0].name &&
-        (isCreatingNewAgent ? (
-          <AgentCreation setIsCreatingNewAgent={setIsCreatingNewAgent} />
-        ) : (
-          <AgentConfigs setIsCreatingNewAgent={setIsCreatingNewAgent} />
-        ))}
-      {selectedTab?.name === tabItems[1].name && (
-        <ProviderConfigs llmUsageList={getLLMUsageByAgents()} />
-      )}
-    </ModalWrapper>
   );
 }

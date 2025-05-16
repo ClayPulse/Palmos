@@ -1,20 +1,20 @@
-import { Extension, InstalledAgent } from "@/lib/types";
+import { Extension } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ExtensionLoader from "../../misc/extension-loader";
 import {
-  Agent,
   ConnectionListener,
   IMCMessage,
   IMCMessageTypeEnum,
+  ViewModel,
 } from "@pulse-editor/shared-utils";
 import Loading from "../../interface/loading";
 import { useTheme } from "next-themes";
-import { InterModuleCommunication } from "@pulse-editor/shared-utils";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
 import { IMCContext } from "@/components/providers/imc-provider";
+import { v4 } from "uuid";
 
 export default function ConsoleViewLoader({
   consoleExt,
@@ -40,9 +40,11 @@ export default function ConsoleViewLoader({
     ConnectionListener | undefined
   >(undefined);
 
-  const [remoteModuleId, setRemoteModuleId] = useState<string | undefined>(
+  const [remoteWindowId, setRemoteWindowId] = useState<string | undefined>(
     undefined,
   );
+
+  const [model, setModel] = useState<ViewModel | undefined>(undefined);
 
   useEffect(() => {
     function getAndLoadExtension() {
@@ -66,7 +68,7 @@ export default function ConsoleViewLoader({
             setIsExtensionLoaded((prev) => false);
 
             const moduleId = message.from;
-            setRemoteModuleId(moduleId);
+            setRemoteWindowId(moduleId);
 
             // Close the connection listener
             if (connectionListener) {
@@ -82,8 +84,8 @@ export default function ConsoleViewLoader({
 
     if (consoleExt) {
       // Reset the extension and IMC
-      if (imcContext?.polyIMC && remoteModuleId) {
-        imcContext?.polyIMC.removeChannel(remoteModuleId);
+      if (imcContext?.polyIMC && remoteWindowId) {
+        imcContext?.polyIMC.removeChannel(remoteWindowId);
 
         setIsExtensionWindowReady(false);
         setIsExtensionLoaded(false);
@@ -95,25 +97,59 @@ export default function ConsoleViewLoader({
 
   useEffect(() => {
     // Send theme update to the extension
-    if (isExtensionWindowReady && remoteModuleId) {
+    if (isExtensionWindowReady && remoteWindowId) {
       imcContext?.polyIMC?.sendMessage(
-        remoteModuleId,
+        remoteWindowId,
         IMCMessageTypeEnum.ThemeChange,
         resolvedTheme,
       );
     }
-  }, [isExtensionWindowReady, remoteModuleId, resolvedTheme]);
+  }, [isExtensionWindowReady, remoteWindowId, resolvedTheme]);
 
   // When the editor context changes, update the IMC receiver handler map
   // to include the new handlers for the extension
   useEffect(() => {
-    if (remoteModuleId) {
+    if (remoteWindowId) {
       imcContext?.polyIMC?.updateChannelReceiverHandlerMap(
-        remoteModuleId,
+        remoteWindowId,
         getHandlerMap(),
       );
     }
-  }, [editorContext, imcContext]);
+  }, [editorContext, imcContext, remoteWindowId]);
+
+  useEffect(() => {
+    if (usedExtension && model) {
+      setModel({
+        ...model,
+        extensionConfig: usedExtension.config,
+      });
+    }
+  }, [usedExtension, model]);
+
+  useEffect(() => {
+    const newModel: ViewModel = {
+      viewId: v4(),
+      isFocused: false,
+      extensionConfig: usedExtension?.config,
+    };
+
+    setModel(newModel);
+
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      openedViewModels: [...prev.openedViewModels, newModel],
+    }));
+
+    return () => {
+      // Remove the view model from the editor context
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        openedViewModels: prev.openedViewModels.filter(
+          (view) => view.viewId !== newModel.viewId,
+        ),
+      }));
+    };
+  }, []);
 
   function getHandlerMap() {
     const newMap = new Map<
@@ -171,9 +207,10 @@ export default function ConsoleViewLoader({
               <Loading />
             </div>
           )}
-          {connectionListener && (
+          {connectionListener && model && (
             <ExtensionLoader
               key={usedExtension.config.id}
+              viewId={model.viewId}
               remoteOrigin={usedExtension.remoteOrigin}
               moduleId={usedExtension.config.id}
               moduleVersion={usedExtension.config.version}

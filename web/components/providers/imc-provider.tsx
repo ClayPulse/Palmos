@@ -88,7 +88,7 @@ export default function InterModuleCommunicationProvider({
             llmConfig?: LLMConfig;
           } = message.payload;
 
-          const agent = editorContext?.persistSettings?.installedAgents?.find(
+          const agent = editorContext?.persistSettings?.extensionAgents?.find(
             (agent) => agent.name === agentName,
           );
 
@@ -128,7 +128,7 @@ export default function InterModuleCommunicationProvider({
             apiKey,
             config,
             agent,
-            method,
+            methodName,
             parameters,
             abortSignal,
           );

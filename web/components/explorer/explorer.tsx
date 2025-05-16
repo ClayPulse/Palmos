@@ -26,7 +26,7 @@ export default function Explorer({
   const { platformApi } = usePlatformApi();
   const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
     useState(false);
-  const { openFileView } = useViewManager();
+  const { openFileInView } = useViewManager();
 
   const rootGroupRef = useRef<TreeViewGroupRef | null>(null);
 
@@ -58,7 +58,7 @@ export default function Explorer({
 
   function viewFile(uri: string) {
     platformApi?.readFile(uri).then((file) => {
-      openFileView(file).then(() => {
+      openFileInView(file).then(() => {
         if (platform === PlatformEnum.Capacitor) {
           setIsMenuOpen(false);
         }
