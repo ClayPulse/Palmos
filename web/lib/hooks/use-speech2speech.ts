@@ -98,8 +98,7 @@ export default function useSpeech2Speech() {
     async function processTranscript() {
       if (!isUsing) {
         return;
-      }
-      if (!isSTTDone) {
+      } else if (!isSTTDone) {
         return;
       }
 
@@ -151,10 +150,11 @@ export default function useSpeech2Speech() {
     async function processOutputAudio() {
       if (!isUsing) {
         return;
-      }
-      if (!ttsModel) {
+      } else if (!ttsModel) {
         return;
       } else if (!isTextProcessingDone) {
+        return;
+      } else if (processedText.length === 0) {
         return;
       }
 
@@ -163,6 +163,7 @@ export default function useSpeech2Speech() {
       editorContext?.setEditorStates((prev) => ({
         ...prev,
         isThinking: false,
+        thinkingText: undefined,
         isSpeaking: true,
       }));
 
@@ -246,7 +247,7 @@ export default function useSpeech2Speech() {
    * @param textProcessFunc Function to process the result of STT,
    * and return the input text for TTS.
    */
-  async function runSpeech2Speech(
+  function runSpeech2Speech(
     textProcessFunc?: (inputText: string) => Promise<string>,
     textProcessStreamFunc?: (
       inputText: string,
@@ -291,12 +292,14 @@ export default function useSpeech2Speech() {
       isRecording: false,
       isListening: false,
       isThinking: false,
+      thinkingText: undefined,
       isSpeaking: false,
       inputAudioStream: undefined,
     }));
   }
 
   return {
+    isUsing,
     runSpeech2Speech,
     stopSpeech2Speech,
   };

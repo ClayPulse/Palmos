@@ -2,6 +2,7 @@ import {
   ExtensionCommandInfo,
   IMCMessage,
   IMCMessageTypeEnum,
+  ReceiverHandler,
 } from "@pulse-editor/shared-utils";
 import useIMC from "../../lib/use-imc";
 import { useEffect, useState } from "react";
@@ -25,10 +26,7 @@ export default function useExtCommand(
   }, [handler, imc]);
 
   function getReceiverHandlerMap() {
-    const receiverHandlerMap = new Map<
-      IMCMessageTypeEnum,
-      (senderWindow: Window, message: IMCMessage) => Promise<void>
-    >([
+    const receiverHandlerMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
       [
         IMCMessageTypeEnum.RunExtCommand,
         async (senderWindow: Window, message: IMCMessage) => {
@@ -72,7 +70,9 @@ export default function useExtCommand(
             // Execute the command handler with the parameters
             if (handler) {
               const res = await handler(args);
-              // TODO: Send the result back to the sender so the platform assistant is aware of command result 
+              if (res) {
+                return res;
+              }
             }
           }
         },

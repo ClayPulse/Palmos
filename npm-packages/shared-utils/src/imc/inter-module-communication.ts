@@ -127,7 +127,18 @@ export class InterModuleCommunication {
       throw new Error("Receiver not initialized");
     }
 
+    // Clear all existing handlers except the acknowledgement handler.
     this.receiverHandlerMap?.clear();
+    this.receiverHandlerMap?.set(
+      IMCMessageTypeEnum.Acknowledge,
+      async (senderWindow: Window, message: IMCMessage) => {
+        const pendingMessage = this.sender?.getPendingMessage(message.id);
+        if (pendingMessage) {
+          pendingMessage.resolve(message.payload);
+          this.sender?.removePendingMessage(message.id);
+        }
+      }
+    );
     receiverHandlerMap.forEach((value, key) => {
       this.receiverHandlerMap?.set(key, value);
     });

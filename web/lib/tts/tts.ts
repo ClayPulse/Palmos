@@ -73,11 +73,31 @@ export function getModelTTS(
   }
 
   async function elevenLabsGenerateFunc(model: any, text: string) {
-    const data: Readable = await model.generate({
+    const client = model as ElevenLabsClient;
+    const data: Readable = await client.generate({
       text: text,
       model_id: modelName,
       output_format: "mp3_22050_32",
       voice: voiceName,
+    });
+
+    const chunks = [];
+    for await (const chunk of data) {
+      chunks.push(chunk);
+    }
+    const buffer = Buffer.concat(chunks);
+    const blob = new Blob([buffer], { type: "audio/mp3" });
+    return blob;
+  }
+
+  async function elevenLabsGenerateStreamFunc(model: any, text: string) {
+    const client = model as ElevenLabsClient;
+    const data: Readable = await client.generate({
+      text: text,
+      model_id: modelName,
+      output_format: "mp3_22050_32",
+      voice: voiceName,
+      stream: true,
     });
 
     const chunks = [];
@@ -105,7 +125,7 @@ export function getModelTTS(
       model = client;
 
       generateFunc = elevenLabsGenerateFunc;
-      generateStreamFunc = undefined;
+      generateStreamFunc = elevenLabsGenerateStreamFunc;
       break;
     case "playht":
       throw new Error("Playht model not implemented yet");

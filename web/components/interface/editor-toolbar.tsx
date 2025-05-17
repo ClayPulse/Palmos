@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Divider, Tooltip } from "@heroui/react";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Icon from "@/components/misc/icon";
 import AppSettingsModal from "@/components/modals/app-settings-modal";
 import { AnimatePresence, motion } from "framer-motion";
@@ -16,6 +16,7 @@ import { getAPIKey } from "@/lib/settings/settings";
 import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
 import { getAgentLLMConfig, runAgentMethod } from "@/lib/agent/agent-runner";
 import useExtensionCommands from "@/lib/hooks/use-extension-commands";
+import useTTS from "@/lib/hooks/use-tts";
 
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
@@ -24,8 +25,128 @@ export default function EditorToolbar() {
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
   const [isAppSettingsModalOpen, setAppIsSettingsModalOpen] = useState(false);
 
-  const { runSpeech2Speech, stopSpeech2Speech } = useSpeech2Speech();
+  const { runSpeech2Speech, stopSpeech2Speech, isUsing } = useSpeech2Speech();
+  const { readText, playAudio } = useTTS();
   const { runCommand } = useExtensionCommands();
+
+  const [userVoiceMessage, setUserVoiceMessage] = useState<string>("");
+
+  const [assistantResult, setAssistantResult] = useState<any>(null);
+  const [pendingAnalysis, setPendingAnalysis] = useState("");
+  const [analysisAudio, setAnalysisAudio] = useState<Blob | undefined>(
+    undefined,
+  );
+
+  // When speech2speech returns assistant result, we let the assistant agent to analyze its effects
+  useEffect(() => {
+    async function processAssistantResult() {
+      if (!assistantResult) {
+        return;
+      }
+
+      const {
+        suggestedCmd,
+        suggestedArgs,
+        suggestedViewId,
+        response,
+      }: {
+        suggestedCmd: string;
+        suggestedArgs: {
+          name: string;
+          value: any;
+        }[];
+        suggestedViewId: string;
+        response: string;
+      } = assistantResult;
+
+      // TODO: The agent needs to confirm the command with the user
+      // TODO: before executing it.
+      const args = suggestedArgs.reduce(
+        (acc, arg) => {
+          acc[arg.name] = arg.value;
+          return acc;
+        },
+        {} as Record<string, any>,
+      );
+
+      // Show thinking indicator
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        isThinking: true,
+        thinkingText: "Executing command...",
+      }));
+
+      const cmdResult = await runCommand(suggestedViewId, suggestedCmd, args);
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("Command result:", cmdResult);
+      }
+
+      const llmKey = getAPIKey(
+        editorContext,
+        editorContext?.persistSettings?.llmProvider,
+      );
+
+      if (!llmKey) {
+        toast.error("Please set your LLM API key in settings.");
+        return;
+      }
+
+      const { analysis }: { analysis: string } = await runAgentMethod(
+        llmKey,
+        editorAssistantAgent.LLMConfig,
+        editorAssistantAgent,
+        "analyzeCommandResult",
+        {
+          userMessage: userVoiceMessage,
+          suggestedCmd: suggestedCmd,
+          previousSuggestion: response,
+          commandResult: cmdResult,
+        },
+      );
+
+      if (process.env.NODE_ENV === "development") {
+        console.log("Command analysis:", analysis);
+      }
+      setPendingAnalysis(analysis);
+    }
+
+    processAssistantResult();
+  }, [assistantResult]);
+
+  // When the assistant agent is done analyzing the command result, we can
+  // play the analysis result to the user.
+  useEffect(() => {
+    if (pendingAnalysis.length > 0) {
+      if (!isUsing) {
+        // Show thinking indicator
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isThinking: true,
+          thinkingText: "Analyzing command result...",
+        }));
+      }
+      readText(pendingAnalysis).then((blob) => {
+        setPendingAnalysis("");
+        setAnalysisAudio(blob);
+      });
+    }
+  }, [pendingAnalysis, isUsing]);
+
+  // Play the audio when the speech2speech is done and the analysis is done
+  useEffect(() => {
+    if (!isUsing && analysisAudio) {
+      // Show thinking indicator
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        isThinking: true,
+        thinkingText: "Analyzing command result...",
+      }));
+      playAudio(analysisAudio).then(() => {
+        setAnalysisAudio(undefined);
+      });
+    }
+  }, [isUsing, analysisAudio]);
 
   function setIsOpen(val: boolean) {
     if (editorContext) {
@@ -69,7 +190,8 @@ export default function EditorToolbar() {
       const agent = editorAssistantAgent;
       const methodName = "useExtensionCommands";
 
-      await runSpeech2Speech(async (inputText: string) => {
+      runSpeech2Speech(async (inputText: string) => {
+        setUserVoiceMessage(inputText);
         // Pipe the LLM result to Speech2Speech
         // const stream = await llm.generateStream(inputText);
         const result = await runAgentMethod(
@@ -132,17 +254,7 @@ export default function EditorToolbar() {
           response: string;
         } = result;
 
-        // TODO: The agent needs to confirm the command with the user
-        // TODO: before executing it.
-        const args = suggestedArgs.reduce(
-          (acc, arg) => {
-            acc[arg.name] = arg.value;
-            return acc;
-          },
-          {} as Record<string, any>,
-        );
-
-        runCommand(suggestedViewId, suggestedCmd, args);
+        setAssistantResult(result);
 
         return response;
       });

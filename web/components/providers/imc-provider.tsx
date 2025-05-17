@@ -6,6 +6,7 @@ import {
   IMCMessageTypeEnum,
   LLMConfig,
   PolyIMC,
+  ReceiverHandler,
   STTConfig,
   TTSConfig,
 } from "@pulse-editor/shared-utils";
@@ -55,16 +56,7 @@ export default function InterModuleCommunicationProvider({
    * Provide a map of handlers for the IMC messages used for Pulse Editor APIs.
    */
   function getHandlerMap() {
-    const newMap = new Map<
-      IMCMessageTypeEnum,
-      {
-        (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ): Promise<any>;
-      }
-    >([
+    const newMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
       [
         IMCMessageTypeEnum.RunAgentMethod,
         async (

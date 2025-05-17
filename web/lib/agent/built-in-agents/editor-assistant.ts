@@ -135,13 +135,12 @@ Pulse Editor extensions and its features.`,
                   id: {
                     name: "id",
                     type: "string",
-                    description:
-                      "The module ID of the extension.",
-                  }
+                    description: "The module ID of the extension.",
+                  },
                 },
                 description:
                   "The configuration of the extension/module that the view belongs to.",
-              }
+              },
             },
           ],
           description: `The list of opened views that are visible to the user. \
@@ -260,8 +259,11 @@ opened view's ID (uuid) as the suggested view ID.",
           name: "response",
           type: "string",
           description: `The platform-level assistant agent's response to the user's input or question. \
-Explain to the user that you will call the command for them, and explain the reasoning behind \
-picking the command and values of the arguments.`,
+Explain in a friendly way to the user that you will call the command for them, and explain the reasoning behind \
+picking the command and values of the arguments. If a command is suggested, you will let the user know \
+that you will execute this command for them and wait for the response to further analyze its effects. \
+Keep your response short and concise but informative in 2-3 sentences unless the user wants a detailed \
+explanation. `,
         },
       },
     },
@@ -338,6 +340,67 @@ Relevant extensions:
           type: "string",
           description:
             "The platform-level assistant agent's response to the user's input or question.",
+        },
+      },
+    },
+    {
+      access: AccessEnum.public,
+      name: "analyzeCommandResult",
+      parameters: {
+        userMessage: {
+          name: "userMessage",
+          type: "string",
+          description: "The user's message.",
+        },
+        suggestedCmd: {
+          name: "suggestedCmd",
+          type: "string",
+          description:
+            "The command that you suggested earlier for the user to try for their needs.",
+        },
+        previousSuggestion: {
+          name: "previousSuggestion",
+          type: "string",
+          description:
+            "The previous suggestion you made to the user before running the command.",
+        },
+        commandResult: {
+          name: "commandResult",
+          type: "string",
+          description: "The command returns this result.",
+        },
+      },
+      prompt: `\
+For this task, you will analyze the result of the command that was run.
+Explain to the user what the command result means and how it relates to their needs.
+You are given the following information about the command result.
+
+Original user message:
+\`\`\`
+{userMessage}
+\`\`\`
+Suggested command from your previous response:
+\`\`\`
+{suggestedCmd}
+\`\`\`
+Your previous suggestion:
+\`\`\`
+{previousSuggestion}
+\`\`\`
+Command result:
+\`\`\`
+{commandResult}
+\`\`\`
+`,
+      returns: {
+        analysis: {
+          name: "analysis",
+          type: "string",
+          description:
+            "The analysis of the command result and its relevance to the user's needs. \
+Explain in a friendly way to the user what the command result did. \
+Keep your response short and concise but informative in 2-3 sentences unless the user wants a detailed \
+explanation.",
         },
       },
     },

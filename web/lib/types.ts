@@ -39,6 +39,7 @@ export type EditorStates = {
   isListening: boolean;
   // Is the agent thinking (processing the user input)
   isThinking: boolean;
+  thinkingText?: string;
   // Is the agent speaking (reading the output)
   isSpeaking: boolean;
   // Audio input stream

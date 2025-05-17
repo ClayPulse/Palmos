@@ -29,9 +29,9 @@ export default function VoiceIndicator() {
           animate={{ y: 48 }}
           exit={{ y: -56 }}
           transition={{ duration: 0.1 }}
-          className="absolute flex h-full w-full items-center justify-center"
+          className="pointer-events-none absolute flex h-full w-full items-center justify-center"
         >
-          <div className="bg-content2 flex h-10 w-40 items-center rounded-full px-4">
+          <div className="bg-content2 flex h-10 min-w-40 items-center rounded-full px-4">
             <div className="flex w-12 items-center justify-center">
               {editorContext?.editorStates?.isListening ? (
                 <BounceLoader color={colors.red["300"]} size={24} />
@@ -52,7 +52,7 @@ export default function VoiceIndicator() {
               {editorContext?.editorStates?.isListening
                 ? "Listening"
                 : editorContext?.editorStates?.isThinking
-                  ? "Thinking"
+                  ? (editorContext.editorStates.thinkingText ?? "Thinking")
                   : editorContext?.editorStates.isSpeaking
                     ? "Speaking"
                     : editorContext.editorStates.isLoadingRecorder

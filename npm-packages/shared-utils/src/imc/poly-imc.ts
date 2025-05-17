@@ -54,7 +54,7 @@ export class PolyIMC {
       throw new Error("Channel not found for window ID " + targetWindowId);
     }
 
-    return channel.sendMessage(handlingType, payload, abortSignal);
+    return await channel.sendMessage(handlingType, payload, abortSignal);
   }
 
   public updateBaseReceiverHandlerMap(handlerMap: ReceiverHandlerMap) {

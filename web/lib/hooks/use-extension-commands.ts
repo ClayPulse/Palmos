@@ -6,7 +6,7 @@ export default function useExtensionCommands() {
   const imcContext = useContext(IMCContext);
 
   async function runCommand(windowId: string, commandName: string, args: any) {
-    imcContext?.polyIMC?.sendMessage(
+    const result = await imcContext?.polyIMC?.sendMessage(
       windowId,
       IMCMessageTypeEnum.RunExtCommand,
       {
@@ -14,6 +14,11 @@ export default function useExtensionCommands() {
         args: args,
       },
     );
+
+
+    if (result) {
+      return result;
+    }
   }
   return { runCommand };
 }

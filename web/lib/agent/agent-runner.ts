@@ -47,7 +47,7 @@ export async function runAgentMethod(
   const returns = extractReturns(llmResult);
 
   if (process.env.NODE_ENV === "development") {
-    console.log("Result: ", returns);
+    console.log("Agent result: ", returns);
   }
 
   return returns;
