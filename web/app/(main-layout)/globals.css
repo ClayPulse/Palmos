@@ -31,6 +31,10 @@
   @apply w-3/4 sm:w-[480px];
 }
 
+@utility safe-area-padding {
+  padding-top: var(--safe-area-inset-top);
+}
+
 :root {
   --background: #ffffff;
 }
@@ -41,7 +45,6 @@
 
 body {
   font-family: sans-serif;
-  padding-top: var(--safe-area-inset-top);
 }
 
 @layer base {

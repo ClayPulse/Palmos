@@ -12,17 +12,23 @@ export default function useTerminal() {
   const [websocketUrl, setWebsocketUrl] = useState<string | undefined>(
     undefined
   );
+  const [projectHomePath, setProjectHomePath] = useState<string | undefined>(
+    undefined
+  );
 
   useEffect(() => {
     if (isReady) {
       imc?.sendMessage(IMCMessageTypeEnum.RequestTerminal).then((response) => {
         const {
           websocketUrl,
+          projectHomePath,
         }: {
           websocketUrl: string;
+          projectHomePath: string;
         } = response;
 
         setWebsocketUrl(websocketUrl);
+        setProjectHomePath(projectHomePath);
 
         imc.sendMessage(IMCMessageTypeEnum.Loaded);
       });
@@ -31,5 +37,6 @@ export default function useTerminal() {
 
   return {
     websocketUrl,
+    projectHomePath,
   };
 }

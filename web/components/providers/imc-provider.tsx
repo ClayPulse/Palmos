@@ -140,11 +140,13 @@ export default function InterModuleCommunicationProvider({
           if (platform === PlatformEnum.Capacitor) {
             return {
               websocketUrl: editorContext?.persistSettings?.mobileHost,
+              projectHomePath: `~/storage/shared/${editorContext?.persistSettings?.projectHomePath}`,
             };
           } else {
             const wsUrl = await platformApi?.createTerminal();
             return {
               websocketUrl: wsUrl,
+              projectHomePath: editorContext?.persistSettings?.projectHomePath,
             };
           }
         },

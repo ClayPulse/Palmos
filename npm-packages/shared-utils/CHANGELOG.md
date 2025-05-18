@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.12
+
+### Patch Changes
+
+- Hotfix packages
+
 ## 0.1.1-alpha.11
 
 ### Patch Changes

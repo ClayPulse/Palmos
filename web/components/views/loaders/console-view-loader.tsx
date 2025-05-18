@@ -167,27 +167,6 @@ export default function ConsoleViewLoader({
           setIsExtensionLoaded((prev) => true);
         },
       ],
-      [
-        IMCMessageTypeEnum.RequestTerminal,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const platform = getPlatform();
-          // Get a shell terminal from native platform APIs
-          if (platform === PlatformEnum.Capacitor) {
-            return {
-              websocketUrl: editorContext?.persistSettings?.mobileHost,
-            };
-          } else {
-            const wsUrl = await platformApi?.createTerminal();
-            return {
-              websocketUrl: wsUrl,
-            };
-          }
-        },
-      ],
     ]);
     return newMap;
   }
