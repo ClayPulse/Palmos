@@ -7,12 +7,13 @@ import {
   VisuallyHidden,
 } from "@heroui/react";
 import Icon from "../misc/icon";
-import { ContextMenuState, Extension } from "@/lib/types";
+import { ContextMenuState, Extension, PlatformEnum } from "@/lib/types";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import toast from "react-hot-toast";
 import { useContext, useEffect, useState } from "react";
 import ContextMenu from "../interface/context-menu";
 import { EditorContext } from "../providers/editor-context-provider";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 
 export default function ExtensionPreview({
   extension,
@@ -74,11 +75,15 @@ export default function ExtensionPreview({
       <div
         className="relative h-28 w-full"
         onMouseEnter={() => {
-          setIsShowInfo(true);
+          if (getPlatform() !== PlatformEnum.Capacitor) {
+            setIsShowInfo(true);
+          }
         }}
         // Hide show info when user taps outside of the modal
         onMouseLeave={() => {
-          setIsShowInfo(false);
+          if (getPlatform() !== PlatformEnum.Capacitor) {
+            setIsShowInfo(false);
+          }
         }}
       >
         <div className="absolute top-0 right-0.5 z-10">
@@ -95,6 +100,9 @@ export default function ExtensionPreview({
         </div>
         <Button
           className="relative m-0 h-full w-full rounded-md p-0"
+          onPress={() => {
+            setIsShowInfo((prev) => !prev);
+          }}
           onContextMenu={(e) => {
             e.preventDefault();
             // Get parent element position
@@ -124,8 +132,6 @@ export default function ExtensionPreview({
                     setIsInstalled(true);
                     setIsEnabled(extension.isEnabled);
                   });
-
-                  
                 }}
               >
                 Install

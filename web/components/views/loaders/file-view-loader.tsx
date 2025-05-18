@@ -1,8 +1,8 @@
 import { Extension } from "@/lib/types";
-import { useContext, useEffect, useState } from "react";
+import { use, useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ExtensionViewLayout from "../layout";
-import ExtensionLoader from "../../misc/extension-loader";
+import ExtensionLoader from "../../extension/extension-loader";
 import {
   ConnectionListener,
   ViewModel,
@@ -28,20 +28,25 @@ export default function FileViewLoader({
   );
   const [hasExtension, setHasExtension] = useState(true);
 
-  const [isExtensionWindowReady, setIsExtensionWindowReady] = useState(false);
   const [isExtensionLoaded, setIsExtensionLoaded] = useState(false);
+  const [isExtensionWindowReady, setIsExtensionWindowReady] = useState(false);
 
   const { resolvedTheme } = useTheme();
 
   const [fileUri, setFileUri] = useState<string | undefined>(undefined);
 
-  const [connectionListener, setConnectionListener] = useState<
-    ConnectionListener | undefined
-  >(undefined);
-
   const [remoteWindowId, setRemoteWindowId] = useState<string | undefined>(
     undefined,
   );
+
+  const clRef = useRef<ConnectionListener | null>(null);
+
+  useEffect(() => {
+    if (remoteWindowId && clRef.current) {
+      clRef.current.close();
+      clRef.current = null;
+    }
+  }, [remoteWindowId]);
 
   useEffect(() => {
     if (fileUri !== model.file?.path) {
@@ -72,24 +77,17 @@ export default function FileViewLoader({
         // Create IMC channel
         if (imcContext?.polyIMC) {
           const cl = new ConnectionListener(
-            imcContext?.polyIMC,
+            imcContext.polyIMC,
             getHandlerMap(),
             (senderWindow: Window, message: IMCMessage) => {
               setIsExtensionWindowReady((prev) => true);
               setIsExtensionLoaded((prev) => false);
 
               const moduleId = message.from;
-              setRemoteWindowId(moduleId);
-
-              // Close the listener when the extension is connected
-              if (connectionListener) {
-                connectionListener.close();
-                setConnectionListener(undefined);
-              }
+              setRemoteWindowId((prev) => moduleId);
             },
           );
-
-          setConnectionListener(cl);
+          clRef.current = cl;
         }
       }
     }
@@ -197,15 +195,14 @@ export default function FileViewLoader({
               <Loading />
             </div>
           )}
-          {connectionListener && (
-            <ExtensionLoader
-              key={fileUri}
-              viewId={model.viewId}
-              remoteOrigin={usedExtension.remoteOrigin}
-              moduleId={usedExtension.config.id}
-              moduleVersion={usedExtension.config.version}
-            />
-          )}
+
+          <ExtensionLoader
+            key={fileUri}
+            viewId={model.viewId}
+            remoteOrigin={usedExtension.remoteOrigin}
+            moduleId={usedExtension.config.id}
+            moduleVersion={usedExtension.config.version}
+          />
         </div>
       ) : hasExtension ? (
         <div className="absolute top-0 left-0 h-full w-full">

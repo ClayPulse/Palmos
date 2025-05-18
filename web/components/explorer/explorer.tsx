@@ -145,8 +145,10 @@ export default function Explorer({
     return (
       <div className="bg-content2 relative h-full w-full px-4 py-2">
         {editorContext.editorStates.projectContent?.length === 0 && (
-          <div className="pointer-events-none absolute top-0 left-0 m-0 flex h-full w-full flex-col items-center justify-center pb-16">
-            <p>Empty content. Create a new file to get started.</p>
+          <div className="pointer-events-none absolute top-0 left-0 m-0 flex h-full w-full flex-col items-center justify-center px-2 pb-16">
+            <p className="text-center">
+              Empty content. Create a new file to get started.
+            </p>
           </div>
         )}
         <div className="flex h-full w-full flex-col space-y-2">

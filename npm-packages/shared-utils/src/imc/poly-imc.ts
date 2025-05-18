@@ -83,9 +83,11 @@ export class PolyIMC {
     );
 
     channel.updateReceiverHandlerMap(combinedMap);
+
+    this.channelReceiverHandlerMapMap.set(targetWindowId, handlerMap);
   }
 
-  public async createChannel(
+  public createChannel(
     targetWindow: Window,
     targetWindowId: string,
     receiverHandlerMap?: ReceiverHandlerMap
@@ -111,7 +113,7 @@ export class PolyIMC {
     this.channels.set(targetWindowId, channel);
   }
 
-  public async removeChannel(targetWindowId: string) {
+  public removeChannel(targetWindowId: string) {
     const channel = this.channels.get(targetWindowId);
     if (!channel) {
       throw new Error("Channel not found for window ID " + targetWindowId);
@@ -168,7 +170,7 @@ export class PolyIMC {
           }
 
           // Create a new channel for the incoming connection
-          await this.createChannel(
+          this.createChannel(
             senderWindow,
             targetWindowId,
             this.getCombinedHandlerMap(

@@ -41,6 +41,7 @@
 
 body {
   font-family: sans-serif;
+  padding-top: var(--safe-area-inset-top);
 }
 
 @layer base {

@@ -11,8 +11,9 @@ export default function useExtensionManager() {
     const remoteOrigin = extension.remoteOrigin;
     const id = extension.config.id;
     const version = extension.config.version;
-
     console.log("Registering remote", remoteOrigin, id, version);
+
+    // TODO: Prevent CSS from being injected from the remote
 
     registerRemotes([
       {

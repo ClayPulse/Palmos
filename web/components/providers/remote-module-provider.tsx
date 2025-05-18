@@ -70,13 +70,13 @@ export default function RemoteModuleProvider({
     // TODO: Use mf-manifest.json to get the css file name
     const pattern = /\.css/;
     // CSS from Pulse Editor itself
-    const trustedOrigins = ["http://localhost:3000"];
+    const trustedDevOrigins = ["http://localhost:3000", window.location.origin];
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((node) => {
           if (
             node instanceof HTMLLinkElement &&
-            !trustedOrigins.some((origin) => node.href.startsWith(origin)) &&
+            !trustedDevOrigins.some((origin) => node.href.startsWith(origin)) &&
             pattern.test(node.href)
           ) {
             console.warn("Removing federated CSS before it loads:", node.href);

@@ -2,17 +2,20 @@
 
 android {
   compileOptions {
-      sourceCompatibility JavaVersion.VERSION_17
-      targetCompatibility JavaVersion.VERSION_17
+      sourceCompatibility JavaVersion.VERSION_21
+      targetCompatibility JavaVersion.VERSION_21
   }
 }
 
 apply from: "../capacitor-cordova-android-plugins/cordova.variables.gradle"
 dependencies {
+    implementation project(':capacitor-community-safe-area')
     implementation project(':capacitor-filesystem')
+    implementation project(':capacitor-keyboard')
     implementation project(':capacitor-screen-orientation')
     implementation project(':capacitor-status-bar')
     implementation project(':capawesome-capacitor-file-picker')
+    implementation project(':pulse-editor-capacitor-plugin')
 
 }
 

@@ -1,5 +1,37 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.11
+
+### Patch Changes
+
+- Hotfix bugs
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.11
+
+## 0.1.1-alpha.10
+
+### Patch Changes
+
+- Hotfix react package bug
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.10
+
+## 0.1.1-alpha.9
+
+### Patch Changes
+
+- Hotfix adding missing hooks
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.9
+
+## 0.1.1-alpha.8
+
+### Patch Changes
+
+- 17cda54: Update AI configs
+- Updated dependencies [17cda54]
+  - @pulse-editor/shared-utils@0.1.1-alpha.8
+
 ## 0.1.1-alpha.7
 
 ### Patch Changes

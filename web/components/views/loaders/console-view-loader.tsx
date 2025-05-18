@@ -1,7 +1,7 @@
 import { Extension } from "@/lib/types";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
-import ExtensionLoader from "../../misc/extension-loader";
+import ExtensionLoader from "../../extension/extension-loader";
 import {
   ConnectionListener,
   IMCMessage,
@@ -29,22 +29,56 @@ export default function ConsoleViewLoader({
   );
   const [hasExtension, setHasExtension] = useState(false);
 
-  const [isExtensionWindowReady, setIsExtensionWindowReady] = useState(false);
   const [isExtensionLoaded, setIsExtensionLoaded] = useState(false);
+  const [isExtensionWindowReady, setIsExtensionWindowReady] = useState(false);
 
   const { resolvedTheme } = useTheme();
 
   const { platformApi } = usePlatformApi();
-
-  const [connectionListener, setConnectionListener] = useState<
-    ConnectionListener | undefined
-  >(undefined);
 
   const [remoteWindowId, setRemoteWindowId] = useState<string | undefined>(
     undefined,
   );
 
   const [model, setModel] = useState<ViewModel | undefined>(undefined);
+
+  const clRef = useRef<ConnectionListener | null>(null);
+
+  useEffect(() => {
+    if (remoteWindowId && clRef.current) {
+      clRef.current.close();
+      clRef.current = null;
+    }
+  }, [remoteWindowId]);
+
+  useEffect(() => {
+    const newModel: ViewModel = {
+      viewId: v4(),
+      isFocused: false,
+      extensionConfig: usedExtension?.config,
+    };
+
+    setModel(newModel);
+
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      openedViewModels: [...prev.openedViewModels, newModel],
+    }));
+
+    return () => {
+      // Remove the view model from the editor context
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        openedViewModels: prev.openedViewModels.filter(
+          (view) => view.viewId !== newModel.viewId,
+        ),
+      }));
+      // Reset the extension and IMC
+      if (imcContext?.polyIMC && remoteWindowId) {
+        imcContext?.polyIMC.removeChannel(remoteWindowId);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     function getAndLoadExtension() {
@@ -63,34 +97,18 @@ export default function ConsoleViewLoader({
           imcContext.polyIMC,
           getHandlerMap(),
           (senderWindow: Window, message: IMCMessage) => {
-            console.log("Extension window ready.");
             setIsExtensionWindowReady((prev) => true);
             setIsExtensionLoaded((prev) => false);
 
             const moduleId = message.from;
-            setRemoteWindowId(moduleId);
-
-            // Close the connection listener
-            if (connectionListener) {
-              connectionListener.close();
-              setConnectionListener(undefined);
-            }
+            setRemoteWindowId(() => moduleId);
           },
         );
-
-        setConnectionListener(cl);
+        clRef.current = cl;
       }
     }
 
     if (consoleExt) {
-      // Reset the extension and IMC
-      if (imcContext?.polyIMC && remoteWindowId) {
-        imcContext?.polyIMC.removeChannel(remoteWindowId);
-
-        setIsExtensionWindowReady(false);
-        setIsExtensionLoaded(false);
-        setUsedExtension(undefined);
-      }
       getAndLoadExtension();
     }
   }, [consoleExt]);
@@ -119,37 +137,14 @@ export default function ConsoleViewLoader({
 
   useEffect(() => {
     if (usedExtension && model) {
-      setModel({
-        ...model,
-        extensionConfig: usedExtension.config,
-      });
+      if (model.extensionConfig !== usedExtension.config) {
+        setModel({
+          ...model,
+          extensionConfig: usedExtension.config,
+        });
+      }
     }
   }, [usedExtension, model]);
-
-  useEffect(() => {
-    const newModel: ViewModel = {
-      viewId: v4(),
-      isFocused: false,
-      extensionConfig: usedExtension?.config,
-    };
-
-    setModel(newModel);
-
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      openedViewModels: [...prev.openedViewModels, newModel],
-    }));
-
-    return () => {
-      // Remove the view model from the editor context
-      editorContext?.setEditorStates((prev) => ({
-        ...prev,
-        openedViewModels: prev.openedViewModels.filter(
-          (view) => view.viewId !== newModel.viewId,
-        ),
-      }));
-    };
-  }, []);
 
   function getHandlerMap() {
     const newMap = new Map<
@@ -169,7 +164,6 @@ export default function ConsoleViewLoader({
           message: IMCMessage,
           abortSignal?: AbortSignal,
         ) => {
-          console.log("Extension loaded.");
           setIsExtensionLoaded((prev) => true);
         },
       ],
@@ -207,7 +201,7 @@ export default function ConsoleViewLoader({
               <Loading />
             </div>
           )}
-          {connectionListener && model && (
+          {model && (
             <ExtensionLoader
               key={usedExtension.config.id}
               viewId={model.viewId}

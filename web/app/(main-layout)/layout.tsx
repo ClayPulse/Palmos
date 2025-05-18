@@ -20,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`h-screen w-screen antialiased`}>
+      <body className={`h-[100dvh] w-[100dvw] antialiased`}>
         <CapacitorProvider>
           <WrappedHeroUIProvider>
             <EditorContextProvider>

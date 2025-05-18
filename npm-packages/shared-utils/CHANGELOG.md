@@ -1,5 +1,29 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.11
+
+### Patch Changes
+
+- Hotfix bugs
+
+## 0.1.1-alpha.10
+
+### Patch Changes
+
+- Hotfix react package bug
+
+## 0.1.1-alpha.9
+
+### Patch Changes
+
+- Hotfix adding missing hooks
+
+## 0.1.1-alpha.8
+
+### Patch Changes
+
+- 17cda54: Update AI configs
+
 ## 0.1.1-alpha.7
 
 ### Patch Changes

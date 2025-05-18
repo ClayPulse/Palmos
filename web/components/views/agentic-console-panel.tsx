@@ -144,7 +144,7 @@ export default function AgenticConsolePanel() {
 
   return (
     <ExtensionViewLayout>
-      <div className="bg-content1 flex h-full w-full flex-col pb-3">
+      <div className="bg-content1 flex h-full w-full flex-col">
         <ConsoleNavBar
           consoles={consoles}
           setConsoles={setConsoles}
