@@ -38,17 +38,13 @@ export async function runAgentMethod(
 
   const prompt = await getPrompt(agent, method, args);
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("Prompt: ", prompt);
-  }
+  console.log("Prompt: ", prompt);
 
   const llmResult = await llm.generate(prompt, abortSignal);
 
   const returns = extractReturns(llmResult);
 
-  if (process.env.NODE_ENV === "development") {
-    console.log("Agent result: ", returns);
-  }
+  console.log("Agent result: ", returns);
 
   return returns;
 }
@@ -92,8 +88,6 @@ Finally, you must return a JSON object. The requirements for the JSON object are
 }}
 \`\`\`
 `;
-  
-  console.log("User Prompt Template: ", userPromptTemplate);
 
   const promptTemplate = ChatPromptTemplate.fromMessages([
     ["system", agent.systemPrompt],

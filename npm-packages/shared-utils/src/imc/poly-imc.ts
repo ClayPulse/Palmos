@@ -186,6 +186,10 @@ export class PolyIMC {
 }
 
 export class ConnectionListener {
+  private polyIMC: PolyIMC;
+  private newConnectionReceiverHandlerMap: ReceiverHandlerMap;
+  private onConnection?: (senderWindow: Window, message: IMCMessage) => void;
+
   private listener: InterModuleCommunication;
 
   constructor(
@@ -193,6 +197,10 @@ export class ConnectionListener {
     newConnectionReceiverHandlerMap: ReceiverHandlerMap,
     onConnection?: (senderWindow: Window, message: IMCMessage) => void
   ) {
+    this.polyIMC = polyIMC;
+    this.newConnectionReceiverHandlerMap = newConnectionReceiverHandlerMap;
+    this.onConnection = onConnection;
+
     const listener = new InterModuleCommunication();
     this.listener = listener;
     listener.initThisWindow(window);
@@ -206,29 +214,7 @@ export class ConnectionListener {
             message: IMCMessage,
             abortSignal?: AbortSignal
           ) => {
-            const targetWindowId = message.from;
-
-            if (polyIMC.hasChannel(targetWindowId)) {
-              // Channel already exists for the target window ID,
-              // so we don't need to create a new one.
-              console.log(
-                "Channel already exists for window ID " +
-                  targetWindowId +
-                  ". Re-using the existing channel."
-              );
-              return;
-            }
-
-            // Create a new channel for the incoming connection
-            await polyIMC.createChannel(
-              senderWindow,
-              targetWindowId,
-              newConnectionReceiverHandlerMap
-            );
-
-            if (onConnection) {
-              onConnection(senderWindow, message);
-            }
+            this.handleExtReady(senderWindow, message, abortSignal);
           },
         ],
       ])
@@ -237,5 +223,41 @@ export class ConnectionListener {
 
   public close() {
     this.listener?.close();
+  }
+
+  public updateReceiverHandlerMap(
+    newReceiverHandlerMap: ReceiverHandlerMap
+  ): void {
+    this.newConnectionReceiverHandlerMap = newReceiverHandlerMap;
+  }
+
+  private async handleExtReady(
+    senderWindow: Window,
+    message: IMCMessage,
+    abortSignal?: AbortSignal
+  ) {
+    const targetWindowId = message.from;
+
+    if (this.polyIMC.hasChannel(targetWindowId)) {
+      // Channel already exists for the target window ID,
+      // so we don't need to create a new one.
+      console.log(
+        "Channel already exists for window ID " +
+          targetWindowId +
+          ". Re-using the existing channel."
+      );
+      return;
+    }
+
+    // Create a new channel for the incoming connection
+    await this.polyIMC.createChannel(
+      senderWindow,
+      targetWindowId,
+      this.newConnectionReceiverHandlerMap
+    );
+
+    if (this.onConnection) {
+      this.onConnection(senderWindow, message);
+    }
   }
 }

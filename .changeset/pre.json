@@ -13,6 +13,7 @@
     "@pulse-editor/capacitor-plugin": "0.0.1"
   },
   "changesets": [
+    "angry-llamas-smash",
     "beige-pandas-rhyme",
     "calm-rivers-march",
     "chatty-trains-beam",

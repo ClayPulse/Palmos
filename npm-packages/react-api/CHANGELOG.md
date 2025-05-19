@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.13
+
+### Patch Changes
+
+- Update types
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.13
+
 ## 0.1.1-alpha.12
 
 ### Patch Changes
