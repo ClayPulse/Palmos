@@ -1,5 +1,29 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.16
+
+### Patch Changes
+
+- Fix IMC initialization bug on desktop prod build
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.16
+
+## 0.1.1-alpha.15
+
+### Patch Changes
+
+- Update IMC initialization
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.15
+
+## 0.1.1-alpha.14
+
+### Patch Changes
+
+- Wrap windowId request in event listener
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.14
+
 ## 0.1.1-alpha.13
 
 ### Patch Changes

@@ -1,5 +1,23 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.16
+
+### Patch Changes
+
+- Fix IMC initialization bug on desktop prod build
+
+## 0.1.1-alpha.15
+
+### Patch Changes
+
+- Update IMC initialization
+
+## 0.1.1-alpha.14
+
+### Patch Changes
+
+- Wrap windowId request in event listener
+
 ## 0.1.1-alpha.13
 
 ### Patch Changes

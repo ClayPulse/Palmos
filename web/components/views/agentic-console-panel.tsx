@@ -51,6 +51,30 @@ export default function AgenticConsolePanel() {
     }
   }, [editorContext?.persistSettings?.extensions]);
 
+  useEffect(() => {
+    if (editorContext?.editorStates.isChatViewOpen) {
+      // Add view models to editor states
+      editorContext.setEditorStates((prev) => ({
+        ...prev,
+        openedViewModels: [
+          ...(prev.openedViewModels ?? []),
+          ...viewModels.map((vm) => ({
+            ...vm,
+            isFocused: false,
+          })),
+        ],
+      }));
+    } else {
+      // Remove view models from editor states
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        openedViewModels: prev.openedViewModels?.filter(
+          (vm) => !viewModels.some((v) => v.viewId === vm.viewId),
+        ),
+      }));
+    }
+  }, [viewModels, editorContext?.editorStates.isChatViewOpen]);
+
   return (
     <AnimatePresence>
       <motion.div

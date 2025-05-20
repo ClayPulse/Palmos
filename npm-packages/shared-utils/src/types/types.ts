@@ -1,6 +1,9 @@
 // #region Inter-Module Communication
 /* Inter Module Communication messages */
 export enum IMCMessageTypeEnum {
+  GetWindowId = "get-window-id",
+  ReturnWindowId = "return-window-id",
+
   // Update view file
   WriteViewFile = "write-view-file",
   // Request view file

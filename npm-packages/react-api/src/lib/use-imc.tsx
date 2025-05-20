@@ -25,18 +25,22 @@ export default function useIMC(handlerMap: ReceiverHandlerMap) {
   }, []);
 
   useEffect(() => {
-    if (!isMounted) return;
-    else if (imc !== undefined) return;
+    async function initIMC() {
+      if (!isMounted) return;
+      else if (imc !== undefined) return;
 
-    const newImc = new InterModuleCommunication();
-    newImc.initThisWindow(window);
-    newImc.updateReceiverHandlerMap(handlerMap);
-    newImc.initOtherWindow(targetWindow);
-    setImc(newImc);
+      const newImc = new InterModuleCommunication();
+      newImc.initThisWindow(window);
+      newImc.updateReceiverHandlerMap(handlerMap);
+      await newImc.initOtherWindow(targetWindow);
+      setImc(newImc);
 
-    newImc.sendMessage(IMCMessageTypeEnum.ExtReady).then(() => {
-      setIsReady(true);
-    });
+      newImc.sendMessage(IMCMessageTypeEnum.ExtReady).then(() => {
+        setIsReady(true);
+      });
+    }
+
+    initIMC();
   }, [isMounted, imc]);
 
   return {

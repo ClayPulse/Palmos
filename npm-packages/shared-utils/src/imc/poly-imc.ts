@@ -87,14 +87,14 @@ export class PolyIMC {
     this.channelReceiverHandlerMapMap.set(targetWindowId, handlerMap);
   }
 
-  public createChannel(
+  public async createChannel(
     targetWindow: Window,
     targetWindowId: string,
     receiverHandlerMap?: ReceiverHandlerMap
   ) {
     const channel = new InterModuleCommunication();
     channel.initThisWindow(window, targetWindowId);
-    channel.initOtherWindow(targetWindow);
+    await channel.initOtherWindow(targetWindow);
 
     // If there is a channel specific receiver handler map,
     // combine it with the base receiver handler map.
@@ -170,7 +170,7 @@ export class PolyIMC {
           }
 
           // Create a new channel for the incoming connection
-          this.createChannel(
+          await this.createChannel(
             senderWindow,
             targetWindowId,
             this.getCombinedHandlerMap(

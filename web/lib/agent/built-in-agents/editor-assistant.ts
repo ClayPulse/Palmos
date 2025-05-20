@@ -372,7 +372,6 @@ Relevant extensions:
       },
       prompt: `\
 For this task, you will analyze the result of the command that was run.
-Explain to the user what the command result means and how it relates to their needs.
 You are given the following information about the command result.
 
 Original user message:
@@ -398,9 +397,8 @@ Command result:
           type: "string",
           description:
             "The analysis of the command result and its relevance to the user's needs. \
-Explain in a friendly way to the user what the command result did. \
-Keep your response short and concise but informative in 2-3 sentences unless the user wants a detailed \
-explanation.",
+Acknowledge command result in a friendly way to the user what the command result did. \
+Keep your response short and concise but informative in 2-3 sentences.",
         },
       },
     },

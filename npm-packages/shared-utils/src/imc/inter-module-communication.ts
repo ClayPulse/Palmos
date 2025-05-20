@@ -54,6 +54,14 @@ export class InterModuleCommunication {
       }
 
       const message = event.data;
+      if (process.env.NODE_ENV === "development") {
+        console.log(
+          `Module ${this.thisWindowId} received message from module ${
+            message.from
+          }:\n ${JSON.stringify(message)}`
+        );
+      }
+
       if (otherWindowId && message.from !== otherWindowId) {
         return;
       }
@@ -62,43 +70,55 @@ export class InterModuleCommunication {
     };
     window.addEventListener("message", this.listener);
     console.log("Adding IMC listener in " + this.thisWindowId);
+    // refresh the receiver handler map
+    this.setBaseHandler();
   }
 
   /* Initialize a sender to send message ot the other window. */
-  public initOtherWindow(window: Window) {
-    if (!this.thisWindow || !this.thisWindowId) {
-      throw new Error("You must initialize the current window first.");
-    }
-
-    this.otherWindow = window;
-    // @ts-expect-error viewId is injected by the browser
-    const otherWindowId = window.viewId as string | undefined;
-    if (!otherWindowId) {
-      throw new Error("Other window's ID is not defined.");
-    }
-    this.otherWindowId = otherWindowId;
-
-    const sender = new MessageSender(window, messageTimeout, this.thisWindowId);
-    this.sender = sender;
-
-    if (!this.receiverHandlerMap) {
-      throw new Error("You must initialize the current window first.");
-    }
-
-    // Add an acknowledgement handler in current window's receiver for results of sent messages.
-    // This is to receive the acknowledgement from the other window, so that we know the other
-    // window has received the message and finished processing it.
-    // The current window must be initialized first. i.e. call initThisWindow() before initOtherWindow().
-    this.receiverHandlerMap.set(
-      IMCMessageTypeEnum.Acknowledge,
-      async (senderWindow: Window, message: IMCMessage) => {
-        const pendingMessage = sender.getPendingMessage(message.id);
-        if (pendingMessage) {
-          pendingMessage.resolve(message.payload);
-          sender.removePendingMessage(message.id);
-        }
+  public async initOtherWindow(window: Window) {
+    return new Promise<void>((resolve) => {
+      if (!this.thisWindow || !this.thisWindowId) {
+        throw new Error("You must initialize the current window first.");
       }
-    );
+
+      const onReceiveWindowID = (event: MessageEvent) => {
+        if (!this.thisWindow || !this.thisWindowId) {
+          throw new Error("You must initialize the current window first.");
+        }
+
+        const message = event.data;
+        const otherWindowId = message.windowId;
+        this.otherWindowId = otherWindowId;
+
+        const sender = new MessageSender(
+          window,
+          messageTimeout,
+          this.thisWindowId
+        );
+        this.sender = sender;
+
+        if (!this.receiverHandlerMap) {
+          throw new Error("You must initialize the current window first.");
+        }
+
+        this.setBaseHandler();
+        resolve();
+      };
+
+      // Wait for the other window to send its ID.
+      this.thisWindow.addEventListener("message", onReceiveWindowID, {
+        once: true,
+      });
+
+      this.otherWindow = window;
+      this.otherWindow.postMessage(
+        {
+          type: IMCMessageTypeEnum.GetWindowId,
+          from: this.thisWindowId,
+        },
+        "*"
+      );
+    });
   }
 
   public close() {
@@ -129,16 +149,7 @@ export class InterModuleCommunication {
 
     // Clear all existing handlers except the acknowledgement handler.
     this.receiverHandlerMap?.clear();
-    this.receiverHandlerMap?.set(
-      IMCMessageTypeEnum.Acknowledge,
-      async (senderWindow: Window, message: IMCMessage) => {
-        const pendingMessage = this.sender?.getPendingMessage(message.id);
-        if (pendingMessage) {
-          pendingMessage.resolve(message.payload);
-          this.sender?.removePendingMessage(message.id);
-        }
-      }
-    );
+    this.setBaseHandler();
     receiverHandlerMap.forEach((value, key) => {
       this.receiverHandlerMap?.set(key, value);
     });
@@ -156,5 +167,45 @@ export class InterModuleCommunication {
       throw new Error("Other window ID is not defined.");
     }
     return this.otherWindowId;
+  }
+
+  private setBaseHandler() {
+    // Add an acknowledgement handler in current window's receiver for results of sent messages.
+    // This is to receive the acknowledgement from the other window, so that we know the other
+    // window has received the message and finished processing it.
+    // The current window must be initialized first. i.e. call initThisWindow() before initOtherWindow().
+    this.receiverHandlerMap?.set(
+      IMCMessageTypeEnum.Acknowledge,
+      async (senderWindow: Window, message: IMCMessage) => {
+        const pendingMessage = this.sender?.getPendingMessage(message.id);
+        if (pendingMessage) {
+          pendingMessage.resolve(message.payload);
+          this.sender?.removePendingMessage(message.id);
+        }
+      }
+    );
+
+    // Set get window ID handler in the receiver handler map.
+    this.receiverHandlerMap?.set(
+      IMCMessageTypeEnum.GetWindowId,
+      async (senderWindow: Window, message: IMCMessage) => {
+        console.log(
+          "Received window ID request. Sending window ID to other window: "
+        );
+        const id = this.thisWindowId;
+        if (!id) {
+          throw new Error("This window ID is not defined.");
+        }
+        const msg: IMCMessage = {
+          id: message.id,
+          type: IMCMessageTypeEnum.ReturnWindowId,
+          payload: {
+            windowId: id,
+          },
+          from: id,
+        };
+        senderWindow.postMessage(msg, "*");
+      }
+    );
   }
 }

@@ -12,26 +12,17 @@ export class MessageReceiver {
       controller: AbortController;
     }
   >;
-  private moduleId: string;
+  private windowId: string;
 
-  constructor(listenerMap: ReceiverHandlerMap, moduleId: string) {
+  constructor(listenerMap: ReceiverHandlerMap, windowId: string) {
     this.handlerMap = listenerMap;
     this.pendingTasks = new Map();
-    this.moduleId = moduleId;
+    this.windowId = windowId;
   }
 
   public receiveMessage(senderWindow: Window, message: IMCMessage) {
     // Not handling messages from self
-    if (this.moduleId === message.from) return;
-
-    // Log the message in dev mode
-    if (process.env.NODE_ENV === "development") {
-      console.log(
-        `Module ${this.moduleId} received message from module ${
-          message.from
-        }:\n ${JSON.stringify(message)}`
-      );
-    }
+    if (this.windowId === message.from) return;
 
     // Abort the task if the message type is Abort
     if (message.type === IMCMessageTypeEnum.Abort) {
@@ -74,7 +65,7 @@ export class MessageReceiver {
             id: message.id,
             type: IMCMessageTypeEnum.Error,
             payload: error.message,
-            from: this.moduleId,
+            from: this.windowId,
           };
 
           senderWindow.postMessage(errMsg, "*");
@@ -94,7 +85,7 @@ export class MessageReceiver {
       id,
       type: IMCMessageTypeEnum.Acknowledge,
       payload: payload,
-      from: this.moduleId,
+      from: this.windowId,
     };
     senderWindow.postMessage(message, "*");
   }
