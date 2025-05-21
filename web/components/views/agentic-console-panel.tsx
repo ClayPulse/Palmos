@@ -28,10 +28,17 @@ export default function AgenticConsolePanel() {
   const [selectedConsoleIndex, setSelectedConsoleIndex] = useState<number>(0);
 
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isFirstOpened, setIsFirstOpened] = useState(false);
+
+  useEffect(() => {
+    if (editorContext?.editorStates.isConsolePanelOpen) {
+      setIsFirstOpened(true);
+    }
+  }, [editorContext?.editorStates.isConsolePanelOpen]);
 
   useEffect(() => {
     // Load extensions from editor context
-    if (editorContext?.persistSettings?.extensions) {
+    if (editorContext?.persistSettings?.extensions && isFirstOpened) {
       const foundConsoles = editorContext.persistSettings?.extensions.filter(
         (extension) =>
           extension.config.extensionType === ExtensionTypeEnum.ConsoleView,
@@ -49,10 +56,10 @@ export default function AgenticConsolePanel() {
         })),
       );
     }
-  }, [editorContext?.persistSettings?.extensions]);
+  }, [editorContext?.persistSettings?.extensions, isFirstOpened]);
 
   useEffect(() => {
-    if (editorContext?.editorStates.isChatViewOpen) {
+    if (editorContext?.editorStates.isConsolePanelOpen) {
       // Add view models to editor states
       editorContext.setEditorStates((prev) => ({
         ...prev,
@@ -73,7 +80,7 @@ export default function AgenticConsolePanel() {
         ),
       }));
     }
-  }, [viewModels, editorContext?.editorStates.isChatViewOpen]);
+  }, [viewModels, editorContext?.editorStates.isConsolePanelOpen]);
 
   return (
     <AnimatePresence>
@@ -81,8 +88,12 @@ export default function AgenticConsolePanel() {
         className="hidden h-[60%] w-full shrink-0 pb-0 data-[is-open=true]:block data-[is-open=true]:pb-14"
         // Enter from bottom and exit to bottom
         initial={false}
-        animate={{ y: editorContext?.editorStates.isChatViewOpen ? 0 : "100%" }}
-        data-is-open={editorContext?.editorStates.isChatViewOpen || isAnimating}
+        animate={{
+          y: editorContext?.editorStates.isConsolePanelOpen ? 0 : "100%",
+        }}
+        data-is-open={
+          editorContext?.editorStates.isConsolePanelOpen || isAnimating
+        }
         onAnimationStart={() => {
           setIsAnimating(true);
         }}

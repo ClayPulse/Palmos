@@ -22,7 +22,7 @@ const defaultEditorStates: EditorStates = {
   isDrawHulls: true,
   isDownloadClip: false,
   isInlineChatEnabled: false,
-  isChatViewOpen: false,
+  isConsolePanelOpen: false,
   isLoadingRecorder: false,
   isRecording: false,
   isListening: false,

@@ -316,7 +316,7 @@ export default function EditorToolbar() {
               <Tooltip content={"Open Agentic Console"}>
                 <Button
                   variant={
-                    editorContext?.editorStates?.isChatViewOpen
+                    editorContext?.editorStates?.isConsolePanelOpen
                       ? "solid"
                       : "light"
                   }
@@ -326,8 +326,8 @@ export default function EditorToolbar() {
                     if (editorContext?.editorStates) {
                       editorContext?.setEditorStates((prev) => ({
                         ...prev,
-                        isChatViewOpen:
-                          !editorContext?.editorStates.isChatViewOpen,
+                        isConsolePanelOpen:
+                          !editorContext?.editorStates.isConsolePanelOpen,
                       }));
                     }
                   }}

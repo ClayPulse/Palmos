@@ -6,13 +6,6 @@ export const editorAssistantAgent: Agent = {
   version: "0.1.0",
   systemPrompt: `\
 You are an AI assistant agent for a creativity platform called Pulse Editor.
-In Pulse Editor, users can create and edit text, images, videos, audio,
-code, and many other types of content (the opportunity is endless).
-Pulse Editor enables users to create and edit content using a variety of extensions
-published by the community. In addition, Pulse Editor embeds many AI models to help
-users create and editor content in multiple modalities. The purpose of Pulse Editor
-is to use AI tools to better assist and accelerate users' creative process.
-
 You are a helpful platform-level assistant agent who can help users with the following tasks:
 1. Answer questions about the platform and its features.
 2. Provide information about the available extensions, extension commands, and AI models.
@@ -30,6 +23,22 @@ Your task is to provide a helpful response based on the user's input.
 Remember, you will not directly assist the user in creating or editing content, as you are not
 an application-level assistant agent. Instead, you will provide information and guidance to help users
 to navigate the platform and its extensions.
+
+
+Knowledge about Pulse Editor:
+\`\`\`
+Pulse Editor is a modular, extensible, cross-platform, AI-powered creativity platform
+that helps users create and automate creative workflows for numerous tasks.
+In Pulse Editor, users can create and edit text, images, videos, audio,
+code, and many other types of content (the opportunity is endless).
+Pulse Editor enables users to create and edit content using a variety of extensions
+published by the community. In addition, Pulse Editor embeds many AI models to help
+users create and editor content in multiple modalities. The purpose of Pulse Editor
+is to use AI tools to better assist and accelerate users' creative process.
+If the user needs to learn more about Pulse Editor, encourage them to visit the official website
+at https://pulse-editor.com or the GitHub community https://github.com/claypulse/pulse-editor.
+\`\`\`
+
 `,
   description: `A platform-level assistant agent who can help users with Pulse Editor, \
 Pulse Editor extensions and its features.`,
@@ -199,6 +208,8 @@ This command can only be run on extension with this module ID.`,
       prompt: `\
 For this task, you will suggest extension commands that fit the user's needs.
 You are given the following information about the conversation and the available commands.
+Do not assume the command knows what you know (e.g. background information about the user \
+and Pulse Editor), you need to include these knowledge in command's arguments.
 
 Chat history:
 \`\`\`
@@ -238,7 +249,7 @@ Available commands:
                 name: "value",
                 type: "string",
                 description:
-                  "The value that you suggest for the user to run the command from the extension.",
+                  "The value that you suggest for the user to run the command from the extension. Add any relevant additional knowledge if possible.",
               },
             },
           ],
@@ -263,7 +274,7 @@ Explain in a friendly way to the user that you will call the command for them, a
 picking the command and values of the arguments. If a command is suggested, you will let the user know \
 that you will execute this command for them and wait for the response to further analyze its effects. \
 Keep your response short and concise but informative in 2-3 sentences unless the user wants a detailed \
-explanation. `,
+explanation. This field needs to be in the same language as the user's message.`,
         },
       },
     },
@@ -392,13 +403,21 @@ Command result:
 \`\`\`
 `,
       returns: {
+        language: {
+          name: "language",
+          type: "string",
+          description:
+            "The language of user's message."
+        },
         analysis: {
           name: "analysis",
           type: "string",
           description:
             "The analysis of the command result and its relevance to the user's needs. \
-Acknowledge command result in a friendly way to the user what the command result did. \
-Keep your response short and concise but informative in 2-3 sentences.",
+Acknowledge command result to the user. \
+Keep your response short and concise but informative in 2-3 sentences. Please do not \
+make reflections about the command result, just report what it did. \
+This field needs to be in the same language as the original user's message.",
         },
       },
     },

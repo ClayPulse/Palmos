@@ -11,6 +11,7 @@ import {
 import { getModelLLM } from "../llm/llm";
 import toast from "react-hot-toast";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
+import { JsonOutputParser } from "@langchain/core/output_parsers";
 
 export function getAgentLLMConfig(agent: Agent, methodName: string) {
   const method = agent.availableMethods.find((m) => m.name === methodName);
@@ -41,8 +42,9 @@ export async function runAgentMethod(
   console.log("Prompt: ", prompt);
 
   const llmResult = await llm.generate(prompt, abortSignal);
+  console.log("LLM result: ", llmResult);
 
-  const returns = extractReturns(llmResult);
+  const returns = await extractReturns(llmResult);
 
   console.log("Agent result: ", returns);
 
@@ -79,11 +81,12 @@ async function getPrompt(
   const userPromptTemplate = `\
 ${method.prompt}
 
-Finally, you must return a JSON object. The requirements for the JSON object are as follows:
+Finally, you must return a valid JSON object string. The requirements for the JSON object are as follows,
+you must make sure the JSON string is parsable and valid:
 \`\`\`
 {{
   ${Array.from(Object.entries(method.returns)).map(
-    ([key, variable]) => `${key}: ${getVariablePrompt(variable)}`,
+    ([key, variable]) => `"${key}": ${getVariablePrompt(variable)}`,
   )}
 }}
 \`\`\`
@@ -101,13 +104,11 @@ Finally, you must return a JSON object. The requirements for the JSON object are
   return prompt.toString();
 }
 
-function extractReturns(result: string): Record<string, any> {
-  result = result
-    .replace(/^```(?:json)?/, "")
-    .replace(/```$/, "")
-    .trim();
-  const llmResultJson = JSON.parse(result);
-  return llmResultJson;
+async function extractReturns(result: string): Promise<Record<string, any>> {
+  const parser = new JsonOutputParser();
+  const parsed = await parser.parse(result);
+
+  return parsed;
 }
 
 function getVariablePrompt(variable: TypedVariable) {
@@ -127,7 +128,7 @@ function getVariableTypePrompt(type: TypedVariableType): string {
     const objectType = type as TypedVariableObjectType;
 
     const properties = Object.entries(objectType).map(
-      ([key, value]) => `${key}: ${getVariablePrompt(value)}`,
+      ([key, value]) => `"${key}": ${getVariablePrompt(value)}`,
     );
 
     const typePrompt = `An object with the following properties: 
@@ -139,6 +140,9 @@ function getVariableTypePrompt(type: TypedVariableType): string {
 `;
 
     return typePrompt;
+  }
+  else if (type === "string") { 
+    return "A string value, all quotes must be escaped";
   }
 
   return `A ${type} value`;

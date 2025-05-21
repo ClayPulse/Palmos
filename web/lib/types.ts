@@ -28,7 +28,7 @@ export type EditorStates = {
   isInlineChatEnabled: boolean;
 
   /* Open chat view */
-  isChatViewOpen: boolean;
+  isConsolePanelOpen: boolean;
 
   /* Voice agent */
   isLoadingRecorder: boolean;
