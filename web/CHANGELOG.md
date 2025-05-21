@@ -1,4 +1,4 @@
-# pulse-editor-web
+# @pulse-editor/web
 
 ## 0.1.1-alpha.2
 

@@ -1,5 +1,9 @@
+// #region Inter-Module Communication
 /* Inter Module Communication messages */
 export enum IMCMessageTypeEnum {
+  GetWindowId = "get-window-id",
+  ReturnWindowId = "return-window-id",
+
   // Update view file
   WriteViewFile = "write-view-file",
   // Request view file
@@ -13,23 +17,30 @@ export enum IMCMessageTypeEnum {
   ThemeChange = "theme-change",
 
   /* Agents */
-  // Install agent
-  InstallAgent = "install-agent",
   // Execute agent method
   RunAgentMethod = "run-agent-method",
 
-  /* Tools */
-  InstallAgentTool = "install-agent-tool",
-
   /* Modality tools */
-  OCR = "ocr",
+  UseVAD = "use-vad",
+  UseSTT = "use-stt",
+  UseLLM = "use-llm",
+  UseTTS = "use-tts",
+  UseDiffusion = "use-diffusion",
+  UseOCR = "use-ocr",
+  UseSpeech2Speech = "use-speech2speech",
+
+  /* Extension commands*/
+  RunExtCommand = "run-ext-command",
 
   /* Terminal */
   RequestTerminal = "request-terminal",
 
   /* Extension statuses */
   // Notify Pulse that extension window is available
-  Ready = "ready",
+  ExtReady = "ext-ready",
+  // Notify Pulse that extension is closing
+  ExtClose = "ext-close",
+
   // Notify Pulse that extension has finished loading
   Loaded = "loaded",
   // A message to notify sender that the message
@@ -48,17 +59,15 @@ export type IMCMessage = {
   payload?: any;
 };
 
+export type ReceiverHandler = (
+  senderWindow: Window,
+  message: IMCMessage,
+  abortSignal?: AbortSignal
+) => Promise<any>;
+
 // IMC receiver handler map
-export type ReceiverHandlerMap = Map<
-  IMCMessageTypeEnum,
-  {
-    (
-      senderWindow: Window,
-      message: IMCMessage,
-      abortSignal?: AbortSignal
-    ): Promise<any>;
-  }
->;
+export type ReceiverHandlerMap = Map<IMCMessageTypeEnum, ReceiverHandler>;
+// #endregion
 
 /* File view */
 export type TextFileSelection = {
@@ -67,11 +76,17 @@ export type TextFileSelection = {
   text: string;
 };
 
-export type FileViewModel = {
-  fileContent: string;
-  filePath: string;
-  selections?: TextFileSelection[];
-  isActive: boolean;
+export type ViewModel = {
+  viewId: string;
+  isFocused: boolean;
+  // The file content and path.
+  // Optional, if the view is not a file view.
+  file?: {
+    content: string;
+    path: string;
+    selections?: TextFileSelection[];
+  };
+  extensionConfig?: ExtensionConfig;
 };
 
 /* Fetch API */
@@ -106,9 +121,14 @@ export type ExtensionConfig = {
   fileTypes?: string[];
   preview?: string;
   enabledPlatforms?: Record<string, boolean>;
+
+  // Extension or user installed agents
+  agents?: Agent[];
+  // Exposed commands in the extension
+  commandsInfoList?: ExtensionCommandInfo[];
 };
 
-/* Agent config */
+// #region Agent config
 export type Agent = {
   name: string;
   version: string;
@@ -125,55 +145,92 @@ export type Agent = {
 export type AgentMethod = {
   access: AccessEnum;
   name: string;
-  parameters: Record<string, AgentVariable>;
+  parameters: Record<string, TypedVariable>;
   prompt: string;
-  returns: Record<string, AgentVariable>;
+  returns: Record<string, TypedVariable>;
   // If this config does not exist, use the class's LLMConfig
   LLMConfig?: LLMConfig;
 };
 
-export type AgentVariable = {
-  type: AgentVariableType;
+export type TypedVariable = {
+  type: TypedVariableType;
+  name: string;
   // Describe the variable for LLM to better understand it
   description: string;
-};
-
-export type AgentVariableType =
-  | "string"
-  | "number"
-  | "boolean"
-  | AgentVariableTypeArray;
-
-type AgentVariableTypeArray = {
-  size: number;
-  elementType: AgentVariableType;
+  optional?: boolean;
+  defaultValue?: any;
 };
 
 /**
  * A tool that agent can use during method execution.
  *
- * This is linked to a callback function created by user,
- * tool developer, or extension.
  *
- * The tool may optionally return a value to running
- * agent method.
+ * The tool may optionally return a value to the agent.
  */
 export type AgentTool = {
   access: AccessEnum;
   name: string;
   description: string;
-  parameters: Record<string, AgentVariable>;
-  returns: Record<string, AgentVariable>;
+  parameters: Record<string, TypedVariable>;
+  returns: Record<string, TypedVariable>;
+};
+// #endregion
+
+export type TypedVariableType =
+  | "string"
+  | "number"
+  | "boolean"
+  | TypedVariableObjectType
+  | TypedVariableArrayType;
+
+export type TypedVariableObjectType = {
+  [key: string]: TypedVariable;
 };
 
+export type TypedVariableArrayType = [TypedVariableType];
+
+export function isArrayType(
+  value: TypedVariableType
+): value is TypedVariableArrayType {
+  return Array.isArray(value) && value.length === 1;
+}
+
+export function isObjectType(
+  value: TypedVariableType
+): value is TypedVariableObjectType {
+  return typeof value === "object" && !Array.isArray(value);
+}
+
+export enum AccessEnum {
+  public = "public",
+  private = "private",
+}
+
 /* AI settings */
+export type STTConfig = {
+  provider: string;
+  modelName: string;
+};
+
 export type LLMConfig = {
   provider: string;
   modelName: string;
   temperature: number;
 };
 
-export enum AccessEnum {
-  public = "public",
-  private = "private",
-}
+export type TTSConfig = {
+  provider: string;
+  modelName: string;
+  voice: string;
+};
+
+export type ExtensionCommandInfo = {
+  name: string;
+  description: string;
+  parameters: Record<string, TypedVariable>;
+};
+
+export type ExtensionCommand = {
+  info: ExtensionCommandInfo;
+  handler: (args: any) => Promise<any>;
+};

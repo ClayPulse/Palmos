@@ -1,28 +1,55 @@
 import { Dispatch, RefObject, SetStateAction } from "react";
-import { AIModelConfig } from "./ai-model-config";
-import { Agent, ExtensionConfig, TextFileSelection } from "@pulse-editor/shared-utils";
+import {
+  Agent,
+  ExtensionCommandInfo,
+  ExtensionConfig,
+  PolyIMC,
+  ViewModel,
+} from "@pulse-editor/shared-utils";
+import { BaseSTT } from "./stt/stt";
+import { BaseLLM } from "./llm/llm";
+import { BaseTTS } from "./tts/tts";
 
-// #region Context
+// #region Editor Context
+export type EditorContextType = {
+  editorStates: EditorStates;
+  setEditorStates: Dispatch<SetStateAction<EditorStates>>;
+  persistSettings: PersistentSettings | undefined;
+  setPersistSettings: Dispatch<SetStateAction<PersistentSettings | undefined>>;
+};
+
 export type EditorStates = {
-  // Selection by drawing
+  /* Selection by drawing */
   isDrawing: boolean;
   isDrawHulls: boolean;
   isDownloadClip: boolean;
 
-  // Inline/popover chat
+  /* Inline/popover chat */
   isInlineChatEnabled: boolean;
 
-  // Open chat view
-  isChatViewOpen: boolean;
+  /* Open chat view */
+  isConsolePanelOpen: boolean;
 
-  // Voice agent
+  /* Voice agent */
+  isLoadingRecorder: boolean;
+  // Is the recorder on.
+  // The recorder might be on while the agent is thinking or speaking
   isRecording: boolean;
+  // Is the agent listening to the user input
   isListening: boolean;
+  // Is the agent thinking (processing the user input)
   isThinking: boolean;
+  thinkingText?: string;
+  // Is the agent speaking (reading the output)
   isSpeaking: boolean;
-  isMuted: boolean;
+  // Audio input stream
+  // This is consumed when recording is processed
+  inputAudioStream: ArrayBuffer | undefined;
+  // // Audio output stream
+  // // This is consumed when audio is played
+  // outputAudioStream: ReadableStream<Uint8Array> | undefined;
 
-  // Toolbar
+  /* Toolbar */
   isToolbarOpen: boolean;
 
   project?: string;
@@ -33,10 +60,17 @@ export type EditorStates = {
 
   pressedKeys: string[];
 
-  // Password to access the credentials
+  /* Password to access the credentials */
   password?: string;
 
-  openedViewModels: FileViewModel[];
+  openedViewModels: ViewModel[];
+
+  // Keep track of unique ids of each view
+  // to make sure that the view is not duplicated
+  // and not interfered with each other
+  viewIds: string[];
+
+  aiModels?: AIModels;
 };
 
 export type PersistentSettings = {
@@ -47,10 +81,6 @@ export type PersistentSettings = {
   sttModel?: string;
   llmModel?: string;
   ttsModel?: string;
-
-  sttAPIKey?: string;
-  llmAPIKey?: string;
-  ttsAPIKey?: string;
 
   isUsePassword?: boolean;
   isPasswordSet?: boolean;
@@ -64,66 +94,20 @@ export type PersistentSettings = {
   defaultFileTypeExtensionMap?: { [key: string]: Extension };
   isExtensionDevMode?: boolean;
 
-  installedAgents?: InstalledAgent[];
+  extensionAgents?: ExtensionAgent[];
+  extensionCommands?: PEExtensionCommandInfo[];
+
+  userAgents?: UserAgent[];
 
   apiKeys?: {
     [key: string]: string;
   };
 
-
   mobileHost?: string;
 };
 // #endregion
 
-// #region View Models
-export type FileViewModel = {
-  fileContent: string;
-  filePath: string;
-  selections?: TextFileSelection[];
-  suggestedLines?: LineChange[];
-  isActive: boolean;
-};
-// #endregion
-
-export type CodeCompletionInstruction = {
-  text?: string;
-  audio?: Blob;
-};
-
-export type CodeCompletionResult = {
-  text: {
-    codeCompletion: string;
-    explanation: string;
-  };
-  audio?: Blob;
-};
-
-export type InlineSuggestionResult = {
-  snippets: string[];
-};
-
-export type LineChange = {
-  // Index starts from 1
-  index: number;
-  content: string;
-  status: "added" | "deleted" | "modified";
-};
-
-export type ChatMessage = {
-  from: string;
-  content: string;
-  datetime: string;
-};
-
-export type EditorContextType = {
-  editorStates: EditorStates;
-  setEditorStates: Dispatch<SetStateAction<EditorStates>>;
-  persistSettings: PersistentSettings | undefined;
-  setPersistSettings: Dispatch<SetStateAction<PersistentSettings | undefined>>;
-  aiModelConfig: AIModelConfig;
-};
-
-/* File system */
+// #region Interface
 export type OpenFileDialogConfig = {
   isFolder?: boolean;
   isMultiple?: boolean;
@@ -174,20 +158,30 @@ export type TabItem = {
   icon?: string;
   description: string;
 };
+// #endregion
 
-export type Extension = {
-  config: ExtensionConfig;
-  isEnabled: boolean;
-  remoteOrigin: string;
+// #region AI
+export type AIModels = {
+  // --- Speech-to-Text ---
+  sttModel?: BaseSTT;
+  // --- Language Model ---
+  llmModel?: BaseLLM;
+  // --- Text-to-Speech ---
+  ttsModel?: BaseTTS;
 };
 
-export type InstalledAgent = Agent & {
+export type ExtensionAgent = Agent & {
   author: {
-    type: "user" | "extension";
     // Individual user or the author of a 3rd party extension
     publisher: string;
     // 3rd party extension name
     extension?: string;
+  };
+};
+
+export type UserAgent = Agent & {
+  author: {
+    publisher: string;
   };
 };
 
@@ -198,9 +192,37 @@ export type LLMUsage = {
   totalUsageByAgents: number;
 };
 
+export type ChatMessage = {
+  from: string;
+  content: string;
+  datetime: string;
+};
+// #endregion
+
+// #region Cross platform API
 export enum PlatformEnum {
   Capacitor = "capacitor",
   Electron = "electron",
   VSCode = "vscode",
   Web = "web",
 }
+// #endregion
+
+// #region Extension
+export type Extension = {
+  config: ExtensionConfig;
+  isEnabled: boolean;
+  remoteOrigin: string;
+};
+
+export type PEExtensionCommandInfo = ExtensionCommandInfo & {
+  moduleId: string;
+};
+// #endregion
+
+// #region IMC Context
+export type IMCContextType = {
+  polyIMC: PolyIMC | undefined;
+};
+
+// #endregion

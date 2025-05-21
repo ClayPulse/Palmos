@@ -7,15 +7,28 @@
     "@pulse-editor/react-api": "0.1.1-beta.1",
     "@pulse-editor/shared-utils": "0.1.1-beta.1",
     "pulse-editor-vscode": "0.0.3",
-    "pulse-editor-web": "0.1.1-beta.1"
+    "@pulse-editor/web": "0.1.1-beta.1",
+    "@pulse-editor/desktop": "0.0.1",
+    "@pulse-editor/mobile": "0.0.1",
+    "@pulse-editor/capacitor-plugin": "0.0.1"
   },
   "changesets": [
+    "angry-llamas-smash",
     "beige-pandas-rhyme",
     "calm-rivers-march",
     "chatty-trains-beam",
+    "curvy-places-wash",
     "dirty-swans-rescue",
+    "early-pumas-listen",
+    "hot-symbols-fry",
+    "large-moose-tap",
     "mighty-ghosts-crash",
+    "real-knives-rest",
+    "rude-ducks-design",
+    "sad-tables-join",
     "slick-roses-fix",
-    "tender-jeans-occur"
+    "social-donkeys-cross",
+    "tender-jeans-occur",
+    "wicked-spoons-fry"
   ]
 }

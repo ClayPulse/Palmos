@@ -20,3 +20,5 @@ node_modules
 .keystore
 # act cli secrets for testing github actions locally
 *.secrets
+
+dist/

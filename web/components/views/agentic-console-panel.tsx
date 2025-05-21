@@ -5,35 +5,165 @@ import {
   SetStateAction,
   useContext,
   useEffect,
-  useRef,
   useState,
 } from "react";
-import FileViewLayout from "./layout";
-import { ChatMessage, TabItem, Extension } from "@/lib/types";
-import { Avatar, Button, Divider, Tooltip } from "@heroui/react";
-import { BeatLoader } from "react-spinners";
+import ExtensionViewLayout from "./layout";
+import { TabItem, Extension } from "@/lib/types";
+import { Button, Divider, select, Tooltip } from "@heroui/react";
 import AgentConfigModal from "../modals/agent-config-modal";
 import { EditorContext } from "../providers/editor-context-provider";
 import Tabs from "@/components/misc/tabs";
 import Icon from "../misc/icon";
-import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
-import ConsoleViewLoader from "./loaders/console-view-loader";
+import { ExtensionTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
+import { AnimatePresence, motion } from "framer-motion";
+import { v4 } from "uuid";
+import ViewLoader from "./loaders/view-loader";
+
+export default function AgenticConsolePanel() {
+  const editorContext = useContext(EditorContext);
+
+  const [consoles, setConsoles] = useState<Extension[]>([]);
+  const [viewModels, setViewModels] = useState<ViewModel[]>([]);
+
+  const [selectedConsoleIndex, setSelectedConsoleIndex] = useState<number>(0);
+
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isFirstOpened, setIsFirstOpened] = useState(false);
+
+  useEffect(() => {
+    if (editorContext?.editorStates.isConsolePanelOpen) {
+      setIsFirstOpened(true);
+    }
+  }, [editorContext?.editorStates.isConsolePanelOpen]);
+
+  useEffect(() => {
+    // Load extensions from editor context
+    if (editorContext?.persistSettings?.extensions && isFirstOpened) {
+      const foundConsoles = editorContext.persistSettings?.extensions.filter(
+        (extension) =>
+          extension.config.extensionType === ExtensionTypeEnum.ConsoleView,
+      );
+      console.log(
+        "Found consoles:",
+        foundConsoles.map((ext) => ext.config.displayName),
+      );
+      setConsoles(foundConsoles);
+      setViewModels(
+        foundConsoles.map((ext) => ({
+          viewId: v4(),
+          isFocused: false,
+          extensionConfig: ext.config,
+        })),
+      );
+    }
+  }, [editorContext?.persistSettings?.extensions, isFirstOpened]);
+
+  useEffect(() => {
+    if (editorContext?.editorStates.isConsolePanelOpen) {
+      // Add view models to editor states
+      editorContext.setEditorStates((prev) => ({
+        ...prev,
+        openedViewModels: [
+          ...(prev.openedViewModels ?? []),
+          ...viewModels.map((vm) => ({
+            ...vm,
+            isFocused: false,
+          })),
+        ],
+      }));
+    } else {
+      // Remove view models from editor states
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        openedViewModels: prev.openedViewModels?.filter(
+          (vm) => !viewModels.some((v) => v.viewId === vm.viewId),
+        ),
+      }));
+    }
+  }, [viewModels, editorContext?.editorStates.isConsolePanelOpen]);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="hidden h-[60%] w-full shrink-0 pb-0 data-[is-open=true]:block data-[is-open=true]:pb-14"
+        // Enter from bottom and exit to bottom
+        initial={false}
+        animate={{
+          y: editorContext?.editorStates.isConsolePanelOpen ? 0 : "100%",
+        }}
+        data-is-open={
+          editorContext?.editorStates.isConsolePanelOpen || isAnimating
+        }
+        onAnimationStart={() => {
+          setIsAnimating(true);
+        }}
+        onAnimationComplete={() => {
+          setIsAnimating(false);
+        }}
+      >
+        <ExtensionViewLayout>
+          <div className="bg-content1 flex h-full w-full flex-col">
+            <ConsoleNavBar
+              consoles={consoles}
+              setConsoles={setConsoles}
+              selectedConsoleIndex={selectedConsoleIndex}
+              setSelectedConsoleIndex={setSelectedConsoleIndex}
+            />
+
+            {viewModels.length > 0 && (
+              <ViewLoader
+                viewModel={viewModels[selectedConsoleIndex]}
+                setViewModel={(viewModel: ViewModel) => {
+                  const newViewModels = [...viewModels];
+                  newViewModels[selectedConsoleIndex] = viewModel;
+                  setViewModels(newViewModels);
+                }}
+              />
+            )}
+          </div>
+        </ExtensionViewLayout>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 function ConsoleNavBar({
   consoles,
   setConsoles,
-  selectedConsole,
-  setSelectedConsole,
+  selectedConsoleIndex,
+  setSelectedConsoleIndex,
 }: {
   consoles: Extension[];
   setConsoles: Dispatch<SetStateAction<Extension[]>>;
-  selectedConsole: Extension | undefined;
-  setSelectedConsole: Dispatch<SetStateAction<Extension | undefined>>;
+  selectedConsoleIndex: number;
+  setSelectedConsoleIndex: Dispatch<SetStateAction<number>>;
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
+  const [selectedConsole, setSelectedConsole] = useState<Extension | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    if (consoles.length > 0) {
+      setSelectedConsole(consoles[selectedConsoleIndex]);
+    }
+  }, []);
+
+  // Update index when selected console changes
+  useEffect(() => {
+    if (selectedConsole) {
+      const index = consoles.findIndex(
+        (ext) =>
+          ext.config.displayName === selectedConsole.config.displayName ||
+          ext.config.id === selectedConsole.config.id,
+      );
+      setSelectedConsoleIndex(index);
+    }
+  }, [selectedConsole]);
+
   return (
-    <div className="flex h-10 w-full shrink-0 items-center bg-content2 text-content2-foreground">
+    <div className="bg-content2 text-content2-foreground flex h-10 w-full shrink-0 items-center">
       <Tabs
         tabItems={
           consoles?.map((extension) => {
@@ -81,25 +211,6 @@ function ConsoleNavBar({
         <AgentConfigModal isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
       <div className="flex grow justify-end pr-2">
-        {/* <Tooltip content="Refresh agent instance">
-          <Button
-            isIconOnly
-            variant="light"
-            size="sm"
-            onPress={() => {
-              if (selectedTerminalExt) {
-                chatHistoryMap.current.set(
-                  selectedTerminalExt.config.displayName ??
-                    selectedTerminalExt.config.id,
-                  [],
-                );
-                setCurrentChatHistory([]);
-              }
-            }}
-          >
-            <Icon name="refresh" />
-          </Button>
-        </Tooltip> */}
         <Tooltip content="Close tab">
           <Button
             isIconOnly
@@ -123,225 +234,5 @@ function ConsoleNavBar({
         </Tooltip>
       </div>
     </div>
-  );
-}
-
-export default function AgenticConsolePanel() {
-  const [consoles, setConsoles] = useState<Extension[]>([]);
-  const [selectedConsole, setSelectedConsole] = useState<Extension | undefined>(
-    undefined,
-  );
-
-  // const chatHistoryMap = useRef<Map<string, ChatMessage[]>>(new Map());
-  // const [currentChatHistory, setCurrentChatHistory] = useState<ChatMessage[]>(
-  //   [],
-  // );
-
-  // const [inputValue, setInputValue] = useState<string>("");
-  // const chatListRef = useRef<HTMLDivElement>(null);
-  // const [isThinking, setIsThinking] = useState<boolean>(false);
-
-  const editorContext = useContext(EditorContext);
-
-  useEffect(() => {
-    // Load extensions from editor context
-    if (editorContext?.persistSettings?.extensions) {
-      const foundConsoles = editorContext.persistSettings?.extensions.filter(
-        (extension) =>
-          extension.config.extensionType === ExtensionTypeEnum.ConsoleView,
-      );
-      console.log(
-        "Found consoles:",
-        foundConsoles.map((ext) => ext.config.displayName),
-      );
-      setConsoles(foundConsoles);
-    }
-  }, []);
-
-  // useEffect(() => {
-  //   // Scroll chat list to bottom
-  //   if (chatListRef.current) {
-  //     chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
-  //   }
-
-  //   // Update chat history map
-  //   if (selectedConsole) {
-  //     chatHistoryMap.current.set(selectedConsole.config.id, currentChatHistory);
-  //   }
-  // }, [currentChatHistory]);
-
-  // useEffect(() => {
-  //   if (selectedTerminal) {
-  //     // Get chat history
-  //     if (!chatHistoryMap.current.has(selectedTerminal.config.id)) {
-  //       chatHistoryMap.current.set(selectedTerminal.config.id, []);
-  //     }
-  //     setCurrentChatHistory(
-  //       chatHistoryMap.current.get(selectedTerminal.config.id) || [],
-  //     );
-
-  //     if (
-  //       editorContext?.persistSettings?.llmAPIKey &&
-  //       editorContext?.persistSettings?.llmProvider &&
-  //       editorContext?.persistSettings?.llmModel
-  //     ) {
-  //       const llm = getModelLLM(
-  //         editorContext?.persistSettings.llmAPIKey,
-  //         editorContext?.persistSettings.llmProvider,
-  //         editorContext?.persistSettings.llmModel,
-  //         0.85,
-  //       );
-  //       agentRef.current = new TerminalAgent(llm, selectedTerminal);
-  //     }
-  //   }
-  // }, [selectedTerminal]);
-
-  useEffect(() => {
-    setSelectedConsole(consoles[0] || undefined);
-  }, [consoles]);
-
-  // async function onInputSubmit(content: string) {
-  //   if (!agentRef.current) {
-  //     toast.error("LLM agent is not configured");
-  //   }
-
-  //   const userMessage: ChatMessage = {
-  //     from: "User",
-  //     content: content,
-  //     datetime: new Date().toLocaleDateString(),
-  //   };
-  //   setCurrentChatHistory((prev) => [...prev, userMessage]);
-  //   setInputValue("");
-  //   setIsThinking(true);
-
-  //   // Get all code editor views and their content
-  //   const codeEditorViews = editorContext?.viewManager?.getViewByType(
-  //     ViewTypeEnum.Code,
-  //   );
-  //   const viewDocuments: FileViewModel[] = [];
-  //   codeEditorViews?.forEach((view) => {
-  //     const viewDocument = view.viewDocument;
-  //     if (viewDocument) {
-  //       viewDocuments.push(viewDocument);
-  //     }
-  //   });
-
-  //   const viewContent = viewDocuments
-  //     .map((view, index) => `Code file ${index}:\n${view.fileContent}`)
-  //     .join("\n\n");
-
-  //   // Try to generate agent completion
-  //   try {
-  //     const res = await agentRef.current?.generateAgentCompletion(
-  //       userMessage,
-  //       viewContent,
-  //     );
-
-  //     const agentMessage: ChatMessage = {
-  //       from: selectedTerminal?.name || "Agent",
-  //       content: res || "No response",
-  //       datetime: new Date().toLocaleDateString(),
-  //     };
-
-  //     setCurrentChatHistory((prev) => [...prev, agentMessage]);
-  //   } catch (e) {
-  //     toast.error("Error in generating agent completion. Please try again.");
-  //   }
-  //   setIsThinking(false);
-  // }
-
-  // function MessageBlock({ message }: { message: ChatMessage }) {
-  //   return (
-  //     <div className="flex w-full space-x-2 text-base">
-  //       <div className="pt-0.5">
-  //         <Avatar />
-  //       </div>
-  //       <div className="flex w-full min-w-0 grow flex-col space-y-1.5">
-  //         <div className="flex h-4 space-x-3">
-  //           <p className="font-bold">
-  //             {message.from === "User" ? "You" : message.from}
-  //           </p>
-  //           <p className="opacity-60">{message.datetime}</p>
-  //         </div>
-  //         <div className="w-full">
-  //           <p className="w-full whitespace-pre-wrap break-words">
-  //             {message.content}
-  //           </p>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  return (
-    <FileViewLayout>
-      <div className="flex h-full w-full flex-col bg-content1 pb-3">
-        <ConsoleNavBar
-          consoles={consoles}
-          setConsoles={setConsoles}
-          selectedConsole={selectedConsole}
-          setSelectedConsole={setSelectedConsole}
-        />
-
-        <ConsoleViewLoader consoleExt={selectedConsole} />
-
-        {/* <div
-          ref={chatListRef}
-          className="min-h-0 w-full grow space-y-2 overflow-y-auto px-4 py-1"
-        >
-          {currentChatHistory.map((message, index) => (
-            <MessageBlock key={index} message={message} />
-          ))}
-          {isThinking && (
-            <div className="flex w-full justify-center">
-              <BeatLoader className="[&>span]:bg-content1-foreground!" />
-            </div>
-          )}
-        </div> */}
-        {/* 
-        <Input
-          className="px-2"
-          placeholder="Type a message"
-          classNames={{
-            inputWrapper: ["data-[hover=true]:bg-content2", "pl-4"],
-            input: ["text-base"],
-          }}
-          endContent={
-            <div className="flex h-full items-center">
-              <Button isIconOnly variant="light" size="sm">
-                <Icon variant="outlined" name="insert_link" />
-              </Button>
-              <Button isIconOnly variant="light" size="sm">
-                <Icon variant="outlined" name="insert_photo" />
-              </Button>
-              <Button isIconOnly variant="light" size="sm">
-                <Icon variant="outlined" name="insert_drive_file" />
-              </Button>
-              <div className="h-full px-1 py-2">
-                <Divider orientation="vertical" />
-              </div>
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                onPress={() => {
-                  onInputSubmit(inputValue);
-                }}
-              >
-                <Icon variant="round" name="send" />
-              </Button>
-            </div>
-          }
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              onInputSubmit(inputValue);
-            }
-          }}
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-        />
-        */}
-      </div>
-    </FileViewLayout>
   );
 }

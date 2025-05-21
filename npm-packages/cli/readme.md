@@ -1,6 +1,5 @@
 # Pulse CLI
 ## Install
-
 ```bash
 $ npm install --global @pulse-editor/cli
 ```
@@ -40,4 +39,9 @@ $ npm install --global @pulse-editor/cli
   Examples
     pulse help publish
 
+```
+
+## Development
+```
+npm run dev
 ```

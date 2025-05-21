@@ -26,6 +26,7 @@ function MenuPanel({ children }: { children?: React.ReactNode }) {
           }}
         >
           {children}
+          
         </motion.div>
       ) : (
         <motion.div
