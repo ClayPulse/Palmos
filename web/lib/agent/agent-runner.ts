@@ -142,7 +142,7 @@ function getVariableTypePrompt(type: TypedVariableType): string {
     return typePrompt;
   }
   else if (type === "string") { 
-    return "A string value, all quotes must be escaped";
+    return "A string value.";
   }
 
   return `A ${type} value`;

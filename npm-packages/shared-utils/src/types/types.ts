@@ -134,9 +134,9 @@ export type Agent = {
   version: string;
   systemPrompt: string;
   availableMethods: AgentMethod[];
-  LLMConfig: LLMConfig;
   description: string;
   tools?: AgentTool[];
+  LLMConfig?: LLMConfig;
 };
 
 /**
@@ -180,6 +180,7 @@ export type TypedVariableType =
   | "string"
   | "number"
   | "boolean"
+  | "any"
   | TypedVariableObjectType
   | TypedVariableArrayType;
 

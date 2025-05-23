@@ -7,6 +7,8 @@ import {
 import { AbstractPlatformAPI } from "../abstract-platform-api";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
+import ignore from "ignore";
+import path from "path";
 
 export class CapacitorAPI extends AbstractPlatformAPI {
   constructor() {
@@ -75,6 +77,7 @@ export class CapacitorAPI extends AbstractPlatformAPI {
   async listPathContent(
     uri: string,
     options: ListPathOptions,
+    baseUri?: string,
   ): Promise<FileSystemObject[]> {
     // Try to get permissions to read the directory
     const permission = await Filesystem.requestPermissions();
@@ -89,12 +92,28 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     });
 
     const promise = files.files
+      // Filter by types
       .filter(
         (file) =>
           (options?.include === "folders" && file.type === "directory") ||
           (options?.include === "files" && file.type === "file") ||
           options?.include === "all",
       )
+      // Filter by gitignore
+      .filter((file) => {
+        if (!options?.gitignore) {
+          return true;
+        }
+        const ig = ignore().add(options.gitignore);
+
+        const filePath = baseUri
+          ? path.relative(baseUri, path.join(uri, file.name))
+          : file.name;
+
+        const isIgnored = ig.ignores(filePath);
+
+        return !isIgnored;
+      })
       .map(async (file) => {
         const absoluteUri = uri + "/" + file.name;
         if (file.type === "directory") {
@@ -102,7 +121,7 @@ export class CapacitorAPI extends AbstractPlatformAPI {
             name: file.name,
             isFolder: true,
             subDirItems: options?.isRecursive
-              ? await this.listPathContent(absoluteUri, options)
+              ? await this.listPathContent(absoluteUri, options, baseUri ?? uri)
               : [],
             uri: absoluteUri,
           };

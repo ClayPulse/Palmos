@@ -1,7 +1,6 @@
 import {
   FileSystemObject,
   ListPathOptions,
-  OpenFileDialogConfig,
   PersistentSettings,
   ProjectInfo,
 } from "@/lib/types";

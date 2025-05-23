@@ -28,6 +28,14 @@ export const llmProviderOptions: {
         model: "gpt-4o-mini",
         isSupported: true,
       },
+      {
+        model: "gpt-4.1-mini",
+        isSupported: true,
+      },
+      {
+        model: "gpt-4.1",
+        isSupported: true,
+      },
     ],
   },
   anthropic: {

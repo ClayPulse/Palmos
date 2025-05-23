@@ -17,9 +17,13 @@ import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assista
 import { getAgentLLMConfig, runAgentMethod } from "@/lib/agent/agent-runner";
 import useExtensionCommands from "@/lib/hooks/use-extension-commands";
 import useTTS from "@/lib/hooks/use-tts";
+import { usePlatformApi } from "@/lib/hooks/use-platform-api";
+import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
+import { useViewManager } from "@/lib/hooks/use-view-manager";
 
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
+  const { platformApi } = usePlatformApi();
 
   const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
@@ -36,6 +40,8 @@ export default function EditorToolbar() {
   const [analysisAudio, setAnalysisAudio] = useState<Blob | undefined>(
     undefined,
   );
+
+  const { activeViewModel } = useViewManager();
 
   // When speech2speech returns assistant result, we let the assistant agent to analyze its effects
   useEffect(() => {
@@ -157,7 +163,7 @@ export default function EditorToolbar() {
     }
   }
 
-  async function handleMic() {
+  async function handleMicFinished() {
     if (!editorContext) {
       return;
     }
@@ -191,6 +197,33 @@ export default function EditorToolbar() {
       const methodName = "useExtensionCommands";
 
       runSpeech2Speech(async (inputText: string) => {
+        const currentPath =
+          editorContext.persistSettings?.projectHomePath &&
+          editorContext.editorStates.project
+            ? editorContext.persistSettings?.projectHomePath +
+              "/" +
+              editorContext.editorStates.project
+            : undefined;
+
+        const projectDirTree = [];
+        if (currentPath) {
+          const gitIgnorePath = `${currentPath}/.gitignore`;
+          const gitIgnoreLines: string[] = [];
+          if (await platformApi?.hasPath(gitIgnorePath)) {
+            const gitIgnoreFile = await platformApi?.readFile(gitIgnorePath);
+            const gitIgnoreContent = await gitIgnoreFile?.text();
+            const lines = gitIgnoreContent?.split("\n") ?? [];
+            gitIgnoreLines.push(...lines.filter((line) => line.trim() !== ""));
+          }
+          const tree =
+            (await platformApi?.listPathContent(currentPath, {
+              include: "all",
+              gitignore: gitIgnoreLines,
+              isRecursive: true,
+            })) ?? [];
+          projectDirTree.push(...tree);
+        }
+
         setUserVoiceMessage(inputText);
         // Pipe the LLM result to Speech2Speech
         // const stream = await llm.generateStream(inputText);
@@ -222,8 +255,33 @@ export default function EditorToolbar() {
                 return viewInfo;
               },
             ),
-            commands: editorContext.persistSettings?.extensionCommands?.map(
-              (command) => ({
+            commands: editorContext.persistSettings?.extensionCommands
+              ?.filter((command) => {
+                // Find the extension that has this command
+                const ext = editorContext.persistSettings?.extensions?.find(
+                  (ext) => ext.config.id === command.moduleId,
+                );
+
+                if (!ext) {
+                  return false;
+                }
+
+                // Filter by active view
+                if (activeViewModel?.extensionConfig?.id === ext.config.id) {
+                  return true;
+                }
+                // Else, filter by extension type -- no need to remove console view command
+                // if the console panel is open
+                else if (
+                  editorContext.editorStates.isConsolePanelOpen &&
+                  ext.config.extensionType === ExtensionTypeEnum.ConsoleView
+                ) {
+                  return true;
+                }
+
+                return false;
+              })
+              .map((command) => ({
                 cmd: command.name,
                 parameters: Object.entries(command.parameters).map(
                   ([key, value]) => ({
@@ -234,8 +292,8 @@ export default function EditorToolbar() {
                 ),
                 description: command.description,
                 moduleId: command.moduleId,
-              }),
-            ),
+              })),
+            projectDirTree: projectDirTree,
           },
         );
 
@@ -266,7 +324,7 @@ export default function EditorToolbar() {
   return (
     <div
       className={
-        "fixed bottom-0 left-1/2 z-10 flex w-fit -translate-x-1/2 flex-col items-center justify-center space-y-0.5 pb-1"
+        "fixed bottom-0 left-1/2 z-30 flex w-fit -translate-x-1/2 flex-col items-center justify-center space-y-0.5 pb-1"
       }
     >
       <AnimatePresence>
@@ -341,7 +399,7 @@ export default function EditorToolbar() {
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
-                    handleMic();
+                    handleMicFinished();
                   }}
                   variant={
                     editorContext?.editorStates?.isRecording ? "solid" : "light"

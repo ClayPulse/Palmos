@@ -150,7 +150,8 @@ export type ContextMenuState = {
 
 export type ListPathOptions = {
   include: "folders" | "files" | "all";
-  isRecursive: boolean;
+  isRecursive?: boolean;
+  gitignore?: string[];
 };
 
 export type TabItem = {
