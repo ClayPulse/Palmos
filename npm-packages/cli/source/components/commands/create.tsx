@@ -61,7 +61,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				const packageJson = JSON.parse(
 					fs.readFileSync(packageJsonPath, 'utf8'),
 				);
-				packageJson.name = name;
+				packageJson.name = name.replaceAll('-', '_');
 
 				// Write the modified package.json back to the file
 				fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
