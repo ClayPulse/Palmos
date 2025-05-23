@@ -1,9 +1,9 @@
 import {Result} from 'meow';
-import React, {useEffect, useState} from 'react';
+import React, {ReactNode, useEffect, useState} from 'react';
 import {Flags} from '../../lib/cli-flags.js';
 import {Box, Text} from 'ink';
 import Spinner from 'ink-spinner';
-import {$} from 'execa';
+import {$, execa} from 'execa';
 import SelectInput from 'ink-select-input';
 import {Item} from '../../lib/types.js';
 import {UncontrolledTextInput} from 'ink-text-input';
@@ -14,11 +14,9 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 	const [framework, setFramework] = useState<string | undefined>(undefined);
 	const [projectName, setProjectName] = useState<string | undefined>(undefined);
 
-	const [isCreated, setIsCreated] = useState(false);
 	const [isFrameworkSelected, setIsFrameworkSelected] = useState(false);
 
-	const [isPathValid, setIsPathValid] = useState(true);
-	const [isCloneFailed, setIsCloneFailed] = useState(false);
+	const [message, setMessage] = useState<ReactNode>();
 
 	const frameworkItems: Item<string>[] = [
 		{
@@ -48,15 +46,34 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 		async function createFromTemplate(name: string) {
 			if (framework === 'react') {
 				// Clone the template repository
+				setMessage(
+					<Box>
+						<Spinner type="dots" />
+						<Text>
+							{' '}
+							Creating a new Pulse Editor app using React template...
+						</Text>
+					</Box>,
+				);
 				try {
 					await $`git clone https://github.com/ClayPulse/pulse-editor-extension-template.git ${name}`;
-					setIsCreated(true);
 				} catch (error) {
-					setIsCloneFailed(true);
+					setMessage(
+						<Text color="redBright">
+							❌ Failed to clone the template. Please check your internet
+							connection and try again.
+						</Text>,
+					);
 					return;
 				}
 
 				// Modify the package.json file to update the name
+				setMessage(
+					<Box>
+						<Spinner type="dots" />
+						<Text> Initializing project...</Text>
+					</Box>,
+				);
 				const packageJsonPath = path.join(process.cwd(), name, 'package.json');
 				const packageJson = JSON.parse(
 					fs.readFileSync(packageJsonPath, 'utf8'),
@@ -65,6 +82,30 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 
 				// Write the modified package.json back to the file
 				fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+				setMessage(
+					<Box>
+						<Spinner type="dots" />
+						<Text> Installing dependencies...</Text>
+					</Box>,
+				);
+				// Run `npm i`
+				try {
+					await execa(`npm install`, {
+						cwd: path.join(process.cwd(), name),
+					});
+				} catch (error) {
+					setMessage(
+						<Text color="redBright">
+							❌ Failed to install dependencies. Please check your internet
+							connection and try again.
+						</Text>,
+					);
+					return;
+				}
+				setMessage(
+					<Text>🚀 Pulse Editor React app project created successfully!</Text>,
+				);
 			}
 		}
 
@@ -72,7 +113,11 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			// Check if the project already exists
 			const projectPath = path.join(process.cwd(), projectName);
 			if (fs.existsSync(projectPath)) {
-				setIsPathValid(false);
+				setMessage(
+					<Text color="redBright">
+						❌ A project with same name already exists in current path.
+					</Text>,
+				);
 				return;
 			}
 			createFromTemplate(projectName);
@@ -116,31 +161,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 
 					{projectName && (
 						<>
-							{framework === 'react' &&
-								(!isPathValid ? (
-									<Text color="redBright">
-										❌ A project with same name already exists in current path.
-									</Text>
-								) : isCloneFailed ? (
-									<Text color="redBright">
-										❌ Failed to clone the template. Please check your internet
-										connection and try again.
-									</Text>
-								) : isCreated ? (
-									<Text>
-										🚀 Pulse Editor React app project created successfully!
-									</Text>
-								) : (
-									<>
-										<Box>
-											<Spinner type="dots" />
-											<Text>
-												{' '}
-												Creating a new Pulse Editor app using React template...
-											</Text>
-										</Box>
-									</>
-								))}
+							{framework === 'react' && <>{message}</>}
 							{framework !== 'react' && (
 								<Text>
 									🚧 Currently not available. We'd like to invite you to work on

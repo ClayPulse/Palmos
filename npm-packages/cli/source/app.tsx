@@ -33,13 +33,15 @@ export default function App({cli}: {cli: Result<Flags>}) {
 			) : command === 'create' ? (
 				<Create cli={cli} />
 			) : (
-				<>
-					<Text color={'redBright'}>Invalid command: {command}</Text>
-					<Text>
-						Run <Text color={'blueBright'}>pulse help</Text> to see the list of
-						available commands.
-					</Text>
-				</>
+				command !== undefined && (
+					<>
+						<Text color={'redBright'}>Invalid command: {command}</Text>
+						<Text>
+							Run <Text color={'blueBright'}>pulse help</Text> to see the list
+							of available commands.
+						</Text>
+					</>
+				)
 			)}
 		</>
 	);
