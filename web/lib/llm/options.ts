@@ -3,12 +3,20 @@ export type LLMProviderOption = {
   isSupported: boolean;
   models: {
     model: string;
+    // TODO: do not enforce supported models in the future
+    // and allow users to enter any model from the provider.
+    // Available models should be displayed in a dropdown
+    // as suggestions.
     isSupported: boolean;
   }[];
 };
 
-export const llmProviderOptions: LLMProviderOption[] = [
-  {
+type ProviderName = "openai" | "anthropic" | "togetherai" | "local";
+
+export const llmProviderOptions: {
+  [key in ProviderName]: LLMProviderOption;
+} = {
+  openai: {
     provider: "openai",
     isSupported: true,
     models: [
@@ -20,9 +28,17 @@ export const llmProviderOptions: LLMProviderOption[] = [
         model: "gpt-4o-mini",
         isSupported: true,
       },
+      {
+        model: "gpt-4.1-mini",
+        isSupported: true,
+      },
+      {
+        model: "gpt-4.1",
+        isSupported: true,
+      },
     ],
   },
-  {
+  anthropic: {
     provider: "anthropic",
     isSupported: true,
     models: [
@@ -36,7 +52,7 @@ export const llmProviderOptions: LLMProviderOption[] = [
       },
     ],
   },
-  {
+  togetherai: {
     provider: "togetherai",
     isSupported: true,
     models: [
@@ -58,7 +74,7 @@ export const llmProviderOptions: LLMProviderOption[] = [
       },
     ],
   },
-  {
+  local: {
     provider: "local",
     isSupported: true,
     models: [
@@ -68,4 +84,4 @@ export const llmProviderOptions: LLMProviderOption[] = [
       },
     ],
   },
-];
+};

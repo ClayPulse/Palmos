@@ -14,17 +14,24 @@ import { colors } from "@heroui/react";
 export default function VoiceIndicator() {
   const editorContext = useContext(EditorContext);
 
+  const isShowingIndicator =
+    editorContext?.editorStates?.isRecording ||
+    editorContext?.editorStates?.isListening ||
+    editorContext?.editorStates?.isThinking ||
+    editorContext?.editorStates?.isSpeaking ||
+    editorContext?.editorStates?.isLoadingRecorder;
+
   return (
     <AnimatePresence>
-      {editorContext?.editorStates?.isRecording && (
+      {isShowingIndicator && (
         <motion.div
           initial={{ y: -56 }}
           animate={{ y: 48 }}
           exit={{ y: -56 }}
           transition={{ duration: 0.1 }}
-          className="absolute flex h-full w-full items-center justify-center"
+          className="pointer-events-none absolute flex h-full w-full items-center justify-center"
         >
-          <div className="flex h-10 w-40 items-center rounded-full bg-content2 px-4">
+          <div className="bg-content2 flex h-10 min-w-40 items-center rounded-full px-4">
             <div className="flex w-12 items-center justify-center">
               {editorContext?.editorStates?.isListening ? (
                 <BounceLoader color={colors.red["300"]} size={24} />
@@ -32,21 +39,25 @@ export default function VoiceIndicator() {
                 <PulseLoader color={colors.blue["300"]} size={8} />
               ) : editorContext?.editorStates?.isSpeaking ? (
                 <PuffLoader color={colors.green["300"]} size={24} />
+              ) : editorContext?.editorStates?.isLoadingRecorder ? (
+                <PulseLoader color={colors.black} size={8} />
               ) : (
                 <ClockLoader
-                  className="shadow-[0px_0px_0px_2px_inset]! shadow-content2-foreground! [&>span]:bg-content2-foreground!"
+                  className="shadow-content2-foreground! [&>span]:bg-content2-foreground! shadow-[0px_0px_0px_2px_inset]!"
                   size={24}
                 />
               )}
             </div>
-            <p className="w-full text-center text-xl text-content2-foreground">
+            <p className="text-content2-foreground w-full text-center text-xl">
               {editorContext?.editorStates?.isListening
                 ? "Listening"
                 : editorContext?.editorStates?.isThinking
-                  ? "Thinking"
+                  ? (editorContext.editorStates.thinkingText ?? "Thinking")
                   : editorContext?.editorStates.isSpeaking
                     ? "Speaking"
-                    : "Waiting"}
+                    : editorContext.editorStates.isLoadingRecorder
+                      ? "Loading"
+                      : "Waiting"}
             </p>
           </div>
         </motion.div>

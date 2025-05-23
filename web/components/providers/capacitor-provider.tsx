@@ -31,5 +31,5 @@ export default function CapacitorProvider({
       ScreenOrientation.addListener("screenOrientationChange", setStatusBar);
     }
   }, []);
-  return children;
+  return <div className="safe-area-padding h-full w-full">{children}</div>;
 }

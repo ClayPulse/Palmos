@@ -184,7 +184,11 @@ export function useMicVAD(options: Partial<ReactRealTimeVADOptions>) {
   };
   const stop = () => {
     if (vad) {
-      vad.destroy();
+      try {
+        vad.destroy();
+      } catch (e) {
+        console.log("vad might have already been destroyed", e);
+      }
       setVAD(null);
     }
   };

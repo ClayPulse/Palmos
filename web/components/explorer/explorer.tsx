@@ -1,6 +1,6 @@
 "use client";
 
-import { TreeViewGroupRef, FileViewModel } from "@/lib/types";
+import { TreeViewGroupRef } from "@/lib/types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/types";
@@ -26,7 +26,7 @@ export default function Explorer({
   const { platformApi } = usePlatformApi();
   const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
     useState(false);
-  const { openFileView } = useViewManager();
+  const { openFileInView } = useViewManager();
 
   const rootGroupRef = useRef<TreeViewGroupRef | null>(null);
 
@@ -58,7 +58,7 @@ export default function Explorer({
 
   function viewFile(uri: string) {
     platformApi?.readFile(uri).then((file) => {
-      openFileView(file).then(() => {
+      openFileInView(file).then(() => {
         if (platform === PlatformEnum.Capacitor) {
           setIsMenuOpen(false);
         }
@@ -145,8 +145,10 @@ export default function Explorer({
     return (
       <div className="bg-content2 relative h-full w-full px-4 py-2">
         {editorContext.editorStates.projectContent?.length === 0 && (
-          <div className="pointer-events-none absolute top-0 left-0 m-0 flex h-full w-full flex-col items-center justify-center pb-16">
-            <p>Empty content. Create a new file to get started.</p>
+          <div className="pointer-events-none absolute top-0 left-0 m-0 flex h-full w-full flex-col items-center justify-center px-2 pb-16">
+            <p className="text-center">
+              Empty content. Create a new file to get started.
+            </p>
           </div>
         )}
         <div className="flex h-full w-full flex-col space-y-2">

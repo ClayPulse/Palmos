@@ -5,6 +5,7 @@ import { fileURLToPath } from "url";
 
 import fs from "fs";
 import { createTerminalServer } from "./lib/node-pty-server.js";
+import ignore from "ignore";
 
 // Change path to "Pulse Editor"
 app.setName("Pulse Editor");
@@ -27,6 +28,12 @@ const appServe = serve({
   directory: path.join(process.resourcesPath, "next"),
 });
 
+serve({
+  directory: path.join(process.resourcesPath, "next"),
+  file: "extension",
+  scheme: "extension",
+});
+
 function createWindow() {
   const win = new BrowserWindow({
     width: 960,
@@ -38,10 +45,7 @@ function createWindow() {
       color: "#00000000",
       symbolColor: "#74b1be",
     },
-    icon: path.join(
-      __dirname,
-      "../shared-assets/icons/electron/pulse_editor"
-    ),
+    icon: path.join(__dirname, "../shared-assets/icons/electron/pulse_editor"),
   });
 
   win.menuBarVisible = false;
@@ -115,16 +119,32 @@ async function handleListProjects(event, uri) {
   return folders;
 }
 
-async function listPathContent(uri, options) {
+async function listPathContent(uri, options, baseUri = undefined) {
   const files = await fs.promises.readdir(uri, { withFileTypes: true });
 
   const promise = files
+    // Filter by file type
     .filter(
       (file) =>
         (options?.include === "folders" && file.isDirectory()) ||
         (options?.include === "files" && file.isFile()) ||
         options?.include === "all"
     )
+    // Filter by gitignore
+    .filter((file) => {
+      if (!options?.gitignore) {
+        return true;
+      }
+      const ig = ignore().add(options.gitignore);
+
+      const filePath = baseUri
+        ? path.relative(baseUri, path.join(uri, file.name))
+        : file.name;
+
+      const isIgnored = ig.ignores(filePath);
+
+      return !isIgnored;
+    })
     .map(async (file) => {
       const name = file.name;
       const absoluteUri = path.join(uri, name);
@@ -133,7 +153,7 @@ async function listPathContent(uri, options) {
           name: name,
           isFolder: true,
           subDirItems: options.isRecursive
-            ? await listPathContent(absoluteUri, options)
+            ? await listPathContent(absoluteUri, options, baseUri ?? uri)
             : [],
           uri: absoluteUri.replace(/\\/g, "/"),
         };

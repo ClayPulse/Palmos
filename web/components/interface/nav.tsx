@@ -57,7 +57,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
 
   return (
-    <div className="grid grid-rows-[max-content_auto] h-screen w-full flex-col overflow-x-hidden">
+    <div className="grid grid-rows-[max-content_auto] h-full w-full flex-col overflow-x-hidden">
       <PasswordScreen
         isOpen={isPasswordScreenOpen}
         setIsOpen={setIsPasswordScreenOpen}

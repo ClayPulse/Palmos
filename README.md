@@ -97,9 +97,9 @@ sudo apt install -y make python build-essential
 Then you can rebuild native dependencies in `desktop/` using.
 ```
 # For Windows
-./node_modules/.bin/electron-rebuild.ps1 -m desktop -v electron_version
+./node_modules/.bin/electron-rebuild.ps1 -m desktop -v (electron_version)
 # For Linux
-./node_modules/.bin/electron-rebuild -m desktop -v electron_version
+./node_modules/.bin/electron-rebuild -m desktop -v (electron_version)
 ```
 For example, Electron may warn you need NODE_MODULE_VERSION xxx. If you have electron@35.0.2 installed (check desktop/package.json), you can run:
 ```

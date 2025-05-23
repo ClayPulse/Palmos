@@ -9,7 +9,15 @@ const config: CapacitorConfig = {
       signingType: "apksigner",
     },
     path: "./android",
-  }, 
+  },
+  plugins: {
+    Keyboard: {
+      resizeOnFullScreen: true,
+    },
+    SafeArea: {
+      enabled: true,
+    },
+  },
 };
 
 export default config;

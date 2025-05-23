@@ -7,22 +7,29 @@ import {
 import { AbstractPlatformAPI } from "../abstract-platform-api";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
+import ignore from "ignore";
+import path from "path";
 
 export class CapacitorAPI extends AbstractPlatformAPI {
   constructor() {
     super();
 
-    // If "projects" directory does not exist, create it
+    this.initCapacitorPlatformAPI();
+  }
 
-    Filesystem.readdir({
-      path: "/projects",
-      directory: Directory.Data,
-    }).catch((e) => {
+  private async initCapacitorPlatformAPI() {
+    // If "projects" directory does not exist, create it
+    try {
+      await Filesystem.readdir({
+        path: "/projects",
+        directory: Directory.ExternalStorage,
+      });
+    } catch (e) {
       Filesystem.mkdir({
         path: "/projects",
-        directory: Directory.Data,
+        directory: Directory.ExternalStorage,
       });
-    });
+    }
   }
 
   /* This is not implemented on Android because files not written by this app cannot be read. */
@@ -54,10 +61,8 @@ export class CapacitorAPI extends AbstractPlatformAPI {
   }
 
   async listProjects(projectHomePath: string): Promise<ProjectInfo[]> {
-    const files = await Filesystem.readdir({
-      path: projectHomePath,
-      directory: Directory.Data,
-    });
+    const pathDir = this.getStoragePathAndDir(projectHomePath);
+    const files = await Filesystem.readdir(pathDir);
 
     const folders = files.files
       .filter((file) => file.type === "directory")
@@ -72,6 +77,7 @@ export class CapacitorAPI extends AbstractPlatformAPI {
   async listPathContent(
     uri: string,
     options: ListPathOptions,
+    baseUri?: string,
   ): Promise<FileSystemObject[]> {
     // Try to get permissions to read the directory
     const permission = await Filesystem.requestPermissions();
@@ -79,20 +85,35 @@ export class CapacitorAPI extends AbstractPlatformAPI {
       throw new Error("Permission denied");
     }
 
-    const pathDir = this.getPathAndDir(uri);
+    const pathDir = this.getStoragePathAndDir(uri);
 
     const files = await Filesystem.readdir({
-      path: pathDir.path,
-      directory: pathDir.directory,
+      ...pathDir,
     });
 
     const promise = files.files
+      // Filter by types
       .filter(
         (file) =>
           (options?.include === "folders" && file.type === "directory") ||
           (options?.include === "files" && file.type === "file") ||
           options?.include === "all",
       )
+      // Filter by gitignore
+      .filter((file) => {
+        if (!options?.gitignore) {
+          return true;
+        }
+        const ig = ignore().add(options.gitignore);
+
+        const filePath = baseUri
+          ? path.relative(baseUri, path.join(uri, file.name))
+          : file.name;
+
+        const isIgnored = ig.ignores(filePath);
+
+        return !isIgnored;
+      })
       .map(async (file) => {
         const absoluteUri = uri + "/" + file.name;
         if (file.type === "directory") {
@@ -100,7 +121,7 @@ export class CapacitorAPI extends AbstractPlatformAPI {
             name: file.name,
             isFolder: true,
             subDirItems: options?.isRecursive
-              ? await this.listPathContent(absoluteUri, options)
+              ? await this.listPathContent(absoluteUri, options, baseUri ?? uri)
               : [],
             uri: absoluteUri,
           };
@@ -121,36 +142,33 @@ export class CapacitorAPI extends AbstractPlatformAPI {
   }
 
   async createProject(uri: string): Promise<void> {
-    const pathDir = this.getPathAndDir(uri);
+    const pathDir = this.getStoragePathAndDir(uri);
     await Filesystem.mkdir({
-      path: pathDir.path,
-      directory: pathDir.directory,
+      ...pathDir,
     });
   }
 
   async createFolder(uri: string): Promise<void> {
     console.log("Creating folder at", uri);
-    const pathDir = this.getPathAndDir(uri);
+    const pathDir = this.getStoragePathAndDir(uri);
     await Filesystem.mkdir({
-      path: pathDir.path,
-      directory: pathDir.directory,
+      ...pathDir,
     });
   }
 
   async createFile(uri: string): Promise<void> {
     console.log("Creating file at", uri);
-    const pathDir = this.getPathAndDir(uri);
+    const pathDir = this.getStoragePathAndDir(uri);
     await Filesystem.writeFile({
-      path: pathDir.path,
+      ...pathDir,
       data: "",
       encoding: Encoding.UTF8,
-      directory: pathDir.directory,
     });
   }
 
   async rename(oldUri: string, newUri: string): Promise<void> {
-    const oldPathDir = this.getPathAndDir(oldUri);
-    const newPathDir = this.getPathAndDir(newUri);
+    const oldPathDir = this.getStoragePathAndDir(oldUri);
+    const newPathDir = this.getStoragePathAndDir(newUri);
     await Filesystem.rename({
       from: oldPathDir.path,
       to: newPathDir.path,
@@ -161,33 +179,29 @@ export class CapacitorAPI extends AbstractPlatformAPI {
 
   async delete(uri: string): Promise<void> {
     // Check if it's a file or a directory
-    const pathDir = this.getPathAndDir(uri);
+    const pathDir = this.getStoragePathAndDir(uri);
 
     const file = await Filesystem.stat({
-      path: pathDir.path,
-      directory: pathDir.directory,
+      ...pathDir,
     });
 
     if (file.type === "directory") {
       await Filesystem.rmdir({
-        path: pathDir.path,
-        directory: pathDir.directory,
+        ...pathDir,
         recursive: true,
       });
     } else if (file.type === "file") {
       await Filesystem.deleteFile({
-        path: pathDir.path,
-        directory: pathDir.directory,
+        ...pathDir,
       });
     }
   }
 
   async hasPath(uri: string): Promise<boolean> {
     try {
-      const pathDir = this.getPathAndDir(uri);
+      const pathDir = this.getStoragePathAndDir(uri);
       await Filesystem.stat({
-        path: pathDir.path,
-        directory: pathDir.directory,
+        ...pathDir,
       });
       return true;
     } catch (e) {
@@ -196,7 +210,7 @@ export class CapacitorAPI extends AbstractPlatformAPI {
   }
 
   async readFile(uri: string): Promise<File> {
-    const pathDir = this.getPathAndDir(uri);
+    const pathDir = this.getStoragePathAndDir(uri);
     const res = await Filesystem.readFile({
       path: pathDir.path,
       directory: pathDir.directory,
@@ -214,10 +228,9 @@ export class CapacitorAPI extends AbstractPlatformAPI {
    */
   async writeFile(file: File, uri: string): Promise<void> {
     try {
-      const pathDir = this.getPathAndDir(uri);
+      const pathDir = this.getStoragePathAndDir(uri);
       await Filesystem.writeFile({
-        path: pathDir.path,
-        directory: pathDir.directory,
+        ...pathDir,
         data: await file.text(),
         encoding: Encoding.UTF8,
       });
@@ -227,8 +240,8 @@ export class CapacitorAPI extends AbstractPlatformAPI {
   }
 
   async copyFiles(from: string, to: string): Promise<void> {
-    const oldPathDir = this.getPathAndDir(from);
-    const newPathDir = this.getPathAndDir(to);
+    const oldPathDir = this.getStoragePathAndDir(from);
+    const newPathDir = this.getStoragePathAndDir(to);
     await Filesystem.copy({
       from: oldPathDir.path,
       to: newPathDir.path,
@@ -238,10 +251,10 @@ export class CapacitorAPI extends AbstractPlatformAPI {
   }
 
   async getPersistentSettings(): Promise<PersistentSettings> {
+    const pathDir = this.getDataPathDir("settings.json");
     try {
       const res = await Filesystem.readFile({
-        path: "settings.json",
-        directory: Directory.Data,
+        ...pathDir,
         encoding: Encoding.UTF8,
       });
 
@@ -258,18 +271,18 @@ export class CapacitorAPI extends AbstractPlatformAPI {
   }
 
   async setPersistentSettings(settings: PersistentSettings): Promise<void> {
+    const pathDir = this.getDataPathDir("settings.json");
     await Filesystem.writeFile({
+      ...pathDir,
       data: JSON.stringify(settings),
-      path: "settings.json",
-      directory: Directory.Data,
       encoding: Encoding.UTF8,
     });
   }
 
   async resetPersistentSettings(): Promise<void> {
+    const pathDir = this.getDataPathDir("settings.json");
     await Filesystem.deleteFile({
-      path: "settings.json",
-      directory: Directory.Data,
+      ...pathDir,
     });
   }
 
@@ -283,26 +296,23 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     );
   }
 
-  private getPathAndDir(uri: string): {
+  private getStoragePathAndDir(uri: string): {
     path: string;
     directory: Directory;
   } {
-    if (uri.startsWith("/")) {
-      return {
-        path: uri,
-        directory: Directory.Data,
-      };
-    }
-
-    // "content://com.android.externalstorage.documents/tree/primary%3Adist"
     return {
-      path:
-        "/" +
-        uri.replace(
-          "content://com.android.externalstorage.documents/tree/primary%3A",
-          "",
-        ),
+      path: uri.replace(
+        "content://com.android.externalstorage.documents/tree/primary%3A",
+        "",
+      ),
       directory: Directory.ExternalStorage,
+    };
+  }
+
+  private getDataPathDir(uri: string) {
+    return {
+      path: uri,
+      directory: Directory.Data,
     };
   }
 }

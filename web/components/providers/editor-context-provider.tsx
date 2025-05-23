@@ -1,6 +1,5 @@
 "use client";
 
-import { AIModelConfig } from "@/lib/ai-model-config";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getModelLLM } from "@/lib/llm/llm";
 import { decrypt } from "@/lib/security/simple-password";
@@ -10,8 +9,9 @@ import {
   EditorStates,
   EditorContextType,
   PersistentSettings,
+  AIModels,
 } from "@/lib/types";
-import React, { createContext, useEffect, useRef, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 export const EditorContext = createContext<EditorContextType | undefined>(
   undefined,
@@ -22,16 +22,18 @@ const defaultEditorStates: EditorStates = {
   isDrawHulls: true,
   isDownloadClip: false,
   isInlineChatEnabled: false,
-  isChatViewOpen: false,
+  isConsolePanelOpen: false,
+  isLoadingRecorder: false,
   isRecording: false,
   isListening: false,
   isThinking: false,
   isSpeaking: false,
-  isMuted: false,
+  inputAudioStream: undefined,
   isToolbarOpen: true,
   explorerSelectedNodeRefs: [],
   pressedKeys: [],
   openedViewModels: [],
+  viewIds: [],
 };
 
 export default function EditorContextProvider({
@@ -49,9 +51,6 @@ export default function EditorContextProvider({
     undefined,
   );
   const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
-
-  // --- AI Model Management ---
-  const aiModelConfig = useRef<AIModelConfig>(new AIModelConfig());
 
   // --- Platform API ---
   const { platformApi } = usePlatformApi();
@@ -112,20 +111,29 @@ export default function EditorContextProvider({
   useEffect(() => {
     if (
       !editorStates.password &&
-      settings?.sttAPIKey &&
       settings?.sttProvider &&
-      settings?.sttModel
+      settings?.sttModel &&
+      settings.apiKeys?.[settings?.sttProvider]
     ) {
       const model = getModelSTT(
-        settings.sttAPIKey,
+        settings.apiKeys?.[settings?.sttProvider],
         settings?.sttProvider,
         settings?.sttModel,
       );
-      aiModelConfig.current.setSTTModel(model);
+
+      const aiModels: AIModels = {
+        ...editorStates.aiModels,
+        sttModel: model,
+      };
+
+      setEditorStates((prev) => ({
+        ...prev,
+        aiModels: aiModels,
+      }));
     }
   }, [
     editorStates.password,
-    settings?.sttAPIKey,
+    settings?.apiKeys,
     settings?.sttProvider,
     settings?.sttModel,
   ]);
@@ -134,21 +142,30 @@ export default function EditorContextProvider({
   useEffect(() => {
     if (
       !editorStates.password &&
-      settings?.llmAPIKey &&
       settings?.llmProvider &&
-      settings?.llmModel
+      settings?.llmModel &&
+      settings.apiKeys?.[settings?.llmProvider]
     ) {
       const model = getModelLLM(
-        settings.llmAPIKey,
+        settings.apiKeys?.[settings?.llmProvider],
         settings?.llmProvider,
         settings?.llmModel,
         0.85,
       );
-      aiModelConfig.current.setLLMModel(model);
+
+      const aiModels: AIModels = {
+        ...editorStates.aiModels,
+        llmModel: model,
+      };
+
+      setEditorStates((prev) => ({
+        ...prev,
+        aiModels: aiModels,
+      }));
     }
   }, [
     editorStates.password,
-    settings?.llmAPIKey,
+    settings?.apiKeys,
     settings?.llmProvider,
     settings?.llmModel,
   ]);
@@ -157,22 +174,31 @@ export default function EditorContextProvider({
   useEffect(() => {
     if (
       !editorStates.password &&
-      settings?.ttsAPIKey &&
       settings?.ttsProvider &&
       settings?.ttsModel &&
-      settings?.ttsVoice
+      settings?.ttsVoice &&
+      settings.apiKeys?.[settings?.ttsProvider]
     ) {
       const model = getModelTTS(
-        settings.ttsAPIKey,
+        settings.apiKeys?.[settings?.ttsProvider],
         settings?.ttsProvider,
         settings?.ttsModel,
         settings?.ttsVoice,
       );
-      aiModelConfig.current.setTTSModel(model);
+
+      const aiModels: AIModels = {
+        ...editorStates.aiModels,
+        ttsModel: model,
+      };
+
+      setEditorStates((prev) => ({
+        ...prev,
+        aiModels: aiModels,
+      }));
     }
   }, [
     editorStates.password,
-    settings?.ttsAPIKey,
+    settings?.apiKeys,
     settings?.ttsProvider,
     settings?.ttsModel,
     settings?.ttsVoice,
@@ -181,9 +207,13 @@ export default function EditorContextProvider({
   // Load API keys when password is entered
   useEffect(() => {
     if (editorStates.password && settings?.isPasswordSet) {
-      if (settings?.sttAPIKey && settings?.sttProvider && settings?.sttModel) {
+      if (
+        settings?.sttProvider &&
+        settings?.sttModel &&
+        settings.apiKeys?.[settings?.sttProvider]
+      ) {
         const decryptedSTTAPIKey = decrypt(
-          settings.sttAPIKey,
+          settings.apiKeys?.[settings?.sttProvider],
           editorStates.password,
         );
 
@@ -192,14 +222,25 @@ export default function EditorContextProvider({
           settings?.sttProvider,
           settings?.sttModel,
         );
-        aiModelConfig.current.setSTTModel(model);
 
-        console.log("decryptedSTTAPIKey", decryptedSTTAPIKey);
+        const aiModels: AIModels = {
+          ...editorStates.aiModels,
+          sttModel: model,
+        };
+
+        setEditorStates((prev) => ({
+          ...prev,
+          aiModels: aiModels,
+        }));
       }
 
-      if (settings?.llmAPIKey && settings?.llmProvider && settings?.llmModel) {
+      if (
+        settings?.llmProvider &&
+        settings?.llmModel &&
+        settings.apiKeys?.[settings?.llmProvider]
+      ) {
         const decryptedLLMAPIKey = decrypt(
-          settings.llmAPIKey,
+          settings.apiKeys?.[settings?.llmProvider],
           editorStates.password,
         );
 
@@ -209,19 +250,26 @@ export default function EditorContextProvider({
           settings?.llmModel,
           0.85,
         );
-        aiModelConfig.current.setLLMModel(model);
 
-        console.log("decryptedLLMAPIKey", decryptedLLMAPIKey);
+        const aiModels: AIModels = {
+          ...editorStates.aiModels,
+          llmModel: model,
+        };
+
+        setEditorStates((prev) => ({
+          ...prev,
+          aiModels: aiModels,
+        }));
       }
 
       if (
-        settings?.ttsAPIKey &&
         settings?.ttsProvider &&
         settings?.ttsModel &&
-        settings?.ttsVoice
+        settings?.ttsVoice &&
+        settings.apiKeys?.[settings?.ttsProvider]
       ) {
         const decryptedTTSAPIKey = decrypt(
-          settings.ttsAPIKey,
+          settings.apiKeys?.[settings?.ttsProvider],
           editorStates.password,
         );
 
@@ -231,26 +279,32 @@ export default function EditorContextProvider({
           settings?.ttsModel,
           settings?.ttsVoice,
         );
-        aiModelConfig.current.setTTSModel(model);
 
-        console.log("decryptedTTSAPIKey", decryptedTTSAPIKey);
+        const aiModels: AIModels = {
+          ...editorStates.aiModels,
+          ttsModel: model,
+        };
+
+        setEditorStates((prev) => ({
+          ...prev,
+          aiModels: aiModels,
+        }));
       }
     }
   }, [
     editorStates.password,
 
-    settings?.sttAPIKey,
     settings?.sttProvider,
     settings?.sttModel,
 
-    settings?.llmAPIKey,
     settings?.llmProvider,
     settings?.llmModel,
 
-    settings?.ttsAPIKey,
     settings?.ttsProvider,
     settings?.ttsModel,
     settings?.ttsVoice,
+
+    settings?.apiKeys,
   ]);
 
   return (
@@ -260,7 +314,6 @@ export default function EditorContextProvider({
         setEditorStates,
         persistSettings: settings,
         setPersistSettings: setSettings,
-        aiModelConfig: aiModelConfig.current,
       }}
     >
       {children}
