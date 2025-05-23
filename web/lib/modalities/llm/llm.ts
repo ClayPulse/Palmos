@@ -55,7 +55,7 @@ export class BaseLLM {
   }
 }
 
-export function getModelLLM(
+export function getLLMModel(
   apiKey: string,
   provider: string,
   modelName: string,

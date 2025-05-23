@@ -2,6 +2,7 @@
 
 import { IMCContextType, PlatformEnum } from "@/lib/types";
 import {
+  ImageModelConfig,
   IMCMessage,
   IMCMessageTypeEnum,
   LLMConfig,
@@ -16,10 +17,17 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getAPIKey } from "@/lib/settings/settings";
 import { runAgentMethod } from "@/lib/agent/agent-runner";
-import { getModelLLM } from "@/lib/llm/llm";
-import { getModelTTS } from "@/lib/tts/tts";
-import { getModelSTT } from "@/lib/stt/stt";
-import { recognizeText } from "@/lib/image-processing/ocr";
+import { getLLMModel } from "@/lib/modalities/llm/llm";
+import { getTTSModel } from "@/lib/modalities/tts/tts";
+import { getSTTModel } from "@/lib/modalities/stt/stt";
+import { recognizeText } from "@/lib/modalities/ocr/ocr";
+import {
+  getDefaultImageModelConfig,
+  getDefaultLLMConfig,
+  getDefaultSTTConfig,
+  getDefaultTTSConfig,
+} from "@/lib/modalities/utils";
+import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
 
 export const IMCContext = createContext<IMCContextType | undefined>(undefined);
 
@@ -178,7 +186,8 @@ export default function InterModuleCommunicationProvider({
             sttConfig,
           }: { audio: ArrayBuffer; sttConfig?: STTConfig } = message.payload;
 
-          const config = sttConfig ? sttConfig : undefined; // TODO: use editor level default config -- getDefaultLLMConfig();
+          const config = sttConfig ?? getDefaultSTTConfig(editorContext);
+
           if (!config) {
             throw new Error("No STT config found for this agent method.");
           }
@@ -189,7 +198,7 @@ export default function InterModuleCommunicationProvider({
             throw new Error(`No API key found for provider ${provider}.`);
           }
 
-          const stt = getModelSTT(apiKey, provider, config.modelName);
+          const stt = getSTTModel(apiKey, provider, config.modelName);
           if (!stt) {
             throw new Error("STT not found.");
           }
@@ -219,7 +228,7 @@ export default function InterModuleCommunicationProvider({
             llmConfig?: LLMConfig;
           } = message.payload;
 
-          const config = llmConfig ? llmConfig : undefined; // TODO: use editor level default config -- getDefaultLLMConfig();
+          const config = llmConfig ?? getDefaultLLMConfig(editorContext);
 
           if (!config) {
             throw new Error("No LLM config found for this agent method.");
@@ -232,7 +241,7 @@ export default function InterModuleCommunicationProvider({
             throw new Error(`No API key found for provider ${provider}.`);
           }
 
-          const llm = getModelLLM(
+          const llm = getLLMModel(
             apiKey,
             provider,
             config.modelName,
@@ -261,7 +270,7 @@ export default function InterModuleCommunicationProvider({
           const { text, ttsConfig }: { text: string; ttsConfig?: TTSConfig } =
             message.payload;
 
-          const config = ttsConfig ? ttsConfig : undefined; // TODO: use editor level default config -- getDefaultLLMConfig();
+          const config = ttsConfig ?? getDefaultTTSConfig(editorContext);
 
           if (!config) {
             throw new Error("No TTS config found for this agent method.");
@@ -273,7 +282,7 @@ export default function InterModuleCommunicationProvider({
             throw new Error(`No API key found for provider ${provider}.`);
           }
 
-          const tts = getModelTTS(
+          const tts = getTTSModel(
             apiKey,
             provider,
             config.modelName,
@@ -291,7 +300,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.UseDiffusion,
+        IMCMessageTypeEnum.UseImageGen,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -299,11 +308,36 @@ export default function InterModuleCommunicationProvider({
         ) => {
           // Handle the use diffusion message
           console.log(
-            "Received use diffusion message from extension:",
+            `Received ${IMCMessageTypeEnum.UseImageGen.toString()} message from extension:`,
             message,
           );
 
-          throw new Error("Not implemented");
+          const {
+            textPrompt,
+            imagePrompt,
+            imageModelConfig,
+          }: {
+            textPrompt?: string;
+            imagePrompt?: string | ArrayBuffer;
+            imageModelConfig?: ImageModelConfig;
+          } = message.payload;
+
+          const config =
+            imageModelConfig ?? getDefaultImageModelConfig(editorContext);
+
+          if (!config) {
+            throw new Error(
+              "No image model config found for this agent method.",
+            );
+          }
+
+          const provider = config.provider;
+          const apiKey = getAPIKey(editorContext, provider);
+          if (!apiKey) {
+            throw new Error(`No API key found for provider ${provider}.`);
+          }
+
+          const imageGen = getImageGenModel(apiKey, provider, config.modelName);
         },
       ],
       [

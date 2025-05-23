@@ -8,7 +8,7 @@ import {
   isArrayType,
   isObjectType,
 } from "@pulse-editor/shared-utils";
-import { getModelLLM } from "../llm/llm";
+import { getLLMModel } from "../modalities/llm/llm";
 import toast from "react-hot-toast";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
@@ -63,7 +63,7 @@ function getLLM(llmConfig: LLMConfig, agentName: string, apiKey: string) {
     throw new Error(`No API key found for provider ${provider}.`);
   }
 
-  const llm = getModelLLM(
+  const llm = getLLMModel(
     apiKey,
     provider,
     llmConfig.modelName,

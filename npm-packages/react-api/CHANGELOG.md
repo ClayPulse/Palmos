@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.17
+
+### Patch Changes
+
+- Add useLoading, image gen, video gen hooks
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.17
+
 ## 0.1.1-alpha.16
 
 ### Patch Changes

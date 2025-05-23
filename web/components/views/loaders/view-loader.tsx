@@ -174,13 +174,18 @@ export default function ViewLoader({
 
     // Add loaded handler
     newMap.set(
-      IMCMessageTypeEnum.Loaded,
+      IMCMessageTypeEnum.UseLoading,
       async (
         senderWindow: Window,
         message: IMCMessage,
         abortSignal?: AbortSignal,
       ) => {
-        setIsLoadingExtension((prev) => false);
+        const {
+          isLoading,
+        }: {
+          isLoading: boolean;
+        } = message.payload;
+        setIsLoadingExtension((prev) => isLoading);
       },
     );
 

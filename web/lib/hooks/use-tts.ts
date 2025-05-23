@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react";
-import { BaseTTS, getModelTTS } from "../tts/tts";
+import { BaseTTS, getTTSModel } from "../modalities/tts/tts";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { getAPIKey } from "../settings/settings";
 
@@ -24,7 +24,7 @@ export default function useTTS() {
     if (!ttsKey || !ttsProvider || !ttsModel || !ttsVoice) {
       return;
     }
-    const tts = getModelTTS(ttsKey, ttsProvider, ttsModel, ttsVoice);
+    const tts = getTTSModel(ttsKey, ttsProvider, ttsModel, ttsVoice);
     if (tts) {
       setTtsModel(tts);
     } else {

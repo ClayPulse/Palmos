@@ -1,8 +1,8 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useContext, useEffect, useRef, useState } from "react";
-import { BaseTTS, getModelTTS } from "../tts/tts";
+import { BaseTTS, getTTSModel } from "../modalities/tts/tts";
 import { getAPIKey } from "../settings/settings";
-import { BaseSTT, getModelSTT } from "../stt/stt";
+import { BaseSTT, getSTTModel } from "../modalities/stt/stt";
 import toast from "react-hot-toast";
 
 export default function useSpeech2Speech() {
@@ -210,7 +210,7 @@ export default function useSpeech2Speech() {
     if (!ttsKey || !ttsProvider || !ttsModel || !ttsVoice) {
       return;
     }
-    const tts = getModelTTS(ttsKey, ttsProvider, ttsModel, ttsVoice);
+    const tts = getTTSModel(ttsKey, ttsProvider, ttsModel, ttsVoice);
     if (tts) {
       setTtsModel(tts);
     } else {
@@ -234,7 +234,7 @@ export default function useSpeech2Speech() {
     if (!sttKey || !sttProvider || !sttModel) {
       return;
     }
-    const stt = getModelSTT(sttKey, sttProvider, sttModel);
+    const stt = getSTTModel(sttKey, sttProvider, sttModel);
     if (stt) {
       setSttModel(stt);
     } else {

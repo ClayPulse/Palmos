@@ -8,8 +8,8 @@ import {
   Tooltip,
 } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
-import { sttProviderOptions } from "@/lib/stt/options";
-import { ttsProviderOptions } from "@/lib/tts/options";
+import { sttProviderOptions } from "@/lib/modalities/stt/options";
+import { ttsProviderOptions } from "@/lib/modalities/tts/options";
 import toast from "react-hot-toast";
 import ModalWrapper from "./modal-wrapper";
 import { EditorContext } from "../providers/editor-context-provider";
@@ -20,8 +20,10 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
-import { llmProviderOptions } from "@/lib/llm/options";
+import { llmProviderOptions } from "@/lib/modalities/llm/options";
 import { getAPIKey, setAPIKey } from "@/lib/settings/settings";
+import { imageGenProviderOptions } from "@/lib/modalities/image-gen/options";
+import { videoGenProviderOptions } from "@/lib/modalities/video-gen/options";
 
 function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
   const { selectAndSetProjectHome } = useExplorer();
@@ -75,12 +77,13 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
           )}
         </div>
       </div>
+      <Divider />
       <div>
         <p className="text-medium pb-2 font-bold">STT</p>
         <div className="w-full space-y-2">
           <Select
-            items={sttProviderOptions}
-            disabledKeys={sttProviderOptions
+            items={Object.values(sttProviderOptions)}
+            disabledKeys={Object.values(sttProviderOptions)
               .filter((provider) => !provider.isSupported)
               .map((provider) => provider.provider)}
             label="Provider"
@@ -110,14 +113,14 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
           <Select
             isDisabled={!editorContext?.persistSettings?.sttProvider}
             items={
-              sttProviderOptions.find(
+              Object.values(sttProviderOptions).find(
                 (provider) =>
                   provider.provider ===
                   editorContext?.persistSettings?.sttProvider,
               )?.models ?? []
             }
             disabledKeys={
-              sttProviderOptions
+              Object.values(sttProviderOptions)
                 .find(
                   (provider) =>
                     provider.provider ===
@@ -297,8 +300,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
         <p className="text-medium pb-2 font-bold">TTS</p>
         <div className="w-full space-y-2">
           <Select
-            items={ttsProviderOptions}
-            disabledKeys={ttsProviderOptions
+            items={Object.values(ttsProviderOptions)}
+            disabledKeys={Object.values(ttsProviderOptions)
               .filter((provider) => !provider.isSupported)
               .map((provider) => provider.provider)}
             label="Provider"
@@ -328,14 +331,14 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
           <Select
             isDisabled={!editorContext?.persistSettings?.ttsProvider}
             items={
-              ttsProviderOptions.find(
+              Object.values(ttsProviderOptions).find(
                 (provider) =>
                   provider.provider ===
                   editorContext?.persistSettings?.ttsProvider,
               )?.models ?? []
             }
             disabledKeys={
-              ttsProviderOptions
+              Object.values(ttsProviderOptions)
                 .find(
                   (provider) =>
                     provider.provider ===
@@ -415,6 +418,216 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             />
           </Tooltip>
         </div>
+      </div>
+      <Divider />
+      <div>
+        <p className="text-medium pb-2 font-bold">Image Gen</p>
+        <Select
+          items={Object.values(imageGenProviderOptions)}
+          disabledKeys={Object.values(imageGenProviderOptions)
+            .filter((provider) => !provider.isSupported)
+            .map((provider) => provider.provider)}
+          label="Provider"
+          placeholder="Select a provider"
+          onChange={(e) => {
+            editorContext?.setPersistSettings((prev) => {
+              return {
+                ...prev,
+                imageGenProvider: e.target.value,
+                imageGenModel: undefined,
+              };
+            });
+          }}
+          isRequired
+          selectedKeys={
+            editorContext?.persistSettings?.imageGenProvider
+              ? [editorContext?.persistSettings?.imageGenProvider]
+              : []
+          }
+        >
+          {(providerOption) => (
+            <SelectItem key={providerOption.provider}>
+              {providerOption.provider}
+            </SelectItem>
+          )}
+        </Select>
+        <Select
+          isDisabled={!editorContext?.persistSettings?.imageGenProvider}
+          items={
+            Object.values(imageGenProviderOptions).find(
+              (provider) =>
+                provider.provider ===
+                editorContext?.persistSettings?.imageGenProvider,
+            )?.models ?? []
+          }
+          disabledKeys={
+            Object.values(imageGenProviderOptions)
+              .find(
+                (provider) =>
+                  provider.provider ===
+                  editorContext?.persistSettings?.imageGenProvider,
+              )
+              ?.models.filter((model) => !model.isSupported)
+              .map((model) => model.model) ?? []
+          }
+          label="Model"
+          placeholder="Select a model"
+          isRequired
+          onChange={(e) => {
+            editorContext?.setPersistSettings((prev) => {
+              return {
+                ...prev,
+                imageGenModel: e.target.value,
+              };
+            });
+          }}
+          selectedKeys={
+            editorContext?.persistSettings?.imageGenModel
+              ? [editorContext?.persistSettings?.imageGenModel]
+              : []
+          }
+        >
+          {(modelOption) => (
+            <SelectItem key={modelOption.model}>{modelOption.model}</SelectItem>
+          )}
+        </Select>
+        <Tooltip
+          content={
+            <p>
+              Please disable password to edit API Key. <br />
+              You can enable password again after editing API keys.
+            </p>
+          }
+          isDisabled={!editorContext?.persistSettings?.isUsePassword}
+        >
+          <Input
+            label="API Key"
+            size="md"
+            isRequired
+            value={
+              editorContext?.persistSettings?.isPasswordSet
+                ? "API key is encrypted"
+                : (getAPIKey(
+                    editorContext,
+                    editorContext?.persistSettings?.imageGenProvider,
+                  ) ?? "")
+            }
+            onValueChange={(value) => {
+              setAPIKey(
+                editorContext,
+                editorContext?.persistSettings?.imageGenProvider,
+                value,
+              );
+            }}
+            isDisabled={!editorContext?.persistSettings?.imageGenProvider}
+            isReadOnly={editorContext?.persistSettings?.isUsePassword}
+          />
+        </Tooltip>
+      </div>
+      <Divider />
+      <div>
+        <p className="text-medium pb-2 font-bold">Video Gen</p>
+        <Select
+          items={Object.values(videoGenProviderOptions)}
+          disabledKeys={Object.values(videoGenProviderOptions)
+            .filter((provider) => !provider.isSupported)
+            .map((provider) => provider.provider)}
+          label="Provider"
+          placeholder="Select a provider"
+          onChange={(e) => {
+            editorContext?.setPersistSettings((prev) => {
+              return {
+                ...prev,
+                videoGenProvider: e.target.value,
+                videoGenModel: undefined,
+              };
+            });
+          }}
+          isRequired
+          selectedKeys={
+            editorContext?.persistSettings?.videoGenProvider
+              ? [editorContext?.persistSettings?.videoGenProvider]
+              : []
+          }
+        >
+          {(providerOption) => (
+            <SelectItem key={providerOption.provider}>
+              {providerOption.provider}
+            </SelectItem>
+          )}
+        </Select>
+        <Select
+          isDisabled={!editorContext?.persistSettings?.videoGenProvider}
+          items={
+            Object.values(videoGenProviderOptions).find(
+              (provider) =>
+                provider.provider ===
+                editorContext?.persistSettings?.videoGenProvider,
+            )?.models ?? []
+          }
+          disabledKeys={
+            Object.values(videoGenProviderOptions)
+              .find(
+                (provider) =>
+                  provider.provider ===
+                  editorContext?.persistSettings?.videoGenProvider,
+              )
+              ?.models.filter((model) => !model.isSupported)
+              .map((model) => model.model) ?? []
+          }
+          label="Model"
+          placeholder="Select a model"
+          isRequired
+          onChange={(e) => {
+            editorContext?.setPersistSettings((prev) => {
+              return {
+                ...prev,
+                videoGenModel: e.target.value,
+              };
+            });
+          }}
+          selectedKeys={
+            editorContext?.persistSettings?.videoGenModel
+              ? [editorContext?.persistSettings?.videoGenModel]
+              : []
+          }
+        >
+          {(modelOption) => (
+            <SelectItem key={modelOption.model}>{modelOption.model}</SelectItem>
+          )}
+        </Select>
+        <Tooltip
+          content={
+            <p>
+              Please disable password to edit API Key. <br />
+              You can enable password again after editing API keys.
+            </p>
+          }
+          isDisabled={!editorContext?.persistSettings?.isUsePassword}
+        >
+          <Input
+            label="API Key"
+            size="md"
+            isRequired
+            value={
+              editorContext?.persistSettings?.isPasswordSet
+                ? "API key is encrypted"
+                : (getAPIKey(
+                    editorContext,
+                    editorContext?.persistSettings?.videoGenProvider,
+                  ) ?? "")
+            }
+            onValueChange={(value) => {
+              setAPIKey(
+                editorContext,
+                editorContext?.persistSettings?.videoGenProvider,
+                value,
+              );
+            }}
+            isDisabled={!editorContext?.persistSettings?.videoGenProvider}
+            isReadOnly={editorContext?.persistSettings?.isUsePassword}
+          />
+        </Tooltip>
       </div>
     </>
   );

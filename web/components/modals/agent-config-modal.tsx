@@ -42,8 +42,8 @@ export default function AgentConfigModal({
     const usageList: LLMUsage[] = [];
 
     for (const agent of agents) {
-      const provider = agent.LLMConfig.provider;
-      const modelName = agent.LLMConfig.modelName;
+      const provider = agent.LLMConfig?.provider ?? "default";
+      const modelName = agent.LLMConfig?.modelName ?? "default";
 
       const existing = usageList.find((u) => u.provider === provider);
 
@@ -137,7 +137,9 @@ function AgentConfigs({
             <div className="flex gap-x-1 pt-2">
               <p>LLM config:</p>
               <p>
-                {agent.LLMConfig.provider + " " + agent.LLMConfig.modelName}
+                {(agent.LLMConfig?.provider ?? "default") +
+                  " " +
+                  (agent.LLMConfig?.modelName ?? "default")}
               </p>
             </div>
             <div className="flex w-full justify-end gap-1">

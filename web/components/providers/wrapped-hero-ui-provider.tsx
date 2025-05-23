@@ -1,10 +1,9 @@
-// app/providers.tsx
 "use client";
 
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import { ThemeProvider } from "next-themes";
 
-export function WrappedHeroUIProvider({
+export default function WrappedHeroUIProvider({
   children,
 }: {
   children: React.ReactNode;

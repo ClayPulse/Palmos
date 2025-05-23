@@ -20,6 +20,7 @@ import useTTS from "@/lib/hooks/use-tts";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
 import { useViewManager } from "@/lib/hooks/use-view-manager";
+import { getDefaultLLMConfig } from "@/lib/modalities/utils";
 
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
@@ -86,6 +87,11 @@ export default function EditorToolbar() {
 
       if (process.env.NODE_ENV === "development") {
         console.log("Command result:", cmdResult);
+      }
+
+      if (!editorAssistantAgent.LLMConfig) {
+        toast.error("Agent is not configured to analyze command result.");
+        return;
       }
 
       const llmKey = getAPIKey(
@@ -224,78 +230,81 @@ export default function EditorToolbar() {
           projectDirTree.push(...tree);
         }
 
+        const config =
+          getAgentLLMConfig(agent, methodName) ??
+          getDefaultLLMConfig(editorContext);
+
+        if (!config) {
+          toast.error("No LLM config found for agent.");
+          return "No LLM config found for agent. Please configure the LLM in settings.";
+        }
+
         setUserVoiceMessage(inputText);
         // Pipe the LLM result to Speech2Speech
         // const stream = await llm.generateStream(inputText);
-        const result = await runAgentMethod(
-          llmKey,
-          getAgentLLMConfig(agent, methodName),
-          agent,
-          methodName,
-          {
-            chatHistory: [],
-            userMessage: inputText,
-            openedViews: editorContext.editorStates.openedViewModels.map(
-              (view) => {
-                if (!view.extensionConfig) {
-                  throw new Error(
-                    "View is missing extension config. Are you sure this is a valid view?",
-                  );
-                }
-
-                const viewInfo = {
-                  viewId: view.viewId,
-                  isFocused: view.isFocused,
-                  file: view.file,
-
-                  extensionConfig: {
-                    id: view.extensionConfig?.id,
-                  },
-                };
-                return viewInfo;
-              },
-            ),
-            commands: editorContext.persistSettings?.extensionCommands
-              ?.filter((command) => {
-                // Find the extension that has this command
-                const ext = editorContext.persistSettings?.extensions?.find(
-                  (ext) => ext.config.id === command.moduleId,
+        const result = await runAgentMethod(llmKey, config, agent, methodName, {
+          chatHistory: [],
+          userMessage: inputText,
+          openedViews: editorContext.editorStates.openedViewModels.map(
+            (view) => {
+              if (!view.extensionConfig) {
+                throw new Error(
+                  "View is missing extension config. Are you sure this is a valid view?",
                 );
+              }
 
-                if (!ext) {
-                  return false;
-                }
+              const viewInfo = {
+                viewId: view.viewId,
+                isFocused: view.isFocused,
+                file: view.file,
 
-                // Filter by active view
-                if (activeViewModel?.extensionConfig?.id === ext.config.id) {
-                  return true;
-                }
-                // Else, filter by extension type -- no need to remove console view command
-                // if the console panel is open
-                else if (
-                  editorContext.editorStates.isConsolePanelOpen &&
-                  ext.config.extensionType === ExtensionTypeEnum.ConsoleView
-                ) {
-                  return true;
-                }
+                extensionConfig: {
+                  id: view.extensionConfig?.id,
+                },
+              };
+              return viewInfo;
+            },
+          ),
+          commands: editorContext.persistSettings?.extensionCommands
+            ?.filter((command) => {
+              // Find the extension that has this command
+              const ext = editorContext.persistSettings?.extensions?.find(
+                (ext) => ext.config.id === command.moduleId,
+              );
 
+              if (!ext) {
                 return false;
-              })
-              .map((command) => ({
-                cmd: command.name,
-                parameters: Object.entries(command.parameters).map(
-                  ([key, value]) => ({
-                    name: key,
-                    type: value.type,
-                    description: value.description,
-                  }),
-                ),
-                description: command.description,
-                moduleId: command.moduleId,
-              })),
-            projectDirTree: projectDirTree,
-          },
-        );
+              }
+
+              // Filter by active view
+              if (activeViewModel?.extensionConfig?.id === ext.config.id) {
+                return true;
+              }
+              // Else, filter by extension type -- no need to remove console view command
+              // if the console panel is open
+              else if (
+                editorContext.editorStates.isConsolePanelOpen &&
+                ext.config.extensionType === ExtensionTypeEnum.ConsoleView
+              ) {
+                return true;
+              }
+
+              return false;
+            })
+            .map((command) => ({
+              cmd: command.name,
+              parameters: Object.entries(command.parameters).map(
+                ([key, value]) => ({
+                  name: key,
+                  type: value.type,
+                  description: value.description,
+                }),
+              ),
+              description: command.description,
+              moduleId: command.moduleId,
+            })),
+          projectDirTree: projectDirTree,
+        });
 
         const {
           suggestedCmd,

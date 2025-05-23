@@ -45,7 +45,7 @@ export class BaseSTT {
   }
 }
 
-export function getModelSTT(
+export function getSTTModel(
   apiKey: string,
   provider: string,
   modelName: string,

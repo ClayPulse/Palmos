@@ -1,20 +1,9 @@
-export type LLMProviderOption = {
-  provider: string;
-  isSupported: boolean;
-  models: {
-    model: string;
-    // TODO: do not enforce supported models in the future
-    // and allow users to enter any model from the provider.
-    // Available models should be displayed in a dropdown
-    // as suggestions.
-    isSupported: boolean;
-  }[];
-};
+import { AIProviderOption } from "@/lib/types";
 
 type ProviderName = "openai" | "anthropic" | "togetherai" | "local";
 
 export const llmProviderOptions: {
-  [key in ProviderName]: LLMProviderOption;
+  [key in ProviderName]: AIProviderOption;
 } = {
   openai: {
     provider: "openai",

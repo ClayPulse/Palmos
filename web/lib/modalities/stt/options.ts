@@ -1,14 +1,11 @@
-export interface STTProviderOption {
-  provider: string;
-  isSupported: boolean;
-  models: {
-    model: string;
-    isSupported: boolean;
-  }[];
-}
+import { AIProviderOption } from "@/lib/types";
 
-export const sttProviderOptions: STTProviderOption[] = [
-  {
+type ProviderName = "openai";
+
+export const sttProviderOptions: {
+  [key in ProviderName]: AIProviderOption;
+} = {
+  openai: {
     provider: "openai",
     isSupported: true,
     models: [
@@ -26,4 +23,4 @@ export const sttProviderOptions: STTProviderOption[] = [
       },
     ],
   },
-];
+};
