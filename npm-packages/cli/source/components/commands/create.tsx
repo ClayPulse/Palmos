@@ -56,7 +56,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 					</Box>,
 				);
 				try {
-					await $`git clone https://github.com/ClayPulse/pulse-editor-extension-template.git ${name}`;
+					await $`git clone --depth 1 https://github.com/ClayPulse/pulse-editor-extension-template.git ${name}`;
 				} catch (error) {
 					setMessage(
 						<Text color="redBright">
@@ -82,6 +82,18 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 
 				// Write the modified package.json back to the file
 				fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+				// Remove the .git directory
+				const gitDirPath = path.join(process.cwd(), name, '.git');
+				if (fs.existsSync(gitDirPath)) {
+					fs.rmSync(gitDirPath, {recursive: true, force: true});
+				}
+
+				// Remove the .github directory
+				const githubDirPath = path.join(process.cwd(), name, '.github');
+				if (fs.existsSync(githubDirPath)) {
+					fs.rmSync(githubDirPath, {recursive: true, force: true});
+				}
 
 				setMessage(
 					<Box>
