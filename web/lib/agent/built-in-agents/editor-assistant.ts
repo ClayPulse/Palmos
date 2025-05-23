@@ -2,7 +2,7 @@ import { llmProviderOptions } from "@/lib/llm/options";
 import { AccessEnum, Agent } from "@pulse-editor/shared-utils";
 
 export const editorAssistantAgent: Agent = {
-  name: "Editor Assistant",
+  name: "EditorAssistant",
   version: "0.1.0",
   systemPrompt: `\
 You are an AI assistant agent for a creativity platform called Pulse Editor.
@@ -204,6 +204,37 @@ This command can only be run on extension with this module ID.`,
           description:
             "The commands that the user is trying to use from the extension.",
         },
+        projectDirTree: {
+          name: "projectDirTree",
+          type: [
+            {
+              name: {
+                name: "name",
+                type: "string",
+                description: "File system object's name.",
+              },
+              uri: {
+                name: "uri",
+                type: "string",
+                description: "File system object's uri.",
+              },
+              isFolder: {
+                name: "isFolder",
+                type: "boolean",
+                description:
+                  "Whether the file system object is a folder or not.",
+              },
+              subDirItems: {
+                name: "subDirItems",
+                type: "any",
+                description:
+                  "The sub-directory items of the file system object. ",
+                optional: true,
+              },
+            },
+          ],
+          description: "The project directory structure.",
+        },
       },
       prompt: `\
 For this task, you will suggest extension commands that fit the user's needs.
@@ -227,8 +258,17 @@ Available commands:
 \`\`\`
 {commands}
 \`\`\`
+Project directory tree:
+\`\`\`
+{projectDirTree}
+\`\`\`
 `,
       returns: {
+        language: {
+          name: "language",
+          type: "string",
+          description: "The language of user's message.",
+        },
         suggestedCmd: {
           name: "suggestedCmd",
           type: "string",
@@ -406,8 +446,7 @@ Command result:
         language: {
           name: "language",
           type: "string",
-          description:
-            "The language of user's message."
+          description: "The language of user's message.",
         },
         analysis: {
           name: "analysis",
@@ -425,6 +464,6 @@ This field needs to be in the same language as the original user's message.",
   LLMConfig: {
     provider: llmProviderOptions.openai.provider,
     modelName: "gpt-4o",
-    temperature: 0.7,
+    temperature: 0.95,
   },
 };
