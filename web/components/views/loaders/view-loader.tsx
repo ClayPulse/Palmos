@@ -115,6 +115,7 @@ export default function ViewLoader({
 
     if (currentViewId) {
       // Listen for an incoming extension connection
+      console.log("Listening for extension connection...");
       listenForExtensionConnection();
 
       setIsLookingForExtension(true);

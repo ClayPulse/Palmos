@@ -10,7 +10,20 @@ export const videoGenProviderOptions: {
     isSupported: true,
     models: [
       {
-        model: "kelin",
+        model: "kwaivgi/kling-v1.6-standard",
+        isSupported: true,
+      },
+      {
+        model: "kwaivgi/kling-v1.6-pro",
+        isSupported: true,
+      },
+
+      {
+        model: "kwaivgi/kling-v2.0",
+        isSupported: true,
+      },
+      {
+        model: "google/veo-2",
         isSupported: true,
       },
     ],

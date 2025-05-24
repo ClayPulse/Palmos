@@ -11,7 +11,7 @@ import {
   STTConfig,
   TTSConfig,
 } from "@pulse-editor/shared-utils";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "./editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
@@ -26,8 +26,10 @@ import {
   getDefaultLLMConfig,
   getDefaultSTTConfig,
   getDefaultTTSConfig,
+  getDefaultVideoModelConfig,
 } from "@/lib/modalities/utils";
 import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
+import { getVideoGenModel } from "@/lib/modalities/video-gen/video-gen";
 
 export const IMCContext = createContext<IMCContextType | undefined>(undefined);
 
@@ -44,6 +46,14 @@ export default function InterModuleCommunicationProvider({
   useEffect(() => {
     // @ts-expect-error set window viewId
     window.viewId = "Pulse Editor Main";
+
+    return () => {
+      // Cleanup the polyIMC instance when the component unmounts
+      if (polyIMC) {
+        polyIMC.close();
+        setPolyIMC(undefined);
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -337,7 +347,58 @@ export default function InterModuleCommunicationProvider({
             throw new Error(`No API key found for provider ${provider}.`);
           }
 
-          const imageGen = getImageGenModel(apiKey, provider, config.modelName);
+          const model = getImageGenModel(apiKey, provider, config.modelName);
+
+          const res = await model.generate(textPrompt, imagePrompt);
+
+          return res;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.UseVideoGen,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          // Handle the use video generation message
+          console.log(
+            `Received ${IMCMessageTypeEnum.UseVideoGen.toString()} message from extension:`,
+            message,
+          );
+
+          const {
+            duration,
+            textPrompt,
+            imagePrompt,
+            videoModelConfig,
+          }: {
+            duration: number;
+            textPrompt?: string;
+            imagePrompt?: string | ArrayBuffer;
+            videoModelConfig?: ImageModelConfig;
+          } = message.payload;
+
+          const config =
+            videoModelConfig ?? getDefaultVideoModelConfig(editorContext);
+
+          if (!config) {
+            throw new Error(
+              "No video model config found for this agent method.",
+            );
+          }
+
+          const provider = config.provider;
+          const apiKey = getAPIKey(editorContext, provider);
+          if (!apiKey) {
+            throw new Error(`No API key found for provider ${provider}.`);
+          }
+
+          const model = getVideoGenModel(apiKey, provider, config.modelName);
+
+          const res = await model.generate(duration, textPrompt, imagePrompt);
+
+          return res;
         },
       ],
       [

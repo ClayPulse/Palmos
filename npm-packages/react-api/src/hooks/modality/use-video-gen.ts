@@ -21,11 +21,15 @@ export default function useVideoGen() {
    * @returns The generated video in an ArrayBuffer.
    */
   async function runVideoGen(
+    duration: number,
     textPrompt?: string,
     imagePrompt?: string | ArrayBuffer,
     // LLM config is optional, if not provided, the default config will be used.
     videoModelConfig?: VideoModelConfig
-  ): Promise<ArrayBuffer> {
+  ): Promise<{
+    url?: string;
+    arrayBuffer?: ArrayBuffer;
+  }> {
     if (!imc) {
       throw new Error("IMC not initialized.");
     }
@@ -36,12 +40,16 @@ export default function useVideoGen() {
 
     const result = await imc
       .sendMessage(IMCMessageTypeEnum.UseVideoGen, {
+        duration,
         textPrompt,
         imagePrompt,
         videoModelConfig,
       })
       .then((response) => {
-        return response as ArrayBuffer;
+        return response as {
+          url?: string;
+          arrayBuffer?: ArrayBuffer;
+        };
       });
 
     return result;

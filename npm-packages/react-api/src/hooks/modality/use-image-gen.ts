@@ -25,7 +25,10 @@ export default function useImageGen() {
     imagePrompt?: string | ArrayBuffer,
     // LLM config is optional, if not provided, the default config will be used.
     imageModelConfig?: ImageModelConfig
-  ): Promise<ArrayBuffer> {
+  ): Promise<{
+    arrayBuffer?: ArrayBuffer;
+    url?: string;
+  }> {
     if (!imc) {
       throw new Error("IMC not initialized.");
     }
@@ -41,7 +44,10 @@ export default function useImageGen() {
         imageModelConfig,
       })
       .then((response) => {
-        return response as ArrayBuffer;
+        return response as {
+          arrayBuffer?: ArrayBuffer;
+          url?: string;
+        };
       });
 
     return result;

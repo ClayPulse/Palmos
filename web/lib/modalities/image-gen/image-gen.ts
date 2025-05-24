@@ -1,16 +1,18 @@
-import Replicate from "replicate";
-
 export class BaseImageGen {
   private model: any;
   private generateFunc?: (
     model: any,
     textPrompt?: string,
-    imagePrompt?: string,
-  ) => Promise<ArrayBuffer>;
+    // URL or ArrayBuffer for the image prompt
+    imagePrompt?: string | ArrayBuffer,
+  ) => Promise<{
+    arrayBuffer?: ArrayBuffer;
+    url?: string;
+  }>;
   private generateStreamFunc?: (
     model: any,
     textPrompt?: string,
-    imagePrompt?: string,
+    imagePrompt?: string | ArrayBuffer,
   ) => Promise<ReadableStream<ArrayBuffer>>;
 
   constructor(
@@ -18,12 +20,15 @@ export class BaseImageGen {
     generateFunc?: (
       model: any,
       textPrompt?: string,
-      imagePrompt?: string,
-    ) => Promise<ArrayBuffer>,
+      imagePrompt?: string | ArrayBuffer,
+    ) => Promise<{
+      arrayBuffer?: ArrayBuffer;
+      url?: string;
+    }>,
     generateStreamFunc?: (
       model: any,
       textPrompt?: string,
-      imagePrompt?: string,
+      imagePrompt?: string | ArrayBuffer,
     ) => Promise<ReadableStream<ArrayBuffer>>,
   ) {
     this.model = model;
@@ -37,8 +42,11 @@ export class BaseImageGen {
 
   public async generate(
     textPrompt?: string,
-    imagePrompt?: string,
-  ): Promise<ArrayBuffer> {
+    imagePrompt?: string | ArrayBuffer,
+  ): Promise<{
+    arrayBuffer?: ArrayBuffer;
+    url?: string;
+  }> {
     if (!this.generateFunc) {
       throw new Error("Generate function is not defined.");
     }
@@ -47,7 +55,7 @@ export class BaseImageGen {
 
   public async generateStream(
     textPrompt?: string,
-    imagePrompt?: string,
+    imagePrompt?: string | ArrayBuffer,
   ): Promise<ReadableStream<ArrayBuffer>> {
     if (!this.generateStreamFunc) {
       throw new Error("Generate stream function is not defined.");
@@ -65,44 +73,91 @@ export function getImageGenModel(
   let generateFunc: (
     model: any,
     textPrompt?: string,
-    imagePrompt?: string,
-  ) => Promise<ArrayBuffer>;
+    imagePrompt?: string | ArrayBuffer,
+  ) => Promise<{
+    arrayBuffer?: ArrayBuffer;
+    url?: string;
+  }>;
   let generateStreamFunc:
     | ((
         model: any,
         textPrompt?: string,
-        imagePrompt?: string,
+        imagePrompt?: string | ArrayBuffer,
       ) => Promise<ReadableStream<ArrayBuffer>>)
     | undefined;
 
   async function replicateGenerateFunc(
     model: any,
     textPrompt?: string,
-    imagePrompt?: string,
+    imagePrompt?: string | ArrayBuffer,
   ) {
-    const replicate: Replicate = model;
     const identifier: `${string}/${string}` | `${string}/${string}:${string}` =
       modelName.includes(":")
         ? (modelName as `${string}/${string}:${string}`)
         : (modelName as `${string}/${string}`);
-    const obj = await replicate.run(identifier, {
-      input: {
-        prompt: textPrompt,
-        image: imagePrompt,
+
+    const proxyHost = "https://pulse-editor.com";
+    const response = await fetch(`${proxyHost}/api/predictions/replicate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({
+        model: identifier,
+        input: {
+          prompt: textPrompt,
+          output_format: "png",
+        },
+        token: apiKey,
+      }),
     });
-    const result = new Blob([JSON.stringify(obj)], {
-      type: "application/json",
-    });
-    const arrayBuffer = await result.arrayBuffer();
-    return arrayBuffer;
+
+    if (response.status !== 201) {
+      throw new Error(
+        `Failed to generate image: ${response.status} ${response.statusText}`,
+      );
+    }
+    let prediction = await response.json();
+    while (
+      prediction.status !== "succeeded" &&
+      prediction.status !== "failed"
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await fetch(
+        `${proxyHost}/api/predictions/replicate/${prediction.id}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            token: apiKey,
+          }),
+        },
+      );
+      console.log("Fetching prediction status:", prediction.id);
+      prediction = await response.json();
+      if (response.status !== 200) {
+        console.error(
+          `Error fetching prediction status: ${response.status} ${response.statusText}`,
+        );
+        throw new Error(
+          `Failed to fetch prediction status: ${response.status} ${response.statusText}`,
+        );
+      }
+      console.log({ prediction: prediction });
+    }
+
+    const imgUrl = prediction.output[prediction.output.length - 1];
+
+    const arrayBuffer = await fetch(imgUrl).then((res) => res.arrayBuffer());
+
+    return {
+      arrayBuffer: arrayBuffer,
+      url: imgUrl,
+    };
   }
 
   switch (provider) {
     case "replicate":
-      model = new Replicate({
-        auth: apiKey,
-      });
+      model = undefined;
       generateFunc = replicateGenerateFunc;
       generateStreamFunc = undefined;
       break;

@@ -19,28 +19,16 @@ export class PolyIMC {
   private channels: Map<string, InterModuleCommunication>;
   private baseReceiverHandlerMap: ReceiverHandlerMap;
   private channelReceiverHandlerMapMap: Map<string, ReceiverHandlerMap>;
-  private connectionListener: InterModuleCommunication | undefined;
 
   /**
    *
    * @param baseReceiverHandlerMap A base receiver handler map for universal handlers.
    * E.g. Pulse Editor API handler
    */
-  constructor(
-    baseReceiverHandlerMap: ReceiverHandlerMap,
-    isAutoConnect: boolean = false
-  ) {
+  constructor(baseReceiverHandlerMap: ReceiverHandlerMap) {
     this.channels = new Map();
     this.baseReceiverHandlerMap = baseReceiverHandlerMap;
     this.channelReceiverHandlerMapMap = new Map();
-
-    if (isAutoConnect) {
-      this.connectionListener = new InterModuleCommunication();
-      this.connectionListener.initThisWindow(window);
-      this.connectionListener.updateReceiverHandlerMap(
-        this.getConnectionListenerHandlerMap()
-      );
-    }
   }
 
   public async sendMessage(
@@ -92,25 +80,20 @@ export class PolyIMC {
     targetWindowId: string,
     receiverHandlerMap?: ReceiverHandlerMap
   ) {
+    console.log("Creating channel for window ID: " + targetWindowId);
     const channel = new InterModuleCommunication();
     channel.initThisWindow(window, targetWindowId);
     await channel.initOtherWindow(targetWindow);
 
+    this.channels.set(targetWindowId, channel);
+
     // If there is a channel specific receiver handler map,
     // combine it with the base receiver handler map.
     if (receiverHandlerMap) {
-      channel.updateReceiverHandlerMap(
-        this.getCombinedHandlerMap(
-          this.baseReceiverHandlerMap,
-          receiverHandlerMap
-        )
-      );
-      this.channelReceiverHandlerMapMap.set(targetWindowId, receiverHandlerMap);
+      this.updateChannelReceiverHandlerMap(targetWindowId, receiverHandlerMap);
     } else {
       channel.updateReceiverHandlerMap(this.baseReceiverHandlerMap);
     }
-
-    this.channels.set(targetWindowId, channel);
   }
 
   public removeChannel(targetWindowId: string) {
@@ -126,6 +109,14 @@ export class PolyIMC {
 
   public hasChannel(targetWindowId: string): boolean {
     return this.channels.has(targetWindowId);
+  }
+
+  public close() {
+    this.channels.forEach((channel) => {
+      channel.close();
+    });
+    this.channels.clear();
+    this.channelReceiverHandlerMapMap.clear();
   }
 
   private getCombinedHandlerMap(
@@ -144,44 +135,6 @@ export class PolyIMC {
     } else {
       return new Map();
     }
-  }
-
-  private getConnectionListenerHandlerMap(): ReceiverHandlerMap {
-    // The connection listener is a special receiver for poly IMC
-    // that listens for incoming connections from other windows.
-    // It is used to create a new channel for the incoming connection.
-    const connectionListenerHandlerMap = new Map<
-      IMCMessageTypeEnum,
-      ReceiverHandler
-    >([
-      [
-        IMCMessageTypeEnum.ExtReady,
-        async (senderWindow: Window, message: IMCMessage) => {
-          const targetWindowId = message.from;
-          if (this.channels.has(targetWindowId)) {
-            // Channel already exists for the target window ID,
-            // so we don't need to create a new one.
-            console.log(
-              "Channel already exists for window ID " +
-                targetWindowId +
-                ". Re-using the existing channel."
-            );
-            return;
-          }
-
-          // Create a new channel for the incoming connection
-          await this.createChannel(
-            senderWindow,
-            targetWindowId,
-            this.getCombinedHandlerMap(
-              this.baseReceiverHandlerMap,
-              this.channelReceiverHandlerMapMap.get(targetWindowId)
-            )
-          );
-        },
-      ],
-    ]);
-    return connectionListenerHandlerMap;
   }
 }
 

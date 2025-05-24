@@ -8,11 +8,12 @@ import useTheme from "./hooks/editor/use-theme";
 import useToolbar from "./hooks/editor/use-toolbar";
 import useExtCommand from "./hooks/extension/use-ext-command";
 
-import useDiffusion from "./hooks/modality/use-image-gen";
+import useImageGen from "./hooks/modality/use-image-gen";
 import useLLM from "./hooks/modality/use-llm";
 import useOCR from "./hooks/modality/use-ocr";
 import useSTT from "./hooks/modality/use-stt";
 import useTTS from "./hooks/modality/use-tts";
+import useVideoGen from "./hooks/modality/use-video-gen";
 import useTerminal from "./hooks/terminal/use-terminal";
 
 export {
@@ -23,7 +24,8 @@ export {
   useNotification,
   useTheme,
   useToolbar,
-  useDiffusion,
+  useImageGen,
+  useVideoGen,
   useLLM,
   useOCR,
   useSTT,
