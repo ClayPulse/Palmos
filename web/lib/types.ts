@@ -6,9 +6,9 @@ import {
   PolyIMC,
   ViewModel,
 } from "@pulse-editor/shared-utils";
-import { BaseSTT } from "./stt/stt";
-import { BaseLLM } from "./llm/llm";
-import { BaseTTS } from "./tts/tts";
+import { BaseSTT } from "./modalities/stt/stt";
+import { BaseLLM } from "./modalities/llm/llm";
+import { BaseTTS } from "./modalities/tts/tts";
 
 // #region Editor Context
 export type EditorContextType = {
@@ -75,18 +75,24 @@ export type EditorStates = {
 
 export type PersistentSettings = {
   sttProvider?: string;
-  llmProvider?: string;
-  ttsProvider?: string;
-
   sttModel?: string;
+
+  llmProvider?: string;
   llmModel?: string;
+
+  ttsProvider?: string;
   ttsModel?: string;
+  ttsVoice?: string;
+
+  imageGenProvider?: string;
+  imageGenModel?: string;
+
+  videoGenProvider?: string;
+  videoGenModel?: string;
 
   isUsePassword?: boolean;
   isPasswordSet?: boolean;
   ttl?: number;
-
-  ttsVoice?: string;
 
   projectHomePath?: string;
 
@@ -161,7 +167,7 @@ export type TabItem = {
 };
 // #endregion
 
-// #region AI
+// #region AI Settings
 export type AIModels = {
   // --- Speech-to-Text ---
   sttModel?: BaseSTT;
@@ -170,6 +176,20 @@ export type AIModels = {
   // --- Text-to-Speech ---
   ttsModel?: BaseTTS;
 };
+
+export type AIProviderOption = {
+  provider: string;
+  isSupported: boolean;
+  models: {
+    model: string;
+    // TODO: do not enforce supported models in the future
+    // and allow users to enter any model from the provider.
+    // Available models should be displayed in a dropdown
+    // as suggestions.
+    isSupported: boolean;
+  }[];
+};
+// #endregion
 
 export type ExtensionAgent = Agent & {
   author: {
@@ -198,7 +218,6 @@ export type ChatMessage = {
   content: string;
   datetime: string;
 };
-// #endregion
 
 // #region Cross platform API
 export enum PlatformEnum {

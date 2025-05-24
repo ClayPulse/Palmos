@@ -29,8 +29,6 @@ export default function useTerminal() {
 
         setWebsocketUrl(websocketUrl);
         setProjectHomePath(projectHomePath);
-
-        imc.sendMessage(IMCMessageTypeEnum.Loaded);
       });
     }
   }, [isReady]);

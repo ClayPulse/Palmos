@@ -4,6 +4,11 @@
 $ npm install --global @pulse-editor/cli
 ```
 
+## Link local development version
+```bash
+npm run link
+```
+
 ## CLI Manual
 
 ```

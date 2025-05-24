@@ -34,7 +34,7 @@ export class BaseTTS {
   }
 }
 
-export function getModelTTS(
+export function getTTSModel(
   apiKey: string,
   provider: string,
   modelName: string,

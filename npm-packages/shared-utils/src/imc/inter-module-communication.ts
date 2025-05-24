@@ -21,7 +21,7 @@ export class InterModuleCommunication {
 
   private listener: ((event: MessageEvent) => void) | undefined;
 
-  constructor() {}
+  private messageRecords: Map<string, IMCMessage> | undefined;
 
   /**
    * Initialize a receiver to receive message.
@@ -46,7 +46,19 @@ export class InterModuleCommunication {
     );
     this.receiver = receiver;
 
+    this.messageRecords = new Map<string, IMCMessage>();
+
     this.listener = (event: MessageEvent<IMCMessage>) => {
+      const messageId = event.data.id;
+
+      if (this.messageRecords?.has(messageId)) {
+        console.warn(
+          `Duplicate message received with ID: ${messageId}. Ignoring this message.`
+        );
+        return;
+      }
+      this.messageRecords?.set(messageId, event.data);
+
       if (!receiver) {
         throw new Error(
           "Receiver not initialized at module " + this.thisWindowId

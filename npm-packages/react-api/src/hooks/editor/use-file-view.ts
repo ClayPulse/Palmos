@@ -8,7 +8,6 @@ import useIMC from "../../lib/use-imc";
 
 export default function useFileView() {
   const [viewModel, setViewModel] = useState<ViewModel | undefined>(undefined);
-  const [isLoaded, setIsLoaded] = useState(false);
 
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
@@ -25,12 +24,6 @@ export default function useFileView() {
     }
   }, [isReady]);
 
-  useEffect(() => {
-    if (isLoaded) {
-      imc?.sendMessage(IMCMessageTypeEnum.Loaded);
-    }
-  }, [isLoaded, imc]);
-
   function updateViewModel(viewModel: ViewModel) {
     // sender.sendMessage(ViewBoxMessageTypeEnum.ViewFile, JSON.stringify(file));
     imc?.sendMessage(IMCMessageTypeEnum.WriteViewFile, viewModel);
@@ -39,6 +32,5 @@ export default function useFileView() {
   return {
     viewModel,
     updateViewModel,
-    setIsLoaded,
   };
 }

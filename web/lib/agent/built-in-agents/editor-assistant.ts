@@ -1,4 +1,4 @@
-import { llmProviderOptions } from "@/lib/llm/options";
+import { llmProviderOptions } from "@/lib/modalities/llm/options";
 import { AccessEnum, Agent } from "@pulse-editor/shared-utils";
 
 export const editorAssistantAgent: Agent = {

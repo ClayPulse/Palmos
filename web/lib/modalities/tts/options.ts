@@ -1,14 +1,11 @@
-export interface TTSProviderOption {
-  provider: string;
-  isSupported: boolean;
-  models: {
-    model: string;
-    isSupported: boolean;
-  }[];
-}
+import { AIProviderOption } from "@/lib/types";
 
-export const ttsProviderOptions: TTSProviderOption[] = [
-  {
+type ProviderName = "openai" | "elevenlabs" | "playht";
+
+export const ttsProviderOptions: {
+  [key in ProviderName]: AIProviderOption;
+} = {
+  openai: {
     provider: "openai",
     isSupported: true,
     models: [
@@ -26,7 +23,7 @@ export const ttsProviderOptions: TTSProviderOption[] = [
       },
     ],
   },
-  {
+  elevenlabs: {
     provider: "elevenlabs",
     isSupported: true,
     models: [
@@ -40,7 +37,7 @@ export const ttsProviderOptions: TTSProviderOption[] = [
       },
     ],
   },
-  {
+  playht: {
     provider: "playht",
     isSupported: true,
     models: [
@@ -50,4 +47,4 @@ export const ttsProviderOptions: TTSProviderOption[] = [
       },
     ],
   },
-];
+};

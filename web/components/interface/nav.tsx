@@ -113,13 +113,13 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       )}
 
       <div
-        className={`relative flex h-full w-full overflow-hidden`}
+        className={`flex h-full w-full overflow-hidden`}
       >
         {isShowNavbar && (
           <NavMenu isMenuOpen={isMenuOpen} setIsMenuOpen={setIsMenuOpen} />
         )}
 
-        <div className="min-w-0 grow">{children}</div>
+        {children}
       </div>
     </div>
   );

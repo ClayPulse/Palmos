@@ -1,10 +1,10 @@
 "use client";
 
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
-import { getModelLLM } from "@/lib/llm/llm";
+import { getLLMModel } from "@/lib/modalities/llm/llm";
 import { decrypt } from "@/lib/security/simple-password";
-import { getModelSTT } from "@/lib/stt/stt";
-import { getModelTTS } from "@/lib/tts/tts";
+import { getSTTModel } from "@/lib/modalities/stt/stt";
+import { getTTSModel } from "@/lib/modalities/tts/tts";
 import {
   EditorStates,
   EditorContextType,
@@ -115,7 +115,7 @@ export default function EditorContextProvider({
       settings?.sttModel &&
       settings.apiKeys?.[settings?.sttProvider]
     ) {
-      const model = getModelSTT(
+      const model = getSTTModel(
         settings.apiKeys?.[settings?.sttProvider],
         settings?.sttProvider,
         settings?.sttModel,
@@ -146,7 +146,7 @@ export default function EditorContextProvider({
       settings?.llmModel &&
       settings.apiKeys?.[settings?.llmProvider]
     ) {
-      const model = getModelLLM(
+      const model = getLLMModel(
         settings.apiKeys?.[settings?.llmProvider],
         settings?.llmProvider,
         settings?.llmModel,
@@ -179,7 +179,7 @@ export default function EditorContextProvider({
       settings?.ttsVoice &&
       settings.apiKeys?.[settings?.ttsProvider]
     ) {
-      const model = getModelTTS(
+      const model = getTTSModel(
         settings.apiKeys?.[settings?.ttsProvider],
         settings?.ttsProvider,
         settings?.ttsModel,
@@ -217,7 +217,7 @@ export default function EditorContextProvider({
           editorStates.password,
         );
 
-        const model = getModelSTT(
+        const model = getSTTModel(
           decryptedSTTAPIKey,
           settings?.sttProvider,
           settings?.sttModel,
@@ -244,7 +244,7 @@ export default function EditorContextProvider({
           editorStates.password,
         );
 
-        const model = getModelLLM(
+        const model = getLLMModel(
           decryptedLLMAPIKey,
           settings?.llmProvider,
           settings?.llmModel,
@@ -273,7 +273,7 @@ export default function EditorContextProvider({
           editorStates.password,
         );
 
-        const model = getModelTTS(
+        const model = getTTSModel(
           decryptedTTSAPIKey,
           settings?.ttsProvider,
           settings?.ttsModel,

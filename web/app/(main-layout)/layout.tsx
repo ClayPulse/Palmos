@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { WrappedHeroUIProvider } from "@/components/providers/wrapped-hero-ui-provider";
+import  WrappedHeroUIProvider from "@/components/providers/wrapped-hero-ui-provider";
 import EditorContextProvider from "@/components/providers/editor-context-provider";
 import { Toaster } from "react-hot-toast";
 import "material-icons/iconfont/material-icons.css";

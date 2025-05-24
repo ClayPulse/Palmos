@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {Result} from 'meow';
+import {Text} from 'ink';
+
 import Login from './components/commands/login.js';
 import {Flags} from './lib/cli-flags.js';
 import Publish from './components/commands/publish.js';
@@ -18,12 +20,29 @@ export default function App({cli}: {cli: Result<Flags>}) {
 
 	return (
 		<>
-			{command === 'help' && <Help cli={cli} />}
-			{command === 'chat' && <Chat cli={cli} />}
-			{command === 'login' && <Login cli={cli} />}
-			{command === 'logout' && <Logout cli={cli} />}
-			{command === 'publish' && <Publish cli={cli} />}
-			{command === 'create' && <Create cli={cli} />}
+			{command === 'help' ? (
+				<Help cli={cli} />
+			) : command === 'chat' ? (
+				<Chat cli={cli} />
+			) : command === 'login' ? (
+				<Login cli={cli} />
+			) : command === 'logout' ? (
+				<Logout cli={cli} />
+			) : command === 'publish' ? (
+				<Publish cli={cli} />
+			) : command === 'create' ? (
+				<Create cli={cli} />
+			) : (
+				command !== undefined && (
+					<>
+						<Text color={'redBright'}>Invalid command: {command}</Text>
+						<Text>
+							Run <Text color={'blueBright'}>pulse help</Text> to see the list
+							of available commands.
+						</Text>
+					</>
+				)
+			)}
 		</>
 	);
 }

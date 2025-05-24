@@ -25,9 +25,12 @@ export enum IMCMessageTypeEnum {
   UseSTT = "use-stt",
   UseLLM = "use-llm",
   UseTTS = "use-tts",
-  UseDiffusion = "use-diffusion",
+  UseSpeech2Speech = "use-speech-to-speech",
+  // TODO: Do not use UseX2Y or Use__Gen in the future.
+  // Instead, use a common AI IO adapter.
+  UseImageGen = "use-image-gen",
+  UseVideoGen = "use-video-gen",
   UseOCR = "use-ocr",
-  UseSpeech2Speech = "use-speech2speech",
 
   /* Extension commands*/
   RunExtCommand = "run-ext-command",
@@ -41,8 +44,9 @@ export enum IMCMessageTypeEnum {
   // Notify Pulse that extension is closing
   ExtClose = "ext-close",
 
-  // Notify Pulse that extension has finished loading
-  Loaded = "loaded",
+  // Notify Pulse that extension is loading or loaded
+  UseLoading = "use-loading",
+
   // A message to notify sender that the message
   // has been received and finished processing
   Acknowledge = "acknowledge",
@@ -103,7 +107,7 @@ export enum NotificationTypeEnum {
   Warning = "warning",
 }
 
-/* Extension settings */
+// #region Extension settings
 export enum ExtensionTypeEnum {
   Generic = "generic",
   FileView = "file-view",
@@ -127,6 +131,18 @@ export type ExtensionConfig = {
   // Exposed commands in the extension
   commandsInfoList?: ExtensionCommandInfo[];
 };
+
+export type ExtensionCommandInfo = {
+  name: string;
+  description: string;
+  parameters: Record<string, TypedVariable>;
+};
+
+export type ExtensionCommand = {
+  info: ExtensionCommandInfo;
+  handler: (args: any) => Promise<any>;
+};
+// #endregion
 
 // #region Agent config
 export type Agent = {
@@ -207,7 +223,7 @@ export enum AccessEnum {
   private = "private",
 }
 
-/* AI settings */
+// #region AI settings
 export type STTConfig = {
   provider: string;
   modelName: string;
@@ -225,13 +241,23 @@ export type TTSConfig = {
   voice: string;
 };
 
-export type ExtensionCommandInfo = {
-  name: string;
-  description: string;
-  parameters: Record<string, TypedVariable>;
+export type ImageModelConfig = {
+  provider: string;
+  modelName: string;
 };
 
-export type ExtensionCommand = {
-  info: ExtensionCommandInfo;
-  handler: (args: any) => Promise<any>;
+export type VideoModelConfig = {
+  provider: string;
+  modelName: string;
 };
+// #endregion
+
+// TODO: In the future, add a common AI IO adapter
+// where the input and output types are arbitrary
+// modalities. So we can plug in any AI model,
+// or even a program, for either input or output.
+// e.g. similar to how a function works.
+// export type FuncAdapter = {
+// input:
+// output:
+// }
