@@ -13,6 +13,14 @@ export const imageGenProviderOptions: {
         model: "black-forest-labs/flux-schnell",
         isSupported: true,
       },
+      {
+        model: "black-forest-labs/flux-1.1-pro",
+        isSupported: true,
+      },
+      {
+        model: "black-forest-labs/flux-1.1-pro-ultra",
+        isSupported: true,
+      },
     ],
   },
 };

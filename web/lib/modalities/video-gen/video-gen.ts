@@ -174,14 +174,18 @@ export function getVideoGenModel(
       console.log({ prediction: prediction });
     }
 
-    const imgUrl = prediction.output;
+    const videoUrl =
+      typeof prediction.output === "string"
+        ? prediction.output
+        : prediction.output[prediction.output.length - 1];
 
-    console.log("Video URL:", imgUrl);
 
-    const arrayBuffer = await fetch(imgUrl).then((res) => res.arrayBuffer());
+    console.log("Video URL:", videoUrl);
+
+    const arrayBuffer = await fetch(videoUrl).then((res) => res.arrayBuffer());
 
     return {
-      url: imgUrl,
+      url: videoUrl,
       arrayBuffer: arrayBuffer,
     };
   }

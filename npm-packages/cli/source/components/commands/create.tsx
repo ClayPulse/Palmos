@@ -95,6 +95,12 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 					fs.rmSync(githubDirPath, {recursive: true, force: true});
 				}
 
+				// Remove LICENSE file
+				const licenseFilePath = path.join(process.cwd(), name, 'LICENSE');
+				if (fs.existsSync(licenseFilePath)) {
+					fs.rmSync(licenseFilePath, {force: true});
+				}
+
 				setMessage(
 					<Box>
 						<Spinner type="dots" />
