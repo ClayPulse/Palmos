@@ -3,7 +3,7 @@ Pulse Editor
 </h1>
 
 > [!IMPORTANT]
-> Pulse Editor is still in its early development stage, with a BETA release planned for the end of Q2 2025. Until then, there is no official stable support for extension marketplaces. However, you can explore the platform by developing your own extensions or running our official extensions locally. This is a great opportunity to get an early look at Pulse Editor and start experimenting with its capabilities! See [Extension Development](#pulse-editor-extension-development) below.
+> Pulse Editor is still in its early development stage. We are trying hard to make sure everything works as expected for all different platforms. See [Beta Release Roadmap](#beta-release-roadmap) below.
 
 
 
@@ -22,7 +22,11 @@ Pulse Editor
 
 - [Table of Contents](#table-of-contents)
 - [Introduction](#introduction)
-- [Documentation](#documentation)
+- [Beta Release Roadmap](#beta-release-roadmap)
+    - [Major Beta Release 1 (June 2025):](#major-beta-release-1-june-2025)
+    - [Major Beta Release 2 (planned for 2025 Q3)](#major-beta-release-2-planned-for-2025-q3)
+    - [Major Beta Release 3 (planned for 2025 Q4)](#major-beta-release-3-planned-for-2025-q4)
+- [Documentation (WIP)](#documentation-wip)
 - [Getting Started -- User Guide](#getting-started----user-guide)
   - [Web Client](#web-client)
   - [Mobile Client](#mobile-client)
@@ -44,7 +48,40 @@ Pulse Editor
 
 # Introduction
 Pulse Editor is a cross-platform tool built to make AI-powered creation and development feel intuitive and seamless.
-# Documentation
+
+# Beta Release Roadmap
+🎉🎉Pulse Editor is now in beta. 
+
+We plan to have 2-3 major beta release stages before we reach a stable release version.
+
+### Major Beta Release 1 (June 2025):
+Pulse Editor is now available on Android and Desktop (tested for Windows, needs more testing for Linux and MacOS).
+
+Pulse Editor Marketplace now is available for editor users. Simply download Pulse Editor, and view all available extensions in the extension page. You can also browser and search extensions in [Marketplace Web (WIP)](https://pulse-editor.com/marketplace). As for now, the following extensions are available:
+- (Official) [Pulse Editor Code View (MIT)](https://github.com/ClayPulse/pulse-editor-code-view)
+- (Official) [Pulse Editor Terminal (MIT)](https://github.com/ClayPulse/pulse-editor-terminal)
+- (Official) [Pulse Editor Image Editor (MIT)](https://github.com/Shellishack/pulse-editor-image-editor)
+- (Official) [Pulse Editor Video Editor (MIT)](https://github.com/Shellishack/pulse-editor-video-editor)
+
+Pulse Editor Marketplace Developer Access is now open for application. If you'd like to develop and publish your own extensions to Pulse Editor Marketplace, submit a form here [Developer Beta Access](https://pulse-editor.com/beta).
+
+Even if you haven't got access to publish your extensions to the marketplace, you can still explore Pulse Editor platform by developing your own extensions locally. This is a great opportunity to get an early look at Pulse Editor and start experimenting with its capabilities! See [Extension Development](#pulse-editor-extension-development) below.
+
+
+### Major Beta Release 2 (planned for 2025 Q3)
+Planned items:
+- Documentation
+- Support for web
+- Support remote Pulse Editor instance access
+- Extension app AI builder
+- ... (WIP)
+
+~~Coming Soon: [Making 100 Extension Apps Challenge](https://github.com/shellishack)~~
+
+### Major Beta Release 3 (planned for 2025 Q4)
+... (WIP)
+
+# Documentation (WIP)
 The documentation will be available at https://docs.pulse-editor.com. You can find documentation repository [here](https://github.com/ClayPulse/docs).
 
 # Getting Started -- User Guide
@@ -137,6 +174,10 @@ npm run desktop-build
 If you run `npm run desktop-build` for a production build, you can find an executable file inside `build/desktop`.
 
 ## VSCode Extension Development
+> [!warning]
+> The code in `vscode-extension` might be out of date, as it was made for an Alpha Demo.  
+> Support for using Pulse Editor as an extension in VSCode might be discontinued, or get simply replaced with a webview.
+
 Pulse Editor uses VSCode Webview API to create a VSCode Extension. To develop VScode Extension locally, open the `vscode-extension` in a separate VSCode window. Then press F5 to launch debug task.
 
 Note that you will also need to run the Nextjs server locally during development.
