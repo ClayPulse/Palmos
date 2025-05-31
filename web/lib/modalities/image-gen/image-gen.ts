@@ -145,7 +145,11 @@ export function getImageGenModel(
       console.log({ prediction: prediction });
     }
 
-    const imgUrl = prediction.output[prediction.output.length - 1];
+    // Get the last output if output is an array, else if it is string get the output directly
+    const imgUrl =
+      typeof prediction.output === "string"
+        ? prediction.output
+        : prediction.output[prediction.output.length - 1];
 
     const arrayBuffer = await fetch(imgUrl).then((res) => res.arrayBuffer());
 
