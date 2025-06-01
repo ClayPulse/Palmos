@@ -1,12 +1,15 @@
-name: Build Capacitor Release
+name: Build Mobile
 
 env:
   ANDROID_SDK_VERSION: "35.0.0"
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "web/**"
+      - "android/**"
+      - ".github/workflows/build-mobile.yml"
 
 jobs:
   build:
@@ -35,7 +38,7 @@ jobs:
 
       - name: Get Keystore
         run: |
-          mkdir android/.keystore 
+          mkdir .keystore 
           echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > android/.keystore/keystore.jks
 
       - name: Setup Node.js
@@ -43,8 +46,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install web dependencies
+        run: npm install --workspace=web
+
+      - name: Install mobile dependencies
+        run: npm install --workspace=mobile
 
       - name: Build Web App
         run: npm run build
@@ -57,11 +63,3 @@ jobs:
 
       - name: Build Capacitor App
         run: npx cap build android --keystorepath .keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
-
-      - name: Move APK
-        run: mv android/app/build/outputs/apk/release/app-release-signed.apk pulse-editor.apk
-
-      - name: Create Release Build (Android)
-        uses: softprops/action-gh-release@v2
-        with:
-          files: pulse-editor.apk

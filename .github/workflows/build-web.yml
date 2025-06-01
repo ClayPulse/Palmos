@@ -1,0 +1,35 @@
+name: Build Web
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "web/**"
+      - ".github/workflows/build-web.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # echo node version to the log
+      - name: Echo Node.js version
+        run: node --version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # echo node version to the log
+      - name: Echo npm version
+        run: npm --version
+
+      - name: Install web dependencies
+        run: npm install --workspace=web
+
+      - name: Build web app
+        run: |
+          npm run web-build

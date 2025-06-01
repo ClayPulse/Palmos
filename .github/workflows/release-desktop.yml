@@ -6,7 +6,7 @@ on:
       - "v*.*.*"
 
 jobs:
-  build:
+  release:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
