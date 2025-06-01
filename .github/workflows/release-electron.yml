@@ -19,10 +19,16 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install web dependencies
+        run: npm install --workspace=web
+
+      - name: Install desktop dependencies
+        run: npm install --workspace=desktop
+
+      - name: Rebuild native modules
+        run: npm run rebuild-native --workspace=desktop
 
       - name: Build Electron App
         run: |

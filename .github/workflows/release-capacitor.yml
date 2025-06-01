@@ -1,5 +1,8 @@
 name: Build Capacitor Release
 
+env:
+  ANDROID_SDK_VERSION: "35.0.0"
+
 on:
   push:
     tags:
@@ -27,8 +30,8 @@ jobs:
 
       - name: Install Android SDK build tools
         run: |
-          sdkmanager "build-tools;34.0.0"
-          echo "$ANDROID_SDK_ROOT/build-tools/34.0.0" >> $GITHUB_PATH
+          sdkmanager "build-tools;${{env.ANDROID_SDK_VERSION}}"
+          echo "$ANDROID_SDK_ROOT/build-tools/${{env.ANDROID_SDK_VERSION}}" >> $GITHUB_PATH
 
       - name: Get Keystore
         run: |
@@ -38,7 +41,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 20
 
       - name: Install dependencies
         run: npm install

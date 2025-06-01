@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "dev": "electron .",
-    "build": "electron-forge package"
+    "build": "electron-forge package",
+    "rebuild-native": "../node_modules/.bin/electron-rebuild -v 36.1.0"
   },
   "dependencies": {
     "electron-serve": "^2.1.1",
