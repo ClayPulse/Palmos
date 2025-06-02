@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -37,7 +37,7 @@ jobs:
         run: npm install --workspace=capacitor-plugin
 
       - name: Build capacitor-plugin
-        run: npm run build --workspace=capacitor-plugin
+        run: npm run capacitor-plugin-build
 
       - name: Install web dependencies
         run: npm install --workspace=web

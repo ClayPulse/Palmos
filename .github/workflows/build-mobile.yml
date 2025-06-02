@@ -59,22 +59,24 @@ jobs:
         run: npm install --workspace=capacitor-plugin
 
       - name: Build capacitor-plugin
-        run: npm run build --workspace=capacitor-plugin
+        run: npm run capacitor-plugin-build
 
       - name: Install web dependencies
         run: npm install --workspace=web
+        
+      - name: Build Web App
+        run: npm run web-build
 
       - name: Install mobile dependencies
         run: npm install --workspace=mobile
-
-      - name: Build Web App
-        run: npm run build --workspace=web
 
       - name: Change Android Project Permission
         run: chmod +x mobile/android/gradlew
 
       - name: Sync Capacitor App
         run: npx cap sync
+        working-directory: mobile
 
       - name: Build Capacitor App
         run: npx cap build android --keystorepath .keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
+        working-directory: mobile
