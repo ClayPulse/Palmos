@@ -8,6 +8,9 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: write
+
 jobs:
   release:
     strategy:
@@ -19,10 +22,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
-          java-version: "17"
+          java-version: "21"
           distribution: "temurin"
 
       - name: Setup Android SDK
@@ -35,28 +38,45 @@ jobs:
 
       - name: Get Keystore
         run: |
-          mkdir android/.keystore 
-          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > android/.keystore/keystore.jks
+          mkdir ~/.keystore 
+          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > ~/.keystore/keystore.jks
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install dependencies
-        run: npm install
+      - name: Install shared-utils dependencies
+        run: npm install --workspace=npm-packages/shared-utils
+
+      - name: Build shared-utils
+        run: npm run shared-utils-build
+
+      - name: Install capacitor-plugin dependencies
+        run: npm install --workspace=capacitor-plugin
+
+      - name: Build capacitor-plugin
+        run: npm run capacitor-plugin-build
+
+      - name: Install web dependencies
+        run: npm install --workspace=web
 
       - name: Build Web App
-        run: npm run build
+        run: npm run web-build
+
+      - name: Install mobile dependencies
+        run: npm install --workspace=mobile
 
       - name: Change Android Project Permission
-        run: chmod +x android/gradlew
+        run: chmod +x mobile/android/gradlew
 
       - name: Sync Capacitor App
         run: npx cap sync
+        working-directory: mobile
 
       - name: Build Capacitor App
-        run: npx cap build android --keystorepath .keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
+        run: npx cap build android --keystorepath ~/.keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
+        working-directory: mobile
 
       - name: Move APK
         run: mv android/app/build/outputs/apk/release/app-release-signed.apk pulse-editor.apk
