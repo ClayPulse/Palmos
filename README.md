@@ -133,14 +133,21 @@ sudo apt install -y make python build-essential
 
 Then you can rebuild native dependencies in `desktop/` using.
 ```
-# For Windows
-./node_modules/.bin/electron-rebuild.ps1 -m desktop -v (electron_version)
-# For Linux
-./node_modules/.bin/electron-rebuild -m desktop -v (electron_version)
+cd desktop
+npm run rebuild-native
 ```
-For example, Electron may warn you need NODE_MODULE_VERSION xxx. If you have electron@35.0.2 installed (check desktop/package.json), you can run:
+Electron may warn you need NODE_MODULE_VERSION xxx. If you have electron@35.0.2 installed (check desktop/package.json), you can run:
 ```
-./node_modules/.bin/electron-rebuild -m desktop -v 35.0.2
+electron-rebuild -v 35.0.2
+```
+
+Start development:
+```
+npm run desktop-dev
+```
+Build production release:
+```
+npm run desktop-build
 ```
 
 
@@ -152,11 +159,15 @@ npm run web-dev
 ```
 
 ## Mobile Development
-Pulse Editor uses Capacitor.js to create mobile apps on Android and iOS. To develop mobile app locally, run the following:
+Pulse Editor uses Capacitor.js to create mobile apps on Android and iOS. To develop mobile app locally, try the following.
+
+Start development:
+```
+npm run android-dev
+```
+
+Build production release
 ```bash
-# Development with Live Reload. You need to first run a local development server as specified above.
-cd mobile
-npx cap run android -l --host [your_LAN_server_that_your_phone_can_access]
 # Production
 npm run android-build
 ```

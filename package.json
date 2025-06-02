@@ -4,7 +4,6 @@
     "private": true,
     "workspaces": [
         "web",
-        "desktop",
         "mobile",
         "capacitor-plugin",
         "vscode-extension",
@@ -15,15 +14,15 @@
         "web-dev": "npm run dev --workspace=web",
         "web-build": "npm run build --workspace=web",
         "web-start": "npm run start --workspace=web",
-        "desktop-dev": "npm run dev --workspace=desktop",
-        "desktop-build": "npm run web-build && npm run build --workspace=desktop",
+        "desktop-dev": "npm --prefix ./desktop run dev",
+        "desktop-build": "npm run web-build && npm --prefix ./desktop run build",
         "android-dev": "npm run web-build && npm run android-dev --workspace=mobile",
         "android-build": "npm run web-build && npm run android-build --workspace=mobile",
         "react-api-build": "npm run build --workspace=npm-packages/react-api",
         "shared-utils-build": "npm run build --workspace=npm-packages/shared-utils",
         "cli-dev": "npm run dev --workspace=cli",
         "cli-build": "npm run build --workspace=cli",
-        "capacitor-plugin-build-android": "npm run verify:android --workspace=capacitor-plugin"
+        "capacitor-plugin-build": "npm run build --workspace=capacitor-plugin"
     },
     "devDependencies": {
         "@changesets/cli": "^2.29.4"

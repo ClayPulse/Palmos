@@ -5,8 +5,11 @@ on:
     tags:
       - "v*.*.*"
 
+permissions:
+  contents: write
+
 jobs:
-  build:
+  release:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
@@ -19,10 +22,30 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20.x
+          node-version: 20
 
-      - name: Install dependencies
+      - name: Install shared-utils dependencies
+        run: npm install --workspace=npm-packages/shared-utils
+
+      - name: Build shared-utils
+        run: npm run shared-utils-build
+
+      - name: Install capacitor-plugin dependencies
+        run: npm install --workspace=capacitor-plugin
+
+      - name: Build capacitor-plugin
+        run: npm run capacitor-plugin-build
+
+      - name: Install web dependencies
+        run: npm install --workspace=web
+
+      - name: Install desktop dependencies
         run: npm install
+        working-directory: desktop
+
+      - name: Rebuild native modules
+        run: npm run rebuild-native
+        working-directory: desktop
 
       - name: Build Electron App
         run: |

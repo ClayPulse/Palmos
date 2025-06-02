@@ -1,0 +1,87 @@
+name: Build Capacitor Release
+
+env:
+  ANDROID_SDK_VERSION: "35.0.0"
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    strategy:
+      matrix:
+        target: [android]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK build tools
+        run: |
+          sdkmanager "build-tools;${{env.ANDROID_SDK_VERSION}}"
+          echo "$ANDROID_SDK_ROOT/build-tools/${{env.ANDROID_SDK_VERSION}}" >> $GITHUB_PATH
+
+      - name: Get Keystore
+        run: |
+          mkdir ~/.keystore 
+          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > ~/.keystore/keystore.jks
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install shared-utils dependencies
+        run: npm install --workspace=npm-packages/shared-utils
+
+      - name: Build shared-utils
+        run: npm run shared-utils-build
+
+      - name: Install capacitor-plugin dependencies
+        run: npm install --workspace=capacitor-plugin
+
+      - name: Build capacitor-plugin
+        run: npm run capacitor-plugin-build
+
+      - name: Install web dependencies
+        run: npm install --workspace=web
+
+      - name: Build Web App
+        run: npm run web-build
+
+      - name: Install mobile dependencies
+        run: npm install --workspace=mobile
+
+      - name: Change Android Project Permission
+        run: chmod +x mobile/android/gradlew
+
+      - name: Sync Capacitor App
+        run: npx cap sync
+        working-directory: mobile
+
+      - name: Build Capacitor App
+        run: npx cap build android --keystorepath ~/.keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
+        working-directory: mobile
+
+      - name: Move APK
+        run: mv android/app/build/outputs/apk/release/app-release-signed.apk pulse-editor.apk
+
+      - name: Create Release Build (Android)
+        uses: softprops/action-gh-release@v2
+        with:
+          files: pulse-editor.apk

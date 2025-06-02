@@ -1,0 +1,42 @@
+name: Build Web
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "web/**"
+      - ".github/workflows/build-web.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      
+      - name: Install shared-utils dependencies
+        run: npm install --workspace=npm-packages/shared-utils
+
+      - name: Build shared-utils
+        run: npm run shared-utils-build
+
+      - name: Install capacitor-plugin dependencies
+        run: npm install --workspace=capacitor-plugin
+
+      - name: Build capacitor-plugin
+        run: npm run capacitor-plugin-build
+      
+      - name: Install web dependencies
+        run: npm install --workspace=web
+
+      - name: Build web app
+        run: |
+          npm run web-build
