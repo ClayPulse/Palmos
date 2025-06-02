@@ -11,7 +11,7 @@ function moveModule(moduleList: string[], resourcePath: string) {
   });
 }
 
-const electronModules = ["electron-serve"];
+const electronModules = ["electron-serve", "ws"];
 
 const config: ForgeConfig = {
   outDir: "../build/desktop",
