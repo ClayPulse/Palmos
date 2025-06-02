@@ -41,9 +41,8 @@ jobs:
 
       - name: Get Keystore
         run: |
-          mkdir .keystore 
-          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > .keystore/keystore.jks
-        working-directory: mobile
+          mkdir ~/.keystore 
+          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > ~/.keystore/keystore.jks
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -64,7 +63,7 @@ jobs:
 
       - name: Install web dependencies
         run: npm install --workspace=web
-        
+
       - name: Build Web App
         run: npm run web-build
 
@@ -79,6 +78,5 @@ jobs:
         working-directory: mobile
 
       - name: Build Capacitor App
-        run: npx cap build android --keystorepath ./.keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
+        run: npx cap build android --keystorepath ~/.keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
         working-directory: mobile
- 
