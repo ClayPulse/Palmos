@@ -5,7 +5,7 @@ import fs from "fs-extra";
 function moveModule(moduleList: string[], resourcePath: string) {
   moduleList.forEach((module) => {
     fs.moveSync(
-      path.join(resourcePath, module),
+      path.join("./node_modules", module),
       path.join(resourcePath, "app/node_modules", module)
     );
   });
@@ -20,7 +20,7 @@ const config: ForgeConfig = {
     icon: path.join(__dirname, "../shared-assets/icons/electron/pulse_editor"),
     // Copy the electron modules and the nextjs build to the electron build.
     extraResource: electronModules
-      .map((module) => `../node_modules/${module}`)
+      .map((module) => `./node_modules/${module}`)
       .concat("../build/next"),
     afterComplete: [
       (extractPath, electronVersion, platform, arch, done) => {
@@ -34,7 +34,6 @@ const config: ForgeConfig = {
             path.join(extractPath, "pulse-editor.app/Contents/Resources")
           );
         } else if (platform === "linux") {
-          moveModule(electronModules, path.join(extractPath, "resources"));
         }
 
         done();

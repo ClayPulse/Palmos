@@ -25,10 +25,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v3
         with:
-          java-version: "17"
+          java-version: "21"
           distribution: "temurin"
 
       - name: Setup Android SDK
@@ -43,6 +43,7 @@ jobs:
         run: |
           mkdir .keystore 
           echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > .keystore/keystore.jks
+        working-directory: mobile
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -78,5 +79,6 @@ jobs:
         working-directory: mobile
 
       - name: Build Capacitor App
-        run: npx cap build android --keystorepath .keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
+        run: npx cap build android --keystorepath ./.keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
         working-directory: mobile
+ 

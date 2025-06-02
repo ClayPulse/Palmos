@@ -4,7 +4,6 @@
     "private": true,
     "workspaces": [
         "web",
-        "desktop",
         "mobile",
         "capacitor-plugin",
         "vscode-extension",
@@ -15,8 +14,8 @@
         "web-dev": "npm run dev --workspace=web",
         "web-build": "npm run build --workspace=web",
         "web-start": "npm run start --workspace=web",
-        "desktop-dev": "npm run dev --workspace=desktop",
-        "desktop-build": "npm run web-build && npm run build --workspace=desktop",
+        "desktop-dev": "npm --prefix ./desktop run dev",
+        "desktop-build": "npm run web-build && npm --prefix ./desktop run build",
         "android-dev": "npm run web-build && npm run android-dev --workspace=mobile",
         "android-build": "npm run web-build && npm run android-build --workspace=mobile",
         "react-api-build": "npm run build --workspace=npm-packages/react-api",

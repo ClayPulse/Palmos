@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -43,10 +43,12 @@ jobs:
         run: npm install --workspace=web
 
       - name: Install desktop dependencies
-        run: npm install --workspace=desktop
+        run: npm install
+        working-directory: desktop
 
       - name: Rebuild native modules
-        run: npm run rebuild-native --workspace=desktop
+        run: npm run rebuild-native
+        working-directory: desktop
 
       - name: Build Electron App
         run: |
