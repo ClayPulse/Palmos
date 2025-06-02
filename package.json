@@ -23,7 +23,7 @@
         "shared-utils-build": "npm run build --workspace=npm-packages/shared-utils",
         "cli-dev": "npm run dev --workspace=cli",
         "cli-build": "npm run build --workspace=cli",
-        "capacitor-plugin-build-android": "npm run verify:android --workspace=capacitor-plugin"
+        "capacitor-plugin-build": "npm run verify:android --workspace=capacitor-plugin"
     },
     "devDependencies": {
         "@changesets/cli": "^2.29.4"

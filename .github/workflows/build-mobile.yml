@@ -11,6 +11,9 @@ on:
       - "android/**"
       - ".github/workflows/build-mobile.yml"
 
+permissions:
+  contents: read
+
 jobs:
   build:
     strategy:
@@ -39,12 +42,24 @@ jobs:
       - name: Get Keystore
         run: |
           mkdir .keystore 
-          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > android/.keystore/keystore.jks
+          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > .keystore/keystore.jks
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+
+      - name: Install shared-utils dependencies
+        run: npm install --workspace=npm-packages/shared-utils
+
+      - name: Build shared-utils
+        run: npm run shared-utils-build
+
+      - name: Install capacitor-plugin dependencies
+        run: npm install --workspace=capacitor-plugin
+
+      - name: Build capacitor-plugin
+        run: npm run build --workspace=capacitor-plugin
 
       - name: Install web dependencies
         run: npm install --workspace=web
@@ -53,10 +68,10 @@ jobs:
         run: npm install --workspace=mobile
 
       - name: Build Web App
-        run: npm run build
+        run: npm run build --workspace=web
 
       - name: Change Android Project Permission
-        run: chmod +x android/gradlew
+        run: chmod +x mobile/android/gradlew
 
       - name: Sync Capacitor App
         run: npx cap sync

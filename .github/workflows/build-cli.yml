@@ -6,6 +6,9 @@ on:
     paths:
       - "npm-packages/cli/**"
       - ".github/workflows/build-cli.yml"
+      
+permissions:
+  contents: read
 
 jobs:
   build:
