@@ -79,7 +79,7 @@ jobs:
         working-directory: mobile
 
       - name: Move APK
-        run: mv android/app/build/outputs/apk/release/app-release-signed.apk pulse-editor.apk
+        run: mv mobile/android/app/build/outputs/apk/release/app-release-signed.apk pulse-editor.apk
 
       - name: Create Release Build (Android)
         uses: softprops/action-gh-release@v2
