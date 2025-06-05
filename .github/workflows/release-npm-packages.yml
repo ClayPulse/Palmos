@@ -8,6 +8,9 @@ permissions:
 on:
   push:
     branches: ["main"]
+    paths:
+      - "npm-packages/shared-utils/**"
+      - "npm-packages/react-api/**"
 
 jobs:
   release:

@@ -3,6 +3,8 @@ name: Release Pulse CLI
 on:
   push:
     branches: ["main"]
+    paths:
+      - "npm-packages/cli/**"
 
 jobs:
   release:

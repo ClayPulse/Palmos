@@ -8,7 +8,7 @@ on:
     paths:
       - "npm-packages/shared-utils/**"
       - "npm-packages/react-api/**"
-      - ".github/workflows/build-desktop.yml"
+      - ".github/workflows/build-npm-packages.yml"
 
 permissions:
   contents: read
