@@ -1,4 +1,4 @@
-name: Test deployment
+name: Build docs
 
 on:
   pull_request:
@@ -6,6 +6,9 @@ on:
       - main
     # Review gh actions docs if you want to further define triggers, paths, etc
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+
+permissions:
+  contents: read
 
 jobs:
   test-deploy:
@@ -25,5 +28,5 @@ jobs:
         working-directory: docs
 
       - name: Test build website
-        run: npm build
+        run: npm run build
         working-directory: docs
