@@ -6,7 +6,7 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
   title: "Pulse Editor Documentation",
-  tagline: "AI-powered editor for developers nad creators on any platform",
+  tagline: "A modular, cross-platform, AI-powered creative platform built to adapt to your ideas.",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
@@ -40,8 +40,7 @@ const config: Config = {
           sidebarPath: "./sidebars.ts",
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/ClayPulse/pulse-editor/tree/main/docs/",
+          editUrl: "https://github.com/ClayPulse/pulse-editor/tree/main/docs/",
         },
         blog: {
           showReadingTime: true,
@@ -51,8 +50,7 @@ const config: Config = {
           },
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
-          editUrl:
-            "https://github.com/ClayPulse/pulse-editor/tree/main/docs/",
+          editUrl: "https://github.com/ClayPulse/pulse-editor/tree/main/docs/",
           // Useful options to enforce blogging best practices
           onInlineTags: "warn",
           onInlineAuthors: "warn",
@@ -76,12 +74,27 @@ const config: Config = {
       },
       items: [
         {
-          type: "docSidebar",
-          sidebarId: "tutorialSidebar",
+          to: "/docs/guide",
+          sidebarId: "guideSidebar",
           position: "left",
-          label: "Tutorial",
+          label: "Guide",
         },
         { to: "/blog", label: "Blog", position: "left" },
+        {
+          to: "/docs/api-reference",
+          sidebarId: "apiRefSidebar",
+          label: "API Reference",
+          position: "left",
+        },
+        {
+          type: "docsVersionDropdown",
+          position: "right",
+          versions: {
+            current: {
+              label: "Latest",
+            },
+          },
+        },
         {
           href: "https://github.com/ClayPulse/pulse-editor",
           label: "GitHub",
@@ -93,11 +106,19 @@ const config: Config = {
       style: "dark",
       links: [
         {
-          title: "Docs",
+          title: "Section",
           items: [
             {
-              label: "Tutorial",
-              to: "/docs/intro",
+              label: "Guide",
+              to: "/docs/guide",
+            },
+            {
+              label: "Blog",
+              to: "/blog",
+            },
+            {
+              label: "API Reference",
+              to: "/docs/api-reference",
             },
           ],
         },
@@ -106,16 +127,7 @@ const config: Config = {
           items: [
             {
               label: "Discord",
-              href: "https://discord.gg/DjssdjEq",
-            },
-          ],
-        },
-        {
-          title: "More",
-          items: [
-            {
-              label: "Blog",
-              to: "/blog",
+              href: "https://discord.com/invite/s6J54HFxQp",
             },
             {
               label: "GitHub",
@@ -123,8 +135,21 @@ const config: Config = {
             },
           ],
         },
+        {
+          title: "Website",
+          items: [
+            {
+              label: "Pulse Editor",
+              href: "https://pulse-editor.com",
+            },
+            {
+              label: "Marketplace",
+              href: "https://pulse-editor.com/marketplace",
+            },
+          ],
+        },
       ],
-      copyright: `Copyright © ${new Date().getFullYear()} ClayPulse. Built with Docusaurus.`,
+      copyright: `ClayPulse AI © ${new Date().getFullYear()}`,
     },
     prism: {
       theme: prismThemes.github,

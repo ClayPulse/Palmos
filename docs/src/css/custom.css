@@ -6,25 +6,56 @@
 
 /* You can override the default Infima variables here. */
 :root {
-  --ifm-color-primary: #2e8555;
-  --ifm-color-primary-dark: #29784c;
-  --ifm-color-primary-darker: #277148;
-  --ifm-color-primary-darkest: #205d3b;
-  --ifm-color-primary-light: #33925d;
-  --ifm-color-primary-lighter: #359962;
-  --ifm-color-primary-lightest: #3cad6e;
-  --ifm-code-font-size: 95%;
+  --ifm-color-primary: #754100;
+  --ifm-color-primary-dark: #693a00;
+  --ifm-color-primary-darker: #633700;
+  --ifm-color-primary-darkest: #522d00;
+  --ifm-color-primary-light: #814700;
+  --ifm-color-primary-lighter: #874b00;
+  --ifm-color-primary-lightest: #985400;
+  --ifm-background-color: #fff8eb;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
-[data-theme='dark'] {
-  --ifm-color-primary: #25c2a0;
-  --ifm-color-primary-dark: #21af90;
-  --ifm-color-primary-darker: #1fa588;
-  --ifm-color-primary-darkest: #1a8870;
-  --ifm-color-primary-light: #29d5b0;
-  --ifm-color-primary-lighter: #32d8b4;
-  --ifm-color-primary-lightest: #4fddbf;
+[data-theme="dark"] {
+  --ifm-color-primary: #fadda0;
+  --ifm-color-primary-dark: #f8cf79;
+  --ifm-color-primary-darker: #f7c866;
+  --ifm-color-primary-darkest: #f4b32b;
+  --ifm-color-primary-light: #fcebc7;
+  --ifm-color-primary-lighter: #fdf2da;
+  --ifm-color-primary-lightest: #ffffff;
+  --ifm-background-color: #191919;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
+
+.homepageWrapper {
+  height: 100%;
+  width: 100%;
+  min-height: 480px;
+}
+
+.quickLinks {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  justify-content: center;
+}
+
+/* Change to smaller font when screen is less than 480 wide */
+@media screen and (max-width: 540px) {
+  .hero__title {
+    font-size: 34px;
+  }
+  .hero__subtitle {
+    font-size: 22px;
+  }
+
+  .quickLinks {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    justify-content: center;
+  }
 }
