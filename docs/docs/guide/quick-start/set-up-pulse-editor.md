@@ -2,7 +2,7 @@
 sidebar_position: 1
 ---
 
-# Set up Pulse Editor
+# Set Up Pulse Editor
 
 ## Configuring AI models in Pulse Editor
 

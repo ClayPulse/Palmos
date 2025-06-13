@@ -6,6 +6,7 @@ import Layout from "@theme/Layout";
 import Heading from "@theme/Heading";
 
 import styles from "./index.module.css";
+import "material-icons/iconfont/material-icons.css";
 
 function HomepageHeader() {
   const { siteConfig } = useDocusaurusContext();
