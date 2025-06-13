@@ -6,7 +6,8 @@ import type * as Preset from "@docusaurus/preset-classic";
 
 const config: Config = {
   title: "Pulse Editor Documentation",
-  tagline: "A modular, cross-platform, AI-powered creative platform built to adapt to your ideas.",
+  tagline:
+    "A modular, cross-platform, AI-powered creative platform built to adapt to your ideas.",
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
@@ -94,6 +95,16 @@ const config: Config = {
               label: "Latest",
             },
           },
+        },
+        {
+          href: "https://pulse-editor.com",
+          label: "Website",
+          position: "right",
+        },
+        {
+          href: "https://discord.com/invite/s6J54HFxQp",
+          label: "Discord",
+          position: "right",
         },
         {
           href: "https://github.com/ClayPulse/pulse-editor",
