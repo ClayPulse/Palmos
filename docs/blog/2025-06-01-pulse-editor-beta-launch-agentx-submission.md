@@ -54,7 +54,7 @@ We’re opening up early access for developers to build and publish extensions f
 - 🐞 Found a bug or have a feature request? [Open an issue on GitHub](https://github.com/ClayPulse/pulse-editor/issues)
 
 Documentation is still a work in progress, but updates are coming soon at:
-- [GitHub Wiki / Docs](https://github.com/ClayPulse/pulse-editor)
+- [GitHub ReadMe](https://github.com/ClayPulse/pulse-editor)
 - [Official Docs Site](https://docs.pulse-editor.com)
 
 ---
