@@ -1,4 +1,8 @@
-# Develop Extensions
+---
+sidebar_position: 5
+---
+
+# Development Guide
 
 ## Choose your framework
 
