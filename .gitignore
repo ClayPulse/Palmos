@@ -9,6 +9,7 @@ node_modules
 # misc
 .DS_Store
 *.pem
+*.cert
 
 # local env files
 .env*.local
