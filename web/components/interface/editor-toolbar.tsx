@@ -12,7 +12,7 @@ import toast from "react-hot-toast";
 import ExtensionModal from "../modals/extension-modal";
 import AgentConfigModal from "../modals/agent-config-modal";
 import useSpeech2Speech from "@/lib/hooks/use-speech2speech";
-import { getAPIKey } from "@/lib/settings/settings";
+import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
 import { getAgentLLMConfig, runAgentMethod } from "@/lib/agent/agent-runner";
 import useExtensionCommands from "@/lib/hooks/use-extension-commands";

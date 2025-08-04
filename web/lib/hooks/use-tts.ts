@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { BaseTTS, getTTSModel } from "../modalities/tts/tts";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { getAPIKey } from "../settings/settings";
+import { getAPIKey } from "../settings/api-manager-utils";
 
 export default function useTTS() {
   const editorContext = useContext(EditorContext);

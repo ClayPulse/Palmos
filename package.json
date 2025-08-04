@@ -12,6 +12,7 @@
     ],
     "scripts": {
         "web-dev": "npm run dev --workspace=web",
+        "web-dev-https": "npm run dev-https --workspace=web",
         "web-build": "npm run build --workspace=web",
         "web-start": "npm run start --workspace=web",
         "desktop-dev": "npm --prefix ./desktop run dev",

@@ -4,7 +4,7 @@ import { getPlatform } from "../platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
 import { CapacitorAPI } from "../platform-api/capacitor/capacitor-api";
 import { ElectronAPI } from "../platform-api/electron/electron-api";
-import { RemoteInstance } from "../platform-api/remote-instance/remote-instance-api";
+import { RemoteInstance } from "../platform-api/remote-workspace/remote-workspace-api";
 
 export function usePlatformApi() {
   // const platformApi = useRef<AbstractPlatformAPI | undefined>(undefined);

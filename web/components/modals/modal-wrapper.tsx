@@ -8,6 +8,7 @@ export default function ModalWrapper({
   title,
   isShowGoBack,
   goBackCallback,
+  placement = undefined,
 }: {
   children?: React.ReactNode;
   isOpen: boolean;
@@ -15,6 +16,14 @@ export default function ModalWrapper({
   title: string;
   isShowGoBack?: boolean;
   goBackCallback?: () => void;
+  placement?:
+    | "center"
+    | "bottom"
+    | "top"
+    | "auto"
+    | "top-center"
+    | "bottom-center"
+    | undefined;
 }) {
   return (
     <Modal
@@ -44,12 +53,13 @@ export default function ModalWrapper({
         setIsOpen(false);
       }}
       isDismissable={false}
+      placement={placement}
     >
       <ModalContent>
         <div className="h-fit w-full">
           {isShowGoBack && (
             <Button
-              className="absolute left-1 top-1 rounded-full text-foreground-500"
+              className="text-foreground-500 absolute top-1 left-1 rounded-full"
               isIconOnly
               onPress={goBackCallback}
               size="sm"

@@ -15,7 +15,7 @@ import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "./editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
-import { getAPIKey } from "@/lib/settings/settings";
+import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { runAgentMethod } from "@/lib/agent/agent-runner";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
 import { getTTSModel } from "@/lib/modalities/tts/tts";

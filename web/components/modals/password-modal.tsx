@@ -5,9 +5,9 @@ import { encrypt } from "@/lib/security/simple-password";
 import Icon from "../misc/icon";
 import ModalWrapper from "./modal-wrapper";
 import { EditorContext } from "../providers/editor-context-provider";
-import { getAPIKey, setAPIKey } from "@/lib/settings/settings";
+import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 
-export default function PasswordScreen({
+export default function PasswordModal({
   isOpen,
   setIsOpen,
 }: {

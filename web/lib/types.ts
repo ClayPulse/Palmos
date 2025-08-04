@@ -71,6 +71,9 @@ export type EditorStates = {
   viewIds: string[];
 
   aiModels?: AIModels;
+
+  // The currently selected workspace
+  currentWorkspace?: RemoteWorkspace;
 };
 
 export type PersistentSettings = {
@@ -245,4 +248,23 @@ export type IMCContextType = {
   polyIMC: PolyIMC | undefined;
 };
 
+// #endregion
+
+// #region Pulse Editor Cloud
+export type RemoteWorkspace = {
+  id: string;
+  name: string;
+  address: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+};
+
+export type Session = {
+  user: {
+    name: string;
+    email: string;
+    image: string;
+  };
+  expires: string;
+};
 // #endregion

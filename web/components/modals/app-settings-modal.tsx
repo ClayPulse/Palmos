@@ -21,7 +21,7 @@ import { PlatformEnum } from "@/lib/types";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
 import { llmProviderOptions } from "@/lib/modalities/llm/options";
-import { getAPIKey, setAPIKey } from "@/lib/settings/settings";
+import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 import { imageGenProviderOptions } from "@/lib/modalities/image-gen/options";
 import { videoGenProviderOptions } from "@/lib/modalities/video-gen/options";
 
@@ -945,20 +945,15 @@ export default function AppSettingsModal({
 
   return (
     <ModalWrapper isOpen={isOpen} setIsOpen={setIsOpen} title={"App Settings"}>
-      <>
-        <div className="flex w-full flex-col gap-2">
-          <AISettings editorContext={editorContext} />
-          <Divider />
-          <SecuritySettings
-            editorContext={editorContext}
-            setIsOpen={setIsOpen}
-          />
-          <Divider />
-          <DevExtensionSettings editorContext={editorContext} />
-          <Divider />
-          <ExtensionDefinedSettings editorContext={editorContext} />
-        </div>
-      </>
+      <div className="flex w-full flex-col gap-2">
+        <AISettings editorContext={editorContext} />
+        <Divider />
+        <SecuritySettings editorContext={editorContext} setIsOpen={setIsOpen} />
+        <Divider />
+        <DevExtensionSettings editorContext={editorContext} />
+        <Divider />
+        <ExtensionDefinedSettings editorContext={editorContext} />
+      </div>
     </ModalWrapper>
   );
 }
