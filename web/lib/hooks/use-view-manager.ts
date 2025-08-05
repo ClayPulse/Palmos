@@ -157,12 +157,12 @@ export function useViewManager() {
   }
 
   return {
+    activeViewModel,
+    viewCount,
     openFileInView,
-    getViewByFilePath,
     closeView,
+    getViewByFilePath,
     updateViewModel,
     closeAllViews,
-    viewCount,
-    activeViewModel
   };
 }

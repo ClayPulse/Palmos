@@ -1,5 +1,29 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.22
+
+### Patch Changes
+
+- Fix getwindowid IMC issue
+
+## 0.1.1-alpha.21
+
+### Patch Changes
+
+- Rebuild packages
+
+## 0.1.1-alpha.20
+
+### Patch Changes
+
+- Add imc debug message for ignored messages
+
+## 0.1.1-alpha.19
+
+### Patch Changes
+
+- Add new AI modality
+
 ## 0.1.1-alpha.18
 
 ### Patch Changes

@@ -31,6 +31,7 @@ export enum IMCMessageTypeEnum {
   UseImageGen = "use-image-gen",
   UseVideoGen = "use-video-gen",
   UseOCR = "use-ocr",
+  UseMusicGen = "use-music-gen",
 
   /* Extension commands*/
   RunExtCommand = "run-ext-command",

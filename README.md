@@ -44,6 +44,8 @@ Pulse Editor
   - [Desktop Development](#desktop-development)
   - [VSCode Extension Development](#vscode-extension-development)
   - [Pulse Editor Extension Development](#pulse-editor-extension-development)
+  - [Pulse Editor NPM libraries development](#pulse-editor-npm-libraries-development)
+    - [Versioning](#versioning)
 
 </span>
 
@@ -243,3 +245,36 @@ Some of our official extensions are also open-source. Feel free to take examples
 
 - [Pulse Editor Code View](https://github.com/ClayPulse/pulse-editor-code-view)
 - [Pulse Editor Terminal](https://github.com/ClayPulse/pulse-editor-terminal)
+
+## Pulse Editor NPM libraries development
+### Versioning
+Use changeset to version each release of npm library.
+
+Enter/Exit prerelease
+```bash
+npx changeset pre enter alpha
+npx changeset pre exit
+```
+
+Add a new version
+```bash
+npx changeset
+```
+
+Commit the new version
+```bash
+npx changeset version
+``` 
+
+Publish npm libraries
+```bash
+# Run build before publishing
+npm run shared-utils-build && npm run react-api-build
+npx changeset publish
+```
+
+For developing main client and using recently modified npm libraries without publishing, you can change web/package.json to have the following:
+```json
+"@pulse-editor/shared-utils": "../npm-packages/shared-utils",
+```
+Make sure to change back if using published versions.

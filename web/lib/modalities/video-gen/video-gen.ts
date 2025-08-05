@@ -123,7 +123,7 @@ export function getVideoGenModel(
     }
 
     const proxyHost = "https://pulse-editor.com";
-    const response = await fetch(`${proxyHost}/api/predictions/replicate`, {
+    const response = await fetch(`${proxyHost}/api/inference/replicate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -153,7 +153,7 @@ export function getVideoGenModel(
     ) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
       const response = await fetch(
-        `${proxyHost}/api/predictions/replicate/${prediction.id}`,
+        `${proxyHost}/api/inference/replicate/${prediction.id}`,
         {
           method: "POST",
           body: JSON.stringify({

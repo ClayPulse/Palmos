@@ -50,10 +50,16 @@ export class InterModuleCommunication {
 
     this.listener = (event: MessageEvent<IMCMessage>) => {
       const messageId = event.data.id;
+      const type = event.data.type;
 
-      if (this.messageRecords?.has(messageId)) {
+      if (
+        this.messageRecords?.has(messageId) &&
+        type !== IMCMessageTypeEnum.GetWindowId
+      ) {
         console.warn(
-          `Duplicate message received with ID: ${messageId}. Ignoring this message.`
+          `Duplicate message received with ID: ${messageId}. Ignoring this message. Message: ${JSON.stringify(
+            event.data
+          )}`
         );
         return;
       }

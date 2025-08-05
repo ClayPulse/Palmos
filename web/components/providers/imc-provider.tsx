@@ -11,11 +11,11 @@ import {
   STTConfig,
   TTSConfig,
 } from "@pulse-editor/shared-utils";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { EditorContext } from "./editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
-import { getAPIKey } from "@/lib/settings/settings";
+import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { runAgentMethod } from "@/lib/agent/agent-runner";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
 import { getTTSModel } from "@/lib/modalities/tts/tts";
@@ -30,6 +30,7 @@ import {
 } from "@/lib/modalities/utils";
 import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
 import { getVideoGenModel } from "@/lib/modalities/video-gen/video-gen";
+import { getMusicGenModel } from "@/lib/modalities/music-gen/music-gen";
 
 export const IMCContext = createContext<IMCContextType | undefined>(undefined);
 
@@ -416,6 +417,25 @@ export default function InterModuleCommunicationProvider({
           const result = await recognizeText(image);
 
           return result;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.UseMusicGen,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const {
+            prompt,
+            lyrics,
+          }: {
+            prompt?: string;
+            lyrics?: string;
+            } = message.payload;
+          
+          
+          // const model = getMusicGenModel()
         },
       ],
     ]);

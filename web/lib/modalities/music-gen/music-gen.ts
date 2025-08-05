@@ -1,34 +1,33 @@
-export class BaseImageGen {
+export class BaseMusicGen {
   private model: any;
   private generateFunc?: (
     model: any,
-    textPrompt?: string,
-    // URL or ArrayBuffer for the image prompt
-    imagePrompt?: string | ArrayBuffer,
+    prompt?: string,
+    lyrics?: string,
   ) => Promise<{
     arrayBuffer?: ArrayBuffer;
     url?: string;
   }>;
   private generateStreamFunc?: (
     model: any,
-    textPrompt?: string,
-    imagePrompt?: string | ArrayBuffer,
+    prompt?: string,
+    lyrics?: string,
   ) => Promise<ReadableStream<ArrayBuffer>>;
 
   constructor(
     model: any,
     generateFunc?: (
       model: any,
-      textPrompt?: string,
-      imagePrompt?: string | ArrayBuffer,
+      prompt?: string,
+      lyrics?: string,
     ) => Promise<{
       arrayBuffer?: ArrayBuffer;
       url?: string;
     }>,
     generateStreamFunc?: (
       model: any,
-      textPrompt?: string,
-      imagePrompt?: string | ArrayBuffer,
+      prompt?: string,
+      lyrics?: string,
     ) => Promise<ReadableStream<ArrayBuffer>>,
   ) {
     this.model = model;
@@ -41,8 +40,8 @@ export class BaseImageGen {
   }
 
   public async generate(
-    textPrompt?: string,
-    imagePrompt?: string | ArrayBuffer,
+    prompt?: string,
+    lyrics?: string,
   ): Promise<{
     arrayBuffer?: ArrayBuffer;
     url?: string;
@@ -50,30 +49,30 @@ export class BaseImageGen {
     if (!this.generateFunc) {
       throw new Error("Generate function is not defined.");
     }
-    return await this.generateFunc(this.model, textPrompt, imagePrompt);
+    return await this.generateFunc(this.model, prompt, lyrics);
   }
 
   public async generateStream(
-    textPrompt?: string,
-    imagePrompt?: string | ArrayBuffer,
+    prompt?: string,
+    lyrics?: string,
   ): Promise<ReadableStream<ArrayBuffer>> {
     if (!this.generateStreamFunc) {
       throw new Error("Generate stream function is not defined.");
     }
-    return await this.generateStreamFunc(this.model, textPrompt, imagePrompt);
+    return await this.generateStreamFunc(this.model, prompt, lyrics);
   }
 }
 
-export function getImageGenModel(
-  apiKey: string,
+export function getMusicGenModel(
+  apiKey: string | undefined,
   provider: string,
   modelName: string,
-): BaseImageGen {
+): BaseMusicGen {
   let model: any;
   let generateFunc: (
     model: any,
-    textPrompt?: string,
-    imagePrompt?: string | ArrayBuffer,
+    prompt?: string,
+    lyrics?: string,
   ) => Promise<{
     arrayBuffer?: ArrayBuffer;
     url?: string;
@@ -81,15 +80,15 @@ export function getImageGenModel(
   let generateStreamFunc:
     | ((
         model: any,
-        textPrompt?: string,
-        imagePrompt?: string | ArrayBuffer,
+        prompt?: string,
+        lyrics?: string,
       ) => Promise<ReadableStream<ArrayBuffer>>)
     | undefined;
 
   async function replicateGenerateFunc(
     model: any,
-    textPrompt?: string,
-    imagePrompt?: string | ArrayBuffer,
+    prompt?: string,
+    lyrics?: string,
   ) {
     const identifier: `${string}/${string}` | `${string}/${string}:${string}` =
       modelName.includes(":")
@@ -105,7 +104,7 @@ export function getImageGenModel(
       body: JSON.stringify({
         model: identifier,
         input: {
-          prompt: textPrompt,
+          prompt: prompt,
           output_format: "png",
         },
         token: apiKey,
@@ -114,7 +113,7 @@ export function getImageGenModel(
 
     if (response.status !== 201) {
       throw new Error(
-        `Failed to generate image: ${response.status} ${response.statusText}`,
+        `Failed to generate music: ${response.status} ${response.statusText}`,
       );
     }
     let prediction = await response.json();
@@ -169,5 +168,5 @@ export function getImageGenModel(
       throw new Error(`Unsupported provider: ${provider}`);
   }
 
-  return new BaseImageGen(model, generateFunc, generateStreamFunc);
+  return new BaseMusicGen(model, generateFunc, generateStreamFunc);
 }
