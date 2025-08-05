@@ -16,6 +16,7 @@ const eslintConfig = [
       "@typescript-eslint/no-unused-vars": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "react-hooks/exhaustive-deps": "off",
+      "@typescript-eslint/no-empty-function": "off",
     },
     ignorePatterns: ["/lib/hooks/use-mic-vad.ts"],
   }),
