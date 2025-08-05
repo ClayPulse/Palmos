@@ -58,7 +58,13 @@ function createWindow() {
   }
   // Development launch
   else {
-    win.loadURL("http://localhost:3000");
+    // Choose either http or https by trying both
+    if (process.env.HTTPS === "true") {
+      win.loadURL("https://localhost:3000");
+    } else {
+      win.loadURL("http://localhost:3000");
+    }
+
     win.webContents.openDevTools();
     win.webContents.on("did-fail-load", (e, code, desc) => {
       win.webContents.reloadIgnoringCache();

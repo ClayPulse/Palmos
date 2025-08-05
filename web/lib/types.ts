@@ -74,6 +74,8 @@ export type EditorStates = {
 
   // The currently selected workspace
   currentWorkspace?: RemoteWorkspace;
+
+  isUsingOfflineMode?: boolean;
 };
 
 export type PersistentSettings = {

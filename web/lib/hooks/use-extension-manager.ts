@@ -19,6 +19,7 @@ export default function useExtensionManager() {
       {
         name: id,
         entry: `${remoteOrigin}/${id}/${version}/mf-manifest.json`,
+        version: version,
       },
     ]);
 

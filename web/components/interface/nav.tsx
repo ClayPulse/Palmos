@@ -24,6 +24,8 @@ import LoginModal from "../modals/login-modal";
 import { useAuth } from "@/lib/hooks/use-auth";
 import WorkspaceSettingsModal from "../modals/workspace-settings-model";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
+import useAndroidManageStorageNotification from "@/lib/hooks/use-android-manage-storage-notification";
+import { SafeArea } from "@capacitor-community/safe-area";
 
 export default function Nav({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -36,7 +38,14 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     useState(false);
 
   const { theme, setTheme } = useTheme();
-  const { session, isLoading: isLoadingSession, signIn, signOut } = useAuth();
+  const {
+    session,
+    isLoading: isLoadingSession,
+    signIn,
+    signOut,
+    isUsingOfflineMode,
+    toggleOfflineMode,
+  } = useAuth();
 
   const workspaceHook = useWorkspace();
 
@@ -64,6 +73,29 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     }
   }, [editorContext?.persistSettings]);
 
+  useAndroidManageStorageNotification();
+
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    if (resolvedTheme === "light") {
+      SafeArea.enable({
+        config: {
+          customColorsForSystemBars: true,
+          statusBarContent: "dark",
+          navigationBarContent: "dark",
+        },
+      });
+    } else if (resolvedTheme === "dark") {
+      SafeArea.enable({
+        config: {
+          statusBarContent: "light",
+          navigationBarContent: "light",
+        },
+      });
+    }
+  }, [resolvedTheme]);
+
   // If the component is not mounted, the theme can't be determined.
   if (!mounted) {
     return <Loading />;
@@ -76,7 +108,9 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         setIsOpen={setIsPasswordModalOpen}
       />
 
-      {!isLoadingSession && !session && <LoginModal signIn={signIn} />}
+      {!isLoadingSession && !session && !isUsingOfflineMode && (
+        <LoginModal signIn={signIn} />
+      )}
 
       <WorkspaceSettingsModal
         isOpen={isWorkspaceSettingsModalOpen}
@@ -114,7 +148,9 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                 }}
                 label="Workspace"
                 placeholder="Select Workspace"
-                isLoading={!workspaceHook.cloudWorkspaces}
+                isLoading={
+                  !isUsingOfflineMode && !workspaceHook.cloudWorkspaces
+                }
                 selectedKeys={
                   workspaceHook.workspace ? [workspaceHook.workspace.id] : []
                 }
@@ -168,6 +204,15 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               <VoiceIndicator />
             </div>
             <div className="col-start-3 flex justify-end gap-x-1">
+              {isUsingOfflineMode && (
+                <Button
+                  onPress={() => {
+                    toggleOfflineMode();
+                  }}
+                >
+                  Sign-in
+                </Button>
+              )}
               <Button
                 // Disable on hover background
                 className="data-[hover=true]:bg-transparent"

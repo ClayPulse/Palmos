@@ -2,9 +2,10 @@ import { Button, Divider, Input } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import ModalWrapper from "./modal-wrapper";
 import { EditorContext } from "../providers/editor-context-provider";
-import { RemoteWorkspace } from "@/lib/types";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import toast from "react-hot-toast";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { PlatformEnum } from "@/lib/types";
 
 export default function LoginModal({ signIn }: { signIn: () => void }) {
   const editorContext = useContext(EditorContext);
@@ -13,6 +14,8 @@ export default function LoginModal({ signIn }: { signIn: () => void }) {
   );
 
   const [isModelOpen, setIsModelOpen] = useState(false);
+
+  const { toggleOfflineMode } = useAuth();
 
   // Open remote instance selection if the current platform is web
   useEffect(() => {
@@ -73,9 +76,13 @@ export default function LoginModal({ signIn }: { signIn: () => void }) {
             }
 
             setIsModelOpen(false);
+
+            toggleOfflineMode();
           }}
         >
-          Continue Locally
+          {getPlatform() === PlatformEnum.Web
+            ? "Continue as Guest"
+            : "Continue Offline"}
         </Button>
       </div>
     </ModalWrapper>

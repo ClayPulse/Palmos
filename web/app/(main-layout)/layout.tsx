@@ -7,6 +7,7 @@ import "material-icons/iconfont/material-icons.css";
 import CapacitorProvider from "@/components/providers/capacitor-provider";
 import RemoteModuleProvider from "@/components/providers/remote-module-provider";
 import InterModuleCommunicationProvider from "@/components/providers/imc-provider";
+import Nav from "@/components/interface/nav";
 
 export const metadata: Metadata = {
   title: "Pulse Editor",
@@ -27,7 +28,7 @@ export default function RootLayout({
               <InterModuleCommunicationProvider>
                 <RemoteModuleProvider isPreventingCSS={true}>
                   <Toaster />
-                  {children}
+                  <Nav>{children}</Nav>
                 </RemoteModuleProvider>
               </InterModuleCommunicationProvider>
             </EditorContextProvider>

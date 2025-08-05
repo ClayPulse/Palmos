@@ -1,5 +1,37 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.22
+
+### Patch Changes
+
+- Fix getwindowid IMC issue
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.22
+
+## 0.1.1-alpha.21
+
+### Patch Changes
+
+- Rebuild packages
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.21
+
+## 0.1.1-alpha.20
+
+### Patch Changes
+
+- Add imc debug message for ignored messages
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.20
+
+## 0.1.1-alpha.19
+
+### Patch Changes
+
+- Add new AI modality
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.19
+
 ## 0.1.1-alpha.18
 
 ### Patch Changes

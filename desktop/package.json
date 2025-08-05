@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "electron .",
+    "dev-https": "cross-env HTTPS=true electron .",
     "build": "electron-forge package",
     "rebuild-native": "electron-rebuild -v 36.1.0"
   },
@@ -21,6 +22,7 @@
     "@electron-forge/cli": "^7.8.0",
     "@electron/rebuild": "^3.7.2",
     "@types/node": "^22",
+    "cross-env": "^10.0.0",
     "electron": "^36.1.0",
     "esbuild": "^0.25.3",
     "esbuild-register": "^3.6.0"

@@ -16,6 +16,7 @@
         "web-build": "npm run build --workspace=web",
         "web-start": "npm run start --workspace=web",
         "desktop-dev": "npm --prefix ./desktop run dev",
+        "desktop-dev-https": "npm --prefix ./desktop run dev-https",
         "desktop-build": "npm run web-build && npm --prefix ./desktop run build",
         "android-dev": "npm run web-build && npm run android-dev --workspace=mobile",
         "android-build": "npm run web-build && npm run android-build --workspace=mobile",
@@ -27,5 +28,8 @@
     },
     "devDependencies": {
         "@changesets/cli": "^2.29.4"
+    },
+    "dependencies": {
+        "@pulse-editor/shared-utils": "^0.1.1-alpha.21"
     }
 }
