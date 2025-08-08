@@ -432,9 +432,8 @@ export default function InterModuleCommunicationProvider({
           }: {
             prompt?: string;
             lyrics?: string;
-            } = message.payload;
-          
-          
+          } = message.payload;
+
           // const model = getMusicGenModel()
         },
       ],

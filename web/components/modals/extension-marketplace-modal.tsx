@@ -6,7 +6,7 @@ import { EditorContext } from "../providers/editor-context-provider";
 import useSWR from "swr";
 import ExtensionList from "../extension/extension-list";
 
-export default function ExtensionModal({
+export default function ExtensionMarketplaceModal({
   isOpen,
   setIsOpen,
 }: {

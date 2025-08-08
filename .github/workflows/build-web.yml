@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: 20
       
+      # need to build this because it is symlinked to the web app, likely by changeset
       - name: Install shared-utils dependencies
         run: npm install --workspace=npm-packages/shared-utils
 

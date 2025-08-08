@@ -8,6 +8,7 @@ import CapacitorProvider from "@/components/providers/capacitor-provider";
 import RemoteModuleProvider from "@/components/providers/remote-module-provider";
 import InterModuleCommunicationProvider from "@/components/providers/imc-provider";
 import Nav from "@/components/interface/nav";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Pulse Editor",
@@ -22,18 +23,20 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`h-[100dvh] w-[100dvw] antialiased`}>
-        <CapacitorProvider>
-          <WrappedHeroUIProvider>
-            <EditorContextProvider>
-              <InterModuleCommunicationProvider>
-                <RemoteModuleProvider isPreventingCSS={true}>
-                  <Toaster />
-                  <Nav>{children}</Nav>
-                </RemoteModuleProvider>
-              </InterModuleCommunicationProvider>
-            </EditorContextProvider>
-          </WrappedHeroUIProvider>
-        </CapacitorProvider>
+        <Suspense>
+          <CapacitorProvider>
+            <WrappedHeroUIProvider>
+              <EditorContextProvider>
+                <InterModuleCommunicationProvider>
+                  <RemoteModuleProvider isPreventingCSS={true}>
+                    <Toaster />
+                    <Nav>{children}</Nav>
+                  </RemoteModuleProvider>
+                </InterModuleCommunicationProvider>
+              </EditorContextProvider>
+            </WrappedHeroUIProvider>
+          </CapacitorProvider>
+        </Suspense>
       </body>
     </html>
   );

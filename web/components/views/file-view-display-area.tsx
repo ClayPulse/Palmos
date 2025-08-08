@@ -16,6 +16,7 @@ export default function ViewDisplayArea() {
   const params = useSearchParams();
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
+  
   const { installExtension } = useExtensionManager();
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
     ViewModel | undefined
