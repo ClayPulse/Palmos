@@ -1,5 +1,21 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.24
+
+### Patch Changes
+
+- Remove visibility in extension config
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.24
+
+## 0.1.1-alpha.23
+
+### Patch Changes
+
+- Add extension package visibility
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.23
+
 ## 0.1.1-alpha.22
 
 ### Patch Changes

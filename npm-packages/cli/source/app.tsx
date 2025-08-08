@@ -13,6 +13,10 @@ import Create from './components/commands/create.js';
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
 
+	if (cli.flags.dev) {
+		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+	}
+
 	useEffect(() => {
 		const cmd = cli.input[0] ?? 'help';
 		setCommand(cmd);
@@ -20,6 +24,9 @@ export default function App({cli}: {cli: Result<Flags>}) {
 
 	return (
 		<>
+			{cli.flags.dev && (
+				<Text color={'yellow'}>⚠️ You are in development mode.</Text>
+			)}
 			{command === 'help' ? (
 				<Help cli={cli} />
 			) : command === 'chat' ? (

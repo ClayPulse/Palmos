@@ -48,7 +48,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 
 	// Check login method
 	useEffect(() => {
-		const savedToken = getToken();
+		const savedToken = getToken(cli.flags.dev);
 		setIsShowLoginMethod(!savedToken && !cli.flags.token && !cli.flags.flow);
 
 		if (savedToken) {
@@ -121,38 +121,39 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 				) : isAuthenticated ? (
 					<>
 						<Text>✅ You are signed in successfully.</Text>
-						{!isTokenInEnv() && getToken() !== token && (
-							<>
-								<Text>
-									🟢 It is recommended to save your access token as an
-									environment variable PE_ACCESS_TOKEN.
-								</Text>
-								<Box>
+						{!isTokenInEnv(cli.flags.dev) &&
+							getToken(cli.flags.dev) !== token && (
+								<>
 									<Text>
-										⚠️ (NOT recommended) Or, do you want to save access token to
-										user home directory? (y/n){' '}
+										🟢 It is recommended to save your access token as an
+										environment variable PE_ACCESS_TOKEN.
 									</Text>
-									<TextInput
-										value={saveTokenInput}
-										onChange={setSaveTokenInput}
-										onSubmit={value => {
-											if (value.length === 0) {
-												return;
-											}
-											if (value === 'y') {
-												saveToken(token);
-												setIsTokenSaved(true);
-												setTimeout(() => {
+									<Box>
+										<Text>
+											⚠️ (NOT recommended) Or, do you want to save access token
+											to user home directory? (y/n){' '}
+										</Text>
+										<TextInput
+											value={saveTokenInput}
+											onChange={setSaveTokenInput}
+											onSubmit={value => {
+												if (value.length === 0) {
+													return;
+												}
+												if (value === 'y') {
+													saveToken(token, cli.flags.dev);
+													setIsTokenSaved(true);
+													setTimeout(() => {
+														exit();
+													}, 0);
+												} else {
 													exit();
-												}, 0);
-											} else {
-												exit();
-											}
-										}}
-									/>
-								</Box>
-							</>
-						)}
+												}
+											}}
+										/>
+									</Box>
+								</>
+							)}
 						{isTokenSaved && (
 							<Text>
 								Token saved to {path.join(os.homedir(), '.pulse-editor')}
