@@ -59,6 +59,7 @@ export default function ExtensionMarketplaceModal({
             org: {
               name: string;
             };
+            visibility: string;
           }[] = body;
           const extensions: Extension[] = fetchedExts.map((ext) => {
             return {
@@ -68,6 +69,7 @@ export default function ExtensionMarketplaceModal({
                 author: ext.user ? ext.user.name : ext.org.name,
                 description: ext.description ?? "No description available",
                 displayName: ext.displayName ?? ext.name,
+                visibility: ext.visibility,
               },
               isEnabled: true,
               remoteOrigin: `https://cdn.pulse-editor.com/extension`,

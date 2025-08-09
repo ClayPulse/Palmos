@@ -887,6 +887,7 @@ function DevExtensionSettings({
                   config: {
                     id: devExtensionId,
                     version: devExtensionVersion,
+                    visibility: "private",
                   },
                   isEnabled: true,
                 };

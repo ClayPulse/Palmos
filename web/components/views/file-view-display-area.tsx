@@ -16,7 +16,7 @@ export default function ViewDisplayArea() {
   const params = useSearchParams();
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
-  
+
   const { installExtension } = useExtensionManager();
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
     ViewModel | undefined
@@ -45,6 +45,7 @@ export default function ViewDisplayArea() {
         org: {
           name: string;
         };
+        visibility: string;
       }[] = await res.json();
 
       console.log("Fetched extensions:", fetchedExts);
@@ -57,6 +58,7 @@ export default function ViewDisplayArea() {
             author: ext.user ? ext.user.name : ext.org.name,
             description: ext.description ?? "No description available",
             displayName: ext.displayName ?? ext.name,
+            visibility: ext.visibility,
           },
           isEnabled: true,
           remoteOrigin: `https://cdn.pulse-editor.com/extension`,
