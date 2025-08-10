@@ -1,5 +1,5 @@
 import ModalWrapper from "./modal-wrapper";
-import { Extension, TabItem } from "@/lib/types";
+import { Extension, ExtensionMeta, TabItem } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
@@ -43,24 +43,12 @@ export default function ExtensionMarketplaceModal({
     isLoading: isLoadingMarketplaceExtensions,
     mutate: mutateMarketplaceExtensions,
   } = useSWR<Extension[]>(
-    isOpen ? "https://pulse-editor.com/api/extension/list" : null,
+    isOpen ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/list` : null,
     (url: string) =>
       fetch(url)
         .then((res) => res.json())
         .then((body) => {
-          const fetchedExts: {
-            name: string;
-            version: string;
-            description?: string;
-            displayName?: string;
-            user: {
-              name: string;
-            };
-            org: {
-              name: string;
-            };
-            visibility: string;
-          }[] = body;
+          const fetchedExts: ExtensionMeta[] = body;
           const extensions: Extension[] = fetchedExts.map((ext) => {
             return {
               config: {
@@ -72,7 +60,7 @@ export default function ExtensionMarketplaceModal({
                 visibility: ext.visibility,
               },
               isEnabled: true,
-              remoteOrigin: `https://cdn.pulse-editor.com/extension`,
+              remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
             };
           });
           return extensions;

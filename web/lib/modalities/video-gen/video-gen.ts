@@ -122,7 +122,7 @@ export function getVideoGenModel(
       );
     }
 
-    const proxyHost = "https://pulse-editor.com";
+    const proxyHost = process.env.NEXT_PUBLIC_BACKEND_URL;
     const response = await fetch(`${proxyHost}/api/inference/replicate`, {
       method: "POST",
       headers: {

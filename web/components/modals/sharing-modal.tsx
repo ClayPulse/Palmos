@@ -1,13 +1,13 @@
-import { Button, Select, SelectItem } from "@heroui/react";
+import { Button, Input, Select, SelectItem } from "@heroui/react";
 import ModalWrapper from "./modal-wrapper";
 import { useSearchParams } from "next/navigation";
 import QRDisplay from "../misc/qr-display";
 import Tabs from "../misc/tabs";
 import { TabItem } from "@/lib/types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Icon from "../misc/icon";
 import toast from "react-hot-toast";
-import { useAuth } from "@/lib/hooks/use-auth";
+import useSWR from "swr";
 
 export default function SharingModal({
   isOpen,
@@ -36,35 +36,57 @@ export default function SharingModal({
   );
 
   const visibilityOptions = ["public", "unlisted", "private"];
-  const [selectedVisibility, setSelectedVisibility] = useState<
-    string | undefined
-  >(undefined);
 
-  const { session } = useAuth();
-  const [isDeveloper, setIsDeveloper] = useState(false);
-
-  // Load app visibility
-  useEffect(() => {
-    async function getVisibility() {
-      if (!app) return;
-
-      const url = new URL(`https://pulse-editor.com/api/extension/get`);
-      url.searchParams.append("app", app);
-      url.searchParams.append("latest", "true");
-
+  const {
+    data: shareInfo,
+    mutate,
+    isLoading: isLoadingShareInfo,
+  } = useSWR<
+    | {
+        visibility: string;
+        canEdit: boolean;
+        inviteCode?: string;
+      }
+    | undefined
+  >(
+    app
+      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/get-share-info?name=${app}`
+      : null,
+    async (url: URL) => {
       const res = await fetch(url, {
         credentials: "include",
       });
 
+      if (!res.ok) {
+        toast.error("Failed to fetch extension share info");
+        return undefined;
+      }
+
       const data: {
         visibility: string;
-      }[] = await res.json();
-      if (data) {
-        const ext = data[0];
-        setSelectedVisibility(ext.visibility);
-      }
-    }
-  }, []);
+        canEdit: boolean;
+        inviteCode?: string;
+      } = await res.json();
+
+      return data;
+    },
+  );
+
+  async function updateShareInfo(visibility: string) {
+    const url = new URL(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/update`,
+    );
+    await fetch(url, {
+      method: "PATCH",
+      body: JSON.stringify({
+        visibility,
+        name: app,
+      }),
+      credentials: "include",
+    });
+
+    mutate();
+  }
 
   return (
     <ModalWrapper
@@ -79,9 +101,11 @@ export default function SharingModal({
             label="Visibility"
             placeholder="Select visibility"
             onChange={(e) => {
-              setSelectedVisibility(e.target.value);
+              updateShareInfo(e.target.value);
             }}
-            isDisabled={!isDeveloper}
+            isDisabled={!shareInfo?.canEdit}
+            isLoading={isLoadingShareInfo}
+            selectedKeys={shareInfo?.visibility ? [shareInfo.visibility] : []}
           >
             {visibilityOptions.map((option) => (
               <SelectItem key={option}>{option}</SelectItem>
@@ -89,9 +113,13 @@ export default function SharingModal({
           </Select>
         )}
 
-        {!selectedVisibility && app ? (
+        {app && shareInfo?.canEdit && shareInfo.visibility === "unlisted" && (
+          <Input value={shareInfo.inviteCode} label="Invite Code" readOnly />
+        )}
+
+        {!shareInfo?.visibility && app ? (
           <p>Select a visibility option to see sharing options.</p>
-        ) : selectedVisibility === "private" && app ? (
+        ) : shareInfo?.visibility === "private" && app ? (
           <p>Your workspace is private.</p>
         ) : (
           <>
@@ -106,7 +134,9 @@ export default function SharingModal({
                 <p className="text-content4-foreground text-sm">
                   Share your workspace via this QR Code
                 </p>
-                <QRDisplay url={window.location.href} />
+                <QRDisplay
+                  url={`${window.location.origin}?app=${app}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`}
+                />
               </div>
             )}
 
@@ -116,11 +146,13 @@ export default function SharingModal({
                   Share your workspace via this URL
                 </p>
 
-                <p className="font-bold break-all">{window.location.href}</p>
+                <p className="font-bold break-all">{`${window.location.origin}?app=${app}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`}</p>
                 <Button
                   color="primary"
                   onPress={() => {
-                    navigator.clipboard.writeText(window.location.href);
+                    navigator.clipboard.writeText(
+                      `${window.location.origin}?app=${app}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`,
+                    );
                     toast.success("URL copied to clipboard");
                   }}
                 >

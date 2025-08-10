@@ -3,11 +3,12 @@ import { useViewManager } from "@/lib/hooks/use-view-manager";
 import ExtensionViewLayout from "./layout";
 import ViewLoader from "./loaders/view-loader";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
-import { Extension } from "@/lib/types";
+import { Extension, ExtensionMeta } from "@/lib/types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { compare } from "semver";
 import { ViewModel } from "@pulse-editor/shared-utils";
+import NotAuthorized from "../interface/not-authorized";
 
 export default function ViewDisplayArea() {
   const { updateViewModel, activeViewModel } = useViewManager();
@@ -16,37 +17,34 @@ export default function ViewDisplayArea() {
   const params = useSearchParams();
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
+  const inviteCode = params.get("inviteCode");
 
   const { installExtension } = useExtensionManager();
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
     ViewModel | undefined
   >(undefined);
+  const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
 
   useEffect(() => {
     // Download and load the extension app if specified
-    async function loadApp(appName: string) {
-      const url = new URL(`https://pulse-editor.com/api/extension/get`);
+    async function loadApp(appName: string, inviteCode?: string) {
+      const url = new URL(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/get`,
+      );
       url.searchParams.set("name", appName);
+      url.searchParams.set("latest", "true");
+      if (inviteCode) url.searchParams.set("inviteCode", inviteCode);
 
-      const res = await fetch(url);
+      const res = await fetch(url, {
+        credentials: "include",
+      });
 
       if (!res.ok) {
-        throw new Error("Failed to fetch extension app");
+        setNoAccessToApp(true);
+        return;
       }
 
-      const fetchedExts: {
-        name: string;
-        version: string;
-        description?: string;
-        displayName?: string;
-        user: {
-          name: string;
-        };
-        org: {
-          name: string;
-        };
-        visibility: string;
-      }[] = await res.json();
+      const fetchedExts: ExtensionMeta[] = await res.json();
 
       console.log("Fetched extensions:", fetchedExts);
 
@@ -61,7 +59,7 @@ export default function ViewDisplayArea() {
             visibility: ext.visibility,
           },
           isEnabled: true,
-          remoteOrigin: `https://cdn.pulse-editor.com/extension`,
+          remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
         };
       });
 
@@ -69,6 +67,11 @@ export default function ViewDisplayArea() {
       const ext = extensions.sort((a, b) => {
         return compare(b.config.version, a.config.version);
       })[0];
+
+      if (!ext) {
+        setNoAccessToApp(true);
+        return;
+      }
 
       console.log("Installing extension:", ext);
 
@@ -82,11 +85,15 @@ export default function ViewDisplayArea() {
     }
 
     if (app) {
-      loadApp(app);
+      loadApp(app, inviteCode ?? undefined);
     }
   }, [app]);
 
   // #endregion
+
+  if (noAccessToApp) {
+    return <NotAuthorized />;
+  }
 
   return (
     <div className="flex h-full w-full flex-col p-1">

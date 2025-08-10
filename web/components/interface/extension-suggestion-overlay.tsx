@@ -18,7 +18,7 @@ export default function ExtensionSuggestionOverlay() {
                   visibility: "public",
                 },
                 isEnabled: false,
-                remoteOrigin: "https://cdn.pulse-editor.com/extension",
+                remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
               }}
             />
             <ExtensionPreview
@@ -32,7 +32,7 @@ export default function ExtensionSuggestionOverlay() {
                   visibility: "public",
                 },
                 isEnabled: false,
-                remoteOrigin: "https://cdn.pulse-editor.com/extension",
+                remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
               }}
             />
             <ExtensionPreview
@@ -46,7 +46,7 @@ export default function ExtensionSuggestionOverlay() {
                   visibility: "public",
                 },
                 isEnabled: false,
-                remoteOrigin: "https://cdn.pulse-editor.com/extension",
+                remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
               }}
             />
           </div>
