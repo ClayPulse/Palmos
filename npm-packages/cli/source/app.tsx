@@ -15,6 +15,8 @@ export default function App({cli}: {cli: Result<Flags>}) {
 
 	if (cli.flags.dev) {
 		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
+	} else {
+		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
 	}
 
 	useEffect(() => {
