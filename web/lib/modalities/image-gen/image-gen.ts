@@ -96,7 +96,7 @@ export function getImageGenModel(
         ? (modelName as `${string}/${string}:${string}`)
         : (modelName as `${string}/${string}`);
 
-    const proxyHost = "https://pulse-editor.com";
+    const proxyHost = process.env.NEXT_PUBLIC_BACKEND_URL;
     const response = await fetch(`${proxyHost}/api/inference/replicate`, {
       method: "POST",
       headers: {

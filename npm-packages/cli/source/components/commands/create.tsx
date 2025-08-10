@@ -1,7 +1,7 @@
 import {Result} from 'meow';
-import React, {ReactNode, useEffect, useState} from 'react';
+import {ReactNode, useEffect, useState} from 'react';
 import {Flags} from '../../lib/cli-flags.js';
-import {Box, Text} from 'ink';
+import {Box, Text, useApp} from 'ink';
 import Spinner from 'ink-spinner';
 import {$, execa} from 'execa';
 import SelectInput from 'ink-select-input';
@@ -13,10 +13,17 @@ import path from 'path';
 export default function Create({cli}: {cli: Result<Flags>}) {
 	const [framework, setFramework] = useState<string | undefined>(undefined);
 	const [projectName, setProjectName] = useState<string | undefined>(undefined);
+	const [visibility, setVisibility] = useState<string | undefined>(undefined);
 
-	const [isFrameworkSelected, setIsFrameworkSelected] = useState(false);
+	const [isShowFrameworkSelect, setIsShowFrameworkSelect] =
+		useState<boolean>(true);
+	const [isShowProjectNameInput, setIsShowProjectNameInput] =
+		useState<boolean>(false);
+	const [isShowVisibilitySelect, setIsShowVisibilitySelect] =
+		useState<boolean>(false);
 
-	const [message, setMessage] = useState<ReactNode>();
+	const [createMessage, setCreateMessage] = useState<ReactNode>();
+	const [errorMessage, setErrorMessage] = useState<ReactNode>();
 
 	const frameworkItems: Item<string>[] = [
 		{
@@ -37,117 +44,188 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 		},
 	];
 
+	const {exit} = useApp();
+
 	useEffect(() => {
 		const framework = cli.flags.framework;
-		setFramework(framework);
+		if (framework) {
+			setFramework(framework);
+		} else {
+			setIsShowFrameworkSelect(true);
+		}
 	}, [cli]);
 
 	useEffect(() => {
-		async function createFromTemplate(name: string) {
-			if (framework === 'react') {
-				// Clone the template repository
-				setMessage(
-					<Box>
-						<Spinner type="dots" />
-						<Text>
-							{' '}
-							Creating a new Pulse Editor app using React template...
-						</Text>
-					</Box>,
-				);
-				try {
-					await $`git clone --depth 1 https://github.com/ClayPulse/pulse-editor-extension-template.git ${name}`;
-				} catch (error) {
-					setMessage(
-						<Text color="redBright">
-							❌ Failed to clone the template. Please check your internet
-							connection and try again.
-						</Text>,
-					);
-					return;
-				}
-
-				// Modify the package.json file to update the name
-				setMessage(
-					<Box>
-						<Spinner type="dots" />
-						<Text> Initializing project...</Text>
-					</Box>,
-				);
-				const packageJsonPath = path.join(process.cwd(), name, 'package.json');
-				const packageJson = JSON.parse(
-					fs.readFileSync(packageJsonPath, 'utf8'),
-				);
-				packageJson.name = name.replaceAll('-', '_');
-
-				// Write the modified package.json back to the file
-				fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
-
-				// Remove the .git directory
-				const gitDirPath = path.join(process.cwd(), name, '.git');
-				if (fs.existsSync(gitDirPath)) {
-					fs.rmSync(gitDirPath, {recursive: true, force: true});
-				}
-
-				// Remove the .github directory
-				const githubDirPath = path.join(process.cwd(), name, '.github');
-				if (fs.existsSync(githubDirPath)) {
-					fs.rmSync(githubDirPath, {recursive: true, force: true});
-				}
-
-				// Remove LICENSE file
-				const licenseFilePath = path.join(process.cwd(), name, 'LICENSE');
-				if (fs.existsSync(licenseFilePath)) {
-					fs.rmSync(licenseFilePath, {force: true});
-				}
-
-				setMessage(
-					<Box>
-						<Spinner type="dots" />
-						<Text> Installing dependencies...</Text>
-					</Box>,
-				);
-				// Run `npm i`
-				try {
-					await execa(`npm install`, {
-						cwd: path.join(process.cwd(), name),
-					});
-				} catch (error) {
-					setMessage(
-						<Text color="redBright">
-							❌ Failed to install dependencies. Please check your internet
-							connection and try again.
-						</Text>,
-					);
-					return;
-				}
-				setMessage(
-					<Text>🚀 Pulse Editor React app project created successfully!</Text>,
-				);
-			}
+		if (framework) {
+			setIsShowProjectNameInput(true);
 		}
+	}, [framework]);
 
+	useEffect(() => {
 		if (projectName) {
 			// Check if the project already exists
 			const projectPath = path.join(process.cwd(), projectName);
 			if (fs.existsSync(projectPath)) {
-				setMessage(
+				setErrorMessage(
 					<Text color="redBright">
 						❌ A project with same name already exists in current path.
 					</Text>,
 				);
+				setTimeout(() => {
+					exit();
+				}, 0);
 				return;
 			}
-			createFromTemplate(projectName);
+
+			setIsShowVisibilitySelect(true);
 		}
 	}, [projectName]);
 
 	useEffect(() => {
-		setTimeout(() => {
-			setIsFrameworkSelected(framework !== undefined);
-		}, 0);
-	}, [framework]);
+		if (visibility && projectName) {
+			createFromTemplate(projectName, visibility);
+		}
+	}, [visibility, projectName]);
 
+	async function createFromTemplate(name: string, visibility: string) {
+		if (framework === 'react') {
+			// Clone the template repository
+			setCreateMessage(
+				<Box>
+					<Spinner type="dots" />
+					<Text> Creating a new Pulse Editor app using React template...</Text>
+				</Box>,
+			);
+			try {
+				await $`git clone --depth 1 https://github.com/ClayPulse/pulse-editor-extension-template.git ${name}`;
+			} catch (error) {
+				setCreateMessage(
+					<Text color="redBright">
+						❌ Failed to clone the template. Please check your internet
+						connection and try again.
+					</Text>,
+				);
+				return;
+			}
+
+			// Modify the package.json file to update the name
+			setCreateMessage(
+				<Box>
+					<Spinner type="dots" />
+					<Text> Initializing project...</Text>
+				</Box>,
+			);
+			const packageJsonPath = path.join(process.cwd(), name, 'package.json');
+			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
+			packageJson.name = name.replaceAll('-', '_');
+
+			// Modify the visibility
+			packageJson['pulse-editor-marketplace'] = {
+				visibility,
+			};
+
+			// Write the modified package.json back to the file
+			fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
+
+			// Remove the .git directory
+			const gitDirPath = path.join(process.cwd(), name, '.git');
+			if (fs.existsSync(gitDirPath)) {
+				fs.rmSync(gitDirPath, {recursive: true, force: true});
+			}
+
+			// Remove the .github directory
+			const githubDirPath = path.join(process.cwd(), name, '.github');
+			if (fs.existsSync(githubDirPath)) {
+				fs.rmSync(githubDirPath, {recursive: true, force: true});
+			}
+
+			// Remove LICENSE file
+			const licenseFilePath = path.join(process.cwd(), name, 'LICENSE');
+			if (fs.existsSync(licenseFilePath)) {
+				fs.rmSync(licenseFilePath, {force: true});
+			}
+
+			setCreateMessage(
+				<Box>
+					<Spinner type="dots" />
+					<Text> Installing dependencies...</Text>
+				</Box>,
+			);
+			// Run `npm i`
+			try {
+				await execa(`npm install`, {
+					cwd: path.join(process.cwd(), name),
+				});
+			} catch (error) {
+				setCreateMessage(
+					<Text color="redBright">
+						❌ Failed to install dependencies. Please check your internet
+						connection and try again.
+					</Text>,
+				);
+				return;
+			}
+			setCreateMessage(
+				<Text>🚀 Pulse Editor React app project created successfully!</Text>,
+			);
+		}
+	}
+
+	return (
+		<>
+			{isShowFrameworkSelect && (
+				<FrameworkSelect
+					cli={cli}
+					frameworkItems={frameworkItems}
+					framework={framework}
+					setFramework={setFramework}
+				/>
+			)}
+
+			{isShowProjectNameInput && (
+				<ProjectNameInput
+					projectName={projectName}
+					setProjectName={setProjectName}
+				/>
+			)}
+
+			{isShowVisibilitySelect && (
+				<VisibilitySelect
+					visibility={visibility}
+					setVisibility={setVisibility}
+				/>
+			)}
+
+			{visibility !== undefined && (
+				<>
+					{framework === 'react' && <>{createMessage}</>}
+					{framework !== 'react' && (
+						<Text>
+							🚧 Currently not available. We'd like to invite you to work on
+							these frameworks if you are interested in! Check out our tutorial
+							to integrate your favorite web framework with Pulse Editor using
+							Module Federation.
+						</Text>
+					)}
+				</>
+			)}
+
+			<Text>{errorMessage}</Text>
+		</>
+	);
+}
+
+function FrameworkSelect({
+	cli,
+	frameworkItems,
+	framework,
+	setFramework,
+}: {
+	cli: any;
+	frameworkItems: Item<string>[];
+	framework: string | undefined;
+	setFramework: (value: string) => void;
+}) {
 	return (
 		<>
 			{!cli.flags.framework && (
@@ -155,6 +233,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 					<Text>
 						🚩Create a new Pulse Editor app using your favorite web framework!
 					</Text>
+
 					<SelectInput
 						items={frameworkItems}
 						onSelect={item => {
@@ -166,32 +245,55 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 					<Text> </Text>
 				</>
 			)}
+		</>
+	);
+}
 
-			{isFrameworkSelected && (
-				<>
-					<Box>
-						<Text>Enter your project name: </Text>
-						<UncontrolledTextInput
-							onSubmit={value => setProjectName(value)}
-							focus={projectName === undefined}
-						/>
-					</Box>
+function ProjectNameInput({
+	projectName,
+	setProjectName,
+}: {
+	projectName: string | undefined;
+	setProjectName: (value: string) => void;
+}) {
+	return (
+		<>
+			<Box>
+				<Text>Enter your project name: </Text>
 
-					{projectName && (
-						<>
-							{framework === 'react' && <>{message}</>}
-							{framework !== 'react' && (
-								<Text>
-									🚧 Currently not available. We'd like to invite you to work on
-									these frameworks if you are interested in! Check out our
-									tutorial to integrate your favorite web framework with Pulse
-									Editor using Module Federation.
-								</Text>
-							)}
-						</>
-					)}
-				</>
-			)}
+				<UncontrolledTextInput
+					onSubmit={value => setTimeout(() => setProjectName(value), 0)}
+					focus={projectName === undefined}
+				/>
+			</Box>
+		</>
+	);
+}
+
+function VisibilitySelect({
+	visibility,
+	setVisibility,
+}: {
+	visibility: string | undefined;
+	setVisibility: (value: string) => void;
+}) {
+	return (
+		<>
+			<Text>Enter marketplace visibility for your project:</Text>
+
+			<SelectInput
+				items={[
+					{label: 'Public', value: 'public'},
+					{label: 'Unlisted', value: 'unlisted'},
+					{label: 'Private', value: 'private'},
+				]}
+				onSelect={item => {
+					setVisibility(item.value);
+				}}
+				isFocused={visibility === undefined}
+			/>
+
+			<Text> </Text>
 		</>
 	);
 }

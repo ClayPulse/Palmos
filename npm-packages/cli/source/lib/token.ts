@@ -2,22 +2,36 @@ import os from 'os';
 import path from 'path';
 import fs from 'fs';
 
-export function saveToken(token: string | undefined) {
+export function saveToken(token: string | undefined, devMode: boolean) {
 	// Save the token to .pulse-editor/config.json in user home directory
 	const configDir = path.join(os.homedir(), '.pulse-editor');
 	const configFile = path.join(configDir, 'config.json');
-	const config = {
-		accessToken: token,
-	};
+
+	const hasConfig = fs.existsSync(configFile);
+	const existingConfig = hasConfig
+		? JSON.parse(fs.readFileSync(configFile, 'utf8'))
+		: {};
+
+	const newConfig = devMode
+		? {
+				...existingConfig,
+				devAccessToken: token,
+			}
+		: {
+				...existingConfig,
+				accessToken: token,
+			};
 	if (!fs.existsSync(configDir)) {
 		fs.mkdirSync(configDir, {recursive: true});
 	}
-	fs.writeFileSync(configFile, JSON.stringify(config, null, 2));
+	fs.writeFileSync(configFile, JSON.stringify(newConfig, null, 2));
 }
 
-export function getToken() {
+export function getToken(devMode: boolean) {
 	// First try to get the token from the environment variable
-	const tokenEnv = process.env['PE_ACCESS_TOKEN'];
+	const tokenEnv = devMode
+		? process.env['PE_DEV_ACCESS_TOKEN']
+		: process.env['PE_ACCESS_TOKEN'];
 	if (tokenEnv) {
 		return tokenEnv;
 	}
@@ -28,8 +42,11 @@ export function getToken() {
 	if (fs.existsSync(configFile)) {
 		try {
 			const config = JSON.parse(fs.readFileSync(configFile, 'utf8'));
-			if (config.accessToken) {
-				return config.accessToken as string;
+
+			const token = devMode ? config.devAccessToken : config.accessToken;
+
+			if (token) {
+				return token as string;
 			}
 		} catch (error) {
 			console.error('Failed to parse config.json:', error);
@@ -42,9 +59,11 @@ export function getToken() {
 	return undefined;
 }
 
-export function isTokenInEnv() {
+export function isTokenInEnv(devMode: boolean) {
 	// Check if the token is set in the environment variable
-	const tokenEnv = process.env['PE_ACCESS_TOKEN'];
+	const tokenEnv = devMode
+		? process.env['PE_DEV_ACCESS_TOKEN']
+		: process.env['PE_ACCESS_TOKEN'];
 	if (tokenEnv) {
 		return true;
 	}
@@ -54,7 +73,7 @@ export function isTokenInEnv() {
 export async function checkToken(token: string, devMode: boolean) {
 	const res = await fetch(
 		devMode
-			? 'http://localhost:3000/api/api-keys/check'
+			? 'https://localhost:8080/api/api-keys/check'
 			: 'https://pulse-editor.com/api/api-keys/check',
 		{
 			body: JSON.stringify({token}),

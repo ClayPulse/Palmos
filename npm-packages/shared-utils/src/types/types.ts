@@ -131,6 +131,8 @@ export type ExtensionConfig = {
   agents?: Agent[];
   // Exposed commands in the extension
   commandsInfoList?: ExtensionCommandInfo[];
+  // Visibility
+  visibility: string;
 };
 
 export type ExtensionCommandInfo = {

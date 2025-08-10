@@ -9,7 +9,7 @@ import { EditorContext } from "../providers/editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
 import toast from "react-hot-toast";
-import ExtensionModal from "../modals/extension-modal";
+import ExtensionMarketplaceModal from "../modals/extension-marketplace-modal";
 import AgentConfigModal from "../modals/agent-config-modal";
 import useSpeech2Speech from "@/lib/hooks/use-speech2speech";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
@@ -459,7 +459,7 @@ export default function EditorToolbar() {
                   <Icon name="dashboard_customize" variant="outlined" />
                 </Button>
               </Tooltip>
-              <ExtensionModal
+              <ExtensionMarketplaceModal
                 isOpen={isExtensionModalOpen}
                 setIsOpen={setIsExtensionModalOpen}
               />

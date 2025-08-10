@@ -26,6 +26,8 @@ import WorkspaceSettingsModal from "../modals/workspace-settings-model";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import useAndroidManageStorageNotification from "@/lib/hooks/use-android-manage-storage-notification";
 import { SafeArea } from "@capacitor-community/safe-area";
+import { useSearchParams } from "next/navigation";
+import SharingModal from "../modals/sharing-modal";
 
 export default function Nav({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -36,6 +38,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const [isShowNavbar, setIsShowNavbar] = useState(true);
   const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
     useState(false);
+  const [isSharingOpen, setIsSharingOpen] = useState(false);
 
   const { theme, setTheme } = useTheme();
   const {
@@ -48,6 +51,11 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   } = useAuth();
 
   const workspaceHook = useWorkspace();
+
+  // #region Load specified app if app query parameter is present
+  const params = useSearchParams();
+  // Use the 'app' query parameter to load specific extension app upon loading page
+  const app = params.get("app");
 
   useEffect(() => {
     const platform = getPlatform();
@@ -103,20 +111,28 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="grid h-full w-full grid-rows-[max-content_auto] flex-col overflow-x-hidden">
-      <PasswordModal
-        isOpen={isPasswordModalOpen}
-        setIsOpen={setIsPasswordModalOpen}
-      />
+      {isPasswordModalOpen && (
+        <PasswordModal
+          isOpen={isPasswordModalOpen}
+          setIsOpen={setIsPasswordModalOpen}
+        />
+      )}
 
       {!isLoadingSession && !session && !isUsingOfflineMode && (
         <LoginModal signIn={signIn} />
       )}
 
-      <WorkspaceSettingsModal
-        isOpen={isWorkspaceSettingsModalOpen}
-        setIsOpen={setIsWorkspaceSettingsModalOpen}
-        workspaceHook={workspaceHook}
-      />
+      {isWorkspaceSettingsModalOpen && (
+        <WorkspaceSettingsModal
+          isOpen={isWorkspaceSettingsModalOpen}
+          setIsOpen={setIsWorkspaceSettingsModalOpen}
+          workspaceHook={workspaceHook}
+        />
+      )}
+
+      {isSharingOpen && (
+        <SharingModal isOpen={isSharingOpen} setIsOpen={setIsSharingOpen} />
+      )}
 
       {isShowNavbar && (
         <div className="z-40 h-12 w-full">
@@ -204,6 +220,26 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               <VoiceIndicator />
             </div>
             <div className="col-start-3 flex justify-end gap-x-1">
+              <Button
+                className="hidden sm:block"
+                color="primary"
+                onPress={() => {
+                  setIsSharingOpen(true);
+                }}
+              >
+                {app ? <span>Share App</span> : <span>Share</span>}
+              </Button>
+              <Button
+                className="block sm:hidden"
+                isIconOnly
+                variant="light"
+                onPress={() => {
+                  setIsSharingOpen(true);
+                }}
+              >
+                <Icon name="share" variant="round" />
+              </Button>
+
               {isUsingOfflineMode && (
                 <Button
                   onPress={() => {

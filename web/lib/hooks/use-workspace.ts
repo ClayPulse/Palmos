@@ -13,7 +13,7 @@ export function useWorkspace() {
   const { session } = useAuth();
 
   const { data: cloudWorkspaces } = useSWR<RemoteWorkspace[]>(
-    session ? "https://pulse-editor.com/api/workspace/list" : null,
+    session ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workspace/list` : null,
     async (url: string) => {
       const res = await fetch(url, {
         credentials: "include",
@@ -51,7 +51,7 @@ export function useWorkspace() {
 
     // Request to create a new workspace
     const response = await fetch(
-      "https://pulse-editor.com/api/workspace/create",
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workspace/create`,
       {
         credentials: "include",
       },
@@ -73,7 +73,7 @@ export function useWorkspace() {
         currentWorkspace: {
           id,
           name,
-          address: `https://pulse-editor.com/workspace/${id}`,
+          address: `${process.env.NEXT_PUBLIC_BACKEND_URL}/workspace/${id}`,
           createdAt,
           updatedAt,
         },

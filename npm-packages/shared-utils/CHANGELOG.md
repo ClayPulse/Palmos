@@ -1,5 +1,17 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.24
+
+### Patch Changes
+
+- Remove visibility in extension config
+
+## 0.1.1-alpha.23
+
+### Patch Changes
+
+- Add extension package visibility
+
 ## 0.1.1-alpha.22
 
 ### Patch Changes

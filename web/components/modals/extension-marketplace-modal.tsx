@@ -1,12 +1,12 @@
 import ModalWrapper from "./modal-wrapper";
-import { Extension, TabItem } from "@/lib/types";
+import { Extension, ExtensionMeta, TabItem } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
 import useSWR from "swr";
 import ExtensionList from "../extension/extension-list";
 
-export default function ExtensionModal({
+export default function ExtensionMarketplaceModal({
   isOpen,
   setIsOpen,
 }: {
@@ -43,23 +43,12 @@ export default function ExtensionModal({
     isLoading: isLoadingMarketplaceExtensions,
     mutate: mutateMarketplaceExtensions,
   } = useSWR<Extension[]>(
-    isOpen ? "https://pulse-editor.com/api/extension/list" : null,
+    isOpen ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/list` : null,
     (url: string) =>
       fetch(url)
         .then((res) => res.json())
         .then((body) => {
-          const fetchedExts: {
-            name: string;
-            version: string;
-            description?: string;
-            displayName?: string;
-            user: {
-              name: string;
-            };
-            org: {
-              name: string;
-            };
-          }[] = body;
+          const fetchedExts: ExtensionMeta[] = body;
           const extensions: Extension[] = fetchedExts.map((ext) => {
             return {
               config: {
@@ -68,9 +57,10 @@ export default function ExtensionModal({
                 author: ext.user ? ext.user.name : ext.org.name,
                 description: ext.description ?? "No description available",
                 displayName: ext.displayName ?? ext.name,
+                visibility: ext.visibility,
               },
               isEnabled: true,
-              remoteOrigin: `https://cdn.pulse-editor.com/extension`,
+              remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
             };
           });
           return extensions;

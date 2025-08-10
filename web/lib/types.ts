@@ -269,4 +269,18 @@ export type Session = {
   };
   expires: string;
 };
+
+export type ExtensionMeta = {
+  name: string;
+  version: string;
+  description?: string;
+  displayName?: string;
+  user: {
+    name: string;
+  };
+  org: {
+    name: string;
+  };
+  visibility: string;
+};
 // #endregion

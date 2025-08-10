@@ -22,18 +22,21 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 	);
 
 	useEffect(() => {
-		// Check if the current dir contains pulse.config.ts
-		const currentDir = process.cwd();
-		const pulseConfigPath = `${currentDir}/pulse.config.ts`;
-		if (fs.existsSync(pulseConfigPath)) {
-			setIsInProjectDir(true);
+		async function checkConfig() {
+			// Check if the current dir contains pulse.config.ts
+			const currentDir = process.cwd();
+			const pulseConfigPath = `${currentDir}/pulse.config.ts`;
+			if (fs.existsSync(pulseConfigPath)) {
+				setIsInProjectDir(true);
+			}
 		}
+		checkConfig();
 	}, []);
 
 	// Check if the user is authenticated
 	useEffect(() => {
 		async function checkAuth() {
-			const token = getToken();
+			const token = getToken(cli.flags.dev);
 			if (token) {
 				const isValid = await checkToken(token, cli.flags.dev);
 				if (isValid) {
@@ -69,24 +72,32 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		async function publishExtension() {
 			setIsPublishing(true);
 
+			// Read package.json
+			const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+
+			const visibility = packageJson['pulse-editor-marketplace']
+				.visibility as string;
+
 			// Upload the zip file to the server
 			try {
 				const formData = new FormData();
 				const buffer = fs.readFileSync('./node_modules/@pulse-editor/dist.zip');
+				// @ts-ignore Create a Blob from the buffer
 				const blob = new Blob([buffer], {
 					type: 'application/zip',
 				});
 				formData.append('file', blob, 'dist.zip');
+				formData.append('visibility', visibility);
 
 				// Send the file to the server
 				const res = await fetch(
 					cli.flags.dev
-						? 'http://localhost:3000/api/extension/publish'
+						? 'https://localhost:8080/api/extension/publish'
 						: 'https://pulse-editor.com/api/extension/publish',
 					{
 						method: 'POST',
 						headers: {
-							Authorization: `Bearer ${getToken()}`,
+							Authorization: `Bearer ${getToken(cli.flags.dev)}`,
 						},
 						body: formData,
 					},

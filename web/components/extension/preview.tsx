@@ -186,7 +186,7 @@ export default function ExtensionPreview({
           </div>
         </ContextMenu>
       </div>
-      <p className="text-center">{extension.config.id}</p>
+      <p className="text-center">{extension.config.displayName}</p>
       <p className="text-center">{extension.config.version}</p>
     </div>
   );
