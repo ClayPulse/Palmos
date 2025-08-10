@@ -3,7 +3,10 @@
 	"compilerOptions": {
 		"outDir": "dist",
 		"noUnusedLocals": false,
-		"noUnusedParameters": false
+		"noUnusedParameters": false,
+		"moduleResolution": "nodenext"
 	},
-	"include": ["source"]
+	"include": [
+		"source"
+	]
 }
