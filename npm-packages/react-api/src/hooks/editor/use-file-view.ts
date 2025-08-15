@@ -18,15 +18,14 @@ export default function useFileView() {
 
   useEffect(() => {
     if (isReady) {
-      imc?.sendMessage(IMCMessageTypeEnum.RequestViewFile).then((model) => {
+      imc?.sendMessage(IMCMessageTypeEnum.PlatformReadFile).then((model) => {
         setViewModel(model);
       });
     }
   }, [isReady]);
 
   function updateViewModel(viewModel: ViewModel) {
-    // sender.sendMessage(ViewBoxMessageTypeEnum.ViewFile, JSON.stringify(file));
-    imc?.sendMessage(IMCMessageTypeEnum.WriteViewFile, viewModel);
+    imc?.sendMessage(IMCMessageTypeEnum.PlatformWriteFile, viewModel);
   }
 
   return {

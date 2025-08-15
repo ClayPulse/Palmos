@@ -27,7 +27,7 @@ export default function useAgents() {
 
     const result = await imc
       .sendMessage(
-        IMCMessageTypeEnum.RunAgentMethod,
+        IMCMessageTypeEnum.EditorRunAgentMethod,
         {
           agentName,
           methodName,

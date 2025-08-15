@@ -28,7 +28,7 @@ export default function useExtCommand(
   function getReceiverHandlerMap() {
     const receiverHandlerMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
       [
-        IMCMessageTypeEnum.RunExtCommand,
+        IMCMessageTypeEnum.EditorRunExtCommand,
         async (senderWindow: Window, message: IMCMessage) => {
           if (!commandInfo) {
             throw new Error("Extension command is not available");

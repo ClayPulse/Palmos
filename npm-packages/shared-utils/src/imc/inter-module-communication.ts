@@ -54,7 +54,7 @@ export class InterModuleCommunication {
 
       if (
         this.messageRecords?.has(messageId) &&
-        type !== IMCMessageTypeEnum.GetWindowId
+        type !== IMCMessageTypeEnum.SignalGetWindowId
       ) {
         console.warn(
           `Duplicate message received with ID: ${messageId}. Ignoring this message. Message: ${JSON.stringify(
@@ -131,7 +131,7 @@ export class InterModuleCommunication {
       this.otherWindow = window;
       this.otherWindow.postMessage(
         {
-          type: IMCMessageTypeEnum.GetWindowId,
+          type: IMCMessageTypeEnum.SignalGetWindowId,
           from: this.thisWindowId,
         },
         "*"
@@ -193,7 +193,7 @@ export class InterModuleCommunication {
     // window has received the message and finished processing it.
     // The current window must be initialized first. i.e. call initThisWindow() before initOtherWindow().
     this.receiverHandlerMap?.set(
-      IMCMessageTypeEnum.Acknowledge,
+      IMCMessageTypeEnum.SignalAcknowledge,
       async (senderWindow: Window, message: IMCMessage) => {
         const pendingMessage = this.sender?.getPendingMessage(message.id);
         if (pendingMessage) {
@@ -205,7 +205,7 @@ export class InterModuleCommunication {
 
     // Set get window ID handler in the receiver handler map.
     this.receiverHandlerMap?.set(
-      IMCMessageTypeEnum.GetWindowId,
+      IMCMessageTypeEnum.SignalGetWindowId,
       async (senderWindow: Window, message: IMCMessage) => {
         console.log(
           "Received window ID request. Sending window ID to other window: "
@@ -216,7 +216,7 @@ export class InterModuleCommunication {
         }
         const msg: IMCMessage = {
           id: message.id,
-          type: IMCMessageTypeEnum.ReturnWindowId,
+          type: IMCMessageTypeEnum.SignalReturnWindowId,
           payload: {
             windowId: id,
           },

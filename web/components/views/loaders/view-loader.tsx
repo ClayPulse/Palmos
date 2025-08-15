@@ -2,7 +2,9 @@ import ExtensionLoader from "@/components/extension/extension-loader";
 import Loading from "@/components/interface/loading";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
-import { Extension } from "@/lib/types";
+import { usePlatformApi } from "@/lib/hooks/use-platform-api";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { Extension, PlatformEnum } from "@/lib/types";
 import {
   ConnectionListener,
   ExtensionTypeEnum,
@@ -45,6 +47,7 @@ export default function ViewLoader({
   const [isConnected, setIsConnected] = useState<boolean>(false);
 
   const { resolvedTheme } = useTheme();
+  const { platformApi } = usePlatformApi();
 
   // Update view Id when the view model changes
   useEffect(() => {
@@ -148,7 +151,7 @@ export default function ViewLoader({
     if (currentViewId && imcContext?.polyIMC?.hasChannel(currentViewId)) {
       imcContext?.polyIMC?.sendMessage(
         currentViewId,
-        IMCMessageTypeEnum.ThemeChange,
+        IMCMessageTypeEnum.EditorThemeUpdate,
         resolvedTheme,
       );
     }
@@ -175,7 +178,7 @@ export default function ViewLoader({
 
     // Add loaded handler
     newMap.set(
-      IMCMessageTypeEnum.UseLoading,
+      IMCMessageTypeEnum.EditorLoadingExt,
       async (
         senderWindow: Window,
         message: IMCMessage,
@@ -190,9 +193,11 @@ export default function ViewLoader({
       },
     );
 
+    // The following message handlers require OS-like environment.
+    // This can be either local environment or remote instance.
     if (model.extensionConfig?.extensionType === ExtensionTypeEnum.FileView) {
       newMap.set(
-        IMCMessageTypeEnum.WriteViewFile,
+        IMCMessageTypeEnum.PlatformWriteFile,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -205,7 +210,7 @@ export default function ViewLoader({
         },
       );
       newMap.set(
-        IMCMessageTypeEnum.RequestViewFile,
+        IMCMessageTypeEnum.PlatformReadFile,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -217,7 +222,29 @@ export default function ViewLoader({
     } else if (
       model.extensionConfig?.extensionType === ExtensionTypeEnum.ConsoleView
     ) {
-      // Add console view handlers here
+      newMap.set(
+        IMCMessageTypeEnum.PlatformCreateTerminal,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const platform = getPlatform();
+          // Get a shell terminal from native platform APIs
+          if (platform === PlatformEnum.Capacitor) {
+            return {
+              websocketUrl: editorContext?.persistSettings?.mobileHost,
+              projectHomePath: `~/storage/shared/${editorContext?.persistSettings?.projectHomePath}`,
+            };
+          } else {
+            const wsUrl = await platformApi?.createTerminal();
+            return {
+              websocketUrl: wsUrl,
+              projectHomePath: editorContext?.persistSettings?.projectHomePath,
+            };
+          }
+        },
+      );
     }
 
     return newMap;

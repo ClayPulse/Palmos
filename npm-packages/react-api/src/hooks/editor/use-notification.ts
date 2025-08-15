@@ -18,7 +18,7 @@ export default function useNotification() {
     if (!imc) {
       throw new Error("IMC is not initialized.");
     }
-    imc.sendMessage(IMCMessageTypeEnum.Notification, {
+    imc.sendMessage(IMCMessageTypeEnum.EditorShowNotification, {
       text,
       type,
     });

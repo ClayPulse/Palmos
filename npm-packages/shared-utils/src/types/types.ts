@@ -1,60 +1,60 @@
 // #region Inter-Module Communication
 /* Inter Module Communication messages */
 export enum IMCMessageTypeEnum {
-  GetWindowId = "get-window-id",
-  ReturnWindowId = "return-window-id",
-
-  // Update view file
-  WriteViewFile = "write-view-file",
-  // Request view file
-  RequestViewFile = "request-view-file",
-
-  // Network fetch request
-  Fetch = "fetch",
-  // Send notification
-  Notification = "notification",
-  // Get theme
-  ThemeChange = "theme-change",
-
-  /* Agents */
-  // Execute agent method
-  RunAgentMethod = "run-agent-method",
-
-  /* Modality tools */
-  UseVAD = "use-vad",
-  UseSTT = "use-stt",
-  UseLLM = "use-llm",
-  UseTTS = "use-tts",
-  UseSpeech2Speech = "use-speech-to-speech",
+  // #region AI modality tools
+  ModalityVAD = "modality-vad",
+  ModalitySTT = "modality-stt",
+  ModalityLLM = "modality-llm",
+  ModalityTTS = "modality-tts",
+  ModalitySpeech2Speech = "modality-speech-to-speech",
   // TODO: Do not use UseX2Y or Use__Gen in the future.
   // Instead, use a common AI IO adapter.
-  UseImageGen = "use-image-gen",
-  UseVideoGen = "use-video-gen",
-  UseOCR = "use-ocr",
-  UseMusicGen = "use-music-gen",
+  ModalityImageGen = "modality-image-gen",
+  ModalityVideoGen = "modality-video-gen",
+  ModalityOCR = "modality-ocr",
+  ModalityMusicGen = "modality-music-gen",
+  // #endregion
 
-  /* Extension commands*/
-  RunExtCommand = "run-ext-command",
-
-  /* Terminal */
-  RequestTerminal = "request-terminal",
-
-  /* Extension statuses */
+  // #region Extension states
   // Notify Pulse that extension window is available
   ExtReady = "ext-ready",
   // Notify Pulse that extension is closing
   ExtClose = "ext-close",
+  // #endregion
 
-  // Notify Pulse that extension is loading or loaded
-  UseLoading = "use-loading",
+  // #region Editor states
+  // Notify editor that extension is loading or loaded
+  EditorLoadingExt = "editor-loading-ext",
+  /* Extension commands*/
+  EditorRunExtCommand = "editor-run-ext-command",
+  // Execute agent method
+  EditorRunAgentMethod = "editor-run-agent-method",
+  // Get theme
+  EditorThemeUpdate = "editor-theme-update",
+  // Send notification
+  EditorShowNotification = "editor-show-notification",
+  // #endregion
 
+  // #region Platform API interaction messages (require OS-like environment)
+  /* Terminal */
+  PlatformCreateTerminal = "platform-create-terminal",
+  // Update view file
+  PlatformWriteFile = "platform-write-file",
+  // Request view file
+  PlatformReadFile = "platform-read-file",
+  // #endregion
+
+  // #region Signal messages
+  SignalGetWindowId = "signal-get-window-id",
+  SignalReturnWindowId = "signal-return-window-id",
   // A message to notify sender that the message
   // has been received and finished processing
-  Acknowledge = "acknowledge",
+  SignalAcknowledge = "signal-acknowledge",
   // Notify abort
-  Abort = "abort",
+  SignalAbort = "signal-abort",
   // Error
-  Error = "error",
+  SignalError = "signal-error",
+  // #endregion
 }
 
 export type IMCMessage = {

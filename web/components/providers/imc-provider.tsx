@@ -1,6 +1,6 @@
 "use client";
 
-import { IMCContextType, PlatformEnum } from "@/lib/types";
+import { IMCContextType } from "@/lib/types";
 import {
   ImageModelConfig,
   IMCMessage,
@@ -13,8 +13,6 @@ import {
 } from "@pulse-editor/shared-utils";
 import { createContext, useContext, useEffect, useState } from "react";
 import { EditorContext } from "./editor-context-provider";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { runAgentMethod } from "@/lib/agent/agent-runner";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
@@ -30,7 +28,6 @@ import {
 } from "@/lib/modalities/utils";
 import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
 import { getVideoGenModel } from "@/lib/modalities/video-gen/video-gen";
-import { getMusicGenModel } from "@/lib/modalities/music-gen/music-gen";
 
 export const IMCContext = createContext<IMCContextType | undefined>(undefined);
 
@@ -42,7 +39,6 @@ export default function InterModuleCommunicationProvider({
   const [polyIMC, setPolyIMC] = useState<PolyIMC | undefined>(undefined);
 
   const editorContext = useContext(EditorContext);
-  const { platformApi } = usePlatformApi();
 
   useEffect(() => {
     // @ts-expect-error set window viewId
@@ -77,7 +73,7 @@ export default function InterModuleCommunicationProvider({
   function getHandlerMap() {
     const newMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
       [
-        IMCMessageTypeEnum.RunAgentMethod,
+        IMCMessageTypeEnum.EditorRunAgentMethod,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -148,30 +144,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.RequestTerminal,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const platform = getPlatform();
-          // Get a shell terminal from native platform APIs
-          if (platform === PlatformEnum.Capacitor) {
-            return {
-              websocketUrl: editorContext?.persistSettings?.mobileHost,
-              projectHomePath: `~/storage/shared/${editorContext?.persistSettings?.projectHomePath}`,
-            };
-          } else {
-            const wsUrl = await platformApi?.createTerminal();
-            return {
-              websocketUrl: wsUrl,
-              projectHomePath: editorContext?.persistSettings?.projectHomePath,
-            };
-          }
-        },
-      ],
-      [
-        IMCMessageTypeEnum.UseVAD,
+        IMCMessageTypeEnum.ModalityVAD,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -183,7 +156,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.UseSTT,
+        IMCMessageTypeEnum.ModalitySTT,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -222,7 +195,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.UseLLM,
+        IMCMessageTypeEnum.ModalityLLM,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -269,7 +242,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.UseTTS,
+        IMCMessageTypeEnum.ModalityTTS,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -311,7 +284,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.UseImageGen,
+        IMCMessageTypeEnum.ModalityImageGen,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -319,7 +292,7 @@ export default function InterModuleCommunicationProvider({
         ) => {
           // Handle the use diffusion message
           console.log(
-            `Received ${IMCMessageTypeEnum.UseImageGen.toString()} message from extension:`,
+            `Received ${IMCMessageTypeEnum.ModalityImageGen.toString()} message from extension:`,
             message,
           );
 
@@ -356,7 +329,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.UseVideoGen,
+        IMCMessageTypeEnum.ModalityVideoGen,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -364,7 +337,7 @@ export default function InterModuleCommunicationProvider({
         ) => {
           // Handle the use video generation message
           console.log(
-            `Received ${IMCMessageTypeEnum.UseVideoGen.toString()} message from extension:`,
+            `Received ${IMCMessageTypeEnum.ModalityVideoGen.toString()} message from extension:`,
             message,
           );
 
@@ -403,7 +376,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.UseOCR,
+        IMCMessageTypeEnum.ModalityOCR,
         async (
           senderWindow: Window,
           message: IMCMessage,
@@ -420,7 +393,7 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
-        IMCMessageTypeEnum.UseMusicGen,
+        IMCMessageTypeEnum.ModalityMusicGen,
         async (
           senderWindow: Window,
           message: IMCMessage,
