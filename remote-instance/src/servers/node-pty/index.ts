@@ -64,18 +64,32 @@ export function createTerminalServer(server: http.Server | https.Server) {
   server.on("upgrade", (request, socket, head) => {
     const { url } = request;
 
+    if (!url) {
+      socket.write("HTTP/1.1 400 Bad Request: Missing WebSocket URL\r\n\r\n");
+      socket.destroy();
+      return;
+    }
+
     // Only match URLs like /anything/terminal/ws
     const wsPathRegex = /^\/([^/]+)\/terminal\/ws$/;
-    
-    if (url && wsPathRegex.test(url)) {
-      wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit("connection", ws, request);
-      });
-    } else {
-      // Reject unknown upgrade paths
-      socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+    const match = url.match(wsPathRegex);
+
+    if (!match) {
+      socket.write("HTTP/1.1 400 Bad Request: Invalid WebSocket path\r\n\r\n");
       socket.destroy();
+      return;
     }
+
+    const instanceId = match?.[1];
+    if (instanceId !== process.env.INSTANCE_ID) {
+      socket.write("HTTP/1.1 400 Bad Request: Invalid instance ID\r\n\r\n");
+      socket.destroy();
+      return;
+    }
+
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
   });
 
   return server;

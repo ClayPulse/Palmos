@@ -203,7 +203,7 @@ async function handleListPathContent(event, uri, options) {
   return await listPathContent(uri, options);
 }
 
-async function handleHasFile(event, path) {
+async function handleHasPath(event, path) {
   return fs.existsSync(path);
 }
 
@@ -278,7 +278,7 @@ app.whenReady().then(() => {
   ipcMain.handle("rename", handleRename);
   ipcMain.handle("delete", handleDelete);
 
-  ipcMain.handle("has-file", handleHasFile);
+  ipcMain.handle("has-path", handleHasPath);
   ipcMain.handle("read-file", handleReadFile);
   ipcMain.handle("write-file", handleWriteFile);
 

@@ -56,7 +56,7 @@ export class ElectronAPI extends AbstractPlatformAPI {
   }
 
   async hasPath(uri: string): Promise<boolean> {
-    return await this.electronAPI?.hasFile(uri);
+    return await this.electronAPI?.hasPath(uri);
   }
 
   async readFile(uri: string): Promise<File> {
