@@ -18,7 +18,7 @@ export default function useTerminal() {
 
   useEffect(() => {
     if (isReady) {
-      imc?.sendMessage(IMCMessageTypeEnum.RequestTerminal).then((response) => {
+      imc?.sendMessage(IMCMessageTypeEnum.PlatformCreateTerminal).then((response) => {
         const {
           websocketUrl,
           projectHomePath,

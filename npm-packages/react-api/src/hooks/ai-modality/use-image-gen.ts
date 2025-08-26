@@ -1,11 +1,11 @@
 import {
+  ImageModelConfig,
   IMCMessage,
   IMCMessageTypeEnum,
-  VideoModelConfig,
 } from "@pulse-editor/shared-utils";
 import useIMC from "../../lib/use-imc";
 
-export default function useVideoGen() {
+export default function useImageGen() {
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>
@@ -15,20 +15,19 @@ export default function useVideoGen() {
 
   /**
    *
-   * @param textPrompt The text prompt to generate the video.
+   * @param textPrompt The text prompt to generate the image.
    * @param imagePrompt A URL to an image or an image in an ArrayBuffer.
-   * @param videoModelConfig (optional) The video model config to use.
-   * @returns The generated video in an ArrayBuffer.
+   * @param imageModelConfig (optional) The image model config to use.
+   * @returns The generated image in an ArrayBuffer.
    */
-  async function runVideoGen(
-    duration: number,
+  async function runImageGen(
     textPrompt?: string,
     imagePrompt?: string | ArrayBuffer,
     // LLM config is optional, if not provided, the default config will be used.
-    videoModelConfig?: VideoModelConfig
+    imageModelConfig?: ImageModelConfig
   ): Promise<{
-    url?: string;
     arrayBuffer?: ArrayBuffer;
+    url?: string;
   }> {
     if (!imc) {
       throw new Error("IMC not initialized.");
@@ -39,16 +38,15 @@ export default function useVideoGen() {
     }
 
     const result = await imc
-      .sendMessage(IMCMessageTypeEnum.UseVideoGen, {
-        duration,
+      .sendMessage(IMCMessageTypeEnum.ModalityImageGen, {
         textPrompt,
         imagePrompt,
-        videoModelConfig,
+        imageModelConfig,
       })
       .then((response) => {
         return response as {
-          url?: string;
           arrayBuffer?: ArrayBuffer;
+          url?: string;
         };
       });
 
@@ -56,7 +54,7 @@ export default function useVideoGen() {
   }
 
   return {
-    runVideoGen,
+    runImageGen,
     isReady,
   };
 }

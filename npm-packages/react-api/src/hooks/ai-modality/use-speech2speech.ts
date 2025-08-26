@@ -6,7 +6,7 @@ import { useState } from "react";
  * Use speech-to-speech API to listen to user input and read the output
  * provided by you.
  */
-export default function UseSpeech2Speech() {
+export default function useSpeech2Speech() {
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>

@@ -1,11 +1,11 @@
 import {
   IMCMessage,
   IMCMessageTypeEnum,
-  TTSConfig,
+  LLMConfig,
 } from "@pulse-editor/shared-utils";
 import useIMC from "../../lib/use-imc";
 
-export default function useTTS() {
+export default function useLLM() {
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>
@@ -13,29 +13,29 @@ export default function useTTS() {
 
   const { imc, isReady } = useIMC(receiverHandlerMap);
 
-  async function runTTS(
-    text: string,
-    // Config is optional, if not provided, the default config will be used.
-    ttsConfig?: TTSConfig
-  ): Promise<Uint8Array> {
+  async function runLLM(
+    prompt: string,
+    // LLM config is optional, if not provided, the default config will be used.
+    llmConfig?: LLMConfig
+  ): Promise<string> {
     if (!imc) {
       throw new Error("IMC not initialized.");
     }
 
     const result = await imc
-      .sendMessage(IMCMessageTypeEnum.UseTTS, {
-        text,
-        ttsConfig,
+      .sendMessage(IMCMessageTypeEnum.ModalityLLM, {
+        prompt,
+        llmConfig,
       })
       .then((response) => {
-        return response as Uint8Array;
+        return response as string;
       });
 
     return result;
   }
 
   return {
-    runTTS,
+    runLLM,
     isReady,
   };
 }

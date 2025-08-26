@@ -8,7 +8,7 @@ export default function useExtensionCommands() {
   async function runCommand(windowId: string, commandName: string, args: any) {
     const result = await imcContext?.polyIMC?.sendMessage(
       windowId,
-      IMCMessageTypeEnum.RunExtCommand,
+      IMCMessageTypeEnum.EditorRunExtCommand,
       {
         name: commandName,
         args: args,

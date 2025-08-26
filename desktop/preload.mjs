@@ -16,7 +16,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   rename: (oldUri, newUri) => ipcRenderer.invoke("rename", oldUri, newUri),
   delete: (uri) => ipcRenderer.invoke("delete", uri),
 
-  hasFile: (path) => ipcRenderer.invoke("has-file", path),
+  hasPath: (path) => ipcRenderer.invoke("has-path", path),
   readFile: (path) => ipcRenderer.invoke("read-file", path),
   writeFile: (data, path) => ipcRenderer.invoke("write-file", data, path),
 

@@ -26,5 +26,5 @@ Create `.env` file in current folder, and set `SSL_CERT_PATH` and `SSL_KEY_PATH`
 Generate self-signed SSL certificates:
 
 ```bash
-bash ./generate-self-signed.sh
+bash ./utils/generate-self-signed.sh
 ```

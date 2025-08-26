@@ -97,7 +97,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				</Box>,
 			);
 			try {
-				await $`git clone --depth 1 https://github.com/ClayPulse/pulse-editor-extension-template.git ${name}`;
+				await $`git clone --depth 1 https://github.com/ClayPulse/pulse-app-template.git ${name}`;
 			} catch (error) {
 				setCreateMessage(
 					<Text color="redBright">

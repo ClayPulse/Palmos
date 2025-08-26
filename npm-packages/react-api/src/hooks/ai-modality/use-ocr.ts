@@ -21,7 +21,7 @@ export default function useOCR() {
     }
 
     // Send the message to the extension
-    const result = await imc.sendMessage(IMCMessageTypeEnum.UseOCR, { image });
+    const result = await imc.sendMessage(IMCMessageTypeEnum.ModalityOCR, { image });
 
     return result.payload.text;
   }

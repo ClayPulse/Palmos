@@ -10,7 +10,7 @@ export default function useTheme() {
   >();
 
   receiverHandlerMap.set(
-    IMCMessageTypeEnum.ThemeChange,
+    IMCMessageTypeEnum.EditorThemeUpdate,
     async (senderWindow: Window, message: IMCMessage) => {
       const theme = message.payload;
       setTheme((prev) => theme);

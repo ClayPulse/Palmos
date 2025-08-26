@@ -45,7 +45,7 @@ export class MessageSender {
         this.targetWindow.postMessage(
           {
             id,
-            type: IMCMessageTypeEnum.Abort,
+            type: IMCMessageTypeEnum.SignalAbort,
             payload: JSON.stringify({
               status: "Task aborted",
               data: null,

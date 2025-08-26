@@ -11,8 +11,10 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
+    "@pulse-editor/shared-utils": "^0.1.1-alpha.24",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
+    "ignore": "^7.0.5",
     "node-pty": "^1.1.0-beta34",
     "ws": "^8.18.3"
   },

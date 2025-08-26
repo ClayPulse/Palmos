@@ -25,7 +25,7 @@ export class MessageReceiver {
     if (this.windowId === message.from) return;
 
     // Abort the task if the message type is Abort
-    if (message.type === IMCMessageTypeEnum.Abort) {
+    if (message.type === IMCMessageTypeEnum.SignalAbort) {
       const id = message.id;
       const pendingTask = this.pendingTasks.get(id);
 
@@ -55,7 +55,7 @@ export class MessageReceiver {
           if (signal.aborted) return;
 
           // Acknowledge the sender with the result if the message type is not Acknowledge
-          if (message.type !== IMCMessageTypeEnum.Acknowledge) {
+          if (message.type !== IMCMessageTypeEnum.SignalAcknowledge) {
             this.acknowledgeSender(senderWindow, message.id, result);
           }
         })
@@ -63,7 +63,7 @@ export class MessageReceiver {
           // Send the error message to the sender
           const errMsg: IMCMessage = {
             id: message.id,
-            type: IMCMessageTypeEnum.Error,
+            type: IMCMessageTypeEnum.SignalError,
             payload: error.message,
             from: this.windowId,
           };
@@ -83,7 +83,7 @@ export class MessageReceiver {
   ): void {
     const message: IMCMessage = {
       id,
-      type: IMCMessageTypeEnum.Acknowledge,
+      type: IMCMessageTypeEnum.SignalAcknowledge,
       payload: payload,
       from: this.windowId,
     };

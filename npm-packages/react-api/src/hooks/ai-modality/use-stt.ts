@@ -23,7 +23,7 @@ export default function useSTT() {
     }
 
     const result = await imc
-      .sendMessage(IMCMessageTypeEnum.UseSTT, {
+      .sendMessage(IMCMessageTypeEnum.ModalitySTT, {
         audio,
         sttConfig,
       })
