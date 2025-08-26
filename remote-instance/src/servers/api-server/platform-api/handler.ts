@@ -203,5 +203,6 @@ export async function handlePlatformAPIRequest(
   } else if (operation === "create-terminal") {
     return `${host}/${instanceId}/terminal/ws`;
   }
-  return data;
+  // Do not reflect input data back to the client, return an explicit error message.
+  return { error: "Unknown operation" };
 }

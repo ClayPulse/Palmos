@@ -91,6 +91,10 @@ async function createEndpoints(app: express.Express) {
     );
 
     // Process the request and send a response
-    res.send(result);
+    if (result && result.error) {
+      res.status(400).json(result);
+    } else {
+      res.send(result);
+    }
   });
 }
