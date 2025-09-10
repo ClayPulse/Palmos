@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.26
+
+### Patch Changes
+
+- Fix export alias
+
 ## 0.1.1-alpha.25
 
 ### Patch Changes
