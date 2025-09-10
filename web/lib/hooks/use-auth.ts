@@ -4,13 +4,17 @@ import { useContext } from "react";
 import { Session } from "../types";
 import useSWR from "swr";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { fetchAPI, getAPIUrl } from "../utils/backend";
 
 export function useAuth() {
+  const editorContext = useContext(EditorContext);
   // --- Auth ---
   const { data: session, isLoading } = useSWR<Session | undefined>(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/session`,
+    !editorContext?.editorStates.isUsingOfflineMode
+      ? `/api/auth/session`
+      : null,
     async (url: string) => {
-      const res = await fetch(url, {
+      const res = await fetchAPI(url, {
         credentials: "include",
       });
       if (!res.ok) {
@@ -25,20 +29,17 @@ export function useAuth() {
     },
   );
 
-  const editorContext = useContext(EditorContext);
-
   // Open a sign-in page if the user is not signed in.
   async function signIn() {
     if (session) {
       return;
     }
 
-    const url = new URL(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/signin`,
-    );
+    const url = new URL(`/api/auth/signin`);
     url.searchParams.set("callbackUrl", window.location.href);
 
-    window.location.href = url.toString();
+    const apiUrl = getAPIUrl(url);
+    window.location.href = apiUrl;
   }
 
   // Open a sign-out page if the user is signed in.
@@ -47,11 +48,11 @@ export function useAuth() {
       return;
     }
 
-    const url = new URL(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/auth/signout`,
-    );
+    const url = new URL(`/api/auth/signout`);
     url.searchParams.set("callbackUrl", window.location.href);
-    window.location.href = url.toString();
+
+    const apiUrl = getAPIUrl(url);
+    window.location.href = apiUrl;
   }
 
   async function toggleOfflineMode() {

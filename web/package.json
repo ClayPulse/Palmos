@@ -30,6 +30,7 @@
       "@pulse-editor/shared-utils": "^0.1.1-alpha.22",
       "@ricky0123/vad-web": "^0.0.24",
       "@vercel/analytics": "^1.5.0",
+      "@xyflow/react": "^12.8.4",
       "elevenlabs": "^1.59.0",
       "framer-motion": "^12.23.12",
       "html2canvas": "^1.4.1",

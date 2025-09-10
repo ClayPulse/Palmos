@@ -4,6 +4,7 @@ import { PlatformEnum, RemoteWorkspace } from "../types";
 import { getPlatform } from "../platform-api/platform-checker";
 import { useAuth } from "./use-auth";
 import useSWR from "swr";
+import { fetchAPI, getAPIUrl } from "../utils/backend";
 
 export function useWorkspace() {
   const editorContext = useContext(EditorContext);
@@ -13,9 +14,9 @@ export function useWorkspace() {
   const { session } = useAuth();
 
   const { data: cloudWorkspaces } = useSWR<RemoteWorkspace[]>(
-    session ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workspace/list` : null,
+    session ? `/api/workspace/list` : null,
     async (url: string) => {
-      const res = await fetch(url, {
+      const res = await fetchAPI(url, {
         credentials: "include",
       });
       if (!res.ok) {
@@ -50,8 +51,8 @@ export function useWorkspace() {
     }
 
     // Request to create a new workspace
-    const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workspace/create`,
+    const response = await fetchAPI(
+      `/api/workspace/create`,
       {
         credentials: "include",
       },
@@ -73,7 +74,7 @@ export function useWorkspace() {
         currentWorkspace: {
           id,
           name,
-          address: `${process.env.NEXT_PUBLIC_BACKEND_URL}/workspace/${id}`,
+          address: getAPIUrl(`/workspace/${id}`),
           createdAt,
           updatedAt,
         },

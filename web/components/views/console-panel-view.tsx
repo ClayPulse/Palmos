@@ -19,7 +19,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { v4 } from "uuid";
 import ViewLoader from "./loaders/view-loader";
 
-export default function AgenticConsolePanel() {
+export default function ConsolePanelView() {
   const editorContext = useContext(EditorContext);
 
   const [consoles, setConsoles] = useState<Extension[]>([]);

@@ -5,6 +5,7 @@ import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
 import useSWR from "swr";
 import ExtensionList from "../extension/extension-list";
+import { fetchAPI } from "@/lib/utils/backend";
 
 export default function ExtensionMarketplaceModal({
   isOpen,
@@ -43,9 +44,9 @@ export default function ExtensionMarketplaceModal({
     isLoading: isLoadingMarketplaceExtensions,
     mutate: mutateMarketplaceExtensions,
   } = useSWR<Extension[]>(
-    isOpen ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/list` : null,
+    isOpen ? `/api/extension/list` : null,
     (url: string) =>
-      fetch(url)
+      fetchAPI(url)
         .then((res) => res.json())
         .then((body) => {
           const fetchedExts: ExtensionMeta[] = body;

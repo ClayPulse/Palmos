@@ -143,7 +143,7 @@ export default function Explorer({
   // Browse inside a project
   if (editorContext?.editorStates.project) {
     return (
-      <div className="bg-content2 relative h-full w-full px-4 py-2">
+      <div className="relative h-full w-full px-4 py-2">
         {editorContext.editorStates.projectContent?.length === 0 && (
           <div className="pointer-events-none absolute top-0 left-0 m-0 flex h-full w-full flex-col items-center justify-center px-2 pb-16">
             <p className="text-center">

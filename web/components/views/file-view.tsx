@@ -1,4 +1,4 @@
-import AgenticConsolePanel from "./agentic-console-panel";
+import ConsolePanelView from "./console-panel-view";
 import { useViewManager } from "@/lib/hooks/use-view-manager";
 import ExtensionViewLayout from "./layout";
 import ViewLoader from "./loaders/view-loader";
@@ -9,8 +9,9 @@ import { useEffect, useState } from "react";
 import { compare } from "semver";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import NotAuthorized from "../interface/not-authorized";
+import { fetchAPI } from "@/lib/utils/backend";
 
-export default function ViewDisplayArea() {
+export default function FileView() {
   const { updateViewModel, activeViewModel } = useViewManager();
 
   // #region Load specified app if app query parameter is present
@@ -29,13 +30,13 @@ export default function ViewDisplayArea() {
     // Download and load the extension app if specified
     async function loadApp(appName: string, inviteCode?: string) {
       const url = new URL(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/get`,
+        `/api/extension/get`,
       );
       url.searchParams.set("name", appName);
       url.searchParams.set("latest", "true");
       if (inviteCode) url.searchParams.set("inviteCode", inviteCode);
 
-      const res = await fetch(url, {
+      const res = await fetchAPI(url, {
         credentials: "include",
       });
 
@@ -123,7 +124,7 @@ export default function ViewDisplayArea() {
           </div>
         )}
 
-        <AgenticConsolePanel />
+        <ConsolePanelView />
       </div>
     </div>
   );

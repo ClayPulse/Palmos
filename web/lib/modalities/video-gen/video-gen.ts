@@ -1,3 +1,5 @@
+import { fetchAPI } from "@/lib/utils/backend";
+
 export class BaseVideoGen {
   private model: any;
   private generateFunc?: (
@@ -122,8 +124,7 @@ export function getVideoGenModel(
       );
     }
 
-    const proxyHost = process.env.NEXT_PUBLIC_BACKEND_URL;
-    const response = await fetch(`${proxyHost}/api/inference/replicate`, {
+    const response = await fetchAPI(`/api/inference/replicate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -152,8 +153,8 @@ export function getVideoGenModel(
       prediction.status !== "failed"
     ) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      const response = await fetch(
-        `${proxyHost}/api/inference/replicate/${prediction.id}`,
+      const response = await fetchAPI(
+        `/api/inference/replicate/${prediction.id}`,
         {
           method: "POST",
           body: JSON.stringify({
@@ -178,7 +179,6 @@ export function getVideoGenModel(
       typeof prediction.output === "string"
         ? prediction.output
         : prediction.output[prediction.output.length - 1];
-
 
     console.log("Video URL:", videoUrl);
 
