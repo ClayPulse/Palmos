@@ -85,7 +85,7 @@ export default function ConsolePanelView() {
   return (
     <AnimatePresence>
       <motion.div
-        className="hidden h-[60%] w-full shrink-0 pb-0 data-[is-open=true]:block data-[is-open=true]:pb-14"
+        className="absolute bottom-0 z-10 hidden h-[60%] w-full shrink-0 px-2 py-2 pb-6 data-[is-open=true]:block data-[is-toolbar-open=true]:pb-16"
         // Enter from bottom and exit to bottom
         initial={false}
         animate={{
@@ -100,28 +100,31 @@ export default function ConsolePanelView() {
         onAnimationComplete={() => {
           setIsAnimating(false);
         }}
+        data-is-toolbar-open={editorContext?.editorStates.isToolbarOpen}
       >
-        <ExtensionViewLayout>
-          <div className="bg-content1 flex h-full w-full flex-col">
-            <ConsoleNavBar
-              consoles={consoles}
-              setConsoles={setConsoles}
-              selectedConsoleIndex={selectedConsoleIndex}
-              setSelectedConsoleIndex={setSelectedConsoleIndex}
-            />
-
-            {viewModels.length > 0 && (
-              <ViewLoader
-                viewModel={viewModels[selectedConsoleIndex]}
-                setViewModel={(viewModel: ViewModel) => {
-                  const newViewModels = [...viewModels];
-                  newViewModels[selectedConsoleIndex] = viewModel;
-                  setViewModels(newViewModels);
-                }}
+        <div className="h-full w-full">
+          <ExtensionViewLayout>
+            <div className="bg-content1 flex h-full w-full flex-col">
+              <ConsoleNavBar
+                consoles={consoles}
+                setConsoles={setConsoles}
+                selectedConsoleIndex={selectedConsoleIndex}
+                setSelectedConsoleIndex={setSelectedConsoleIndex}
               />
-            )}
-          </div>
-        </ExtensionViewLayout>
+
+              {viewModels.length > 0 && (
+                <ViewLoader
+                  viewModel={viewModels[selectedConsoleIndex]}
+                  setViewModel={(viewModel: ViewModel) => {
+                    const newViewModels = [...viewModels];
+                    newViewModels[selectedConsoleIndex] = viewModel;
+                    setViewModels(newViewModels);
+                  }}
+                />
+              )}
+            </div>
+          </ExtensionViewLayout>
+        </div>
       </motion.div>
     </AnimatePresence>
   );

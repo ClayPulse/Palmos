@@ -7,7 +7,7 @@ import {
 } from "@/lib/types";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
 import toast from "react-hot-toast";
-import { fetchAPI } from "@/lib/utils/backend";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 
 export class CloudAPI extends AbstractPlatformAPI {
   private workspace: RemoteWorkspace | undefined;

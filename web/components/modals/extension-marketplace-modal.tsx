@@ -5,7 +5,7 @@ import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
 import useSWR from "swr";
 import ExtensionList from "../extension/extension-list";
-import { fetchAPI } from "@/lib/utils/backend";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 
 export default function ExtensionMarketplaceModal({
   isOpen,

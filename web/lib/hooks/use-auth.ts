@@ -4,7 +4,7 @@ import { useContext } from "react";
 import { Session } from "../types";
 import useSWR from "swr";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { fetchAPI, getAPIUrl } from "../utils/backend";
+import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
 
 export function useAuth() {
   const editorContext = useContext(EditorContext);

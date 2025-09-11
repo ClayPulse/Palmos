@@ -4,7 +4,7 @@ import { PlatformEnum, RemoteWorkspace } from "../types";
 import { getPlatform } from "../platform-api/platform-checker";
 import { useAuth } from "./use-auth";
 import useSWR from "swr";
-import { fetchAPI, getAPIUrl } from "../utils/backend";
+import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
 
 export function useWorkspace() {
   const editorContext = useContext(EditorContext);

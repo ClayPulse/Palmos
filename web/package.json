@@ -46,8 +46,10 @@
       "react": "^19.1.1",
       "react-dom": "^19.1.1",
       "react-hot-toast": "^2.6.0",
+      "react-markdown": "^10.1.0",
       "react-responsive": "^10.0.1",
       "react-spinners": "^0.17.0",
+      "remark-gfm": "^4.0.1",
       "swr": "^2.3.6",
       "tesseract.js": "^6.0.1",
       "uuid": "^11.1.0"
@@ -55,6 +57,7 @@
    "devDependencies": {
       "@module-federation/runtime": "^0.18.3",
       "@tailwindcss/postcss": "^4.1.12",
+      "@tailwindcss/typography": "^0.5.16",
       "@types/node": "^24",
       "@types/react": "^19",
       "@types/react-dom": "^19",

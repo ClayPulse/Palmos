@@ -1,4 +1,4 @@
-import { fetchAPI } from "@/lib/utils/backend";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 
 export class BaseImageGen {
   private model: any;

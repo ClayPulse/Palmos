@@ -1,4 +1,3 @@
-import ConsolePanelView from "./console-panel-view";
 import { useViewManager } from "@/lib/hooks/use-view-manager";
 import ExtensionViewLayout from "./layout";
 import ViewLoader from "./loaders/view-loader";
@@ -9,7 +8,7 @@ import { useEffect, useState } from "react";
 import { compare } from "semver";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import NotAuthorized from "../interface/not-authorized";
-import { fetchAPI } from "@/lib/utils/backend";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 
 export default function FileView() {
   const { updateViewModel, activeViewModel } = useViewManager();
@@ -123,8 +122,6 @@ export default function FileView() {
             </p>
           </div>
         )}
-
-        <ConsolePanelView />
       </div>
     </div>
   );

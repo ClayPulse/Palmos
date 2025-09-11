@@ -17,6 +17,7 @@ import useAndroidManageStorageNotification from "@/lib/hooks/use-android-manage-
 import { SafeArea } from "@capacitor-community/safe-area";
 import SharingModal from "../modals/sharing-modal";
 import NavTopBar from "./nav-top-bar";
+import AppInfoModal from "../modals/app-info-modal";
 
 export default function Nav({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -92,7 +93,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-full w-full flex-col overflow-x-hidden bg-default">
+    <div className="bg-default flex h-full w-full flex-col overflow-x-hidden">
       {isPasswordModalOpen && (
         <PasswordModal
           isOpen={isPasswordModalOpen}
@@ -116,6 +117,8 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         <SharingModal isOpen={isSharingOpen} setIsOpen={setIsSharingOpen} />
       )}
 
+      <AppInfoModal />
+
       <div className="grid h-full w-full grid-cols-[max-content_auto]">
         <div className="h-full w-full">
           {isShowNavbar && (
@@ -125,7 +128,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             />
           )}
         </div>
-        <div className="h-full w-full relative">
+        <div className="relative h-full w-full">
           {isShowNavbar && (
             <NavTopBar
               isMenuOpen={isMenuOpen}

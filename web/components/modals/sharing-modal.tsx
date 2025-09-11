@@ -8,7 +8,7 @@ import { useState } from "react";
 import Icon from "../misc/icon";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { fetchAPI } from "@/lib/utils/backend";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 
 export default function SharingModal({
   isOpen,
