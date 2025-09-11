@@ -5,12 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 export default function ExtensionLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body
-        style={{
-          height: "100vh",
-          width: "100vw",
-        }}
-      >
+      <body className="h-full w-full overflow-hidden">
         <Analytics />
         <RemoteModuleProvider isPreventingCSS={false}>
           <Suspense>{children}</Suspense>

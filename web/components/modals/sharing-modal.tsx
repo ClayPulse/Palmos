@@ -74,10 +74,7 @@ export default function SharingModal({
   );
 
   async function updateShareInfo(visibility: string) {
-    const url = new URL(
-      `/api/extension/update`,
-    );
-    await fetchAPI(url, {
+    await fetchAPI(`/api/extension/update`, {
       method: "PATCH",
       body: JSON.stringify({
         visibility,

@@ -41,7 +41,11 @@ export default function ExtensionPage({}) {
       registerRemotes([
         {
           name: moduleId,
-          entry: `${remoteOrigin}/${moduleId}/${moduleVersion}/mf-manifest.json`,
+          entry: `${remoteOrigin}/${moduleId}/${moduleVersion}/client/mf-manifest.json`,
+        },
+        {
+          name: moduleId,
+          entry: `${remoteOrigin}/${moduleId}/${moduleVersion}/server/mf-manifest.json`,
         },
       ]);
       setIsRegistered(true);

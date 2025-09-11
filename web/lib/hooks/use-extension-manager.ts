@@ -15,10 +15,16 @@ export default function useExtensionManager() {
 
     // TODO: Prevent CSS from being injected from the remote
 
+    // Register the frontend and backend from remote
     registerRemotes([
       {
         name: id,
-        entry: `${remoteOrigin}/${id}/${version}/mf-manifest.json`,
+        entry: `${remoteOrigin}/${id}/${version}/client/mf-manifest.json`,
+        version: version,
+      },
+      {
+        name: id,
+        entry: `${remoteOrigin}/${id}/${version}/server/mf-manifest.json`,
         version: version,
       },
     ]);

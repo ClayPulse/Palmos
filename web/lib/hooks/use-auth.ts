@@ -35,11 +35,10 @@ export function useAuth() {
       return;
     }
 
-    const url = new URL(`/api/auth/signin`);
+    const url = getAPIUrl(`/api/auth/signin`);
     url.searchParams.set("callbackUrl", window.location.href);
 
-    const apiUrl = getAPIUrl(url);
-    window.location.href = apiUrl;
+    window.location.href = url.toString();
   }
 
   // Open a sign-out page if the user is signed in.
@@ -48,11 +47,10 @@ export function useAuth() {
       return;
     }
 
-    const url = new URL(`/api/auth/signout`);
+    const url = getAPIUrl(`/api/auth/signout`);
     url.searchParams.set("callbackUrl", window.location.href);
 
-    const apiUrl = getAPIUrl(url);
-    window.location.href = apiUrl;
+    window.location.href = url.toString();
   }
 
   async function toggleOfflineMode() {
