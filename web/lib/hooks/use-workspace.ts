@@ -51,12 +51,9 @@ export function useWorkspace() {
     }
 
     // Request to create a new workspace
-    const response = await fetchAPI(
-      `/api/workspace/create`,
-      {
-        credentials: "include",
-      },
-    );
+    const response = await fetchAPI(`/api/workspace/create`, {
+      credentials: "include",
+    });
 
     const {
       id,
@@ -74,7 +71,7 @@ export function useWorkspace() {
         currentWorkspace: {
           id,
           name,
-          address: getAPIUrl(`/workspace/${id}`),
+          address: getAPIUrl(`/workspace/${id}`).toString(),
           createdAt,
           updatedAt,
         },
