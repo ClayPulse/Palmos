@@ -7,7 +7,7 @@ import {
 import { AbstractPlatformAPI } from "../abstract-platform-api";
 
 export class ElectronAPI extends AbstractPlatformAPI {
-  electronAPI: any;
+  private electronAPI: any;
   constructor() {
     super();
     // @ts-expect-error window.electronAPI is exposed by the Electron main process

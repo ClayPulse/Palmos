@@ -1,3 +1,5 @@
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+
 export class BaseImageGen {
   private model: any;
   private generateFunc?: (
@@ -96,8 +98,7 @@ export function getImageGenModel(
         ? (modelName as `${string}/${string}:${string}`)
         : (modelName as `${string}/${string}`);
 
-    const proxyHost = process.env.NEXT_PUBLIC_BACKEND_URL;
-    const response = await fetch(`${proxyHost}/api/inference/replicate`, {
+    const response = await fetchAPI(`/api/inference/replicate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -123,8 +124,8 @@ export function getImageGenModel(
       prediction.status !== "failed"
     ) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      const response = await fetch(
-        `${proxyHost}/api/inference/replicate/${prediction.id}`,
+      const response = await fetchAPI(
+        `/api/inference/replicate/${prediction.id}`,
         {
           method: "POST",
           body: JSON.stringify({

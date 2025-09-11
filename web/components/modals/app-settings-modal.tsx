@@ -726,7 +726,7 @@ function DevExtensionSettings({
   const fileTypeEntries = Array.from(fileTypeExtensionMap.entries());
 
   const [devExtensionRemoteOrigin, setDevExtensionRemoteOrigin] =
-    useState<string>("http://localhost:3001");
+    useState<string>("http://localhost:3030");
   const [devExtensionId, setDevExtensionId] = useState<string>("");
   const [devExtensionVersion, setDevExtensionVersion] = useState<string>("");
 
@@ -832,7 +832,7 @@ function DevExtensionSettings({
 
       <p className="text-small font-bold">Extension Dev Mode</p>
       <p className="text-small">
-        Load extension from local extension dev server at http://localhost:3001.
+        Load extension from local extension dev server at http://localhost:3030.
       </p>
       <Switch
         isSelected={editorContext?.persistSettings?.isExtensionDevMode ?? false}
@@ -875,31 +875,50 @@ function DevExtensionSettings({
             value={devExtensionVersion}
             onValueChange={setDevExtensionVersion}
           />
-          <Button
-            onPress={() => {
-              if (
-                devExtensionRemoteOrigin &&
-                devExtensionId &&
-                devExtensionVersion
-              ) {
-                const ext: Extension = {
-                  remoteOrigin: devExtensionRemoteOrigin,
-                  config: {
-                    id: devExtensionId,
-                    version: devExtensionVersion,
-                    visibility: "private",
-                  },
-                  isEnabled: true,
-                };
+          <div className="flex gap-x-1">
+            <Button
+              onPress={() => {
+                if (
+                  devExtensionRemoteOrigin &&
+                  devExtensionId &&
+                  devExtensionVersion
+                ) {
+                  const ext: Extension = {
+                    remoteOrigin: devExtensionRemoteOrigin,
+                    config: {
+                      id: devExtensionId,
+                      version: devExtensionVersion,
+                      visibility: "private",
+                    },
+                    isEnabled: true,
+                  };
 
-                installExtension(ext).then(() => {
-                  toast.success("Extension installed");
-                });
-              }
-            }}
-          >
-            Add Dev Extension
-          </Button>
+                  installExtension(ext).then(() => {
+                    toast.success("Extension installed");
+                  });
+                }
+              }}
+            >
+              Add Dev Extension
+            </Button>
+            <Button
+              onPress={() => {
+                if (
+                  devExtensionRemoteOrigin &&
+                  devExtensionId &&
+                  devExtensionVersion
+                ) {
+                  const url = `/?app=${encodeURIComponent(
+                    `${devExtensionRemoteOrigin}/${devExtensionId}/${devExtensionVersion}`,
+                  )}`;
+
+                  window.location.href = url;
+                }
+              }}
+            >
+              Open as App
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -1,4 +1,3 @@
-import AgenticConsolePanel from "./agentic-console-panel";
 import { useViewManager } from "@/lib/hooks/use-view-manager";
 import ExtensionViewLayout from "./layout";
 import ViewLoader from "./loaders/view-loader";
@@ -9,8 +8,9 @@ import { useEffect, useState } from "react";
 import { compare } from "semver";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import NotAuthorized from "../interface/not-authorized";
+import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
 
-export default function ViewDisplayArea() {
+export default function FileBrowseView() {
   const { updateViewModel, activeViewModel } = useViewManager();
 
   // #region Load specified app if app query parameter is present
@@ -26,16 +26,43 @@ export default function ViewDisplayArea() {
   const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
 
   useEffect(() => {
+    // Download and load the extension app from a URL if specified
+    async function loadAppFromURL(urlStr: string) {
+      // the url is expected to be in the format of {remoteOrigin}/{extensionId}/{version}
+
+      const url = new URL(urlStr);
+      const parts = url.pathname.split("/").filter((part) => part.length > 0);
+      if (parts.length < 2) {
+        console.error("Invalid app URL format");
+        return undefined;
+      }
+      const extensionId = parts[parts.length - 2];
+      const version = parts[parts.length - 1];
+      const remoteOrigin = url.origin;
+      const ext: Extension = {
+        config: {
+          id: extensionId,
+          version: version,
+          author: "Unknown",
+          description: "No description available",
+          displayName: extensionId,
+          visibility: "private",
+        },
+        isEnabled: true,
+        remoteOrigin: remoteOrigin,
+      };
+
+      return ext;
+    }
+
     // Download and load the extension app if specified
-    async function loadApp(appName: string, inviteCode?: string) {
-      const url = new URL(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/get`,
-      );
+    async function loadAppFromRegistry(appName: string, inviteCode?: string) {
+      const url = getAPIUrl(`/api/extension/get`);
       url.searchParams.set("name", appName);
       url.searchParams.set("latest", "true");
       if (inviteCode) url.searchParams.set("inviteCode", inviteCode);
 
-      const res = await fetch(url, {
+      const res = await fetchAPI(url, {
         credentials: "include",
       });
 
@@ -70,9 +97,13 @@ export default function ViewDisplayArea() {
 
       if (!ext) {
         setNoAccessToApp(true);
-        return;
+        return undefined;
       }
 
+      return ext;
+    }
+
+    async function installAndOpenApp(ext: Extension) {
       console.log("Installing extension:", ext);
 
       await installExtension(ext);
@@ -84,9 +115,22 @@ export default function ViewDisplayArea() {
       setPulseAppViewModel(viewModel);
     }
 
-    if (app) {
-      loadApp(app, inviteCode ?? undefined);
+    async function loadApp() {
+      console.log("App query parameter:", app);
+
+      if (!app) return;
+      else if (app?.startsWith("http://") || app?.startsWith("https://")) {
+        const ext = await loadAppFromURL(app);
+        if (!ext) return;
+        await installAndOpenApp(ext);
+      } else {
+        const ext = await loadAppFromRegistry(app, inviteCode ?? undefined);
+        if (!ext) return;
+        await installAndOpenApp(ext);
+      }
     }
+
+    loadApp();
   }, [app]);
 
   // #endregion
@@ -96,8 +140,8 @@ export default function ViewDisplayArea() {
   }
 
   return (
-    <div className="flex h-full w-full flex-col p-1">
-      <div className="bg-default flex h-full w-full flex-col items-start justify-between gap-1.5 overflow-hidden rounded-xl p-2">
+    <div className="flex h-full w-full flex-col p-1 mt-15">
+      <div className="bg-default flex h-full w-full flex-col items-start justify-between gap-1.5 overflow-hidden rounded-xl p-1">
         {activeViewModel ? (
           <ExtensionViewLayout>
             <ViewLoader
@@ -122,8 +166,6 @@ export default function ViewDisplayArea() {
             </p>
           </div>
         )}
-
-        <AgenticConsolePanel />
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { useState } from "react";
 import Icon from "../misc/icon";
 import toast from "react-hot-toast";
 import useSWR from "swr";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 
 export default function SharingModal({
   isOpen,
@@ -50,10 +51,10 @@ export default function SharingModal({
     | undefined
   >(
     app
-      ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/get-share-info?name=${app}`
+      ? `/api/extension/get-share-info?name=${app}`
       : null,
     async (url: URL) => {
-      const res = await fetch(url, {
+      const res = await fetchAPI(url, {
         credentials: "include",
       });
 
@@ -73,10 +74,7 @@ export default function SharingModal({
   );
 
   async function updateShareInfo(visibility: string) {
-    const url = new URL(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/extension/update`,
-    );
-    await fetch(url, {
+    await fetchAPI(`/api/extension/update`, {
       method: "PATCH",
       body: JSON.stringify({
         visibility,

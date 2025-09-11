@@ -76,6 +76,10 @@ export type EditorStates = {
   currentWorkspace?: RemoteWorkspace;
 
   isUsingOfflineMode?: boolean;
+
+  /* Modals */
+  isAppInfoModalOpen?: boolean;
+  appInfoModalContent?: AppInfoModalContent;
 };
 
 export type PersistentSettings = {
@@ -169,6 +173,16 @@ export type TabItem = {
   name: string;
   icon?: string;
   description: string;
+};
+
+export type AppInfoModalContent = {
+  name: string;
+  version: string;
+  // Markdown content
+  readme?: string;
+  url?: string;
+  author?: string;
+  license?: string;
 };
 // #endregion
 
