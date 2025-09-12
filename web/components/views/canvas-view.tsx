@@ -8,10 +8,11 @@ import {
   EdgeChange,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Icon from "../misc/icon";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { AppInfoModalContent } from "@/lib/types";
+import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 
 const initialNodes = [
   { id: "n1", position: { x: 0, y: 0 }, data: { label: "Node 1" } },
@@ -62,6 +63,34 @@ export default function CanvasView() {
       setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
     [],
   );
+
+  async function exportWorkflow() {
+    const workflow = { nodes, edges };
+    const blob = new Blob([JSON.stringify(workflow, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "workflow.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  const { registerMenuAction } = useMenuActions();
+  // Register menu actions
+  useEffect(() => {
+    registerMenuAction({
+      name: "Export Workflow",
+      menuCategory: "file",
+      description: "Export the current workflow as a JSON file",
+      shortcut: "Ctrl+Alt+E",
+      actionFunc: () => {
+        exportWorkflow();
+      },
+      icon: "download",
+    });
+  }, []);
 
   return (
     <div className="bg-default text-default-foreground relative h-full w-full">

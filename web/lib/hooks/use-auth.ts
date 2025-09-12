@@ -10,7 +10,7 @@ export function useAuth() {
   const editorContext = useContext(EditorContext);
   // --- Auth ---
   const { data: session, isLoading } = useSWR<Session | undefined>(
-    !editorContext?.editorStates.isUsingOfflineMode
+    !editorContext?.editorStates.isSigningIn
       ? `/api/auth/session`
       : null,
     async (url: string) => {
@@ -53,21 +53,10 @@ export function useAuth() {
     window.location.href = url.toString();
   }
 
-  async function toggleOfflineMode() {
-    editorContext?.setEditorStates((prev) => {
-      return {
-        ...prev,
-        isUsingOfflineMode: !prev.isUsingOfflineMode,
-      };
-    });
-  }
-
   return {
     session,
     isLoading,
-    isUsingOfflineMode: editorContext?.editorStates.isUsingOfflineMode,
     signIn,
-    signOut,
-    toggleOfflineMode,
+    signOut
   };
 }

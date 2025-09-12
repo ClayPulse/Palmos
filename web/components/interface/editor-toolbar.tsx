@@ -350,7 +350,7 @@ export default function EditorToolbar() {
             }}
           >
             <div className="bg-content2 relative flex h-10 w-fit items-center rounded-full px-2 py-1 shadow-md">
-              <Tooltip content={"Pen Tool"}>
+              {/* <Tooltip content={"Pen Tool"}>
                 <Button
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
@@ -377,9 +377,9 @@ export default function EditorToolbar() {
                 >
                   <Icon name="comment" variant="outlined" />
                 </Button>
-              </Tooltip>
+              </Tooltip> */}
 
-              <Divider className="mx-1" orientation="vertical" />
+              {/* <Divider className="mx-1" orientation="vertical" /> */}
               <Tooltip content={"Open Agentic Console"}>
                 <Button
                   variant={
@@ -415,16 +415,6 @@ export default function EditorToolbar() {
                   }
                 >
                   <Icon name="mic" variant="outlined" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip content={"Agent Speech Volume"}>
-                <Button
-                  variant="light"
-                  isIconOnly
-                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
-                >
-                  <Icon name="volume_up" variant="outlined" />
                 </Button>
               </Tooltip>
 

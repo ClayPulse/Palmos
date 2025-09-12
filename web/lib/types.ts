@@ -75,11 +75,13 @@ export type EditorStates = {
   // The currently selected workspace
   currentWorkspace?: RemoteWorkspace;
 
-  isUsingOfflineMode?: boolean;
+  isSigningIn?: boolean;
 
   /* Modals */
   isAppInfoModalOpen?: boolean;
   appInfoModalContent?: AppInfoModalContent;
+
+  menuActions?: MenuAction[];
 };
 
 export type PersistentSettings = {
@@ -184,6 +186,16 @@ export type AppInfoModalContent = {
   author?: string;
   license?: string;
 };
+
+export type MenuAction = {
+  name: string;
+  menuCategory: "file" | "edit" | "view";
+  description?: string;
+  shortcut?: string;
+  actionFunc: () => void;
+  icon?: string;
+};
+
 // #endregion
 
 // #region AI Settings

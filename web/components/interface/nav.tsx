@@ -35,7 +35,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     session,
     isLoading: isLoadingSession,
     signIn,
-    isUsingOfflineMode,
   } = useAuth();
 
   const workspaceHook = useWorkspace();
@@ -101,7 +100,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {!isLoadingSession && !session && !isUsingOfflineMode && (
+      {!isLoadingSession && !session && editorContext?.editorStates.isSigningIn && (
         <LoginModal signIn={signIn} />
       )}
 

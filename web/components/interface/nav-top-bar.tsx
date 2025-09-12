@@ -15,7 +15,9 @@ import { useTheme } from "next-themes";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { useSearchParams } from "next/navigation";
 import { EditorContext } from "../providers/editor-context-provider";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
+import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import NavMenuDropdown from "./nav-menu-dropdown";
 
 export default function NavTopBar({
   isMenuOpen,
@@ -30,7 +32,7 @@ export default function NavTopBar({
 }) {
   const editorContext = useContext(EditorContext);
 
-  const { session, signOut, isUsingOfflineMode, toggleOfflineMode } = useAuth();
+  const { session, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
 
   const workspaceHook = useWorkspace();
@@ -40,14 +42,53 @@ export default function NavTopBar({
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
 
+  const { menuActions } = useMenuActions();
+
+  // Handle menu action shortcuts
+  useEffect(() => {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.target && (event.target as HTMLElement).tagName === "INPUT") {
+        return; // Ignore key presses when focused on input fields
+      }
+      menuActions?.forEach((action) => {
+        if (action.shortcut) {
+          const keys = action.shortcut
+            .toLowerCase()
+            .split("+")
+            .map((k) => k.trim());
+          const ctrl = keys.includes("ctrl") || keys.includes("cmd");
+          const shift = keys.includes("shift");
+          const alt = keys.includes("alt");
+          const key = keys.find(
+            (k) => !["ctrl", "cmd", "shift", "alt"].includes(k),
+          );
+          if (
+            (ctrl ? event.ctrlKey || event.metaKey : true) &&
+            (shift ? event.shiftKey : true) &&
+            (alt ? event.altKey : true) &&
+            event.key.toLowerCase() === key
+          ) {
+            event.preventDefault();
+            action.actionFunc();
+          }
+        }
+      });
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [menuActions]);
+
   return (
-    <div className="z-40 w-full px-2 py-2 absolute">
+    <div className="absolute z-40 w-full px-2 py-2">
       <div
         className={
-          "text-default-foreground grid h-14 w-full grid-cols-3 grid-rows-1 px-2 py-2 bg-content1 rounded-xl shadow-md"
+          "text-default-foreground bg-content1 grid h-14 w-full grid-cols-3 grid-rows-1 rounded-xl px-2 py-2 shadow-md"
         }
       >
-        <div className="col-start-1 flex gap-x-2">
+        <div className="col-start-1 flex items-center gap-x-2">
           {!isMenuOpen && (
             <Button
               isIconOnly
@@ -60,6 +101,13 @@ export default function NavTopBar({
               <Icon name="menu" variant="round" />
             </Button>
           )}
+
+          <NavMenuDropdown
+            menuActions={menuActions?.filter(
+              (action) => action.menuCategory === "file",
+            )}
+          />
+
           <Select
             className="max-w-50"
             classNames={{
@@ -68,7 +116,10 @@ export default function NavTopBar({
             }}
             label="Workspace"
             placeholder="Select Workspace"
-            isLoading={!isUsingOfflineMode && !workspaceHook.cloudWorkspaces}
+            isLoading={
+              !editorContext?.editorStates?.isSigningIn &&
+              !workspaceHook.cloudWorkspaces
+            }
             selectedKeys={
               workspaceHook.workspace ? [workspaceHook.workspace.id] : []
             }
@@ -142,13 +193,18 @@ export default function NavTopBar({
             <Icon name="share" variant="round" />
           </Button>
 
-          {isUsingOfflineMode && (
+          {!session && (
             <Button
               onPress={() => {
-                toggleOfflineMode();
+                editorContext?.setEditorStates((prev) => {
+                  return {
+                    ...prev,
+                    isSigningIn: true,
+                  };
+                });
               }}
             >
-              Sign-in
+              Sign In
             </Button>
           )}
           <Button
