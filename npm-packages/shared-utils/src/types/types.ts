@@ -84,13 +84,6 @@ export type TextFileSelection = {
 export type ViewModel = {
   viewId: string;
   isFocused: boolean;
-  // The file content and path.
-  // Optional, if the view is not a file view.
-  file?: {
-    content: string;
-    path: string;
-    selections?: TextFileSelection[];
-  };
   extensionConfig?: ExtensionConfig;
 };
 

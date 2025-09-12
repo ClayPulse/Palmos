@@ -9,13 +9,24 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useState, useCallback, useEffect } from "react";
-import Icon from "../misc/icon";
+import Icon from "../../misc/icon";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import { AppInfoModalContent } from "@/lib/types";
+import { AppInfoModalContent, CanvasViewConfig } from "@/lib/types";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import AppNode from "./nodes/app-node";
 
 const initialNodes = [
-  { id: "n1", position: { x: 0, y: 0 }, data: { label: "Node 1" } },
+  {
+    id: "n1",
+    position: { x: 200, y: 0 },
+    data: {
+      label: "Node 1",
+      config: {
+        app: "http://localhost:3030/spin_wheel/0.0.1/",
+      },
+    },
+    type: "appNode",
+  },
   { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
 ];
 const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" }];
@@ -38,7 +49,7 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 `,
 };
 
-export default function CanvasView() {
+export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
   const { openAppInfoModal } = useAppInfo();
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
@@ -90,6 +101,38 @@ export default function CanvasView() {
       },
       icon: "download",
     });
+
+    registerMenuAction({
+      name: "Import Workflow",
+      menuCategory: "file",
+      description: "Import a workflow from a JSON file",
+      shortcut: "Ctrl+Alt+I",
+      actionFunc: () => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = "application/json";
+        input.onchange = (e: any) => {
+          const file = e.target.files[0];
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            try {
+              const workflow = JSON.parse(event.target?.result as string);
+              if (workflow.nodes && workflow.edges) {
+                setNodes(workflow.nodes);
+                setEdges(workflow.edges);
+              } else {
+                alert("Invalid workflow file");
+              }
+            } catch (err) {
+              alert("Error reading workflow file");
+            }
+          };
+          reader.readAsText(file);
+        };
+        input.click();
+      },
+      icon: "upload",
+    });
   }, []);
 
   return (
@@ -103,6 +146,9 @@ export default function CanvasView() {
         fitView
         proOptions={{
           hideAttribution: true,
+        }}
+        nodeTypes={{
+          appNode: AppNode,
         }}
       />
       <Button

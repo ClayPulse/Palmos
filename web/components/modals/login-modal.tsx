@@ -82,7 +82,8 @@ export default function LoginModal({ signIn }: { signIn: () => void }) {
             });
           }}
         >
-          {getPlatform() === PlatformEnum.Web
+          {getPlatform() === PlatformEnum.Web ||
+          getPlatform() === PlatformEnum.WebMobile
             ? "Continue as Guest"
             : "Continue Offline"}
         </Button>

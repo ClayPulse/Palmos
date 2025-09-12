@@ -42,7 +42,10 @@ export function useWorkspace() {
   async function createWorkspace(name: string) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
-    } else if (getPlatform() !== PlatformEnum.Web) {
+    } else if (
+      getPlatform() !== PlatformEnum.Web &&
+      getPlatform() !== PlatformEnum.WebMobile
+    ) {
       throw new Error(
         "Workspace creation is only supported on the web platform.",
       );

@@ -16,7 +16,12 @@ export function getPlatform() {
     }
     return PlatformEnum.Electron;
   }
-  
+
+  // Check for mobile browser
+  else if (/Mobi|Android/i.test(navigator.userAgent)) {
+    return PlatformEnum.WebMobile;
+  }
+
   // If none of the above, it's web
   return PlatformEnum.Web;
 }

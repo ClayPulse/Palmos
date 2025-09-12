@@ -18,6 +18,8 @@ import { EditorContext } from "../providers/editor-context-provider";
 import { useContext, useEffect } from "react";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import NavMenuDropdown from "./nav-menu-dropdown";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { PlatformEnum } from "@/lib/types";
 
 export default function NavTopBar({
   isMenuOpen,
@@ -88,7 +90,7 @@ export default function NavTopBar({
           "text-default-foreground bg-content1 grid h-14 w-full grid-cols-3 grid-rows-1 rounded-xl px-2 py-2 shadow-md"
         }
       >
-        <div className="col-start-1 flex items-center gap-x-2">
+        <div className="col-start-1 flex items-center sm:gap-x-1">
           {!isMenuOpen && (
             <Button
               isIconOnly
@@ -108,65 +110,70 @@ export default function NavTopBar({
             )}
           />
 
-          <Select
-            className="max-w-50"
-            classNames={{
-              mainWrapper: "h-10",
-              trigger: "py-0.5 min-h-10",
-            }}
-            label="Workspace"
-            placeholder="Select Workspace"
-            isLoading={
-              !editorContext?.editorStates?.isSigningIn &&
-              !workspaceHook.cloudWorkspaces
-            }
-            selectedKeys={
-              workspaceHook.workspace ? [workspaceHook.workspace.id] : []
-            }
-            size="sm"
-            disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
-          >
-            <>
-              {workspaceHook.cloudWorkspaces?.map((workspace) => (
+          {/* Do not show workspace selector when the app is open in web, and session is not available */}
+          {(getPlatform() === PlatformEnum.Web ||
+            getPlatform() === PlatformEnum.WebMobile) &&
+          !session ? null : (
+            <Select
+              className="max-w-50"
+              classNames={{
+                mainWrapper: "h-10",
+                trigger: "py-0.5 min-h-10",
+              }}
+              label="Workspace"
+              placeholder="Select Workspace"
+              isLoading={
+                !editorContext?.editorStates?.isSigningIn &&
+                !workspaceHook.cloudWorkspaces
+              }
+              selectedKeys={
+                workspaceHook.workspace ? [workspaceHook.workspace.id] : []
+              }
+              size="sm"
+              disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
+            >
+              <>
+                {workspaceHook.cloudWorkspaces?.map((workspace) => (
+                  <SelectItem
+                    key={workspace.id}
+                    onPress={() => {
+                      workspaceHook.selectWorkspace(workspace.id);
+                    }}
+                  >
+                    {workspace.name}
+                  </SelectItem>
+                )) ?? []}
                 <SelectItem
-                  key={workspace.id}
+                  className="bg-primary text-primary-foreground"
+                  color="primary"
                   onPress={() => {
-                    workspaceHook.selectWorkspace(workspace.id);
+                    setIsWorkspaceSettingsModalOpen(true);
                   }}
+                  startContent={
+                    <div className="text-primary-foreground h-4 w-4">
+                      <Icon name="add" variant="round" />
+                    </div>
+                  }
                 >
-                  {workspace.name}
+                  Create New
                 </SelectItem>
-              )) ?? []}
-              <SelectItem
-                className="bg-primary text-primary-foreground"
-                color="primary"
-                onPress={() => {
-                  setIsWorkspaceSettingsModalOpen(true);
-                }}
-                startContent={
-                  <div className="text-primary-foreground h-4 w-4">
-                    <Icon name="add" variant="round" />
-                  </div>
-                }
-              >
-                Create New
-              </SelectItem>
-              <SelectItem
-                key={"settings"}
-                className="bg-default"
-                onPress={() => {
-                  setIsWorkspaceSettingsModalOpen(true);
-                }}
-                startContent={
-                  <div className="h-4 w-4">
-                    <Icon name="settings" variant="round" />
-                  </div>
-                }
-              >
-                Settings
-              </SelectItem>
-            </>
-          </Select>
+                <SelectItem
+                  key={"settings"}
+                  className="bg-default"
+                  onPress={() => {
+                    setIsWorkspaceSettingsModalOpen(true);
+                  }}
+                  startContent={
+                    <div className="h-4 w-4">
+                      <Icon name="settings" variant="round" />
+                    </div>
+                  }
+                >
+                  Settings
+                </SelectItem>
+              </>
+            </Select>
+          )}
         </div>
         <div className="col-start-2 flex flex-col items-center justify-center">
           {editorContext?.editorStates.project && <ProjectIndicator />}

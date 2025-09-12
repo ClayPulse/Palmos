@@ -1,4 +1,4 @@
-import { MenuAction } from "@/lib/types";
+import { MenuAction, PlatformEnum } from "@/lib/types";
 import {
   Button,
   Dropdown,
@@ -8,6 +8,7 @@ import {
 } from "@heroui/react";
 import Icon from "../misc/icon";
 import { useState } from "react";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 
 export default function NavMenuDropdown({
   menuActions,
@@ -21,7 +22,7 @@ export default function NavMenuDropdown({
       <DropdownTrigger>
         <Button
           variant="light"
-          className="text-md data-[is-active=true]:bg-default h-fit min-w-0 px-4 py-2"
+          className="text-md data-[is-active=true]:bg-default h-fit min-w-0 px-3 py-2 sm:px-4"
           data-is-active={isOpen}
         >
           File
@@ -34,10 +35,19 @@ export default function NavMenuDropdown({
             onPress={() => {
               action.actionFunc();
             }}
-            shortcut={action.shortcut}
+            shortcut={
+              getPlatform() !== PlatformEnum.Capacitor &&
+              getPlatform() !== PlatformEnum.WebMobile
+                ? action.shortcut
+                : null
+            }
             description={action.description}
             startContent={
-              action.icon ? <Icon name={action.icon} variant="round" /> : null
+              action.icon ? (
+                <div className="w-6">
+                  <Icon name={action.icon} variant="round" />
+                </div>
+              ) : null
             }
           >
             {action.name}

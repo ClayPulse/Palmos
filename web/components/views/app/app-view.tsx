@@ -1,29 +1,20 @@
-import { useViewManager } from "@/lib/hooks/use-view-manager";
-import ExtensionViewLayout from "./layout";
-import ViewLoader from "./loaders/view-loader";
+import NotAuthorized from "@/components/interface/not-authorized";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
-import { Extension, ExtensionMeta } from "@/lib/types";
-import { useSearchParams } from "next/navigation";
+import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
+import { AppViewConfig, Extension, ExtensionMeta } from "@/lib/types";
+import { ViewModel } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
 import { compare } from "semver";
-import { ViewModel } from "@pulse-editor/shared-utils";
-import NotAuthorized from "../interface/not-authorized";
-import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
+import ExtensionViewLayout from "../layout";
+import ViewLoader from "../loaders/view-loader";
+import Loading from "@/components/interface/loading";
 
-export default function FileBrowseView() {
-  const { updateViewModel, activeViewModel } = useViewManager();
-
-  // #region Load specified app if app query parameter is present
-  const params = useSearchParams();
-  // Use the 'app' query parameter to load specific extension app upon loading page
-  const app = params.get("app");
-  const inviteCode = params.get("inviteCode");
-
+export default function AppView({ config }: { config: AppViewConfig }) {
+  const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
   const { installExtension } = useExtensionManager();
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
     ViewModel | undefined
   >(undefined);
-  const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
 
   useEffect(() => {
     // Download and load the extension app from a URL if specified
@@ -116,57 +107,38 @@ export default function FileBrowseView() {
     }
 
     async function loadApp() {
-      console.log("App query parameter:", app);
+      console.log("App query parameter:", config.app);
 
-      if (!app) return;
-      else if (app?.startsWith("http://") || app?.startsWith("https://")) {
-        const ext = await loadAppFromURL(app);
+      if (!config.app) return;
+      else if (
+        config.app?.startsWith("http://") ||
+        config.app?.startsWith("https://")
+      ) {
+        const ext = await loadAppFromURL(config.app);
         if (!ext) return;
         await installAndOpenApp(ext);
       } else {
-        const ext = await loadAppFromRegistry(app, inviteCode ?? undefined);
+        const ext = await loadAppFromRegistry(
+          config.app,
+          config.inviteCode ?? undefined,
+        );
         if (!ext) return;
         await installAndOpenApp(ext);
       }
     }
 
     loadApp();
-  }, [app]);
-
-  // #endregion
+  }, [config]);
 
   if (noAccessToApp) {
     return <NotAuthorized />;
+  } else if (!pulseAppViewModel) {
+    return <Loading text="Searching for app..." />;
   }
 
   return (
-    <div className="flex h-full w-full flex-col p-1 mt-15">
-      <div className="bg-default flex h-full w-full flex-col items-start justify-between gap-1.5 overflow-hidden rounded-xl p-1">
-        {activeViewModel ? (
-          <ExtensionViewLayout>
-            <ViewLoader
-              viewModel={activeViewModel}
-              setViewModel={updateViewModel}
-            />
-          </ExtensionViewLayout>
-        ) : pulseAppViewModel ? (
-          <ExtensionViewLayout>
-            <ViewLoader
-              viewModel={pulseAppViewModel}
-              setViewModel={setPulseAppViewModel}
-            />
-          </ExtensionViewLayout>
-        ) : (
-          <div className="text-default-foreground flex h-full w-full flex-col items-center justify-center gap-y-1 pb-12">
-            <h1 className="text-center text-2xl font-bold">
-              Welcome to Pulse Editor!
-            </h1>
-            <p className="text-center text-lg font-normal">
-              Start by opening a file or project.
-            </p>
-          </div>
-        )}
-      </div>
-    </div>
+    <ExtensionViewLayout>
+      <ViewLoader viewModel={pulseAppViewModel} />
+    </ExtensionViewLayout>
   );
 }

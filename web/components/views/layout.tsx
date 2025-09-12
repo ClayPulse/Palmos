@@ -16,9 +16,11 @@ export default function ExtensionViewLayout({
       }}
     >
       <div className="absolute top-0 z-20 -mt-0.5 flex w-full justify-center">
-        <div className="bg-default-500 h-1 w-8 cursor-pointer rounded-full"></div>
+        <div className="bg-default-500 h-1 w-8 cursor-grab rounded-full active:cursor-grabbing"></div>
       </div>
-      <div className="h-full w-full overflow-hidden rounded-lg shadow-md">{children}</div>
+      <div className="h-full w-full overflow-hidden rounded-lg shadow-md">
+        {children}
+      </div>
     </div>
   );
 }

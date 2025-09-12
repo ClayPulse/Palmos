@@ -7,9 +7,9 @@ import { v4 } from "uuid";
 export function useViewManager() {
   const editorContext = useContext(EditorContext);
   const { platformApi } = usePlatformApi();
-  const [activeViewModel, setActiveView] = useState<ViewModel | undefined>(
-    undefined,
-  );
+  const [activeFileViewModel, setActiveFileViewModel] = useState<
+    ViewModel | undefined
+  >(undefined);
 
   useEffect(() => {
     if (!editorContext) {
@@ -18,7 +18,7 @@ export function useViewManager() {
     const activeView = editorContext.editorStates.openedViewModels.find(
       (view) => view.isFocused,
     );
-    setActiveView(activeView);
+    setActiveFileViewModel(activeView);
   }, [editorContext?.editorStates.openedViewModels]);
 
   async function openFileInView(file: File) {
@@ -157,7 +157,7 @@ export function useViewManager() {
   }
 
   return {
-    activeViewModel,
+    activeFileViewModel,
     viewCount,
     openFileInView,
     closeView,

@@ -33,7 +33,10 @@ export function usePlatformApi() {
       return new CapacitorAPI();
     } else if (platform === PlatformEnum.Electron) {
       return new ElectronAPI();
-    } else if (platform === PlatformEnum.Web) {
+    } else if (
+      platform === PlatformEnum.Web ||
+      platform === PlatformEnum.WebMobile
+    ) {
       const workspace = editorContext?.editorStates.currentWorkspace;
       return new CloudAPI(workspace);
     } else if (platform === PlatformEnum.VSCode) {

@@ -1,6 +1,6 @@
 import { Progress } from "@heroui/react";
 
-export default function Loading() {
+export default function Loading({ text = "Loading..." }: { text?: string }) {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center dark:bg-[#27272A]">
       <Progress

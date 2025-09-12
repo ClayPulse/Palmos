@@ -196,6 +196,28 @@ export type MenuAction = {
   icon?: string;
 };
 
+export enum ViewModeEnum {
+  App = "app",
+  Canvas = "canvas",
+  Home = "home",
+}
+
+export type AppViewConfig = {
+  app: string;
+  inviteCode?: string;
+  initialFileUri?: string;
+};
+
+export type CanvasViewConfig = {
+  workflow: Workflow;
+  appConfigs?: AppViewConfig[];
+};
+
+export type TabView = {
+  type: ViewModeEnum;
+  config: AppViewConfig | CanvasViewConfig;
+};
+
 // #endregion
 
 // #region AI Settings
@@ -256,6 +278,7 @@ export enum PlatformEnum {
   Electron = "electron",
   VSCode = "vscode",
   Web = "web",
+  WebMobile = "web-mobile",
 }
 // #endregion
 
@@ -308,5 +331,12 @@ export type ExtensionMeta = {
     name: string;
   };
   visibility: string;
+};
+// #endregion
+
+// #region Workflow
+export type Workflow = {
+  nodes: any;
+  edges: any;
 };
 // #endregion

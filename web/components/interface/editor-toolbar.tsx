@@ -42,7 +42,7 @@ export default function EditorToolbar() {
     undefined,
   );
 
-  const { activeViewModel } = useViewManager();
+  const { activeFileViewModel: activeViewModel } = useViewManager();
 
   // When speech2speech returns assistant result, we let the assistant agent to analyze its effects
   useEffect(() => {

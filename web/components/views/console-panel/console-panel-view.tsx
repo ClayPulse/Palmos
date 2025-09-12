@@ -7,17 +7,17 @@ import {
   useEffect,
   useState,
 } from "react";
-import ExtensionViewLayout from "./layout";
+import ExtensionViewLayout from "../layout";
 import { TabItem, Extension } from "@/lib/types";
 import { Button, Divider, select, Tooltip } from "@heroui/react";
-import AgentConfigModal from "../modals/agent-config-modal";
-import { EditorContext } from "../providers/editor-context-provider";
+import AgentConfigModal from "../../modals/agent-config-modal";
+import { EditorContext } from "../../providers/editor-context-provider";
 import Tabs from "@/components/misc/tabs";
-import Icon from "../misc/icon";
+import Icon from "../../misc/icon";
 import { ExtensionTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 } from "uuid";
-import ViewLoader from "./loaders/view-loader";
+import ViewLoader from "../loaders/view-loader";
 
 export default function ConsolePanelView() {
   const editorContext = useContext(EditorContext);
