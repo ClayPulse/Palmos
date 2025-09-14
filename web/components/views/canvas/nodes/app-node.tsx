@@ -1,14 +1,20 @@
 import { AppViewConfig } from "@/lib/types";
 import { Node } from "@xyflow/react";
-import AppView from "../../app/app-view";
+import BaseAppView from "../../base/base-app-view";
+import { memo } from "react";
+import ViewControlLayout from "../../layout/view-control-layout";
 
-export default function AppNode(props: any) {
+const AppNode = memo((props: any) => {
   const nodeProps = props as Node<{ config: AppViewConfig }>;
   const { config }: { config: AppViewConfig } = nodeProps.data;
 
   return (
-    <div className="app-node h-80 w-80 rounded-lg">
-      <AppView config={config} />
-    </div>
+    <ViewControlLayout type="canvas">
+      <BaseAppView config={config}/>
+    </ViewControlLayout>
   );
-}
+});
+
+AppNode.displayName = "AppNode";
+
+export default AppNode;

@@ -7,7 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import ExtensionViewLayout from "../layout";
+import ViewControlLayout from "../layout/view-control-layout";
 import { TabItem, Extension } from "@/lib/types";
 import { Button, Divider, select, Tooltip } from "@heroui/react";
 import AgentConfigModal from "../../modals/agent-config-modal";
@@ -17,118 +17,7 @@ import Icon from "../../misc/icon";
 import { ExtensionTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 } from "uuid";
-import ViewLoader from "../loaders/view-loader";
-
-export default function ConsolePanelView() {
-  const editorContext = useContext(EditorContext);
-
-  const [consoles, setConsoles] = useState<Extension[]>([]);
-  const [viewModels, setViewModels] = useState<ViewModel[]>([]);
-
-  const [selectedConsoleIndex, setSelectedConsoleIndex] = useState<number>(0);
-
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [isFirstOpened, setIsFirstOpened] = useState(false);
-
-  useEffect(() => {
-    if (editorContext?.editorStates.isConsolePanelOpen) {
-      setIsFirstOpened(true);
-    }
-  }, [editorContext?.editorStates.isConsolePanelOpen]);
-
-  useEffect(() => {
-    // Load extensions from editor context
-    if (editorContext?.persistSettings?.extensions && isFirstOpened) {
-      const foundConsoles = editorContext.persistSettings?.extensions.filter(
-        (extension) =>
-          extension.config.extensionType === ExtensionTypeEnum.ConsoleView,
-      );
-      console.log(
-        "Found consoles:",
-        foundConsoles.map((ext) => ext.config.displayName),
-      );
-      setConsoles(foundConsoles);
-      setViewModels(
-        foundConsoles.map((ext) => ({
-          viewId: v4(),
-          isFocused: false,
-          extensionConfig: ext.config,
-        })),
-      );
-    }
-  }, [editorContext?.persistSettings?.extensions, isFirstOpened]);
-
-  useEffect(() => {
-    if (editorContext?.editorStates.isConsolePanelOpen) {
-      // Add view models to editor states
-      editorContext.setEditorStates((prev) => ({
-        ...prev,
-        openedViewModels: [
-          ...(prev.openedViewModels ?? []),
-          ...viewModels.map((vm) => ({
-            ...vm,
-            isFocused: false,
-          })),
-        ],
-      }));
-    } else {
-      // Remove view models from editor states
-      editorContext?.setEditorStates((prev) => ({
-        ...prev,
-        openedViewModels: prev.openedViewModels?.filter(
-          (vm) => !viewModels.some((v) => v.viewId === vm.viewId),
-        ),
-      }));
-    }
-  }, [viewModels, editorContext?.editorStates.isConsolePanelOpen]);
-
-  return (
-    <AnimatePresence>
-      <motion.div
-        className="absolute bottom-0 z-10 hidden h-[60%] w-full shrink-0 px-2 py-2 pb-6 data-[is-open=true]:block data-[is-toolbar-open=true]:pb-16"
-        // Enter from bottom and exit to bottom
-        initial={false}
-        animate={{
-          y: editorContext?.editorStates.isConsolePanelOpen ? 0 : "100%",
-        }}
-        data-is-open={
-          editorContext?.editorStates.isConsolePanelOpen || isAnimating
-        }
-        onAnimationStart={() => {
-          setIsAnimating(true);
-        }}
-        onAnimationComplete={() => {
-          setIsAnimating(false);
-        }}
-        data-is-toolbar-open={editorContext?.editorStates.isToolbarOpen}
-      >
-        <div className="h-full w-full">
-          <ExtensionViewLayout>
-            <div className="bg-content1 flex h-full w-full flex-col">
-              <ConsoleNavBar
-                consoles={consoles}
-                setConsoles={setConsoles}
-                selectedConsoleIndex={selectedConsoleIndex}
-                setSelectedConsoleIndex={setSelectedConsoleIndex}
-              />
-
-              {viewModels.length > 0 && (
-                <ViewLoader
-                  viewModel={viewModels[selectedConsoleIndex]}
-                  setViewModel={(viewModel: ViewModel) => {
-                    const newViewModels = [...viewModels];
-                    newViewModels[selectedConsoleIndex] = viewModel;
-                    setViewModels(newViewModels);
-                  }}
-                />
-              )}
-            </div>
-          </ExtensionViewLayout>
-        </div>
-      </motion.div>
-    </AnimatePresence>
-  );
-}
+import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 
 function ConsoleNavBar({
   consoles,
@@ -237,5 +126,115 @@ function ConsoleNavBar({
         </Tooltip>
       </div>
     </div>
+  );
+}
+
+export default function ConsolePanelView() {
+  const editorContext = useContext(EditorContext);
+
+  const [consoles, setConsoles] = useState<Extension[]>([]);
+  const [viewModels, setViewModels] = useState<ViewModel[]>([]);
+
+  const [selectedConsoleIndex, setSelectedConsoleIndex] = useState<number>(0);
+
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isFirstOpened, setIsFirstOpened] = useState(false);
+
+  useEffect(() => {
+    if (editorContext?.editorStates.isConsolePanelOpen) {
+      setIsFirstOpened(true);
+    }
+  }, [editorContext?.editorStates.isConsolePanelOpen]);
+
+  useEffect(() => {
+    // Load extensions from editor context
+    if (editorContext?.persistSettings?.extensions && isFirstOpened) {
+      const foundConsoles = editorContext.persistSettings?.extensions.filter(
+        (extension) =>
+          extension.config.extensionType === ExtensionTypeEnum.ConsoleView,
+      );
+      console.log(
+        "Found consoles:",
+        foundConsoles.map((ext) => ext.config.displayName),
+      );
+      setConsoles(foundConsoles);
+      setViewModels(
+        foundConsoles.map((ext) => ({
+          viewId: v4(),
+          isFocused: false,
+          extensionConfig: ext.config,
+        })),
+      );
+    }
+  }, [editorContext?.persistSettings?.extensions, isFirstOpened]);
+
+  useEffect(() => {
+    if (editorContext?.editorStates.isConsolePanelOpen) {
+      // Add view models to editor states
+      editorContext.setEditorStates((prev) => ({
+        ...prev,
+        openedViewModels: [
+          ...(prev.openedViewModels ?? []),
+          ...viewModels.map((vm) => ({
+            ...vm,
+            isFocused: false,
+          })),
+        ],
+      }));
+    } else {
+      // Remove view models from editor states
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        openedViewModels: prev.openedViewModels?.filter(
+          (vm) => !viewModels.some((v) => v.viewId === vm.viewId),
+        ),
+      }));
+    }
+  }, [viewModels, editorContext?.editorStates.isConsolePanelOpen]);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="absolute bottom-0 z-10 hidden h-[60%] w-full shrink-0 px-2 py-2 pb-6 data-[is-open=true]:block data-[is-toolbar-open=true]:pb-16"
+        // Enter from bottom and exit to bottom
+        initial={false}
+        animate={{
+          y: editorContext?.editorStates.isConsolePanelOpen ? 0 : "100%",
+        }}
+        data-is-open={
+          editorContext?.editorStates.isConsolePanelOpen || isAnimating
+        }
+        onAnimationStart={() => {
+          setIsAnimating(true);
+        }}
+        onAnimationComplete={() => {
+          setIsAnimating(false);
+        }}
+        data-is-toolbar-open={editorContext?.editorStates.isToolbarOpen}
+      >
+        <div className="h-full w-full">
+          <ViewControlLayout type="app">
+            <div className="bg-content1 flex h-full w-full flex-col">
+              <ConsoleNavBar
+                consoles={consoles}
+                setConsoles={setConsoles}
+                selectedConsoleIndex={selectedConsoleIndex}
+                setSelectedConsoleIndex={setSelectedConsoleIndex}
+              />
+
+              {/* Refactor this such that ConsolePanelView does not manage view models. 
+                Instead, it just maintains the list of app configs, and passes them to a
+                BaseAppView which manages its own view model internally.
+              */}
+              {viewModels.length > 0 && (
+                <SandboxAppLoader
+                  viewModel={viewModels[selectedConsoleIndex]}
+                />
+              )}
+            </div>
+          </ViewControlLayout>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

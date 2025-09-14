@@ -25,3 +25,10 @@ export function getPlatform() {
   // If none of the above, it's web
   return PlatformEnum.Web;
 }
+
+export function isMobile() {
+  return (
+    getPlatform() === PlatformEnum.Capacitor ||
+    getPlatform() === PlatformEnum.WebMobile
+  );
+}

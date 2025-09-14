@@ -22,7 +22,7 @@ const initialNodes = [
     data: {
       label: "Node 1",
       config: {
-        app: "http://localhost:3030/spin_wheel/0.0.1/",
+        app: "https://cdn.pulse-editor.com/extension/spin_wheel/0.0.1/",
       },
     },
     type: "appNode",
@@ -61,7 +61,10 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
         position: { x: number; y: number };
         data: { label: string };
       }>[],
-    ) => setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
+    ) => {
+      console.log("Node changes:", changes);
+      setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
+    },
     [],
   );
   const onEdgesChange = useCallback(

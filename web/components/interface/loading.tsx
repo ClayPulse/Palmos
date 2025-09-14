@@ -8,7 +8,7 @@ export default function Loading({ text = "Loading..." }: { text?: string }) {
         className="w-1/2 text-black dark:text-white"
         color="default"
         size="md"
-        label="Loading..."
+        label={text}
         classNames={{
           label: "w-full text-center",
         }}

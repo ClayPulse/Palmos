@@ -5,11 +5,10 @@ import { AppViewConfig, Extension, ExtensionMeta } from "@/lib/types";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
 import { compare } from "semver";
-import ExtensionViewLayout from "../layout";
-import ViewLoader from "../loaders/view-loader";
+import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 import Loading from "@/components/interface/loading";
 
-export default function AppView({ config }: { config: AppViewConfig }) {
+export default function BaseAppView({ config }: { config: AppViewConfig }) {
   const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
   const { installExtension } = useExtensionManager();
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
@@ -29,7 +28,8 @@ export default function AppView({ config }: { config: AppViewConfig }) {
       }
       const extensionId = parts[parts.length - 2];
       const version = parts[parts.length - 1];
-      const remoteOrigin = url.origin;
+      // Remote origin is everything before the last two parts
+      const remoteOrigin = url.origin + "/" + parts.slice(0, -2).join("/");
       const ext: Extension = {
         config: {
           id: extensionId,
@@ -95,8 +95,6 @@ export default function AppView({ config }: { config: AppViewConfig }) {
     }
 
     async function installAndOpenApp(ext: Extension) {
-      console.log("Installing extension:", ext);
-
       await installExtension(ext);
       const viewModel: ViewModel = {
         viewId: ext.config.id,
@@ -130,15 +128,13 @@ export default function AppView({ config }: { config: AppViewConfig }) {
     loadApp();
   }, [config]);
 
-  if (noAccessToApp) {
-    return <NotAuthorized />;
-  } else if (!pulseAppViewModel) {
-    return <Loading text="Searching for app..." />;
-  }
-
   return (
-    <ExtensionViewLayout>
-      <ViewLoader viewModel={pulseAppViewModel} />
-    </ExtensionViewLayout>
+      noAccessToApp ? (
+        <NotAuthorized />
+      ) : !pulseAppViewModel ? (
+        <Loading text="Searching for app..." />
+      ) : (
+        <SandboxAppLoader viewModel={pulseAppViewModel} />
+      )
   );
 }

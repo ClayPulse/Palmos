@@ -8,7 +8,7 @@ import { useEffect, useState } from "react";
 import HomeView from "./home/home-view";
 import CanvasView from "./canvas/canvas-view";
 import { useSearchParams } from "next/navigation";
-import AppView from "./app/app-view";
+import StandaloneAppView from "./standalone-app/standalone-app-view";
 
 export default function ViewArea() {
   const params = useSearchParams();
@@ -104,7 +104,7 @@ export default function ViewArea() {
       )}
       <div className="h-full w-full">
         {currentTabView.type === ViewModeEnum.App ? (
-          <AppView config={currentTabView.config as AppViewConfig} />
+          <StandaloneAppView config={currentTabView.config as AppViewConfig} />
         ) : currentTabView.type === ViewModeEnum.Canvas ? (
           <CanvasView config={currentTabView.config as CanvasViewConfig} />
         ) : (

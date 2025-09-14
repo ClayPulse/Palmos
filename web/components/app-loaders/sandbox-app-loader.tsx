@@ -22,7 +22,11 @@ import { useContext, useEffect, useRef, useState } from "react";
  * It may not decide to reload the extension if resources can
  * be reused.
  */
-export default function ViewLoader({ viewModel }: { viewModel: ViewModel }) {
+export default function SandboxAppLoader({
+  viewModel,
+}: {
+  viewModel: ViewModel;
+}) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
