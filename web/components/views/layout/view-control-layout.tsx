@@ -9,6 +9,7 @@ export default function ViewControlLayout({
   width = "100%",
   children,
   type,
+  controlActions = {},
 }: {
   height?: string;
   width?: string;
@@ -21,6 +22,7 @@ export default function ViewControlLayout({
    *  - "app": for app views without canvas controls
    */
   type: "canvas" | "app";
+  controlActions?: Record<string, (() => void) | undefined>;
 }) {
   const [isGrabbing, setIsGrabbing] = useState(false);
   const [isShowingMenu, setIsShowingMenu] = useState(false);
@@ -33,7 +35,15 @@ export default function ViewControlLayout({
   function CanvasControl() {
     return (
       <>
-        <Button isIconOnly variant="light" size="sm" onPress={() => {}}>
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          onPress={() => {
+            const action = controlActions["fullscreen"];
+            if (action) action();
+          }}
+        >
           <Icon name="fullscreen" />
         </Button>
         {type === "canvas" && (

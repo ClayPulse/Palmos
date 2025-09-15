@@ -5,12 +5,25 @@ import { memo } from "react";
 import ViewControlLayout from "../../layout/view-control-layout";
 
 const AppNode = memo((props: any) => {
-  const nodeProps = props as Node<{ config: AppViewConfig }>;
+  const nodeProps = props as Node<{ config: AppViewConfig }> & {
+    openViewInFullScreen?: (config: AppViewConfig) => void;
+  };
+  const openViewInFullScreen = nodeProps.openViewInFullScreen;
   const { config }: { config: AppViewConfig } = nodeProps.data;
 
   return (
-    <ViewControlLayout type="canvas">
-      <BaseAppView config={config}/>
+    <ViewControlLayout
+      type="canvas"
+      controlActions={{
+        fullscreen: openViewInFullScreen
+          ? () =>
+              openViewInFullScreen({
+                app: config.app,
+              })
+          : undefined,
+      }}
+    >
+      <BaseAppView config={config} />
     </ViewControlLayout>
   );
 });

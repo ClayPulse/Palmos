@@ -209,7 +209,7 @@ export type AppViewConfig = {
 };
 
 export type CanvasViewConfig = {
-  workflow: Workflow;
+  workflow?: Workflow;
   appConfigs?: AppViewConfig[];
 };
 

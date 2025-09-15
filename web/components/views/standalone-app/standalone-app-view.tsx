@@ -8,7 +8,7 @@ export default function StandaloneAppView({
   config: AppViewConfig;
 }) {
   return (
-    <ViewControlLayout type="app">
+    <ViewControlLayout type="app" >
       <BaseAppView config={config} />
     </ViewControlLayout>
   );

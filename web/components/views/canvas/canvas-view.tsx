@@ -11,7 +11,11 @@ import "@xyflow/react/dist/style.css";
 import { useState, useCallback, useEffect } from "react";
 import Icon from "../../misc/icon";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import { AppInfoModalContent, CanvasViewConfig } from "@/lib/types";
+import {
+  AppInfoModalContent,
+  AppViewConfig,
+  CanvasViewConfig,
+} from "@/lib/types";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import AppNode from "./nodes/app-node";
 
@@ -49,7 +53,13 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 `,
 };
 
-export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
+export default function CanvasView({
+  config,
+  openViewInFullScreen,
+}: {
+  config?: CanvasViewConfig;
+  openViewInFullScreen: (config: AppViewConfig) => void;
+}) {
   const { openAppInfoModal } = useAppInfo();
   const [nodes, setNodes] = useState(initialNodes);
   const [edges, setEdges] = useState(initialEdges);
@@ -91,9 +101,18 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
     URL.revokeObjectURL(url);
   }
 
+  const createAppNode = useCallback(
+    (props: any) => {
+      return <AppNode {...props} openViewInFullScreen={openViewInFullScreen} />;
+    },
+    [openViewInFullScreen],
+  );
+
   const { registerMenuAction } = useMenuActions();
   // Register menu actions
   useEffect(() => {
+    console.log("CanvasView rendered: registering menu actions");
+
     registerMenuAction({
       name: "Export Workflow",
       menuCategory: "file",
@@ -151,7 +170,7 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
           hideAttribution: true,
         }}
         nodeTypes={{
-          appNode: AppNode,
+          appNode: createAppNode,
         }}
       />
       <Button

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { compare } from "semver";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 import Loading from "@/components/interface/loading";
+import { v4 as uuidv4 } from "uuid";
 
 export default function BaseAppView({ config }: { config: AppViewConfig }) {
   const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
@@ -14,6 +15,10 @@ export default function BaseAppView({ config }: { config: AppViewConfig }) {
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
     ViewModel | undefined
   >(undefined);
+
+  useEffect(() => {
+    console.log("Loading app with config:", config);
+  }, []);
 
   useEffect(() => {
     // Download and load the extension app from a URL if specified
@@ -97,7 +102,7 @@ export default function BaseAppView({ config }: { config: AppViewConfig }) {
     async function installAndOpenApp(ext: Extension) {
       await installExtension(ext);
       const viewModel: ViewModel = {
-        viewId: ext.config.id,
+        viewId: ext.config.id + "-" + uuidv4(),
         isFocused: true,
         extensionConfig: ext.config,
       };
@@ -128,13 +133,11 @@ export default function BaseAppView({ config }: { config: AppViewConfig }) {
     loadApp();
   }, [config]);
 
-  return (
-      noAccessToApp ? (
-        <NotAuthorized />
-      ) : !pulseAppViewModel ? (
-        <Loading text="Searching for app..." />
-      ) : (
-        <SandboxAppLoader viewModel={pulseAppViewModel} />
-      )
+  return noAccessToApp ? (
+    <NotAuthorized />
+  ) : !pulseAppViewModel ? (
+    <Loading text="Searching for app..." />
+  ) : (
+    <SandboxAppLoader viewModel={pulseAppViewModel} />
   );
 }
