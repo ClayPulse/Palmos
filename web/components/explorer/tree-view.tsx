@@ -6,6 +6,7 @@ import {
   FileSystemObject,
   TreeViewGroupRef,
   TreeViewNodeRef,
+  ViewModeEnum,
 } from "@/lib/types";
 import {
   forwardRef,
@@ -63,7 +64,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
     parentGroupRef,
   }: {
     object: FileSystemObject;
-    viewFile: (uri: string) => void;
+    viewFile: (uri: string, viewMode: ViewModeEnum) => void;
     platformApi?: AbstractPlatformAPI;
     parentGroupRef: RefObject<TreeViewGroupRef>;
   },
@@ -239,7 +240,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                     selectNode();
                   } else {
                     unSelectNode();
-                  } 
+                  }
                   // Only toggle folder collapsed state if Ctrl is not pressed
                   setIsFolderCollapsed(!isFolderCollapsed);
                 }
@@ -280,7 +281,12 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                     unSelectNode();
                   }
                 }
-                viewFile(object.uri);
+                // check if ctrl is down
+                if (isCtrlDown()) {
+                  viewFile(object.uri, ViewModeEnum.Canvas);
+                } else {
+                  viewFile(object.uri, ViewModeEnum.App);
+                }
               }}
               onContextMenu={handleOnContextMenu}
             >
@@ -314,6 +320,34 @@ const TreeViewNode = forwardRef(function TreeViewNode(
               >
                 <p className="w-full text-start">Delete</p>
               </Button>
+              {!object.isFolder && (
+                <Button
+                  className="text-medium h-12 sm:h-8 sm:text-sm"
+                  variant="solid"
+                  color="danger"
+                  onPress={(e) => {
+                    setContextMenuState({ x: 0, y: 0, isOpen: false });
+
+                    viewFile(object.uri, ViewModeEnum.Canvas);
+                  }}
+                >
+                  <p className="w-full text-start">Open In Canvas</p>
+                </Button>
+              )}
+              {!object.isFolder && (
+                <Button
+                  className="text-medium h-12 sm:h-8 sm:text-sm"
+                  variant="solid"
+                  color="danger"
+                  onPress={(e) => {
+                    setContextMenuState({ x: 0, y: 0, isOpen: false });
+
+                    viewFile(object.uri, ViewModeEnum.App);
+                  }}
+                >
+                  <p className="w-full text-start">Open In App</p>
+                </Button>
+              )}
             </div>
           </ContextMenu>
         </>
@@ -341,7 +375,7 @@ function TreeViewNodeWrapper({
   parentGroupRef,
 }: {
   object: FileSystemObject;
-  viewFile: (uri: string) => void;
+  viewFile: (uri: string, viewMode: ViewModeEnum) => void;
   platformApi?: AbstractPlatformAPI;
   parentGroupRef: RefObject<TreeViewGroupRef>;
 }) {
@@ -366,7 +400,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     platformApi,
   }: {
     objects: FileSystemObject[];
-    viewFile: (uri: string) => void;
+    viewFile: (uri: string, viewMode: ViewModeEnum) => void;
     folderUri: string;
     platformApi?: AbstractPlatformAPI;
   },

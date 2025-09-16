@@ -83,9 +83,14 @@ export type TextFileSelection = {
 
 export type ViewModel = {
   viewId: string;
-  isFocused: boolean;
   extensionConfig?: ExtensionConfig;
 };
+
+export enum ViewModeEnum {
+  App = "app",
+  Canvas = "canvas",
+  Home = "home",
+}
 
 /* Fetch API */
 export type FetchPayload = {

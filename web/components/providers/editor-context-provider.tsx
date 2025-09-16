@@ -32,8 +32,9 @@ const defaultEditorStates: EditorStates = {
   isToolbarOpen: true,
   explorerSelectedNodeRefs: [],
   pressedKeys: [],
-  openedViewModels: [],
   viewIds: [],
+  tabViews: [],
+  tabIndex: -1,
 };
 
 export default function EditorContextProvider({

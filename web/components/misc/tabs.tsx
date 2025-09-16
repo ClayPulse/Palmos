@@ -14,7 +14,7 @@ export default function Tabs({
   tabItems: TabItem[];
   selectedItem: TabItem | undefined;
   setSelectedItem: Dispatch<SetStateAction<TabItem | undefined>>;
-  isShowPagination: boolean;
+  isShowPagination?: boolean;
   onTabReady?: (tabItem: TabItem | undefined) => void;
 }) {
   const tabsRootRef = useRef<HTMLDivElement | null>(null);

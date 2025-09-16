@@ -103,7 +103,6 @@ export default function BaseAppView({ config }: { config: AppViewConfig }) {
       await installExtension(ext);
       const viewModel: ViewModel = {
         viewId: ext.config.id + "-" + uuidv4(),
-        isFocused: true,
         extensionConfig: ext.config,
       };
       setPulseAppViewModel(viewModel);

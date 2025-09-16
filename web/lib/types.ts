@@ -4,6 +4,7 @@ import {
   ExtensionCommandInfo,
   ExtensionConfig,
   PolyIMC,
+  ViewModeEnum,
   ViewModel,
 } from "@pulse-editor/shared-utils";
 import { BaseSTT } from "./modalities/stt/stt";
@@ -63,8 +64,6 @@ export type EditorStates = {
   /* Password to access the credentials */
   password?: string;
 
-  openedViewModels: ViewModel[];
-
   // Keep track of unique ids of each view
   // to make sure that the view is not duplicated
   // and not interfered with each other
@@ -82,6 +81,9 @@ export type EditorStates = {
   appInfoModalContent?: AppInfoModalContent;
 
   menuActions?: MenuAction[];
+
+  tabViews: TabView[];
+  tabIndex: number;
 };
 
 export type PersistentSettings = {
@@ -196,16 +198,13 @@ export type MenuAction = {
   icon?: string;
 };
 
-export enum ViewModeEnum {
-  App = "app",
-  Canvas = "canvas",
-  Home = "home",
-}
-
 export type AppViewConfig = {
   app: string;
   inviteCode?: string;
-  initialFileUri?: string;
+  // An app can be opened via a file.
+  // e.g. a PDF viewer app can be opened with a PDF file;
+  //      a game engine app can be opened with a game project file.
+  fileUri?: string;
 };
 
 export type CanvasViewConfig = {
@@ -339,4 +338,6 @@ export type Workflow = {
   nodes: any;
   edges: any;
 };
+
+export { ViewModeEnum };
 // #endregion

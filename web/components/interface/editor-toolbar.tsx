@@ -7,7 +7,7 @@ import AppSettingsModal from "@/components/modals/app-settings-modal";
 import { AnimatePresence, motion } from "framer-motion";
 import { EditorContext } from "../providers/editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { PlatformEnum } from "@/lib/types";
+import { AppViewConfig, CanvasViewConfig, PlatformEnum } from "@/lib/types";
 import toast from "react-hot-toast";
 import ExtensionMarketplaceModal from "../modals/extension-marketplace-modal";
 import AgentConfigModal from "../modals/agent-config-modal";
@@ -18,8 +18,8 @@ import { getAgentLLMConfig, runAgentMethod } from "@/lib/agent/agent-runner";
 import useExtensionCommands from "@/lib/hooks/use-extension-commands";
 import useTTS from "@/lib/hooks/use-tts";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
-import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
-import { useViewManager } from "@/lib/hooks/use-view-manager";
+import { ExtensionTypeEnum, ViewModeEnum } from "@pulse-editor/shared-utils";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getDefaultLLMConfig } from "@/lib/modalities/utils";
 
 export default function EditorToolbar() {
@@ -42,7 +42,7 @@ export default function EditorToolbar() {
     undefined,
   );
 
-  const { activeFileViewModel: activeViewModel } = useViewManager();
+  const { activeTabView } = useTabViewManager();
 
   // When speech2speech returns assistant result, we let the assistant agent to analyze its effects
   useEffect(() => {
@@ -245,48 +245,59 @@ export default function EditorToolbar() {
         const result = await runAgentMethod(llmKey, config, agent, methodName, {
           chatHistory: [],
           userMessage: inputText,
-          openedViews: editorContext.editorStates.openedViewModels.map(
-            (view) => {
-              if (!view.extensionConfig) {
-                throw new Error(
-                  "View is missing extension config. Are you sure this is a valid view?",
-                );
-              }
-
-              const viewInfo = {
-                viewId: view.viewId,
-                isFocused: view.isFocused,
-                file: view.file,
-
-                extensionConfig: {
-                  id: view.extensionConfig?.id,
-                },
-              };
-              return viewInfo;
-            },
-          ),
+          activeTabView,
           commands: editorContext.persistSettings?.extensionCommands
             ?.filter((command) => {
-              // Find the extension that has this command
-              const ext = editorContext.persistSettings?.extensions?.find(
-                (ext) => ext.config.id === command.moduleId,
-              );
+              // TODO: Filter commands based on the opened views
+              //       instead of installed extensions.
+              //       For example, some extension might be opened
+              //       in multiple StandaloneAppView. Commands should
+              //       be separately available in all those views.
+              if (activeTabView?.type === ViewModeEnum.App) {
+                // Find the extension that has this command
+                const installedApp =
+                  editorContext.persistSettings?.extensions?.find(
+                    (ext) => ext.config.id === command.moduleId,
+                  );
 
-              if (!ext) {
-                return false;
-              }
+                if (!installedApp) {
+                  return false;
+                }
 
-              // Filter by active view
-              if (activeViewModel?.extensionConfig?.id === ext.config.id) {
-                return true;
-              }
-              // Else, filter by extension type -- no need to remove console view command
-              // if the console panel is open
-              else if (
-                editorContext.editorStates.isConsolePanelOpen &&
-                ext.config.extensionType === ExtensionTypeEnum.ConsoleView
-              ) {
-                return true;
+                const appConfig = activeTabView?.config as AppViewConfig;
+                // Filter by active view
+                if (appConfig?.app === installedApp.config.id) {
+                  return true;
+                }
+                // Else, filter by extension type -- no need to remove console view command
+                // if the console panel is open
+                else if (
+                  editorContext.editorStates.isConsolePanelOpen &&
+                  installedApp.config.extensionType ===
+                    ExtensionTypeEnum.ConsoleView
+                ) {
+                  return true;
+                }
+              } else if (activeTabView?.type === ViewModeEnum.Canvas) {
+                // In canvas view, we show all commands from apps opened in the canvas
+                const appConfigs = (activeTabView?.config as CanvasViewConfig)
+                  .appConfigs;
+
+                const installedApps =
+                  editorContext.persistSettings?.extensions?.filter(
+                    (ext) =>
+                      appConfigs?.find((app) => app.app === ext.config.id) !==
+                      undefined,
+                  );
+
+                //
+                if (
+                  installedApps?.find(
+                    (ext) => ext.config.id === command.moduleId,
+                  )
+                ) {
+                  return true;
+                }
               }
 
               return false;

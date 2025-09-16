@@ -1,6 +1,6 @@
 "use client";
 
-import { TreeViewGroupRef } from "@/lib/types";
+import { TreeViewGroupRef, ViewModeEnum } from "@/lib/types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/types";
@@ -12,7 +12,7 @@ import ProjectSettingsModal from "../modals/project-settings-modal";
 import Icon from "../misc/icon";
 import toast from "react-hot-toast";
 import TreeViewGroup from "./tree-view";
-import { useViewManager } from "@/lib/hooks/use-view-manager";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import ProjectList from "./project-list";
 
 export default function Explorer({
@@ -26,7 +26,7 @@ export default function Explorer({
   const { platformApi } = usePlatformApi();
   const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
     useState(false);
-  const { openFileInView } = useViewManager();
+  const { openFileInView } = useTabViewManager();
 
   const rootGroupRef = useRef<TreeViewGroupRef | null>(null);
 
@@ -56,9 +56,9 @@ export default function Explorer({
     }
   }, [editorContext?.editorStates.explorerSelectedNodeRefs]);
 
-  function viewFile(uri: string) {
+  function viewFile(uri: string, viewMode: ViewModeEnum) {
     platformApi?.readFile(uri).then((file) => {
-      openFileInView(file).then(() => {
+      openFileInView(file, viewMode).then(() => {
         if (platform === PlatformEnum.Capacitor) {
           setIsMenuOpen(false);
         }

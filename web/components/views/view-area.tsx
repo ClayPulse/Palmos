@@ -4,12 +4,13 @@ import {
   TabView,
   ViewModeEnum,
 } from "@/lib/types";
-import { useEffect, useState, useRef, memo, useCallback } from "react";
+import { useEffect, useState, memo, useCallback } from "react";
 import HomeView from "./home/home-view";
 import CanvasView from "./canvas/canvas-view";
 import { useSearchParams } from "next/navigation";
 import StandaloneAppView from "./standalone-app/standalone-app-view";
 import Tabs from "../misc/tabs";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 
 const MemoizedStandaloneAppView = memo(StandaloneAppView);
 const MemoizedCanvasView = memo(CanvasView);
@@ -17,45 +18,51 @@ const MemoizedCanvasView = memo(CanvasView);
 export default function ViewArea() {
   const params = useSearchParams();
 
-  const [tabViews, setTabViews] = useState<TabView[]>([]);
+  const { tabViews, setTabViews, tabIndex, setTabIndex } = useTabViewManager();
+
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
-  const [tabIndex, setTabIndex] = useState<number>(-1);
 
-  const tabItems = tabViews.map((view) => ({
-    name:
-      view.type === ViewModeEnum.App
-        ? (view.config as AppViewConfig).app || "App"
-        : "Canvas",
-    description:
-      view.type === ViewModeEnum.App
-        ? `App: ${(view.config as AppViewConfig).app}`
-        : "Canvas View",
-  }));
+  const tabItems =
+    tabViews.map((view) => ({
+      name:
+        view.type === ViewModeEnum.App
+          ? (view.config as AppViewConfig).app || "App"
+          : "Canvas",
+      description:
+        view.type === ViewModeEnum.App
+          ? `App: ${(view.config as AppViewConfig).app}`
+          : "Canvas View",
+    })) ?? [];
 
-  const openInAppView = useCallback((config: AppViewConfig) => {
-    setTabViews((prev) => {
-      const newViews = [...prev, { type: ViewModeEnum.App, config }];
+  const openInAppView = useCallback(
+    (config: AppViewConfig) => {
+      const newViews = [...tabViews, { type: ViewModeEnum.App, config }];
       const newIdx = newViews.length - 1;
+      setTabViews(newViews);
       setTabIndex(newIdx);
-      return newViews;
-    });
-  }, []);
+    },
+    [tabViews],
+  );
 
   function openInCanvasView(config: AppViewConfig) {
-    setTabViews((prev) => [...prev, { type: ViewModeEnum.Canvas, config }]);
-    setTabIndex(tabViews.length); // Set to the new tab
+    const newViews = [...tabViews, { type: ViewModeEnum.Canvas, config }];
+    const newIdx = newViews.length - 1;
+    setTabViews(newViews);
+    setTabIndex(newIdx);
   }
 
   function createNewCanvas() {
-    setTabViews((prev) => [...prev, { type: ViewModeEnum.Canvas, config: {} }]);
-    setTabIndex(tabViews.length); // Set to the new tab
+    const newViews = [...tabViews, { type: ViewModeEnum.Canvas, config: {} }];
+    const newIdx = newViews.length - 1;
+    setTabViews(newViews);
+    setTabIndex(newIdx);
   }
 
   useEffect(() => {
     // Standalone app mode
     const app = params?.get("app");
     const inviteCode = params?.get("inviteCode") || undefined;
-    const file = params?.get("file") || undefined;
+    const fileUri = params?.get("fileUri") || undefined;
 
     if (app) {
       // Add app to tabs if not already present
@@ -67,11 +74,11 @@ export default function ViewArea() {
 
       if (existingAppIndex === -1) {
         // Create new tab if not already exists
-        setTabViews((prev) => [
-          ...prev,
+        setTabViews([
+          ...tabViews,
           {
             type: ViewModeEnum.App,
-            config: { app, inviteCode, initialFileUri: file },
+            config: { app, inviteCode, fileUri },
           },
         ]);
         setTabIndex(tabViews.length); // Set to the new tab

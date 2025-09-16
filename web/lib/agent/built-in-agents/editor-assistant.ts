@@ -78,79 +78,138 @@ Pulse Editor extensions and its features.`,
           type: "string",
           description: "The user's message.",
         },
-        openedViews: {
-          name: "openedViews",
+        activeTabView: {
+          name: "activeTabView",
           type: [
             {
-              viewId: {
-                name: "viewId",
+              type: {
+                name: "type",
                 type: "string",
-                description: "The ID of an opened view visible to user.",
-              },
-              isFocused: {
-                name: "isFocused",
-                type: "boolean",
                 description:
-                  "Whether the view is currently focused by cursor or not.",
+                  "The type of the view. This can be 'App' or 'Canvas'",
               },
-              file: {
-                name: "file",
+              config: {
+                name: "config",
                 type: {
-                  content: {
-                    name: "content",
+                  app: {
                     type: "string",
-                    description: "The content of the file in this view.",
+                    name: "app",
+                    description:
+                      "The ID of the app that the view is using. This field exists if the view type is 'App'.",
+                    optional: true,
                   },
-                  path: {
-                    name: "path",
+                  fileUri: {
                     type: "string",
-                    description: "The path of the file in this view.",
+                    name: "fileUri",
+                    description:
+                      "The URI of the file that the app is opened with. This field exists if the view type is 'App'.",
+                    optional: true,
                   },
-                  selection: {
-                    name: "selection",
+                  workflow: {
+                    type: "any",
+                    name: "workflow",
+                    description: `The workflow that the canvas is using. This contains nodes and edges information required for a xyflow/ReactFlow graph. \
+This field exists if the view type is 'Canvas'.`,
+                    optional: true,
+                  },
+                  appConfigs: {
                     type: [
                       {
-                        lineStart: {
-                          name: "lineStart",
-                          type: "number",
-                          description:
-                            "The line number of the start of the selection.",
-                        },
-                        lineEnd: {
-                          name: "lineEnd",
-                          type: "number",
-                          description:
-                            "The line number of the end of the selection.",
-                        },
-                        text: {
-                          name: "text",
+                        app: {
                           type: "string",
+                          name: "app",
                           description:
-                            "The text of the selection in this view.",
+                            "The ID of the app that the view is using.",
+                        },
+                        fileUri: {
+                          type: "string",
+                          name: "fileUri",
+                          description:
+                            "The URI of the file that the app is opened with. This field is optional.",
+                          optional: true,
                         },
                       },
                     ],
-                    description:
-                      "The selection(s) of the file in this view. This is optional.",
+                    name: "appConfigs",
+                    description: `The list of app configurations that are opened in the canvas. \
+This field exists if the view type is 'Canvas'.`,
+                    optional: true,
                   },
                 },
-                description:
-                  "The file that the view is currently opened on. This is optional. Undefined if the view does not open a file.",
-                optional: true,
-              },
-              extensionConfig: {
-                name: "extensionConfig",
-                type: {
-                  id: {
-                    name: "id",
-                    type: "string",
-                    description: "The module ID of the extension.",
-                  },
-                },
-                description:
-                  "The configuration of the extension/module that the view belongs to.",
+                description: `The configuration of the view. \
+This is an object that contains different fields based on the view type.`,
               },
             },
+            // {
+            //   viewId: {
+            //     name: "viewId",
+            //     type: "string",
+            //     description: "The ID of an opened view visible to user.",
+            //   },
+            //   isFocused: {
+            //     name: "isFocused",
+            //     type: "boolean",
+            //     description:
+            //       "Whether the view is currently focused by cursor or not.",
+            //   },
+            //   file: {
+            //     name: "file",
+            //     type: {
+            //       content: {
+            //         name: "content",
+            //         type: "string",
+            //         description: "The content of the file in this view.",
+            //       },
+            //       path: {
+            //         name: "path",
+            //         type: "string",
+            //         description: "The path of the file in this view.",
+            //       },
+            //       selection: {
+            //         name: "selection",
+            //         type: [
+            //           {
+            //             lineStart: {
+            //               name: "lineStart",
+            //               type: "number",
+            //               description:
+            //                 "The line number of the start of the selection.",
+            //             },
+            //             lineEnd: {
+            //               name: "lineEnd",
+            //               type: "number",
+            //               description:
+            //                 "The line number of the end of the selection.",
+            //             },
+            //             text: {
+            //               name: "text",
+            //               type: "string",
+            //               description:
+            //                 "The text of the selection in this view.",
+            //             },
+            //           },
+            //         ],
+            //         description:
+            //           "The selection(s) of the file in this view. This is optional.",
+            //       },
+            //     },
+            //     description:
+            //       "The file that the view is currently opened on. This is optional. Undefined if the view does not open a file.",
+            //     optional: true,
+            //   },
+            //   extensionConfig: {
+            //     name: "extensionConfig",
+            //     type: {
+            //       id: {
+            //         name: "id",
+            //         type: "string",
+            //         description: "The module ID of the extension.",
+            //       },
+            //     },
+            //     description:
+            //       "The configuration of the extension/module that the view belongs to.",
+            //   },
+            // },
           ],
           description: `The list of opened views that are visible to the user. \
 You will need to use these as the context to suggest the user to interact \
@@ -252,7 +311,7 @@ User message:
 \`\`\`
 Opened views:
 \`\`\`
-{openedViews}
+{activeTabView}
 \`\`\`
 Available commands:
 \`\`\`

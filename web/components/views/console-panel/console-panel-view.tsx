@@ -168,30 +168,6 @@ export default function ConsolePanelView() {
     }
   }, [editorContext?.persistSettings?.extensions, isFirstOpened]);
 
-  useEffect(() => {
-    if (editorContext?.editorStates.isConsolePanelOpen) {
-      // Add view models to editor states
-      editorContext.setEditorStates((prev) => ({
-        ...prev,
-        openedViewModels: [
-          ...(prev.openedViewModels ?? []),
-          ...viewModels.map((vm) => ({
-            ...vm,
-            isFocused: false,
-          })),
-        ],
-      }));
-    } else {
-      // Remove view models from editor states
-      editorContext?.setEditorStates((prev) => ({
-        ...prev,
-        openedViewModels: prev.openedViewModels?.filter(
-          (vm) => !viewModels.some((v) => v.viewId === vm.viewId),
-        ),
-      }));
-    }
-  }, [viewModels, editorContext?.editorStates.isConsolePanelOpen]);
-
   return (
     <AnimatePresence>
       <motion.div
