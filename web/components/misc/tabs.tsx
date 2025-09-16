@@ -2,7 +2,8 @@ import { Button, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
 import Icon from "./icon";
-import { TabItem } from "@/lib/types";
+import { ContextMenuState, TabItem } from "@/lib/types";
+import ContextMenu from "../interface/context-menu";
 
 export default function Tabs({
   tabItems,
@@ -10,12 +11,14 @@ export default function Tabs({
   setSelectedItem,
   isShowPagination = false,
   onTabReady,
+  onTabClose,
 }: {
   tabItems: TabItem[];
   selectedItem: TabItem | undefined;
   setSelectedItem: Dispatch<SetStateAction<TabItem | undefined>>;
   isShowPagination?: boolean;
   onTabReady?: (tabItem: TabItem | undefined) => void;
+  onTabClose?: (tabItem: TabItem | undefined) => void;
 }) {
   const tabsRootRef = useRef<HTMLDivElement | null>(null);
   const scrollableDivRef = useRef<HTMLDivElement | null>(null);
@@ -27,6 +30,16 @@ export default function Tabs({
   const [targetWidth, setTargetWidth] = useState<number>(0);
 
   const scrollControlWidth = 32;
+
+  const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
+    x: 0,
+    y: 0,
+    isOpen: false,
+  });
+
+  const [contextItem, setContextItem] = useState<TabItem | undefined>(
+    undefined,
+  );
 
   function updateScroll() {
     if (
@@ -53,6 +66,22 @@ export default function Tabs({
       setIsLeftScrollable(isLeftScrollable);
       setIsRightScrollable(isRightScrollable);
     }
+  }
+
+  function handleOnContextMenu(e: React.MouseEvent, item: TabItem) {
+    e.preventDefault();
+    // Get parent element position
+    const current = e.currentTarget as HTMLElement;
+    const container = current.parentElement?.parentElement as HTMLElement;
+    const containerRect = container.getBoundingClientRect();
+
+    setContextMenuState({
+      x: e.clientX - containerRect.left,
+      y: e.clientY - containerRect.top,
+      isOpen: true,
+    });
+
+    setContextItem(item);
   }
 
   // Update scroll on window resize
@@ -128,10 +157,28 @@ export default function Tabs({
             }}
           />
         </AnimatePresence>
+        <ContextMenu state={contextMenuState} setState={setContextMenuState}>
+          <div className="flex flex-col">
+            <Button
+              className="text-medium h-12 sm:h-8 sm:text-sm"
+              variant="light"
+              onPress={(e) => {
+                if (onTabClose) {
+                  onTabClose(contextItem);
+                }
+                setContextMenuState({ x: 0, y: 0, isOpen: false });
+              }}
+              color="danger"
+            >
+              Close Tab
+              <Icon name="delete" variant="outlined" />
+            </Button>
+          </div>
+        </ContextMenu>
         <div className="flex items-center" ref={tabsContentRef}>
-          {tabItems.map((item) => (
+          {tabItems.map((item, index) => (
             <div
-              key={item.name}
+              key={index}
               id={item.name}
               className="flex h-full items-center"
             >
@@ -149,6 +196,7 @@ export default function Tabs({
                       inline: "nearest",
                     });
                   }}
+                  onContextMenu={(e) => handleOnContextMenu(e, item)}
                 >
                   <div
                     className={`text-content1-foreground flex items-center space-x-0.5 text-sm`}

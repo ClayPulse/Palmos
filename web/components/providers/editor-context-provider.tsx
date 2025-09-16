@@ -32,7 +32,6 @@ const defaultEditorStates: EditorStates = {
   isToolbarOpen: true,
   explorerSelectedNodeRefs: [],
   pressedKeys: [],
-  viewIds: [],
   tabViews: [],
   tabIndex: -1,
 };

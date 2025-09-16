@@ -18,44 +18,55 @@ const MemoizedCanvasView = memo(CanvasView);
 export default function ViewArea() {
   const params = useSearchParams();
 
-  const { tabViews, setTabViews, tabIndex, setTabIndex } = useTabViewManager();
+  const {
+    tabViews,
+    tabIndex,
+    selectTab: setTabIndex,
+    closeView,
+    createTabView,
+  } = useTabViewManager();
 
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
 
-  const tabItems =
-    tabViews.map((view) => ({
-      name:
-        view.type === ViewModeEnum.App
-          ? (view.config as AppViewConfig).app || "App"
-          : "Canvas",
-      description:
-        view.type === ViewModeEnum.App
-          ? `App: ${(view.config as AppViewConfig).app}`
-          : "Canvas View",
-    })) ?? [];
+  // Generate tab names with index suffixes for duplicates
+  const nameCounts: Record<string, number> = {};
+  tabViews.forEach((view) => {
+    const baseName =
+      view.type === ViewModeEnum.App
+        ? (view.config as AppViewConfig).app
+        : "Canvas";
+    nameCounts[baseName] = (nameCounts[baseName] || 0) + 1;
+  });
 
-  const openInAppView = useCallback(
-    (config: AppViewConfig) => {
-      const newViews = [...tabViews, { type: ViewModeEnum.App, config }];
-      const newIdx = newViews.length - 1;
-      setTabViews(newViews);
-      setTabIndex(newIdx);
-    },
-    [tabViews],
-  );
+  const nameIndexes: Record<string, number> = {};
+  const tabItems =
+    tabViews.map((view) => {
+      const baseName =
+        view.type === ViewModeEnum.App
+          ? (view.config as AppViewConfig).app
+          : "Canvas";
+      nameIndexes[baseName] = (nameIndexes[baseName] || 0) + 1;
+      const count = nameCounts[baseName];
+      const index = nameIndexes[baseName];
+      return {
+        name: count > 1 ? `${baseName} ${index}` : baseName,
+        description:
+          view.type === ViewModeEnum.App
+            ? `App: ${(view.config as AppViewConfig).app}`
+            : "Canvas View",
+      };
+    }) ?? [];
+
+  const openInAppView = useCallback((config: AppViewConfig) => {
+    createTabView(ViewModeEnum.App, config);
+  }, []);
 
   function openInCanvasView(config: AppViewConfig) {
-    const newViews = [...tabViews, { type: ViewModeEnum.Canvas, config }];
-    const newIdx = newViews.length - 1;
-    setTabViews(newViews);
-    setTabIndex(newIdx);
+    createTabView(ViewModeEnum.Canvas, config);
   }
 
   function createNewCanvas() {
-    const newViews = [...tabViews, { type: ViewModeEnum.Canvas, config: {} }];
-    const newIdx = newViews.length - 1;
-    setTabViews(newViews);
-    setTabIndex(newIdx);
+    createTabView(ViewModeEnum.Canvas, {});
   }
 
   useEffect(() => {
@@ -74,14 +85,7 @@ export default function ViewArea() {
 
       if (existingAppIndex === -1) {
         // Create new tab if not already exists
-        setTabViews([
-          ...tabViews,
-          {
-            type: ViewModeEnum.App,
-            config: { app, inviteCode, fileUri },
-          },
-        ]);
-        setTabIndex(tabViews.length); // Set to the new tab
+        createTabView(ViewModeEnum.App, { app, inviteCode, fileUri });
       } else {
         setTabIndex(existingAppIndex);
       }
@@ -98,6 +102,7 @@ export default function ViewArea() {
     } else {
       setIsShowTabs(true);
     }
+    console.log("Tab views changed:", tabViews);
   }, [tabViews]);
 
   if (tabViews.length === 0) {
@@ -126,22 +131,32 @@ export default function ViewArea() {
               setTabIndex(index !== -1 ? index : 0);
             }}
             isShowPagination={true}
+            onTabClose={(item) => {
+              const index = tabItems.findIndex(
+                (tab) => tab.name === item?.name,
+              );
+              if (index !== -1) {
+                closeView(tabViews[index]);
+              }
+            }}
           />
         </div>
       )}
       <div className="h-full w-full">
         {tabViews.map((tabView, idx) => (
           <div
-            key={idx}
+            key={tabView.viewId}
             data-is-active={idx === tabIndex}
             className="hidden h-full w-full data-[is-active=true]:block"
           >
             {tabView.type === ViewModeEnum.App ? (
               <MemoizedStandaloneAppView
+                viewId={tabView.viewId}
                 config={tabView.config as AppViewConfig}
               />
             ) : tabView.type === ViewModeEnum.Canvas ? (
               <MemoizedCanvasView
+                viewId={tabView.viewId}
                 config={tabView.config as CanvasViewConfig}
                 openViewInFullScreen={openInAppView}
               />

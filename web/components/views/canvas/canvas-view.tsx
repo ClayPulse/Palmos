@@ -54,9 +54,11 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 };
 
 export default function CanvasView({
+  viewId,
   config,
   openViewInFullScreen,
 }: {
+  viewId: string;
   config?: CanvasViewConfig;
   openViewInFullScreen: (config: AppViewConfig) => void;
 }) {
@@ -103,7 +105,13 @@ export default function CanvasView({
 
   const createAppNode = useCallback(
     (props: any) => {
-      return <AppNode {...props} openViewInFullScreen={openViewInFullScreen} />;
+      return (
+        <AppNode
+          {...props}
+          viewId={viewId}
+          openViewInFullScreen={openViewInFullScreen}
+        />
+      );
     },
     [openViewInFullScreen],
   );

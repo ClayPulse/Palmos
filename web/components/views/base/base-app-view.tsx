@@ -7,9 +7,14 @@ import { useEffect, useState } from "react";
 import { compare } from "semver";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 import Loading from "@/components/interface/loading";
-import { v4 as uuidv4 } from "uuid";
 
-export default function BaseAppView({ config }: { config: AppViewConfig }) {
+export default function BaseAppView({
+  config,
+  viewId,
+}: {
+  config: AppViewConfig;
+  viewId: string;
+}) {
   const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
   const { installExtension } = useExtensionManager();
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
@@ -102,7 +107,7 @@ export default function BaseAppView({ config }: { config: AppViewConfig }) {
     async function installAndOpenApp(ext: Extension) {
       await installExtension(ext);
       const viewModel: ViewModel = {
-        viewId: ext.config.id + "-" + uuidv4(),
+        viewId: ext.config.id + "-" + viewId,
         extensionConfig: ext.config,
       };
       setPulseAppViewModel(viewModel);

@@ -64,11 +64,6 @@ export type EditorStates = {
   /* Password to access the credentials */
   password?: string;
 
-  // Keep track of unique ids of each view
-  // to make sure that the view is not duplicated
-  // and not interfered with each other
-  viewIds: string[];
-
   aiModels?: AIModels;
 
   // The currently selected workspace
@@ -213,6 +208,7 @@ export type CanvasViewConfig = {
 };
 
 export type TabView = {
+  viewId: string;
   type: ViewModeEnum;
   config: AppViewConfig | CanvasViewConfig;
 };

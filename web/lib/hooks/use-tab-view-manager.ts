@@ -2,21 +2,22 @@ import { useContext } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { AppViewConfig, CanvasViewConfig, Extension, TabView } from "../types";
+import { v4 as uuidv4 } from "uuid";
 
 export function useTabViewManager() {
   const editorContext = useContext(EditorContext);
 
-  function setTabViews(newTabViews: TabView[]) {
-    if (!editorContext) {
-      throw new Error("Editor context is not available");
-    }
-    editorContext.setEditorStates((prev) => ({
-      ...prev,
-      tabViews: newTabViews,
-    }));
-  }
+  // function setTabViews(newTabViews: TabView[]) {
+  //   if (!editorContext) {
+  //     throw new Error("Editor context is not available");
+  //   }
+  //   editorContext.setEditorStates((prev) => ({
+  //     ...prev,
+  //     tabViews: newTabViews,
+  //   }));
+  // }
 
-  function setTabIndex(newIndex: number) {
+  function selectTab(newIndex: number) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -27,13 +28,6 @@ export function useTabViewManager() {
   }
 
   async function openFileInView(file: File, viewMode: ViewModeEnum) {
-    // const text = await files.text();
-    // const model: ViewModel = {
-    //   viewId: v4(),
-    //   isActive: true,
-    //   viewMode,
-    // };
-
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -63,24 +57,15 @@ export function useTabViewManager() {
         const existingTabIndex = editorContext.editorStates.tabViews.findIndex(
           (view) => view === existingAppTab,
         );
-        setTabIndex(existingTabIndex);
+        selectTab(existingTabIndex);
         return;
       }
 
       // Create a new tab for the app with the file
-      const newViews = [
-        ...editorContext.editorStates.tabViews,
-        {
-          type: ViewModeEnum.App,
-          config: {
-            app: installedApp.config.id,
-            fileUri: file.name,
-          } as AppViewConfig,
-        },
-      ];
-      const newIdx = newViews.length - 1;
-      setTabViews(newViews);
-      setTabIndex(newIdx);
+      createTabView(ViewModeEnum.App, {
+        app: installedApp.config.id,
+        fileUri: file.name,
+      } as AppViewConfig);
     } else if (viewMode === ViewModeEnum.Canvas) {
       // Find in the canvas if this app is opened
       const currentTab =
@@ -119,12 +104,17 @@ export function useTabViewManager() {
         ],
       };
 
-      const newViews = [...editorContext.editorStates.tabViews];
-      newViews[editorContext.editorStates.tabIndex] = {
-        ...currentTab,
-        config: newCanvasConfig,
-      };
-      setTabViews(newViews);
+      editorContext.setEditorStates((prev) => {
+        const newViews = [...prev.tabViews];
+        newViews[prev.tabIndex] = {
+          ...currentTab,
+          config: newCanvasConfig,
+        };
+        return {
+          ...prev,
+          tabViews: newViews,
+        };
+      });
     }
   }
 
@@ -149,15 +139,15 @@ export function useTabViewManager() {
       return;
     }
 
-    const newViews = editorContext.editorStates.tabViews.filter(
-      (v) => v !== view,
-    );
-    const newIdx = Math.min(
-      editorContext.editorStates.tabIndex,
-      newViews.length - 1,
-    );
-    setTabViews(newViews);
-    setTabIndex(newIdx);
+    editorContext.setEditorStates((prev) => {
+      const newViews = prev.tabViews.filter((v) => v !== view);
+      const newIdx = Math.min(prev.tabIndex, newViews.length - 1);
+      return {
+        ...prev,
+        tabViews: newViews,
+        tabIndex: newIdx,
+      };
+    });
   }
 
   /**
@@ -183,6 +173,29 @@ export function useTabViewManager() {
     return editorContext.editorStates.tabViews.length;
   }
 
+  function createTabView(
+    type: ViewModeEnum,
+    config: AppViewConfig | CanvasViewConfig,
+  ) {
+    if (!editorContext) {
+      throw new Error("Editor context is not available");
+    }
+    editorContext.setEditorStates((prev) => {
+      return {
+        ...prev,
+        tabViews: [
+          ...prev.tabViews,
+          {
+            viewId: uuidv4(),
+            type,
+            config,
+          },
+        ],
+        tabIndex: prev.tabViews.length,
+      };
+    });
+  }
+
   return {
     tabViews: editorContext?.editorStates.tabViews ?? [],
     tabIndex: editorContext?.editorStates.tabIndex ?? -1,
@@ -190,11 +203,11 @@ export function useTabViewManager() {
       editorContext?.editorStates.tabViews[
         editorContext?.editorStates.tabIndex
       ],
-    setTabViews,
-    setTabIndex,
+    selectTab,
     viewCount,
     openFileInView,
     closeView,
     closeAllViews,
+    createTabView,
   };
 }
