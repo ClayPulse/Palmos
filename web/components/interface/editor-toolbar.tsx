@@ -7,7 +7,7 @@ import AppSettingsModal from "@/components/modals/app-settings-modal";
 import { AnimatePresence, motion } from "framer-motion";
 import { EditorContext } from "../providers/editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { AppViewConfig, CanvasViewConfig, PlatformEnum } from "@/lib/types";
+import { PlatformEnum } from "@/lib/types";
 import toast from "react-hot-toast";
 import ExtensionMarketplaceModal from "../modals/extension-marketplace-modal";
 import AgentConfigModal from "../modals/agent-config-modal";
@@ -15,10 +15,9 @@ import useSpeech2Speech from "@/lib/hooks/use-speech2speech";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
 import { getAgentLLMConfig, runAgentMethod } from "@/lib/agent/agent-runner";
-import useExtensionCommands from "@/lib/hooks/use-extension-commands";
+import useCommands from "@/lib/hooks/use-commands";
 import useTTS from "@/lib/hooks/use-tts";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
-import { ExtensionTypeEnum, ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getDefaultLLMConfig } from "@/lib/modalities/utils";
 
@@ -32,7 +31,7 @@ export default function EditorToolbar() {
 
   const { runSpeech2Speech, stopSpeech2Speech, isUsing } = useSpeech2Speech();
   const { readText, playAudio } = useTTS();
-  const { runCommand } = useExtensionCommands();
+  const { runCommand, commands: commandsInTab } = useCommands();
 
   const [userVoiceMessage, setUserVoiceMessage] = useState<string>("");
 
@@ -246,74 +245,18 @@ export default function EditorToolbar() {
           chatHistory: [],
           userMessage: inputText,
           activeTabView,
-          commands: editorContext.persistSettings?.extensionCommands
-            ?.filter((command) => {
-              // TODO: Filter commands based on the opened views
-              //       instead of installed extensions.
-              //       For example, some extension might be opened
-              //       in multiple StandaloneAppView. Commands should
-              //       be separately available in all those views.
-              if (activeTabView?.type === ViewModeEnum.App) {
-                // Find the extension that has this command
-                const installedApp =
-                  editorContext.persistSettings?.extensions?.find(
-                    (ext) => ext.config.id === command.moduleId,
-                  );
-
-                if (!installedApp) {
-                  return false;
-                }
-
-                const appConfig = activeTabView?.config as AppViewConfig;
-                // Filter by active view
-                if (appConfig?.app === installedApp.config.id) {
-                  return true;
-                }
-                // Else, filter by extension type -- no need to remove console view command
-                // if the console panel is open
-                else if (
-                  editorContext.editorStates.isConsolePanelOpen &&
-                  installedApp.config.extensionType ===
-                    ExtensionTypeEnum.ConsoleView
-                ) {
-                  return true;
-                }
-              } else if (activeTabView?.type === ViewModeEnum.Canvas) {
-                // In canvas view, we show all commands from apps opened in the canvas
-                const appConfigs = (activeTabView?.config as CanvasViewConfig)
-                  .appConfigs;
-
-                const installedApps =
-                  editorContext.persistSettings?.extensions?.filter(
-                    (ext) =>
-                      appConfigs?.find((app) => app.app === ext.config.id) !==
-                      undefined,
-                  );
-
-                //
-                if (
-                  installedApps?.find(
-                    (ext) => ext.config.id === command.moduleId,
-                  )
-                ) {
-                  return true;
-                }
-              }
-
-              return false;
-            })
-            .map((command) => ({
-              cmd: command.name,
-              parameters: Object.entries(command.parameters).map(
-                ([key, value]) => ({
-                  name: key,
-                  type: value.type,
-                  description: value.description,
-                }),
-              ),
-              description: command.description,
-              moduleId: command.moduleId,
-            })),
+          commands: commandsInTab.map((commandInTab) => ({
+            cmd: commandInTab.commandInfo.name,
+            parameters: Object.entries(commandInTab.commandInfo.parameters).map(
+              ([key, value]) => ({
+                name: key,
+                type: value.type,
+                description: value.description,
+              }),
+            ),
+            description: commandInTab.commandInfo.description,
+            viewId: commandInTab.viewId,
+          })),
           projectDirTree: projectDirTree,
         });
 
@@ -331,6 +274,8 @@ export default function EditorToolbar() {
           suggestedViewId: string;
           response: string;
         } = result;
+
+        console.log("Agent suggestion:", result);
 
         setAssistantResult(result);
 

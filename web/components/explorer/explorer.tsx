@@ -1,6 +1,6 @@
 "use client";
 
-import { TreeViewGroupRef, ViewModeEnum } from "@/lib/types";
+import { TreeViewGroupRef } from "@/lib/types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/types";
@@ -14,6 +14,8 @@ import toast from "react-hot-toast";
 import TreeViewGroup from "./tree-view";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import ProjectList from "./project-list";
+import { v4 } from "uuid";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 
 export default function Explorer({
   setIsMenuOpen,
@@ -58,7 +60,8 @@ export default function Explorer({
 
   function viewFile(uri: string, viewMode: ViewModeEnum) {
     platformApi?.readFile(uri).then((file) => {
-      openFileInView(file, viewMode).then(() => {
+      const viewId = v4();
+      openFileInView(viewId, file, viewMode).then(() => {
         if (platform === PlatformEnum.Capacitor) {
           setIsMenuOpen(false);
         }

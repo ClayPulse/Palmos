@@ -2,20 +2,11 @@ import { useContext } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { AppViewConfig, CanvasViewConfig, Extension, TabView } from "../types";
-import { v4 as uuidv4 } from "uuid";
+import { IMCContext } from "@/components/providers/imc-provider";
 
 export function useTabViewManager() {
   const editorContext = useContext(EditorContext);
-
-  // function setTabViews(newTabViews: TabView[]) {
-  //   if (!editorContext) {
-  //     throw new Error("Editor context is not available");
-  //   }
-  //   editorContext.setEditorStates((prev) => ({
-  //     ...prev,
-  //     tabViews: newTabViews,
-  //   }));
-  // }
+  const imcContext = useContext(IMCContext);
 
   function selectTab(newIndex: number) {
     if (!editorContext) {
@@ -27,7 +18,7 @@ export function useTabViewManager() {
     }));
   }
 
-  async function openFileInView(file: File, viewMode: ViewModeEnum) {
+  function openFileInView(viewId: string, file: File, viewMode: ViewModeEnum) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -63,6 +54,7 @@ export function useTabViewManager() {
 
       // Create a new tab for the app with the file
       createTabView(ViewModeEnum.App, {
+        viewId,
         app: installedApp.config.id,
         fileUri: file.name,
       } as AppViewConfig);
@@ -93,6 +85,7 @@ export function useTabViewManager() {
 
       // Add the app with the file to the current canvas
       const newAppConfig: AppViewConfig = {
+        viewId,
         app: installedApp.config.id,
         fileUri: file.name,
       };
@@ -173,12 +166,14 @@ export function useTabViewManager() {
     return editorContext.editorStates.tabViews.length;
   }
 
-  function createTabView(
+  async function createTabView(
     type: ViewModeEnum,
     config: AppViewConfig | CanvasViewConfig,
   ) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
+    } else if (!imcContext) {
+      throw new Error("IMC context is not available");
     }
     editorContext.setEditorStates((prev) => {
       return {
@@ -186,7 +181,7 @@ export function useTabViewManager() {
         tabViews: [
           ...prev.tabViews,
           {
-            viewId: uuidv4(),
+            viewId: config.viewId,
             type,
             config,
           },
@@ -194,6 +189,95 @@ export function useTabViewManager() {
         tabIndex: prev.tabViews.length,
       };
     });
+
+    await imcContext.resolveWhenViewInitialized(config.viewId);
+    console.log("App view created:", config.viewId);
+  }
+
+  async function createAppViewInCanvasView(appConfig: AppViewConfig) {
+    if (!editorContext) {
+      throw new Error("Editor context is not available");
+    }
+    const currentTab =
+      editorContext.editorStates.tabViews[editorContext.editorStates.tabIndex];
+    if (currentTab?.type !== ViewModeEnum.Canvas) {
+      throw new Error("Current tab is not a canvas");
+    }
+    const newCanvasConfig: CanvasViewConfig = {
+      ...currentTab.config,
+      appConfigs: [
+        ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
+        appConfig,
+      ],
+    };
+    editorContext.setEditorStates((prev) => {
+      const newViews = [...prev.tabViews];
+      newViews[prev.tabIndex] = {
+        ...currentTab,
+        config: newCanvasConfig,
+      };
+      return {
+        ...prev,
+        tabViews: newViews,
+      };
+    });
+
+    await imcContext?.resolveWhenViewInitialized(appConfig.viewId);
+  }
+
+  function getId(nameOrUrl: string) {
+    try {
+      const url = new URL(nameOrUrl);
+      const parts = url.pathname.split("/").filter((part) => part.length > 0);
+      const id = parts[parts.length - 2];
+      return id;
+    } catch {
+      return nameOrUrl;
+    }
+  }
+
+  function isAppNameMatched(a: string, b: string) {
+    const aId = getId(a);
+    const bId = getId(b);
+    return aId === bId;
+  }
+
+  function findAppInTabView(appId: string): AppViewConfig | undefined {
+    if (!editorContext) {
+      throw new Error("Editor context is not available");
+    }
+
+    const activeTabView =
+      editorContext?.editorStates.tabViews[
+        editorContext?.editorStates.tabIndex
+      ];
+
+    console.log("Finding app in tab views:", appId);
+    console.log(
+      "Active tab view:",
+      activeTabView,
+      editorContext?.editorStates.tabViews,
+      editorContext?.editorStates.tabIndex,
+    );
+
+    if (activeTabView?.type === ViewModeEnum.App) {
+      const config = activeTabView.config as AppViewConfig;
+      return isAppNameMatched(config.app, appId) ? config : undefined;
+    } else if (activeTabView?.type === ViewModeEnum.Canvas) {
+      const canvasView = activeTabView.config as CanvasViewConfig;
+
+      // Throw an error if multiple instances of the same app are found
+      const appInstances = canvasView.appConfigs?.filter((app) =>
+        isAppNameMatched(app.app, appId),
+      );
+      if ((appInstances?.length ?? 0) > 1) {
+        throw new Error("Multiple instances of the same app found in canvas");
+      }
+      const appInstance = appInstances?.[0];
+      return appInstance;
+    }
+
+    return undefined;
   }
 
   return {
@@ -209,5 +293,7 @@ export function useTabViewManager() {
     closeView,
     closeAllViews,
     createTabView,
+    createAppViewInCanvasView,
+    findAppInTabView,
   };
 }

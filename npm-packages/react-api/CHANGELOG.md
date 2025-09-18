@@ -1,5 +1,21 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.28
+
+### Patch Changes
+
+- Add IMC receiver error handling
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.28
+
+## 0.1.1-alpha.27
+
+### Patch Changes
+
+- Update commands
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.27
+
 ## 0.1.1-alpha.26
 
 ### Patch Changes

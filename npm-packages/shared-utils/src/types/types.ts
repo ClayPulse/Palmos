@@ -128,19 +128,19 @@ export type ExtensionConfig = {
   // Extension or user installed agents
   agents?: Agent[];
   // Exposed commands in the extension
-  commandsInfoList?: ExtensionCommandInfo[];
+  commandsInfoList?: CommandInfo[];
   // Visibility
   visibility: string;
 };
 
-export type ExtensionCommandInfo = {
+export type CommandInfo = {
   name: string;
   description: string;
   parameters: Record<string, TypedVariable>;
 };
 
-export type ExtensionCommand = {
-  info: ExtensionCommandInfo;
+export type CommandDefinition = {
+  info: CommandInfo;
   handler: (args: any) => Promise<any>;
 };
 // #endregion

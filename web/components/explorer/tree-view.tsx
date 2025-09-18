@@ -6,7 +6,6 @@ import {
   FileSystemObject,
   TreeViewGroupRef,
   TreeViewNodeRef,
-  ViewModeEnum,
 } from "@/lib/types";
 import {
   forwardRef,
@@ -26,6 +25,7 @@ import toast from "react-hot-toast";
 import { AbstractPlatformAPI } from "@/lib/platform-api/abstract-platform-api";
 import ContextMenu from "../interface/context-menu";
 import { PlatformEnum } from "@/lib/types";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 
 function refreshProjectContent(
   platformApi: AbstractPlatformAPI,

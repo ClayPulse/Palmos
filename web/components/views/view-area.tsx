@@ -1,16 +1,13 @@
-import {
-  AppViewConfig,
-  CanvasViewConfig,
-  TabView,
-  ViewModeEnum,
-} from "@/lib/types";
-import { useEffect, useState, memo, useCallback } from "react";
+import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
+import { useEffect, useState, memo, useCallback, useRef } from "react";
 import HomeView from "./home/home-view";
 import CanvasView from "./canvas/canvas-view";
 import { useSearchParams } from "next/navigation";
 import StandaloneAppView from "./standalone-app/standalone-app-view";
 import Tabs from "../misc/tabs";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { v4 } from "uuid";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 
 const MemoizedStandaloneAppView = memo(StandaloneAppView);
 const MemoizedCanvasView = memo(CanvasView);
@@ -18,13 +15,8 @@ const MemoizedCanvasView = memo(CanvasView);
 export default function ViewArea() {
   const params = useSearchParams();
 
-  const {
-    tabViews,
-    tabIndex,
-    selectTab: setTabIndex,
-    closeView,
-    createTabView,
-  } = useTabViewManager();
+  const { tabViews, tabIndex, selectTab, closeView, createTabView } =
+    useTabViewManager();
 
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
 
@@ -57,17 +49,21 @@ export default function ViewArea() {
       };
     }) ?? [];
 
-  const openInAppView = useCallback((config: AppViewConfig) => {
-    createTabView(ViewModeEnum.App, config);
+  const openInAppView = useCallback(async (config: AppViewConfig) => {
+    await createTabView(ViewModeEnum.App, config);
   }, []);
 
-  function openInCanvasView(config: AppViewConfig) {
-    createTabView(ViewModeEnum.Canvas, config);
-  }
+  const openInCanvasView = useCallback(async (config: CanvasViewConfig) => {
+    await createTabView(ViewModeEnum.Canvas, config);
+  }, []);
 
-  function createNewCanvas() {
-    createTabView(ViewModeEnum.Canvas, {});
-  }
+  const createNewCanvas = useCallback(async () => {
+    await createTabView(ViewModeEnum.Canvas, {
+      viewId: v4(),
+    });
+  }, []);
+
+  const isInitialized = useRef(false);
 
   useEffect(() => {
     // Standalone app mode
@@ -75,23 +71,36 @@ export default function ViewArea() {
     const inviteCode = params?.get("inviteCode") || undefined;
     const fileUri = params?.get("fileUri") || undefined;
 
-    if (app) {
-      // Add app to tabs if not already present
-      const existingAppIndex = tabViews.findIndex(
-        (view) =>
-          view.type === ViewModeEnum.App &&
-          (view.config as AppViewConfig).app === app,
-      );
+    async function openInStandaloneApp() {
+      if (app) {
+        // Add app to tabs if not already present
+        const existingAppIndex = tabViews.findIndex(
+          (view) =>
+            view.type === ViewModeEnum.App &&
+            (view.config as AppViewConfig).app === app,
+        );
 
-      if (existingAppIndex === -1) {
-        // Create new tab if not already exists
-        createTabView(ViewModeEnum.App, { app, inviteCode, fileUri });
-      } else {
-        setTabIndex(existingAppIndex);
+        if (existingAppIndex === -1) {
+          // Create new tab if not already exists
+          const viewId = v4();
+          await createTabView(ViewModeEnum.App, {
+            viewId,
+            app,
+            inviteCode,
+            fileUri,
+          });
+        } else {
+          selectTab(existingAppIndex);
+        }
+
+        // Hide tabs if in standalone app mode
+        setIsShowTabs(false);
       }
+    }
 
-      // Hide tabs if in standalone app mode
-      setIsShowTabs(false);
+    if (!isInitialized.current) {
+      openInStandaloneApp();
+      isInitialized.current = true;
     }
   }, [params]);
 
@@ -119,7 +128,7 @@ export default function ViewArea() {
       data-is-show-tabs={isShowTabs}
     >
       {isShowTabs && (
-        <div className="border-default-border bg-content2 w-full rounded-lg px-1">
+        <div className="border-default-border bg-content2 w-full rounded-lg py-0.5">
           {/* Add tabs here */}
           <Tabs
             tabItems={tabItems}
@@ -128,7 +137,7 @@ export default function ViewArea() {
               const index = tabItems.findIndex(
                 (tab) => tab.name === item?.name,
               );
-              setTabIndex(index !== -1 ? index : 0);
+              selectTab(index !== -1 ? index : 0);
             }}
             isShowPagination={true}
             onTabClose={(item) => {
@@ -145,18 +154,16 @@ export default function ViewArea() {
       <div className="h-full w-full">
         {tabViews.map((tabView, idx) => (
           <div
-            key={tabView.viewId}
+            key={tabView.config.viewId}
             data-is-active={idx === tabIndex}
             className="hidden h-full w-full data-[is-active=true]:block"
           >
             {tabView.type === ViewModeEnum.App ? (
               <MemoizedStandaloneAppView
-                viewId={tabView.viewId}
                 config={tabView.config as AppViewConfig}
               />
             ) : tabView.type === ViewModeEnum.Canvas ? (
               <MemoizedCanvasView
-                viewId={tabView.viewId}
                 config={tabView.config as CanvasViewConfig}
                 openViewInFullScreen={openInAppView}
               />

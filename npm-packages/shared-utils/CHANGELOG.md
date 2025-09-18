@@ -1,5 +1,17 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.28
+
+### Patch Changes
+
+- Add IMC receiver error handling
+
+## 0.1.1-alpha.27
+
+### Patch Changes
+
+- Update commands
+
 ## 0.1.1-alpha.26
 
 ### Patch Changes

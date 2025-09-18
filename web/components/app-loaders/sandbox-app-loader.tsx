@@ -24,8 +24,10 @@ import { useContext, useEffect, useRef, useState } from "react";
  */
 export default function SandboxAppLoader({
   viewModel,
+  onInitialLoaded,
 }: {
   viewModel: ViewModel;
+  onInitialLoaded?: () => void;
 }) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
@@ -182,6 +184,9 @@ export default function SandboxAppLoader({
           isLoading: boolean;
         } = message.payload;
         setIsLoadingExtension((prev) => isLoading);
+        if (onInitialLoaded) {
+          onInitialLoaded();
+        }
       },
     );
 

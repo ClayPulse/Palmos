@@ -6,12 +6,11 @@ import ViewControlLayout from "../../layout/view-control-layout";
 
 const AppNode = memo((props: any) => {
   const nodeProps = props as Node<{ config: AppViewConfig }> & {
-    viewId: string;
     openViewInFullScreen?: (config: AppViewConfig) => void;
   };
-  const viewId = nodeProps.viewId;
   const openViewInFullScreen = nodeProps.openViewInFullScreen;
   const { config }: { config: AppViewConfig } = nodeProps.data;
+  const viewId = config.viewId;
 
   return (
     <ViewControlLayout
@@ -20,6 +19,7 @@ const AppNode = memo((props: any) => {
         fullscreen: openViewInFullScreen
           ? () =>
               openViewInFullScreen({
+                viewId: viewId,
                 app: config.app,
               })
           : undefined,

@@ -1,11 +1,10 @@
 import { Dispatch, RefObject, SetStateAction } from "react";
 import {
   Agent,
-  ExtensionCommandInfo,
+  CommandInfo,
   ExtensionConfig,
   PolyIMC,
   ViewModeEnum,
-  ViewModel,
 } from "@pulse-editor/shared-utils";
 import { BaseSTT } from "./modalities/stt/stt";
 import { BaseLLM } from "./modalities/llm/llm";
@@ -104,12 +103,12 @@ export type PersistentSettings = {
 
   projectHomePath?: string;
 
+  // Note: right now extension == app -- this might change in the future for more clarity
   extensions?: Extension[];
   defaultFileTypeExtensionMap?: { [key: string]: Extension };
   isExtensionDevMode?: boolean;
 
   extensionAgents?: ExtensionAgent[];
-  extensionCommands?: PEExtensionCommandInfo[];
 
   userAgents?: UserAgent[];
 
@@ -194,21 +193,27 @@ export type MenuAction = {
 };
 
 export type AppViewConfig = {
+  viewId: string;
   app: string;
   inviteCode?: string;
   // An app can be opened via a file.
   // e.g. a PDF viewer app can be opened with a PDF file;
   //      a game engine app can be opened with a game project file.
   fileUri?: string;
+  // These are commands exposed by the app after the app is initialized.
+  //
+  // Editor only stores command info but do not store or run
+  // the actual command handlers.
+  dynamicCommands?: CommandInfo[];
 };
 
 export type CanvasViewConfig = {
+  viewId: string;
   workflow?: Workflow;
   appConfigs?: AppViewConfig[];
 };
 
 export type TabView = {
-  viewId: string;
   type: ViewModeEnum;
   config: AppViewConfig | CanvasViewConfig;
 };
@@ -282,16 +287,23 @@ export type Extension = {
   config: ExtensionConfig;
   isEnabled: boolean;
   remoteOrigin: string;
+
+  // These are commands that can be used without initializing an app.
+  // These commands are always available once the extension is loaded and enabled.
+  // When these commands are run, an instance of the app is created.
+  //
+  // Editor only stores command info but do not store or run
+  // the actual command handlers.
+  staticCommands?: CommandInfo[];
 };
 
-export type PEExtensionCommandInfo = ExtensionCommandInfo & {
-  moduleId: string;
-};
 // #endregion
 
 // #region IMC Context
 export type IMCContextType = {
   polyIMC: PolyIMC | undefined;
+  resolveWhenViewInitialized: (viewId: string) => Promise<void>;
+  markIMCInitialized: (viewId: string) => void;
 };
 
 // #endregion
@@ -335,5 +347,12 @@ export type Workflow = {
   edges: any;
 };
 
-export { ViewModeEnum };
+// #endregion
+
+// #region Command
+export type Command = {
+  type: "editor" | "static" | "dynamic";
+  commandInfo: CommandInfo;
+  viewId?: string;
+};
 // #endregion

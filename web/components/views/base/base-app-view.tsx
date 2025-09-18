@@ -3,10 +3,11 @@ import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
 import { AppViewConfig, Extension, ExtensionMeta } from "@/lib/types";
 import { ViewModel } from "@pulse-editor/shared-utils";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { compare } from "semver";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 import Loading from "@/components/interface/loading";
+import { IMCContext } from "@/components/providers/imc-provider";
 
 export default function BaseAppView({
   config,
@@ -15,15 +16,13 @@ export default function BaseAppView({
   config: AppViewConfig;
   viewId: string;
 }) {
+  const imcContext = useContext(IMCContext);
+
   const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
   const { installExtension } = useExtensionManager();
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
     ViewModel | undefined
   >(undefined);
-
-  useEffect(() => {
-    console.log("Loading app with config:", config);
-  }, []);
 
   useEffect(() => {
     // Download and load the extension app from a URL if specified
@@ -39,7 +38,7 @@ export default function BaseAppView({
       const extensionId = parts[parts.length - 2];
       const version = parts[parts.length - 1];
       // Remote origin is everything before the last two parts
-      const remoteOrigin = url.origin + "/" + parts.slice(0, -2).join("/");
+      const remoteOrigin = url.origin + parts.slice(0, -2).join("/");
       const ext: Extension = {
         config: {
           id: extensionId,
@@ -142,6 +141,9 @@ export default function BaseAppView({
   ) : !pulseAppViewModel ? (
     <Loading text="Searching for app..." />
   ) : (
-    <SandboxAppLoader viewModel={pulseAppViewModel} />
+    <SandboxAppLoader
+      viewModel={pulseAppViewModel}
+      onInitialLoaded={() => imcContext?.markIMCInitialized(viewId)}
+    />
   );
 }

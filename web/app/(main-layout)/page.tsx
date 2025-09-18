@@ -1,5 +1,6 @@
 "use client";
 
+import CommandViewer from "@/components/interface/command-viewer";
 import EditorToolbar from "@/components/interface/editor-toolbar";
 import ExtensionSuggestionOverlay from "@/components/interface/extension-suggestion-overlay";
 import Voice from "@/components/tools/voice";
@@ -15,6 +16,7 @@ export default function HomePage() {
 
       <Voice />
       {false && <ExtensionSuggestionOverlay />}
+      <CommandViewer />
     </div>
   );
 }

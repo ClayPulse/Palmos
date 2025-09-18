@@ -18,6 +18,7 @@ import {
 } from "@/lib/types";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import AppNode from "./nodes/app-node";
+import { v4 } from "uuid";
 
 const initialNodes = [
   {
@@ -26,6 +27,7 @@ const initialNodes = [
     data: {
       label: "Node 1",
       config: {
+        viewId: v4(),
         app: "https://cdn.pulse-editor.com/extension/spin_wheel/0.0.1/",
       },
     },
@@ -54,11 +56,9 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 };
 
 export default function CanvasView({
-  viewId,
   config,
   openViewInFullScreen,
 }: {
-  viewId: string;
   config?: CanvasViewConfig;
   openViewInFullScreen: (config: AppViewConfig) => void;
 }) {
@@ -105,13 +105,7 @@ export default function CanvasView({
 
   const createAppNode = useCallback(
     (props: any) => {
-      return (
-        <AppNode
-          {...props}
-          viewId={viewId}
-          openViewInFullScreen={openViewInFullScreen}
-        />
-      );
+      return <AppNode {...props} openViewInFullScreen={openViewInFullScreen} />;
     },
     [openViewInFullScreen],
   );

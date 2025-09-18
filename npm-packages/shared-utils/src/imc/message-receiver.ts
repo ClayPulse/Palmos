@@ -68,6 +68,8 @@ export class MessageReceiver {
             from: this.windowId,
           };
 
+          console.error("Error handling message:", error);
+
           senderWindow.postMessage(errMsg, "*");
         })
         .finally(() => {
