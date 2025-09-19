@@ -4,7 +4,7 @@ import {
   IMCMessageTypeEnum,
   ViewModeEnum,
 } from "@pulse-editor/shared-utils";
-import { useContext, useEffect, useState } from "react";
+import { use, useContext, useEffect, useState } from "react";
 import {
   AppViewConfig,
   Command,
@@ -69,21 +69,23 @@ export default function useCommands() {
 
   const [commands, setCommands] = useState<Command[]>([]);
 
-  const [keyword, setKeyword] = useState<string>("");
+  const [keyword, setKeyword] = useState<string | undefined>(undefined);
 
   // Update editor commands
   useEffect(() => {
-    const newEditorCommands = editorCommands
-      .filter((cmd) =>
-        cmd.info.name.toLowerCase().includes(keyword.toLowerCase().trim()),
-      )
-      .map((cmd) => ({
-        type: "editor" as const,
-        commandInfo: cmd.info,
-      }));
+    const newEditorCommands = editorCommands.map((cmd) => ({
+      type: "editor" as const,
+      commandInfo: cmd.info,
+    }));
     setCommands((prev) => [
       ...prev.filter((c) => c.type !== "editor"),
-      ...newEditorCommands,
+      ...(keyword
+        ? newEditorCommands.filter((cmd) =>
+            cmd.commandInfo.name
+              .toLowerCase()
+              .includes(keyword.toLowerCase().trim()),
+          )
+        : newEditorCommands),
     ]);
   }, [keyword]);
 
@@ -194,37 +196,46 @@ export default function useCommands() {
     }
   }
 
-  function getStaticAppCommands(extension: Extension, keyword: string) {
-    return (extension.config.commandsInfoList ?? []).filter((cmd) =>
-      cmd.name.toLowerCase().includes(keyword.toLowerCase().trim()),
-    );
-  }
-
-  function getAppViewDynamicCommands(appView: AppViewConfig, keyword: string) {
-    return (
-      appView.dynamicCommands?.filter((cmd) =>
+  function getStaticAppCommands(extension: Extension, keyword?: string) {
+    const commands = extension.config.commandsInfoList ?? [];
+    if (keyword) {
+      return commands.filter((cmd) =>
         cmd.name.toLowerCase().includes(keyword.toLowerCase().trim()),
-      ) ?? []
-    );
+      );
+    }
+    return commands;
   }
 
-  function getViewDynamicCommands(view: TabView, keyword: string) {
+  function getAppViewDynamicCommands(appView: AppViewConfig, keyword?: string) {
+    const commands = appView.dynamicCommands ?? [];
+    if (keyword) {
+      return (
+        commands.filter((cmd) =>
+          cmd.name.toLowerCase().includes(keyword.toLowerCase().trim()),
+        ) ?? []
+      );
+    }
+    return commands;
+  }
+
+  function getViewDynamicCommands(view: TabView, keyword?: string) {
     if (view.type === ViewModeEnum.App) {
       return getAppViewDynamicCommands(view.config as AppViewConfig, keyword);
     } else if (view.type === ViewModeEnum.Canvas) {
       const canvasView = view.config as CanvasViewConfig;
       // Get all available apps' commands in the canvas
       const appCommands = canvasView.appConfigs?.flatMap((appConfig) =>
-        getAppViewDynamicCommands(appConfig, ""),
+        getAppViewDynamicCommands(appConfig, keyword),
       );
       return appCommands ?? [];
     }
     return [];
   }
 
-  function setKeywordFilter(newKeyword: string) {
+  function setKeywordFilter(newKeyword: string | undefined) {
     setKeyword(newKeyword);
   }
+
 
   return {
     runCommand,

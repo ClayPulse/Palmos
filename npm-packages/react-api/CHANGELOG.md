@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.29
+
+### Patch Changes
+
+- Update useCommand callbacks
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.29
+
 ## 0.1.1-alpha.28
 
 ### Patch Changes

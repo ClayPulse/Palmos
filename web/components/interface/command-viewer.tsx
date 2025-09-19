@@ -1,7 +1,9 @@
 import useCommands from "@/lib/hooks/use-commands";
 import { Command } from "@/lib/types";
-import { addToast, Input, Listbox, ListboxItem } from "@heroui/react";
-import { useCallback, useEffect, useState } from "react";
+import { addToast, Button, Input, Listbox, ListboxItem } from "@heroui/react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { EditorContext } from "../providers/editor-context-provider";
+import Icon from "../misc/icon";
 
 const inputPlaceholders = [
   "Type anything...",
@@ -12,7 +14,9 @@ const inputPlaceholders = [
 ];
 
 export default function CommandViewer() {
-  const { commands, runCommand } = useCommands();
+  const editorContext = useContext(EditorContext);
+
+  const { commands, runCommand, setKeywordFilter } = useCommands();
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
 
@@ -71,21 +75,29 @@ export default function CommandViewer() {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Enter" && selectCommandIndex !== -1) {
         runCommandCallback(commands[selectCommandIndex]);
+      } else if (event.key === "Escape" || event.key === "F1") {
+        event.preventDefault();
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isCommandViewerOpen: false,
+        }));
       }
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [selectCommandIndex]);
+  }, [selectCommandIndex, commands]);
 
   useEffect(() => {
     if (inputValue !== "") {
-      // Choose the first command suggestion.
       // Assume commands are ordered by relevance.
+      // Filter commands based on the input value
+      setKeywordFilter(inputValue);
+      // Choose the first command suggestion.
       setSelectCommandIndex(0);
     } else {
-      //
+      setKeywordFilter(undefined);
     }
   }, [inputValue]);
 
@@ -94,13 +106,31 @@ export default function CommandViewer() {
       <div className="flex w-80 flex-col gap-y-1">
         <Input
           classNames={{
-            inputWrapper: "rounded-2xl shadow-md h-12 min-h-0",
+            inputWrapper:
+              "rounded-2xl shadow-md h-12 min-h-0 group-data-[focus-visible=true]:ring-0 group-data-[focus-visible=true]:ring-offset-0",
             innerWrapper: "p-0",
           }}
           label="Command Center"
           placeholder={inputPlaceholder}
           value={inputValue}
           onValueChange={setInputValue}
+          autoFocus
+          endContent={
+            <div className="flex h-full items-center justify-center">
+              <Button
+                isIconOnly
+                variant="light"
+                onPress={() => {
+                  editorContext?.setEditorStates((prev) => ({
+                    ...prev,
+                    isCommandViewerOpen: false,
+                  }));
+                }}
+              >
+                <Icon name="close" />
+              </Button>
+            </div>
+          }
         />
         <div className="bg-content1 rounded-2xl shadow-md">
           <Listbox

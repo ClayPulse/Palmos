@@ -12,22 +12,18 @@ import { useEffect, useState } from "react";
  * and pass to the extension to handle.
  *
  * @param commandInfo Command information to register.
- * @param initialHandler Initial handler function to handle the command.
+ * @param callbackHandler Callback handler function to handle the command.
  *
  */
 export default function useCommand(
   commandInfo: CommandInfo,
-  initialHandler?: (args: any) => Promise<string | void>
+  callbackHandler?: (args: any) => Promise<string | void>
 ) {
   const { isReady, imc } = useIMC(getReceiverHandlerMap());
 
   const [handler, setHandler] = useState<
     ((args: any) => Promise<any>) | undefined
-  >(initialHandler);
-
-  useEffect(() => {
-    imc?.updateReceiverHandlerMap(getReceiverHandlerMap());
-  }, [handler, imc]);
+  >(undefined);
 
   function getReceiverHandlerMap() {
     const receiverHandlerMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
@@ -85,16 +81,15 @@ export default function useCommand(
     return receiverHandlerMap;
   }
 
-  /**
-   *
-   * @param handler Function to handle the command.
-   */
-  function updateHandler(handler: (args: any) => Promise<any>) {
-    setHandler(() => handler);
-  }
+  useEffect(() => {
+    imc?.updateReceiverHandlerMap(getReceiverHandlerMap());
+  }, [handler, imc]);
+
+  useEffect(() => {
+    setHandler(() => callbackHandler);
+  }, [callbackHandler]);
 
   return {
     isReady,
-    updateHandler,
   };
 }

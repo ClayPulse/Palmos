@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.29
+
+### Patch Changes
+
+- Update useCommand callbacks
+
 ## 0.1.1-alpha.28
 
 ### Patch Changes

@@ -6,13 +6,15 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/react";
-import Icon from "../misc/icon";
+import Icon from "../../misc/icon";
 import { useState } from "react";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 
 export default function NavMenuDropdown({
+  category,
   menuActions,
 }: {
+  category: string;
   menuActions?: MenuAction[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,10 +24,10 @@ export default function NavMenuDropdown({
       <DropdownTrigger>
         <Button
           variant="light"
-          className="text-md data-[is-active=true]:bg-default h-fit min-w-0 px-3 py-2 sm:px-4"
+          className="text-md data-[is-active=true]:bg-default h-fit min-w-0 px-2 py-2 sm:px-4 shrink-0"
           data-is-active={isOpen}
         >
-          File
+          {category}
         </Button>
       </DropdownTrigger>
       <DropdownMenu>

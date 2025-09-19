@@ -2,8 +2,10 @@ import { useContext } from "react";
 import { MenuAction } from "../types";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 
-export function useMenuActions() {
+export function useMenuActions(type?: string) {
   const editorContext = useContext(EditorContext);
+
+  const menuActions = editorContext?.editorStates.menuActions;
 
   async function registerMenuAction(action: MenuAction) {
     if (!editorContext) {
@@ -23,7 +25,9 @@ export function useMenuActions() {
   }
 
   return {
-    menuActions: editorContext?.editorStates.menuActions,
+    menuActions: type
+      ? menuActions?.filter((action) => action.menuCategory === type)
+      : menuActions,
     registerMenuAction,
   };
 }

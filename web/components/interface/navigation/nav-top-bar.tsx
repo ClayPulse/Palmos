@@ -7,19 +7,20 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
-import Icon from "../misc/icon";
-import VoiceIndicator from "./voice-indicator";
-import ProjectIndicator from "./project-indicator";
+import Icon from "../../misc/icon";
+import VoiceIndicator from "../voice-indicator";
+import ProjectIndicator from "../project-indicator";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useTheme } from "next-themes";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { useSearchParams } from "next/navigation";
-import { EditorContext } from "../providers/editor-context-provider";
+import { EditorContext } from "../../providers/editor-context-provider";
 import { useContext, useEffect } from "react";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
-import NavMenuDropdown from "./nav-menu-dropdown";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
+import FileMenuDropDown from "./menu-dropdown/file-menu";
+import ViewMenuDropDown from "./menu-dropdown/view-menu";
 
 export default function NavTopBar({
   isMenuOpen,
@@ -104,11 +105,8 @@ export default function NavTopBar({
             </Button>
           )}
 
-          <NavMenuDropdown
-            menuActions={menuActions?.filter(
-              (action) => action.menuCategory === "file",
-            )}
-          />
+          <FileMenuDropDown />
+          <ViewMenuDropDown />
 
           {/* Do not show workspace selector when the app is open in web, and session is not available */}
           {(getPlatform() === PlatformEnum.Web ||

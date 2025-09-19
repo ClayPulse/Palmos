@@ -78,6 +78,9 @@ export type EditorStates = {
 
   tabViews: TabView[];
   tabIndex: number;
+
+  // Command viewer
+  isCommandViewerOpen?: boolean;
 };
 
 export type PersistentSettings = {

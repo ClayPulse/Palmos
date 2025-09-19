@@ -18,7 +18,11 @@ export function useTabViewManager() {
     }));
   }
 
-  function openFileInView(viewId: string, file: File, viewMode: ViewModeEnum) {
+  async function openFileInView(
+    viewId: string,
+    file: File,
+    viewMode: ViewModeEnum,
+  ) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -53,7 +57,7 @@ export function useTabViewManager() {
       }
 
       // Create a new tab for the app with the file
-      createTabView(ViewModeEnum.App, {
+      await createTabView(ViewModeEnum.App, {
         viewId,
         app: installedApp.config.id,
         fileUri: file.name,

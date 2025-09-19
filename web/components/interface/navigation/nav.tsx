@@ -1,23 +1,23 @@
 "use client";
 
 import { useContext, useEffect, useState } from "react";
-import PasswordModal from "../modals/password-modal";
+import PasswordModal from "../../modals/password-modal";
 import { useTheme } from "next-themes";
 import NavSideMenu from "./nav-side-menu";
-import { EditorContext } from "../providers/editor-context-provider";
+import { EditorContext } from "../../providers/editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
-import Loading from "./loading";
+import Loading from "../loading";
 
-import LoginModal from "../modals/login-modal";
+import LoginModal from "../../modals/login-modal";
 import { useAuth } from "@/lib/hooks/use-auth";
-import WorkspaceSettingsModal from "../modals/workspace-settings-model";
+import WorkspaceSettingsModal from "../../modals/workspace-settings-model";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import useAndroidManageStorageNotification from "@/lib/hooks/use-android-manage-storage-notification";
 import { SafeArea } from "@capacitor-community/safe-area";
-import SharingModal from "../modals/sharing-modal";
+import SharingModal from "../../modals/sharing-modal";
 import NavTopBar from "./nav-top-bar";
-import AppInfoModal from "../modals/app-info-modal";
+import AppInfoModal from "../../modals/app-info-modal";
 
 export default function Nav({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
