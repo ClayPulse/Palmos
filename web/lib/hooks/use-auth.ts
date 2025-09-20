@@ -1,7 +1,7 @@
 "use client";
 
 import { useContext } from "react";
-import { Session } from "../types";
+import { CreditBalance, Session, Subscription } from "../types";
 import useSWR from "swr";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
@@ -10,13 +10,9 @@ export function useAuth() {
   const editorContext = useContext(EditorContext);
   // --- Auth ---
   const { data: session, isLoading } = useSWR<Session | undefined>(
-    !editorContext?.editorStates.isSigningIn
-      ? `/api/auth/session`
-      : null,
+    !editorContext?.editorStates.isSigningIn ? `/api/auth/session` : null,
     async (url: string) => {
-      const res = await fetchAPI(url, {
-        credentials: "include",
-      });
+      const res = await fetchAPI(url);
       if (!res.ok) {
         throw new Error("Failed to fetch session data");
       }
@@ -26,6 +22,32 @@ export function useAuth() {
         return undefined;
       }
       return data as Session;
+    },
+  );
+
+  // --- Subscription ---
+  const { data: subscription } = useSWR<Subscription | undefined>(
+    session ? `/api/subscription` : null,
+    async (url: string) => {
+      const res = await fetchAPI(url);
+      if (!res.ok) {
+        throw new Error("Failed to fetch subscription data");
+      }
+      const data = await res.json();
+      return data as Subscription;
+    },
+  );
+
+  // --- Credits ---
+  const { data: creditBalance } = useSWR<CreditBalance | undefined>(
+    session ? `/api/credits` : null,
+    async (url: string) => {
+      const res = await fetchAPI(url);
+      if (!res.ok) {
+        throw new Error("Failed to fetch credit balance");
+      }
+      const data = await res.json();
+      return data as CreditBalance;
     },
   );
 
@@ -55,8 +77,10 @@ export function useAuth() {
 
   return {
     session,
+    subscription,
+    creditBalance,
     isLoading,
     signIn,
-    signOut
+    signOut,
   };
 }

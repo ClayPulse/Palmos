@@ -16,9 +16,7 @@ export function useWorkspace() {
   const { data: cloudWorkspaces } = useSWR<RemoteWorkspace[]>(
     session ? `/api/workspace/list` : null,
     async (url: string) => {
-      const res = await fetchAPI(url, {
-        credentials: "include",
-      });
+      const res = await fetchAPI(url);
       if (!res.ok) {
         throw new Error("Failed to fetch workspace data");
       }
@@ -54,9 +52,7 @@ export function useWorkspace() {
     }
 
     // Request to create a new workspace
-    const response = await fetchAPI(`/api/workspace/create`, {
-      credentials: "include",
-    });
+    const response = await fetchAPI(`/api/workspace/create`);
 
     const {
       id,

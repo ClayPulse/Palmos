@@ -24,7 +24,7 @@ export default function NavMenuDropdown({
       <DropdownTrigger>
         <Button
           variant="light"
-          className="text-md data-[is-active=true]:bg-default h-fit min-w-0 px-2 py-2 sm:px-4 shrink-0"
+          className="text-md data-[is-active=true]:bg-default h-fit min-w-0 shrink-0 px-2 py-2 sm:px-4"
           data-is-active={isOpen}
         >
           {category}
@@ -34,7 +34,7 @@ export default function NavMenuDropdown({
         {menuActions?.map((action) => (
           <DropdownItem
             key={action.name}
-            onPress={() => {
+            onPress={async () => {
               action.actionFunc();
             }}
             shortcut={

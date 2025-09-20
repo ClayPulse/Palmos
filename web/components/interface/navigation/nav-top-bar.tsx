@@ -18,7 +18,7 @@ import { EditorContext } from "../../providers/editor-context-provider";
 import { useContext, useEffect } from "react";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { PlatformEnum } from "@/lib/types";
+import { MenuAction, PlatformEnum } from "@/lib/types";
 import FileMenuDropDown from "./menu-dropdown/file-menu";
 import ViewMenuDropDown from "./menu-dropdown/view-menu";
 
@@ -49,33 +49,38 @@ export default function NavTopBar({
 
   // Handle menu action shortcuts
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
+    async function runAction(action: MenuAction, event: KeyboardEvent) {
+      if (action.shortcut) {
+        const keys = action.shortcut
+          .toLowerCase()
+          .split("+")
+          .map((k) => k.trim());
+        const ctrl = keys.includes("ctrl") || keys.includes("cmd");
+        const shift = keys.includes("shift");
+        const alt = keys.includes("alt");
+        const key = keys.find(
+          (k) => !["ctrl", "cmd", "shift", "alt"].includes(k),
+        );
+        if (
+          (ctrl ? event.ctrlKey || event.metaKey : true) &&
+          (shift ? event.shiftKey : true) &&
+          (alt ? event.altKey : true) &&
+          event.key.toLowerCase() === key
+        ) {
+          event.preventDefault();
+          await action.actionFunc();
+        }
+      }
+    }
+
+    async function handleKeyDown(event: KeyboardEvent) {
       if (event.target && (event.target as HTMLElement).tagName === "INPUT") {
         return; // Ignore key presses when focused on input fields
       }
-      menuActions?.forEach((action) => {
-        if (action.shortcut) {
-          const keys = action.shortcut
-            .toLowerCase()
-            .split("+")
-            .map((k) => k.trim());
-          const ctrl = keys.includes("ctrl") || keys.includes("cmd");
-          const shift = keys.includes("shift");
-          const alt = keys.includes("alt");
-          const key = keys.find(
-            (k) => !["ctrl", "cmd", "shift", "alt"].includes(k),
-          );
-          if (
-            (ctrl ? event.ctrlKey || event.metaKey : true) &&
-            (shift ? event.shiftKey : true) &&
-            (alt ? event.altKey : true) &&
-            event.key.toLowerCase() === key
-          ) {
-            event.preventDefault();
-            action.actionFunc();
-          }
-        }
-      });
+
+      for (const action of menuActions ?? []) {
+        await runAction(action, event);
+      }
     }
 
     window.addEventListener("keydown", handleKeyDown);

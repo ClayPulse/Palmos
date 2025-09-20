@@ -83,6 +83,11 @@ export type EditorStates = {
   isCommandViewerOpen?: boolean;
 };
 
+/**
+ *  Persistent Settings of Editor.
+ *  These fields need to be serializable to be stored
+ *  in local storage or managed cloud storage.
+ */
 export type PersistentSettings = {
   sttProvider?: string;
   sttModel?: string;
@@ -120,6 +125,8 @@ export type PersistentSettings = {
   };
 
   mobileHost?: string;
+
+  isUseManagedCloud?: boolean;
 };
 // #endregion
 
@@ -191,7 +198,7 @@ export type MenuAction = {
   menuCategory: "file" | "edit" | "view";
   description?: string;
   shortcut?: string;
-  actionFunc: () => void;
+  actionFunc: () => Promise<void>;
   icon?: string;
 };
 
@@ -357,5 +364,17 @@ export type Command = {
   type: "editor" | "static" | "dynamic";
   commandInfo: CommandInfo;
   viewId?: string;
+};
+// #endregion
+
+// #region Pulse Editor Cloud
+export type Subscription = {
+  plan: string;
+  status: string;
+  current_period_end: number;
+};
+
+export type CreditBalance = {
+  balance: number;
 };
 // #endregion

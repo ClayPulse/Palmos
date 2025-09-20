@@ -11,7 +11,7 @@ export default function ViewMenuDropDown() {
   const defaultMenuActions: MenuAction[] = [
     {
       name: "View Command Viewer",
-      actionFunc: () => {
+      actionFunc: async () => {
         editorContext?.setEditorStates((prev) => ({
           ...prev,
           isCommandViewerOpen: true,
@@ -19,6 +19,8 @@ export default function ViewMenuDropDown() {
       },
       menuCategory: "view",
       shortcut: "F1",
+      icon: "terminal",
+      description: "View all commands and shortcuts",
     },
   ];
 

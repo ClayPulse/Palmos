@@ -1,12 +1,68 @@
-import { useContext } from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { AppViewConfig, CanvasViewConfig, Extension, TabView } from "../types";
+import {
+  AppViewConfig,
+  CanvasViewConfig,
+  Extension,
+  MenuAction,
+  TabView,
+} from "../types";
 import { IMCContext } from "@/components/providers/imc-provider";
+import { useMenuActions } from "./use-menu-actions";
 
 export function useTabViewManager() {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
+  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
+
+  const [tabViews, setTabViews] = useState<TabView[]>(
+    editorContext?.editorStates.tabViews ?? [],
+  );
+  const [tabIndex, setTabIndex] = useState<number>(
+    editorContext?.editorStates.tabIndex ?? -1,
+  );
+  const [activeTabView, setActiveTabView] = useState<TabView | undefined>(
+    tabViews[tabIndex],
+  );
+
+  useEffect(() => {
+    if (!editorContext) {
+      throw new Error("Editor context is not available");
+    }
+    setTabViews(editorContext.editorStates.tabViews);
+    setTabIndex(editorContext.editorStates.tabIndex);
+    setActiveTabView(
+      editorContext?.editorStates.tabViews[
+        editorContext?.editorStates.tabIndex
+      ],
+    );
+  }, [
+    editorContext?.editorStates.tabViews,
+    editorContext?.editorStates.tabIndex,
+  ]);
+
+  useEffect(() => {
+    const action: MenuAction = {
+      name: "Close Workflow",
+      actionFunc: async () => {
+        if (activeTabView) {
+          closeView(activeTabView);
+        }
+      },
+      menuCategory: "file",
+      shortcut: "Ctrl+C",
+      icon: "close",
+      description: "Close the current workflow",
+    };
+    if ((tabViews.length ?? 0) > 0) {
+      // Register the action if there are tab views open
+      registerMenuAction(action, true);
+    } else {
+      // Unregister the action if no tab views are open
+      unregisterMenuAction(action);
+    }
+  }, [tabViews, activeTabView]);
 
   function selectTab(newIndex: number) {
     if (!editorContext) {
@@ -195,7 +251,6 @@ export function useTabViewManager() {
     });
 
     await imcContext.resolveWhenViewInitialized(config.viewId);
-    console.log("App view created:", config.viewId);
   }
 
   async function createAppViewInCanvasView(appConfig: AppViewConfig) {
@@ -256,14 +311,6 @@ export function useTabViewManager() {
         editorContext?.editorStates.tabIndex
       ];
 
-    console.log("Finding app in tab views:", appId);
-    console.log(
-      "Active tab view:",
-      activeTabView,
-      editorContext?.editorStates.tabViews,
-      editorContext?.editorStates.tabIndex,
-    );
-
     if (activeTabView?.type === ViewModeEnum.App) {
       const config = activeTabView.config as AppViewConfig;
       return isAppNameMatched(config.app, appId) ? config : undefined;
@@ -285,12 +332,9 @@ export function useTabViewManager() {
   }
 
   return {
-    tabViews: editorContext?.editorStates.tabViews ?? [],
-    tabIndex: editorContext?.editorStates.tabIndex ?? -1,
-    activeTabView:
-      editorContext?.editorStates.tabViews[
-        editorContext?.editorStates.tabIndex
-      ],
+    tabViews,
+    tabIndex,
+    activeTabView,
     selectTab,
     viewCount,
     openFileInView,

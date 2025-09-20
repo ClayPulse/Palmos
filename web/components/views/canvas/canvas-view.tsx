@@ -15,6 +15,7 @@ import {
   AppInfoModalContent,
   AppViewConfig,
   CanvasViewConfig,
+  MenuAction,
 } from "@/lib/types";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import AppNode from "./nodes/app-node";
@@ -110,53 +111,65 @@ export default function CanvasView({
     [openViewInFullScreen],
   );
 
-  const { registerMenuAction } = useMenuActions();
+  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
   // Register menu actions
   useEffect(() => {
     console.log("CanvasView rendered: registering menu actions");
 
-    registerMenuAction({
-      name: "Export Workflow",
-      menuCategory: "file",
-      description: "Export the current workflow as a JSON file",
-      shortcut: "Ctrl+Alt+E",
-      actionFunc: () => {
-        exportWorkflow();
+    const menuActions: MenuAction[] = [
+      {
+        name: "Export Workflow",
+        menuCategory: "file",
+        description: "Export the current workflow as a JSON file",
+        shortcut: "Ctrl+Alt+E",
+        actionFunc: async () => {
+          await exportWorkflow();
+        },
+        icon: "download",
       },
-      icon: "download",
+      {
+        name: "Import Workflow",
+        menuCategory: "file",
+        description: "Import a workflow from a JSON file",
+        shortcut: "Ctrl+Alt+I",
+        actionFunc: async () => {
+          const input = document.createElement("input");
+          input.type = "file";
+          input.accept = "application/json";
+          input.onchange = (e: any) => {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              try {
+                const workflow = JSON.parse(event.target?.result as string);
+                if (workflow.nodes && workflow.edges) {
+                  setNodes(workflow.nodes);
+                  setEdges(workflow.edges);
+                } else {
+                  alert("Invalid workflow file");
+                }
+              } catch (err) {
+                alert("Error reading workflow file");
+              }
+            };
+            reader.readAsText(file);
+          };
+          input.click();
+        },
+        icon: "upload",
+      },
+    ];
+
+    menuActions.forEach((action) => {
+      registerMenuAction(action);
     });
 
-    registerMenuAction({
-      name: "Import Workflow",
-      menuCategory: "file",
-      description: "Import a workflow from a JSON file",
-      shortcut: "Ctrl+Alt+I",
-      actionFunc: () => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = "application/json";
-        input.onchange = (e: any) => {
-          const file = e.target.files[0];
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            try {
-              const workflow = JSON.parse(event.target?.result as string);
-              if (workflow.nodes && workflow.edges) {
-                setNodes(workflow.nodes);
-                setEdges(workflow.edges);
-              } else {
-                alert("Invalid workflow file");
-              }
-            } catch (err) {
-              alert("Error reading workflow file");
-            }
-          };
-          reader.readAsText(file);
-        };
-        input.click();
-      },
-      icon: "upload",
-    });
+    return () => {
+      // Unregister menu actions on unmount
+      menuActions.forEach((action) => {
+        unregisterMenuAction(action);
+      });
+    };
   }, []);
 
   return (

@@ -62,9 +62,7 @@ export default function BaseAppView({
       url.searchParams.set("latest", "true");
       if (inviteCode) url.searchParams.set("inviteCode", inviteCode);
 
-      const res = await fetchAPI(url, {
-        credentials: "include",
-      });
+      const res = await fetchAPI(url);
 
       if (!res.ok) {
         setNoAccessToApp(true);

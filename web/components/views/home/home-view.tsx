@@ -14,10 +14,11 @@ export default function HomeView({
         Start by opening a project.
       </p>
 
-      <div>
+      <div className="mt-4 flex gap-x-2">
         <Button color="primary" onPress={createNewCanvas}>
-          New Project
+          New Workflow
         </Button>
+        <Button color="secondary">Discover Apps</Button>
       </div>
     </div>
   );

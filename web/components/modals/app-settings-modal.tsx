@@ -1,4 +1,5 @@
 import {
+  Alert,
   Button,
   Divider,
   Input,
@@ -24,611 +25,693 @@ import { llmProviderOptions } from "@/lib/modalities/llm/options";
 import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 import { imageGenProviderOptions } from "@/lib/modalities/image-gen/options";
 import { videoGenProviderOptions } from "@/lib/modalities/video-gen/options";
+import { useAuth } from "@/lib/hooks/use-auth";
+
+export default function AppSettingsModal({
+  isOpen,
+  setIsOpen,
+}: {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+}) {
+  const editorContext = useContext(EditorContext);
+
+  return (
+    <ModalWrapper isOpen={isOpen} setIsOpen={setIsOpen} title={"App Settings"}>
+      <div className="flex w-full flex-col gap-2">
+        <EditorSettings editorContext={editorContext} />
+        <Divider />
+        <AISettings editorContext={editorContext} />
+        <Divider />
+        <SecuritySettings editorContext={editorContext} setIsOpen={setIsOpen} />
+        <Divider />
+        <DevExtensionSettings editorContext={editorContext} />
+        <Divider />
+        <ExtensionDefinedSettings editorContext={editorContext} />
+      </div>
+    </ModalWrapper>
+  );
+}
+
+function EditorSettings({
+  editorContext,
+}: {
+  editorContext?: EditorContextType;
+}) {
+  const { selectAndSetProjectHome } = useExplorer();
+  return (
+    <div>
+      <p className="text-medium pb-2 font-bold">Editor Settings</p>
+      <div className="w-full space-y-2">
+        {editorContext?.persistSettings?.projectHomePath ? (
+          <Input
+            label="Project Home Path"
+            size="md"
+            isRequired
+            value={editorContext?.persistSettings?.projectHomePath}
+            onValueChange={(value) => {
+              editorContext.setPersistSettings((prev) => {
+                return {
+                  ...prev,
+                  projectHomePath: value,
+                };
+              });
+            }}
+            endContent={
+              <Button
+                onPress={() => {
+                  selectAndSetProjectHome();
+                }}
+                isIconOnly
+                variant="light"
+              >
+                <Icon name="folder" />
+              </Button>
+            }
+            isDisabled={getPlatform() === PlatformEnum.Capacitor}
+          />
+        ) : (
+          <div className="space-y-1">
+            <p className="text-content4-foreground text-sm">
+              All your projects will be saved in this folder.
+            </p>
+            <Button
+              className="w-full"
+              onPress={() => {
+                selectAndSetProjectHome();
+              }}
+            >
+              Select Project Home Path
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
-  const { selectAndSetProjectHome } = useExplorer();
+  const { subscription, creditBalance } = useAuth();
 
   return (
     <>
       <div>
-        <p className="text-medium pb-2 font-bold">Editor Settings</p>
-        <div className="w-full space-y-2">
-          {editorContext?.persistSettings?.projectHomePath ? (
-            <Input
-              label="Project Home Path"
-              size="md"
-              isRequired
-              value={editorContext?.persistSettings?.projectHomePath}
-              onValueChange={(value) => {
-                editorContext.setPersistSettings((prev) => {
+        <p className="text-medium pb-2 font-bold">AI Settings</p>
+        <Switch
+          isSelected={editorContext?.persistSettings?.isUseManagedCloud ?? true}
+          onChange={(e) => {
+            const newValue = e.target.checked;
+            editorContext?.setPersistSettings((prev) => {
+              return {
+                ...prev,
+                isUseManagedCloud: newValue,
+              };
+            });
+          }}
+        >
+          Use Managed AI Endpoints
+        </Switch>
+        <Alert
+          color={
+            (editorContext?.persistSettings?.isUseManagedCloud ?? true)
+              ? "primary"
+              : "secondary"
+          }
+        >
+          {(editorContext?.persistSettings?.isUseManagedCloud ?? true)
+            ? "Unlock the full power of Pulse Editor instantly with managed cloud you get lightning-fast AI assistance, cross-platform syncing, creative tools. So you always stay in flow."
+            : "Bring Your Own API Keys lets you connect directly to AI providers. More setup required, but you stay in full control."}
+        </Alert>
+      </div>
+
+      {(editorContext?.persistSettings?.isUseManagedCloud ?? true) ? (
+        <div className="flex flex-col items-center">
+          <p className="text-medium pb-2 font-bold">
+            Your Plan: {subscription?.plan}
+          </p>
+          <Button color="primary">Upgrade/Manage Plan</Button>
+          <p className="text-medium pb-2 font-bold">
+            Credits: {creditBalance?.balance}
+          </p>
+          <Button color="primary">Top Up Credits</Button>
+        </div>
+      ) : (
+        <div>
+          <p className="text-medium pb-2 font-bold">STT</p>
+          <div className="w-full space-y-2">
+            <Select
+              items={Object.values(sttProviderOptions)}
+              disabledKeys={Object.values(sttProviderOptions)
+                .filter((provider) => !provider.isSupported)
+                .map((provider) => provider.provider)}
+              label="Provider"
+              placeholder="Select a provider"
+              onChange={(e) => {
+                editorContext?.setPersistSettings((prev) => {
                   return {
                     ...prev,
-                    projectHomePath: value,
+                    sttProvider: e.target.value,
+                    sttModel: undefined,
                   };
                 });
               }}
-              endContent={
-                <Button
-                  onPress={() => {
-                    selectAndSetProjectHome();
-                  }}
-                  isIconOnly
-                  variant="light"
-                >
-                  <Icon name="folder" />
-                </Button>
+              isRequired
+              selectedKeys={
+                editorContext?.persistSettings?.sttProvider
+                  ? [editorContext?.persistSettings.sttProvider]
+                  : []
               }
-              isDisabled={getPlatform() === PlatformEnum.Capacitor}
-            />
-          ) : (
-            <div className="space-y-1">
-              <p className="text-content4-foreground text-sm">
-                All your projects will be saved in this folder.
-              </p>
-              <Button
-                className="w-full"
-                onPress={() => {
-                  selectAndSetProjectHome();
-                }}
-              >
-                Select Project Home Path
-              </Button>
-            </div>
-          )}
-        </div>
-      </div>
-      <Divider />
-      <div>
-        <p className="text-medium pb-2 font-bold">STT</p>
-        <div className="w-full space-y-2">
-          <Select
-            items={Object.values(sttProviderOptions)}
-            disabledKeys={Object.values(sttProviderOptions)
-              .filter((provider) => !provider.isSupported)
-              .map((provider) => provider.provider)}
-            label="Provider"
-            placeholder="Select a provider"
-            onChange={(e) => {
-              editorContext?.setPersistSettings((prev) => {
-                return {
-                  ...prev,
-                  sttProvider: e.target.value,
-                  sttModel: undefined,
-                };
-              });
-            }}
-            isRequired
-            selectedKeys={
-              editorContext?.persistSettings?.sttProvider
-                ? [editorContext?.persistSettings.sttProvider]
-                : []
-            }
-          >
-            {(providerOption) => (
-              <SelectItem key={providerOption.provider}>
-                {providerOption.provider}
-              </SelectItem>
-            )}
-          </Select>
-          <Select
-            isDisabled={!editorContext?.persistSettings?.sttProvider}
-            items={
-              Object.values(sttProviderOptions).find(
-                (provider) =>
-                  provider.provider ===
-                  editorContext?.persistSettings?.sttProvider,
-              )?.models ?? []
-            }
-            disabledKeys={
-              Object.values(sttProviderOptions)
-                .find(
+            >
+              {(providerOption) => (
+                <SelectItem key={providerOption.provider}>
+                  {providerOption.provider}
+                </SelectItem>
+              )}
+            </Select>
+            <Select
+              isDisabled={!editorContext?.persistSettings?.sttProvider}
+              items={
+                Object.values(sttProviderOptions).find(
                   (provider) =>
                     provider.provider ===
                     editorContext?.persistSettings?.sttProvider,
-                )
-                ?.models.filter((model) => !model.isSupported)
-                .map((model) => model.model) ?? []
-            }
-            label="Model"
-            placeholder="Select a model"
-            isRequired
-            selectedKeys={
-              editorContext?.persistSettings?.sttModel
-                ? [editorContext?.persistSettings.sttModel]
-                : []
-            }
-            onChange={(e) => {
-              editorContext?.setPersistSettings((prev) => {
-                return {
-                  ...prev,
-                  sttModel: e.target.value,
-                };
-              });
-            }}
-          >
-            {(modelOption) => (
-              <SelectItem key={modelOption.model}>
-                {modelOption.model}
-              </SelectItem>
-            )}
-          </Select>
-          <Tooltip
-            content={
-              <p>
-                Please disable password to edit API Key. <br />
-                You can enable password again after editing API keys.
-              </p>
-            }
-            isDisabled={!editorContext?.persistSettings?.isUsePassword}
-          >
-            <Input
-              label="API Key"
-              size="md"
-              isRequired
-              value={
-                editorContext?.persistSettings?.isPasswordSet
-                  ? "API key is encrypted"
-                  : (getAPIKey(
-                      editorContext,
-                      editorContext?.persistSettings?.sttProvider,
-                    ) ?? "")
+                )?.models ?? []
               }
-              onValueChange={(value) => {
-                setAPIKey(
-                  editorContext,
-                  editorContext?.persistSettings?.sttProvider,
-                  value,
-                );
-              }}
-              isDisabled={!editorContext?.persistSettings?.sttProvider}
-              isReadOnly={editorContext?.persistSettings?.isUsePassword}
-            />
-          </Tooltip>
-        </div>
-      </div>
-      <Divider />
-      <div>
-        <p className="text-medium pb-2 font-bold">LLM</p>
-        <div className="w-full space-y-2">
-          <Select
-            items={Object.values(llmProviderOptions)}
-            disabledKeys={Object.values(llmProviderOptions)
-              .filter((provider) => !provider.isSupported)
-              .map((provider) => provider.provider)}
-            label="Provider"
-            placeholder="Select a provider"
-            onChange={(e) => {
-              editorContext?.setPersistSettings((prev) => {
-                return {
-                  ...prev,
-                  llmProvider: e.target.value,
-                  llmModel: undefined,
-                };
-              });
-            }}
-            isRequired
-            selectedKeys={
-              editorContext?.persistSettings?.llmProvider
-                ? [editorContext?.persistSettings.llmProvider]
-                : []
-            }
-          >
-            {(providerOption) => (
-              <SelectItem key={providerOption.provider}>
-                {providerOption.provider}
-              </SelectItem>
-            )}
-          </Select>
-          <Select
-            isDisabled={!editorContext?.persistSettings?.llmProvider}
-            items={
-              Object.values(llmProviderOptions).find(
-                (provider) =>
-                  provider.provider ===
-                  editorContext?.persistSettings?.llmProvider,
-              )?.models ?? []
-            }
-            disabledKeys={
-              Object.values(llmProviderOptions)
-                .find(
-                  (provider) =>
-                    provider.provider ===
-                    editorContext?.persistSettings?.llmProvider,
-                )
-                ?.models.filter((model) => !model.isSupported)
-                .map((model) => model.model) ?? []
-            }
-            label="Model"
-            placeholder="Select a model"
-            isRequired
-            onChange={(e) => {
-              editorContext?.setPersistSettings((prev) => {
-                return {
-                  ...prev,
-                  llmModel: e.target.value,
-                };
-              });
-            }}
-            selectedKeys={
-              editorContext?.persistSettings?.llmModel
-                ? [editorContext?.persistSettings?.llmModel]
-                : []
-            }
-          >
-            {(modelOption) => (
-              <SelectItem key={modelOption.model}>
-                {modelOption.model}
-              </SelectItem>
-            )}
-          </Select>
-          <Tooltip
-            content={
-              <p>
-                Please disable password to edit API Key. <br />
-                You can enable password again after editing API keys.
-              </p>
-            }
-            isDisabled={!editorContext?.persistSettings?.isUsePassword}
-          >
-            <Input
-              label="API Key"
-              size="md"
+              disabledKeys={
+                Object.values(sttProviderOptions)
+                  .find(
+                    (provider) =>
+                      provider.provider ===
+                      editorContext?.persistSettings?.sttProvider,
+                  )
+                  ?.models.filter((model) => !model.isSupported)
+                  .map((model) => model.model) ?? []
+              }
+              label="Model"
+              placeholder="Select a model"
               isRequired
-              value={
-                editorContext?.persistSettings?.isPasswordSet
-                  ? "API key is encrypted"
-                  : (getAPIKey(
+              selectedKeys={
+                editorContext?.persistSettings?.sttModel
+                  ? [editorContext?.persistSettings.sttModel]
+                  : []
+              }
+              onChange={(e) => {
+                editorContext?.setPersistSettings((prev) => {
+                  return {
+                    ...prev,
+                    sttModel: e.target.value,
+                  };
+                });
+              }}
+            >
+              {(modelOption) => (
+                <SelectItem key={modelOption.model}>
+                  {modelOption.model}
+                </SelectItem>
+              )}
+            </Select>
+            <Tooltip
+              content={
+                <p>
+                  Please disable password to edit API Key. <br />
+                  You can enable password again after editing API keys.
+                </p>
+              }
+              isDisabled={!editorContext?.persistSettings?.isUsePassword}
+            >
+              <Input
+                label="API Key"
+                size="md"
+                isRequired
+                value={
+                  editorContext?.persistSettings?.isPasswordSet
+                    ? "API key is encrypted"
+                    : (getAPIKey(
+                        editorContext,
+                        editorContext?.persistSettings?.sttProvider,
+                      ) ?? "")
+                }
+                onValueChange={(value) => {
+                  setAPIKey(
+                    editorContext,
+                    editorContext?.persistSettings?.sttProvider,
+                    value,
+                  );
+                }}
+                isDisabled={!editorContext?.persistSettings?.sttProvider}
+                isReadOnly={editorContext?.persistSettings?.isUsePassword}
+              />
+            </Tooltip>
+          </div>
+
+          <div>
+            <p className="text-medium pb-2 font-bold">LLM</p>
+            <div className="w-full space-y-2">
+              <Select
+                items={Object.values(llmProviderOptions)}
+                disabledKeys={Object.values(llmProviderOptions)
+                  .filter((provider) => !provider.isSupported)
+                  .map((provider) => provider.provider)}
+                label="Provider"
+                placeholder="Select a provider"
+                onChange={(e) => {
+                  editorContext?.setPersistSettings((prev) => {
+                    return {
+                      ...prev,
+                      llmProvider: e.target.value,
+                      llmModel: undefined,
+                    };
+                  });
+                }}
+                isRequired
+                selectedKeys={
+                  editorContext?.persistSettings?.llmProvider
+                    ? [editorContext?.persistSettings.llmProvider]
+                    : []
+                }
+              >
+                {(providerOption) => (
+                  <SelectItem key={providerOption.provider}>
+                    {providerOption.provider}
+                  </SelectItem>
+                )}
+              </Select>
+              <Select
+                isDisabled={!editorContext?.persistSettings?.llmProvider}
+                items={
+                  Object.values(llmProviderOptions).find(
+                    (provider) =>
+                      provider.provider ===
+                      editorContext?.persistSettings?.llmProvider,
+                  )?.models ?? []
+                }
+                disabledKeys={
+                  Object.values(llmProviderOptions)
+                    .find(
+                      (provider) =>
+                        provider.provider ===
+                        editorContext?.persistSettings?.llmProvider,
+                    )
+                    ?.models.filter((model) => !model.isSupported)
+                    .map((model) => model.model) ?? []
+                }
+                label="Model"
+                placeholder="Select a model"
+                isRequired
+                onChange={(e) => {
+                  editorContext?.setPersistSettings((prev) => {
+                    return {
+                      ...prev,
+                      llmModel: e.target.value,
+                    };
+                  });
+                }}
+                selectedKeys={
+                  editorContext?.persistSettings?.llmModel
+                    ? [editorContext?.persistSettings?.llmModel]
+                    : []
+                }
+              >
+                {(modelOption) => (
+                  <SelectItem key={modelOption.model}>
+                    {modelOption.model}
+                  </SelectItem>
+                )}
+              </Select>
+              <Tooltip
+                content={
+                  <p>
+                    Please disable password to edit API Key. <br />
+                    You can enable password again after editing API keys.
+                  </p>
+                }
+                isDisabled={!editorContext?.persistSettings?.isUsePassword}
+              >
+                <Input
+                  label="API Key"
+                  size="md"
+                  isRequired
+                  value={
+                    editorContext?.persistSettings?.isPasswordSet
+                      ? "API key is encrypted"
+                      : (getAPIKey(
+                          editorContext,
+                          editorContext?.persistSettings?.llmProvider,
+                        ) ?? "")
+                  }
+                  onValueChange={(value) => {
+                    setAPIKey(
                       editorContext,
                       editorContext?.persistSettings?.llmProvider,
-                    ) ?? "")
-              }
-              onValueChange={(value) => {
-                setAPIKey(
-                  editorContext,
-                  editorContext?.persistSettings?.llmProvider,
-                  value,
-                );
-              }}
-              isDisabled={!editorContext?.persistSettings?.llmProvider}
-              isReadOnly={editorContext?.persistSettings?.isUsePassword}
-            />
-          </Tooltip>
-        </div>
-      </div>
-      <Divider />
-      <div>
-        <p className="text-medium pb-2 font-bold">TTS</p>
-        <div className="w-full space-y-2">
-          <Select
-            items={Object.values(ttsProviderOptions)}
-            disabledKeys={Object.values(ttsProviderOptions)
-              .filter((provider) => !provider.isSupported)
-              .map((provider) => provider.provider)}
-            label="Provider"
-            placeholder="Select a provider"
-            onChange={(e) => {
-              editorContext?.setPersistSettings((prev) => {
-                return {
-                  ...prev,
-                  ttsProvider: e.target.value,
-                  ttsModel: undefined,
-                };
-              });
-            }}
-            isRequired
-            selectedKeys={
-              editorContext?.persistSettings?.ttsProvider
-                ? [editorContext?.persistSettings?.ttsProvider]
-                : []
-            }
-          >
-            {(providerOption) => (
-              <SelectItem key={providerOption.provider}>
-                {providerOption.provider}
-              </SelectItem>
-            )}
-          </Select>
-          <Select
-            isDisabled={!editorContext?.persistSettings?.ttsProvider}
-            items={
-              Object.values(ttsProviderOptions).find(
-                (provider) =>
-                  provider.provider ===
-                  editorContext?.persistSettings?.ttsProvider,
-              )?.models ?? []
-            }
-            disabledKeys={
-              Object.values(ttsProviderOptions)
-                .find(
-                  (provider) =>
-                    provider.provider ===
-                    editorContext?.persistSettings?.ttsProvider,
-                )
-                ?.models.filter((model) => !model.isSupported)
-                .map((model) => model.model) ?? []
-            }
-            label="Model"
-            placeholder="Select a model"
-            isRequired
-            onChange={(e) => {
-              editorContext?.setPersistSettings((prev) => {
-                return {
-                  ...prev,
-                  ttsModel: e.target.value,
-                };
-              });
-            }}
-            selectedKeys={
-              editorContext?.persistSettings?.ttsModel
-                ? [editorContext?.persistSettings?.ttsModel]
-                : []
-            }
-          >
-            {(modelOption) => (
-              <SelectItem key={modelOption.model}>
-                {modelOption.model}
-              </SelectItem>
-            )}
-          </Select>
-          <Input
-            label="Voice Name"
-            size="md"
-            isRequired
-            value={editorContext?.persistSettings?.ttsVoice ?? ""}
-            onValueChange={(value) => {
-              editorContext?.setPersistSettings((prev) => {
-                return {
-                  ...prev,
-                  ttsVoice: value,
-                };
-              });
-            }}
-            isDisabled={!editorContext?.persistSettings?.ttsProvider}
-          />
-          <Tooltip
-            content={
-              <p>
-                Please disable password to edit API Key. <br />
-                You can enable password again after editing API keys.
-              </p>
-            }
-            isDisabled={!editorContext?.persistSettings?.isUsePassword}
-          >
-            <Input
-              label="API Key"
-              size="md"
-              isRequired
-              value={
-                editorContext?.persistSettings?.isPasswordSet
-                  ? "API key is encrypted"
-                  : (getAPIKey(
+                      value,
+                    );
+                  }}
+                  isDisabled={!editorContext?.persistSettings?.llmProvider}
+                  isReadOnly={editorContext?.persistSettings?.isUsePassword}
+                />
+              </Tooltip>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-medium pb-2 font-bold">TTS</p>
+            <div className="w-full space-y-2">
+              <Select
+                items={Object.values(ttsProviderOptions)}
+                disabledKeys={Object.values(ttsProviderOptions)
+                  .filter((provider) => !provider.isSupported)
+                  .map((provider) => provider.provider)}
+                label="Provider"
+                placeholder="Select a provider"
+                onChange={(e) => {
+                  editorContext?.setPersistSettings((prev) => {
+                    return {
+                      ...prev,
+                      ttsProvider: e.target.value,
+                      ttsModel: undefined,
+                    };
+                  });
+                }}
+                isRequired
+                selectedKeys={
+                  editorContext?.persistSettings?.ttsProvider
+                    ? [editorContext?.persistSettings?.ttsProvider]
+                    : []
+                }
+              >
+                {(providerOption) => (
+                  <SelectItem key={providerOption.provider}>
+                    {providerOption.provider}
+                  </SelectItem>
+                )}
+              </Select>
+              <Select
+                isDisabled={!editorContext?.persistSettings?.ttsProvider}
+                items={
+                  Object.values(ttsProviderOptions).find(
+                    (provider) =>
+                      provider.provider ===
+                      editorContext?.persistSettings?.ttsProvider,
+                  )?.models ?? []
+                }
+                disabledKeys={
+                  Object.values(ttsProviderOptions)
+                    .find(
+                      (provider) =>
+                        provider.provider ===
+                        editorContext?.persistSettings?.ttsProvider,
+                    )
+                    ?.models.filter((model) => !model.isSupported)
+                    .map((model) => model.model) ?? []
+                }
+                label="Model"
+                placeholder="Select a model"
+                isRequired
+                onChange={(e) => {
+                  editorContext?.setPersistSettings((prev) => {
+                    return {
+                      ...prev,
+                      ttsModel: e.target.value,
+                    };
+                  });
+                }}
+                selectedKeys={
+                  editorContext?.persistSettings?.ttsModel
+                    ? [editorContext?.persistSettings?.ttsModel]
+                    : []
+                }
+              >
+                {(modelOption) => (
+                  <SelectItem key={modelOption.model}>
+                    {modelOption.model}
+                  </SelectItem>
+                )}
+              </Select>
+              <Input
+                label="Voice Name"
+                size="md"
+                isRequired
+                value={editorContext?.persistSettings?.ttsVoice ?? ""}
+                onValueChange={(value) => {
+                  editorContext?.setPersistSettings((prev) => {
+                    return {
+                      ...prev,
+                      ttsVoice: value,
+                    };
+                  });
+                }}
+                isDisabled={!editorContext?.persistSettings?.ttsProvider}
+              />
+              <Tooltip
+                content={
+                  <p>
+                    Please disable password to edit API Key. <br />
+                    You can enable password again after editing API keys.
+                  </p>
+                }
+                isDisabled={!editorContext?.persistSettings?.isUsePassword}
+              >
+                <Input
+                  label="API Key"
+                  size="md"
+                  isRequired
+                  value={
+                    editorContext?.persistSettings?.isPasswordSet
+                      ? "API key is encrypted"
+                      : (getAPIKey(
+                          editorContext,
+                          editorContext?.persistSettings?.ttsProvider,
+                        ) ?? "")
+                  }
+                  onValueChange={(value) => {
+                    setAPIKey(
                       editorContext,
                       editorContext?.persistSettings?.ttsProvider,
-                    ) ?? "")
-              }
-              onValueChange={(value) => {
-                setAPIKey(
-                  editorContext,
-                  editorContext?.persistSettings?.ttsProvider,
-                  value,
-                );
+                      value,
+                    );
+                  }}
+                  isDisabled={!editorContext?.persistSettings?.ttsProvider}
+                  isReadOnly={editorContext?.persistSettings?.isUsePassword}
+                />
+              </Tooltip>
+            </div>
+          </div>
+
+          <div>
+            <p className="text-medium pb-2 font-bold">Image Gen</p>
+            <Select
+              items={Object.values(imageGenProviderOptions)}
+              disabledKeys={Object.values(imageGenProviderOptions)
+                .filter((provider) => !provider.isSupported)
+                .map((provider) => provider.provider)}
+              label="Provider"
+              placeholder="Select a provider"
+              onChange={(e) => {
+                editorContext?.setPersistSettings((prev) => {
+                  return {
+                    ...prev,
+                    imageGenProvider: e.target.value,
+                    imageGenModel: undefined,
+                  };
+                });
               }}
-              isDisabled={!editorContext?.persistSettings?.ttsProvider}
-              isReadOnly={editorContext?.persistSettings?.isUsePassword}
-            />
-          </Tooltip>
-        </div>
-      </div>
-      <Divider />
-      <div>
-        <p className="text-medium pb-2 font-bold">Image Gen</p>
-        <Select
-          items={Object.values(imageGenProviderOptions)}
-          disabledKeys={Object.values(imageGenProviderOptions)
-            .filter((provider) => !provider.isSupported)
-            .map((provider) => provider.provider)}
-          label="Provider"
-          placeholder="Select a provider"
-          onChange={(e) => {
-            editorContext?.setPersistSettings((prev) => {
-              return {
-                ...prev,
-                imageGenProvider: e.target.value,
-                imageGenModel: undefined,
-              };
-            });
-          }}
-          isRequired
-          selectedKeys={
-            editorContext?.persistSettings?.imageGenProvider
-              ? [editorContext?.persistSettings?.imageGenProvider]
-              : []
-          }
-        >
-          {(providerOption) => (
-            <SelectItem key={providerOption.provider}>
-              {providerOption.provider}
-            </SelectItem>
-          )}
-        </Select>
-        <Select
-          isDisabled={!editorContext?.persistSettings?.imageGenProvider}
-          items={
-            Object.values(imageGenProviderOptions).find(
-              (provider) =>
-                provider.provider ===
-                editorContext?.persistSettings?.imageGenProvider,
-            )?.models ?? []
-          }
-          disabledKeys={
-            Object.values(imageGenProviderOptions)
-              .find(
-                (provider) =>
-                  provider.provider ===
-                  editorContext?.persistSettings?.imageGenProvider,
-              )
-              ?.models.filter((model) => !model.isSupported)
-              .map((model) => model.model) ?? []
-          }
-          label="Model"
-          placeholder="Select a model"
-          isRequired
-          onChange={(e) => {
-            editorContext?.setPersistSettings((prev) => {
-              return {
-                ...prev,
-                imageGenModel: e.target.value,
-              };
-            });
-          }}
-          selectedKeys={
-            editorContext?.persistSettings?.imageGenModel
-              ? [editorContext?.persistSettings?.imageGenModel]
-              : []
-          }
-        >
-          {(modelOption) => (
-            <SelectItem key={modelOption.model}>{modelOption.model}</SelectItem>
-          )}
-        </Select>
-        <Tooltip
-          content={
-            <p>
-              Please disable password to edit API Key. <br />
-              You can enable password again after editing API keys.
-            </p>
-          }
-          isDisabled={!editorContext?.persistSettings?.isUsePassword}
-        >
-          <Input
-            label="API Key"
-            size="md"
-            isRequired
-            value={
-              editorContext?.persistSettings?.isPasswordSet
-                ? "API key is encrypted"
-                : (getAPIKey(
+              isRequired
+              selectedKeys={
+                editorContext?.persistSettings?.imageGenProvider
+                  ? [editorContext?.persistSettings?.imageGenProvider]
+                  : []
+              }
+            >
+              {(providerOption) => (
+                <SelectItem key={providerOption.provider}>
+                  {providerOption.provider}
+                </SelectItem>
+              )}
+            </Select>
+            <Select
+              isDisabled={!editorContext?.persistSettings?.imageGenProvider}
+              items={
+                Object.values(imageGenProviderOptions).find(
+                  (provider) =>
+                    provider.provider ===
+                    editorContext?.persistSettings?.imageGenProvider,
+                )?.models ?? []
+              }
+              disabledKeys={
+                Object.values(imageGenProviderOptions)
+                  .find(
+                    (provider) =>
+                      provider.provider ===
+                      editorContext?.persistSettings?.imageGenProvider,
+                  )
+                  ?.models.filter((model) => !model.isSupported)
+                  .map((model) => model.model) ?? []
+              }
+              label="Model"
+              placeholder="Select a model"
+              isRequired
+              onChange={(e) => {
+                editorContext?.setPersistSettings((prev) => {
+                  return {
+                    ...prev,
+                    imageGenModel: e.target.value,
+                  };
+                });
+              }}
+              selectedKeys={
+                editorContext?.persistSettings?.imageGenModel
+                  ? [editorContext?.persistSettings?.imageGenModel]
+                  : []
+              }
+            >
+              {(modelOption) => (
+                <SelectItem key={modelOption.model}>
+                  {modelOption.model}
+                </SelectItem>
+              )}
+            </Select>
+            <Tooltip
+              content={
+                <p>
+                  Please disable password to edit API Key. <br />
+                  You can enable password again after editing API keys.
+                </p>
+              }
+              isDisabled={!editorContext?.persistSettings?.isUsePassword}
+            >
+              <Input
+                label="API Key"
+                size="md"
+                isRequired
+                value={
+                  editorContext?.persistSettings?.isPasswordSet
+                    ? "API key is encrypted"
+                    : (getAPIKey(
+                        editorContext,
+                        editorContext?.persistSettings?.imageGenProvider,
+                      ) ?? "")
+                }
+                onValueChange={(value) => {
+                  setAPIKey(
                     editorContext,
                     editorContext?.persistSettings?.imageGenProvider,
-                  ) ?? "")
-            }
-            onValueChange={(value) => {
-              setAPIKey(
-                editorContext,
-                editorContext?.persistSettings?.imageGenProvider,
-                value,
-              );
-            }}
-            isDisabled={!editorContext?.persistSettings?.imageGenProvider}
-            isReadOnly={editorContext?.persistSettings?.isUsePassword}
-          />
-        </Tooltip>
-      </div>
-      <Divider />
-      <div>
-        <p className="text-medium pb-2 font-bold">Video Gen</p>
-        <Select
-          items={Object.values(videoGenProviderOptions)}
-          disabledKeys={Object.values(videoGenProviderOptions)
-            .filter((provider) => !provider.isSupported)
-            .map((provider) => provider.provider)}
-          label="Provider"
-          placeholder="Select a provider"
-          onChange={(e) => {
-            editorContext?.setPersistSettings((prev) => {
-              return {
-                ...prev,
-                videoGenProvider: e.target.value,
-                videoGenModel: undefined,
-              };
-            });
-          }}
-          isRequired
-          selectedKeys={
-            editorContext?.persistSettings?.videoGenProvider
-              ? [editorContext?.persistSettings?.videoGenProvider]
-              : []
-          }
-        >
-          {(providerOption) => (
-            <SelectItem key={providerOption.provider}>
-              {providerOption.provider}
-            </SelectItem>
-          )}
-        </Select>
-        <Select
-          isDisabled={!editorContext?.persistSettings?.videoGenProvider}
-          items={
-            Object.values(videoGenProviderOptions).find(
-              (provider) =>
-                provider.provider ===
-                editorContext?.persistSettings?.videoGenProvider,
-            )?.models ?? []
-          }
-          disabledKeys={
-            Object.values(videoGenProviderOptions)
-              .find(
-                (provider) =>
-                  provider.provider ===
-                  editorContext?.persistSettings?.videoGenProvider,
-              )
-              ?.models.filter((model) => !model.isSupported)
-              .map((model) => model.model) ?? []
-          }
-          label="Model"
-          placeholder="Select a model"
-          isRequired
-          onChange={(e) => {
-            editorContext?.setPersistSettings((prev) => {
-              return {
-                ...prev,
-                videoGenModel: e.target.value,
-              };
-            });
-          }}
-          selectedKeys={
-            editorContext?.persistSettings?.videoGenModel
-              ? [editorContext?.persistSettings?.videoGenModel]
-              : []
-          }
-        >
-          {(modelOption) => (
-            <SelectItem key={modelOption.model}>{modelOption.model}</SelectItem>
-          )}
-        </Select>
-        <Tooltip
-          content={
-            <p>
-              Please disable password to edit API Key. <br />
-              You can enable password again after editing API keys.
-            </p>
-          }
-          isDisabled={!editorContext?.persistSettings?.isUsePassword}
-        >
-          <Input
-            label="API Key"
-            size="md"
-            isRequired
-            value={
-              editorContext?.persistSettings?.isPasswordSet
-                ? "API key is encrypted"
-                : (getAPIKey(
+                    value,
+                  );
+                }}
+                isDisabled={!editorContext?.persistSettings?.imageGenProvider}
+                isReadOnly={editorContext?.persistSettings?.isUsePassword}
+              />
+            </Tooltip>
+          </div>
+
+          <div>
+            <p className="text-medium pb-2 font-bold">Video Gen</p>
+            <Select
+              items={Object.values(videoGenProviderOptions)}
+              disabledKeys={Object.values(videoGenProviderOptions)
+                .filter((provider) => !provider.isSupported)
+                .map((provider) => provider.provider)}
+              label="Provider"
+              placeholder="Select a provider"
+              onChange={(e) => {
+                editorContext?.setPersistSettings((prev) => {
+                  return {
+                    ...prev,
+                    videoGenProvider: e.target.value,
+                    videoGenModel: undefined,
+                  };
+                });
+              }}
+              isRequired
+              selectedKeys={
+                editorContext?.persistSettings?.videoGenProvider
+                  ? [editorContext?.persistSettings?.videoGenProvider]
+                  : []
+              }
+            >
+              {(providerOption) => (
+                <SelectItem key={providerOption.provider}>
+                  {providerOption.provider}
+                </SelectItem>
+              )}
+            </Select>
+            <Select
+              isDisabled={!editorContext?.persistSettings?.videoGenProvider}
+              items={
+                Object.values(videoGenProviderOptions).find(
+                  (provider) =>
+                    provider.provider ===
+                    editorContext?.persistSettings?.videoGenProvider,
+                )?.models ?? []
+              }
+              disabledKeys={
+                Object.values(videoGenProviderOptions)
+                  .find(
+                    (provider) =>
+                      provider.provider ===
+                      editorContext?.persistSettings?.videoGenProvider,
+                  )
+                  ?.models.filter((model) => !model.isSupported)
+                  .map((model) => model.model) ?? []
+              }
+              label="Model"
+              placeholder="Select a model"
+              isRequired
+              onChange={(e) => {
+                editorContext?.setPersistSettings((prev) => {
+                  return {
+                    ...prev,
+                    videoGenModel: e.target.value,
+                  };
+                });
+              }}
+              selectedKeys={
+                editorContext?.persistSettings?.videoGenModel
+                  ? [editorContext?.persistSettings?.videoGenModel]
+                  : []
+              }
+            >
+              {(modelOption) => (
+                <SelectItem key={modelOption.model}>
+                  {modelOption.model}
+                </SelectItem>
+              )}
+            </Select>
+            <Tooltip
+              content={
+                <p>
+                  Please disable password to edit API Key. <br />
+                  You can enable password again after editing API keys.
+                </p>
+              }
+              isDisabled={!editorContext?.persistSettings?.isUsePassword}
+            >
+              <Input
+                label="API Key"
+                size="md"
+                isRequired
+                value={
+                  editorContext?.persistSettings?.isPasswordSet
+                    ? "API key is encrypted"
+                    : (getAPIKey(
+                        editorContext,
+                        editorContext?.persistSettings?.videoGenProvider,
+                      ) ?? "")
+                }
+                onValueChange={(value) => {
+                  setAPIKey(
                     editorContext,
                     editorContext?.persistSettings?.videoGenProvider,
-                  ) ?? "")
-            }
-            onValueChange={(value) => {
-              setAPIKey(
-                editorContext,
-                editorContext?.persistSettings?.videoGenProvider,
-                value,
-              );
-            }}
-            isDisabled={!editorContext?.persistSettings?.videoGenProvider}
-            isReadOnly={editorContext?.persistSettings?.isUsePassword}
-          />
-        </Tooltip>
-      </div>
+                    value,
+                  );
+                }}
+                isDisabled={!editorContext?.persistSettings?.videoGenProvider}
+                isReadOnly={editorContext?.persistSettings?.isUsePassword}
+              />
+            </Tooltip>
+          </div>
+        </div>
+      )}
     </>
   );
 }
@@ -951,29 +1034,5 @@ function ExtensionDefinedSettings({
         />
       </div>
     </div>
-  );
-}
-
-export default function AppSettingsModal({
-  isOpen,
-  setIsOpen,
-}: {
-  isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
-}) {
-  const editorContext = useContext(EditorContext);
-
-  return (
-    <ModalWrapper isOpen={isOpen} setIsOpen={setIsOpen} title={"App Settings"}>
-      <div className="flex w-full flex-col gap-2">
-        <AISettings editorContext={editorContext} />
-        <Divider />
-        <SecuritySettings editorContext={editorContext} setIsOpen={setIsOpen} />
-        <Divider />
-        <DevExtensionSettings editorContext={editorContext} />
-        <Divider />
-        <ExtensionDefinedSettings editorContext={editorContext} />
-      </div>
-    </ModalWrapper>
   );
 }
