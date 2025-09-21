@@ -1,40 +1,29 @@
-import { useRef, useState } from "react";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useContext } from "react";
 
 export default function useRecorder() {
-  // Recording refs
-  const inStreamRef = useRef<MediaStream | null>(null);
-  const [audioData, setAudioData] = useState<Blob | null>(null);
-  const recorderRef = useRef<MediaRecorder | null>(null);
+  const editorContext = useContext(EditorContext);
 
-  async function getRecorder() {
-    const mediaStream = await navigator.mediaDevices.getUserMedia({
-      audio: true,
-    });
-    const mediaRecorder = new MediaRecorder(mediaStream);
-    mediaRecorder.ondataavailable = (e) => {
-      const blob = new Blob([e.data], { type: "audio/wav" });
-      setAudioData(blob);
-    };
-    mediaRecorder.onstop = () => {
-      console.log("Recording stopped");
-      inStreamRef.current?.getTracks().forEach((track) => track.stop());
-    };
+  const stream = editorContext?.editorStates.inputAudioStream;
+  const isRecording = editorContext?.editorStates.isRecording ?? false;
 
-    inStreamRef.current = mediaStream;
-    recorderRef.current = mediaRecorder;
+  function startRecording() {
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isRecording: true,
+    }));
   }
 
-  async function startRecording() {
-    setAudioData(null);
-    await getRecorder();
-    console.log("Recording started:", recorderRef.current);
-    recorderRef.current?.start();
+  function record(): ReadableStream | undefined {
+    if (isRecording) {
+      throw new Error("Already recording");
+    }
+    startRecording();
+    return stream;
   }
 
-  async function stopRecording() {
-    // Close the recorder
-    recorderRef.current?.stop();
-  }
-
-  return { startRecording, stopRecording, audioData };
+  return {
+    isRecording,
+    record,
+  };
 }

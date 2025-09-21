@@ -12,13 +12,52 @@ import { getLLMModel } from "../modalities/llm/llm";
 import toast from "react-hot-toast";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { fetchAPI } from "../pulse-editor-website/backend";
 
 export function getAgentLLMConfig(agent: Agent, methodName: string) {
   const method = agent.availableMethods.find((m) => m.name === methodName);
   return method?.LLMConfig ? method.LLMConfig : agent.LLMConfig;
 }
 
-export async function runAgentMethod(
+export async function runAgentMethodCloud(
+  llmConfig: LLMConfig,
+  agent: Agent,
+  methodName: string,
+  args: Record<string, any>,
+): Promise<any> {
+  const method = agent.availableMethods.find((m) => m.name === methodName);
+  if (!method) {
+    throw new Error(`Method ${methodName} not found in agent ${agent.name}.`);
+  }
+
+  const prompt = await getPrompt(agent, method, args);
+
+  console.log("Prompt: ", prompt);
+
+  const response = await fetchAPI("/api/inference/platform-assistant", {
+    method: "POST",
+    body: JSON.stringify({
+      prompt: prompt,
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(error);
+  }
+
+  const llmResult = await response.text();
+
+  console.log("LLM result: ", llmResult);
+
+  const returns = await extractReturns(llmResult);
+
+  console.log("Agent result: ", returns);
+
+  return returns;
+}
+
+export async function runAgentMethodLocal(
   apiKey: string,
   llmConfig: LLMConfig,
   agent: Agent,
@@ -140,8 +179,7 @@ function getVariableTypePrompt(type: TypedVariableType): string {
 `;
 
     return typePrompt;
-  }
-  else if (type === "string") { 
+  } else if (type === "string") {
     return "A string value.";
   }
 

@@ -48,7 +48,6 @@ Pulse Editor extensions and its features.`,
       name: "determineTask",
       parameters: {
         userMessage: {
-          name: "userMessage",
           type: "string",
           description:
             "The user's input or question about the platform or its features.",
@@ -57,7 +56,6 @@ Pulse Editor extensions and its features.`,
       prompt: "(WIP)",
       returns: {
         task: {
-          name: "task",
           type: "string",
           description:
             "The task that the user is trying to accomplish based on their input.",
@@ -69,45 +67,43 @@ Pulse Editor extensions and its features.`,
       name: "useExtensionCommands",
       parameters: {
         chatHistory: {
-          name: "chatHistory",
           type: "string",
           description: "The chat history between the user and you.",
         },
         userMessage: {
-          name: "userMessage",
           type: "string",
           description: "The user's message.",
         },
         activeTabView: {
-          name: "activeTabView",
           type: [
             {
               type: {
-                name: "type",
                 type: "string",
                 description:
                   "The type of the view. This can be 'App' or 'Canvas'",
               },
               config: {
-                name: "config",
                 type: {
+                  viewId: {
+                    type: "string",
+                    description: "The ID of an opened view visible to user.",
+                  },
+                  // AppViewConfig
                   app: {
                     type: "string",
-                    name: "app",
                     description:
                       "The ID of the app that the view is using. This field exists if the view type is 'App'.",
                     optional: true,
                   },
                   fileUri: {
                     type: "string",
-                    name: "fileUri",
                     description:
                       "The URI of the file that the app is opened with. This field exists if the view type is 'App'.",
                     optional: true,
                   },
+                  // CanvasViewConfig
                   workflow: {
                     type: "any",
-                    name: "workflow",
                     description: `The workflow that the canvas is using. This contains nodes and edges information required for a xyflow/ReactFlow graph. \
 This field exists if the view type is 'Canvas'.`,
                     optional: true,
@@ -115,22 +111,21 @@ This field exists if the view type is 'Canvas'.`,
                   appConfigs: {
                     type: [
                       {
+                        // AppViewConfig
                         app: {
                           type: "string",
-                          name: "app",
                           description:
-                            "The ID of the app that the view is using.",
+                            "The ID of the app that the view is using. This field exists if the view type is 'App'.",
+                          optional: true,
                         },
                         fileUri: {
                           type: "string",
-                          name: "fileUri",
                           description:
-                            "The URI of the file that the app is opened with. This field is optional.",
+                            "The URI of the file that the app is opened with. This field exists if the view type is 'App'.",
                           optional: true,
                         },
                       },
                     ],
-                    name: "appConfigs",
                     description: `The list of app configurations that are opened in the canvas. \
 This field exists if the view type is 'Canvas'.`,
                     optional: true,
@@ -140,118 +135,36 @@ This field exists if the view type is 'Canvas'.`,
 This is an object that contains different fields based on the view type.`,
               },
             },
-            // {
-            //   viewId: {
-            //     name: "viewId",
-            //     type: "string",
-            //     description: "The ID of an opened view visible to user.",
-            //   },
-            //   isFocused: {
-            //     name: "isFocused",
-            //     type: "boolean",
-            //     description:
-            //       "Whether the view is currently focused by cursor or not.",
-            //   },
-            //   file: {
-            //     name: "file",
-            //     type: {
-            //       content: {
-            //         name: "content",
-            //         type: "string",
-            //         description: "The content of the file in this view.",
-            //       },
-            //       path: {
-            //         name: "path",
-            //         type: "string",
-            //         description: "The path of the file in this view.",
-            //       },
-            //       selection: {
-            //         name: "selection",
-            //         type: [
-            //           {
-            //             lineStart: {
-            //               name: "lineStart",
-            //               type: "number",
-            //               description:
-            //                 "The line number of the start of the selection.",
-            //             },
-            //             lineEnd: {
-            //               name: "lineEnd",
-            //               type: "number",
-            //               description:
-            //                 "The line number of the end of the selection.",
-            //             },
-            //             text: {
-            //               name: "text",
-            //               type: "string",
-            //               description:
-            //                 "The text of the selection in this view.",
-            //             },
-            //           },
-            //         ],
-            //         description:
-            //           "The selection(s) of the file in this view. This is optional.",
-            //       },
-            //     },
-            //     description:
-            //       "The file that the view is currently opened on. This is optional. Undefined if the view does not open a file.",
-            //     optional: true,
-            //   },
-            //   extensionConfig: {
-            //     name: "extensionConfig",
-            //     type: {
-            //       id: {
-            //         name: "id",
-            //         type: "string",
-            //         description: "The module ID of the extension.",
-            //       },
-            //     },
-            //     description:
-            //       "The configuration of the extension/module that the view belongs to.",
-            //   },
-            // },
           ],
           description: `The list of opened views that are visible to the user. \
 You will need to use these as the context to suggest the user to interact \
 with Pulse Editor and extension commands.`,
         },
-        commands: {
-          name: "commands",
+        availableCommands: {
           type: [
             {
-              cmd: {
-                name: "cmd",
+              cmdName: {
                 type: "string",
                 description:
                   "The name of the command that the user is trying to use from the extension.",
               },
               parameters: {
-                name: "parameters",
                 type: [
                   {
                     name: {
-                      name: "name",
                       type: "string",
                       description:
                         "The name of the parameter needed to run the command from the extension.",
                     },
                     type: {
-                      name: "type",
                       type: "string",
                       description:
                         "The type of the parameter needed to run the command from the extension.",
                     },
                     description: {
-                      name: "description",
                       type: "string",
                       description:
                         "The description of the parameter needed to run the command from the extension.",
-                    },
-                    moduleId: {
-                      name: "moduleId",
-                      type: "string",
-                      description: `The ID of the extension/module that the command belongs to. \
-This command can only be run on extension with this module ID.`,
                     },
                   },
                 ],
@@ -264,27 +177,22 @@ This command can only be run on extension with this module ID.`,
             "The commands that the user is trying to use from the extension.",
         },
         projectDirTree: {
-          name: "projectDirTree",
           type: [
             {
               name: {
-                name: "name",
                 type: "string",
                 description: "File system object's name.",
               },
               uri: {
-                name: "uri",
                 type: "string",
                 description: "File system object's uri.",
               },
               isFolder: {
-                name: "isFolder",
                 type: "boolean",
                 description:
                   "Whether the file system object is a folder or not.",
               },
               subDirItems: {
-                name: "subDirItems",
                 type: "any",
                 description:
                   "The sub-directory items of the file system object. ",
@@ -324,28 +232,23 @@ Project directory tree:
 `,
       returns: {
         language: {
-          name: "language",
           type: "string",
           description: "The language of user's message.",
         },
         suggestedCmd: {
-          name: "suggestedCmd",
           type: "string",
           description:
             "The command that you suggest the user to try for their needs.",
         },
         suggestedArgs: {
-          name: "suggestedArgs",
           type: [
             {
               name: {
-                name: "name",
                 type: "string",
                 description:
                   "The name of the argument needed to run the command from the extension.",
               },
               value: {
-                name: "value",
                 type: "string",
                 description:
                   "The value that you suggest for the user to run the command from the extension. Add any relevant additional knowledge if possible.",
@@ -356,7 +259,6 @@ Project directory tree:
 This must match the command's parameters provided earlier.`,
         },
         suggestedViewId: {
-          name: "suggestedViewId",
           type: "string",
           description:
             "The ID of the view (usually a uuid) that you suggest the user to run the command on. \
@@ -366,7 +268,6 @@ If a command and an opened view has the same extension/module ID (named ID), you
 opened view's ID (uuid) as the suggested view ID.",
         },
         response: {
-          name: "response",
           type: "string",
           description: `The platform-level assistant agent's response to the user's input or question. \
 Explain in a friendly way to the user that you will call the command for them, and explain the reasoning behind \
@@ -382,25 +283,20 @@ explanation. This field needs to be in the same language as the user's message.`
       name: "suggestExtensions",
       parameters: {
         chatHistory: {
-          name: "chatHistory",
           type: "string",
           description: "The chat history between the user and you.",
         },
         userMessage: {
-          name: "userMessage",
           type: "string",
           description: "The user's message.",
         },
         relevantExtensions: {
-          name: "relevantExtensions",
           type: {
             name: {
-              name: "name",
               type: "string",
               description: "The name of the extension",
             },
             description: {
-              name: "description",
               type: "string",
               description: "The description of the extension",
             },
@@ -428,16 +324,13 @@ Relevant extensions:
 `,
       returns: {
         extensionSuggestions: {
-          name: "extensionSuggestions",
           type: [
             {
               name: {
-                name: "name",
                 type: "string",
                 description: "The name of the extension",
               },
               description: {
-                name: "description",
                 type: "string",
                 description: "The description of the extension",
               },
@@ -446,7 +339,6 @@ Relevant extensions:
           description: `The extension suggestions.`,
         },
         response: {
-          name: "response",
           type: "string",
           description:
             "The platform-level assistant agent's response to the user's input or question.",
@@ -458,24 +350,20 @@ Relevant extensions:
       name: "analyzeCommandResult",
       parameters: {
         userMessage: {
-          name: "userMessage",
           type: "string",
           description: "The user's message.",
         },
         suggestedCmd: {
-          name: "suggestedCmd",
           type: "string",
           description:
             "The command that you suggested earlier for the user to try for their needs.",
         },
         previousSuggestion: {
-          name: "previousSuggestion",
           type: "string",
           description:
             "The previous suggestion you made to the user before running the command.",
         },
         commandResult: {
-          name: "commandResult",
           type: "string",
           description: "The command returns this result.",
         },
@@ -503,12 +391,10 @@ Command result:
 `,
       returns: {
         language: {
-          name: "language",
           type: "string",
           description: "The language of user's message.",
         },
         analysis: {
-          name: "analysis",
           type: "string",
           description:
             "The analysis of the command result and its relevance to the user's needs. \

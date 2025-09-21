@@ -29,7 +29,7 @@ export default function FileMenuDropDown() {
     defaultMenuActions.forEach((action) => {
       registerMenuAction(action);
     });
-  }, [registerMenuAction]);
+  }, []);
 
   return <NavMenuDropdown category="File" menuActions={menuActions} />;
 }

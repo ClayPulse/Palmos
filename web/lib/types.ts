@@ -33,7 +33,6 @@ export type EditorStates = {
   /* Voice agent */
   isLoadingRecorder: boolean;
   // Is the recorder on.
-  // The recorder might be on while the agent is thinking or speaking
   isRecording: boolean;
   // Is the agent listening to the user input
   isListening: boolean;
@@ -44,7 +43,7 @@ export type EditorStates = {
   isSpeaking: boolean;
   // Audio input stream
   // This is consumed when recording is processed
-  inputAudioStream: ArrayBuffer | undefined;
+  inputAudioStream: ReadableStream | undefined;
   // // Audio output stream
   // // This is consumed when audio is played
   // outputAudioStream: ReadableStream<Uint8Array> | undefined;

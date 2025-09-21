@@ -9,11 +9,13 @@ import { EditorContext } from "../providers/editor-context-provider";
 import AgentConfigModal from "../modals/agent-config-modal";
 import ExtensionMarketplaceModal from "../modals/extension-marketplace-modal";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
+import useRecorder from "@/lib/hooks/use-recorder";
 
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
 
-  const { runAssistant } = usePlatformAIAssistant();
+  const { chatWithAssistant: runAssistant } = usePlatformAIAssistant();
+  const { isRecording, record } = useRecorder();
 
   const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
   const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
@@ -106,7 +108,10 @@ export default function EditorToolbar() {
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
-                    runAssistant(true);
+                    if (!isRecording) {
+                      const stream = record();
+                      runAssistant(stream, true);
+                    }
                   }}
                   variant={
                     editorContext?.editorStates?.isRecording ? "solid" : "light"

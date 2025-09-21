@@ -171,7 +171,6 @@ export type AgentMethod = {
 
 export type TypedVariable = {
   type: TypedVariableType;
-  name: string;
   // Describe the variable for LLM to better understand it
   description: string;
   optional?: boolean;

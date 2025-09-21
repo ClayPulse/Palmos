@@ -10,6 +10,7 @@ import InterModuleCommunicationProvider from "@/components/providers/imc-provide
 import Nav from "@/components/interface/navigation/nav";
 import { Suspense } from "react";
 import { Analytics } from "@vercel/analytics/next";
+import PlatformAssistantProvider from "@/components/providers/platform-assistant-provider";
 
 export const metadata: Metadata = {
   title: "Pulse Editor",
@@ -32,7 +33,11 @@ export default function RootLayout({
                 <InterModuleCommunicationProvider>
                   <RemoteModuleProvider isPreventingCSS={true}>
                     <Toaster />
-                    <Nav>{children}</Nav>
+                    <Nav>
+                      <PlatformAssistantProvider>
+                        {children}
+                      </PlatformAssistantProvider>
+                    </Nav>
                   </RemoteModuleProvider>
                 </InterModuleCommunicationProvider>
               </EditorContextProvider>

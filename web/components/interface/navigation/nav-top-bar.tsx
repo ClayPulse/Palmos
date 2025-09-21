@@ -51,6 +51,7 @@ export default function NavTopBar({
   useEffect(() => {
     async function runAction(action: MenuAction, event: KeyboardEvent) {
       if (action.shortcut) {
+        // Parse shortcut like "Ctrl+Shift+X"
         const keys = action.shortcut
           .toLowerCase()
           .split("+")
@@ -74,10 +75,6 @@ export default function NavTopBar({
     }
 
     async function handleKeyDown(event: KeyboardEvent) {
-      if (event.target && (event.target as HTMLElement).tagName === "INPUT") {
-        return; // Ignore key presses when focused on input fields
-      }
-
       for (const action of menuActions ?? []) {
         await runAction(action, event);
       }

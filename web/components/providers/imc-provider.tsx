@@ -14,7 +14,7 @@ import {
 import { createContext, useContext, useEffect, useState } from "react";
 import { EditorContext } from "./editor-context-provider";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
-import { runAgentMethod } from "@/lib/agent/agent-runner";
+import { runAgentMethodLocal } from "@/lib/agent/agent-runner";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
 import { getTTSModel } from "@/lib/modalities/tts/tts";
 import { getSTTModel } from "@/lib/modalities/stt/stt";
@@ -139,7 +139,7 @@ export default function InterModuleCommunicationProvider({
             throw new Error(`No API key found for provider ${provider}.`);
           }
 
-          const result = await runAgentMethod(
+          const result = await runAgentMethodLocal(
             apiKey,
             config,
             agent,

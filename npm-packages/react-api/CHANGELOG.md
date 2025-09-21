@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.30
+
+### Patch Changes
+
+- Update agent object format
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.30
+
 ## 0.1.1-alpha.29
 
 ### Patch Changes

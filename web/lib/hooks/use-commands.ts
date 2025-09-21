@@ -37,7 +37,6 @@ const editorCommands: CommandDefinition[] = [
       description: "Open a file in a new tab",
       parameters: {
         filePath: {
-          name: "File Path",
           type: "string",
           description: "Path to the file to open",
         },

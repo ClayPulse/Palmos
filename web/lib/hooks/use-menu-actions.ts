@@ -7,7 +7,7 @@ export function useMenuActions(type?: string) {
 
   const menuActions = editorContext?.editorStates.menuActions;
 
-  async function registerMenuAction(action: MenuAction, overwrite = false) {
+  function registerMenuAction(action: MenuAction, overwrite = false) {
     if (!editorContext) {
       return;
     }
@@ -37,7 +37,7 @@ export function useMenuActions(type?: string) {
     });
   }
 
-  async function unregisterMenuAction(action: MenuAction) {
+  function unregisterMenuAction(action: MenuAction) {
     if (!editorContext) {
       return;
     }
