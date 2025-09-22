@@ -54,9 +54,7 @@ export default function SharingModal({
       ? `/api/extension/get-share-info?name=${app}`
       : null,
     async (url: URL) => {
-      const res = await fetchAPI(url, {
-        credentials: "include",
-      });
+      const res = await fetchAPI(url);
 
       if (!res.ok) {
         toast.error("Failed to fetch extension share info");
@@ -80,7 +78,6 @@ export default function SharingModal({
         visibility,
         name: app,
       }),
-      credentials: "include",
     });
 
     mutate();

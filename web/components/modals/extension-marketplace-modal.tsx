@@ -89,11 +89,13 @@ export default function ExtensionMarketplaceModal({
       <div className="h-full w-full space-y-2 overflow-y-auto px-2">
         <div className="flex justify-center">
           {isOpen && (
-            <Tabs
-              tabItems={extensionCategories}
-              selectedItem={selectedCategory}
-              setSelectedItem={setSelectedCategory}
-            />
+            <div>
+              <Tabs
+                tabItems={extensionCategories}
+                selectedItem={selectedCategory}
+                setSelectedItem={setSelectedCategory}
+              />
+            </div>
           )}
         </div>
 

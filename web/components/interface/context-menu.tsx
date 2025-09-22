@@ -1,5 +1,6 @@
 "use client";
 
+import { isMobile } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState } from "@/lib/types";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { JSX } from "react";
@@ -13,18 +14,18 @@ export default function ContextMenu({
   state: ContextMenuState;
   setState: (state: ContextMenuState) => void;
 }) {
-
   return (
     <div
       className="absolute"
       style={{
-        top: state.y,
-        left: state.x,
+        // Add slight offset for better focus on touch screens
+        top: isMobile() ? state.y - 8 : state.y,
+        left: isMobile() ? state.x - 8 : state.x,
       }}
     >
       <Popover
         onClose={() => {
-          if (process.env.NODE_ENV === 'development') {
+          if (process.env.NODE_ENV === "development") {
             console.log("Popover closed");
           }
           setState({ isOpen: false, x: 0, y: 0 });

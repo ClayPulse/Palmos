@@ -1,5 +1,6 @@
 "use client";
 
+import { getRemote } from "@/lib/module-federation/remote";
 import { loadRemote, registerRemotes } from "@module-federation/runtime";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -38,16 +39,9 @@ export default function ExtensionPage({}) {
     window.viewId = viewId;
 
     if (!isRegistered) {
-      registerRemotes([
-        {
-          name: moduleId,
-          entry: `${remoteOrigin}/${moduleId}/${moduleVersion}/client/mf-manifest.json`,
-        },
-        {
-          name: moduleId,
-          entry: `${remoteOrigin}/${moduleId}/${moduleVersion}/server/mf-manifest.json`,
-        },
-      ]);
+      registerRemotes(
+        getRemote(remoteOrigin, moduleId, moduleVersion),
+      );
       setIsRegistered(true);
     }
 

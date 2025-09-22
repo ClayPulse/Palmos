@@ -57,7 +57,7 @@ export class InterModuleCommunication {
         type !== IMCMessageTypeEnum.SignalGetWindowId
       ) {
         console.warn(
-          `Duplicate message received with ID: ${messageId}. Ignoring this message. Message: ${JSON.stringify(
+          `Duplicate message received with message ID: ${messageId}. Ignoring this message. Message: ${JSON.stringify(
             event.data
           )}`
         );
@@ -72,7 +72,7 @@ export class InterModuleCommunication {
       }
 
       const message = event.data;
-      if (process.env.NODE_ENV === "development") {
+      if (process.env.NODE_ENV === "development" && message.from !== undefined) {
         console.log(
           `Module ${this.thisWindowId} received message from module ${
             message.from
@@ -208,7 +208,7 @@ export class InterModuleCommunication {
       IMCMessageTypeEnum.SignalGetWindowId,
       async (senderWindow: Window, message: IMCMessage) => {
         console.log(
-          "Received window ID request. Sending window ID to other window: "
+          "Received window ID request. Sending current window ID to other window: "
         );
         const id = this.thisWindowId;
         if (!id) {

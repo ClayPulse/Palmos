@@ -1,10 +1,10 @@
 import { Dispatch, RefObject, SetStateAction } from "react";
 import {
   Agent,
-  ExtensionCommandInfo,
+  CommandInfo,
   ExtensionConfig,
   PolyIMC,
-  ViewModel,
+  ViewModeEnum,
 } from "@pulse-editor/shared-utils";
 import { BaseSTT } from "./modalities/stt/stt";
 import { BaseLLM } from "./modalities/llm/llm";
@@ -33,7 +33,6 @@ export type EditorStates = {
   /* Voice agent */
   isLoadingRecorder: boolean;
   // Is the recorder on.
-  // The recorder might be on while the agent is thinking or speaking
   isRecording: boolean;
   // Is the agent listening to the user input
   isListening: boolean;
@@ -44,7 +43,7 @@ export type EditorStates = {
   isSpeaking: boolean;
   // Audio input stream
   // This is consumed when recording is processed
-  inputAudioStream: ArrayBuffer | undefined;
+  inputAudioStream: ReadableStream | undefined;
   // // Audio output stream
   // // This is consumed when audio is played
   // outputAudioStream: ReadableStream<Uint8Array> | undefined;
@@ -63,25 +62,31 @@ export type EditorStates = {
   /* Password to access the credentials */
   password?: string;
 
-  openedViewModels: ViewModel[];
-
-  // Keep track of unique ids of each view
-  // to make sure that the view is not duplicated
-  // and not interfered with each other
-  viewIds: string[];
-
   aiModels?: AIModels;
 
   // The currently selected workspace
   currentWorkspace?: RemoteWorkspace;
 
-  isUsingOfflineMode?: boolean;
+  isSigningIn?: boolean;
 
   /* Modals */
   isAppInfoModalOpen?: boolean;
   appInfoModalContent?: AppInfoModalContent;
+
+  menuActions?: MenuAction[];
+
+  tabViews: TabView[];
+  tabIndex: number;
+
+  // Command viewer
+  isCommandViewerOpen?: boolean;
 };
 
+/**
+ *  Persistent Settings of Editor.
+ *  These fields need to be serializable to be stored
+ *  in local storage or managed cloud storage.
+ */
 export type PersistentSettings = {
   sttProvider?: string;
   sttModel?: string;
@@ -105,12 +110,12 @@ export type PersistentSettings = {
 
   projectHomePath?: string;
 
+  // Note: right now extension == app -- this might change in the future for more clarity
   extensions?: Extension[];
   defaultFileTypeExtensionMap?: { [key: string]: Extension };
   isExtensionDevMode?: boolean;
 
   extensionAgents?: ExtensionAgent[];
-  extensionCommands?: PEExtensionCommandInfo[];
 
   userAgents?: UserAgent[];
 
@@ -119,6 +124,8 @@ export type PersistentSettings = {
   };
 
   mobileHost?: string;
+
+  isUseManagedCloud?: boolean;
 };
 // #endregion
 
@@ -184,6 +191,42 @@ export type AppInfoModalContent = {
   author?: string;
   license?: string;
 };
+
+export type MenuAction = {
+  name: string;
+  menuCategory: "file" | "edit" | "view";
+  description?: string;
+  shortcut?: string;
+  actionFunc: () => Promise<void>;
+  icon?: string;
+};
+
+export type AppViewConfig = {
+  viewId: string;
+  app: string;
+  inviteCode?: string;
+  // An app can be opened via a file.
+  // e.g. a PDF viewer app can be opened with a PDF file;
+  //      a game engine app can be opened with a game project file.
+  fileUri?: string;
+  // These are commands exposed by the app after the app is initialized.
+  //
+  // Editor only stores command info but do not store or run
+  // the actual command handlers.
+  dynamicCommands?: CommandInfo[];
+};
+
+export type CanvasViewConfig = {
+  viewId: string;
+  workflow?: Workflow;
+  appConfigs?: AppViewConfig[];
+};
+
+export type TabView = {
+  type: ViewModeEnum;
+  config: AppViewConfig | CanvasViewConfig;
+};
+
 // #endregion
 
 // #region AI Settings
@@ -244,6 +287,7 @@ export enum PlatformEnum {
   Electron = "electron",
   VSCode = "vscode",
   Web = "web",
+  WebMobile = "web-mobile",
 }
 // #endregion
 
@@ -252,16 +296,23 @@ export type Extension = {
   config: ExtensionConfig;
   isEnabled: boolean;
   remoteOrigin: string;
+
+  // These are commands that can be used without initializing an app.
+  // These commands are always available once the extension is loaded and enabled.
+  // When these commands are run, an instance of the app is created.
+  //
+  // Editor only stores command info but do not store or run
+  // the actual command handlers.
+  staticCommands?: CommandInfo[];
 };
 
-export type PEExtensionCommandInfo = ExtensionCommandInfo & {
-  moduleId: string;
-};
 // #endregion
 
 // #region IMC Context
 export type IMCContextType = {
   polyIMC: PolyIMC | undefined;
+  resolveWhenViewInitialized: (viewId: string) => Promise<void>;
+  markIMCInitialized: (viewId: string) => void;
 };
 
 // #endregion
@@ -297,4 +348,57 @@ export type ExtensionMeta = {
   };
   visibility: string;
 };
+// #endregion
+
+// #region Workflow
+export type Workflow = {
+  nodes: any;
+  edges: any;
+};
+
+// #endregion
+
+// #region Command
+export type Command = {
+  type: "editor" | "static" | "dynamic";
+  commandInfo: CommandInfo;
+  viewId?: string;
+};
+// #endregion
+
+// #region Pulse Editor Cloud
+export type Subscription = {
+  plan: string;
+  status: string;
+  current_period_end: number;
+};
+
+export type CreditBalance = {
+  balance: number;
+};
+// #endregion
+
+// #region Platform AI Assistant
+export type PlatformAssistantHistory = {
+  role: "user" | "assistant";
+  message: UserMessage | PlatformAssistantMessage;
+};
+
+export type UserMessage = {
+  content: {
+    text?: string;
+    audio?: ReadableStream | undefined;
+  };
+  meta?: any;
+};
+
+export type PlatformAssistantMessage = {
+  content: {
+    text?: string;
+    audio?: ReadableStream | undefined;
+  };
+  // Other data used to interact with the platform
+  meta?: any;
+};
+
 // #endregion

@@ -1,5 +1,5 @@
 import {
-  ExtensionCommandInfo,
+  CommandInfo,
   IMCMessage,
   IMCMessageTypeEnum,
   ReceiverHandler,
@@ -10,20 +10,20 @@ import { useEffect, useState } from "react";
 /**
  * Register an extension command to listen to IMC messages from the core,
  * and pass to the extension to handle.
+ *
+ * @param commandInfo Command information to register.
+ * @param callbackHandler Callback handler function to handle the command.
+ *
  */
-export default function useExtCommand(
-  commandInfo: ExtensionCommandInfo,
-  initialHandler?: (args: any) => Promise<string | void>
+export default function useCommand(
+  commandInfo: CommandInfo,
+  callbackHandler?: (args: any) => Promise<string | void>
 ) {
   const { isReady, imc } = useIMC(getReceiverHandlerMap());
 
   const [handler, setHandler] = useState<
-    ((args: any) => Promise<string | void>) | undefined
-  >(initialHandler);
-
-  useEffect(() => {
-    imc?.updateReceiverHandlerMap(getReceiverHandlerMap());
-  }, [handler, imc]);
+    ((args: any) => Promise<any>) | undefined
+  >(undefined);
 
   function getReceiverHandlerMap() {
     const receiverHandlerMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
@@ -81,17 +81,15 @@ export default function useExtCommand(
     return receiverHandlerMap;
   }
 
-  /**
-   *
-   * @param handler Function to handle the command. Return a string in the handler to let
-   * Pulse Editor assistant to read it out.
-   */
-  function updateHandler(handler: (args: any) => Promise<string | void>) {
-    setHandler(() => handler);
-  }
+  useEffect(() => {
+    imc?.updateReceiverHandlerMap(getReceiverHandlerMap());
+  }, [handler, imc]);
+
+  useEffect(() => {
+    setHandler(() => callbackHandler);
+  }, [callbackHandler]);
 
   return {
     isReady,
-    updateHandler,
   };
 }

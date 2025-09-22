@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 export default function useSpeech2Speech() {
   const editorContext = useContext(EditorContext);
 
-  const [isUsing, setIsUsing] = useState(false);
+  const [isRunning, setIsRunning] = useState(false);
 
   const [textProcessFunc, setTextProcessFunc] = useState<
     ((inputText: string) => Promise<string>) | undefined
@@ -27,7 +27,7 @@ export default function useSpeech2Speech() {
   const [ttsModel, setTtsModel] = useState<BaseTTS | undefined>(undefined);
 
   function initStates() {
-    setIsUsing(false);
+    setIsRunning(false);
     setTextProcessFunc(undefined);
     setTextProcessStreamFunc(undefined);
     setIsSTTDone(false);
@@ -40,7 +40,7 @@ export default function useSpeech2Speech() {
   // This always uses streaming STT, so we can process the audio as it comes in.
   useEffect(() => {
     async function processInputAudio() {
-      if (!isUsing) {
+      if (!isRunning) {
         return;
       }
       if (!sttModel) {
@@ -91,12 +91,12 @@ export default function useSpeech2Speech() {
       toast.error("Error processing input audio. Please try again.");
       stopSpeech2Speech();
     });
-  }, [editorContext?.editorStates.inputAudioStream, sttModel, isUsing]);
+  }, [editorContext?.editorStates.inputAudioStream, sttModel, isRunning]);
 
   // Process the transcript via a text processing function
   useEffect(() => {
     async function processTranscript() {
-      if (!isUsing) {
+      if (!isRunning) {
         return;
       } else if (!isSTTDone) {
         return;
@@ -142,13 +142,13 @@ export default function useSpeech2Speech() {
     textProcessStreamFunc,
     editorContext?.editorStates.isRecording,
     isSTTDone,
-    isUsing,
+    isRunning,
   ]);
 
   // Send processed text to TTS for final output audio
   useEffect(() => {
     async function processOutputAudio() {
-      if (!isUsing) {
+      if (!isRunning) {
         return;
       } else if (!ttsModel) {
         return;
@@ -182,7 +182,7 @@ export default function useSpeech2Speech() {
           ...prev,
           isSpeaking: false,
         }));
-        setIsUsing(false);
+        setIsRunning(false);
       };
     }
 
@@ -191,7 +191,7 @@ export default function useSpeech2Speech() {
       toast.error("Error processing output audio. Please try again.");
       stopSpeech2Speech();
     });
-  }, [processedText, isTextProcessingDone, isUsing]);
+  }, [processedText, isTextProcessingDone, isRunning]);
 
   // Load TTS model
   useEffect(() => {
@@ -278,7 +278,7 @@ export default function useSpeech2Speech() {
       isRecording: true,
     }));
 
-    setIsUsing(true);
+    setIsRunning(true);
   }
 
   function stopSpeech2Speech() {
@@ -299,7 +299,7 @@ export default function useSpeech2Speech() {
   }
 
   return {
-    isUsing,
+    isRunning,
     runSpeech2Speech,
     stopSpeech2Speech,
   };

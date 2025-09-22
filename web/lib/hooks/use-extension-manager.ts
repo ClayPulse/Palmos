@@ -3,6 +3,7 @@ import { Extension } from "../types";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { loadRemote, registerRemotes } from "@module-federation/runtime";
 import { ExtensionConfig } from "@pulse-editor/shared-utils";
+import { getRemote } from "../module-federation/remote";
 
 export default function useExtensionManager() {
   const editorContext = useContext(EditorContext);
@@ -16,18 +17,7 @@ export default function useExtensionManager() {
     // TODO: Prevent CSS from being injected from the remote
 
     // Register the frontend and backend from remote
-    registerRemotes([
-      {
-        name: id,
-        entry: `${remoteOrigin}/${id}/${version}/client/mf-manifest.json`,
-        version: version,
-      },
-      {
-        name: id,
-        entry: `${remoteOrigin}/${id}/${version}/server/mf-manifest.json`,
-        version: version,
-      },
-    ]);
+    registerRemotes(getRemote(remoteOrigin, id, version));
 
     // Types are not available since @module-federation/enhanced
     // cannot work in Nextjs App router. Hence types are not generated.

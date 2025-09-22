@@ -14,6 +14,7 @@ import {
   ViewModel,
 } from "@pulse-editor/shared-utils";
 import { useTheme } from "next-themes";
+import path from "path";
 import { useContext, useEffect, useRef, useState } from "react";
 
 /**
@@ -21,12 +22,12 @@ import { useContext, useEffect, useRef, useState } from "react";
  * It may not decide to reload the extension if resources can
  * be reused.
  */
-export default function ViewLoader({
+export default function SandboxAppLoader({
   viewModel,
-  setViewModel,
+  onInitialLoaded,
 }: {
   viewModel: ViewModel;
-  setViewModel: (model: ViewModel) => void;
+  onInitialLoaded?: () => void;
 }) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
@@ -64,56 +65,49 @@ export default function ViewLoader({
   // Reset the connection when the view ID changes
   useEffect(() => {
     function getExtension(model: ViewModel) {
-      // File view type extension needs to match the file type.
-      // For example:
-      //   .txt, .md, .js for code editor extension;
-      //   .png, .jpg for image viewer extension.
-      if (model.file) {
-        const path = model.file.path;
+      // // File view type extension needs to match the file type.
+      // // For example:
+      // //   .txt, .md, .js for code editor extension;
+      // //   .png, .jpg for image viewer extension.
+      // if (model.file) {
+      //   const path = model.file.path;
 
-        // Get the filename from the file path
-        const fileName = path.split("/").pop();
-        // Remove the first part of the filename -- remove front part of the filename
-        const fileType = fileName?.split(".").slice(1).join(".") ?? "";
+      //   // Get the filename from the file path
+      //   const fileName = path.split("/").pop();
+      //   // Remove the first part of the filename -- remove front part of the filename
+      //   const fileType = fileName?.split(".").slice(1).join(".") ?? "";
 
-        // Get the extension config from the file type
-        const map = editorContext?.persistSettings?.defaultFileTypeExtensionMap;
+      //   // Get the extension config from the file type
+      //   const map = editorContext?.persistSettings?.defaultFileTypeExtensionMap;
 
-        if (!map) {
-          throw new Error("Extension map not found. Something went wrong.");
-        }
+      //   if (!map) {
+      //     throw new Error("Extension map not found. Something went wrong.");
+      //   }
 
-        const ext = map[fileType];
-        if (!ext) {
-          setIsMissingExtension(true);
-        } else {
-          setIsMissingExtension(false);
-          setCurrentExtension(ext);
-          setViewModel({
-            ...viewModel,
-            extensionConfig: ext.config,
-          });
-        }
+      //   const ext = map[fileType];
+      //   if (!ext) {
+      //     setIsMissingExtension(true);
+      //   } else {
+      //     setIsMissingExtension(false);
+      //     setCurrentExtension(ext);
+      //     setViewModel({
+      //       ...viewModel,
+      //       extensionConfig: ext.config,
+      //     });
+      //   }
+      // }
+
+      const extId = model.extensionConfig?.id;
+
+      const ext = editorContext?.persistSettings?.extensions?.find(
+        (extension) => extension.config.id === extId,
+      );
+
+      if (!ext) {
+        throw new Error("Extension not found. Something went wrong.");
       }
-      // Console view type extension does not need a file object,
-      // hence can be loaded directly
-      else {
-        const extId = model.extensionConfig?.id;
 
-        const ext = editorContext?.persistSettings?.extensions?.find(
-          (extension) => extension.config.id === extId,
-        );
-
-        if (!ext) {
-          throw new Error("Extension not found. Something went wrong.");
-        }
-
-        setCurrentExtension(ext);
-        setViewModel({
-          ...viewModel,
-          extensionConfig: ext.config,
-        });
-      }
+      setCurrentExtension(ext);
     }
 
     if (currentViewId) {
@@ -190,6 +184,9 @@ export default function ViewLoader({
           isLoading: boolean;
         } = message.payload;
         setIsLoadingExtension((prev) => isLoading);
+        if (onInitialLoaded) {
+          onInitialLoaded();
+        }
       },
     );
 
@@ -204,8 +201,23 @@ export default function ViewLoader({
           abortSignal?: AbortSignal,
         ) => {
           if (message.payload) {
-            const payload: ViewModel = message.payload;
-            setViewModel(payload);
+            const { uri, content }: { uri: string; content: string } =
+              message.payload;
+
+            const projectPath =
+              editorContext?.persistSettings?.projectHomePath +
+              "/" +
+              editorContext?.editorStates.project;
+            const absoluteUri = path.join(projectPath, uri);
+
+            // Prevent writing to path outside the project path
+            if (!absoluteUri.startsWith(projectPath)) {
+              throw new Error(
+                "Cannot write to path outside the project directory.",
+              );
+            }
+            const newFile = new File([content], absoluteUri);
+            await platformApi?.writeFile(newFile, content);
           }
         },
       );
@@ -216,7 +228,21 @@ export default function ViewLoader({
           message: IMCMessage,
           abortSignal?: AbortSignal,
         ) => {
-          return model;
+          const { uri }: { uri: string } = message.payload;
+
+          const projectPath =
+            editorContext?.persistSettings?.projectHomePath +
+            "/" +
+            editorContext?.editorStates.project;
+          const absoluteUri = path.join(projectPath, uri);
+
+          // Prevent reading path outside the project path
+          if (!absoluteUri.startsWith(projectPath)) {
+            throw new Error("Cannot read file outside the project directory.");
+          }
+
+          const file = await platformApi?.readFile(absoluteUri);
+          return file;
         },
       );
     } else if (
@@ -269,7 +295,7 @@ export default function ViewLoader({
   return (
     <div className="relative h-full w-full">
       {isLookingForExtension ? (
-        <div className="absolute top-0 left-0 h-full w-full">
+        <div className="bg-content1 absolute top-0 left-0 h-full w-full">
           <Loading />
         </div>
       ) : isMissingExtension ? (
@@ -283,7 +309,7 @@ export default function ViewLoader({
       ) : (
         <div className="relative h-full w-full">
           {isLoadingExtension && (
-            <div className="absolute top-0 left-0 h-full w-full">
+            <div className="bg-content1 absolute top-0 left-0 h-full w-full">
               <Loading />
             </div>
           )}

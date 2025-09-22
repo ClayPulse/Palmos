@@ -83,16 +83,14 @@ export type TextFileSelection = {
 
 export type ViewModel = {
   viewId: string;
-  isFocused: boolean;
-  // The file content and path.
-  // Optional, if the view is not a file view.
-  file?: {
-    content: string;
-    path: string;
-    selections?: TextFileSelection[];
-  };
   extensionConfig?: ExtensionConfig;
 };
+
+export enum ViewModeEnum {
+  App = "app",
+  Canvas = "canvas",
+  Home = "home",
+}
 
 /* Fetch API */
 export type FetchPayload = {
@@ -130,19 +128,19 @@ export type ExtensionConfig = {
   // Extension or user installed agents
   agents?: Agent[];
   // Exposed commands in the extension
-  commandsInfoList?: ExtensionCommandInfo[];
+  commandsInfoList?: CommandInfo[];
   // Visibility
   visibility: string;
 };
 
-export type ExtensionCommandInfo = {
+export type CommandInfo = {
   name: string;
   description: string;
   parameters: Record<string, TypedVariable>;
 };
 
-export type ExtensionCommand = {
-  info: ExtensionCommandInfo;
+export type CommandDefinition = {
+  info: CommandInfo;
   handler: (args: any) => Promise<any>;
 };
 // #endregion
@@ -173,7 +171,6 @@ export type AgentMethod = {
 
 export type TypedVariable = {
   type: TypedVariableType;
-  name: string;
   // Describe the variable for LLM to better understand it
   description: string;
   optional?: boolean;

@@ -11,13 +11,13 @@ import {
 } from "@heroui/react";
 import Icon from "../misc/icon";
 import ProjectSettingsModal from "../modals/project-settings-modal";
-import { useViewManager } from "@/lib/hooks/use-view-manager";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 
 export default function ProjectIndicator() {
   const editorContext = useContext(EditorContext);
   const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
     useState(false);
-  const { closeAllViews: closeAllFileViews } = useViewManager();
+  const { closeAllViews: closeAllFileViews } = useTabViewManager();
 
   function closeProject() {
     editorContext?.setEditorStates((prev) => {

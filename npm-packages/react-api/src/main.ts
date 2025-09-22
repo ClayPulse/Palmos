@@ -5,7 +5,7 @@ import useLoading from "./hooks/editor/use-loading";
 import useNotification from "./hooks/editor/use-notification";
 import useTheme from "./hooks/editor/use-theme";
 import useToolbar from "./hooks/editor/use-toolbar";
-import useExtCommand from "./hooks/extension/use-ext-command";
+import useCommand from "./hooks/editor/use-command";
 
 import useImageGen from "./hooks/ai-modality/use-image-gen";
 import useLLM from "./hooks/ai-modality/use-llm";
@@ -28,7 +28,7 @@ export {
   useOCR,
   useSTT,
   useTTS,
-  useExtCommand,
+  useCommand,
   useTerminal,
   useLoading,
 };

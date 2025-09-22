@@ -12,13 +12,73 @@ import { getLLMModel } from "../modalities/llm/llm";
 import toast from "react-hot-toast";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { fetchAPI } from "../pulse-editor-website/backend";
+import { parseJsonChunk } from "./stream-chunk-parser";
 
 export function getAgentLLMConfig(agent: Agent, methodName: string) {
   const method = agent.availableMethods.find((m) => m.name === methodName);
   return method?.LLMConfig ? method.LLMConfig : agent.LLMConfig;
 }
 
-export async function runAgentMethod(
+export async function runAgentMethodCloud(
+  agent: Agent,
+  methodName: string,
+  args: Record<string, any>,
+  onChunkUpdate?: (chunk: any) => void,
+): Promise<any> {
+  const method = agent.availableMethods.find((m) => m.name === methodName);
+  if (!method) {
+    throw new Error(`Method ${methodName} not found in agent ${agent.name}.`);
+  }
+
+  const prompt = await getAgentPrompt(agent, method, args);
+
+  console.log("Prompt: ", prompt);
+
+  const response = await fetchAPI(
+    "/api/inference/platform-assistant/text-to-text",
+    {
+      method: "POST",
+      body: JSON.stringify({ prompt }),
+    },
+  );
+
+  if (!response.ok) {
+    const error = await response.text();
+    toast.error(`Error: ${error}`);
+    return;
+  }
+  const stream = response.body;
+  if (!stream) {
+    toast.error("Error: No response from server.");
+    return;
+  }
+  const reader = stream.getReader();
+  const decoder = new TextDecoder("utf-8");
+  let done = false;
+  let result: any;
+
+  while (!done) {
+    const { done: readerDone, value } = await reader.read();
+    done = readerDone;
+    if (value) {
+      const chunk = decoder.decode(value, { stream: !done });
+      const parsedChunks = parseJsonChunk(chunk);
+
+      const latestChunkValue = parsedChunks[parsedChunks.length - 1];
+
+      result = latestChunkValue;
+
+      if (onChunkUpdate) {
+        onChunkUpdate(latestChunkValue);
+      }
+    }
+  }
+
+  return result;
+}
+
+export async function runAgentMethodLocal(
   apiKey: string,
   llmConfig: LLMConfig,
   agent: Agent,
@@ -37,7 +97,7 @@ export async function runAgentMethod(
     throw new Error("LLM not found.");
   }
 
-  const prompt = await getPrompt(agent, method, args);
+  const prompt = await getAgentPrompt(agent, method, args);
 
   console.log("Prompt: ", prompt);
 
@@ -73,11 +133,19 @@ function getLLM(llmConfig: LLMConfig, agentName: string, apiKey: string) {
   return llm;
 }
 
-async function getPrompt(
+export async function getAgentPrompt(
   agent: Agent,
-  method: AgentMethod,
+  method: AgentMethod | string,
   args: Record<string, any>,
 ) {
+  if (typeof method === "string") {
+    const foundMethod = agent.availableMethods.find((m) => m.name === method);
+    if (!foundMethod) {
+      throw new Error(`Method ${method} not found in agent ${agent.name}.`);
+    }
+    method = foundMethod;
+  }
+
   const userPromptTemplate = `\
 ${method.prompt}
 
@@ -140,8 +208,7 @@ function getVariableTypePrompt(type: TypedVariableType): string {
 `;
 
     return typePrompt;
-  }
-  else if (type === "string") { 
+  } else if (type === "string") {
     return "A string value.";
   }
 

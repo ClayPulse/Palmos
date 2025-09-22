@@ -1,8 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useMediaQuery } from "react-responsive";
-import Explorer from "../explorer/explorer";
+import Explorer from "../../explorer/explorer";
 import { Button } from "@heroui/react";
-import Icon from "../misc/icon";
+import Icon from "../../misc/icon";
 
 function MenuPanel({ children }: { children?: React.ReactNode }) {
   const isLandscape = useMediaQuery({

@@ -10,9 +10,11 @@ import {
   PulseLoader,
 } from "react-spinners";
 import { colors } from "@heroui/react";
+import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 
 export default function VoiceIndicator() {
   const editorContext = useContext(EditorContext);
+  const {} = usePlatformAIAssistant();
 
   const isShowingIndicator =
     editorContext?.editorStates?.isRecording ||

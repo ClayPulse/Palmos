@@ -5,7 +5,8 @@ import React, { useContext, useEffect } from "react";
 import { ReactNode } from "react";
 import ReactDOM from "react-dom";
 import { EditorContext } from "./editor-context-provider";
-import { Extension, ExtensionAgent, PEExtensionCommandInfo } from "@/lib/types";
+import { Extension, ExtensionAgent } from "@/lib/types";
+import { getRemote } from "@/lib/module-federation/remote";
 
 const host = init({
   name: "pulse_editor",
@@ -111,54 +112,27 @@ export default function RemoteModuleProvider({
       return agents;
     }
 
-    function getExtensionCommands(extensions: Extension[]) {
-      const commands: PEExtensionCommandInfo[] = extensions.flatMap((ext) => {
-        return (
-          ext.config.commandsInfoList?.map((command) => {
-            const cmdInfo: PEExtensionCommandInfo = {
-              ...command,
-              // Add the extension id to the command
-              moduleId: ext.config.id,
-            };
-
-            return cmdInfo;
-          }) ?? []
-        );
-      });
-
-      return commands;
-    }
-
-    if (!editorContext) {
-      return;
-    }
-
     // Register all extensions
     const extensions = editorContext?.persistSettings?.extensions ?? [];
 
-    const remotes = extensions.map((ext) => {
-      return {
-        name: ext.config.id,
-        entry: `${ext.remoteOrigin}/${ext.config.id}/${ext.config.version}/mf-manifest.json`,
-      };
-    });
+    const remotes = extensions
+      .map((ext) =>
+        getRemote(ext.remoteOrigin, ext.config.id, ext.config.version),
+      )
+      .flat();
 
     registerRemotes(remotes);
     console.log("Registered remotes", remotes);
 
     // For each extension, load their agents
     const agents = getExtensionAgents(extensions);
-    // For each extension, load their exposed commands
-    const commands = getExtensionCommands(extensions);
 
     console.log("Loaded agents", agents);
-    console.log("Loaded commands", commands);
 
     editorContext?.setPersistSettings((prev) => {
       return {
         ...prev,
         extensionAgents: agents,
-        extensionCommands: commands,
       };
     });
   }, [editorContext?.persistSettings?.extensions]);

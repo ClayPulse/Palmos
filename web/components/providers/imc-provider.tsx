@@ -14,7 +14,7 @@ import {
 import { createContext, useContext, useEffect, useState } from "react";
 import { EditorContext } from "./editor-context-provider";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
-import { runAgentMethod } from "@/lib/agent/agent-runner";
+import { runAgentMethodLocal } from "@/lib/agent/agent-runner";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
 import { getTTSModel } from "@/lib/modalities/tts/tts";
 import { getSTTModel } from "@/lib/modalities/stt/stt";
@@ -36,36 +36,44 @@ export default function InterModuleCommunicationProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const [polyIMC, setPolyIMC] = useState<PolyIMC | undefined>(undefined);
-
   const editorContext = useContext(EditorContext);
 
-  useEffect(() => {
-    // @ts-expect-error set window viewId
-    window.viewId = "Pulse Editor Main";
+  const [polyIMC, setPolyIMC] = useState<PolyIMC | undefined>(undefined);
+  const [imcInitializedMap, setImcInitializedMap] = useState<
+    Map<string, boolean>
+  >(new Map());
+  const [resolvePromises, setResolvePromises] = useState<{
+    [key: string]: () => void;
+  }>({});
 
-    return () => {
-      // Cleanup the polyIMC instance when the component unmounts
-      if (polyIMC) {
-        polyIMC.close();
-        setPolyIMC(undefined);
+  function markIMCInitialized(viewId: string) {
+    setImcInitializedMap((prev) => {
+      const newMap = new Map(prev);
+      newMap.set(viewId, true);
+      return newMap;
+    });
+    if (resolvePromises[viewId]) {
+      resolvePromises[viewId]();
+      setResolvePromises((prev) => {
+        const newPromises = { ...prev };
+        delete newPromises[viewId];
+        return newPromises;
+      });
+    }
+  }
+
+  async function resolveWhenViewInitialized(viewId: string) {
+    return new Promise<void>((resolve) => {
+      if (imcInitializedMap.get(viewId)) {
+        resolve();
+      } else {
+        setResolvePromises((prev) => ({
+          ...prev,
+          [viewId]: resolve,
+        }));
       }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!polyIMC) {
-      const newPolyIMC = new PolyIMC(getHandlerMap());
-      setPolyIMC(newPolyIMC);
-    }
-  }, [polyIMC, setPolyIMC]);
-
-  // Update the base handler map as editor context changes
-  useEffect(() => {
-    if (polyIMC) {
-      polyIMC.updateBaseReceiverHandlerMap(getHandlerMap());
-    }
-  }, [polyIMC, editorContext]);
+    });
+  }
 
   /**
    * Provide a map of handlers for the IMC messages used for Pulse Editor APIs.
@@ -131,7 +139,7 @@ export default function InterModuleCommunicationProvider({
             throw new Error(`No API key found for provider ${provider}.`);
           }
 
-          const result = await runAgentMethod(
+          const result = await runAgentMethodLocal(
             apiKey,
             config,
             agent,
@@ -415,10 +423,39 @@ export default function InterModuleCommunicationProvider({
     return newMap;
   }
 
+  useEffect(() => {
+    // @ts-expect-error set window viewId
+    window.viewId = "Pulse Editor Main";
+
+    return () => {
+      // Cleanup the polyIMC instance when the component unmounts
+      if (polyIMC) {
+        polyIMC.close();
+        setPolyIMC(undefined);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!polyIMC) {
+      const newPolyIMC = new PolyIMC(getHandlerMap());
+      setPolyIMC(newPolyIMC);
+    }
+  }, [polyIMC, setPolyIMC]);
+
+  // Update the base handler map as editor context changes
+  useEffect(() => {
+    if (polyIMC) {
+      polyIMC.updateBaseReceiverHandlerMap(getHandlerMap());
+    }
+  }, [polyIMC, editorContext]);
+
   return (
     <IMCContext.Provider
       value={{
         polyIMC,
+        resolveWhenViewInitialized,
+        markIMCInitialized,
       }}
     >
       {children}

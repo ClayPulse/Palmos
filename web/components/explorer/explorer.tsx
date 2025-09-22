@@ -12,8 +12,10 @@ import ProjectSettingsModal from "../modals/project-settings-modal";
 import Icon from "../misc/icon";
 import toast from "react-hot-toast";
 import TreeViewGroup from "./tree-view";
-import { useViewManager } from "@/lib/hooks/use-view-manager";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import ProjectList from "./project-list";
+import { v4 } from "uuid";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 
 export default function Explorer({
   setIsMenuOpen,
@@ -26,7 +28,7 @@ export default function Explorer({
   const { platformApi } = usePlatformApi();
   const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
     useState(false);
-  const { openFileInView } = useViewManager();
+  const { openFileInView } = useTabViewManager();
 
   const rootGroupRef = useRef<TreeViewGroupRef | null>(null);
 
@@ -56,9 +58,10 @@ export default function Explorer({
     }
   }, [editorContext?.editorStates.explorerSelectedNodeRefs]);
 
-  function viewFile(uri: string) {
+  function viewFile(uri: string, viewMode: ViewModeEnum) {
     platformApi?.readFile(uri).then((file) => {
-      openFileInView(file).then(() => {
+      const viewId = v4();
+      openFileInView(viewId, file, viewMode).then(() => {
         if (platform === PlatformEnum.Capacitor) {
           setIsMenuOpen(false);
         }
