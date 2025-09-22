@@ -223,7 +223,7 @@ Opened views:
 \`\`\`
 Available commands:
 \`\`\`
-{commands}
+{availableCommands}
 \`\`\`
 Project directory tree:
 \`\`\`

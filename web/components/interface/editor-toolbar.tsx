@@ -14,7 +14,7 @@ import useRecorder from "@/lib/hooks/use-recorder";
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
 
-  const { chatWithAssistant: runAssistant } = usePlatformAIAssistant();
+  const { chatWithAssistant } = usePlatformAIAssistant();
   const { isRecording, record } = useRecorder();
 
   const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
@@ -110,7 +110,7 @@ export default function EditorToolbar() {
                   onPress={() => {
                     if (!isRecording) {
                       const stream = record();
-                      runAssistant(stream, true);
+                      chatWithAssistant(stream, true);
                     }
                   }}
                   variant={

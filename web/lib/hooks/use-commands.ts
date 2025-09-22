@@ -16,39 +16,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useTabViewManager } from "./use-tab-view-manager";
 import toast from "react-hot-toast";
 import { v4 } from "uuid";
-
-// Editor built-in commands
-const editorCommands: CommandDefinition[] = [
-  {
-    info: {
-      name: "New Canvas",
-      description: "Create a new blank canvas",
-      parameters: {},
-    },
-    handler: async (args: any) => {
-      // Implementation of creating a new canvas
-      console.log("Creating a new canvas with args:", args);
-      return { success: true };
-    },
-  },
-  {
-    info: {
-      name: "Open File",
-      description: "Open a file in a new tab",
-      parameters: {
-        filePath: {
-          type: "string",
-          description: "Path to the file to open",
-        },
-      },
-    },
-    handler: async (args: any) => {
-      // Implementation of opening a file
-      console.log("Opening file with args:", args);
-      return { success: true };
-    },
-  },
-];
+import { useMenuActions } from "./use-menu-actions";
 
 /**
  *  Use commands in active tab.
@@ -65,10 +33,44 @@ export default function useCommands() {
     createAppViewInCanvasView,
     findAppInTabView,
   } = useTabViewManager();
+  const { menuActions } = useMenuActions();
 
   const [commands, setCommands] = useState<Command[]>([]);
 
   const [keyword, setKeyword] = useState<string | undefined>(undefined);
+
+  // Editor built-in commands
+  const editorCommands: CommandDefinition[] = [
+    {
+      info: {
+        name: "New Workflow",
+        description: "Create a new blank Workflow",
+        parameters: {},
+      },
+      handler: async (args: any) => {
+        // Implementation of creating a new workflow
+        menuActions?.find((a) => a.name === "New Workflow")?.actionFunc();
+        return { success: true };
+      }
+    },
+    {
+      info: {
+        name: "Open File",
+        description: "Open a file in a new tab",
+        parameters: {
+          filePath: {
+            type: "string",
+            description: "Path to the file to open",
+          },
+        },
+      },
+      handler: async (args: any) => {
+        // Implementation of opening a file
+        console.log("Opening file with args:", args);
+        return { success: true };
+      },
+    },
+  ];
 
   // Update editor commands
   useEffect(() => {
@@ -234,7 +236,6 @@ export default function useCommands() {
   function setKeywordFilter(newKeyword: string | undefined) {
     setKeyword(newKeyword);
   }
-
 
   return {
     runCommand,

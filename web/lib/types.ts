@@ -377,3 +377,28 @@ export type CreditBalance = {
   balance: number;
 };
 // #endregion
+
+// #region Platform AI Assistant
+export type PlatformAssistantHistory = {
+  role: "user" | "assistant";
+  message: UserMessage | PlatformAssistantMessage;
+};
+
+export type UserMessage = {
+  content: {
+    text?: string;
+    audio?: ReadableStream | undefined;
+  };
+  meta?: any;
+};
+
+export type PlatformAssistantMessage = {
+  content: {
+    text?: string;
+    audio?: ReadableStream | undefined;
+  };
+  // Other data used to interact with the platform
+  meta?: any;
+};
+
+// #endregion

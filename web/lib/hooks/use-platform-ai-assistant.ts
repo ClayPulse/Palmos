@@ -6,6 +6,7 @@ import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
 import {
   getAgentLLMConfig,
+  getAgentPrompt,
   runAgentMethodCloud,
   runAgentMethodLocal,
 } from "@/lib/agent/agent-runner";
@@ -13,6 +14,7 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
   AppViewConfig,
   CanvasViewConfig,
+  PlatformAssistantHistory,
   PlatformEnum,
   TabView,
 } from "@/lib/types";
@@ -22,6 +24,8 @@ import { usePlatformApi } from "./use-platform-api";
 import useCommands from "./use-commands";
 import { useTabViewManager } from "./use-tab-view-manager";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { fetchAPI } from "../pulse-editor-website/backend";
+import { parseJsonChunk } from "../agent/stream-chunk-parser";
 
 export default function usePlatformAIAssistant() {
   const editorContext = useContext(EditorContext);
@@ -29,13 +33,7 @@ export default function usePlatformAIAssistant() {
   const isUseManagedCloud =
     editorContext?.persistSettings?.isUseManagedCloud ?? true;
 
-  const [history, setHistory] = useState<
-    {
-      role: "user" | "assistant";
-      text: string;
-      audio: ReadableStream | undefined;
-    }[]
-  >([]);
+  const [history, setHistory] = useState<PlatformAssistantHistory[]>([]);
 
   const { platformApi } = usePlatformApi();
 
@@ -124,7 +122,11 @@ export default function usePlatformAIAssistant() {
         thinkingText: "Executing command...",
       }));
 
-      const command = getAgentSuggestedCommands("", 1);
+      console.log("Assistant result:", assistantResult);
+
+      const command = commands.find(
+        (cmd) => cmd.commandInfo.name === suggestedCmd,
+      );
       if (!command) {
         toast.error(`Agent suggested command ${suggestedCmd} not found.`);
         return;
@@ -136,42 +138,169 @@ export default function usePlatformAIAssistant() {
         console.log("Command result:", cmdResult);
       }
 
-      if (!editorAssistantAgent.LLMConfig) {
-        toast.error("Agent is not configured to analyze command result.");
-        return;
+      if (isUseManagedCloud) {
+        const { analysis }: { analysis: string } = await runAgentMethodCloud(
+          editorAssistantAgent,
+          "analyzeCommandResult",
+          {
+            userMessage: userVoiceMessage,
+            suggestedCmd: suggestedCmd,
+            previousSuggestion: response,
+            commandResult: cmdResult,
+          },
+          // (chunk) => {
+          //   // Update this in the history
+          //   setHistory((prev) => {
+          //     const newHistory = [...prev];
+          //     if (newHistory.length > 0) {
+          //       newHistory[newHistory.length - 1].message.content.text = chunk.response;
+          //     }
+          //     return newHistory;
+          //   });
+          // },
+        );
+        if (process.env.NODE_ENV === "development") {
+          console.log("Command analysis:", analysis);
+        }
+
+        // Update this in the history
+        setHistory((prev) => {
+          const newHistory = [...prev];
+          newHistory.push({
+            role: "assistant",
+            message: {
+              content: {
+                text: analysis,
+              },
+            },
+          });
+          return newHistory;
+        });
+
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isThinking: false,
+        }));
+      } else {
+        if (!editorAssistantAgent.LLMConfig) {
+          toast.error("Agent is not configured to analyze command result.");
+          return;
+        }
+
+        const llmKey = getAPIKey(
+          editorContext,
+          editorContext?.persistSettings?.llmProvider,
+        );
+        if (!llmKey) {
+          toast.error("Please set your LLM API key in settings.");
+          return;
+        }
+
+        const { analysis }: { analysis: string } = await runAgentMethodLocal(
+          llmKey,
+          editorAssistantAgent.LLMConfig,
+          editorAssistantAgent,
+          "analyzeCommandResult",
+          {
+            userMessage: userVoiceMessage,
+            suggestedCmd: suggestedCmd,
+            previousSuggestion: response,
+            commandResult: cmdResult,
+          },
+        );
+
+        if (process.env.NODE_ENV === "development") {
+          console.log("Command analysis:", analysis);
+        }
+        setPendingAnalysis(analysis);
       }
-
-      const llmKey = getAPIKey(
-        editorContext,
-        editorContext?.persistSettings?.llmProvider,
-      );
-
-      if (!llmKey) {
-        toast.error("Please set your LLM API key in settings.");
-        return;
-      }
-
-      const { analysis }: { analysis: string } = await runAgentMethodLocal(
-        llmKey,
-        editorAssistantAgent.LLMConfig,
-        editorAssistantAgent,
-        "analyzeCommandResult",
-        {
-          userMessage: userVoiceMessage,
-          suggestedCmd: suggestedCmd,
-          previousSuggestion: response,
-          commandResult: cmdResult,
-        },
-      );
-
-      if (process.env.NODE_ENV === "development") {
-        console.log("Command analysis:", analysis);
-      }
-      setPendingAnalysis(analysis);
     }
 
     processAssistantResult();
   }, [assistantResult]);
+
+  async function getUseExtensionCommandsArgs(userInput: string) {
+    function getCommandsArgs() {
+      return commands.map((cmd) => ({
+        cmdName: cmd.commandInfo.name,
+        parameters: Object.entries(cmd.commandInfo.parameters).map(
+          ([key, value]) => ({
+            name: key,
+            type: value.type,
+            description: value.description,
+          }),
+        ),
+      }));
+    }
+
+    async function getProjectDirTree() {
+      const currentPath =
+        editorContext?.persistSettings?.projectHomePath &&
+        editorContext?.editorStates.project
+          ? editorContext?.persistSettings?.projectHomePath +
+            "/" +
+            editorContext?.editorStates.project
+          : undefined;
+
+      const projectDirTree = [];
+      if (currentPath) {
+        const gitIgnorePath = `${currentPath}/.gitignore`;
+        const gitIgnoreLines: string[] = [];
+        if (await platformApi?.hasPath(gitIgnorePath)) {
+          const gitIgnoreFile = await platformApi?.readFile(gitIgnorePath);
+          const gitIgnoreContent = await gitIgnoreFile?.text();
+          const lines = gitIgnoreContent?.split("\n") ?? [];
+          gitIgnoreLines.push(...lines.filter((line) => line.trim() !== ""));
+        }
+        const tree =
+          (await platformApi?.listPathContent(currentPath, {
+            include: "all",
+            gitignore: gitIgnoreLines,
+            isRecursive: true,
+          })) ?? [];
+        projectDirTree.push(...tree);
+      }
+
+      return projectDirTree;
+    }
+
+    const tabView: TabView | undefined =
+      activeTabView?.type === ViewModeEnum.App
+        ? {
+            ...activeTabView,
+            // Remove dynamic commands to avoid sending too large payload.
+            // This is already included in the commands argument.
+            config: {
+              ...(activeTabView?.config as any),
+              dynamicCommands: undefined,
+            } as AppViewConfig,
+          }
+        : activeTabView?.type === ViewModeEnum.Canvas
+          ? {
+              ...activeTabView,
+              config: {
+                ...(activeTabView?.config as CanvasViewConfig),
+                appConfigs:
+                  (activeTabView?.config as CanvasViewConfig)?.appConfigs?.map(
+                    (appConfig) => ({
+                      ...appConfig,
+                      // Remove dynamic commands to avoid sending too large payload.
+                      // This is already included in the commands argument.
+                      dynamicCommands: undefined,
+                    }),
+                  ) ?? [],
+              } as CanvasViewConfig,
+            }
+          : undefined;
+
+    return {
+      chatHistory: [],
+      userMessage: userInput,
+      activeTabView: tabView,
+      availableCommands: getCommandsArgs(),
+      projectDirTree: await getProjectDirTree(),
+    };
+  }
 
   async function runCloudAssistant(
     input: ReadableStream | string | undefined,
@@ -181,129 +310,67 @@ export default function usePlatformAIAssistant() {
       return;
     }
 
-    if (getPlatform() === PlatformEnum.VSCode) {
-      toast.error(
-        "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
+    if (input instanceof ReadableStream) {
+      if (getPlatform() === PlatformEnum.VSCode) {
+        toast.error(
+          "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
+        );
+        return;
+      }
+    } else if (typeof input === "string") {
+      setHistory((prev) => [
+        ...prev,
+        {
+          role: "user",
+          message: {
+            content: {
+              text: input,
+            },
+          },
+        },
+      ]);
+
+      const args = await getUseExtensionCommandsArgs(input);
+
+      const result = await runAgentMethodCloud(
+        editorAssistantAgent,
+        "useExtensionCommands",
+        args,
+        (chunk) => {
+          // Update history as new chunks arrive
+          setHistory((prev) => {
+            const newHistory = [...prev];
+            if (
+              newHistory.length > 0 &&
+              newHistory[newHistory.length - 1].role === "assistant"
+            ) {
+              newHistory[newHistory.length - 1].message.content.text =
+                chunk.response;
+              newHistory[newHistory.length - 1].message.meta = chunk;
+            } else {
+              newHistory.push({
+                role: "assistant",
+                message: {
+                  content: {
+                    text: chunk.response,
+                  },
+                  meta: chunk,
+                },
+              });
+            }
+
+            return newHistory;
+          });
+        },
       );
-      return;
-    }
 
-    if (!editorContext.editorStates.isRecording) {
-      const agent = editorAssistantAgent;
-      const methodName = "useExtensionCommands";
+      // TODO: use latest history instead of raw agent result
+      setAssistantResult(result);
 
-      runSpeech2Speech(async (inputText: string) => {
-        const currentPath =
-          editorContext.persistSettings?.projectHomePath &&
-          editorContext.editorStates.project
-            ? editorContext.persistSettings?.projectHomePath +
-              "/" +
-              editorContext.editorStates.project
-            : undefined;
-
-        const projectDirTree = [];
-        if (currentPath) {
-          const gitIgnorePath = `${currentPath}/.gitignore`;
-          const gitIgnoreLines: string[] = [];
-          if (await platformApi?.hasPath(gitIgnorePath)) {
-            const gitIgnoreFile = await platformApi?.readFile(gitIgnorePath);
-            const gitIgnoreContent = await gitIgnoreFile?.text();
-            const lines = gitIgnoreContent?.split("\n") ?? [];
-            gitIgnoreLines.push(...lines.filter((line) => line.trim() !== ""));
-          }
-          const tree =
-            (await platformApi?.listPathContent(currentPath, {
-              include: "all",
-              gitignore: gitIgnoreLines,
-              isRecursive: true,
-            })) ?? [];
-          projectDirTree.push(...tree);
-        }
-
-        const config =
-          getAgentLLMConfig(agent, methodName) ??
-          getDefaultLLMConfig(editorContext);
-
-        if (!config) {
-          toast.error("No LLM config found for agent.");
-          return "No LLM config found for agent. Please configure the LLM in settings.";
-        }
-
-        // Pipe the LLM result to Speech2Speech
-
-        function getCommandsArgs() {
-          return commands.map((cmd) => ({
-            cmdName: cmd.commandInfo.name,
-            parameters: Object.entries(cmd.commandInfo.parameters).map(
-              ([key, value]) => ({
-                name: key,
-                type: value.type,
-                description: value.description,
-              }),
-            ),
-          }));
-        }
-
-        const tabView: TabView | undefined =
-          activeTabView?.type === ViewModeEnum.App
-            ? {
-                ...activeTabView,
-                // Remove dynamic commands to avoid sending too large payload.
-                // This is already included in the commands argument.
-                config: {
-                  ...(activeTabView?.config as any),
-                  dynamicCommands: undefined,
-                } as AppViewConfig,
-              }
-            : activeTabView?.type === ViewModeEnum.Canvas
-              ? {
-                  ...activeTabView,
-                  config: {
-                    ...(activeTabView?.config as CanvasViewConfig),
-                    appConfigs:
-                      (
-                        activeTabView?.config as CanvasViewConfig
-                      )?.appConfigs?.map((appConfig) => ({
-                        ...appConfig,
-                        // Remove dynamic commands to avoid sending too large payload.
-                        // This is already included in the commands argument.
-                        dynamicCommands: undefined,
-                      })) ?? [],
-                  } as CanvasViewConfig,
-                }
-              : undefined;
-
-        const result = await runAgentMethodCloud(config, agent, methodName, {
-          chatHistory: [],
-          userMessage: inputText,
-          activeTabView: tabView,
-          availableCommands: getCommandsArgs(),
-          projectDirTree: projectDirTree,
-        });
-
-        const {
-          suggestedCmd,
-          suggestedArgs,
-          suggestedViewId,
-          response,
-        }: {
-          suggestedCmd: string;
-          suggestedArgs: {
-            name: string;
-            value: any;
-          }[];
-          suggestedViewId: string;
-          response: string;
-        } = result;
-
-        console.log("Agent suggestion:", result);
-
-        setAssistantResult(result);
-
-        return response;
-      });
+      return result;
     } else {
-      stopSpeech2Speech();
+      toast.error("Input is empty.");
+      return;
     }
   }
 
@@ -343,34 +410,8 @@ export default function usePlatformAIAssistant() {
       const agent = editorAssistantAgent;
       const methodName = "useExtensionCommands";
 
+      // Pipe the LLM result to Speech2Speech
       runSpeech2Speech(async (inputText: string) => {
-        const currentPath =
-          editorContext.persistSettings?.projectHomePath &&
-          editorContext.editorStates.project
-            ? editorContext.persistSettings?.projectHomePath +
-              "/" +
-              editorContext.editorStates.project
-            : undefined;
-
-        const projectDirTree = [];
-        if (currentPath) {
-          const gitIgnorePath = `${currentPath}/.gitignore`;
-          const gitIgnoreLines: string[] = [];
-          if (await platformApi?.hasPath(gitIgnorePath)) {
-            const gitIgnoreFile = await platformApi?.readFile(gitIgnorePath);
-            const gitIgnoreContent = await gitIgnoreFile?.text();
-            const lines = gitIgnoreContent?.split("\n") ?? [];
-            gitIgnoreLines.push(...lines.filter((line) => line.trim() !== ""));
-          }
-          const tree =
-            (await platformApi?.listPathContent(currentPath, {
-              include: "all",
-              gitignore: gitIgnoreLines,
-              isRecursive: true,
-            })) ?? [];
-          projectDirTree.push(...tree);
-        }
-
         const config =
           getAgentLLMConfig(agent, methodName) ??
           getDefaultLLMConfig(editorContext);
@@ -381,76 +422,20 @@ export default function usePlatformAIAssistant() {
         }
 
         setUserVoiceMessage(inputText);
-        // Pipe the LLM result to Speech2Speech
 
-        function getCommandsArgs() {
-          return commands.map((cmd) => ({
-            cmdName: cmd.commandInfo.name,
-            parameters: Object.entries(cmd.commandInfo.parameters).map(
-              ([key, value]) => ({
-                name: key,
-                type: value.type,
-                description: value.description,
-              }),
-            ),
-          }));
-        }
-
-        const tabView: TabView | undefined =
-          activeTabView?.type === ViewModeEnum.App
-            ? {
-                ...activeTabView,
-                // Remove dynamic commands to avoid sending too large payload.
-                // This is already included in the commands argument.
-                config: {
-                  ...(activeTabView?.config as any),
-                  dynamicCommands: undefined,
-                } as AppViewConfig,
-              }
-            : activeTabView?.type === ViewModeEnum.Canvas
-              ? {
-                  ...activeTabView,
-                  config: {
-                    ...(activeTabView?.config as CanvasViewConfig),
-                    appConfigs:
-                      (
-                        activeTabView?.config as CanvasViewConfig
-                      )?.appConfigs?.map((appConfig) => ({
-                        ...appConfig,
-                        // Remove dynamic commands to avoid sending too large payload.
-                        // This is already included in the commands argument.
-                        dynamicCommands: undefined,
-                      })) ?? [],
-                  } as CanvasViewConfig,
-                }
-              : undefined;
+        const args = await getUseExtensionCommandsArgs(inputText);
 
         const result = await runAgentMethodLocal(
           llmKey,
           config,
           agent,
           methodName,
-          {
-            chatHistory: [],
-            userMessage: inputText,
-            activeTabView: tabView,
-            availableCommands: getCommandsArgs(),
-            projectDirTree: projectDirTree,
-          },
+          args,
         );
 
         const {
-          suggestedCmd,
-          suggestedArgs,
-          suggestedViewId,
           response,
         }: {
-          suggestedCmd: string;
-          suggestedArgs: {
-            name: string;
-            value: any;
-          }[];
-          suggestedViewId: string;
           response: string;
         } = result;
 

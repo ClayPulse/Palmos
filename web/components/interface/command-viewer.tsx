@@ -1,5 +1,5 @@
 import useCommands from "@/lib/hooks/use-commands";
-import { Command, MenuAction } from "@/lib/types";
+import { Command } from "@/lib/types";
 import {
   addToast,
   Button,
@@ -25,15 +25,19 @@ const inputPlaceholders = [
 export default function CommandViewer() {
   const editorContext = useContext(EditorContext);
 
-  const { chatWithAssistant } = usePlatformAIAssistant();
+  const { chatWithAssistant, history } = usePlatformAIAssistant();
   const { commands, runCommand, setKeywordFilter } = useCommands();
-  const { registerMenuAction, unregisterMenuAction } = useMenuActions("view");
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectCommandIndex, setSelectCommandIndex] = useState(-1);
   const [inputTextValue, setInputTextValue] = useState("");
+  const [inputAudioValue, setInputAudioValue] = useState<
+    ReadableStream<ArrayBuffer> | undefined
+  >(undefined);
   const [isInputVoice, setIsInputVoice] = useState(false);
   const [isOutputVoice, setIsOutputVoice] = useState(false);
+
+  const historyRef = useRef<HTMLDivElement>(null);
 
   const runCommandCallback = useCallback(
     async (command: Command) => {
@@ -80,6 +84,13 @@ export default function CommandViewer() {
   useEffect(() => {
     handlePressedKeys(editorContext?.editorStates.pressedKeys ?? []);
   }, [editorContext?.editorStates.pressedKeys]);
+
+  // Scroll to bottom when history changes
+  useEffect(() => {
+    if (historyRef.current) {
+      historyRef.current.scrollTop = historyRef.current.scrollHeight;
+    }
+  }, [history]);
 
   function handleKeyDown(e: KeyboardEvent) {
     // Prevent default behavior for certain keys
@@ -157,9 +168,12 @@ export default function CommandViewer() {
     } else if (isEnterPressed && !isControlPressed) {
       // Chat with assistant if ctrl is not pressed
       console.log("Chatting with assistant");
-      chatWithAssistant(inputTextValue, isOutputVoice);
-    }
-    else if (isArrowUpPressed) {
+      if (isInputVoice) {
+        chatWithAssistant(inputAudioValue, isOutputVoice);
+      } else {
+        chatWithAssistant(inputTextValue, isOutputVoice);
+      }
+    } else if (isArrowUpPressed) {
       setSelectCommandIndex((prev) =>
         prev === 0 ? commands.length - 1 : prev - 1,
       );
@@ -222,6 +236,29 @@ export default function CommandViewer() {
           onKeyDown={(e) => handleKeyDown(e as any)}
           onKeyUp={(e) => handleKeyUp(e as any)}
         />
+
+        {history.length > 0 && (
+          <div
+            ref={historyRef}
+            className="bg-content1 flex max-h-60 flex-col gap-y-1 overflow-y-auto rounded-2xl p-2 shadow-md"
+          >
+            {history.map((entry, index) => (
+              <div key={index}>
+                {entry.role === "user" ? (
+                  <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
+                    <span className="font-bold">You: </span>
+                    {entry.message.content.text}
+                  </div>
+                ) : (
+                  <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
+                    <span className="font-bold">Assistant: </span>
+                    {entry.message.content.text}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
         <div className="bg-content1 rounded-2xl shadow-md">
           <div className="px-3 pt-2">
             <p className="text-sm font-bold whitespace-nowrap">
