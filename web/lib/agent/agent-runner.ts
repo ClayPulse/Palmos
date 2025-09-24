@@ -33,8 +33,6 @@ export async function runAgentMethodCloud(
 
   const prompt = await getAgentPrompt(agent, method, args);
 
-  console.log("Prompt: ", prompt);
-
   const response = await fetchAPI(
     "/api/inference/platform-assistant/text-to-text",
     {
@@ -99,8 +97,6 @@ export async function runAgentMethodLocal(
 
   const prompt = await getAgentPrompt(agent, method, args);
 
-  console.log("Prompt: ", prompt);
-
   const llmResult = await llm.generate(prompt, abortSignal);
   console.log("LLM result: ", llmResult);
 
@@ -154,7 +150,7 @@ you must make sure the JSON string is parsable and valid:
 \`\`\`
 {{
   ${Array.from(Object.entries(method.returns)).map(
-    ([key, variable]) => `"${key}": ${getVariablePrompt(variable)}`,
+    ([key, variable]) => `"${key}": ${getReturnVariablePrompt(variable)}`,
   )}
 }}
 \`\`\`
@@ -179,24 +175,24 @@ async function extractReturns(result: string): Promise<Record<string, any>> {
   return parsed;
 }
 
-function getVariablePrompt(variable: TypedVariable) {
-  const typePrompt = getVariableTypePrompt(variable.type);
+function getReturnVariablePrompt(variable: TypedVariable) {
+  const typePrompt = getReturnVariableTypePrompt(variable.type);
 
   return `(Return type: ${typePrompt}. Description: ${variable.description}.)`;
 }
 
-function getVariableTypePrompt(type: TypedVariableType): string {
+function getReturnVariableTypePrompt(type: TypedVariableType): string {
   if (isArrayType(type)) {
     const innerType = type[0];
 
-    const typePrompt = getVariableTypePrompt(innerType);
+    const typePrompt = getReturnVariableTypePrompt(innerType);
 
     return `An array of values, where each value is ${typePrompt}`;
   } else if (isObjectType(type)) {
     const objectType = type as TypedVariableObjectType;
 
     const properties = Object.entries(objectType).map(
-      ([key, value]) => `"${key}": ${getVariablePrompt(value)}`,
+      ([key, value]) => `"${key}": ${getReturnVariablePrompt(value)}`,
     );
 
     const typePrompt = `An object with the following properties: 

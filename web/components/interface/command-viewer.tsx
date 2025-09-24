@@ -7,12 +7,14 @@ import {
   Kbd,
   Listbox,
   ListboxItem,
+  Spinner,
 } from "@heroui/react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import Icon from "../misc/icon";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const inputPlaceholders = [
   "Type anything...",
@@ -36,6 +38,7 @@ export default function CommandViewer() {
   >(undefined);
   const [isInputVoice, setIsInputVoice] = useState(false);
   const [isOutputVoice, setIsOutputVoice] = useState(false);
+  const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
 
   const historyRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +92,16 @@ export default function CommandViewer() {
   useEffect(() => {
     if (historyRef.current) {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;
+    }
+  }, [history]);
+
+  // Update loading state when history changes
+  useEffect(() => {
+    if (history.length > 0) {
+      const lastEntry = history[history.length - 1];
+      if (lastEntry.role === "assistant") {
+        setIsWaitingAssistant(false);
+      }
     }
   }, [history]);
 
@@ -169,9 +182,13 @@ export default function CommandViewer() {
       // Chat with assistant if ctrl is not pressed
       console.log("Chatting with assistant");
       if (isInputVoice) {
-        chatWithAssistant(inputAudioValue, isOutputVoice);
+        chatWithAssistant(inputAudioValue, isOutputVoice).then(() => {
+          setIsWaitingAssistant(true);
+        });
       } else {
-        chatWithAssistant(inputTextValue, isOutputVoice);
+        chatWithAssistant(inputTextValue, isOutputVoice).then(() => {
+          setIsWaitingAssistant(true);
+        });
       }
     } else if (isArrowUpPressed) {
       setSelectCommandIndex((prev) =>
@@ -244,19 +261,25 @@ export default function CommandViewer() {
           >
             {history.map((entry, index) => (
               <div key={index}>
-                {entry.role === "user" ? (
-                  <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
-                    <span className="font-bold">You: </span>
-                    {entry.message.content.text}
-                  </div>
-                ) : (
-                  <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
-                    <span className="font-bold">Assistant: </span>
-                    {entry.message.content.text}
-                  </div>
-                )}
+                {entry.message.content.text &&
+                  (entry.role === "user" ? (
+                    <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
+                      <div className="font-bold">You: </div>
+                      {entry.message.content.text}
+                    </div>
+                  ) : (
+                    <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
+                      <p className="font-bold">Assistant:</p>
+                      <div className="markdown-styles -my-4">
+                        <Markdown remarkPlugins={[remarkGfm]}>
+                          {entry.message.content.text}
+                        </Markdown>
+                      </div>
+                    </div>
+                  ))}
               </div>
             ))}
+            {isWaitingAssistant && <Spinner />}
           </div>
         )}
         <div className="bg-content1 rounded-2xl shadow-md">

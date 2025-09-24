@@ -138,6 +138,8 @@ export default function usePlatformAIAssistant() {
         console.log("Command result:", cmdResult);
       }
 
+      const previousMessage = history[history.length - 1].message.content.text;
+
       if (isUseManagedCloud) {
         const { analysis }: { analysis: string } = await runAgentMethodCloud(
           editorAssistantAgent,
@@ -148,34 +150,24 @@ export default function usePlatformAIAssistant() {
             previousSuggestion: response,
             commandResult: cmdResult,
           },
-          // (chunk) => {
-          //   // Update this in the history
-          //   setHistory((prev) => {
-          //     const newHistory = [...prev];
-          //     if (newHistory.length > 0) {
-          //       newHistory[newHistory.length - 1].message.content.text = chunk.response;
-          //     }
-          //     return newHistory;
-          //   });
-          // },
+          (chunk) => {
+            if (!chunk.analysis) {
+              return;
+            }
+            // Update this in the history
+            setHistory((prev) => {
+              const newHistory = [...prev];
+              if (newHistory.length > 0) {
+                newHistory[newHistory.length - 1].message.content.text =
+                  previousMessage + "\n\n### Result:\n" + chunk.analysis;
+              }
+              return newHistory;
+            });
+          },
         );
         if (process.env.NODE_ENV === "development") {
           console.log("Command analysis:", analysis);
         }
-
-        // Update this in the history
-        setHistory((prev) => {
-          const newHistory = [...prev];
-          newHistory.push({
-            role: "assistant",
-            message: {
-              content: {
-                text: analysis,
-              },
-            },
-          });
-          return newHistory;
-        });
 
         editorContext?.setEditorStates((prev) => ({
           ...prev,
