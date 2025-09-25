@@ -214,12 +214,15 @@ export type AppViewConfig = {
   // Editor only stores command info but do not store or run
   // the actual command handlers.
   dynamicCommands?: CommandInfo[];
+
+  recommendedHeight?: number;
+  recommendedWidth?: number;
 };
 
 export type CanvasViewConfig = {
   viewId: string;
   workflow?: Workflow;
-  appConfigs?: AppViewConfig[];
+  nodes?: AppViewConfig[];
 };
 
 export type TabView = {

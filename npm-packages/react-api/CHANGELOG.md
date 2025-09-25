@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.31
+
+### Patch Changes
+
+- Add recommended display dimension in canvas view
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.31
+
 ## 0.1.1-alpha.30
 
 ### Patch Changes

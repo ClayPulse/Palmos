@@ -131,7 +131,7 @@ export function useTabViewManager() {
 
       const existingAppConfig = (
         currentTab.config as CanvasViewConfig
-      ).appConfigs?.find(
+      ).nodes?.find(
         (appConfig) =>
           appConfig.app === installedApp.config.id &&
           appConfig.fileUri === file.name,
@@ -148,11 +148,13 @@ export function useTabViewManager() {
         viewId,
         app: installedApp.config.id,
         fileUri: file.name,
+        recommendedHeight: installedApp.config.recommendedHeight,
+        recommendedWidth: installedApp.config.recommendedWidth,
       };
       const newCanvasConfig: CanvasViewConfig = {
         ...currentTab.config,
-        appConfigs: [
-          ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
+        nodes: [
+          ...((currentTab.config as CanvasViewConfig).nodes ?? []),
           newAppConfig,
         ],
       };
@@ -235,6 +237,7 @@ export function useTabViewManager() {
     } else if (!imcContext) {
       throw new Error("IMC context is not available");
     }
+
     editorContext.setEditorStates((prev) => {
       return {
         ...prev,
@@ -250,7 +253,10 @@ export function useTabViewManager() {
       };
     });
 
-    await imcContext.resolveWhenViewInitialized(config.viewId);
+    // Only wait for app view to be initialized
+    if (type === ViewModeEnum.App) {
+      await imcContext.resolveWhenViewInitialized(config.viewId);
+    }
   }
 
   async function createAppViewInCanvasView(appConfig: AppViewConfig) {
@@ -264,8 +270,8 @@ export function useTabViewManager() {
     }
     const newCanvasConfig: CanvasViewConfig = {
       ...currentTab.config,
-      appConfigs: [
-        ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
+      nodes: [
+        ...((currentTab.config as CanvasViewConfig).nodes ?? []),
         appConfig,
       ],
     };
@@ -318,7 +324,13 @@ export function useTabViewManager() {
       const canvasView = activeTabView.config as CanvasViewConfig;
 
       // Throw an error if multiple instances of the same app are found
-      const appInstances = canvasView.appConfigs?.filter((app) =>
+      console.log(
+        "Searching for app in canvas:",
+        appId,
+        canvasView,
+        activeTabView,
+      );
+      const appInstances = canvasView.nodes?.filter((app) =>
         isAppNameMatched(app.app, appId),
       );
       if ((appInstances?.length ?? 0) > 1) {

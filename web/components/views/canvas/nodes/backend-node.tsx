@@ -4,7 +4,8 @@ import BaseAppView from "../../base/base-app-view";
 import { memo } from "react";
 import ViewControlLayout from "../../layout/view-control-layout";
 
-const AppNode = memo((props: any) => {
+/* Runs backend part of pulse app. */
+const BackendNode = memo((props: any) => {
   const nodeProps = props as Node<{ config: AppViewConfig }> & {
     openViewInFullScreen?: (config: AppViewConfig) => void;
   };
@@ -32,6 +33,6 @@ const AppNode = memo((props: any) => {
   );
 });
 
-AppNode.displayName = "AppNode";
+BackendNode.displayName = "BackendNode";
 
-export default AppNode;
+export default BackendNode;

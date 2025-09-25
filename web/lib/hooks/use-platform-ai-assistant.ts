@@ -93,7 +93,6 @@ export default function usePlatformAIAssistant() {
       const {
         suggestedCmd,
         suggestedArgs,
-        suggestedViewId,
         response,
       }: {
         suggestedCmd: string;
@@ -101,7 +100,6 @@ export default function usePlatformAIAssistant() {
           name: string;
           value: any;
         }[];
-        suggestedViewId: string;
         response: string;
       } = assistantResult;
 
@@ -272,8 +270,8 @@ export default function usePlatformAIAssistant() {
               ...activeTabView,
               config: {
                 ...(activeTabView?.config as CanvasViewConfig),
-                appConfigs:
-                  (activeTabView?.config as CanvasViewConfig)?.appConfigs?.map(
+                nodes:
+                  (activeTabView?.config as CanvasViewConfig)?.nodes?.map(
                     (appConfig) => ({
                       ...appConfig,
                       // Remove dynamic commands to avoid sending too large payload.

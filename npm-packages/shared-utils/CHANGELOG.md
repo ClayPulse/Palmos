@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.31
+
+### Patch Changes
+
+- Add recommended display dimension in canvas view
+
 ## 0.1.1-alpha.30
 
 ### Patch Changes

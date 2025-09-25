@@ -6,6 +6,8 @@ import {
   addEdge,
   NodeChange,
   EdgeChange,
+  Node as ReactFlowNode,
+  Edge as ReactFlowEdge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useState, useCallback, useEffect } from "react";
@@ -19,24 +21,23 @@ import {
 } from "@/lib/types";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import AppNode from "./nodes/app-node";
-import { v4 } from "uuid";
 
-const initialNodes = [
-  {
-    id: "n1",
-    position: { x: 200, y: 0 },
-    data: {
-      label: "Node 1",
-      config: {
-        viewId: v4(),
-        app: "https://cdn.pulse-editor.com/extension/spin_wheel/0.0.1/",
-      },
-    },
-    type: "appNode",
-  },
-  { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
-];
-const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" }];
+// const initialNodes = [
+//   {
+//     id: "n1",
+//     position: { x: 200, y: 0 },
+//     data: {
+//       label: "Node 1",
+//       config: {
+//         viewId: v4(),
+//         app: "https://cdn.pulse-editor.com/extension/spin_wheel/0.0.1/",
+//       },
+//     },
+//     type: "appNode",
+//   },
+//   { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
+// ];
+// const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" }];
 
 const appInfo: AppInfoModalContent = {
   name: "Pulse Editor",
@@ -64,22 +65,13 @@ export default function CanvasView({
   openViewInFullScreen: (config: AppViewConfig) => void;
 }) {
   const { openAppInfoModal } = useAppInfo();
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+  const [nodes, setNodes] = useState<ReactFlowNode[]>([]);
+  const [edges, setEdges] = useState<ReactFlowEdge[]>([]);
 
-  const onNodesChange = useCallback(
-    (
-      changes: NodeChange<{
-        id: string;
-        position: { x: number; y: number };
-        data: { label: string };
-      }>[],
-    ) => {
-      console.log("Node changes:", changes);
-      setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
-    },
-    [],
-  );
+  const onNodesChange = useCallback((changes: NodeChange<ReactFlowNode>[]) => {
+    console.log("Node changes:", changes);
+    setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
+  }, []);
   const onEdgesChange = useCallback(
     (changes: EdgeChange<{ id: string; source: string; target: string }>[]) =>
       setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
@@ -91,19 +83,6 @@ export default function CanvasView({
     [],
   );
 
-  async function exportWorkflow() {
-    const workflow = { nodes, edges };
-    const blob = new Blob([JSON.stringify(workflow, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "workflow.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
   const createAppNode = useCallback(
     (props: any) => {
       return <AppNode {...props} openViewInFullScreen={openViewInFullScreen} />;
@@ -112,6 +91,7 @@ export default function CanvasView({
   );
 
   const { registerMenuAction, unregisterMenuAction } = useMenuActions();
+
   // Register menu actions
   useEffect(() => {
     console.log("CanvasView rendered: registering menu actions");
@@ -172,8 +152,46 @@ export default function CanvasView({
     };
   }, []);
 
+  useEffect(() => {
+    if (config) {
+      const appConfigs: ReactFlowNode[] =
+        config.nodes?.map((appConfig) => ({
+          id: appConfig.viewId,
+          position: {
+            x: 0,
+            y: 0,
+          },
+          data: {
+            label: appConfig.app,
+            config: appConfig,
+          },
+          type: "appNode",
+          height: appConfig.recommendedHeight ?? 360,
+          width: appConfig.recommendedWidth ?? 640,
+        })) ?? [];
+
+      setNodes(appConfigs);
+    }
+  }, [config]);
+
+  async function exportWorkflow() {
+    const workflow = { nodes, edges };
+    const blob = new Blob([JSON.stringify(workflow, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "workflow.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
-    <div className="bg-default text-default-foreground relative h-full w-full">
+    <div
+      className="bg-default text-default-foreground relative h-full w-full"
+      id={`canvas-${config?.viewId}`}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}

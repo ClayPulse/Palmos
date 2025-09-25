@@ -26,5 +26,12 @@ export default function ExtensionLoader({
         ? `/extension.html?remoteOrigin=${remoteOrigin}&moduleId=${moduleId}&moduleVersion=${moduleVersion}&viewId=${viewId}`
         : `/extension?remoteOrigin=${remoteOrigin}&moduleId=${moduleId}&moduleVersion=${moduleVersion}&viewId=${viewId}`;
 
-  return <iframe ref={iframeRef} className="h-full w-full" src={src} />;
+  return (
+    <iframe
+      ref={iframeRef}
+      className="h-full w-full"
+      src={src}
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+    />
+  );
 }
