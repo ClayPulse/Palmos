@@ -50,15 +50,16 @@ export default function ExtensionMarketplaceModal({
         .then((res) => res.json())
         .then((body) => {
           const fetchedExts: ExtensionMeta[] = body;
-          const extensions: Extension[] = fetchedExts.map((ext) => {
+          const extensions: Extension[] = fetchedExts.map((extMeta) => {
             return {
               config: {
-                id: ext.name,
-                version: ext.version,
-                author: ext.user ? ext.user.name : ext.org.name,
-                description: ext.description ?? "No description available",
-                displayName: ext.displayName ?? ext.name,
-                visibility: ext.visibility,
+                id: extMeta.name,
+                version: extMeta.version,
+                author: extMeta.user ? extMeta.user.name : extMeta.org.name,
+                description: extMeta.description ?? "No description available",
+                displayName: extMeta.displayName ?? extMeta.name,
+                visibility: extMeta.visibility,
+                thumbnail: extMeta.thumbnail,
               },
               isEnabled: true,
               remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,

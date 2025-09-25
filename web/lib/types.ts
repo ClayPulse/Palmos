@@ -350,6 +350,7 @@ export type ExtensionMeta = {
     name: string;
   };
   visibility: string;
+  thumbnail?: string;
 };
 // #endregion
 

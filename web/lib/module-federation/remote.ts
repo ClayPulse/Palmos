@@ -12,3 +12,19 @@ export function getRemote(remoteOrigin: string, id: string, version: string) {
     },
   ];
 }
+
+export function getRemoteClientBaseURL(
+  remoteOrigin: string,
+  id: string,
+  version: string,
+) {
+  return `${remoteOrigin}/${id}/${version}/client`;
+}
+
+export function getRemoteServerBaseURL(
+  remoteOrigin: string,
+  id: string,
+  version: string,
+) {
+  return `${remoteOrigin}/${id}/${version}/server`;
+}

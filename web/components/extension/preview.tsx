@@ -14,6 +14,7 @@ import { useContext, useEffect, useState } from "react";
 import ContextMenu from "../interface/context-menu";
 import { EditorContext } from "../providers/editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
 
 export default function ExtensionPreview({
   extension,
@@ -52,6 +53,8 @@ export default function ExtensionPreview({
     );
     setIsInstalled(foundExt !== undefined);
     setIsEnabled(foundExt?.isEnabled ?? false);
+
+    console.log("Extension preview loaded", extension);
   }, [extension]);
 
   function toggleExtension() {
@@ -116,7 +119,25 @@ export default function ExtensionPreview({
               isOpen: true,
             }));
           }}
-        ></Button>
+        >
+          {extension.config.thumbnail ? (
+            <img
+              src={
+                getRemoteClientBaseURL(
+                  extension.remoteOrigin,
+                  extension.config.id,
+                  extension.config.version,
+                ) +
+                "/" +
+                extension.config.thumbnail
+              }
+              alt={extension.config.displayName}
+              className="h-full w-full rounded-md object-cover"
+            />
+          ) : (
+            <Skeleton className="h-full w-full" isLoaded={false}></Skeleton>
+          )}
+        </Button>
         {isShowInfo && (
           <div className="absolute bottom-0.5 left-1/2 flex w-full -translate-x-1/2 justify-center gap-x-0.5">
             <Button color="secondary" size="sm">

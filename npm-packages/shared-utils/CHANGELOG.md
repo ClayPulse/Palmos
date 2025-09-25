@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.32
+
+### Patch Changes
+
+- Update types
+
 ## 0.1.1-alpha.31
 
 ### Patch Changes

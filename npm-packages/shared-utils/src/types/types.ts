@@ -122,7 +122,7 @@ export type ExtensionConfig = {
   materialIcon?: string;
   extensionType?: ExtensionTypeEnum;
   fileTypes?: string[];
-  preview?: string;
+  thumbnail?: string;
   enabledPlatforms?: Record<string, boolean>;
 
   // Extension or user installed agents
