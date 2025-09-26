@@ -253,9 +253,17 @@ export function useTabViewManager() {
       };
     });
 
-    // Only wait for app view to be initialized
     if (type === ViewModeEnum.App) {
+      // Wait for app view to be initialized. This is because unlike canvas views,
+      // app views need to load the app first before it can render the view.
       await imcContext.resolveWhenViewInitialized(config.viewId);
+    }
+    else if (type === ViewModeEnum.Canvas) { 
+      // Open explorer for canvas views
+      editorContext.setEditorStates((prev) => ({
+        ...prev,
+        isSideMenuOpen: true
+      }))
     }
   }
 

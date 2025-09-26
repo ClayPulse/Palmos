@@ -2,7 +2,7 @@ import { AppViewConfig } from "@/lib/types";
 import { Node } from "@xyflow/react";
 import BaseAppView from "../../base/base-app-view";
 import { memo } from "react";
-import ViewControlLayout from "../../layout/view-control-layout";
+import CanvasNodeViewLayout from "../../layout/canvas-node-view-layout";
 
 const AppNode = memo((props: any) => {
   const nodeProps = props as Node<{ config: AppViewConfig }> & {
@@ -13,8 +13,7 @@ const AppNode = memo((props: any) => {
   const viewId = config.viewId;
 
   return (
-    <ViewControlLayout
-      type="canvas"
+    <CanvasNodeViewLayout
       controlActions={{
         fullscreen: openViewInFullScreen
           ? () =>
@@ -28,7 +27,7 @@ const AppNode = memo((props: any) => {
       }}
     >
       <BaseAppView viewId={viewId} config={config} />
-    </ViewControlLayout>
+    </CanvasNodeViewLayout>
   );
 });
 

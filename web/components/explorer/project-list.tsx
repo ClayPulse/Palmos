@@ -8,6 +8,32 @@ import { ContextMenuState, ProjectInfo } from "@/lib/types";
 import ContextMenu from "../interface/context-menu";
 import ProjectSettingsModal from "../modals/project-settings-modal";
 
+export default function ProjectList() {
+  const editorContext = useContext(EditorContext);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsProject, setSettingsProject] = useState<
+    ProjectInfo | undefined
+  >(undefined);
+
+  return (
+    <div className="flex w-full flex-col gap-2">
+      {editorContext?.editorStates.projectsInfo?.map((project, index) => (
+        <ProjectTab
+          key={index}
+          project={project}
+          setSettingsOpen={setSettingsOpen}
+          setSettingsProject={setSettingsProject}
+        />
+      ))}
+      <ProjectSettingsModal
+        isOpen={settingsOpen}
+        setIsOpen={setSettingsOpen}
+        projectInfo={settingsProject}
+      />
+    </div>
+  );
+}
+
 function ProjectTab({
   project,
   setSettingsOpen,
@@ -90,7 +116,7 @@ function ProjectTab({
       <ContextMenu state={contextMenuState} setState={setContextMenuState}>
         <div className="flex flex-col">
           <Button
-            className="h-12 text-medium sm:h-8 sm:text-sm"
+            className="text-medium h-12 sm:h-8 sm:text-sm"
             variant="light"
             onPress={(e) => {
               setSettingsOpen(true);
@@ -101,39 +127,13 @@ function ProjectTab({
             <p className="w-full text-start">Project Settings</p>
           </Button>
           <Button
-            className="h-12 text-medium sm:h-8 sm:text-sm"
+            className="text-medium h-12 sm:h-8 sm:text-sm"
             variant="light"
           >
             <p className="w-full text-start">Select Multiple</p>
           </Button>
         </div>
       </ContextMenu>
-    </div>
-  );
-}
-
-export default function ProjectList() {
-  const editorContext = useContext(EditorContext);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsProject, setSettingsProject] = useState<
-    ProjectInfo | undefined
-  >(undefined);
-
-  return (
-    <div className="flex w-full flex-col gap-2">
-      {editorContext?.editorStates.projectsInfo?.map((project, index) => (
-        <ProjectTab
-          key={index}
-          project={project}
-          setSettingsOpen={setSettingsOpen}
-          setSettingsProject={setSettingsProject}
-        />
-      ))}
-      <ProjectSettingsModal
-        isOpen={settingsOpen}
-        setIsOpen={setSettingsOpen}
-        projectInfo={settingsProject}
-      />
     </div>
   );
 }

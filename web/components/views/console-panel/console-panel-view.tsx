@@ -7,7 +7,6 @@ import {
   useEffect,
   useState,
 } from "react";
-import ViewControlLayout from "../layout/view-control-layout";
 import { TabItem, Extension } from "@/lib/types";
 import { Button, Divider, select, Tooltip } from "@heroui/react";
 import AgentConfigModal from "../../modals/agent-config-modal";
@@ -18,6 +17,7 @@ import { ExtensionTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 } from "uuid";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
+import AppViewLayout from "../layout/app-view-layout";
 
 function ConsoleNavBar({
   consoles,
@@ -189,7 +189,7 @@ export default function ConsolePanelView() {
         data-is-toolbar-open={editorContext?.editorStates.isToolbarOpen}
       >
         <div className="h-full w-full">
-          <ViewControlLayout type="app">
+          <AppViewLayout>
             <div className="bg-content1 flex h-full w-full flex-col">
               <ConsoleNavBar
                 consoles={consoles}
@@ -208,7 +208,7 @@ export default function ConsolePanelView() {
                 />
               )}
             </div>
-          </ViewControlLayout>
+          </AppViewLayout>
         </div>
       </motion.div>
     </AnimatePresence>

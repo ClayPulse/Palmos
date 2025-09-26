@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
     ipcRenderer.invoke("list-path-content", uri, options),
 
   createProject: (uri) => ipcRenderer.invoke("create-project", uri),
+  deleteProject: (uri) => ipcRenderer.invoke("delete-project", uri),
+  updateProject: (uri, updatedInfo) => ipcRenderer.invoke("update-project", uri, updatedInfo),
+
   createFolder: (uri) => ipcRenderer.invoke("create-folder", uri),
   createFile: (uri) => ipcRenderer.invoke("create-file", uri),
 

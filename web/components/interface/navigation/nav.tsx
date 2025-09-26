@@ -23,21 +23,18 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
   const editorContext = useContext(EditorContext);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const isMenuOpen = editorContext?.editorStates.isSideMenuOpen ?? false;
+
+  const { setTheme, resolvedTheme } = useTheme();
+  const { session, isLoading: isLoadingSession, signIn } = useAuth();
+  const workspaceHook = useWorkspace();
+  useAndroidManageStorageNotification();
+
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isShowNavbar, setIsShowNavbar] = useState(true);
   const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
     useState(false);
   const [isSharingOpen, setIsSharingOpen] = useState(false);
-
-  const { setTheme } = useTheme();
-  const {
-    session,
-    isLoading: isLoadingSession,
-    signIn,
-  } = useAuth();
-
-  const workspaceHook = useWorkspace();
 
   useEffect(() => {
     const platform = getPlatform();
@@ -63,10 +60,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     }
   }, [editorContext?.persistSettings]);
 
-  useAndroidManageStorageNotification();
-
-  const { resolvedTheme } = useTheme();
-
   useEffect(() => {
     if (resolvedTheme === "light") {
       SafeArea.enable({
@@ -86,6 +79,13 @@ export default function Nav({ children }: { children: React.ReactNode }) {
     }
   }, [resolvedTheme]);
 
+  function setIsMenuOpen(isOpen: boolean) {
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isSideMenuOpen: isOpen,
+    }));
+  }
+
   // If the component is not mounted, the theme can't be determined.
   if (!mounted) {
     return <Loading />;
@@ -100,9 +100,11 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {!isLoadingSession && !session && editorContext?.editorStates.isSigningIn && (
-        <LoginModal signIn={signIn} />
-      )}
+      {!isLoadingSession &&
+        !session &&
+        editorContext?.editorStates.isSigningIn && (
+          <LoginModal signIn={signIn} />
+        )}
 
       {isWorkspaceSettingsModalOpen && (
         <WorkspaceSettingsModal

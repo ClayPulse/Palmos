@@ -80,6 +80,9 @@ export type EditorStates = {
 
   // Command viewer
   isCommandViewerOpen?: boolean;
+
+  // Side menu panel
+  isSideMenuOpen?: boolean;
 };
 
 /**
@@ -148,7 +151,7 @@ export type FileSystemObject = {
 
 export type ProjectInfo = {
   name: string;
-  ctime: Date;
+  ctime?: Date;
 };
 
 export type TreeViewGroupRef = {

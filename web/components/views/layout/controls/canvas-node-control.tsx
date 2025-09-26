@@ -3,7 +3,7 @@ import { isMobile } from "@/lib/platform-api/platform-checker";
 import { Button } from "@heroui/react";
 import { NodeResizeControl } from "@xyflow/react";
 
-export default function CanvasControl({
+export default function CanvasNodeControl({
   controlActions,
   setIsResizing,
 }: {

@@ -4,6 +4,46 @@ import Explorer from "../../explorer/explorer";
 import { Button } from "@heroui/react";
 import Icon from "../../misc/icon";
 
+export default function NavSideMenu({
+  isMenuOpen,
+  setIsMenuOpen,
+}: {
+  isMenuOpen: boolean;
+  setIsMenuOpen: (isOpen: boolean) => void;
+}) {
+  return (
+    <AnimatePresence>
+      {isMenuOpen && (
+        <MenuPanel>
+          <div className="h-full w-full min-[768px]:py-2 min-[768px]:pr-1 min-[768px]:pl-2">
+            <div className="bg-content2 flex h-full w-full flex-col overflow-hidden shadow-md min-[768px]:rounded-xl">
+              <div className="flex w-full items-center px-2 py-1 max-[768px]:justify-end">
+                <Button
+                  className="hidden max-[768px]:block"
+                  onPress={() => setIsMenuOpen(false)}
+                  isIconOnly
+                  variant="light"
+                >
+                  <Icon name="close" />
+                </Button>
+                <Button
+                  className="max-[768px]:hidden"
+                  onPress={() => setIsMenuOpen(false)}
+                  isIconOnly
+                  variant="light"
+                >
+                  <Icon name="arrow_back" />
+                </Button>
+              </div>
+              <Explorer setIsMenuOpen={setIsMenuOpen} />
+            </div>
+          </div>
+        </MenuPanel>
+      )}
+    </AnimatePresence>
+  );
+}
+
 function MenuPanel({ children }: { children?: React.ReactNode }) {
   const isLandscape = useMediaQuery({
     query: "(min-width: 768px)",
@@ -49,45 +89,5 @@ function MenuPanel({ children }: { children?: React.ReactNode }) {
         </motion.div>
       )}
     </>
-  );
-}
-
-export default function NavSideMenu({
-  isMenuOpen,
-  setIsMenuOpen,
-}: {
-  isMenuOpen: boolean;
-  setIsMenuOpen: (isOpen: boolean) => void;
-}) {
-  return (
-    <AnimatePresence>
-      {isMenuOpen && (
-        <MenuPanel>
-          <div className="h-full w-full min-[768px]:pl-2 min-[768px]:pr-1 min-[768px]:py-2">
-            <div className="bg-content2 flex h-full w-full flex-col min-[768px]:rounded-xl shadow-md overflow-hidden">
-              <div className="flex w-full items-center px-2 py-1 max-[768px]:justify-end">
-                <Button
-                  className="hidden max-[768px]:block"
-                  onPress={() => setIsMenuOpen(false)}
-                  isIconOnly
-                  variant="light"
-                >
-                  <Icon name="close" />
-                </Button>
-                <Button
-                  className="max-[768px]:hidden"
-                  onPress={() => setIsMenuOpen(false)}
-                  isIconOnly
-                  variant="light"
-                >
-                  <Icon name="arrow_back" />
-                </Button>
-              </div>
-              <Explorer setIsMenuOpen={setIsMenuOpen} />
-            </div>
-          </div>
-        </MenuPanel>
-      )}
-    </AnimatePresence>
   );
 }

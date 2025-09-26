@@ -60,7 +60,13 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     );
   }
 
-  async listProjects(projectHomePath: string): Promise<ProjectInfo[]> {
+  async listProjects(
+    projectHomePath: string | undefined,
+  ): Promise<ProjectInfo[]> {
+    if (!projectHomePath) {
+      throw new Error("Project home path is undefined");
+    }
+
     const pathDir = this.getStoragePathAndDir(projectHomePath);
     const files = await Filesystem.readdir(pathDir);
 
@@ -146,6 +152,21 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     await Filesystem.mkdir({
       ...pathDir,
     });
+  }
+
+  async deleteProject(uri: string): Promise<void> {
+    // Delete the project directory and all its contents
+    const pathDir = this.getStoragePathAndDir(uri);
+    await Filesystem.rmdir({
+      ...pathDir,
+      recursive: true,
+    });
+  }
+
+  async updateProject(uri: string, updatedInfo: ProjectInfo): Promise<void> {
+    // For now, only support renaming the project
+    const newUri = path.join(path.dirname(uri), updatedInfo.name);
+    await this.rename(uri, newUri);
   }
 
   async createFolder(uri: string): Promise<void> {

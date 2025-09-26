@@ -2,7 +2,7 @@ import { AppViewConfig } from "@/lib/types";
 import { Node } from "@xyflow/react";
 import BaseAppView from "../../base/base-app-view";
 import { memo } from "react";
-import ViewControlLayout from "../../layout/view-control-layout";
+import CanvasNodeViewLayout from "../../layout/canvas-node-view-layout";
 
 /* Runs backend part of pulse app. */
 const BackendNode = memo((props: any) => {
@@ -14,8 +14,7 @@ const BackendNode = memo((props: any) => {
   const viewId = config.viewId;
 
   return (
-    <ViewControlLayout
-      type="canvas"
+    <CanvasNodeViewLayout
       controlActions={{
         fullscreen: openViewInFullScreen
           ? () =>
@@ -29,7 +28,7 @@ const BackendNode = memo((props: any) => {
       }}
     >
       <BaseAppView viewId={viewId} config={config} />
-    </ViewControlLayout>
+    </CanvasNodeViewLayout>
   );
 });
 

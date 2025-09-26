@@ -4,7 +4,7 @@ import { TreeViewGroupRef } from "@/lib/types";
 import { useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/types";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { getPlatform, isWeb } from "@/lib/platform-api/platform-checker";
 import { Button } from "@heroui/react";
 import useExplorer from "@/lib/hooks/use-explorer";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
@@ -35,16 +35,15 @@ export default function Explorer({
   useEffect(() => {
     if (platformApi) {
       const homePath = editorContext?.persistSettings?.projectHomePath;
-      if (homePath) {
-        platformApi.listProjects(homePath).then((projects) => {
-          editorContext?.setEditorStates((prev) => {
-            return {
-              ...prev,
-              projectsInfo: projects,
-            };
-          });
+
+      platformApi.listProjects(homePath).then((projects) => {
+        editorContext?.setEditorStates((prev) => {
+          return {
+            ...prev,
+            projectsInfo: projects,
+          };
         });
-      }
+      });
     }
   }, [editorContext?.persistSettings, platformApi]);
 
@@ -124,7 +123,7 @@ export default function Explorer({
   }
 
   // Choose project home path
-  if (!editorContext?.persistSettings?.projectHomePath) {
+  if (!isWeb() && !editorContext?.persistSettings?.projectHomePath) {
     return (
       <div className="bg-content2 h-full w-full space-y-2 p-4">
         <p>
@@ -210,7 +209,8 @@ export default function Explorer({
   // Pick project
   else {
     return (
-      <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto p-4">
+      <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto px-4">
+        <p className="text-center text-lg font-medium">View Projects</p>
         <Button
           className="w-full"
           onPress={() => {
@@ -219,11 +219,11 @@ export default function Explorer({
         >
           New Project
         </Button>
+        <ProjectList />
         <ProjectSettingsModal
           isOpen={isProjectSettingsModalOpen}
           setIsOpen={setIsProjectSettingsModalOpen}
         />
-        <ProjectList />
       </div>
     );
   }
