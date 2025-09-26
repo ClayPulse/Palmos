@@ -341,6 +341,7 @@ export type Session = {
 export type ExtensionMeta = {
   name: string;
   version: string;
+  mfVersion?: string;
   description?: string;
   displayName?: string;
   user: {

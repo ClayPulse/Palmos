@@ -26,6 +26,11 @@ import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 import { imageGenProviderOptions } from "@/lib/modalities/image-gen/options";
 import { videoGenProviderOptions } from "@/lib/modalities/video-gen/options";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
+import {
+  getHostMFVersion,
+  getRemoteMFVersion,
+} from "@/lib/module-federation/version";
 
 export default function AppSettingsModal({
   isOpen,
@@ -960,25 +965,40 @@ function DevExtensionSettings({
           />
           <div className="flex gap-x-1">
             <Button
-              onPress={() => {
+              onPress={async () => {
                 if (
                   devExtensionRemoteOrigin &&
                   devExtensionId &&
                   devExtensionVersion
                 ) {
+                  const remoteMFVersion = await getRemoteMFVersion(
+                    devExtensionRemoteOrigin,
+                    devExtensionId,
+                    devExtensionVersion,
+                  );
+
+                  const hostMFVersion = await getHostMFVersion();
+
+                  if (remoteMFVersion !== hostMFVersion) {
+                    toast.error(
+                      `Extension MF version ${remoteMFVersion} is not compatible with host MF version ${hostMFVersion}`,
+                    );
+                    return;
+                  }
+
                   const ext: Extension = {
                     remoteOrigin: devExtensionRemoteOrigin,
                     config: {
                       id: devExtensionId,
                       version: devExtensionVersion,
                       visibility: "private",
+                      mfVersion: remoteMFVersion,
                     },
                     isEnabled: true,
                   };
 
-                  installExtension(ext).then(() => {
-                    toast.success("Extension installed");
-                  });
+                  await installExtension(ext);
+                  toast.success("Extension installed");
                 }
               }}
             >

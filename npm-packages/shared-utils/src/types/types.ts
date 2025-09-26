@@ -116,6 +116,7 @@ export enum ExtensionTypeEnum {
 export type ExtensionConfig = {
   id: string;
   version: string;
+  mfVersion: string;
   author?: string;
   displayName?: string;
   description?: string;

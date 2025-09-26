@@ -8,6 +8,11 @@ import { compare } from "semver";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 import Loading from "@/components/interface/loading";
 import { IMCContext } from "@/components/providers/imc-provider";
+import {
+  getHostMFVersion,
+  getRemoteMFVersion,
+} from "@/lib/module-federation/version";
+import toast from "react-hot-toast";
 
 export default function BaseAppView({
   config,
@@ -39,10 +44,27 @@ export default function BaseAppView({
       const version = parts[parts.length - 1];
       // Remote origin is everything before the last two parts
       const remoteOrigin = url.origin + parts.slice(0, -2).join("/");
+
+      const remoteMFVersion = await getRemoteMFVersion(
+        remoteOrigin,
+        extensionId,
+        version,
+      );
+
+      const hostMFVersion = await getHostMFVersion();
+
+      if (remoteMFVersion !== hostMFVersion) {
+        toast.error(
+          `Extension MF version (${remoteMFVersion}) does not match host MF version (${hostMFVersion}). Please install a compatible version.`,
+        );
+        return;
+      }
+
       const ext: Extension = {
         config: {
           id: extensionId,
           version: version,
+          mfVersion: remoteMFVersion,
           author: "Unknown",
           description: "No description available",
           displayName: extensionId,
@@ -73,20 +95,37 @@ export default function BaseAppView({
 
       console.log("Fetched extensions:", fetchedExts);
 
-      const extensions: Extension[] = fetchedExts.map((ext) => {
-        return {
-          config: {
-            id: ext.name,
-            version: ext.version,
-            author: ext.user ? ext.user.name : ext.org.name,
-            description: ext.description ?? "No description available",
-            displayName: ext.displayName ?? ext.name,
-            visibility: ext.visibility,
-          },
-          isEnabled: true,
-          remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-        };
-      });
+      const extensions: Extension[] = await Promise.all(
+        fetchedExts.map(async (extMeta) => {
+          // If backend does not provide mfVersion, try to load it from the manifest
+          if (!extMeta.mfVersion) {
+            console.warn(
+              `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
+            );
+          }
+          const mfVersion =
+            extMeta.mfVersion ??
+            (await getRemoteMFVersion(
+              `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+              extMeta.name,
+              extMeta.version,
+            ));
+
+          return {
+            config: {
+              id: extMeta.name,
+              version: extMeta.version,
+              mfVersion: mfVersion,
+              author: extMeta.user ? extMeta.user.name : extMeta.org.name,
+              description: extMeta.description ?? "No description available",
+              displayName: extMeta.displayName ?? extMeta.name,
+              visibility: extMeta.visibility,
+            },
+            isEnabled: true,
+            remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+          };
+        }),
+      );
 
       // Get the latest version of the extension
       const ext = extensions.sort((a, b) => {
