@@ -29,7 +29,9 @@ export default function useExtensionManager() {
 
     const hostMFVersion = await getHostMFVersion();
 
-    if (compare(remoteMFVersion, hostMFVersion) !== 0) {
+    if (!remoteMFVersion) {
+      throw new Error("Remote MF version is undefined");
+    } else if (compare(remoteMFVersion, hostMFVersion) !== 0) {
       throw new Error(
         `Extension MF version ${remoteMFVersion} is not compatible with host MF version ${hostMFVersion}`,
       );

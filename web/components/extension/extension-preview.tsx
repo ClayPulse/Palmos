@@ -56,7 +56,9 @@ export default function ExtensionPreview({
 
   const [isShowInfo, setIsShowInfo] = useState(false);
 
-  const [hostMFVersion, setHostMFVersion] = useState<string>("unknown");
+  const [hostMFVersion, setHostMFVersion] = useState<string | undefined>(
+    undefined,
+  );
   const [showMFVersionInfo, setShowMFVersionInfo] = useState(false);
 
   useEffect(() => {
@@ -75,8 +77,6 @@ export default function ExtensionPreview({
     );
     setIsInstalled(foundExt !== undefined);
     setIsEnabled(foundExt?.isEnabled ?? false);
-
-    console.log("Extension preview loaded", extension);
   }, [extension]);
 
   function toggleExtension() {
@@ -122,7 +122,9 @@ export default function ExtensionPreview({
               <EnableCheckBox isActive={isEnabled} onPress={toggleExtension} />
             )}
 
-            {extension.mfVersion === "unknown" ? (
+            {hostMFVersion === undefined ||
+            extension.mfVersion === undefined ||
+            extension.mfVersion === "unknown" ? (
               <Popover
                 isOpen={showMFVersionInfo}
                 onOpenChange={setShowMFVersionInfo}
@@ -182,10 +184,9 @@ export default function ExtensionPreview({
                   <div className="max-w-xs">
                     <p>
                       This app's module federation version (
-                      {extension.mfVersion}) does not match the host
-                      version ({hostMFVersion}). This may cause issues when
-                      using the app. Please update the app to the latest
-                      version.
+                      {extension.mfVersion}) does not match the host version (
+                      {hostMFVersion}). This may cause issues when using the
+                      app. Please update the app to the latest version.
                     </p>
                   </div>
                 </PopoverContent>
@@ -271,9 +272,13 @@ export default function ExtensionPreview({
         {isShowInfo && (
           <div className="absolute bottom-0.5 left-1/2 flex w-full -translate-x-1/2 justify-center gap-x-0.5">
             {isShowUseButton && (
-              <Button color="primary" size="sm" onPress={() => { 
-                onPress?.(extension);
-              }}>
+              <Button
+                color="primary"
+                size="sm"
+                onPress={() => {
+                  onPress?.(extension);
+                }}
+              >
                 Use
               </Button>
             )}

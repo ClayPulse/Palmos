@@ -302,7 +302,7 @@ export type Extension = {
   config: ExtensionConfig;
   isEnabled: boolean;
   remoteOrigin: string;
-  mfVersion: string;
+  mfVersion?: string;
 
   // These are commands that can be used without initializing an app.
   // These commands are always available once the extension is loaded and enabled.
