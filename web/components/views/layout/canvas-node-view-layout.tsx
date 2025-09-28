@@ -1,7 +1,7 @@
+import { isMobile } from "@/lib/platform-api/platform-checker";
+import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { NodeResizer } from "@xyflow/react";
 import { useState } from "react";
-import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
-import { isMobile } from "@/lib/platform-api/platform-checker";
 import CanvasNodeControl from "./controls/canvas-node-control";
 
 export default function CanvasNodeViewLayout({
@@ -26,15 +26,15 @@ export default function CanvasNodeViewLayout({
         width,
       }}
     >
-      <div className="absolute -top-1.5 z-20 flex h-3 w-full items-center justify-center">
+      <div className="absolute -top-1.5 z-20 flex w-full justify-center">
         <div
-          className="flex h-1 w-8 cursor-grab flex-col items-center justify-start active:h-16 active:w-16 active:cursor-grabbing"
+          className="flex pt-1 h-3 w-8 cursor-grab flex-col items-center justify-start active:h-16 active:w-16 active:cursor-grabbing"
           onClick={(e) => {
             e.preventDefault();
             setIsShowingMenu((prev) => !prev);
           }}
         >
-          <div className="bg-default-500 data-[is-grabbing=true]:opacity-1/2 h-1 w-8 rounded-full"></div>
+          <div className="bg-default-500 h-1 w-8 rounded-full"></div>
 
           <Popover isOpen={isShowingMenu} onOpenChange={setIsShowingMenu}>
             <PopoverTrigger>

@@ -1,22 +1,35 @@
-import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
-import { useEffect, useState, memo, useCallback, useRef } from "react";
-import HomeView from "./home/home-view";
-import CanvasView from "./canvas/canvas-view";
-import { useSearchParams } from "next/navigation";
-import StandaloneAppView from "./standalone-app/standalone-app-view";
-import Tabs from "../misc/tabs";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { v4 } from "uuid";
+import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { ReactFlowProvider } from "@xyflow/react";
+import { useSearchParams } from "next/navigation";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { v4 } from "uuid";
+import Tabs from "../misc/tabs";
+import CanvasView from "./canvas/canvas-view";
+import HomeView from "./home/home-view";
+import StandaloneAppView from "./standalone-app/standalone-app-view";
 
 const MemoizedStandaloneAppView = memo(StandaloneAppView);
-const MemoizedCanvasView = memo(CanvasView);
+const MemoizedCanvasView = memo(({ config }: { config: CanvasViewConfig }) => (
+  <ReactFlowProvider>
+    <CanvasView config={config} />
+  </ReactFlowProvider>
+));
+MemoizedCanvasView.displayName = "MemoizedCanvasView";
 
 export default function ViewArea() {
   const params = useSearchParams();
 
-  const { tabViews, tabIndex, selectTab, closeView, createTabView } =
-    useTabViewManager();
+  const {
+    tabViews,
+    tabIndex,
+    selectTab,
+    closeTabView,
+    createTabView,
+    deleteAppViewInCanvasView,
+    activeTabView,
+  } = useTabViewManager();
 
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
 
@@ -49,10 +62,6 @@ export default function ViewArea() {
       };
     }) ?? [];
 
-  const openInAppView = useCallback(async (config: AppViewConfig) => {
-    await createTabView(ViewModeEnum.App, config);
-  }, []);
-
   const openInCanvasView = useCallback(async (config: CanvasViewConfig) => {
     await createTabView(ViewModeEnum.Canvas, config);
   }, []);
@@ -62,6 +71,13 @@ export default function ViewArea() {
       viewId: v4(),
     });
   }, []);
+
+  const removeAppFromCanvas = useCallback(
+    async (viewId: string) => {
+      await deleteAppViewInCanvasView(viewId);
+    },
+    [activeTabView],
+  );
 
   const isInitialized = useRef(false);
 
@@ -129,7 +145,6 @@ export default function ViewArea() {
     >
       {isShowTabs && (
         <div className="border-default-border bg-content2 w-full rounded-lg py-0.5">
-          {/* Add tabs here */}
           <Tabs
             tabItems={tabItems}
             selectedItem={tabItems[tabIndex] ? tabItems[tabIndex] : undefined}
@@ -145,7 +160,7 @@ export default function ViewArea() {
                 (tab) => tab.name === item?.name,
               );
               if (index !== -1) {
-                closeView(tabViews[index]);
+                closeTabView(tabViews[index]);
               }
             }}
           />
@@ -163,10 +178,7 @@ export default function ViewArea() {
                 config={tabView.config as AppViewConfig}
               />
             ) : tabView.type === ViewModeEnum.Canvas ? (
-              <MemoizedCanvasView
-                config={tabView.config as CanvasViewConfig}
-                openViewInFullScreen={openInAppView}
-              />
+              <MemoizedCanvasView config={tabView.config as CanvasViewConfig} />
             ) : (
               <div>Unknown view type</div>
             )}

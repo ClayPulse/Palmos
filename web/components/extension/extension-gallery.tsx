@@ -1,9 +1,9 @@
 import { Extension } from "@/lib/types";
-import Loading from "../interface/loading";
-import ExtensionPreview from "./preview";
 import { compare } from "semver";
+import Loading from "../interface/loading";
+import ExtensionPreview from "./extension-preview";
 
-export default function ExtensionList({
+export default function ExtensionGallery({
   extensions,
   isLoading,
   showInstalledChip,
@@ -25,6 +25,26 @@ export default function ExtensionList({
     new Map<string, Extension[]>(),
   );
 
+  const previews = Array.from(groupedExtensions.entries()).map(
+    ([name, extGroup]) => {
+      // Take the latest version of each extension group
+      const latestVersion = extGroup.reduce((latest, current) => {
+        return compare(current.config.version, latest.config.version) > 0
+          ? current
+          : latest;
+      }, extGroup[0]);
+
+      return (
+        <div key={name} className="w-full h-fit">
+          <ExtensionPreview
+            extension={latestVersion}
+            isShowInstalledChip={showInstalledChip}
+          />
+        </div>
+      );
+    },
+  );
+
   return (
     <>
       {isLoading ? (
@@ -38,24 +58,7 @@ export default function ExtensionList({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-1">
-          {Array.from(groupedExtensions.entries()).map(([name, extGroup]) => {
-            // Take the latest version of each extension group
-            const latestVersion = extGroup.reduce((latest, current) => {
-              return compare(current.config.version, latest.config.version) > 0
-                ? current
-                : latest;
-            }, extGroup[0]);
-
-            return (
-              <ExtensionPreview
-                key={name}
-                extension={latestVersion}
-                showInstalledChip={showInstalledChip}
-              />
-            );
-          })}
-        </div>
+        <div className="grid grid-cols-2 gap-2 w-full">{previews}</div>
       )}
     </>
   );

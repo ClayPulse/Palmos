@@ -70,6 +70,18 @@ export default function CanvasNodeControl({
           </NodeResizeControl>
         </div>
       </div>
+
+      <Button
+        isIconOnly
+        variant="light"
+        size="sm"
+        onPress={() => {
+          const action = controlActions["delete"];
+          if (action) action();
+        }}
+      >
+        <Icon name="delete" className="text-danger!" />
+      </Button>
     </>
   );
 }

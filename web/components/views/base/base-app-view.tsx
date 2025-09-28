@@ -1,18 +1,18 @@
-import NotAuthorized from "@/components/interface/not-authorized";
-import useExtensionManager from "@/lib/hooks/use-extension-manager";
-import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
-import { AppViewConfig, Extension, ExtensionMeta } from "@/lib/types";
-import { ViewModel } from "@pulse-editor/shared-utils";
-import { useContext, useEffect, useState } from "react";
-import { compare } from "semver";
-import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 import Loading from "@/components/interface/loading";
+import NotAuthorized from "@/components/interface/not-authorized";
 import { IMCContext } from "@/components/providers/imc-provider";
+import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import {
   getHostMFVersion,
   getRemoteMFVersion,
 } from "@/lib/module-federation/version";
+import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
+import { AppViewConfig, Extension, ExtensionMeta } from "@/lib/types";
+import { ViewModel } from "@pulse-editor/shared-utils";
+import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { compare } from "semver";
+import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 
 export default function BaseAppView({
   config,
@@ -64,7 +64,6 @@ export default function BaseAppView({
         config: {
           id: extensionId,
           version: version,
-          mfVersion: remoteMFVersion,
           author: "Unknown",
           description: "No description available",
           displayName: extensionId,
@@ -72,6 +71,7 @@ export default function BaseAppView({
         },
         isEnabled: true,
         remoteOrigin: remoteOrigin,
+        mfVersion: remoteMFVersion,
       };
 
       return ext;
@@ -115,7 +115,6 @@ export default function BaseAppView({
             config: {
               id: extMeta.name,
               version: extMeta.version,
-              mfVersion: mfVersion,
               author: extMeta.user ? extMeta.user.name : extMeta.org.name,
               description: extMeta.description ?? "No description available",
               displayName: extMeta.displayName ?? extMeta.name,
@@ -123,6 +122,7 @@ export default function BaseAppView({
             },
             isEnabled: true,
             remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+            mfVersion: mfVersion,
           };
         }),
       );
@@ -141,7 +141,11 @@ export default function BaseAppView({
     }
 
     async function installAndOpenApp(ext: Extension) {
-      await installExtension(ext);
+      await installExtension(
+        ext.remoteOrigin,
+        ext.config.id,
+        ext.config.version,
+      );
       const viewModel: ViewModel = {
         viewId: ext.config.id + "-" + viewId,
         extensionConfig: ext.config,

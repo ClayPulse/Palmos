@@ -1,3 +1,14 @@
+import { useAuth } from "@/lib/hooks/use-auth";
+import useExplorer from "@/lib/hooks/use-explorer";
+import useExtensionManager from "@/lib/hooks/use-extension-manager";
+import { imageGenProviderOptions } from "@/lib/modalities/image-gen/options";
+import { llmProviderOptions } from "@/lib/modalities/llm/options";
+import { sttProviderOptions } from "@/lib/modalities/stt/options";
+import { ttsProviderOptions } from "@/lib/modalities/tts/options";
+import { videoGenProviderOptions } from "@/lib/modalities/video-gen/options";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
+import { EditorContextType, Extension, PlatformEnum } from "@/lib/types";
 import {
   Alert,
   Button,
@@ -8,29 +19,12 @@ import {
   Switch,
   Tooltip,
 } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
-import { sttProviderOptions } from "@/lib/modalities/stt/options";
-import { ttsProviderOptions } from "@/lib/modalities/tts/options";
-import toast from "react-hot-toast";
-import ModalWrapper from "./modal-wrapper";
-import { EditorContext } from "../providers/editor-context-provider";
-import { EditorContextType, Extension } from "@/lib/types";
-import Icon from "../misc/icon";
-import useExplorer from "@/lib/hooks/use-explorer";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { PlatformEnum } from "@/lib/types";
-import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
-import { llmProviderOptions } from "@/lib/modalities/llm/options";
-import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
-import { imageGenProviderOptions } from "@/lib/modalities/image-gen/options";
-import { videoGenProviderOptions } from "@/lib/modalities/video-gen/options";
-import { useAuth } from "@/lib/hooks/use-auth";
-import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
-import {
-  getHostMFVersion,
-  getRemoteMFVersion,
-} from "@/lib/module-federation/version";
+import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import Icon from "../misc/icon";
+import { EditorContext } from "../providers/editor-context-provider";
+import ModalWrapper from "./modal-wrapper";
 
 export default function AppSettingsModal({
   isOpen,
@@ -818,7 +812,8 @@ function DevExtensionSettings({
   const [devExtensionId, setDevExtensionId] = useState<string>("");
   const [devExtensionVersion, setDevExtensionVersion] = useState<string>("");
 
-  const { installExtension } = useExtensionManager();
+  const { installExtension } =
+    useExtensionManager();
 
   // Load installed extensions
   useEffect(() => {
@@ -971,34 +966,16 @@ function DevExtensionSettings({
                   devExtensionId &&
                   devExtensionVersion
                 ) {
-                  const remoteMFVersion = await getRemoteMFVersion(
-                    devExtensionRemoteOrigin,
-                    devExtensionId,
-                    devExtensionVersion,
-                  );
-
-                  const hostMFVersion = await getHostMFVersion();
-
-                  if (remoteMFVersion !== hostMFVersion) {
-                    toast.error(
-                      `Extension MF version ${remoteMFVersion} is not compatible with host MF version ${hostMFVersion}`,
+                  try {
+                    await installExtension(
+                      devExtensionRemoteOrigin,
+                      devExtensionId,
+                      devExtensionVersion,
                     );
-                    return;
+                    toast.success("Extension installed");
+                  } catch (e) {
+                    toast.error((e as Error).message);
                   }
-
-                  const ext: Extension = {
-                    remoteOrigin: devExtensionRemoteOrigin,
-                    config: {
-                      id: devExtensionId,
-                      version: devExtensionVersion,
-                      visibility: "private",
-                      mfVersion: remoteMFVersion,
-                    },
-                    isEnabled: true,
-                  };
-
-                  await installExtension(ext);
-                  toast.success("Extension installed");
                 }
               }}
             >

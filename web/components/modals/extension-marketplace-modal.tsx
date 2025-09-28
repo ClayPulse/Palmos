@@ -1,12 +1,12 @@
-import ModalWrapper from "./modal-wrapper";
+import { getRemoteMFVersion } from "@/lib/module-federation/version";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { Extension, ExtensionMeta, TabItem } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
+import useSWR from "swr";
+import ExtensionGallery from "../extension/extension-gallery";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
-import useSWR from "swr";
-import ExtensionList from "../extension/extension-list";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { getRemoteMFVersion } from "@/lib/module-federation/version";
+import ModalWrapper from "./modal-wrapper";
 
 export default function ExtensionMarketplaceModal({
   isOpen,
@@ -71,7 +71,6 @@ export default function ExtensionMarketplaceModal({
             config: {
               id: extMeta.name,
               version: extMeta.version,
-              mfVersion: mfVersion,
               author: extMeta.user ? extMeta.user.name : extMeta.org.name,
               description: extMeta.description ?? "No description available",
               displayName: extMeta.displayName ?? extMeta.name,
@@ -80,6 +79,7 @@ export default function ExtensionMarketplaceModal({
             },
             isEnabled: true,
             remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+            mfVersion: mfVersion,
           };
         }),
       );
@@ -118,7 +118,7 @@ export default function ExtensionMarketplaceModal({
           )}
         </div>
 
-        <ExtensionList
+        <ExtensionGallery
           extensions={
             selectedCategory?.name === "Recommended"
               ? (marketplaceExtensions ?? [])

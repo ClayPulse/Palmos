@@ -1,3 +1,8 @@
+import useExtensionManager from "@/lib/hooks/use-extension-manager";
+import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
+import { getHostMFVersion } from "@/lib/module-federation/version";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { ContextMenuState, Extension, PlatformEnum } from "@/lib/types";
 import {
   Button,
   Chip,
@@ -9,23 +14,27 @@ import {
   useCheckbox,
   VisuallyHidden,
 } from "@heroui/react";
-import Icon from "../misc/icon";
-import { ContextMenuState, Extension, PlatformEnum } from "@/lib/types";
-import useExtensionManager from "@/lib/hooks/use-extension-manager";
+import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { use, useContext, useEffect, useState } from "react";
+import { compare } from "semver";
 import ContextMenu from "../interface/context-menu";
+import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
-import { getHostMFVersion } from "@/lib/module-federation/version";
 
 export default function ExtensionPreview({
   extension,
-  showInstalledChip,
+  isShowInstalledChip = true,
+  isShowUninstallButton = true,
+  isShowUseButton = false,
+  isShowCompatibleChip = true,
+  onPress,
 }: {
   extension: Extension;
-  showInstalledChip: boolean;
+  isShowInstalledChip?: boolean;
+  isShowUninstallButton?: boolean;
+  isShowUseButton?: boolean;
+  isShowCompatibleChip?: boolean;
+  onPress?: (ext: Extension) => void;
 }) {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -83,13 +92,13 @@ export default function ExtensionPreview({
   }
 
   if (!isLoaded) {
-    return <Skeleton className="h-28 w-full" />;
+    return <Skeleton className="h-full w-full" />;
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full h-full grid grid-rows-[auto_max-content_max-content] grid-cols-1">
       <div
-        className="relative h-28 w-full"
+        className="relative h-full w-full min-h-32"
         onMouseEnter={() => {
           if (getPlatform() !== PlatformEnum.Capacitor) {
             setIsShowInfo(true);
@@ -103,8 +112,8 @@ export default function ExtensionPreview({
         }}
       >
         <div className="absolute top-0 right-0.5 z-10">
-          <div className="flex flex-col">
-            {showInstalledChip && isInstalled && (
+          <div className="flex flex-col items-end">
+            {isShowInstalledChip && isInstalled && (
               <Chip startContent={<Icon name="save_alt" />} variant="faded">
                 Installed
               </Chip>
@@ -113,7 +122,7 @@ export default function ExtensionPreview({
               <EnableCheckBox isActive={isEnabled} onPress={toggleExtension} />
             )}
 
-            {extension.config.mfVersion === "unknown" ? (
+            {extension.mfVersion === "unknown" ? (
               <Popover
                 isOpen={showMFVersionInfo}
                 onOpenChange={setShowMFVersionInfo}
@@ -146,7 +155,7 @@ export default function ExtensionPreview({
                   </div>
                 </PopoverContent>
               </Popover>
-            ) : extension.config.mfVersion !== hostMFVersion ? (
+            ) : compare(extension.mfVersion, hostMFVersion) !== 0 ? (
               <Popover
                 isOpen={showMFVersionInfo}
                 onOpenChange={setShowMFVersionInfo}
@@ -173,7 +182,7 @@ export default function ExtensionPreview({
                   <div className="max-w-xs">
                     <p>
                       This app's module federation version (
-                      {extension.config.mfVersion}) does not match the host
+                      {extension.mfVersion}) does not match the host
                       version ({hostMFVersion}). This may cause issues when
                       using the app. Please update the app to the latest
                       version.
@@ -182,36 +191,38 @@ export default function ExtensionPreview({
                 </PopoverContent>
               </Popover>
             ) : (
-              <Popover
-                isOpen={showMFVersionInfo}
-                onOpenChange={setShowMFVersionInfo}
-              >
-                <PopoverTrigger>
-                  <Chip
-                    variant="faded"
-                    color="success"
-                    onMouseEnter={(e) => {
-                      e.stopPropagation();
-                      setShowMFVersionInfo(true);
-                    }}
-                    onMouseLeave={(e) => {
-                      e.stopPropagation();
-                      setShowMFVersionInfo(false);
-                    }}
-                  >
-                    Compatible
-                  </Chip>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <div className="max-w-xs">
-                    <p>
-                      This app's module federation version (
-                      {extension.config.mfVersion}) matches the host version (
-                      {hostMFVersion}). The app should work correctly.
-                    </p>
-                  </div>
-                </PopoverContent>
-              </Popover>
+              isShowCompatibleChip && (
+                <Popover
+                  isOpen={showMFVersionInfo}
+                  onOpenChange={setShowMFVersionInfo}
+                >
+                  <PopoverTrigger>
+                    <Chip
+                      variant="faded"
+                      color="success"
+                      onMouseEnter={(e) => {
+                        e.stopPropagation();
+                        setShowMFVersionInfo(true);
+                      }}
+                      onMouseLeave={(e) => {
+                        e.stopPropagation();
+                        setShowMFVersionInfo(false);
+                      }}
+                    >
+                      Compatible
+                    </Chip>
+                  </PopoverTrigger>
+                  <PopoverContent>
+                    <div className="max-w-xs">
+                      <p>
+                        This app's module federation version (
+                        {extension.mfVersion}) matches the host version (
+                        {hostMFVersion}). The app should work correctly.
+                      </p>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )
             )}
           </div>
         </div>
@@ -219,7 +230,11 @@ export default function ExtensionPreview({
         <Button
           className="relative m-0 h-full w-full rounded-md p-0"
           onPress={() => {
-            setIsShowInfo((prev) => !prev);
+            if (onPress) {
+              onPress(extension);
+            } else {
+              setIsShowInfo((prev) => !prev);
+            }
           }}
           onContextMenu={(e) => {
             e.preventDefault();
@@ -255,6 +270,13 @@ export default function ExtensionPreview({
         </Button>
         {isShowInfo && (
           <div className="absolute bottom-0.5 left-1/2 flex w-full -translate-x-1/2 justify-center gap-x-0.5">
+            {isShowUseButton && (
+              <Button color="primary" size="sm" onPress={() => { 
+                onPress?.(extension);
+              }}>
+                Use
+              </Button>
+            )}
             <Button color="secondary" size="sm">
               Details
             </Button>
@@ -263,28 +285,38 @@ export default function ExtensionPreview({
                 color="primary"
                 size="sm"
                 onPress={(e) => {
-                  installExtension(extension).then(() => {
-                    toast.success("Extension installed");
-                    setIsInstalled(true);
-                    setIsEnabled(extension.isEnabled);
-                  });
+                  installExtension(
+                    extension.remoteOrigin,
+                    extension.config.id,
+                    extension.config.version,
+                  )
+                    .then(() => {
+                      toast.success("Extension installed");
+                      setIsInstalled(true);
+                      setIsEnabled(extension.isEnabled);
+                    })
+                    .catch((err) => {
+                      toast.error(err.message);
+                    });
                 }}
               >
                 Install
               </Button>
             ) : (
-              <Button
-                color="danger"
-                size="sm"
-                onPress={(e) => {
-                  uninstallExtension(extension.config.id).then(() => {
-                    toast.success("Extension uninstalled");
-                    setIsInstalled(false);
-                  });
-                }}
-              >
-                Uninstall
-              </Button>
+              isShowUninstallButton && (
+                <Button
+                  color="danger"
+                  size="sm"
+                  onPress={(e) => {
+                    uninstallExtension(extension.config.id).then(() => {
+                      toast.success("Extension uninstalled");
+                      setIsInstalled(false);
+                    });
+                  }}
+                >
+                  Uninstall
+                </Button>
+              )
             )}
           </div>
         )}
@@ -308,11 +340,19 @@ export default function ExtensionPreview({
                 className="text-medium h-12 sm:h-8 sm:text-sm"
                 variant="light"
                 onPress={(e) => {
-                  installExtension(extension).then(() => {
-                    toast.success("Extension installed");
-                    setIsInstalled(true);
-                    setIsEnabled(extension.isEnabled);
-                  });
+                  installExtension(
+                    extension.remoteOrigin,
+                    extension.config.id,
+                    extension.config.version,
+                  )
+                    .then(() => {
+                      toast.success("Extension installed");
+                      setIsInstalled(true);
+                      setIsEnabled(extension.isEnabled);
+                    })
+                    .catch((err) => {
+                      toast.error(err.message);
+                    });
                   setContextMenuState({ x: 0, y: 0, isOpen: false });
                 }}
               >
@@ -322,7 +362,7 @@ export default function ExtensionPreview({
           </div>
         </ContextMenu>
       </div>
-      <p className="text-center">{extension.config.displayName}</p>
+      <p className="text-center break-words">{extension.config.displayName}</p>
       <p className="text-center">{extension.config.version}</p>
     </div>
   );

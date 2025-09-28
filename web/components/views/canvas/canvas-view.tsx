@@ -1,25 +1,22 @@
+import { useAppInfo } from "@/lib/hooks/use-app-info";
+import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import { AppInfoModalContent, CanvasViewConfig, MenuAction } from "@/lib/types";
 import { Button } from "@heroui/react";
 import {
-  ReactFlow,
-  applyNodeChanges,
-  applyEdgeChanges,
   addEdge,
-  NodeChange,
+  applyEdgeChanges,
+  applyNodeChanges,
   EdgeChange,
-  Node as ReactFlowNode,
+  NodeChange,
+  ReactFlow,
   Edge as ReactFlowEdge,
+  Node as ReactFlowNode,
+  useReactFlow,
+  useViewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "../../misc/icon";
-import { useAppInfo } from "@/lib/hooks/use-app-info";
-import {
-  AppInfoModalContent,
-  AppViewConfig,
-  CanvasViewConfig,
-  MenuAction,
-} from "@/lib/types";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import AppNode from "./nodes/app-node";
 
 // const initialNodes = [
@@ -57,14 +54,15 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 `,
 };
 
-export default function CanvasView({
-  config,
-  openViewInFullScreen,
-}: {
-  config?: CanvasViewConfig;
-  openViewInFullScreen: (config: AppViewConfig) => void;
-}) {
+export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
   const { openAppInfoModal } = useAppInfo();
+  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
+
+  const viewport = useViewport();
+  const { screenToFlowPosition } = useReactFlow();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
   const [nodes, setNodes] = useState<ReactFlowNode[]>([]);
   const [edges, setEdges] = useState<ReactFlowEdge[]>([]);
 
@@ -83,14 +81,9 @@ export default function CanvasView({
     [],
   );
 
-  const createAppNode = useCallback(
-    (props: any) => {
-      return <AppNode {...props} openViewInFullScreen={openViewInFullScreen} />;
-    },
-    [openViewInFullScreen],
-  );
-
-  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
+  const createAppNode = useCallback((props: any) => {
+    return <AppNode {...props} />;
+  }, []);
 
   // Register menu actions
   useEffect(() => {
@@ -154,25 +147,63 @@ export default function CanvasView({
 
   useEffect(() => {
     if (config) {
-      const appConfigs: ReactFlowNode[] =
-        config.nodes?.map((appConfig) => ({
-          id: appConfig.viewId,
-          position: {
-            x: 0,
-            y: 0,
-          },
-          data: {
-            label: appConfig.app,
-            config: appConfig,
-          },
-          type: "appNode",
-          height: appConfig.recommendedHeight ?? 360,
-          width: appConfig.recommendedWidth ?? 640,
-        })) ?? [];
+      // Added nodes
+      const newNodes = config.nodes?.filter(
+        (newNode) => !nodes.find((node) => node.id === newNode.viewId),
+      );
 
-      setNodes(appConfigs);
+      if (newNodes && newNodes.length > 0) {
+        const newAppNodes: ReactFlowNode[] =
+          newNodes?.map((appConfig) => {
+            const containerBounds =
+              containerRef.current?.getBoundingClientRect();
+
+            if (!containerBounds) throw new Error("Container bounds not found");
+
+            const screenCenter = {
+              x:
+                containerBounds.left +
+                containerBounds.width / 2 -
+                ((appConfig.recommendedWidth ?? 640) / 2) * viewport.zoom,
+              y:
+                containerBounds.top +
+                containerBounds.height / 2 -
+                ((appConfig.recommendedHeight ?? 360) / 2) * viewport.zoom,
+            };
+
+            const flowCenter = screenToFlowPosition(screenCenter);
+
+            return {
+              id: appConfig.viewId,
+              position: flowCenter,
+              data: {
+                label: appConfig.app,
+                config: appConfig,
+              },
+              type: "appNode",
+              height: appConfig.recommendedHeight ?? 360,
+              width: appConfig.recommendedWidth ?? 640,
+            };
+          }) ?? [];
+
+        setNodes((nds) => nds.concat(newAppNodes));
+      }
+
+      // Removed nodes
+      const removedNodes = nodes.filter(
+        (node) => !config.nodes?.find((newNode) => newNode.viewId === node.id),
+      );
+
+      if (removedNodes && removedNodes.length > 0) {
+        setNodes((nds) =>
+          nds.filter(
+            (node) =>
+              !removedNodes.find((removedNode) => removedNode.id === node.id),
+          ),
+        );
+      }
     }
-  }, [config]);
+  }, [config, viewport]);
 
   async function exportWorkflow() {
     const workflow = { nodes, edges };
@@ -189,6 +220,7 @@ export default function CanvasView({
 
   return (
     <div
+      ref={containerRef}
       className="bg-default text-default-foreground relative h-full w-full"
       id={`canvas-${config?.viewId}`}
     >

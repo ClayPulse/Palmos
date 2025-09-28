@@ -1,4 +1,4 @@
-import ExtensionPreview from "../extension/preview";
+import ExtensionPreview from "../extension/extension-preview";
 
 export default function ExtensionSuggestionOverlay() {
   return (
@@ -8,7 +8,7 @@ export default function ExtensionSuggestionOverlay() {
         <div className="flex h-full flex-col justify-center pb-20">
           <div className="responsive-content flex gap-2">
             <ExtensionPreview
-              showInstalledChip
+              isShowInstalledChip
               extension={{
                 config: {
                   id: "extension-id",
@@ -16,14 +16,14 @@ export default function ExtensionSuggestionOverlay() {
                   description: "Extension Description",
                   version: "1.0.0",
                   visibility: "public",
-                  mfVersion: "1.0.0",
                 },
+                mfVersion: "1.0.0",
                 isEnabled: false,
                 remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
               }}
             />
             <ExtensionPreview
-              showInstalledChip
+              isShowInstalledChip
               extension={{
                 config: {
                   id: "extension-id",
@@ -31,14 +31,14 @@ export default function ExtensionSuggestionOverlay() {
                   description: "Extension Description",
                   version: "1.0.0",
                   visibility: "public",
-                  mfVersion: "1.0.0",
                 },
+                mfVersion: "1.0.0",
                 isEnabled: false,
                 remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
               }}
             />
             <ExtensionPreview
-              showInstalledChip
+              isShowInstalledChip
               extension={{
                 config: {
                   id: "extension-id",
@@ -46,8 +46,8 @@ export default function ExtensionSuggestionOverlay() {
                   description: "Extension Description",
                   version: "1.0.0",
                   visibility: "public",
-                  mfVersion: "1.0.0",
                 },
+                mfVersion: "1.0.0",
                 isEnabled: false,
                 remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
               }}

@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.34
+
+### Patch Changes
+
+- Revert mfversion in extension config
+
 ## 0.1.1-alpha.33
 
 ### Patch Changes
