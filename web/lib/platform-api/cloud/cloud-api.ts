@@ -36,13 +36,24 @@ export class CloudAPI extends AbstractPlatformAPI {
     throw new Error("Method not implemented.");
   }
 
-  async listProjects(projectHomePath: string): Promise<ProjectInfo[]> {
-    if (!this.workspace) {
-      toast.error("No workspace selected");
-      throw new Error("No workspace selected");
+  async listProjects(
+    projectHomePath: string | undefined,
+  ): Promise<ProjectInfo[]> {
+    // projectHomePath is ignored in cloud environment
+
+    const response = await fetchAPI("/api/project/list");
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch projects");
     }
-    toast.error("Not implemented");
-    throw new Error("Method not implemented.");
+
+    const projects = await response.json();
+
+    const projectsInfo: ProjectInfo[] = projects.map((proj: any) => ({
+      name: proj.name,
+      ctime: new Date(proj.createdAt),
+    }));
+    return projectsInfo;
   }
 
   async listPathContent(
@@ -58,12 +69,43 @@ export class CloudAPI extends AbstractPlatformAPI {
   }
 
   async createProject(uri: string): Promise<void> {
-    if (!this.workspace) {
-      toast.error("No workspace selected");
-      throw new Error("No workspace selected");
+    const response = await fetchAPI("/api/project/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: uri }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create project");
     }
-    toast.error("Not implemented");
-    throw new Error("Method not implemented.");
+  }
+
+  async deleteProject(uri: string): Promise<void> {
+    const response = await fetchAPI("/api/project/delete", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: uri }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to delete project");
+    }
+  }
+
+  async updateProject(uri: string, updatedInfo: ProjectInfo): Promise<void> {
+    const response = await fetchAPI("/api/project/update", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name: uri, updatedInfo }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to update project");
+    }
   }
 
   async createFolder(uri: string): Promise<void> {

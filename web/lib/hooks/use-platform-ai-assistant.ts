@@ -93,7 +93,6 @@ export default function usePlatformAIAssistant() {
       const {
         suggestedCmd,
         suggestedArgs,
-        suggestedViewId,
         response,
       }: {
         suggestedCmd: string;
@@ -101,7 +100,6 @@ export default function usePlatformAIAssistant() {
           name: string;
           value: any;
         }[];
-        suggestedViewId: string;
         response: string;
       } = assistantResult;
 
@@ -138,6 +136,8 @@ export default function usePlatformAIAssistant() {
         console.log("Command result:", cmdResult);
       }
 
+      const previousMessage = history[history.length - 1].message.content.text;
+
       if (isUseManagedCloud) {
         const { analysis }: { analysis: string } = await runAgentMethodCloud(
           editorAssistantAgent,
@@ -148,34 +148,24 @@ export default function usePlatformAIAssistant() {
             previousSuggestion: response,
             commandResult: cmdResult,
           },
-          // (chunk) => {
-          //   // Update this in the history
-          //   setHistory((prev) => {
-          //     const newHistory = [...prev];
-          //     if (newHistory.length > 0) {
-          //       newHistory[newHistory.length - 1].message.content.text = chunk.response;
-          //     }
-          //     return newHistory;
-          //   });
-          // },
+          (chunk) => {
+            if (!chunk.analysis) {
+              return;
+            }
+            // Update this in the history
+            setHistory((prev) => {
+              const newHistory = [...prev];
+              if (newHistory.length > 0) {
+                newHistory[newHistory.length - 1].message.content.text =
+                  previousMessage + "\n\n### Result:\n" + chunk.analysis;
+              }
+              return newHistory;
+            });
+          },
         );
         if (process.env.NODE_ENV === "development") {
           console.log("Command analysis:", analysis);
         }
-
-        // Update this in the history
-        setHistory((prev) => {
-          const newHistory = [...prev];
-          newHistory.push({
-            role: "assistant",
-            message: {
-              content: {
-                text: analysis,
-              },
-            },
-          });
-          return newHistory;
-        });
 
         editorContext?.setEditorStates((prev) => ({
           ...prev,
@@ -280,8 +270,8 @@ export default function usePlatformAIAssistant() {
               ...activeTabView,
               config: {
                 ...(activeTabView?.config as CanvasViewConfig),
-                appConfigs:
-                  (activeTabView?.config as CanvasViewConfig)?.appConfigs?.map(
+                nodes:
+                  (activeTabView?.config as CanvasViewConfig)?.nodes?.map(
                     (appConfig) => ({
                       ...appConfig,
                       // Remove dynamic commands to avoid sending too large payload.

@@ -12,6 +12,7 @@ export default function Tabs({
   isShowPagination = false,
   onTabReady,
   onTabClose,
+  isClosable = true,
 }: {
   tabItems: TabItem[];
   selectedItem: TabItem | undefined;
@@ -19,6 +20,7 @@ export default function Tabs({
   isShowPagination?: boolean;
   onTabReady?: (tabItem: TabItem | undefined) => void;
   onTabClose?: (tabItem: TabItem | undefined) => void;
+  isClosable?: boolean;
 }) {
   const tabsRootRef = useRef<HTMLDivElement | null>(null);
   const scrollableDivRef = useRef<HTMLDivElement | null>(null);
@@ -157,24 +159,26 @@ export default function Tabs({
             }}
           />
         </AnimatePresence>
-        <ContextMenu state={contextMenuState} setState={setContextMenuState}>
-          <div className="flex flex-col">
-            <Button
-              className="text-medium h-12 sm:h-8 sm:text-sm"
-              variant="light"
-              onPress={(e) => {
-                if (onTabClose) {
-                  onTabClose(contextItem);
-                }
-                setContextMenuState({ x: 0, y: 0, isOpen: false });
-              }}
-              color="danger"
-            >
-              Close Tab
-              <Icon name="delete" variant="outlined" />
-            </Button>
-          </div>
-        </ContextMenu>
+        {isClosable && (
+          <ContextMenu state={contextMenuState} setState={setContextMenuState}>
+            <div className="flex flex-col">
+              <Button
+                className="text-medium h-12 sm:h-8 sm:text-sm"
+                variant="light"
+                onPress={(e) => {
+                  if (onTabClose) {
+                    onTabClose(contextItem);
+                  }
+                  setContextMenuState({ x: 0, y: 0, isOpen: false });
+                }}
+                color="danger"
+              >
+                Close Tab
+                <Icon name="delete" variant="outlined" />
+              </Button>
+            </div>
+          </ContextMenu>
+        )}
         <div className="flex items-center" ref={tabsContentRef}>
           {tabItems.map((item, index) => (
             <div

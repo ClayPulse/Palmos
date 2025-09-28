@@ -274,7 +274,8 @@ Explain in a friendly way to the user that you will call the command for them, a
 picking the command and values of the arguments. If a command is suggested, you will let the user know \
 that you will execute this command for them and wait for the response to further analyze its effects. \
 Keep your response short and concise but informative in 2-3 sentences unless the user wants a detailed \
-explanation. This field needs to be in the same language as the user's message.`,
+explanation. This field needs to be in the same language as the user's message. Use a markdown formatted value \
+and highlight parts for better readability.`,
         },
       },
     },

@@ -1,5 +1,29 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.34
+
+### Patch Changes
+
+- Revert mfversion in extension config
+
+## 0.1.1-alpha.33
+
+### Patch Changes
+
+- Update types
+
+## 0.1.1-alpha.32
+
+### Patch Changes
+
+- Update types
+
+## 0.1.1-alpha.31
+
+### Patch Changes
+
+- Add recommended display dimension in canvas view
+
 ## 0.1.1-alpha.30
 
 ### Patch Changes

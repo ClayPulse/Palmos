@@ -40,6 +40,10 @@
   padding-top: var(--safe-area-inset-top);
 }
 
+@utility markdown-styles {
+  @apply prose prose-sm dark:prose-invert prose-h1:mb-0 prose-h2:mb-0 prose-h3:mb-0 prose-h4:mb-0 prose-h5:mb-0 prose-h6:mb-0;
+}
+
 :root {
   --background: #ffffff;
 }

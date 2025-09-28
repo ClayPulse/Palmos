@@ -51,7 +51,7 @@ export default function useCommands() {
         // Implementation of creating a new workflow
         menuActions?.find((a) => a.name === "New Workflow")?.actionFunc();
         return { success: true };
-      }
+      },
     },
     {
       info: {
@@ -155,6 +155,8 @@ export default function useCommands() {
 
       const appInView = findAppInTabView(ext.config.id);
 
+      console.log("App in view for static command:", appInView);
+
       if (appInView) {
         // App is already in the view, execute command in the app's context.
         imcContext?.polyIMC?.sendMessage(
@@ -170,6 +172,8 @@ export default function useCommands() {
           await createAppViewInCanvasView({
             app: ext.config.id,
             viewId,
+            recommendedHeight: ext.config.recommendedHeight,
+            recommendedWidth: ext.config.recommendedWidth,
           });
         } else {
           await createTabView(ViewModeEnum.App, {
@@ -225,7 +229,7 @@ export default function useCommands() {
     } else if (view.type === ViewModeEnum.Canvas) {
       const canvasView = view.config as CanvasViewConfig;
       // Get all available apps' commands in the canvas
-      const appCommands = canvasView.appConfigs?.flatMap((appConfig) =>
+      const appCommands = canvasView.nodes?.flatMap((appConfig) =>
         getAppViewDynamicCommands(appConfig, keyword),
       );
       return appCommands ?? [];

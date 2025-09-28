@@ -1,32 +1,36 @@
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppViewConfig } from "@/lib/types";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { Node } from "@xyflow/react";
-import BaseAppView from "../../base/base-app-view";
 import { memo } from "react";
-import ViewControlLayout from "../../layout/view-control-layout";
+import BaseAppView from "../../base/base-app-view";
+import CanvasNodeViewLayout from "../../layout/canvas-node-view-layout";
 
 const AppNode = memo((props: any) => {
-  const nodeProps = props as Node<{ config: AppViewConfig }> & {
-    openViewInFullScreen?: (config: AppViewConfig) => void;
-  };
-  const openViewInFullScreen = nodeProps.openViewInFullScreen;
+  const nodeProps = props as Node<{ config: AppViewConfig }>;
+
   const { config }: { config: AppViewConfig } = nodeProps.data;
   const viewId = config.viewId;
 
+  const { createTabView, deleteAppViewInCanvasView } = useTabViewManager();
+
+  async function openViewInFullScreen() {
+    await createTabView(ViewModeEnum.App, config);
+  }
+
   return (
-    <ViewControlLayout
-      type="canvas"
+    <CanvasNodeViewLayout
       controlActions={{
-        fullscreen: openViewInFullScreen
-          ? () =>
-              openViewInFullScreen({
-                viewId: viewId,
-                app: config.app,
-              })
-          : undefined,
+        fullscreen: () => {
+          openViewInFullScreen();
+        },
+        delete: () => {
+          deleteAppViewInCanvasView(viewId);
+        },
       }}
     >
       <BaseAppView viewId={viewId} config={config} />
-    </ViewControlLayout>
+    </CanvasNodeViewLayout>
   );
 });
 

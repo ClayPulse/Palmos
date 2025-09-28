@@ -1,44 +1,61 @@
-import { useContext } from "react";
-import { Extension } from "../types";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { loadRemote, registerRemotes } from "@module-federation/runtime";
-import { ExtensionConfig } from "@pulse-editor/shared-utils";
-import { getRemote } from "../module-federation/remote";
+import { registerRemotes } from "@module-federation/runtime";
+import { useContext } from "react";
+import { compare } from "semver";
+import { getRemote, getRemoteClientBaseURL } from "../module-federation/remote";
+import {
+  getHostMFVersion,
+  getRemoteMFVersion,
+} from "../module-federation/version";
+import { Extension } from "../types";
 
 export default function useExtensionManager() {
   const editorContext = useContext(EditorContext);
 
-  async function installExtension(extension: Extension): Promise<void> {
-    const remoteOrigin = extension.remoteOrigin;
-    const id = extension.config.id;
-    const version = extension.config.version;
-    console.log("Registering remote", remoteOrigin, id, version);
+  async function installExtension(
+    remoteOrigin: string,
+    id: string,
+    version: string,
+  ): Promise<void> {
+    const extension = await getExtensionInfoFromRemote(
+      remoteOrigin,
+      id,
+      version,
+    );
+
+    console.log("Installing remote", extension);
+
+    const remoteMFVersion = extension.mfVersion;
+
+    const hostMFVersion = await getHostMFVersion();
+
+    if (compare(remoteMFVersion, hostMFVersion) !== 0) {
+      throw new Error(
+        `Extension MF version ${remoteMFVersion} is not compatible with host MF version ${hostMFVersion}`,
+      );
+    }
 
     // TODO: Prevent CSS from being injected from the remote
-
     // Register the frontend and backend from remote
-    registerRemotes(getRemote(remoteOrigin, id, version));
+    registerRemotes(
+      getRemote(
+        extension.remoteOrigin,
+        extension.config.id,
+        extension.config.version,
+      ),
+    );
 
-    // Types are not available since @module-federation/enhanced
-    // cannot work in Nextjs App router. Hence types are not generated.
-    const mod: any = await loadRemote(`${id}/main`);
-
-    const { Config }: { Config: ExtensionConfig } = mod;
-
-    const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
+    const installedExtensions =
+      (await editorContext?.persistSettings?.extensions) ?? [];
 
     // Check if extension is already installed
-    if (extensions.find((ext) => ext.config.id === Config.id)) {
+    if (
+      installedExtensions.find((ext) => ext.config.id === extension.config.id)
+    ) {
       return;
     }
 
-    const newExtension: Extension = {
-      config: Config,
-      isEnabled: true,
-      remoteOrigin,
-    };
-
-    const updatedExtensions = [...extensions, newExtension];
+    const updatedExtensions = [...installedExtensions, extension];
 
     editorContext?.setPersistSettings((prev) => {
       return {
@@ -48,7 +65,7 @@ export default function useExtensionManager() {
     });
 
     // Try to set default extension for file types
-    tryAutoSetDefault(newExtension);
+    tryAutoSetDefault(extension);
   }
 
   async function uninstallExtension(name: string): Promise<void> {
@@ -100,7 +117,9 @@ export default function useExtensionManager() {
     }));
   }
 
-  async function getExtension(name: string): Promise<Extension | undefined> {
+  async function getInstalledExtension(
+    name: string,
+  ): Promise<Extension | undefined> {
     const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
     return extensions.find((ext) => ext.config.id === name) ?? undefined;
   }
@@ -137,11 +156,42 @@ export default function useExtensionManager() {
     }));
   }
 
+  async function getExtensionInfoFromRemote(
+    remoteOrigin: string,
+    id: string,
+    version: string,
+  ) {
+    // Fetch the remote to get config
+    const configUrl =
+      getRemoteClientBaseURL(remoteOrigin, id, version) + "/pulse.config.json";
+
+    const config = await fetch(configUrl).then((res) => res.json());
+
+    // Fetch the manifest to get mfVersion
+    const remoteMFVersion = await getRemoteMFVersion(remoteOrigin, id, version);
+
+    console.log("Fetched remote config", config);
+
+    if (!config) {
+      throw new Error("Failed to fetch extension config");
+    }
+
+    const extension: Extension = {
+      config: config,
+      isEnabled: true,
+      remoteOrigin: remoteOrigin,
+      mfVersion: remoteMFVersion,
+    };
+
+    return extension;
+  }
+
   return {
     installExtension,
     uninstallExtension,
     enableExtension,
     disableExtension,
-    getExtension,
+    getInstalledExtension,
+    getExtensionInfoFromRemote,
   };
 }

@@ -32,3 +32,10 @@ export function isMobile() {
     getPlatform() === PlatformEnum.WebMobile
   );
 }
+
+export function isWeb() {
+  return (
+    getPlatform() === PlatformEnum.Web ||
+    getPlatform() === PlatformEnum.WebMobile
+  );
+}

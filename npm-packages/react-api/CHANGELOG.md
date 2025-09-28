@@ -1,5 +1,37 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.34
+
+### Patch Changes
+
+- Revert mfversion in extension config
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.34
+
+## 0.1.1-alpha.33
+
+### Patch Changes
+
+- Update types
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.33
+
+## 0.1.1-alpha.32
+
+### Patch Changes
+
+- Update types
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.32
+
+## 0.1.1-alpha.31
+
+### Patch Changes
+
+- Add recommended display dimension in canvas view
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.31
+
 ## 0.1.1-alpha.30
 
 ### Patch Changes

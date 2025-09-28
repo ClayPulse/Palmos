@@ -48,7 +48,7 @@ export default function AppInfoModal() {
             <p>
               <span className="font-semibold">README</span>:
             </p>
-            <div className="prose prose-sm dark:prose-invert prose-h1:mb-0 prose-h2:mb-0 prose-h3:mb-0 prose-h4:mb-0 prose-h5:mb-0 prose-h6:mb-0">
+            <div className="markdown-styles">
               <Markdown remarkPlugins={[remarkGfm]}>{appInfo?.readme}</Markdown>
             </div>
           </div>

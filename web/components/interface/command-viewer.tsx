@@ -7,12 +7,14 @@ import {
   Kbd,
   Listbox,
   ListboxItem,
+  Spinner,
 } from "@heroui/react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import Icon from "../misc/icon";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 const inputPlaceholders = [
   "Type anything...",
@@ -36,6 +38,7 @@ export default function CommandViewer() {
   >(undefined);
   const [isInputVoice, setIsInputVoice] = useState(false);
   const [isOutputVoice, setIsOutputVoice] = useState(false);
+  const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
 
   const historyRef = useRef<HTMLDivElement>(null);
 
@@ -89,6 +92,16 @@ export default function CommandViewer() {
   useEffect(() => {
     if (historyRef.current) {
       historyRef.current.scrollTop = historyRef.current.scrollHeight;
+    }
+  }, [history]);
+
+  // Update loading state when history changes
+  useEffect(() => {
+    if (history.length > 0) {
+      const lastEntry = history[history.length - 1];
+      if (lastEntry.role === "assistant") {
+        setIsWaitingAssistant(false);
+      }
     }
   }, [history]);
 
@@ -169,9 +182,13 @@ export default function CommandViewer() {
       // Chat with assistant if ctrl is not pressed
       console.log("Chatting with assistant");
       if (isInputVoice) {
-        chatWithAssistant(inputAudioValue, isOutputVoice);
+        chatWithAssistant(inputAudioValue, isOutputVoice).then(() => {
+          setIsWaitingAssistant(true);
+        });
       } else {
-        chatWithAssistant(inputTextValue, isOutputVoice);
+        chatWithAssistant(inputTextValue, isOutputVoice).then(() => {
+          setIsWaitingAssistant(true);
+        });
       }
     } else if (isArrowUpPressed) {
       setSelectCommandIndex((prev) =>
@@ -186,8 +203,9 @@ export default function CommandViewer() {
 
   return (
     <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2">
-      <div className="flex w-80 flex-col gap-y-1">
+      <div className="flex max-h-[calc(100vh-100px)] flex-col items-center gap-y-1">
         <Input
+          className="w-80"
           classNames={{
             inputWrapper:
               "rounded-2xl shadow-md h-12 min-h-0 group-data-[focus-visible=true]:ring-0 group-data-[focus-visible=true]:ring-offset-0",
@@ -238,28 +256,41 @@ export default function CommandViewer() {
         />
 
         {history.length > 0 && (
-          <div
-            ref={historyRef}
-            className="bg-content1 flex max-h-60 flex-col gap-y-1 overflow-y-auto rounded-2xl p-2 shadow-md"
-          >
-            {history.map((entry, index) => (
-              <div key={index}>
-                {entry.role === "user" ? (
-                  <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
-                    <span className="font-bold">You: </span>
-                    {entry.message.content.text}
-                  </div>
-                ) : (
-                  <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
-                    <span className="font-bold">Assistant: </span>
-                    {entry.message.content.text}
-                  </div>
-                )}
-              </div>
-            ))}
+          <div className="bg-content1 flex w-[480px] flex-col overflow-y-hidden rounded-2xl px-2 pt-2 shadow-md">
+            <div
+              className="flex flex-col gap-y-2 overflow-y-auto pb-2"
+              ref={historyRef}
+            >
+              {history.map((entry, index) => (
+                <div key={index}>
+                  {entry.message.content.text &&
+                    (entry.role === "user" ? (
+                      <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
+                        <div className="font-bold">You: </div>
+                        {entry.message.content.text}
+                      </div>
+                    ) : (
+                      <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
+                        <p className="font-bold">Assistant:</p>
+                        <div className="markdown-styles -my-4">
+                          <Markdown remarkPlugins={[remarkGfm]}>
+                            {entry.message.content.text}
+                          </Markdown>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              ))}
+              {isWaitingAssistant && (
+                <div className="flex h-8 w-full justify-center">
+                  <Spinner />
+                </div>
+              )}
+            </div>
           </div>
         )}
-        <div className="bg-content1 rounded-2xl shadow-md">
+
+        <div className="bg-content1 w-80 rounded-2xl shadow-md">
           <div className="px-3 pt-2">
             <p className="text-sm font-bold whitespace-nowrap">
               Found {commands.length} commands

@@ -1,42 +1,40 @@
+import { useAppInfo } from "@/lib/hooks/use-app-info";
+import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import { AppInfoModalContent, CanvasViewConfig, MenuAction } from "@/lib/types";
 import { Button } from "@heroui/react";
 import {
-  ReactFlow,
-  applyNodeChanges,
-  applyEdgeChanges,
   addEdge,
-  NodeChange,
+  applyEdgeChanges,
+  applyNodeChanges,
   EdgeChange,
+  NodeChange,
+  ReactFlow,
+  Edge as ReactFlowEdge,
+  Node as ReactFlowNode,
+  useReactFlow,
+  useViewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useState, useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "../../misc/icon";
-import { useAppInfo } from "@/lib/hooks/use-app-info";
-import {
-  AppInfoModalContent,
-  AppViewConfig,
-  CanvasViewConfig,
-  MenuAction,
-} from "@/lib/types";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import AppNode from "./nodes/app-node";
-import { v4 } from "uuid";
 
-const initialNodes = [
-  {
-    id: "n1",
-    position: { x: 200, y: 0 },
-    data: {
-      label: "Node 1",
-      config: {
-        viewId: v4(),
-        app: "https://cdn.pulse-editor.com/extension/spin_wheel/0.0.1/",
-      },
-    },
-    type: "appNode",
-  },
-  { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
-];
-const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" }];
+// const initialNodes = [
+//   {
+//     id: "n1",
+//     position: { x: 200, y: 0 },
+//     data: {
+//       label: "Node 1",
+//       config: {
+//         viewId: v4(),
+//         app: "https://cdn.pulse-editor.com/extension/spin_wheel/0.0.1/",
+//       },
+//     },
+//     type: "appNode",
+//   },
+//   { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
+// ];
+// const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" }];
 
 const appInfo: AppInfoModalContent = {
   name: "Pulse Editor",
@@ -56,30 +54,22 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 `,
 };
 
-export default function CanvasView({
-  config,
-  openViewInFullScreen,
-}: {
-  config?: CanvasViewConfig;
-  openViewInFullScreen: (config: AppViewConfig) => void;
-}) {
+export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
   const { openAppInfoModal } = useAppInfo();
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
 
-  const onNodesChange = useCallback(
-    (
-      changes: NodeChange<{
-        id: string;
-        position: { x: number; y: number };
-        data: { label: string };
-      }>[],
-    ) => {
-      console.log("Node changes:", changes);
-      setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
-    },
-    [],
-  );
+  const viewport = useViewport();
+  const { screenToFlowPosition } = useReactFlow();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const [nodes, setNodes] = useState<ReactFlowNode[]>([]);
+  const [edges, setEdges] = useState<ReactFlowEdge[]>([]);
+
+  const onNodesChange = useCallback((changes: NodeChange<ReactFlowNode>[]) => {
+    console.log("Node changes:", changes);
+    setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
+  }, []);
   const onEdgesChange = useCallback(
     (changes: EdgeChange<{ id: string; source: string; target: string }>[]) =>
       setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
@@ -91,27 +81,10 @@ export default function CanvasView({
     [],
   );
 
-  async function exportWorkflow() {
-    const workflow = { nodes, edges };
-    const blob = new Blob([JSON.stringify(workflow, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "workflow.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const createAppNode = useCallback((props: any) => {
+    return <AppNode {...props} />;
+  }, []);
 
-  const createAppNode = useCallback(
-    (props: any) => {
-      return <AppNode {...props} openViewInFullScreen={openViewInFullScreen} />;
-    },
-    [openViewInFullScreen],
-  );
-
-  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
   // Register menu actions
   useEffect(() => {
     console.log("CanvasView rendered: registering menu actions");
@@ -172,8 +145,85 @@ export default function CanvasView({
     };
   }, []);
 
+  useEffect(() => {
+    if (config) {
+      // Added nodes
+      const newNodes = config.nodes?.filter(
+        (newNode) => !nodes.find((node) => node.id === newNode.viewId),
+      );
+
+      if (newNodes && newNodes.length > 0) {
+        const newAppNodes: ReactFlowNode[] =
+          newNodes?.map((appConfig) => {
+            const containerBounds =
+              containerRef.current?.getBoundingClientRect();
+
+            if (!containerBounds) throw new Error("Container bounds not found");
+
+            const screenCenter = {
+              x:
+                containerBounds.left +
+                containerBounds.width / 2 -
+                ((appConfig.recommendedWidth ?? 640) / 2) * viewport.zoom,
+              y:
+                containerBounds.top +
+                containerBounds.height / 2 -
+                ((appConfig.recommendedHeight ?? 360) / 2) * viewport.zoom,
+            };
+
+            const flowCenter = screenToFlowPosition(screenCenter);
+
+            return {
+              id: appConfig.viewId,
+              position: flowCenter,
+              data: {
+                label: appConfig.app,
+                config: appConfig,
+              },
+              type: "appNode",
+              height: appConfig.recommendedHeight ?? 360,
+              width: appConfig.recommendedWidth ?? 640,
+            };
+          }) ?? [];
+
+        setNodes((nds) => nds.concat(newAppNodes));
+      }
+
+      // Removed nodes
+      const removedNodes = nodes.filter(
+        (node) => !config.nodes?.find((newNode) => newNode.viewId === node.id),
+      );
+
+      if (removedNodes && removedNodes.length > 0) {
+        setNodes((nds) =>
+          nds.filter(
+            (node) =>
+              !removedNodes.find((removedNode) => removedNode.id === node.id),
+          ),
+        );
+      }
+    }
+  }, [config, viewport]);
+
+  async function exportWorkflow() {
+    const workflow = { nodes, edges };
+    const blob = new Blob([JSON.stringify(workflow, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "workflow.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
-    <div className="bg-default text-default-foreground relative h-full w-full">
+    <div
+      ref={containerRef}
+      className="bg-default text-default-foreground relative h-full w-full"
+      id={`canvas-${config?.viewId}`}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}

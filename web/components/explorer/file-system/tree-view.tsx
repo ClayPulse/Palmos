@@ -1,12 +1,20 @@
 "use client";
 
+import ContextMenu from "@/components/interface/context-menu";
+import Icon from "@/components/misc/icon";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import { AbstractPlatformAPI } from "@/lib/platform-api/abstract-platform-api";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
   ContextMenuState,
   EditorContextType,
   FileSystemObject,
+  PlatformEnum,
   TreeViewGroupRef,
   TreeViewNodeRef,
 } from "@/lib/types";
+import { Button, Input } from "@heroui/react";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import {
   forwardRef,
   Ref,
@@ -17,15 +25,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { EditorContext } from "../providers/editor-context-provider";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { Button, Input } from "@heroui/react";
-import Icon from "../misc/icon";
 import toast from "react-hot-toast";
-import { AbstractPlatformAPI } from "@/lib/platform-api/abstract-platform-api";
-import ContextMenu from "../interface/context-menu";
-import { PlatformEnum } from "@/lib/types";
-import { ViewModeEnum } from "@pulse-editor/shared-utils";
 
 function refreshProjectContent(
   platformApi: AbstractPlatformAPI,

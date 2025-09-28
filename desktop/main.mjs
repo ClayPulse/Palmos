@@ -188,6 +188,15 @@ async function handleCreateProject(event, uri) {
   await fs.promises.mkdir(uri);
 }
 
+async function handleDeleteProject(event, uri) {
+  await fs.promises.rm(uri, { recursive: true, force: true });
+}
+
+async function handleUpdateProject(event, uri, updatedInfo) {
+  const newUri = path.join(path.dirname(uri), updatedInfo.name);
+  await fs.promises.rename(uri, newUri);
+}
+
 async function handleCreateFolder(event, uri) {
   // Create a folder at the uri
   await fs.promises.mkdir(uri);
@@ -272,6 +281,9 @@ app.whenReady().then(() => {
   ipcMain.handle("list-path-content", handleListPathContent);
 
   ipcMain.handle("create-project", handleCreateProject);
+  ipcMain.handle("delete-project", handleDeleteProject);
+  ipcMain.handle("update-project", handleUpdateProject);
+
   ipcMain.handle("create-folder", handleCreateFolder);
   ipcMain.handle("create-file", handleCreateFile);
 

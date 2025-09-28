@@ -1,11 +1,12 @@
-import ModalWrapper from "./modal-wrapper";
+import { getRemoteMFVersion } from "@/lib/module-federation/version";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { Extension, ExtensionMeta, TabItem } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
+import useSWR from "swr";
+import ExtensionGallery from "../extension/extension-gallery";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
-import useSWR from "swr";
-import ExtensionList from "../extension/extension-list";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import ModalWrapper from "./modal-wrapper";
 
 export default function ExtensionMarketplaceModal({
   isOpen,
@@ -45,27 +46,45 @@ export default function ExtensionMarketplaceModal({
     mutate: mutateMarketplaceExtensions,
   } = useSWR<Extension[]>(
     isOpen ? `/api/extension/list` : null,
-    (url: string) =>
-      fetchAPI(url)
-        .then((res) => res.json())
-        .then((body) => {
-          const fetchedExts: ExtensionMeta[] = body;
-          const extensions: Extension[] = fetchedExts.map((ext) => {
-            return {
-              config: {
-                id: ext.name,
-                version: ext.version,
-                author: ext.user ? ext.user.name : ext.org.name,
-                description: ext.description ?? "No description available",
-                displayName: ext.displayName ?? ext.name,
-                visibility: ext.visibility,
-              },
-              isEnabled: true,
-              remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-            };
-          });
-          return extensions;
+    async (url: string) => {
+      const res = await fetchAPI(url);
+      const body = await res.json();
+
+      const fetchedExts: ExtensionMeta[] = body;
+      const extensions: Extension[] = await Promise.all(
+        fetchedExts.map(async (extMeta) => {
+          // If backend does not provide mfVersion, try to load it from the manifest
+          if (!extMeta.mfVersion) {
+            console.warn(
+              `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
+            );
+          }
+          const mfVersion =
+            extMeta.mfVersion ??
+            (await getRemoteMFVersion(
+              `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+              extMeta.name,
+              extMeta.version,
+            ));
+
+          return {
+            config: {
+              id: extMeta.name,
+              version: extMeta.version,
+              author: extMeta.user ? extMeta.user.name : extMeta.org.name,
+              description: extMeta.description ?? "No description available",
+              displayName: extMeta.displayName ?? extMeta.name,
+              visibility: extMeta.visibility,
+              thumbnail: extMeta.thumbnail,
+            },
+            isEnabled: true,
+            remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+            mfVersion: mfVersion,
+          };
         }),
+      );
+      return extensions;
+    },
   );
 
   useEffect(() => {
@@ -99,7 +118,7 @@ export default function ExtensionMarketplaceModal({
           )}
         </div>
 
-        <ExtensionList
+        <ExtensionGallery
           extensions={
             selectedCategory?.name === "Recommended"
               ? (marketplaceExtensions ?? [])

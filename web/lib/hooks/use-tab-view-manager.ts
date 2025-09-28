@@ -1,6 +1,8 @@
-import { useCallback, useContext, useEffect, useState } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { IMCContext } from "@/components/providers/imc-provider";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { useContext, useEffect, useState } from "react";
+import { v4 } from "uuid";
 import {
   AppViewConfig,
   CanvasViewConfig,
@@ -8,7 +10,6 @@ import {
   MenuAction,
   TabView,
 } from "../types";
-import { IMCContext } from "@/components/providers/imc-provider";
 import { useMenuActions } from "./use-menu-actions";
 
 export function useTabViewManager() {
@@ -47,7 +48,7 @@ export function useTabViewManager() {
       name: "Close Workflow",
       actionFunc: async () => {
         if (activeTabView) {
-          closeView(activeTabView);
+          closeTabView(activeTabView);
         }
       },
       menuCategory: "file",
@@ -131,7 +132,7 @@ export function useTabViewManager() {
 
       const existingAppConfig = (
         currentTab.config as CanvasViewConfig
-      ).appConfigs?.find(
+      ).nodes?.find(
         (appConfig) =>
           appConfig.app === installedApp.config.id &&
           appConfig.fileUri === file.name,
@@ -148,11 +149,13 @@ export function useTabViewManager() {
         viewId,
         app: installedApp.config.id,
         fileUri: file.name,
+        recommendedHeight: installedApp.config.recommendedHeight,
+        recommendedWidth: installedApp.config.recommendedWidth,
       };
       const newCanvasConfig: CanvasViewConfig = {
         ...currentTab.config,
-        appConfigs: [
-          ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
+        nodes: [
+          ...((currentTab.config as CanvasViewConfig).nodes ?? []),
           newAppConfig,
         ],
       };
@@ -180,7 +183,7 @@ export function useTabViewManager() {
     return editorContext.persistSettings?.defaultFileTypeExtensionMap?.[suffix];
   }
 
-  function closeView(view: TabView) {
+  function closeTabView(view: TabView) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -206,7 +209,7 @@ export function useTabViewManager() {
   /**
    * Clear all views
    */
-  function closeAllViews() {
+  function closeAllTabViews() {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -235,37 +238,54 @@ export function useTabViewManager() {
     } else if (!imcContext) {
       throw new Error("IMC context is not available");
     }
+
+    const newTabView: TabView = {
+      type,
+      config,
+    };
+
     editorContext.setEditorStates((prev) => {
       return {
         ...prev,
-        tabViews: [
-          ...prev.tabViews,
-          {
-            viewId: config.viewId,
-            type,
-            config,
-          },
-        ],
+        tabViews: [...prev.tabViews, newTabView],
         tabIndex: prev.tabViews.length,
       };
     });
 
-    await imcContext.resolveWhenViewInitialized(config.viewId);
+    if (type === ViewModeEnum.App) {
+      // Wait for app view to be initialized. This is because unlike canvas views,
+      // app views need to load the app first before it can render the view.
+      await imcContext.resolveWhenViewInitialized(config.viewId);
+    } else if (type === ViewModeEnum.Canvas) {
+      // Open explorer for canvas views
+      editorContext.setEditorStates((prev) => ({
+        ...prev,
+        isSideMenuOpen: true,
+      }));
+    }
+
+    return newTabView;
   }
 
   async function createAppViewInCanvasView(appConfig: AppViewConfig) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
-    const currentTab =
-      editorContext.editorStates.tabViews[editorContext.editorStates.tabIndex];
+    let currentTab = activeTabView;
+
+    if (!currentTab) {
+      currentTab = await createTabView(ViewModeEnum.Canvas, {
+        viewId: `canvas-${v4()}`,
+      } as CanvasViewConfig);
+    }
+
     if (currentTab?.type !== ViewModeEnum.Canvas) {
       throw new Error("Current tab is not a canvas");
     }
     const newCanvasConfig: CanvasViewConfig = {
       ...currentTab.config,
-      appConfigs: [
-        ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
+      nodes: [
+        ...((currentTab.config as CanvasViewConfig).nodes ?? []),
         appConfig,
       ],
     };
@@ -282,6 +302,35 @@ export function useTabViewManager() {
     });
 
     await imcContext?.resolveWhenViewInitialized(appConfig.viewId);
+  }
+
+  async function deleteAppViewInCanvasView(viewId: string) {
+    if (!editorContext) {
+      throw new Error("Editor context is not available");
+    }
+    const currentTab = activeTabView;
+    if (currentTab?.type !== ViewModeEnum.Canvas) {
+      throw new Error("Current tab is not a canvas");
+    }
+
+    const newCanvasConfig: CanvasViewConfig = {
+      ...currentTab.config,
+      nodes: (currentTab.config as CanvasViewConfig).nodes?.filter(
+        (config) => config.viewId !== viewId,
+      ),
+    };
+
+    editorContext.setEditorStates((prev) => {
+      const newViews = [...prev.tabViews];
+      newViews[prev.tabIndex] = {
+        ...currentTab,
+        config: newCanvasConfig,
+      };
+      return {
+        ...prev,
+        tabViews: newViews,
+      };
+    });
   }
 
   function getId(nameOrUrl: string) {
@@ -318,7 +367,13 @@ export function useTabViewManager() {
       const canvasView = activeTabView.config as CanvasViewConfig;
 
       // Throw an error if multiple instances of the same app are found
-      const appInstances = canvasView.appConfigs?.filter((app) =>
+      console.log(
+        "Searching for app in canvas:",
+        appId,
+        canvasView,
+        activeTabView,
+      );
+      const appInstances = canvasView.nodes?.filter((app) =>
         isAppNameMatched(app.app, appId),
       );
       if ((appInstances?.length ?? 0) > 1) {
@@ -338,10 +393,11 @@ export function useTabViewManager() {
     selectTab,
     viewCount,
     openFileInView,
-    closeView,
-    closeAllViews,
+    closeTabView,
+    closeAllTabViews,
     createTabView,
     createAppViewInCanvasView,
+    deleteAppViewInCanvasView,
     findAppInTabView,
   };
 }

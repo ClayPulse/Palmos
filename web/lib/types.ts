@@ -80,6 +80,9 @@ export type EditorStates = {
 
   // Command viewer
   isCommandViewerOpen?: boolean;
+
+  // Side menu panel
+  isSideMenuOpen?: boolean;
 };
 
 /**
@@ -148,7 +151,7 @@ export type FileSystemObject = {
 
 export type ProjectInfo = {
   name: string;
-  ctime: Date;
+  ctime?: Date;
 };
 
 export type TreeViewGroupRef = {
@@ -214,12 +217,15 @@ export type AppViewConfig = {
   // Editor only stores command info but do not store or run
   // the actual command handlers.
   dynamicCommands?: CommandInfo[];
+
+  recommendedHeight?: number;
+  recommendedWidth?: number;
 };
 
 export type CanvasViewConfig = {
   viewId: string;
   workflow?: Workflow;
-  appConfigs?: AppViewConfig[];
+  nodes?: AppViewConfig[];
 };
 
 export type TabView = {
@@ -296,6 +302,7 @@ export type Extension = {
   config: ExtensionConfig;
   isEnabled: boolean;
   remoteOrigin: string;
+  mfVersion: string;
 
   // These are commands that can be used without initializing an app.
   // These commands are always available once the extension is loaded and enabled.
@@ -338,6 +345,7 @@ export type Session = {
 export type ExtensionMeta = {
   name: string;
   version: string;
+  mfVersion?: string;
   description?: string;
   displayName?: string;
   user: {
@@ -347,6 +355,7 @@ export type ExtensionMeta = {
     name: string;
   };
   visibility: string;
+  thumbnail?: string;
 };
 // #endregion
 

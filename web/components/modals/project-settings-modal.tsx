@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { EditorContext } from "../providers/editor-context-provider";
 import { ProjectInfo } from "@/lib/types";
+import { isWeb } from "@/lib/platform-api/platform-checker";
 
 export default function ProjectSettingsModal({
   isOpen,
@@ -18,7 +19,6 @@ export default function ProjectSettingsModal({
   projectInfo?: ProjectInfo;
 }) {
   const [projectName, setProjectName] = useState("");
-  const [isUsingManagedBackup, setIsUsingManagedBackup] = useState(false);
 
   const { platformApi } = usePlatformApi();
   const editorContext = useContext(EditorContext);
@@ -35,11 +35,6 @@ export default function ProjectSettingsModal({
       return;
     }
 
-    if (isUsingManagedBackup) {
-      toast.error("Managed Cloud Backup is not yet implemented.");
-      return;
-    }
-
     if (projectName === "") {
       toast.error("Project Name is required.");
       return;
@@ -47,15 +42,22 @@ export default function ProjectSettingsModal({
 
     // Update project
     const homePath = editorContext?.persistSettings?.projectHomePath;
-    if (!homePath) {
+    if (!homePath && !isWeb()) {
       toast.error("Project Home Path is not set.");
       return;
     }
 
-    const oldUri = homePath + "/" + projectInfo?.name;
-    const newUri = homePath + "/" + projectName;
+    if (!projectInfo) {
+      toast.error("No project selected.");
+      return;
+    }
+
+    const uri = homePath
+      ? homePath + "/" + projectInfo?.name
+      : projectInfo?.name;
+
     platformApi
-      .rename(oldUri, newUri)
+      .updateProject(uri, { name: projectName })
       .then(() => {
         toast.success("Project updated.");
         platformApi.listProjects(homePath).then((projects) => {
@@ -79,11 +81,6 @@ export default function ProjectSettingsModal({
       return;
     }
 
-    if (isUsingManagedBackup) {
-      toast.error("Managed Cloud Backup is not yet implemented.");
-      return;
-    }
-
     if (projectName === "") {
       toast.error("Project Name is required.");
       return;
@@ -91,12 +88,12 @@ export default function ProjectSettingsModal({
 
     // Create project
     const homePath = editorContext?.persistSettings?.projectHomePath;
-    if (!homePath) {
+    if (!homePath && !isWeb()) {
       toast.error("Project Home Path is not set.");
       return;
     }
 
-    const uri = homePath + "/" + projectName;
+    const uri = homePath ? homePath + "/" + projectName : projectName;
     platformApi
       .createProject(uri)
       .then(() => {
@@ -116,8 +113,47 @@ export default function ProjectSettingsModal({
       });
   }
 
+  function handleDeleteProject() {
+    if (!platformApi) {
+      toast.error("Unknown platform.");
+      return;
+    }
+    if (!projectInfo) {
+      toast.error("No project selected.");
+      return;
+    }
+
+    const homePath = editorContext?.persistSettings?.projectHomePath;
+    if (!homePath && !isWeb()) {
+      toast.error("Project Home Path is not set.");
+      return;
+    }
+    const uri = homePath ? homePath + "/" + projectInfo.name : projectInfo.name;
+    platformApi
+      .deleteProject(uri)
+      .then(() => {
+        toast.success("Project deleted.");
+        platformApi.listProjects(homePath).then((projects) => {
+          editorContext?.setEditorStates((prev) => {
+            return {
+              ...prev,
+              projectsInfo: projects,
+            };
+          });
+        });
+        setIsOpen(false);
+      })
+      .catch((err) => {
+        toast.error("Failed to delete project.");
+      });
+  }
+
   return (
-    <ModalWrapper isOpen={isOpen} setIsOpen={setIsOpen} title="Project Settings">
+    <ModalWrapper
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      title="Project Settings"
+    >
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
         <Input
           label="Project Name"
@@ -125,40 +161,22 @@ export default function ProjectSettingsModal({
           value={projectName}
           onValueChange={setProjectName}
         />
-        <div className="w-full space-y-1">
-          <p>Source Control (Optional)</p>
-          <Switch
-            isSelected={isUsingManagedBackup}
-            onValueChange={setIsUsingManagedBackup}
-          >
-            {isUsingManagedBackup
-              ? "Enable Managed Cloud Backup"
-              : "GitHub as Source Control"}
-          </Switch>
-          {isUsingManagedBackup ? (
-            <p className="text-xs">
-              Easy to use for projects that involves multiple media or large
-              files.
-              <br />
-              e.g. image, audio, video.
-            </p>
+
+        <div className="flex gap-x-2">
+          {projectInfo ? (
+            <Button onPress={handleUpdateProject}>Update</Button>
           ) : (
-            <p className="text-xs">
-              Best for projects that involves code and text files only.
-            </p>
+            <Button onPress={handleCreateProject} color="primary">
+              Create
+            </Button>
+          )}
+
+          {projectInfo && (
+            <Button onPress={handleDeleteProject} color="danger">
+              Delete
+            </Button>
           )}
         </div>
-        {!isUsingManagedBackup && (
-          <Input
-            label="Configure GitHub Remote"
-            placeholder="e.g. https://github.com/Shellishack/pulse-editor.git"
-          />
-        )}
-        {projectInfo ? (
-          <Button onPress={handleUpdateProject}>Update</Button>
-        ) : (
-          <Button onPress={handleCreateProject}>Create</Button>
-        )}
       </div>
     </ModalWrapper>
   );

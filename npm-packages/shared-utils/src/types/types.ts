@@ -122,7 +122,7 @@ export type ExtensionConfig = {
   materialIcon?: string;
   extensionType?: ExtensionTypeEnum;
   fileTypes?: string[];
-  preview?: string;
+  thumbnail?: string;
   enabledPlatforms?: Record<string, boolean>;
 
   // Extension or user installed agents
@@ -131,6 +131,9 @@ export type ExtensionConfig = {
   commandsInfoList?: CommandInfo[];
   // Visibility
   visibility: string;
+  // Recommended dimensions for app view in canvas
+  recommendedHeight?: number;
+  recommendedWidth?: number;
 };
 
 export type CommandInfo = {

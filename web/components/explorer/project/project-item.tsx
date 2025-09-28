@@ -1,14 +1,11 @@
-"use client";
-
-import { useContext, useState } from "react";
-import { EditorContext } from "../providers/editor-context-provider";
-import { Button } from "@heroui/react";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { ContextMenuState, ProjectInfo } from "@/lib/types";
-import ContextMenu from "../interface/context-menu";
-import ProjectSettingsModal from "../modals/project-settings-modal";
+import { Button } from "@heroui/react";
+import { useContext, useState } from "react";
+import ContextMenu from "../../interface/context-menu";
+import { EditorContext } from "../../providers/editor-context-provider";
 
-function ProjectTab({
+export default function ProjectItem({
   project,
   setSettingsOpen,
   setSettingsProject,
@@ -25,24 +22,36 @@ function ProjectTab({
     isOpen: false,
   });
 
-  function openProject(projectName: string) {
-    const uri =
-      editorContext?.persistSettings?.projectHomePath + "/" + projectName;
+  const projectName = project.name;
+  const projectCtime = project.ctime
+    ? formatDateTime(project.ctime)
+    : "Unknown";
 
-    platformApi
-      ?.listPathContent(uri, {
-        include: "all",
-        isRecursive: true,
-      })
-      .then((objects) => {
-        editorContext?.setEditorStates((prev) => {
-          return {
-            ...prev,
-            project: projectName,
-            projectContent: objects,
-          };
-        });
-      });
+  function openProject(projectName: string) {
+    editorContext?.setEditorStates((prev) => {
+      return {
+        ...prev,
+        project: projectName,
+      };
+    });
+
+    // TODO: move this to when workspace is loaded
+    // const uri =
+    //   editorContext?.persistSettings?.projectHomePath + "/" + projectName;
+    // platformApi
+    //   ?.listPathContent(uri, {
+    //     include: "all",
+    //     isRecursive: true,
+    //   })
+    //   .then((objects) => {
+    //     editorContext?.setEditorStates((prev) => {
+    //       return {
+    //         ...prev,
+    //         project: projectName,
+    //         projectContent: objects,
+    //       };
+    //     });
+    //   });
   }
 
   function formatDateTime(date: Date) {
@@ -63,7 +72,7 @@ function ProjectTab({
         onPress={(e) => {
           // Only open project if context menu is not open
           if (!contextMenuState.isOpen) {
-            openProject(project.name);
+            openProject(projectName);
           }
         }}
         onContextMenu={(e) => {
@@ -81,16 +90,14 @@ function ProjectTab({
         }}
       >
         <div className="flex w-full flex-col items-start justify-center">
-          <p>{project.name}</p>
-          <p className="text-xs">
-            {"Created: " + formatDateTime(project.ctime)}
-          </p>
+          <p>{projectName}</p>
+          <p className="text-xs">{"Created: " + projectCtime}</p>
         </div>
       </Button>
       <ContextMenu state={contextMenuState} setState={setContextMenuState}>
         <div className="flex flex-col">
           <Button
-            className="h-12 text-medium sm:h-8 sm:text-sm"
+            className="text-medium h-12 sm:h-8 sm:text-sm"
             variant="light"
             onPress={(e) => {
               setSettingsOpen(true);
@@ -101,39 +108,13 @@ function ProjectTab({
             <p className="w-full text-start">Project Settings</p>
           </Button>
           <Button
-            className="h-12 text-medium sm:h-8 sm:text-sm"
+            className="text-medium h-12 sm:h-8 sm:text-sm"
             variant="light"
           >
             <p className="w-full text-start">Select Multiple</p>
           </Button>
         </div>
       </ContextMenu>
-    </div>
-  );
-}
-
-export default function ProjectList() {
-  const editorContext = useContext(EditorContext);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsProject, setSettingsProject] = useState<
-    ProjectInfo | undefined
-  >(undefined);
-
-  return (
-    <div className="flex w-full flex-col gap-2">
-      {editorContext?.editorStates.projectsInfo?.map((project, index) => (
-        <ProjectTab
-          key={index}
-          project={project}
-          setSettingsOpen={setSettingsOpen}
-          setSettingsProject={setSettingsProject}
-        />
-      ))}
-      <ProjectSettingsModal
-        isOpen={settingsOpen}
-        setIsOpen={setSettingsOpen}
-        projectInfo={settingsProject}
-      />
     </div>
   );
 }
