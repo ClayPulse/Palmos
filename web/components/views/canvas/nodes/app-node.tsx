@@ -3,6 +3,7 @@ import { AppViewConfig } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { Node } from "@xyflow/react";
 import { memo } from "react";
+import { v4 } from "uuid";
 import BaseAppView from "../../base/base-app-view";
 import CanvasNodeViewLayout from "../../layout/canvas-node-view-layout";
 
@@ -15,7 +16,10 @@ const AppNode = memo((props: any) => {
   const { createTabView, deleteAppViewInCanvasView } = useTabViewManager();
 
   async function openViewInFullScreen() {
-    await createTabView(ViewModeEnum.App, config);
+    await createTabView(ViewModeEnum.App, {
+      ...config,
+      viewId: v4(),
+    });
   }
 
   return (
