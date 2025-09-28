@@ -9,7 +9,7 @@ export async function getRemoteMFVersion(
   remoteOrigin: string,
   id: string,
   version: string,
-): Promise<string> {
+): Promise<string | undefined> {
   try {
     const mfManifest = await fetch(
       `${getRemoteClientBaseURL(remoteOrigin, id, version)}/mf-manifest.json`,
@@ -18,6 +18,6 @@ export async function getRemoteMFVersion(
     return mfManifestJson.metaData.pluginVersion;
   } catch (error) {
     console.warn("Error fetching remote MF version:", error);
-    return "unknown";
+    return undefined;
   }
 }
