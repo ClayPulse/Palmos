@@ -1,5 +1,6 @@
 import ExtensionPreview from "@/components/extension/extension-preview";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppViewConfig } from "@/lib/types";
 import { Button } from "@heroui/react";
@@ -10,6 +11,7 @@ export default function AppExplorer() {
   const editorContext = useContext(EditorContext);
 
   const { createAppViewInCanvasView } = useTabViewManager();
+  const { isLandscape } = useScreenSize();
 
   const extensions = editorContext?.persistSettings?.extensions ?? [];
 
@@ -36,6 +38,13 @@ export default function AppExplorer() {
             recommendedWidth: ext.config.recommendedWidth,
           };
           createAppViewInCanvasView(config);
+          console.log("Is Landscape:", isLandscape);
+          if (!isLandscape) {
+            editorContext?.setEditorStates((prev) => ({
+              ...prev,
+              isSideMenuOpen: false,
+            }));
+          }
         }}
       />
     </div>

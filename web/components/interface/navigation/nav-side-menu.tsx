@@ -4,12 +4,12 @@ import Tabs from "@/components/misc/tabs";
 import ProjectSettingsModal from "@/components/modals/project-settings-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import useExplorer from "@/lib/hooks/use-explorer";
+import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { isWeb } from "@/lib/platform-api/platform-checker";
 import { TabItem } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
-import { useMediaQuery } from "react-responsive";
 import FileSystemExplorer from "../../explorer/file-system/fs-explorer";
 import Icon from "../../misc/icon";
 
@@ -55,9 +55,7 @@ export default function NavSideMenu({
 }
 
 function MenuPanel({ children }: { children?: React.ReactNode }) {
-  const isLandscape = useMediaQuery({
-    query: "(min-width: 768px)",
-  });
+  const { isLandscape } = useScreenSize();
 
   return (
     <>
