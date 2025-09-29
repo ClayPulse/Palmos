@@ -1,5 +1,17 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.36
+
+### Patch Changes
+
+- Add queue to command react hook
+
+## 0.1.1-alpha.35
+
+### Patch Changes
+
+- Add env hook
+
 ## 0.1.1-alpha.34
 
 ### Patch Changes

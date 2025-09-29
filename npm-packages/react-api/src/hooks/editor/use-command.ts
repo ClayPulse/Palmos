@@ -4,8 +4,8 @@ import {
   IMCMessageTypeEnum,
   ReceiverHandler,
 } from "@pulse-editor/shared-utils";
+import { useEffect, useRef, useState } from "react";
 import useIMC from "../../lib/use-imc";
-import { useEffect, useState } from "react";
 
 /**
  * Register an extension command to listen to IMC messages from the core,
@@ -17,7 +17,8 @@ import { useEffect, useState } from "react";
  */
 export default function useCommand(
   commandInfo: CommandInfo,
-  callbackHandler?: (args: any) => Promise<string | void>
+  callbackHandler?: (args: any) => Promise<string | void>,
+  isExtReady: boolean = true
 ) {
   const { isReady, imc } = useIMC(getReceiverHandlerMap());
 
@@ -25,25 +26,29 @@ export default function useCommand(
     ((args: any) => Promise<any>) | undefined
   >(undefined);
 
+  // Queue to hold commands until extension is ready
+  const commandQueue = useRef<{ args: any; resolve: (v: any) => void }[]>([]);
+
+  async function executeCommand(args: any) {
+    if (!handler) return;
+
+    const res = await handler(args);
+    return res;
+  }
+
   function getReceiverHandlerMap() {
     const receiverHandlerMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
       [
         IMCMessageTypeEnum.EditorRunExtCommand,
-        async (senderWindow: Window, message: IMCMessage) => {
+        async (_senderWindow: Window, message: IMCMessage) => {
           if (!commandInfo) {
             throw new Error("Extension command is not available");
           }
 
-          const {
-            name,
-            args,
-          }: {
-            name: string;
-            args: any;
-          } = message.payload;
+          const { name, args }: { name: string; args: any } = message.payload;
 
           if (name === commandInfo.name) {
-            // Check if the parameters match the command's parameters
+            // Validate parameters
             const commandParameters = commandInfo.parameters;
             if (
               Object.keys(args).length !== Object.keys(commandParameters).length
@@ -54,6 +59,7 @@ export default function useCommand(
                 }, got ${Object.keys(args).length}`
               );
             }
+
             for (const [key, value] of Object.entries(args)) {
               if (commandInfo.parameters[key] === undefined) {
                 throw new Error(`Invalid parameter: ${key}`);
@@ -67,13 +73,15 @@ export default function useCommand(
               }
             }
 
-            // Execute the command handler with the parameters
-            if (handler) {
-              const res = await handler(args);
-              if (res) {
-                return res;
-              }
+            // If extension is ready, execute immediately
+            if (isExtReady) {
+              return await executeCommand(args);
             }
+
+            // Otherwise, queue the command and return when executed
+            return new Promise((resolve) => {
+              commandQueue.current.push({ args, resolve });
+            });
           }
         },
       ],
@@ -81,9 +89,21 @@ export default function useCommand(
     return receiverHandlerMap;
   }
 
+  // Flush queued commands when isExtReady becomes true
+  useEffect(() => {
+    if (isExtReady && commandQueue.current.length > 0) {
+      const pending = [...commandQueue.current];
+      commandQueue.current = [];
+      pending.forEach(async ({ args, resolve }) => {
+        const res = await executeCommand(args);
+        resolve(res);
+      });
+    }
+  }, [isExtReady]);
+
   useEffect(() => {
     imc?.updateReceiverHandlerMap(getReceiverHandlerMap());
-  }, [handler, imc]);
+  }, [handler, imc, isExtReady]);
 
   useEffect(() => {
     setHandler(() => callbackHandler);

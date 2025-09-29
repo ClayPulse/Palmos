@@ -130,6 +130,9 @@ export type PersistentSettings = {
   mobileHost?: string;
 
   isUseManagedCloud?: boolean;
+
+  // Environment variables
+  envs?: Record<string, string>;
 };
 // #endregion
 

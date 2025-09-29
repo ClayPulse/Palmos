@@ -1,21 +1,21 @@
 export function parseJsonChunk(chunk: string) {
   const jsonObjects = [];
-  // Replace multiple spaces or other delimiters with a single space and trim
-  const cleanedChunk = chunk.trim();
+  let braceCount = 0;
+  let current = "";
 
-  // Use a regular expression to match JSON objects
-  // This assumes objects are separated by spaces and are valid JSON
-  const jsonRegex = /({[^{}]*})/g;
-  const matches = cleanedChunk.match(jsonRegex);
+  for (const char of chunk.trim()) {
+    if (char === "{") braceCount++;
+    if (char === "}") braceCount--;
 
-  if (matches) {
-    for (const match of matches) {
+    current += char;
+
+    if (braceCount === 0 && current.trim()) {
       try {
-        const parsed = JSON.parse(match);
-        jsonObjects.push(parsed);
-      } catch (error) {
-        console.error("Error parsing JSON object:", match, error);
+        jsonObjects.push(JSON.parse(current));
+      } catch (e) {
+        console.error("Error parsing JSON object:", current, e);
       }
+      current = "";
     }
   }
 

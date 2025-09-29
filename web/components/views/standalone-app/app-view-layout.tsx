@@ -1,6 +1,6 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { useState } from "react";
-import AppControl from "./controls/app-control";
+import AppControl from "./app-control";
 
 export default function AppViewLayout({
   height = "100%",

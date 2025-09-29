@@ -1,5 +1,20 @@
 "use client";
 
+import { runAgentMethodLocal } from "@/lib/agent/agent-runner";
+import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
+import { getLLMModel } from "@/lib/modalities/llm/llm";
+import { recognizeText } from "@/lib/modalities/ocr/ocr";
+import { getSTTModel } from "@/lib/modalities/stt/stt";
+import { getTTSModel } from "@/lib/modalities/tts/tts";
+import {
+  getDefaultImageModelConfig,
+  getDefaultLLMConfig,
+  getDefaultSTTConfig,
+  getDefaultTTSConfig,
+  getDefaultVideoModelConfig,
+} from "@/lib/modalities/utils";
+import { getVideoGenModel } from "@/lib/modalities/video-gen/video-gen";
+import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { IMCContextType } from "@/lib/types";
 import {
   ImageModelConfig,
@@ -13,21 +28,6 @@ import {
 } from "@pulse-editor/shared-utils";
 import { createContext, useContext, useEffect, useState } from "react";
 import { EditorContext } from "./editor-context-provider";
-import { getAPIKey } from "@/lib/settings/api-manager-utils";
-import { runAgentMethodLocal } from "@/lib/agent/agent-runner";
-import { getLLMModel } from "@/lib/modalities/llm/llm";
-import { getTTSModel } from "@/lib/modalities/tts/tts";
-import { getSTTModel } from "@/lib/modalities/stt/stt";
-import { recognizeText } from "@/lib/modalities/ocr/ocr";
-import {
-  getDefaultImageModelConfig,
-  getDefaultLLMConfig,
-  getDefaultSTTConfig,
-  getDefaultTTSConfig,
-  getDefaultVideoModelConfig,
-} from "@/lib/modalities/utils";
-import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
-import { getVideoGenModel } from "@/lib/modalities/video-gen/video-gen";
 
 export const IMCContext = createContext<IMCContextType | undefined>(undefined);
 
@@ -416,6 +416,16 @@ export default function InterModuleCommunicationProvider({
           } = message.payload;
 
           // const model = getMusicGenModel()
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorGetEnv,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          return editorContext?.persistSettings?.envs ?? {};
         },
       ],
     ]);

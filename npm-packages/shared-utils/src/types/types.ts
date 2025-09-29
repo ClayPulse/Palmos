@@ -33,6 +33,8 @@ export enum IMCMessageTypeEnum {
   EditorThemeUpdate = "editor-theme-update",
   // Send notification
   EditorShowNotification = "editor-show-notification",
+  // Get environment variables
+  EditorGetEnv = "editor-get-env",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)

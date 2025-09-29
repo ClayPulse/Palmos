@@ -1,6 +1,6 @@
 import { AppViewConfig } from "@/lib/types";
 import BaseAppView from "../base/base-app-view";
-import AppViewLayout from "../layout/app-view-layout";
+import AppViewLayout from "./app-view-layout";
 
 export default function StandaloneAppView({
   config,
