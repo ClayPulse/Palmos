@@ -277,11 +277,12 @@ export function useTabViewManager() {
       currentTab = await createTabView(ViewModeEnum.Canvas, {
         viewId: `canvas-${v4()}`,
       } as CanvasViewConfig);
+    } else if (currentTab?.type !== ViewModeEnum.Canvas) {
+      currentTab = await createTabView(ViewModeEnum.Canvas, {
+        viewId: `canvas-${v4()}`,
+      } as CanvasViewConfig);
     }
 
-    if (currentTab?.type !== ViewModeEnum.Canvas) {
-      throw new Error("Current tab is not a canvas");
-    }
     const newCanvasConfig: CanvasViewConfig = {
       ...currentTab.config,
       nodes: [

@@ -83,6 +83,7 @@ export type EditorStates = {
 
   // Side menu panel
   isSideMenuOpen?: boolean;
+  isMarketplaceOpen?: boolean;
 };
 
 /**

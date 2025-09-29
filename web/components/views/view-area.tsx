@@ -1,5 +1,5 @@
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
+import { AppViewConfig, CanvasViewConfig, Extension } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useSearchParams } from "next/navigation";
@@ -27,6 +27,7 @@ export default function ViewArea() {
     selectTab,
     closeTabView,
     createTabView,
+    createAppViewInCanvasView,
     deleteAppViewInCanvasView,
     activeTabView,
   } = useTabViewManager();
@@ -130,61 +131,83 @@ export default function ViewArea() {
     console.log("Tab views changed:", tabViews);
   }, [tabViews]);
 
-  if (tabViews.length === 0) {
-    return <HomeView createNewCanvas={createNewCanvas} />;
-  }
-
-  if (tabIndex < 0 || tabIndex >= tabViews.length) {
-    return <div>No view selected</div>;
-  }
-
   return (
     <div
-      className="grid h-full w-full grid-rows-1 gap-y-0.5 px-2 pt-17 data-[is-show-tabs=true]:grid-rows-[max-content_auto]"
-      data-is-show-tabs={isShowTabs}
+      className="w-full h-full"
+      onDragOver={(e) => {
+        e.preventDefault();
+      }}
+      onDrop={(e) => {
+        e.preventDefault();
+        const data = e.dataTransfer.getData("text/plain");
+        console.log("Dropped item:", data);
+        const ext: Extension = JSON.parse(data);
+        const config: AppViewConfig = {
+          app: ext.config.id,
+          viewId: v4(),
+          recommendedHeight: ext.config.recommendedHeight,
+          recommendedWidth: ext.config.recommendedWidth,
+        };
+        createAppViewInCanvasView(config);
+      }}
     >
-      {isShowTabs && (
-        <div className="border-default-border bg-content2 w-full rounded-lg py-0.5">
-          <Tabs
-            tabItems={tabItems}
-            selectedItem={tabItems[tabIndex] ? tabItems[tabIndex] : undefined}
-            setSelectedItem={(item) => {
-              const index = tabItems.findIndex(
-                (tab) => tab.name === item?.name,
-              );
-              selectTab(index !== -1 ? index : 0);
-            }}
-            isShowPagination={true}
-            onTabClose={(item) => {
-              const index = tabItems.findIndex(
-                (tab) => tab.name === item?.name,
-              );
-              if (index !== -1) {
-                closeTabView(tabViews[index]);
-              }
-            }}
-          />
+      {tabViews.length === 0 ? (
+        <HomeView createNewCanvas={createNewCanvas} />
+      ) : tabIndex < 0 || tabIndex >= tabViews.length ? (
+        <div>No view selected</div>
+      ) : (
+        <div
+          className="grid h-full w-full grid-rows-1 gap-y-0.5 px-2 pt-17 data-[is-show-tabs=true]:grid-rows-[max-content_auto]"
+          data-is-show-tabs={isShowTabs}
+        >
+          {isShowTabs && (
+            <div className="border-default-border bg-content2 w-full rounded-lg py-0.5">
+              <Tabs
+                tabItems={tabItems}
+                selectedItem={
+                  tabItems[tabIndex] ? tabItems[tabIndex] : undefined
+                }
+                setSelectedItem={(item) => {
+                  const index = tabItems.findIndex(
+                    (tab) => tab.name === item?.name,
+                  );
+                  selectTab(index !== -1 ? index : 0);
+                }}
+                isShowPagination={true}
+                onTabClose={(item) => {
+                  const index = tabItems.findIndex(
+                    (tab) => tab.name === item?.name,
+                  );
+                  if (index !== -1) {
+                    closeTabView(tabViews[index]);
+                  }
+                }}
+              />
+            </div>
+          )}
+          <div className="h-full w-full">
+            {tabViews.map((tabView, idx) => (
+              <div
+                key={tabView.config.viewId}
+                data-is-active={idx === tabIndex}
+                className="hidden h-full w-full data-[is-active=true]:block"
+              >
+                {tabView.type === ViewModeEnum.App ? (
+                  <MemoizedStandaloneAppView
+                    config={tabView.config as AppViewConfig}
+                  />
+                ) : tabView.type === ViewModeEnum.Canvas ? (
+                  <MemoizedCanvasView
+                    config={tabView.config as CanvasViewConfig}
+                  />
+                ) : (
+                  <div>Unknown view type</div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
-      <div className="h-full w-full">
-        {tabViews.map((tabView, idx) => (
-          <div
-            key={tabView.config.viewId}
-            data-is-active={idx === tabIndex}
-            className="hidden h-full w-full data-[is-active=true]:block"
-          >
-            {tabView.type === ViewModeEnum.App ? (
-              <MemoizedStandaloneAppView
-                config={tabView.config as AppViewConfig}
-              />
-            ) : tabView.type === ViewModeEnum.Canvas ? (
-              <MemoizedCanvasView config={tabView.config as CanvasViewConfig} />
-            ) : (
-              <div>Unknown view type</div>
-            )}
-          </div>
-        ))}
-      </div>
     </div>
   );
 }

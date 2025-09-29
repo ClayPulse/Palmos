@@ -24,7 +24,7 @@ export default function NavSideMenu({
     <AnimatePresence>
       {isMenuOpen && (
         <MenuPanel>
-          <div className="h-full w-full min-[768px]:py-2 min-[768px]:pr-1 min-[768px]:pl-2">
+          <div className="h-full w-full min-[768px]:py-2 min-[768px]:pr-1 min-[768px]:pl-2 overflow-y-hidden">
             <div className="bg-content2 flex h-full w-full flex-col overflow-hidden shadow-md min-[768px]:rounded-xl">
               <div className="flex w-full items-center px-2 py-1 max-[768px]:justify-end">
                 <Button
@@ -170,7 +170,7 @@ function PanelContent({
   }
 
   return (
-    <div className="relative h-full w-full px-4">
+    <div className="relative h-full w-full grid grid-rows-[max-content_auto] overflow-y-hidden">
       <div className="flex w-full justify-center">
         <div className="w-fit">
           <Tabs
@@ -186,11 +186,13 @@ function PanelContent({
           />
         </div>
       </div>
-      {tabItems[selectedTabIndex]?.name === "Apps" ? (
-        <AppExplorer />
-      ) : (
-        <FileSystemExplorer setIsMenuOpen={setIsMenuOpen} />
-      )}
+      <div className="h-full w-full overflow-y-hidden">
+        {tabItems[selectedTabIndex]?.name === "Apps" ? (
+          <AppExplorer />
+        ) : (
+          <FileSystemExplorer setIsMenuOpen={setIsMenuOpen} />
+        )}
+      </div>
     </div>
   );
 }

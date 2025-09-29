@@ -102,23 +102,7 @@ export default function FileSystemExplorer({
 
   // Browse inside a project
   return (
-    <div className="relative h-full w-full">
-      {/* <div className="flex w-full justify-center">
-          <div className="w-fit">
-            <Tabs
-              tabItems={tabItems}
-              selectedItem={tabItems[selectedTabIndex]}
-              setSelectedItem={(item) => {
-                const index = tabItems.findIndex(
-                  (tab) => tab.name === item?.name,
-                );
-                setSelectedTabIndex(index !== -1 ? index : 0);
-              }}
-              isClosable={false}
-            />
-          </div>
-        </div> */}
-
+    <div className="relative h-full w-full px-2 py-1">
       <div className="flex h-full w-full flex-col space-y-2">
         <div className="bg-default text-default-foreground flex h-10 w-full items-center rounded-xl px-3">
           <div className="flex w-full">
