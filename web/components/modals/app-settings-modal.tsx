@@ -58,6 +58,9 @@ function EditorSettings({
   editorContext?: EditorContextType;
 }) {
   const { selectAndSetProjectHome } = useExplorer();
+  const [newEnvKey, setNewEnvKey] = useState<string>("");
+  const [newEnvValue, setNewEnvValue] = useState<string>("");
+
   return (
     <div>
       <p className="text-medium pb-2 font-bold">Editor Settings</p>
@@ -104,6 +107,88 @@ function EditorSettings({
             </Button>
           </div>
         )}
+
+        {/* Environment Variables */}
+        <p className="text-content4-foreground text-sm">
+          Environment Variables:
+        </p>
+        {Object.entries(editorContext?.persistSettings?.envs ?? {}).length >
+          0 && (
+          <div className="space-y-1">
+            {Object.entries(editorContext?.persistSettings?.envs ?? {}).map(
+              ([key, value]) => (
+                <div className="flex items-center gap-2" key={key}>
+                  <div className="w-1/3 break-all font-mono text-sm">{key}</div>
+                  <div className="w-2/3 break-all font-mono text-sm">
+                    {value}
+                  </div>
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    onPress={() => {
+                      editorContext?.setPersistSettings((prev) => {
+                        const newEnvs = { ...prev?.envs };
+                        delete newEnvs[key];
+                        return {
+                          ...prev,
+                          envs: newEnvs,
+                        };
+                      });
+                    }}
+                  >
+                    <Icon name="delete" className="text-danger!" />
+                  </Button>
+                </div>
+              ),
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-x-1 items-center">
+          <Input
+            label="Add New Variable"
+            size="sm"
+            value={newEnvKey}
+            onValueChange={setNewEnvKey}
+          />
+          <Input
+            label="Value"
+            size="sm"
+            value={newEnvValue}
+            onValueChange={setNewEnvValue}
+          />
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={() => {
+              if (newEnvKey.trim() === "") {
+                toast.error("Key cannot be empty");
+                return;
+              }
+              editorContext?.setPersistSettings((prev) => {
+                return {
+                  ...prev,
+                  envs: {
+                    ...prev?.envs,
+                    [newEnvKey]: newEnvValue,
+                  },
+                };
+              });
+            }}
+          >
+            <Icon name="add" />
+          </Button>
+        </div>
+        <div className="flex flex-col w-full">
+          <Button
+            onPress={() => {
+              // Refresh page
+              window.location.reload();
+            }}
+          >
+            Restart to Apply
+          </Button>
+        </div>
       </div>
     </div>
   );
@@ -812,8 +897,7 @@ function DevExtensionSettings({
   const [devExtensionId, setDevExtensionId] = useState<string>("");
   const [devExtensionVersion, setDevExtensionVersion] = useState<string>("");
 
-  const { installExtension } =
-    useExtensionManager();
+  const { installExtension } = useExtensionManager();
 
   // Load installed extensions
   useEffect(() => {

@@ -1,3 +1,5 @@
+import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { ChatPromptTemplate } from "@langchain/core/prompts";
 import {
   Agent,
   AgentMethod,
@@ -8,10 +10,8 @@ import {
   isArrayType,
   isObjectType,
 } from "@pulse-editor/shared-utils";
-import { getLLMModel } from "../modalities/llm/llm";
 import toast from "react-hot-toast";
-import { ChatPromptTemplate } from "@langchain/core/prompts";
-import { JsonOutputParser } from "@langchain/core/output_parsers";
+import { getLLMModel } from "../modalities/llm/llm";
 import { fetchAPI } from "../pulse-editor-website/backend";
 import { parseJsonChunk } from "./stream-chunk-parser";
 
@@ -145,8 +145,8 @@ export async function getAgentPrompt(
   const userPromptTemplate = `\
 ${method.prompt}
 
-Finally, you must return a valid JSON object string. The requirements for the JSON object are as follows,
-you must make sure the JSON string is parsable and valid:
+Finally, you must return a valid JSON object string in the required format. The requirements for the JSON object are as follows,
+you must make sure the JSON string is parse-able and valid:
 \`\`\`
 {{
   ${Array.from(Object.entries(method.returns)).map(
@@ -178,7 +178,7 @@ async function extractReturns(result: string): Promise<Record<string, any>> {
 function getReturnVariablePrompt(variable: TypedVariable) {
   const typePrompt = getReturnVariableTypePrompt(variable.type);
 
-  return `(Return type: ${typePrompt}. Description: ${variable.description}.)`;
+  return `(Return type: ${typePrompt} Description: ${variable.description}.)`;
 }
 
 function getReturnVariableTypePrompt(type: TypedVariableType): string {
@@ -196,11 +196,11 @@ function getReturnVariableTypePrompt(type: TypedVariableType): string {
     );
 
     const typePrompt = `An object with the following properties: 
-\`\`\`
+"""
 {{
   ${properties.join(", ")}
 }}
-\`\`\`
+"""
 `;
 
     return typePrompt;

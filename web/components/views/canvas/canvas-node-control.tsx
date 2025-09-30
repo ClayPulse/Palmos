@@ -6,9 +6,13 @@ import { NodeResizeControl } from "@xyflow/react";
 export default function CanvasNodeControl({
   controlActions,
   setIsResizing,
+  isShowingWorkflowConnector,
+  setIsShowingWorkflowConnector,
 }: {
   controlActions: Record<string, (() => void) | undefined>;
   setIsResizing: (resizing: boolean) => void;
+  isShowingWorkflowConnector: boolean;
+  setIsShowingWorkflowConnector: (showing: boolean) => void;
 }) {
   return (
     <>
@@ -22,6 +26,19 @@ export default function CanvasNodeControl({
         }}
       >
         <Icon name="fullscreen" />
+      </Button>
+
+      <Button
+        isIconOnly
+        variant="light"
+        size="sm"
+        onPress={() => {
+          setIsShowingWorkflowConnector(!isShowingWorkflowConnector);
+        }}
+        className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
+        data-active={isShowingWorkflowConnector ? "true" : "false"}
+      >
+        <Icon name="swap_calls" />
       </Button>
 
       <div className="p-3">

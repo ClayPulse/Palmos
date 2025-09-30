@@ -1,4 +1,5 @@
 import useCommands from "@/lib/hooks/use-commands";
+import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import { Command } from "@/lib/types";
 import {
   addToast,
@@ -10,11 +11,10 @@ import {
   Spinner,
 } from "@heroui/react";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
-import { EditorContext } from "../providers/editor-context-provider";
-import Icon from "../misc/icon";
-import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import Icon from "../misc/icon";
+import { EditorContext } from "../providers/editor-context-provider";
 
 const inputPlaceholders = [
   "Type anything...",
@@ -236,6 +236,14 @@ export default function CommandViewer() {
                   </Button>
                 </div>
               )}
+              {inputTextValue && (
+                <Kbd>
+                  <div className="flex gap-1 items-center">
+                    <Icon name="auto_awesome" />
+                    Enter
+                  </div>
+                </Kbd>
+              )}
               <Button
                 isIconOnly
                 variant="light"
@@ -290,46 +298,48 @@ export default function CommandViewer() {
           </div>
         )}
 
-        <div className="bg-content1 w-80 rounded-2xl shadow-md">
-          <div className="px-3 pt-2">
-            <p className="text-sm font-bold whitespace-nowrap">
-              Found {commands.length} commands
-            </p>
-          </div>
-          <Listbox
-            selectionMode="single"
-            selectedKeys={
-              selectCommandIndex === -1 ? [] : [selectCommandIndex.toString()]
-            }
-            onSelectionChange={(selection) => {
-              const key = selection as any;
-              const index = key.currentKey
-                ? parseInt(key.currentKey as string)
-                : selectCommandIndex;
+        {history.length === 0 && (
+          <div className="bg-content1 w-80 rounded-2xl shadow-md">
+            <div className="px-3 pt-2">
+              <p className="text-sm font-bold whitespace-nowrap">
+                Found {commands.length} commands
+              </p>
+            </div>
+            <Listbox
+              selectionMode="single"
+              selectedKeys={
+                selectCommandIndex === -1 ? [] : [selectCommandIndex.toString()]
+              }
+              onSelectionChange={(selection) => {
+                const key = selection as any;
+                const index = key.currentKey
+                  ? parseInt(key.currentKey as string)
+                  : selectCommandIndex;
 
-              setSelectCommandIndex(index);
-              runCommandCallback(commands[index]);
-            }}
-            label="Command Suggestions"
-          >
-            {commands.map((command, index) => (
-              <ListboxItem
-                key={index.toString()}
-                className="data-[is-selected=true]:bg-primary/20"
-                data-is-selected={selectCommandIndex === index}
-                endContent={
-                  selectCommandIndex === index && (
-                    <div className="absolute right-7">
-                      <Kbd>Ctrl + Enter</Kbd>
-                    </div>
-                  )
-                }
-              >
-                {command.commandInfo.name}
-              </ListboxItem>
-            ))}
-          </Listbox>
-        </div>
+                setSelectCommandIndex(index);
+                runCommandCallback(commands[index]);
+              }}
+              label="Command Suggestions"
+            >
+              {commands.map((command, index) => (
+                <ListboxItem
+                  key={index.toString()}
+                  className="data-[is-selected=true]:bg-primary/20"
+                  data-is-selected={selectCommandIndex === index}
+                  endContent={
+                    selectCommandIndex === index && (
+                      <div className="absolute right-7">
+                        <Kbd>Ctrl + Enter</Kbd>
+                      </div>
+                    )
+                  }
+                >
+                  {command.commandInfo.name}
+                </ListboxItem>
+              ))}
+            </Listbox>
+          </div>
+        )}
       </div>
     </div>
   );

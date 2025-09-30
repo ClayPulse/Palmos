@@ -1,16 +1,13 @@
-import { useContext, useEffect, useState } from "react";
-import useSpeech2Speech from "./use-speech2speech";
-import useTTS from "./use-tts";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { getAPIKey } from "@/lib/settings/api-manager-utils";
-import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
 import {
   getAgentLLMConfig,
-  getAgentPrompt,
   runAgentMethodCloud,
   runAgentMethodLocal,
 } from "@/lib/agent/agent-runner";
+import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
+import { getDefaultLLMConfig } from "@/lib/modalities/utils";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import {
   AppViewConfig,
   CanvasViewConfig,
@@ -18,14 +15,14 @@ import {
   PlatformEnum,
   TabView,
 } from "@/lib/types";
-import toast from "react-hot-toast";
-import { getDefaultLLMConfig } from "@/lib/modalities/utils";
-import { usePlatformApi } from "./use-platform-api";
-import useCommands from "./use-commands";
-import { useTabViewManager } from "./use-tab-view-manager";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { fetchAPI } from "../pulse-editor-website/backend";
-import { parseJsonChunk } from "../agent/stream-chunk-parser";
+import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import useCommands from "./use-commands";
+import { usePlatformApi } from "./use-platform-api";
+import useSpeech2Speech from "./use-speech2speech";
+import { useTabViewManager } from "./use-tab-view-manager";
+import useTTS from "./use-tts";
 
 export default function usePlatformAIAssistant() {
   const editorContext = useContext(EditorContext);
@@ -103,6 +100,8 @@ export default function usePlatformAIAssistant() {
         response: string;
       } = assistantResult;
 
+      console.log("Assistant result:", assistantResult);
+
       // TODO: The agent needs to confirm the command with the user
       // TODO: before executing it.
       const args = suggestedArgs.reduce(
@@ -119,8 +118,6 @@ export default function usePlatformAIAssistant() {
         isThinking: true,
         thinkingText: "Executing command...",
       }));
-
-      console.log("Assistant result:", assistantResult);
 
       const command = commands.find(
         (cmd) => cmd.commandInfo.name === suggestedCmd,

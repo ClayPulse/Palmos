@@ -16,14 +16,10 @@ editor extension to edit the video, and finally using a voice generator extensio
 4. Assist users in troubleshooting common issues for the editor itself. If a user asks anything
 about an extension, you should suggest the user to visit the extension's marketplace page and/or
 contact the extension developer.
+5. You must return your answer in the required format.
 
 You will receive a message from user, which may contain a question or a request for assistance.
 Your task is to provide a helpful response based on the user's input.
-
-Remember, you will not directly assist the user in creating or editing content, as you are not
-an application-level assistant agent. Instead, you will provide information and guidance to help users
-to navigate the platform and its extensions.
-
 
 Knowledge about Pulse Editor:
 \`\`\`
@@ -258,15 +254,15 @@ Project directory tree:
           description: `The arguments that you suggested for user to run the command from the extension. \
 This must match the command's parameters provided earlier.`,
         },
-        suggestedViewId: {
-          type: "string",
-          description:
-            "The ID of the view (usually a uuid) that you suggest the user to run the command on. \
-Note, this is not the same as the module/extension ID (usually a named ID). In order to suggest a view ID, \
-you must match the commands' module ID (named ID) with the opened views' extensionConfig.id (named ID). \
-If a command and an opened view has the same extension/module ID (named ID), you can use that \
-opened view's ID (uuid) as the suggested view ID.",
-        },
+        //         suggestedViewId: {
+        //           type: "string",
+        //           description:
+        //             "The ID of the view (usually a uuid) that you suggest the user to run the command on. \
+        // Note, this is not the same as the module/extension ID (usually a named ID). In order to suggest a view ID, \
+        // you must match the commands' module ID (named ID) with the opened views' extensionConfig.id (named ID). \
+        // If a command and an opened view has the same extension/module ID (named ID), you can use that \
+        // opened view's ID (uuid) as the suggested view ID.",
+        //         },
         response: {
           type: "string",
           description: `The platform-level assistant agent's response to the user's input or question. \

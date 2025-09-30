@@ -83,6 +83,7 @@ export type EditorStates = {
 
   // Side menu panel
   isSideMenuOpen?: boolean;
+  isMarketplaceOpen?: boolean;
 };
 
 /**
@@ -129,6 +130,9 @@ export type PersistentSettings = {
   mobileHost?: string;
 
   isUseManagedCloud?: boolean;
+
+  // Environment variables
+  envs?: Record<string, string>;
 };
 // #endregion
 

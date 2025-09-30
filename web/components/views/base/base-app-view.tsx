@@ -1,5 +1,6 @@
 import Loading from "@/components/interface/loading";
 import NotAuthorized from "@/components/interface/not-authorized";
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import {
@@ -21,6 +22,7 @@ export default function BaseAppView({
   config: AppViewConfig;
   viewId: string;
 }) {
+  const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
   const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
@@ -78,9 +80,9 @@ export default function BaseAppView({
     }
 
     // Download and load the extension app if specified
-    async function loadAppFromRegistry(appName: string, inviteCode?: string) {
+    async function loadAppFromRegistry(appId: string, inviteCode?: string) {
       const url = getAPIUrl(`/api/extension/get`);
-      url.searchParams.set("name", appName);
+      url.searchParams.set("name", appId);
       url.searchParams.set("latest", "true");
       if (inviteCode) url.searchParams.set("inviteCode", inviteCode);
 
@@ -92,8 +94,6 @@ export default function BaseAppView({
       }
 
       const fetchedExts: ExtensionMeta[] = await res.json();
-
-      console.log("Fetched extensions:", fetchedExts);
 
       const extensions: Extension[] = await Promise.all(
         fetchedExts.map(async (extMeta) => {
@@ -140,6 +140,14 @@ export default function BaseAppView({
       return ext;
     }
 
+    async function loadAppFromCache(appId: string) {
+      const ext = editorContext?.persistSettings?.extensions?.find(
+        (ext) => ext.config.id === appId,
+      );
+
+      return ext;
+    }
+
     async function installAndOpenApp(ext: Extension) {
       await installExtension(
         ext.remoteOrigin,
@@ -153,11 +161,15 @@ export default function BaseAppView({
       setPulseAppViewModel(viewModel);
     }
 
-    async function loadApp() {
+    async function openApp() {
       console.log("App query parameter:", config.app);
 
       if (!config.app) return;
-      else if (
+
+      const cachedExt = await loadAppFromCache(config.app);
+      if (cachedExt) {
+        await installAndOpenApp(cachedExt);
+      } else if (
         config.app?.startsWith("http://") ||
         config.app?.startsWith("https://")
       ) {
@@ -174,7 +186,7 @@ export default function BaseAppView({
       }
     }
 
-    loadApp();
+    openApp();
   }, [config]);
 
   return noAccessToApp ? (

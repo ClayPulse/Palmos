@@ -2,7 +2,7 @@ import { isMobile } from "@/lib/platform-api/platform-checker";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import { NodeResizer } from "@xyflow/react";
 import { useState } from "react";
-import CanvasNodeControl from "./controls/canvas-node-control";
+import CanvasNodeControl from "./canvas-node-control";
 
 export default function CanvasNodeViewLayout({
   height = "100%",
@@ -17,6 +17,8 @@ export default function CanvasNodeViewLayout({
 }) {
   const [isShowingMenu, setIsShowingMenu] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
+  const [isShowingWorkflowConnector, setIsShowingWorkflowConnector] =
+    useState(false);
 
   return (
     <div
@@ -45,12 +47,24 @@ export default function CanvasNodeViewLayout({
                 <CanvasNodeControl
                   setIsResizing={setIsResizing}
                   controlActions={controlActions}
+                  isShowingWorkflowConnector={isShowingWorkflowConnector}
+                  setIsShowingWorkflowConnector={setIsShowingWorkflowConnector}
                 />
               </div>
             </PopoverContent>
           </Popover>
         </div>
       </div>
+
+      {isShowingWorkflowConnector && (
+        <>
+          {/* Input Area */}
+          <div className="absolute top-0 -left-4 h-10 w-4 bg-red-400"></div>
+
+          {/* Output Area */}
+          <div className="absolute top-0 -right-4 h-10 w-4 bg-blue-400"></div>
+        </>
+      )}
 
       <NodeResizer
         minWidth={40}

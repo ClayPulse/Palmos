@@ -1,22 +1,22 @@
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
 import {
   CommandDefinition,
   IMCMessageTypeEnum,
   ViewModeEnum,
 } from "@pulse-editor/shared-utils";
-import { use, useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { v4 } from "uuid";
 import {
   AppViewConfig,
-  Command,
   CanvasViewConfig,
+  Command,
   Extension,
   TabView,
 } from "../types";
-import { EditorContext } from "@/components/providers/editor-context-provider";
-import { useTabViewManager } from "./use-tab-view-manager";
-import toast from "react-hot-toast";
-import { v4 } from "uuid";
 import { useMenuActions } from "./use-menu-actions";
+import { useTabViewManager } from "./use-tab-view-manager";
 
 /**
  *  Use commands in active tab.
@@ -182,7 +182,7 @@ export default function useCommands() {
           });
         }
 
-        imcContext?.polyIMC?.sendMessage(
+        return await imcContext?.polyIMC?.sendMessage(
           ext.config.id + "-" + viewId,
           IMCMessageTypeEnum.EditorRunExtCommand,
           { name: command.commandInfo.name, args },
@@ -193,7 +193,7 @@ export default function useCommands() {
         throw new Error("View ID is required for view commands");
       }
 
-      imcContext?.polyIMC?.sendMessage(
+      return await imcContext?.polyIMC?.sendMessage(
         command.viewId,
         IMCMessageTypeEnum.EditorRunExtCommand,
         { name: command.commandInfo.name, args },

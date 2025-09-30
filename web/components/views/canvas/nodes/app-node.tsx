@@ -5,7 +5,7 @@ import { Node } from "@xyflow/react";
 import { memo } from "react";
 import { v4 } from "uuid";
 import BaseAppView from "../../base/base-app-view";
-import CanvasNodeViewLayout from "../../layout/canvas-node-view-layout";
+import CanvasNodeViewLayout from "../canvas-node-view-layout";
 
 const AppNode = memo((props: any) => {
   const nodeProps = props as Node<{ config: AppViewConfig }>;

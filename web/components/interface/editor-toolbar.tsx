@@ -1,15 +1,15 @@
 "use client";
 
-import { Button, Divider, Tooltip } from "@heroui/react";
-import { useContext, useState } from "react";
 import Icon from "@/components/misc/icon";
 import AppSettingsModal from "@/components/modals/app-settings-modal";
-import { AnimatePresence, motion } from "framer-motion";
-import { EditorContext } from "../providers/editor-context-provider";
-import AgentConfigModal from "../modals/agent-config-modal";
-import ExtensionMarketplaceModal from "../modals/extension-marketplace-modal";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
+import { Button, Divider, Tooltip } from "@heroui/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useContext, useState } from "react";
+import AgentConfigModal from "../modals/agent-config-modal";
+import ExtensionMarketplaceModal from "../modals/extension-marketplace-modal";
+import { EditorContext } from "../providers/editor-context-provider";
 
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
@@ -18,7 +18,6 @@ export default function EditorToolbar() {
   const { isRecording, record } = useRecorder();
 
   const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
-  const [isExtensionModalOpen, setIsExtensionModalOpen] = useState(false);
   const [isAppSettingsModalOpen, setAppIsSettingsModalOpen] = useState(false);
 
   function setIsOpen(val: boolean) {
@@ -146,15 +145,23 @@ export default function EditorToolbar() {
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
-                    setIsExtensionModalOpen(true);
+                    editorContext?.setEditorStates((prev) => ({
+                      ...prev,
+                      isMarketplaceOpen: true,
+                    }));
                   }}
                 >
                   <Icon name="dashboard_customize" variant="outlined" />
                 </Button>
               </Tooltip>
               <ExtensionMarketplaceModal
-                isOpen={isExtensionModalOpen}
-                setIsOpen={setIsExtensionModalOpen}
+                isOpen={editorContext?.editorStates.isMarketplaceOpen || false}
+                setIsOpen={(isOpen) =>
+                  editorContext?.setEditorStates((prev) => ({
+                    ...prev,
+                    isMarketplaceOpen: isOpen,
+                  }))
+                }
               />
 
               {/* <SettingPopover /> */}

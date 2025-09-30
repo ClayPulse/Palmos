@@ -1,23 +1,23 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import PasswordModal from "../../modals/password-modal";
-import { useTheme } from "next-themes";
-import NavSideMenu from "./nav-side-menu";
-import { EditorContext } from "../../providers/editor-context-provider";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { PlatformEnum } from "@/lib/types";
+import { useTheme } from "next-themes";
+import { useContext, useEffect, useState } from "react";
+import PasswordModal from "../../modals/password-modal";
+import { EditorContext } from "../../providers/editor-context-provider";
 import Loading from "../loading";
+import NavSideMenu from "./nav-side-menu";
 
-import LoginModal from "../../modals/login-modal";
-import { useAuth } from "@/lib/hooks/use-auth";
-import WorkspaceSettingsModal from "../../modals/workspace-settings-model";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
 import useAndroidManageStorageNotification from "@/lib/hooks/use-android-manage-storage-notification";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { SafeArea } from "@capacitor-community/safe-area";
-import SharingModal from "../../modals/sharing-modal";
-import NavTopBar from "./nav-top-bar";
 import AppInfoModal from "../../modals/app-info-modal";
+import LoginModal from "../../modals/login-modal";
+import SharingModal from "../../modals/sharing-modal";
+import WorkspaceSettingsModal from "../../modals/workspace-settings-model";
+import NavTopBar from "./nav-top-bar";
 
 export default function Nav({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -121,7 +121,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       <AppInfoModal />
 
       <div className="grid h-full w-full grid-cols-[max-content_auto]">
-        <div className="h-full w-full">
+        <div className="h-full w-full overflow-y-hidden">
           {isShowNavbar && (
             <NavSideMenu
               isMenuOpen={isMenuOpen}

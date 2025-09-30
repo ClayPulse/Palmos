@@ -8,7 +8,7 @@
       "build": "next build",
       "lint": "next lint",
       "start": "serve ../build/next",
-      "dev-https": "next dev  --experimental-https"
+      "dev-https": "next dev --experimental-https"
    },
    "dependencies": {
       "@capacitor-community/safe-area": "^7.0.0-alpha.1",
