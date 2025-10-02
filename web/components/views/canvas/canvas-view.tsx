@@ -6,35 +6,23 @@ import {
   addEdge,
   applyEdgeChanges,
   applyNodeChanges,
+  Background,
+  BackgroundVariant,
+  Connection,
   EdgeChange,
   NodeChange,
   ReactFlow,
   Edge as ReactFlowEdge,
   Node as ReactFlowNode,
+  reconnectEdge,
   useReactFlow,
   useViewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "../../misc/icon";
-import AppNode from "./nodes/app-node";
-
-// const initialNodes = [
-//   {
-//     id: "n1",
-//     position: { x: 200, y: 0 },
-//     data: {
-//       label: "Node 1",
-//       config: {
-//         viewId: v4(),
-//         app: "https://cdn.pulse-editor.com/extension/spin_wheel/0.0.1/",
-//       },
-//     },
-//     type: "appNode",
-//   },
-//   { id: "n2", position: { x: 0, y: 100 }, data: { label: "Node 2" } },
-// ];
-// const initialEdges = [{ id: "n1-n2", source: "n1", target: "n2" }];
+import AppNode from "./nodes/app-node/app-node";
+import "./theme.css";
 
 const appInfo: AppInfoModalContent = {
   name: "Pulse Editor",
@@ -71,8 +59,10 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
     setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
   }, []);
   const onEdgesChange = useCallback(
-    (changes: EdgeChange<{ id: string; source: string; target: string }>[]) =>
-      setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
+    (changes: EdgeChange<{ id: string; source: string; target: string }>[]) => {
+      console.log("Edge changes:", changes);
+      setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot));
+    },
     [],
   );
   const onConnect = useCallback(
@@ -80,7 +70,13 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
       setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
     [],
   );
+  const onReconnect = useCallback(
+    (oldEdge: ReactFlowEdge, newConnection: Connection) =>
+      setEdges((els) => reconnectEdge(oldEdge, newConnection, els)),
+    [],
+  );
 
+  /* Node creator functions */
   const createAppNode = useCallback((props: any) => {
     return <AppNode {...props} />;
   }, []);
@@ -221,7 +217,7 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
   return (
     <div
       ref={containerRef}
-      className="bg-default text-default-foreground relative h-full w-full"
+      className="bg-content3 text-content3-foreground relative h-full w-full"
       id={`canvas-${config?.viewId}`}
     >
       <ReactFlow
@@ -237,7 +233,18 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
         nodeTypes={{
           appNode: createAppNode,
         }}
-      />
+        deleteKeyCode={["Delete", "Backspace"]}
+        onReconnect={onReconnect}
+        defaultEdgeOptions={{
+          markerEnd: {
+            type: "arrowclosed",
+            width: 20,
+            height: 20,
+          },
+        }}
+      >
+        <Background variant={BackgroundVariant.Dots} />
+      </ReactFlow>
       <Button
         isIconOnly
         className="absolute right-2 bottom-2"
