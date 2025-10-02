@@ -17,7 +17,7 @@ import { ExtensionTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 } from "uuid";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
-import AppViewLayout from "../standalone-app/app-view-layout";
+import AppViewLayout from "../standalone-app/layout";
 
 function ConsoleNavBar({
   consoles,

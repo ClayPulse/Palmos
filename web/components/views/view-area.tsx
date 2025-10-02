@@ -157,40 +157,47 @@ export default function ViewArea() {
         <div>No view selected</div>
       ) : (
         <div
-          className="grid h-full w-full grid-rows-1 gap-y-0.5 px-2 pt-17 data-[is-show-tabs=true]:grid-rows-[max-content_auto]"
+          className="relative grid h-full w-full grid-rows-1 gap-y-0.5 data-[is-show-tabs=true]:data-[type=app]:grid-rows-[max-content_auto] data-[is-show-tabs=false]:data-[type=app]:pt-17"
           data-is-show-tabs={isShowTabs}
+          data-type={activeTabView?.type}
         >
           {isShowTabs && (
-            <div className="border-default-border bg-content2 w-full rounded-lg py-0.5">
-              <Tabs
-                tabItems={tabItems}
-                selectedItem={
-                  tabItems[tabIndex] ? tabItems[tabIndex] : undefined
-                }
-                setSelectedItem={(item) => {
-                  const index = tabItems.findIndex(
-                    (tab) => tab.name === item?.name,
-                  );
-                  selectTab(index !== -1 ? index : 0);
-                }}
-                isShowPagination={true}
-                onTabClose={(item) => {
-                  const index = tabItems.findIndex(
-                    (tab) => tab.name === item?.name,
-                  );
-                  if (index !== -1) {
-                    closeTabView(tabViews[index]);
+            <div
+              className="data-[type=canvas]:absolute pt-17 px-2 w-full z-20"
+              data-type={activeTabView?.type}
+            >
+              <div className="border-default-border bg-content2 w-full rounded-lg shadow-md py-0.5">
+                <Tabs
+                  tabItems={tabItems}
+                  selectedItem={
+                    tabItems[tabIndex] ? tabItems[tabIndex] : undefined
                   }
-                }}
-              />
+                  setSelectedItem={(item) => {
+                    const index = tabItems.findIndex(
+                      (tab) => tab.name === item?.name,
+                    );
+                    selectTab(index !== -1 ? index : 0);
+                  }}
+                  isShowPagination={true}
+                  onTabClose={(item) => {
+                    const index = tabItems.findIndex(
+                      (tab) => tab.name === item?.name,
+                    );
+                    if (index !== -1) {
+                      closeTabView(tabViews[index]);
+                    }
+                  }}
+                />
+              </div>
             </div>
           )}
-          <div className="h-full w-full">
+          <div className="relative h-full w-full">
             {tabViews.map((tabView, idx) => (
               <div
                 key={tabView.config.viewId}
                 data-is-active={idx === tabIndex}
-                className="hidden h-full w-full data-[is-active=true]:block"
+                data-type={tabView.type}
+                className="hidden h-full w-full data-[is-active=true]:block data-[type=app]:px-2"
               >
                 {tabView.type === ViewModeEnum.App ? (
                   <MemoizedStandaloneAppView
