@@ -114,6 +114,11 @@ function PanelContent({
 
   const tabItems: TabItem[] = [
     {
+      name: "Projects",
+      description: "List of projects",
+      icon: "folder",
+    },
+    {
       name: "Apps",
       description: "List of apps",
       icon: "apps",
@@ -145,27 +150,6 @@ function PanelContent({
       </div>
     );
   }
-  // Pick project if no project is opened
-  else if (!editorContext?.editorStates.project) {
-    return (
-      <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto px-4">
-        <p className="text-center text-lg font-medium">View Projects</p>
-        <Button
-          className="w-full"
-          onPress={() => {
-            setIsProjectSettingsModalOpen(true);
-          }}
-        >
-          New Project
-        </Button>
-        <ProjectExplorer />
-        <ProjectSettingsModal
-          isOpen={isProjectSettingsModalOpen}
-          setIsOpen={setIsProjectSettingsModalOpen}
-        />
-      </div>
-    );
-  }
 
   return (
     <div className="relative h-full w-full grid grid-rows-[max-content_auto] overflow-y-hidden">
@@ -187,10 +171,27 @@ function PanelContent({
       <div className="h-full w-full overflow-y-hidden">
         {tabItems[selectedTabIndex]?.name === "Apps" ? (
           <AppExplorer />
-        ) : (
+        ) : tabItems[selectedTabIndex]?.name === "Workspace" ? (
           <FileSystemExplorer setIsMenuOpen={setIsMenuOpen} />
+        ) : (
+          <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto px-4">
+            <p className="text-center text-lg font-medium">View Projects</p>
+            <Button
+              className="w-full"
+              onPress={() => {
+                setIsProjectSettingsModalOpen(true);
+              }}
+            >
+              New Project
+            </Button>
+            <ProjectExplorer />
+          </div>
         )}
       </div>
+      <ProjectSettingsModal
+        isOpen={isProjectSettingsModalOpen}
+        setIsOpen={setIsProjectSettingsModalOpen}
+      />
     </div>
   );
 }
