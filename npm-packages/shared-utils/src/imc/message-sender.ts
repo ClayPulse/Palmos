@@ -6,7 +6,7 @@ export class MessageSender {
 
   private pendingMessages: Map<
     string,
-    { resolve: (result: any) => void; reject: () => void }
+    { resolve: (value: any) => void; reject: (reason: any) => void }
   >;
 
   private moduleId: string;
@@ -58,43 +58,37 @@ export class MessageSender {
       // Attach abort listener
       abortSignal?.addEventListener("abort", abortHandler);
 
-      // Send message
-      this.pendingMessages.set(id, {
-        resolve,
-        reject,
-      });
-      this.targetWindow.postMessage(message, "*");
-
       // Check timeout
       const timeoutId = setTimeout(() => {
         this.pendingMessages.delete(id);
         abortSignal?.removeEventListener("abort", abortHandler);
         reject(new Error("Communication with Pulse Editor timeout."));
       }, this.timeout);
-
       // Ensure cleanup on resolution
-      const currentMessage = this.pendingMessages.get(id);
-      if (currentMessage) {
-        currentMessage.resolve = (result) => {
-          clearTimeout(timeoutId);
-          abortSignal?.removeEventListener("abort", abortHandler);
-          resolve(result);
-        };
+      const onResolve = (value: any) => {
+        clearTimeout(timeoutId);
+        abortSignal?.removeEventListener("abort", abortHandler);
+        this.pendingMessages.delete(id);
+        resolve(value);
+      };
 
-        currentMessage.reject = () => {
-          clearTimeout(timeoutId);
-          abortSignal?.removeEventListener("abort", abortHandler);
-          reject();
-        };
-      }
+      const onReject = (reason: any) => {
+        clearTimeout(timeoutId);
+        abortSignal?.removeEventListener("abort", abortHandler);
+        this.pendingMessages.delete(id);
+        reject(reason);
+      };
+      this.pendingMessages.set(id, {
+        resolve: onResolve,
+        reject: onReject,
+      });
+
+      // Send message
+      this.targetWindow.postMessage(message, "*");
     });
   }
 
   public getPendingMessage(id: string) {
     return this.pendingMessages.get(id);
-  }
-
-  public removePendingMessage(id: string) {
-    this.pendingMessages.delete(id);
   }
 }

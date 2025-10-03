@@ -21,10 +21,12 @@ import useIMC from "../../lib/use-imc";
  *
  */
 export default function useRegisterAction(
-  name: string,
-  description: string,
-  parameters: Record<string, TypedVariable>,
-  returns: Record<string, TypedVariable>,
+  actionInfo: {
+    name: string;
+    description: string;
+    parameters?: Record<string, TypedVariable>;
+    returns?: Record<string, TypedVariable>;
+  },
   callbackHandler?: (args: any) => Promise<string | void>,
   isExtReady: boolean = true
 ) {
@@ -34,10 +36,10 @@ export default function useRegisterAction(
   const commandQueue = useRef<{ args: any; resolve: (v: any) => void }[]>([]);
 
   const [action, setAction] = useState<Action>({
-    name,
-    description,
-    parameters,
-    returns,
+    name: actionInfo.name,
+    description: actionInfo.description,
+    parameters: actionInfo.parameters ?? {},
+    returns: actionInfo.returns ?? {},
     handler: callbackHandler,
   });
 
@@ -76,7 +78,13 @@ export default function useRegisterAction(
   }, [action, imc, isExtReady]);
 
   useEffect(() => {
-    setAction((prev) => ({ ...prev, name, description, parameters, returns }));
+    setAction((prev) => ({
+      ...prev,
+      name: actionInfo.name,
+      description: actionInfo.description,
+      parameters: actionInfo.parameters ?? {},
+      returns: actionInfo.returns ?? {},
+    }));
   }, [callbackHandler]);
 
   async function executeAction(args: any) {
@@ -94,9 +102,9 @@ export default function useRegisterAction(
           const { name: requestedName, args }: { name: string; args: any } =
             message.payload;
 
-          if (name === requestedName) {
+          if (actionInfo.name === requestedName) {
             // Validate parameters
-            const actionParams = parameters;
+            const actionParams = actionInfo.parameters ?? {};
             if (Object.keys(args).length !== Object.keys(actionParams).length) {
               throw new Error(
                 `Invalid number of parameters: expected ${
@@ -106,13 +114,13 @@ export default function useRegisterAction(
             }
 
             for (const [key, value] of Object.entries(args)) {
-              if (parameters[key] === undefined) {
+              if (actionParams[key] === undefined) {
                 throw new Error(`Invalid parameter: ${key}`);
               }
-              if (typeof value !== parameters[key].type) {
+              if (typeof value !== actionParams[key].type) {
                 throw new Error(
                   `Invalid type for parameter ${key}: expected ${
-                    parameters[key].type
+                    actionParams[key].type
                   }, got ${typeof value}. Value received: ${value}`
                 );
               }

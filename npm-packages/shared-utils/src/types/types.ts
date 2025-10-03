@@ -132,7 +132,7 @@ export type AppConfig = {
   // App installed agents
   agents?: Agent[];
   // Exposed actions in the modular app
-  actions?: Action[];
+  preRegisteredActions?: Action[];
   // Visibility
   visibility: string;
   // Recommended dimensions for app view in canvas
