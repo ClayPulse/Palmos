@@ -1,8 +1,15 @@
+import { PlatformEnum } from "@/lib/enums";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
-import { getHostMFVersion } from "@/lib/module-federation/version";
+import {
+  checkCompatibility,
+  getHostLibVersion,
+  getHostMFVersion,
+  getRemoteLibVersion,
+  getRemoteMFVersion,
+} from "@/lib/module-federation/version";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { ContextMenuState, Extension, PlatformEnum } from "@/lib/types";
+import { ContextMenuState, ExtensionApp } from "@/lib/types";
 import {
   Button,
   Chip,
@@ -16,7 +23,6 @@ import {
 } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { compare } from "semver";
 import ContextMenu from "../interface/context-menu";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
@@ -29,12 +35,12 @@ export default function ExtensionPreview({
   isShowCompatibleChip = true,
   onPress,
 }: {
-  extension: Extension;
+  extension: ExtensionApp;
   isShowInstalledChip?: boolean;
   isShowUninstallButton?: boolean;
   isShowUseButton?: boolean;
   isShowCompatibleChip?: boolean;
-  onPress?: (ext: Extension) => void;
+  onPress?: (ext: ExtensionApp) => void;
 }) {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -59,12 +65,59 @@ export default function ExtensionPreview({
   const [hostMFVersion, setHostMFVersion] = useState<string | undefined>(
     undefined,
   );
+  const [hostLibVersion, setHostLibVersion] = useState<string | undefined>(
+    undefined,
+  );
+  const [remoteMFVersion, setRemoteMFVersion] = useState<string | undefined>(
+    undefined,
+  );
+  const [remoteLibVersion, setRemoteLibVersion] = useState<string | undefined>(
+    undefined,
+  );
+
+  const [isCompatible, setIsCompatible] = useState<boolean | undefined>(
+    undefined,
+  );
+
   const [showMFVersionInfo, setShowMFVersionInfo] = useState(false);
 
   useEffect(() => {
-    getHostMFVersion().then((version) => {
-      setHostMFVersion(version);
-    });
+    async function fetchVersions() {
+      const hostMFVersion = await getHostMFVersion();
+      setHostMFVersion(hostMFVersion);
+
+      const hostLibVersion = await getHostLibVersion();
+      setHostLibVersion(hostLibVersion);
+
+      const remoteMFVersion =
+        extension.mfVersion ??
+        (await getRemoteMFVersion(
+          extension.remoteOrigin,
+          extension.config.id,
+          extension.config.version,
+        ));
+      setRemoteMFVersion(remoteMFVersion);
+
+      const remoteLibVersion =
+        extension.config.libVersion === "unknown"
+          ? await getRemoteLibVersion(
+              extension.remoteOrigin,
+              extension.config.id,
+              extension.config.version,
+            )
+          : extension.config.libVersion;
+      setRemoteLibVersion(remoteLibVersion);
+
+      const mfCompatible = await checkCompatibility(
+        hostMFVersion,
+        hostLibVersion,
+        remoteMFVersion,
+        remoteLibVersion,
+      );
+      setIsCompatible(mfCompatible);
+    }
+
+    fetchVersions();
   }, []);
 
   useEffect(() => {
@@ -122,85 +175,18 @@ export default function ExtensionPreview({
               <EnableCheckBox isActive={isEnabled} onPress={toggleExtension} />
             )}
 
-            {hostMFVersion === undefined ||
-            extension.mfVersion === undefined ||
-            extension.mfVersion === "unknown" ? (
-              <Popover
-                isOpen={showMFVersionInfo}
-                onOpenChange={setShowMFVersionInfo}
-              >
-                <PopoverTrigger>
-                  <Button
-                    isIconOnly
-                    variant="light"
-                    radius="full"
-                    size="sm"
-                    onMouseEnter={(e) => {
-                      e.stopPropagation();
-                      setShowMFVersionInfo(true);
-                    }}
-                    onMouseLeave={(e) => {
-                      e.stopPropagation();
-                      setShowMFVersionInfo(false);
-                    }}
-                  >
-                    <Icon name="warning" className="text-danger!" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <div className="max-w-xs">
-                    <p>
-                      This app is outdated and no longer a valid module
-                      federation app. Please update the app to the latest
-                      version.
-                    </p>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            ) : compare(extension.mfVersion, hostMFVersion) !== 0 ? (
-              <Popover
-                isOpen={showMFVersionInfo}
-                onOpenChange={setShowMFVersionInfo}
-              >
-                <PopoverTrigger>
-                  <Button
-                    isIconOnly
-                    variant="light"
-                    radius="full"
-                    size="sm"
-                    onMouseEnter={(e) => {
-                      e.stopPropagation();
-                      setShowMFVersionInfo(true);
-                    }}
-                    onMouseLeave={(e) => {
-                      e.stopPropagation();
-                      setShowMFVersionInfo(false);
-                    }}
-                  >
-                    <Icon name="warning" className="text-warning!" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent>
-                  <div className="max-w-xs">
-                    <p>
-                      This app's module federation version (
-                      {extension.mfVersion}) does not match the host version (
-                      {hostMFVersion}). This may cause issues when using the
-                      app. Please update the app to the latest version.
-                    </p>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            ) : (
-              isShowCompatibleChip && (
+            {isCompatible !== undefined &&
+              (!isCompatible ? (
                 <Popover
                   isOpen={showMFVersionInfo}
                   onOpenChange={setShowMFVersionInfo}
                 >
                   <PopoverTrigger>
-                    <Chip
-                      variant="faded"
-                      color="success"
+                    <Button
+                      isIconOnly
+                      variant="light"
+                      radius="full"
+                      size="sm"
                       onMouseEnter={(e) => {
                         e.stopPropagation();
                         setShowMFVersionInfo(true);
@@ -210,21 +196,60 @@ export default function ExtensionPreview({
                         setShowMFVersionInfo(false);
                       }}
                     >
-                      Compatible
-                    </Chip>
+                      <Icon name="warning" className="text-danger!" />
+                    </Button>
                   </PopoverTrigger>
                   <PopoverContent>
                     <div className="max-w-xs">
                       <p>
-                        This app's module federation version (
-                        {extension.mfVersion}) matches the host version (
-                        {hostMFVersion}). The app should work correctly.
+                        This app is outdated and no longer a valid module
+                        federation app. Please update the app to the latest
+                        version. <br />
+                        Host MF version: {hostMFVersion}
+                        <br />
+                        Host lib version: {hostLibVersion}
+                        <br />
+                        App MF version: {remoteMFVersion}
+                        <br />
+                        App lib version: {remoteLibVersion}
                       </p>
                     </div>
                   </PopoverContent>
                 </Popover>
-              )
-            )}
+              ) : (
+                isShowCompatibleChip && (
+                  <Popover
+                    isOpen={showMFVersionInfo}
+                    onOpenChange={setShowMFVersionInfo}
+                  >
+                    <PopoverTrigger>
+                      <Chip
+                        variant="faded"
+                        color="success"
+                        onMouseEnter={(e) => {
+                          e.stopPropagation();
+                          setShowMFVersionInfo(true);
+                        }}
+                        onMouseLeave={(e) => {
+                          e.stopPropagation();
+                          setShowMFVersionInfo(false);
+                        }}
+                      >
+                        Compatible
+                      </Chip>
+                    </PopoverTrigger>
+                    <PopoverContent>
+                      <div className="max-w-xs">
+                        <p>
+                          This app's module federation version (
+                          {extension.mfVersion}) matches the host version (
+                          {hostMFVersion}). The app should work correctly.
+                        </p>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                )
+              ))}
           </div>
         </div>
 

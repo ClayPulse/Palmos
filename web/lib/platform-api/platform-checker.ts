@@ -1,4 +1,4 @@
-import { PlatformEnum } from "@/lib/types";
+import { PlatformEnum } from "@/lib/enums";
 import { Capacitor } from "@capacitor/core";
 import isElectron from "is-electron";
 

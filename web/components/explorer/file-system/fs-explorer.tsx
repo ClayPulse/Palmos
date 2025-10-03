@@ -3,7 +3,7 @@
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { PlatformEnum, TreeViewGroupRef } from "@/lib/types";
+import { TreeViewGroupRef } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useRef } from "react";
@@ -12,6 +12,7 @@ import { v4 } from "uuid";
 import Icon from "../../misc/icon";
 import { EditorContext } from "../../providers/editor-context-provider";
 import TreeViewGroup from "./tree-view";
+import { PlatformEnum } from "@/lib/enums";
 
 export default function FileSystemExplorer({
   setIsMenuOpen,

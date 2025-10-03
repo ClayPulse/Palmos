@@ -12,9 +12,10 @@ export default function ExtensionSuggestionOverlay() {
               extension={{
                 config: {
                   id: "extension-id",
+                  version: "1.0.0",
+                  libVersion: "unknown",
                   displayName: "Extension Name",
                   description: "Extension Description",
-                  version: "1.0.0",
                   visibility: "public",
                 },
                 mfVersion: "1.0.0",
@@ -27,9 +28,10 @@ export default function ExtensionSuggestionOverlay() {
               extension={{
                 config: {
                   id: "extension-id",
+                  version: "1.0.0",
+                  libVersion: "unknown",
                   displayName: "Extension Name",
                   description: "Extension Description",
-                  version: "1.0.0",
                   visibility: "public",
                 },
                 mfVersion: "1.0.0",
@@ -42,9 +44,10 @@ export default function ExtensionSuggestionOverlay() {
               extension={{
                 config: {
                   id: "extension-id",
+                  version: "1.0.0",
+                  libVersion: "unknown",
                   displayName: "Extension Name",
                   description: "Extension Description",
-                  version: "1.0.0",
                   visibility: "public",
                 },
                 mfVersion: "1.0.0",

@@ -161,7 +161,7 @@ export class ConnectionListener {
     listener.updateReceiverHandlerMap(
       new Map<IMCMessageTypeEnum, ReceiverHandler>([
         [
-          IMCMessageTypeEnum.ExtReady,
+          IMCMessageTypeEnum.AppReady,
           async (
             senderWindow: Window,
             message: IMCMessage,

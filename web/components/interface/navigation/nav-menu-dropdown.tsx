@@ -1,4 +1,6 @@
-import { MenuAction, PlatformEnum } from "@/lib/types";
+import { PlatformEnum } from "@/lib/enums";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { MenuAction } from "@/lib/types";
 import {
   Button,
   Dropdown,
@@ -6,9 +8,8 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/react";
-import Icon from "../../misc/icon";
 import { useState } from "react";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
+import Icon from "../../misc/icon";
 
 export default function NavMenuDropdown({
   category,

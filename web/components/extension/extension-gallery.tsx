@@ -1,4 +1,4 @@
-import { Extension } from "@/lib/types";
+import { ExtensionApp } from "@/lib/types";
 import { compare } from "semver";
 import Loading from "../interface/loading";
 import ExtensionPreview from "./extension-preview";
@@ -8,13 +8,13 @@ export default function ExtensionGallery({
   isLoading,
   showInstalledChip,
 }: {
-  extensions: Extension[];
+  extensions: ExtensionApp[];
   isLoading: boolean;
   showInstalledChip: boolean;
 }) {
   // Group extensions by name
   const groupedExtensions = extensions.reduce(
-    (acc: Map<string, Extension[]>, ext) => {
+    (acc: Map<string, ExtensionApp[]>, ext) => {
       const key = ext.config.id;
       if (!acc.has(key)) {
         acc.set(key, []);
@@ -22,7 +22,7 @@ export default function ExtensionGallery({
       acc.get(key)?.push(ext);
       return acc;
     },
-    new Map<string, Extension[]>(),
+    new Map<string, ExtensionApp[]>(),
   );
 
   const previews = Array.from(groupedExtensions.entries()).map(

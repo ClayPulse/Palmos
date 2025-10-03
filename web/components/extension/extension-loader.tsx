@@ -1,7 +1,7 @@
-import { useRef } from "react";
-import React from "react";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { PlatformEnum } from "@/lib/types";
+import { useRef } from "react";
+
+import { PlatformEnum } from "@/lib/enums";
 
 export default function ExtensionLoader({
   remoteOrigin,

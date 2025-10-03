@@ -1,22 +1,21 @@
 "use client";
 
-import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { PlatformEnum } from "@/lib/types";
-import { useTheme } from "next-themes";
-import { useContext, useEffect, useState } from "react";
-import PasswordModal from "../../modals/password-modal";
-import { EditorContext } from "../../providers/editor-context-provider";
-import Loading from "../loading";
-import NavSideMenu from "./nav-side-menu";
-
+import { PlatformEnum } from "@/lib/enums";
 import useAndroidManageStorageNotification from "@/lib/hooks/use-android-manage-storage-notification";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { SafeArea } from "@capacitor-community/safe-area";
+import { useTheme } from "next-themes";
+import { useContext, useEffect, useState } from "react";
 import AppInfoModal from "../../modals/app-info-modal";
 import LoginModal from "../../modals/login-modal";
+import PasswordModal from "../../modals/password-modal";
 import SharingModal from "../../modals/sharing-modal";
 import WorkspaceSettingsModal from "../../modals/workspace-settings-model";
+import { EditorContext } from "../../providers/editor-context-provider";
+import Loading from "../loading";
+import NavSideMenu from "./nav-side-menu";
 import NavTopBar from "./nav-top-bar";
 
 export default function Nav({ children }: { children: React.ReactNode }) {

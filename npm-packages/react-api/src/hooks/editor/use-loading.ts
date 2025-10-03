@@ -13,7 +13,7 @@ export default function useLoading() {
 
   useEffect(() => {
     if (isReady) {
-      imc?.sendMessage(IMCMessageTypeEnum.EditorLoadingExt, {
+      imc?.sendMessage(IMCMessageTypeEnum.EditorLoadingApp, {
         isLoading,
       });
     }

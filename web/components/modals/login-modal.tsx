@@ -1,10 +1,10 @@
+import { PlatformEnum } from "@/lib/enums";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { Button, Divider, Input } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
-import ModalWrapper from "./modal-wrapper";
-import { EditorContext } from "../providers/editor-context-provider";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
 import toast from "react-hot-toast";
-import { PlatformEnum } from "@/lib/types";
+import { EditorContext } from "../providers/editor-context-provider";
+import ModalWrapper from "./modal-wrapper";
 
 export default function LoginModal({ signIn }: { signIn: () => void }) {
   const editorContext = useContext(EditorContext);

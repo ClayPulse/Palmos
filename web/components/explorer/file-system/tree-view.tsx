@@ -9,10 +9,10 @@ import {
   ContextMenuState,
   EditorContextType,
   FileSystemObject,
-  PlatformEnum,
   TreeViewGroupRef,
   TreeViewNodeRef,
 } from "@/lib/types";
+import { PlatformEnum } from "@/lib/enums";
 import { Button, Input } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import {

@@ -1,6 +1,6 @@
-import useCommands from "@/lib/hooks/use-commands";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
-import { Command } from "@/lib/types";
+import useScopedActions from "@/lib/hooks/use-scoped-actions";
+import { ScopedAction } from "@/lib/types";
 import {
   addToast,
   Button,
@@ -28,7 +28,7 @@ export default function CommandViewer() {
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant, history } = usePlatformAIAssistant();
-  const { commands, runCommand, setKeywordFilter } = useCommands();
+  const { actions, runAction, setKeywordFilter } = useScopedActions();
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectCommandIndex, setSelectCommandIndex] = useState(-1);
@@ -42,17 +42,17 @@ export default function CommandViewer() {
 
   const historyRef = useRef<HTMLDivElement>(null);
 
-  const runCommandCallback = useCallback(
-    async (command: Command) => {
-      const result = await runCommand(command, {});
+  const runActionCallback = useCallback(
+    async (action: ScopedAction) => {
+      const result = await runAction(action, {});
       console.log("Command result:", result);
       addToast({
         color: "success",
         title: "Command Executed",
-        description: `Executed command: ${command.commandInfo.name}`,
+        description: `Executed command: ${action.action.name}`,
       });
     },
-    [runCommand],
+    [runAction],
   );
 
   useEffect(() => {
@@ -177,7 +177,7 @@ export default function CommandViewer() {
     if (isEnterPressed && isControlPressed && selectCommandIndex !== -1) {
       // Run command if ctrl is pressed
       console.log("Running command");
-      runCommandCallback(commands[selectCommandIndex]);
+      runActionCallback(actions[selectCommandIndex]);
     } else if (isEnterPressed && !isControlPressed) {
       // Chat with assistant if ctrl is not pressed
       console.log("Chatting with assistant");
@@ -192,11 +192,11 @@ export default function CommandViewer() {
       }
     } else if (isArrowUpPressed) {
       setSelectCommandIndex((prev) =>
-        prev === 0 ? commands.length - 1 : prev - 1,
+        prev === 0 ? actions.length - 1 : prev - 1,
       );
     } else if (isArrowDownPressed) {
       setSelectCommandIndex((prev) =>
-        prev === commands.length - 1 ? 0 : prev + 1,
+        prev === actions.length - 1 ? 0 : prev + 1,
       );
     }
   }
@@ -302,7 +302,7 @@ export default function CommandViewer() {
           <div className="bg-content1 w-80 rounded-2xl shadow-md">
             <div className="px-3 pt-2">
               <p className="text-sm font-bold whitespace-nowrap">
-                Found {commands.length} commands
+                Found {actions.length} commands
               </p>
             </div>
             <Listbox
@@ -317,11 +317,11 @@ export default function CommandViewer() {
                   : selectCommandIndex;
 
                 setSelectCommandIndex(index);
-                runCommandCallback(commands[index]);
+                runActionCallback(actions[index]);
               }}
               label="Command Suggestions"
             >
-              {commands.map((command, index) => (
+              {actions.map((command, index) => (
                 <ListboxItem
                   key={index.toString()}
                   className="data-[is-selected=true]:bg-primary/20"
@@ -334,7 +334,7 @@ export default function CommandViewer() {
                     )
                   }
                 >
-                  {command.commandInfo.name}
+                  {command.action.name}
                 </ListboxItem>
               ))}
             </Listbox>

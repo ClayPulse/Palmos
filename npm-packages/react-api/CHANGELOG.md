@@ -1,5 +1,29 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.39
+
+### Patch Changes
+
+- Add lib version in AppConfig
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.39
+
+## 0.1.1-alpha.38
+
+### Patch Changes
+
+- Update utils and types
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.38
+
+## 0.1.1-alpha.37
+
+### Patch Changes
+
+- Update types
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.37
+
 ## 0.1.1-alpha.36
 
 ### Patch Changes

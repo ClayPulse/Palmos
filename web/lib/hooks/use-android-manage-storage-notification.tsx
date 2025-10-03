@@ -1,8 +1,8 @@
+import { PlatformEnum } from "@/lib/enums";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { PlatformEnum } from "@/lib/types";
-import { useEffect, useRef, useState } from "react";
-import { PulseEditorCapacitor } from "@pulse-editor/capacitor-plugin";
 import { addToast, Button } from "@heroui/react";
+import { PulseEditorCapacitor } from "@pulse-editor/capacitor-plugin";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
 export default function useAndroidManageStorageNotification() {

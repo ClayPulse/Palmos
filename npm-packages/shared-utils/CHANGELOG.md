@@ -1,5 +1,23 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.39
+
+### Patch Changes
+
+- Add lib version in AppConfig
+
+## 0.1.1-alpha.38
+
+### Patch Changes
+
+- Update utils and types
+
+## 0.1.1-alpha.37
+
+### Patch Changes
+
+- Update types
+
 ## 0.1.1-alpha.36
 
 ### Patch Changes

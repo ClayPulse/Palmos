@@ -5,7 +5,7 @@ import React, { useContext, useEffect } from "react";
 import { ReactNode } from "react";
 import ReactDOM from "react-dom";
 import { EditorContext } from "./editor-context-provider";
-import { Extension, ExtensionAgent } from "@/lib/types";
+import { ExtensionApp, ExtensionAgent } from "@/lib/types";
 import { getRemote } from "@/lib/module-federation/remote";
 
 const host = init({
@@ -93,7 +93,7 @@ export default function RemoteModuleProvider({
   }, [isPreventingCSS]);
 
   useEffect(() => {
-    function getExtensionAgents(extensions: Extension[]) {
+    function getExtensionAgents(extensions: ExtensionApp[]) {
       const agents: ExtensionAgent[] = extensions.flatMap(
         (ext) =>
           ext.config.agents?.map((agent) => {

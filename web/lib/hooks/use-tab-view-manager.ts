@@ -6,7 +6,7 @@ import { v4 } from "uuid";
 import {
   AppViewConfig,
   CanvasViewConfig,
-  Extension,
+  ExtensionApp,
   MenuAction,
   TabView,
 } from "../types";
@@ -174,7 +174,7 @@ export function useTabViewManager() {
     }
   }
 
-  function getInstalledAppByFileSuffix(suffix: string): Extension | undefined {
+  function getInstalledAppByFileSuffix(suffix: string): ExtensionApp | undefined {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
