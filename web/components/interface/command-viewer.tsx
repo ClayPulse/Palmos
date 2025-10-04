@@ -31,7 +31,7 @@ export default function CommandViewer() {
   const { actions, runAction, setKeywordFilter } = useScopedActions();
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
-  const [selectCommandIndex, setSelectCommandIndex] = useState(-1);
+  const [selectActionIndex, setSelectActionIndex] = useState(-1);
   const [inputTextValue, setInputTextValue] = useState("");
   const [inputAudioValue, setInputAudioValue] = useState<
     ReadableStream<ArrayBuffer> | undefined
@@ -40,7 +40,9 @@ export default function CommandViewer() {
   const [isOutputVoice, setIsOutputVoice] = useState(false);
   const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
 
+  const [isArgsInputOpen, setIsArgsInputOpen] = useState(false);
   const [args, setArgs] = useState<any>({});
+  const [actionReadyToRun, setActionReadyToRun] = useState<boolean>(false);
 
   const historyRef = useRef<HTMLDivElement>(null);
 
@@ -61,9 +63,10 @@ export default function CommandViewer() {
           title: "Command Execution Failed",
           description: `Failed to execute command: ${action.action.name}. Error: ${error.message}`,
         });
+        console.error("Failed to run action:", error);
       }
     },
-    [runAction],
+    [runAction, args],
   );
 
   useEffect(() => {
@@ -83,13 +86,14 @@ export default function CommandViewer() {
       clearInterval(interval);
     };
   }, []);
+
   useEffect(() => {
     if (inputTextValue !== "") {
       // Assume commands are ordered by relevance.
       // Filter commands based on the input value
       setKeywordFilter(inputTextValue);
       // Choose the first command suggestion.
-      setSelectCommandIndex(0);
+      setSelectActionIndex(0);
     } else {
       setKeywordFilter(undefined);
     }
@@ -116,6 +120,42 @@ export default function CommandViewer() {
     }
   }, [history]);
 
+  // Reset input if selected index changes
+  useEffect(() => {
+    setArgs({});
+    setIsArgsInputOpen(false);
+  }, [selectActionIndex]);
+
+  // Check action validity
+  useEffect(() => {
+    async function checkAndRunAction() {
+      if (!actionReadyToRun) {
+        return;
+      }
+
+      console.log("Action ready to run:", actionReadyToRun);
+
+      const queuedAction = actions[selectActionIndex];
+
+      if (queuedAction) {
+        const isValid = validateActionArgs(queuedAction, args);
+        if (isValid) {
+          // Run action directly if args are valid
+          await runActionCallback(queuedAction);
+        } else {
+          // Otherwise, open args input and wait for user
+          // to fill in required args.
+          setIsArgsInputOpen(true);
+        }
+      }
+
+      // Reset ready state if this pass ran or did not run.
+      setActionReadyToRun(false);
+    }
+
+    checkAndRunAction();
+  }, [actionReadyToRun]);
+
   function handleKeyDown(e: KeyboardEvent) {
     // Prevent default behavior for certain keys
     const key = e.key;
@@ -136,7 +176,7 @@ export default function CommandViewer() {
     if (keysToPrevent.includes(key)) {
       e.preventDefault();
       // @ts-expect-error continuePropagation is not in the type definition
-      e.continuePropagation();
+      if (e.continuePropagation) e.continuePropagation();
     }
 
     const keys = [...(editorContext?.editorStates.pressedKeys ?? []), key];
@@ -167,7 +207,7 @@ export default function CommandViewer() {
     if (keysToPrevent.includes(key)) {
       e.preventDefault();
       // @ts-expect-error continuePropagation is not in the type definition
-      e.continuePropagation();
+      if (e.continuePropagation) e.continuePropagation();
     }
 
     const keys =
@@ -185,10 +225,10 @@ export default function CommandViewer() {
     const isArrowUpPressed = pressedKeys.includes("ArrowUp");
     const isArrowDownPressed = pressedKeys.includes("ArrowDown");
     const isControlPressed = pressedKeys.includes("Control");
-    if (isEnterPressed && isControlPressed && selectCommandIndex !== -1) {
+    if (isEnterPressed && isControlPressed && selectActionIndex !== -1) {
       // Run command if ctrl is pressed
       console.log("Running command");
-      runActionCallback(actions[selectCommandIndex]);
+      setActionReadyToRun(true);
     } else if (isEnterPressed && !isControlPressed) {
       // Chat with assistant if ctrl is not pressed
       console.log("Chatting with assistant");
@@ -197,19 +237,53 @@ export default function CommandViewer() {
           setIsWaitingAssistant(true);
         });
       } else {
+        if (inputTextValue === "") {
+          if (selectActionIndex !== -1) {
+            addToast({
+              color: "warning",
+              title: "Chat input is empty",
+              description: `Did you mean to run the command: ${actions[selectActionIndex].action.name}? Use Ctrl + Enter to run the selected command.`,
+            });
+          } else {
+            addToast({
+              color: "warning",
+              title: "Chat input is empty",
+              description: "Please enter a message or use voice input.",
+            });
+          }
+          return;
+        }
         chatWithAssistant(inputTextValue, isOutputVoice).then(() => {
           setIsWaitingAssistant(true);
         });
       }
     } else if (isArrowUpPressed) {
-      setSelectCommandIndex((prev) =>
+      setSelectActionIndex((prev) =>
         prev === 0 ? actions.length - 1 : prev - 1,
       );
     } else if (isArrowDownPressed) {
-      setSelectCommandIndex((prev) =>
+      setSelectActionIndex((prev) =>
         prev === actions.length - 1 ? 0 : prev + 1,
       );
     }
+  }
+
+  function validateActionArgs(action: ScopedAction, args: any) {
+    const paramsEntries = Object.entries(action.action.parameters);
+
+    // Check if all required arguments are provided
+    if (paramsEntries.length > 0) {
+      const missingParams = paramsEntries.filter(
+        ([key, value]) =>
+          !action.action.parameters[key].optional && args[key] === undefined,
+      );
+      if (missingParams.length > 0) {
+        return false;
+      }
+      return true;
+    }
+
+    return true;
   }
 
   return (
@@ -319,36 +393,77 @@ export default function CommandViewer() {
             <Listbox
               selectionMode="single"
               selectedKeys={
-                selectCommandIndex === -1 ? [] : [selectCommandIndex.toString()]
+                selectActionIndex === -1 ? [] : [selectActionIndex.toString()]
               }
-              onSelectionChange={(selection) => {
-                const key = selection as any;
-                const index = key.currentKey
-                  ? parseInt(key.currentKey as string)
-                  : selectCommandIndex;
-
-                setSelectCommandIndex(index);
-                runActionCallback(actions[index]);
-              }}
               label="Command Suggestions"
+              shouldSelectOnPressUp
             >
               {actions.map((command, index) => (
                 <ListboxItem
                   key={index.toString()}
                   className="data-[is-selected=true]:bg-primary/20"
-                  data-is-selected={selectCommandIndex === index}
+                  data-is-selected={selectActionIndex === index}
                   endContent={
-                    selectCommandIndex === index && (
+                    selectActionIndex === index && (
                       <div className="absolute right-7">
                         <Kbd>Ctrl + Enter</Kbd>
                       </div>
                     )
                   }
+                  onPress={(e) => {
+                    // Prevent triggering when pressing Enter to run command.
+                    if (e.pointerType === "keyboard") {
+                      return;
+                    }
+
+                    setSelectActionIndex(index);
+                    setActionReadyToRun(true);
+                  }}
+                  onKeyDown={(e) => handleKeyDown(e as any)}
+                  onKeyUp={(e) => handleKeyUp(e as any)}
                 >
                   {command.action.name}
                 </ListboxItem>
               ))}
             </Listbox>
+          </div>
+        )}
+        {isArgsInputOpen && actions[selectActionIndex] && (
+          <div className="bg-content1 w-80 rounded-2xl shadow-md p-4">
+            <p className="mb-2 font-bold">Command Action Arguments</p>
+            {Object.entries(actions[selectActionIndex].action.parameters).map(
+              ([paramName, param], index) => (
+                <div key={paramName} className="mb-2">
+                  <Input
+                    className="w-full"
+                    value={args[paramName] || ""}
+                    onValueChange={(value) =>
+                      setArgs((prev: any) => ({
+                        ...prev,
+                        [paramName]: value,
+                      }))
+                    }
+                    placeholder={param.description || ""}
+                    label={`${paramName}${param.optional ? " (optional)" : ""}`}
+                    autoFocus={index === 0}
+                    isRequired={!param.optional}
+                    size="sm"
+                  />
+                </div>
+              ),
+            )}
+            <Button
+              className="w-full"
+              onPress={() => {
+                setIsArgsInputOpen(false);
+                setActionReadyToRun(true);
+              }}
+              isDisabled={!validateActionArgs(actions[selectActionIndex], args)}
+              color="primary"
+            >
+              Run Command
+              <Kbd>Ctrl + Enter</Kbd>
+            </Button>
           </div>
         )}
       </div>
