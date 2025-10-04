@@ -29,7 +29,7 @@ export function getRemoteServerBaseURL(
   return `${remoteOrigin}/${id}/${version}/server`;
 }
 
-export async function getRemoteManifest(
+export async function getRemoteClientManifest(
   remoteOrigin: string,
   id: string,
   version: string,
@@ -39,13 +39,13 @@ export async function getRemoteManifest(
   )
     .then((res) => res.json())
     .catch((err) => {
-      console.error("Failed to fetch remote manifest:", err);
+      console.warn("Failed to fetch remote manifest:", err);
       return null;
     });
   return mfManifest;
 }
 
-export function getRemoteConfig(
+export function getRemoteClientConfig(
   remoteOrigin: string,
   id: string,
   version: string,
@@ -55,7 +55,7 @@ export function getRemoteConfig(
   )
     .then((res) => res.json())
     .catch((err) => {
-      console.error("Failed to fetch remote config:", err);
+      console.warn("Failed to fetch remote config:", err);
       return null;
     });
   return config;

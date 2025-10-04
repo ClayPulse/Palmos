@@ -119,7 +119,8 @@ export enum AppTypeEnum {
 export type AppConfig = {
   id: string;
   version: string;
-  libVersion: string;
+  libVersion?: string;
+  visibility?: string;
   author?: string;
   displayName?: string;
   description?: string;
@@ -133,8 +134,6 @@ export type AppConfig = {
   agents?: Agent[];
   // Exposed actions in the modular app
   preRegisteredActions?: Action[];
-  // Visibility
-  visibility: string;
   // Recommended dimensions for app view in canvas
   recommendedHeight?: number;
   recommendedWidth?: number;

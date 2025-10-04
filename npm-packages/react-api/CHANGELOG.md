@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.43
+
+### Patch Changes
+
+- Make config type's version nullable
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.43
+
 ## 0.1.1-alpha.42
 
 ### Patch Changes

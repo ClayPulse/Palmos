@@ -2,7 +2,7 @@ import { AppConfig } from "@pulse-editor/shared-utils";
 import { satisfies } from "semver";
 import mfRuntime from "../../../node_modules/@module-federation/runtime/package.json";
 import packageJson from "../../package.json";
-import { getRemoteConfig, getRemoteManifest } from "./remote";
+import { getRemoteClientConfig, getRemoteClientManifest } from "./remote";
 
 export async function getHostMFVersion(): Promise<string> {
   return mfRuntime.version;
@@ -12,10 +12,10 @@ export async function getRemoteMFVersion(
   remoteOrigin: string,
   id: string,
   version: string,
-): Promise<string> {
-  const mfManifest = await getRemoteManifest(remoteOrigin, id, version);
+): Promise<string | undefined> {
+  const mfManifest = await getRemoteClientManifest(remoteOrigin, id, version);
   if (!mfManifest || !mfManifest.metaData) {
-    throw new Error("Remote MF manifest or metaData is undefined");
+    return undefined;
   }
   return mfManifest.metaData.pluginVersion;
 }
@@ -29,14 +29,14 @@ export async function getRemoteLibVersion(
   remoteOrigin: string,
   id: string,
   version: string,
-): Promise<string> {
-  const pulseConfig: AppConfig = await getRemoteConfig(
+): Promise<string | undefined> {
+  const pulseConfig: AppConfig = await getRemoteClientConfig(
     remoteOrigin,
     id,
     version,
   );
-  if (!pulseConfig) {
-    throw new Error("Remote pulse.config.json  undefined");
+  if (!pulseConfig || !pulseConfig.libVersion) {
+    return undefined;
   }
   const libVersion = pulseConfig.libVersion;
   return libVersion;
@@ -44,9 +44,9 @@ export async function getRemoteLibVersion(
 
 export async function checkCompatibility(
   hostVersion: string,
-  remoteVersion: string,
+  remoteVersion: string | undefined,
 ): Promise<boolean> {
-  if (remoteVersion === "unknown") {
+  if (remoteVersion === undefined) {
     console.warn("Could not determine remote versions. ");
     return false;
   }

@@ -101,16 +101,15 @@ export default function ExtensionPreview({
         ));
       setRemoteMFVersion(remoteMFVersion);
 
-      const remoteLibVersion =
-        extension.config.libVersion === "unknown"
-          ? (
-              await getRemoteLibVersion(
-                extension.remoteOrigin,
-                extension.config.id,
-                extension.config.version,
-              )
-            ).replace("^", "")
-          : extension.config.libVersion.replace("^", "");
+      const remoteLibVersion = (
+        extension.config.libVersion === undefined
+          ? await getRemoteLibVersion(
+              extension.remoteOrigin,
+              extension.config.id,
+              extension.config.version,
+            )
+          : extension.config.libVersion
+      )?.replace("^", "");
       setRemoteLibVersion(remoteLibVersion);
 
       const mfCompatible = await checkCompatibility(
