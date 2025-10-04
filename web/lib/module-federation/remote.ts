@@ -39,7 +39,7 @@ export async function getRemoteClientManifest(
   )
     .then((res) => res.json())
     .catch((err) => {
-      console.error("Failed to fetch remote manifest:", err);
+      console.warn("Failed to fetch remote manifest:", err);
       return null;
     });
   return mfManifest;
@@ -55,7 +55,7 @@ export function getRemoteClientConfig(
   )
     .then((res) => res.json())
     .catch((err) => {
-      console.error("Failed to fetch remote config:", err);
+      console.warn("Failed to fetch remote config:", err);
       return null;
     });
   return config;

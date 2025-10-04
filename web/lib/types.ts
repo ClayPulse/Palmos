@@ -326,7 +326,7 @@ export type Session = {
 export type AppMetaData = {
   name: string;
   version: string;
-  libVersion: string;
+  libVersion?: string;
   mfVersion?: string;
   description?: string;
   displayName?: string;

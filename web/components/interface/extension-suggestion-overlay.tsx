@@ -13,7 +13,7 @@ export default function ExtensionSuggestionOverlay() {
                 config: {
                   id: "extension-id",
                   version: "1.0.0",
-                  libVersion: "unknown",
+                  libVersion: undefined,
                   displayName: "Extension Name",
                   description: "Extension Description",
                   visibility: "public",
@@ -29,7 +29,7 @@ export default function ExtensionSuggestionOverlay() {
                 config: {
                   id: "extension-id",
                   version: "1.0.0",
-                  libVersion: "unknown",
+                  libVersion: undefined,
                   displayName: "Extension Name",
                   description: "Extension Description",
                   visibility: "public",
@@ -45,7 +45,7 @@ export default function ExtensionSuggestionOverlay() {
                 config: {
                   id: "extension-id",
                   version: "1.0.0",
-                  libVersion: "unknown",
+                  libVersion: undefined,
                   displayName: "Extension Name",
                   description: "Extension Description",
                   visibility: "public",

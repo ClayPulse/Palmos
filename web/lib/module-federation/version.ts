@@ -12,10 +12,10 @@ export async function getRemoteMFVersion(
   remoteOrigin: string,
   id: string,
   version: string,
-): Promise<string> {
+): Promise<string | undefined> {
   const mfManifest = await getRemoteClientManifest(remoteOrigin, id, version);
   if (!mfManifest || !mfManifest.metaData) {
-    return "unknown";
+    return undefined;
   }
   return mfManifest.metaData.pluginVersion;
 }
@@ -29,14 +29,14 @@ export async function getRemoteLibVersion(
   remoteOrigin: string,
   id: string,
   version: string,
-): Promise<string> {
+): Promise<string | undefined> {
   const pulseConfig: AppConfig = await getRemoteClientConfig(
     remoteOrigin,
     id,
     version,
   );
   if (!pulseConfig || !pulseConfig.libVersion) {
-    return "unknown";
+    return undefined;
   }
   const libVersion = pulseConfig.libVersion;
   return libVersion;
@@ -44,9 +44,9 @@ export async function getRemoteLibVersion(
 
 export async function checkCompatibility(
   hostVersion: string,
-  remoteVersion: string,
+  remoteVersion: string | undefined,
 ): Promise<boolean> {
-  if (remoteVersion === "unknown") {
+  if (remoteVersion === undefined) {
     console.warn("Could not determine remote versions. ");
     return false;
   }

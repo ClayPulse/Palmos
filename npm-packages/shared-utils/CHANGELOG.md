@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.43
+
+### Patch Changes
+
+- Make config type's version nullable
+
 ## 0.1.1-alpha.42
 
 ### Patch Changes
