@@ -40,17 +40,28 @@ export default function CommandViewer() {
   const [isOutputVoice, setIsOutputVoice] = useState(false);
   const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
 
+  const [args, setArgs] = useState<any>({});
+
   const historyRef = useRef<HTMLDivElement>(null);
 
   const runActionCallback = useCallback(
     async (action: ScopedAction) => {
-      const result = await runAction(action, {});
-      console.log("Command result:", result);
-      addToast({
-        color: "success",
-        title: "Command Executed",
-        description: `Executed command: ${action.action.name}`,
-      });
+      try {
+        const result = await runAction(action, args);
+
+        console.log("Command result:", result);
+        addToast({
+          color: "success",
+          title: "Command Executed",
+          description: `Executed command: ${action.action.name}`,
+        });
+      } catch (error: any) {
+        addToast({
+          color: "danger",
+          title: "Command Execution Failed",
+          description: `Failed to execute command: ${action.action.name}. Error: ${error.message}`,
+        });
+      }
     },
     [runAction],
   );

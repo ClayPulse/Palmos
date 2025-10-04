@@ -21,9 +21,7 @@ export async function getRemoteMFVersion(
 }
 
 export async function getHostLibVersion(): Promise<string> {
-  const version = packageJson.dependencies[
-    "@pulse-editor/shared-utils"
-  ].replace("^", "");
+  const version = packageJson.dependencies["@pulse-editor/shared-utils"];
   return version;
 }
 
@@ -40,29 +38,21 @@ export async function getRemoteLibVersion(
   if (!pulseConfig) {
     throw new Error("Remote pulse.config.json  undefined");
   }
-  const libVersion = pulseConfig.libVersion.replace("^", "");
+  const libVersion = pulseConfig.libVersion;
   return libVersion;
 }
 
 export async function checkCompatibility(
-  hostMFVersion: string,
-  hostLibVersion: string,
-  remoteMFVersion: string,
-  remoteLibVersion: string,
+  hostVersion: string,
+  remoteVersion: string,
 ): Promise<boolean> {
-  if (remoteMFVersion === "unknown" || remoteLibVersion === "unknown") {
+  if (remoteVersion === "unknown") {
     console.warn("Could not determine remote versions. ");
     return false;
   }
-  if (!satisfies(remoteMFVersion, hostMFVersion)) {
+  if (!satisfies(remoteVersion, hostVersion)) {
     console.warn(
-      `Incompatible MF versions: host ${hostMFVersion}, remote ${remoteMFVersion}`,
-    );
-    return false;
-  }
-  if (!satisfies(remoteLibVersion, hostLibVersion)) {
-    console.warn(
-      `Incompatible lib versions: host ${hostLibVersion}, remote ${remoteLibVersion}`,
+      `Incompatible versions: host ${hostVersion}, remote ${remoteVersion}`,
     );
     return false;
   }

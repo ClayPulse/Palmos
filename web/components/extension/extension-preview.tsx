@@ -75,7 +75,10 @@ export default function ExtensionPreview({
     undefined,
   );
 
-  const [isCompatible, setIsCompatible] = useState<boolean | undefined>(
+  const [isMFCompatible, setIsMFCompatible] = useState<boolean | undefined>(
+    undefined,
+  );
+  const [isLibCompatible, setIsLibCompatible] = useState<boolean | undefined>(
     undefined,
   );
 
@@ -100,21 +103,26 @@ export default function ExtensionPreview({
 
       const remoteLibVersion =
         extension.config.libVersion === "unknown"
-          ? await getRemoteLibVersion(
-              extension.remoteOrigin,
-              extension.config.id,
-              extension.config.version,
-            )
-          : extension.config.libVersion;
+          ? (
+              await getRemoteLibVersion(
+                extension.remoteOrigin,
+                extension.config.id,
+                extension.config.version,
+              )
+            ).replace("^", "")
+          : extension.config.libVersion.replace("^", "");
       setRemoteLibVersion(remoteLibVersion);
 
       const mfCompatible = await checkCompatibility(
         hostMFVersion,
-        hostLibVersion,
         remoteMFVersion,
+      );
+      const libCompatible = await checkCompatibility(
+        hostLibVersion,
         remoteLibVersion,
       );
-      setIsCompatible(mfCompatible);
+      setIsMFCompatible(mfCompatible);
+      setIsLibCompatible(libCompatible);
     }
 
     fetchVersions();
@@ -175,8 +183,9 @@ export default function ExtensionPreview({
               <EnableCheckBox isActive={isEnabled} onPress={toggleExtension} />
             )}
 
-            {isCompatible !== undefined &&
-              (!isCompatible ? (
+            {isMFCompatible !== undefined &&
+              isLibCompatible !== undefined &&
+              (!isMFCompatible || !isLibCompatible ? (
                 <Popover
                   isOpen={showMFVersionInfo}
                   onOpenChange={setShowMFVersionInfo}
@@ -196,23 +205,36 @@ export default function ExtensionPreview({
                         setShowMFVersionInfo(false);
                       }}
                     >
-                      <Icon name="warning" className="text-danger!" />
+                      {!isMFCompatible ? (
+                        <Icon name="warning" className="text-danger!" />
+                      ) : (
+                        <Icon name="warning" className="text-warning!" />
+                      )}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent>
                     <div className="max-w-xs">
-                      <p>
-                        This app is outdated and no longer a valid module
-                        federation app. Please update the app to the latest
-                        version. <br />
-                        Host MF version: {hostMFVersion}
-                        <br />
-                        Host lib version: {hostLibVersion}
-                        <br />
-                        App MF version: {remoteMFVersion}
-                        <br />
-                        App lib version: {remoteLibVersion}
-                      </p>
+                      {!isMFCompatible && (
+                        <p>
+                          This app is outdated and no longer a valid module
+                          federation app. Please update the app to the latest
+                          version. <br />
+                          Host MF version: {hostMFVersion}
+                          <br />
+                          App MF version: {remoteMFVersion}
+                        </p>
+                      )}
+                      {!isLibCompatible && (
+                        <p>
+                          This app's library version is outdated and may not
+                          work correctly. Please update the app to the latest
+                          version.
+                          <br />
+                          Host lib version: {hostLibVersion}
+                          <br />
+                          App lib version: {remoteLibVersion}
+                        </p>
+                      )}
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -241,9 +263,9 @@ export default function ExtensionPreview({
                     <PopoverContent>
                       <div className="max-w-xs">
                         <p>
-                          This app's module federation version (
-                          {extension.mfVersion}) matches the host version (
-                          {hostMFVersion}). The app should work correctly.
+                          This app's module federation version ({hostMFVersion})
+                          and library version ({hostLibVersion}) match the host
+                          version. The app should work correctly.
                         </p>
                       </div>
                     </PopoverContent>

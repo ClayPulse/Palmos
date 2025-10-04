@@ -122,7 +122,9 @@ export default function useScopedActions() {
     } else if (action.type === "app") {
       const extensions = editorContext?.persistSettings?.extensions ?? [];
       const ext = extensions.find((e) =>
-        (e.config.actions ?? []).some((act) => act.name === action.action.name),
+        (e.config.preRegisteredActions ?? []).some(
+          (act) => act.name === action.action.name,
+        ),
       );
 
       if (!ext) {
@@ -136,11 +138,12 @@ export default function useScopedActions() {
 
       if (appInView) {
         // App is already in the view, execute Action in the app's context.
-        imcContext?.polyIMC?.sendMessage(
+        const result = await imcContext?.polyIMC?.sendMessage(
           ext.config.id + "-" + appInView.viewId,
           IMCMessageTypeEnum.EditorRunAppAction,
           { name: action.action.name, args },
         );
+        return result;
       } else {
         // Create an instance of the app that provides the static Action,
         // then execute Action in the app's context.
@@ -159,11 +162,12 @@ export default function useScopedActions() {
           });
         }
 
-        return await imcContext?.polyIMC?.sendMessage(
+        const result = await imcContext?.polyIMC?.sendMessage(
           ext.config.id + "-" + viewId,
           IMCMessageTypeEnum.EditorRunAppAction,
           { name: action.action.name, args },
         );
+        return result;
       }
     }
   }
@@ -172,7 +176,7 @@ export default function useScopedActions() {
     extension: ExtensionApp,
     keyword?: string,
   ) {
-    const actions = extension.config.actions ?? [];
+    const actions = extension.config.preRegisteredActions ?? [];
     if (keyword) {
       return actions.filter((action) =>
         action.name.toLowerCase().includes(keyword.toLowerCase().trim()),
