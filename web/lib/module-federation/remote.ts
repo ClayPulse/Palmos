@@ -29,7 +29,7 @@ export function getRemoteServerBaseURL(
   return `${remoteOrigin}/${id}/${version}/server`;
 }
 
-export async function getRemoteManifest(
+export async function getRemoteClientManifest(
   remoteOrigin: string,
   id: string,
   version: string,
@@ -45,7 +45,7 @@ export async function getRemoteManifest(
   return mfManifest;
 }
 
-export function getRemoteConfig(
+export function getRemoteClientConfig(
   remoteOrigin: string,
   id: string,
   version: string,

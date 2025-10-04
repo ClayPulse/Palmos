@@ -1,6 +1,6 @@
 import { getRemoteMFVersion } from "@/lib/module-federation/version";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { ExtensionApp, AppMetaData, TabItem } from "@/lib/types";
+import { AppMetaData, ExtensionApp, TabItem } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import useSWR from "swr";
 import ExtensionGallery from "../extension/extension-gallery";
@@ -15,9 +15,9 @@ export default function ExtensionMarketplaceModal({
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }) {
-  const [installedExtensions, setInstalledExtensions] = useState<ExtensionApp[]>(
-    [],
-  );
+  const [installedExtensions, setInstalledExtensions] = useState<
+    ExtensionApp[]
+  >([]);
 
   const extensionCategories: TabItem[] = [
     {
