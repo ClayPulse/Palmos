@@ -1,5 +1,23 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.42
+
+### Patch Changes
+
+- Add error handler in IMC
+
+## 0.1.1-alpha.41
+
+### Patch Changes
+
+- Update register action hook for react api
+
+## 0.1.1-alpha.40
+
+### Patch Changes
+
+- Rename pre-regsitered actions
+
 ## 0.1.1-alpha.39
 
 ### Patch Changes

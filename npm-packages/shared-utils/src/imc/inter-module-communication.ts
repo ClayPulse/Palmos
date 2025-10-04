@@ -1,9 +1,9 @@
+import { messageTimeout } from "../types/constants";
 import {
   IMCMessage,
   IMCMessageTypeEnum,
   ReceiverHandlerMap,
 } from "../types/types";
-import { messageTimeout } from "../types/constants";
 import { MessageReceiver } from "./message-receiver";
 import { MessageSender } from "./message-sender";
 
@@ -72,7 +72,10 @@ export class InterModuleCommunication {
       }
 
       const message = event.data;
-      if (process.env.NODE_ENV === "development" && message.from !== undefined) {
+      if (
+        process.env.NODE_ENV === "development" &&
+        message.from !== undefined
+      ) {
         console.log(
           `Module ${this.thisWindowId} received message from module ${
             message.from
@@ -198,7 +201,17 @@ export class InterModuleCommunication {
         const pendingMessage = this.sender?.getPendingMessage(message.id);
         if (pendingMessage) {
           pendingMessage.resolve(message.payload);
-          this.sender?.removePendingMessage(message.id);
+        }
+      }
+    );
+
+    // Handle error message from the other window.
+    this.receiverHandlerMap?.set(
+      IMCMessageTypeEnum.SignalError,
+      async (senderWindow: Window, message: IMCMessage) => {
+        const pendingMessage = this.sender?.getPendingMessage(message.id);
+        if (pendingMessage) {
+          pendingMessage.reject(new Error(message.payload));
         }
       }
     );
