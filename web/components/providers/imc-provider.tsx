@@ -17,6 +17,7 @@ import { getVideoGenModel } from "@/lib/modalities/video-gen/video-gen";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { IMCContextType } from "@/lib/types";
 import {
+  Action,
   ImageModelConfig,
   IMCMessage,
   IMCMessageTypeEnum,
@@ -26,7 +27,7 @@ import {
   STTConfig,
   TTSConfig,
 } from "@pulse-editor/shared-utils";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { EditorContext } from "./editor-context-provider";
 
 export const IMCContext = createContext<IMCContextType | undefined>(undefined);
@@ -39,38 +40,77 @@ export default function InterModuleCommunicationProvider({
   const editorContext = useContext(EditorContext);
 
   const [polyIMC, setPolyIMC] = useState<PolyIMC | undefined>(undefined);
-  const [imcInitializedMap, setImcInitializedMap] = useState<
-    Map<string, boolean>
-  >(new Map());
-  const [resolvePromises, setResolvePromises] = useState<{
+  const imcInitializedMapRef = useRef<Map<string, boolean>>(new Map());
+  const imcInitializedResolvePromisesRef = useRef<{
     [key: string]: () => void;
   }>({});
 
+  const actionRegisteredMapRef = useRef<Map<string, boolean>>(new Map());
+  const actionRegisteredResolvePromisesRef = useRef<{
+    [key: string]: () => void;
+  }>({});
+
+  useEffect(() => {
+    // @ts-expect-error set window viewId
+    window.viewId = "Pulse Editor Main";
+
+    return () => {
+      // Cleanup the polyIMC instance when the component unmounts
+      if (polyIMC) {
+        polyIMC.close();
+        setPolyIMC(undefined);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!polyIMC) {
+      const newPolyIMC = new PolyIMC(getHandlerMap());
+      setPolyIMC(newPolyIMC);
+    }
+  }, [polyIMC, setPolyIMC]);
+
+  // Update the base handler map as editor context changes
+  useEffect(() => {
+    if (polyIMC) {
+      polyIMC.updateBaseReceiverHandlerMap(getHandlerMap());
+    }
+  }, [polyIMC, editorContext]);
+
   function markIMCInitialized(viewId: string) {
-    setImcInitializedMap((prev) => {
-      const newMap = new Map(prev);
-      newMap.set(viewId, true);
-      return newMap;
-    });
-    if (resolvePromises[viewId]) {
-      resolvePromises[viewId]();
-      setResolvePromises((prev) => {
-        const newPromises = { ...prev };
-        delete newPromises[viewId];
-        return newPromises;
-      });
+    imcInitializedMapRef.current.set(viewId, true);
+    if (imcInitializedResolvePromisesRef.current[viewId]) {
+      imcInitializedResolvePromisesRef.current[viewId]();
+      delete imcInitializedResolvePromisesRef.current[viewId];
     }
   }
 
   async function resolveWhenViewInitialized(viewId: string) {
     return new Promise<void>((resolve) => {
-      if (imcInitializedMap.get(viewId)) {
+      if (imcInitializedMapRef.current.get(viewId)) {
         resolve();
       } else {
-        setResolvePromises((prev) => ({
-          ...prev,
-          [viewId]: resolve,
-        }));
+        imcInitializedResolvePromisesRef.current[viewId] = resolve;
+      }
+    });
+  }
+
+  function markActionRegistered(action: Action) {
+    console.log(`Action registered: ${action.name}`);
+    actionRegisteredMapRef.current.set(action.name, true);
+    if (actionRegisteredResolvePromisesRef.current[action.name]) {
+      actionRegisteredResolvePromisesRef.current[action.name]();
+      delete actionRegisteredResolvePromisesRef.current[action.name];
+    }
+  }
+
+  async function resolveWhenActionRegistered(action: Action) {
+    return new Promise<void>((resolve, reject) => {
+      if (actionRegisteredMapRef.current.get(action.name)) {
+        console.log(`Action "${action.name}" is already registered.`);
+        resolve();
+      } else {
+        actionRegisteredResolvePromisesRef.current[action.name] = resolve;
       }
     });
   }
@@ -428,44 +468,32 @@ export default function InterModuleCommunicationProvider({
           return editorContext?.persistSettings?.envs ?? {};
         },
       ],
+      [
+        IMCMessageTypeEnum.EditorRegisterAction,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const action: Action = message.payload;
+          if (!action.name) {
+            throw new Error("Action must have a name.");
+          }
+          // Mark this action as registered
+          markActionRegistered(action);
+        },
+      ],
     ]);
 
     return newMap;
   }
-
-  useEffect(() => {
-    // @ts-expect-error set window viewId
-    window.viewId = "Pulse Editor Main";
-
-    return () => {
-      // Cleanup the polyIMC instance when the component unmounts
-      if (polyIMC) {
-        polyIMC.close();
-        setPolyIMC(undefined);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!polyIMC) {
-      const newPolyIMC = new PolyIMC(getHandlerMap());
-      setPolyIMC(newPolyIMC);
-    }
-  }, [polyIMC, setPolyIMC]);
-
-  // Update the base handler map as editor context changes
-  useEffect(() => {
-    if (polyIMC) {
-      polyIMC.updateBaseReceiverHandlerMap(getHandlerMap());
-    }
-  }, [polyIMC, editorContext]);
-
   return (
     <IMCContext.Provider
       value={{
         polyIMC,
         resolveWhenViewInitialized,
         markIMCInitialized,
+        resolveWhenActionRegistered,
       }}
     >
       {children}

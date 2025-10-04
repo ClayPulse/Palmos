@@ -17,7 +17,8 @@ import useIMC from "../../lib/use-imc";
  * @param parameters Parameters of the command.
  * @param returns Return values of the command.
  * @param callbackHandler Callback handler function to handle the command.
- * @param isExtReady Whether the extension is ready to receive commands.
+ * @param isExtReady Whether the extension is ready to receive commands. 
+ * Useful for actions that need to wait for some certain app state to be ready.
  *
  */
 export default function useRegisterAction(

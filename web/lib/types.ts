@@ -301,6 +301,7 @@ export type IMCContextType = {
   polyIMC: PolyIMC | undefined;
   resolveWhenViewInitialized: (viewId: string) => Promise<void>;
   markIMCInitialized: (viewId: string) => void;
+  resolveWhenActionRegistered: (action: Action) => Promise<void>;
 };
 
 // #endregion

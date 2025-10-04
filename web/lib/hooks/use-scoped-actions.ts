@@ -162,6 +162,11 @@ export default function useScopedActions() {
           });
         }
 
+        console.log("App is ready");
+
+        // Wait for the action to be ready
+        await waitForActionReady(action);
+
         const result = await imcContext?.polyIMC?.sendMessage(
           ext.config.id + "-" + viewId,
           IMCMessageTypeEnum.EditorRunAppAction,
@@ -187,6 +192,11 @@ export default function useScopedActions() {
 
   function setKeywordFilter(newKeyword: string | undefined) {
     setKeyword(newKeyword);
+  }
+
+  async function waitForActionReady(action: ScopedAction) {
+    await imcContext?.resolveWhenActionRegistered(action.action);
+    console.log(`Action "${action.action.name}" is ready.`);
   }
 
   return {
