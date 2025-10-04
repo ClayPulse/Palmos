@@ -1,6 +1,6 @@
 import useAgentTools from "./hooks/agent/use-agent-tools";
 import useAgents from "./hooks/agent/use-agents";
-import useCommand from "./hooks/editor/use-command";
+import useRegisterAction from "./hooks/editor/use-register-action";
 import useFileView from "./hooks/editor/use-file-view";
 import useLoading from "./hooks/editor/use-loading";
 import useNotification from "./hooks/editor/use-notification";
@@ -19,7 +19,7 @@ import useTerminal from "./hooks/terminal/use-terminal";
 export {
   useAgentTools,
   useAgents,
-  useCommand,
+  useRegisterAction,
   useFileView,
   useImageGen,
   useLLM,

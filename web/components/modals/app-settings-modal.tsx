@@ -1,3 +1,4 @@
+import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import useExplorer from "@/lib/hooks/use-explorer";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
@@ -8,7 +9,7 @@ import { ttsProviderOptions } from "@/lib/modalities/tts/options";
 import { videoGenProviderOptions } from "@/lib/modalities/video-gen/options";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
-import { EditorContextType, Extension, PlatformEnum } from "@/lib/types";
+import { EditorContextType, ExtensionApp } from "@/lib/types";
 import {
   Alert,
   Button,
@@ -19,7 +20,7 @@ import {
   Switch,
   Tooltip,
 } from "@heroui/react";
-import { ExtensionTypeEnum } from "@pulse-editor/shared-utils";
+import { AppTypeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -887,7 +888,7 @@ function DevExtensionSettings({
   editorContext?: EditorContextType;
 }) {
   const [fileTypeExtensionMap, setFileTypeExtensionMap] = useState<
-    Map<string, Extension[]>
+    Map<string, ExtensionApp[]>
   >(new Map());
 
   const fileTypeEntries = Array.from(fileTypeExtensionMap.entries());
@@ -903,7 +904,7 @@ function DevExtensionSettings({
   useEffect(() => {
     const extensions = editorContext?.persistSettings?.extensions ?? [];
     extensions.forEach((extension) => {
-      if (extension.config.extensionType === ExtensionTypeEnum.FileView) {
+      if (extension.config.appType === AppTypeEnum.FileView) {
         const fileTypes = extension.config.fileTypes;
         console.log(fileTypes);
 

@@ -259,7 +259,7 @@ This must match the command's parameters provided earlier.`,
         //           description:
         //             "The ID of the view (usually a uuid) that you suggest the user to run the command on. \
         // Note, this is not the same as the module/extension ID (usually a named ID). In order to suggest a view ID, \
-        // you must match the commands' module ID (named ID) with the opened views' extensionConfig.id (named ID). \
+        // you must match the commands' module ID (named ID) with the opened views' appConfig.id (named ID). \
         // If a command and an opened view has the same extension/module ID (named ID), you can use that \
         // opened view's ID (uuid) as the suggested view ID.",
         //         },

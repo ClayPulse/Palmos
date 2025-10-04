@@ -7,13 +7,13 @@ import {
   useEffect,
   useState,
 } from "react";
-import { TabItem, Extension } from "@/lib/types";
+import { TabItem, ExtensionApp } from "@/lib/types";
 import { Button, Divider, select, Tooltip } from "@heroui/react";
 import AgentConfigModal from "../../modals/agent-config-modal";
 import { EditorContext } from "../../providers/editor-context-provider";
 import Tabs from "@/components/misc/tabs";
 import Icon from "../../misc/icon";
-import { ExtensionTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
+import { AppTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { v4 } from "uuid";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
@@ -25,14 +25,14 @@ function ConsoleNavBar({
   selectedConsoleIndex,
   setSelectedConsoleIndex,
 }: {
-  consoles: Extension[];
-  setConsoles: Dispatch<SetStateAction<Extension[]>>;
+  consoles: ExtensionApp[];
+  setConsoles: Dispatch<SetStateAction<ExtensionApp[]>>;
   selectedConsoleIndex: number;
   setSelectedConsoleIndex: Dispatch<SetStateAction<number>>;
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const [selectedConsole, setSelectedConsole] = useState<Extension | undefined>(
+  const [selectedConsole, setSelectedConsole] = useState<ExtensionApp | undefined>(
     undefined,
   );
 
@@ -132,7 +132,7 @@ function ConsoleNavBar({
 export default function ConsolePanelView() {
   const editorContext = useContext(EditorContext);
 
-  const [consoles, setConsoles] = useState<Extension[]>([]);
+  const [consoles, setConsoles] = useState<ExtensionApp[]>([]);
   const [viewModels, setViewModels] = useState<ViewModel[]>([]);
 
   const [selectedConsoleIndex, setSelectedConsoleIndex] = useState<number>(0);
@@ -151,7 +151,7 @@ export default function ConsolePanelView() {
     if (editorContext?.persistSettings?.extensions && isFirstOpened) {
       const foundConsoles = editorContext.persistSettings?.extensions.filter(
         (extension) =>
-          extension.config.extensionType === ExtensionTypeEnum.ConsoleView,
+          extension.config.appType === AppTypeEnum.ConsoleView,
       );
       console.log(
         "Found consoles:",
@@ -162,7 +162,7 @@ export default function ConsolePanelView() {
         foundConsoles.map((ext) => ({
           viewId: v4(),
           isFocused: false,
-          extensionConfig: ext.config,
+          appConfig: ext.config,
         })),
       );
     }

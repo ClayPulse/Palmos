@@ -1,5 +1,5 @@
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { AppViewConfig, CanvasViewConfig, Extension } from "@/lib/types";
+import { AppViewConfig, CanvasViewConfig, ExtensionApp } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useSearchParams } from "next/navigation";
@@ -141,7 +141,7 @@ export default function ViewArea() {
         e.preventDefault();
         const data = e.dataTransfer.getData("text/plain");
         console.log("Dropped item:", data);
-        const ext: Extension = JSON.parse(data);
+        const ext: ExtensionApp = JSON.parse(data);
         const config: AppViewConfig = {
           app: ext.config.id,
           viewId: v4(),

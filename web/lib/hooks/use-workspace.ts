@@ -1,10 +1,11 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { PlatformEnum } from "@/lib/enums";
 import { useContext, useEffect, useState } from "react";
-import { PlatformEnum, RemoteWorkspace } from "../types";
-import { getPlatform } from "../platform-api/platform-checker";
-import { useAuth } from "./use-auth";
 import useSWR from "swr";
+import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
+import { RemoteWorkspace } from "../types";
+import { useAuth } from "./use-auth";
 
 export function useWorkspace() {
   const editorContext = useContext(EditorContext);

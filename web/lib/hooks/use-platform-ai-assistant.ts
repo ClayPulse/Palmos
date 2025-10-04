@@ -5,6 +5,7 @@ import {
   runAgentMethodLocal,
 } from "@/lib/agent/agent-runner";
 import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
+import { PlatformEnum } from "@/lib/enums";
 import { getDefaultLLMConfig } from "@/lib/modalities/utils";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
@@ -12,14 +13,13 @@ import {
   AppViewConfig,
   CanvasViewConfig,
   PlatformAssistantHistory,
-  PlatformEnum,
   TabView,
 } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import useCommands from "./use-commands";
 import { usePlatformApi } from "./use-platform-api";
+import useScopedActions from "./use-scoped-actions";
 import useSpeech2Speech from "./use-speech2speech";
 import { useTabViewManager } from "./use-tab-view-manager";
 import useTTS from "./use-tts";
@@ -36,7 +36,7 @@ export default function usePlatformAIAssistant() {
 
   const { runSpeech2Speech, stopSpeech2Speech, isRunning } = useSpeech2Speech();
   const { readText, playAudio } = useTTS();
-  const { runCommand, commands } = useCommands();
+  const { runAction, actions } = useScopedActions();
   const { activeTabView } = useTabViewManager();
 
   const [pendingAnalysis, setPendingAnalysis] = useState("");
@@ -119,15 +119,13 @@ export default function usePlatformAIAssistant() {
         thinkingText: "Executing command...",
       }));
 
-      const command = commands.find(
-        (cmd) => cmd.commandInfo.name === suggestedCmd,
-      );
+      const command = actions.find((cmd) => cmd.action.name === suggestedCmd);
       if (!command) {
         toast.error(`Agent suggested command ${suggestedCmd} not found.`);
         return;
       }
 
-      const cmdResult = await runCommand(command, args);
+      const cmdResult = await runAction(command, args);
 
       if (process.env.NODE_ENV === "development") {
         console.log("Command result:", cmdResult);
@@ -208,9 +206,9 @@ export default function usePlatformAIAssistant() {
 
   async function getUseExtensionCommandsArgs(userInput: string) {
     function getCommandsArgs() {
-      return commands.map((cmd) => ({
-        cmdName: cmd.commandInfo.name,
-        parameters: Object.entries(cmd.commandInfo.parameters).map(
+      return actions.map((cmd) => ({
+        cmdName: cmd.action.name,
+        parameters: Object.entries(cmd.action.parameters).map(
           ([key, value]) => ({
             name: key,
             type: value.type,

@@ -2,12 +2,13 @@ import ExtensionLoader from "@/components/extension/extension-loader";
 import Loading from "@/components/interface/loading";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
+import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { Extension, PlatformEnum } from "@/lib/types";
+import { ExtensionApp } from "@/lib/types";
 import {
+  AppTypeEnum,
   ConnectionListener,
-  ExtensionTypeEnum,
   IMCMessage,
   IMCMessageTypeEnum,
   ReceiverHandler,
@@ -33,7 +34,7 @@ export default function SandboxAppLoader({
   const imcContext = useContext(IMCContext);
 
   const [currentExtension, setCurrentExtension] = useState<
-    Extension | undefined
+    ExtensionApp | undefined
   >();
   const [currentViewId, setCurrentViewId] = useState<string | undefined>(
     undefined,
@@ -92,12 +93,12 @@ export default function SandboxAppLoader({
       //     setCurrentExtension(ext);
       //     setViewModel({
       //       ...viewModel,
-      //       extensionConfig: ext.config,
+      //       appConfig: ext.config,
       //     });
       //   }
       // }
 
-      const extId = model.extensionConfig?.id;
+      const extId = model.appConfig?.id;
 
       const ext = editorContext?.persistSettings?.extensions?.find(
         (extension) => extension.config.id === extId,
@@ -172,7 +173,7 @@ export default function SandboxAppLoader({
 
     // Add loaded handler
     newMap.set(
-      IMCMessageTypeEnum.EditorLoadingExt,
+      IMCMessageTypeEnum.EditorLoadingApp,
       async (
         senderWindow: Window,
         message: IMCMessage,
@@ -192,7 +193,7 @@ export default function SandboxAppLoader({
 
     // The following message handlers require OS-like environment.
     // This can be either local environment or remote instance.
-    if (model.extensionConfig?.extensionType === ExtensionTypeEnum.FileView) {
+    if (model.appConfig?.appType === AppTypeEnum.FileView) {
       newMap.set(
         IMCMessageTypeEnum.PlatformWriteFile,
         async (
@@ -245,9 +246,7 @@ export default function SandboxAppLoader({
           return file;
         },
       );
-    } else if (
-      model.extensionConfig?.extensionType === ExtensionTypeEnum.ConsoleView
-    ) {
+    } else if (model.appConfig?.appType === AppTypeEnum.ConsoleView) {
       newMap.set(
         IMCMessageTypeEnum.PlatformCreateTerminal,
         async (

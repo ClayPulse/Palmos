@@ -1,13 +1,16 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
 import { registerRemotes } from "@module-federation/runtime";
 import { useContext } from "react";
+import toast from "react-hot-toast";
 import { compare } from "semver";
 import { getRemote, getRemoteClientBaseURL } from "../module-federation/remote";
 import {
+  getRemoteLibVersion,
   getHostMFVersion,
   getRemoteMFVersion,
 } from "../module-federation/version";
-import { Extension } from "../types";
+import { AppMetaData, ExtensionApp } from "../types";
 
 export default function useExtensionManager() {
   const editorContext = useContext(EditorContext);
@@ -121,12 +124,12 @@ export default function useExtensionManager() {
 
   async function getInstalledExtension(
     name: string,
-  ): Promise<Extension | undefined> {
+  ): Promise<ExtensionApp | undefined> {
     const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
     return extensions.find((ext) => ext.config.id === name) ?? undefined;
   }
 
-  function tryAutoSetDefault(ext: Extension) {
+  function tryAutoSetDefault(ext: ExtensionApp) {
     // Try to set default extension for file types
     const map =
       editorContext?.persistSettings?.defaultFileTypeExtensionMap ?? {};
@@ -144,7 +147,7 @@ export default function useExtensionManager() {
     }));
   }
 
-  function removeDefaultExtension(ext: Extension) {
+  function removeDefaultExtension(ext: ExtensionApp) {
     const map = editorContext?.persistSettings?.defaultFileTypeExtensionMap;
     if (map) {
       ext.config.fileTypes?.forEach((fileType) => {
@@ -178,7 +181,7 @@ export default function useExtensionManager() {
       throw new Error("Failed to fetch extension config");
     }
 
-    const extension: Extension = {
+    const extension: ExtensionApp = {
       config: config,
       isEnabled: true,
       remoteOrigin: remoteOrigin,
@@ -188,6 +191,131 @@ export default function useExtensionManager() {
     return extension;
   }
 
+  // Download and load the extension app from a URL if specified
+  async function loadAppFromURL(urlStr: string) {
+    // the url is expected to be in the format of {remoteOrigin}/{extensionId}/{version}
+
+    const url = new URL(urlStr);
+    const parts = url.pathname.split("/").filter((part) => part.length > 0);
+    if (parts.length < 2) {
+      console.error("Invalid app URL format");
+      return undefined;
+    }
+    const extensionId = parts[parts.length - 2];
+    const version = parts[parts.length - 1];
+    // Remote origin is everything before the last two parts
+    const remoteOrigin = url.origin + parts.slice(0, -2).join("/");
+
+    const remoteMFVersion = await getRemoteMFVersion(
+      remoteOrigin,
+      extensionId,
+      version,
+    );
+
+    const hostMFVersion = await getHostMFVersion();
+
+    const libVersion = await getRemoteLibVersion(
+      remoteOrigin,
+      extensionId,
+      version,
+    );
+
+    if (remoteMFVersion !== hostMFVersion) {
+      const errorMsg = `Extension MF version (${remoteMFVersion}) does not match host MF version (${hostMFVersion}). Please install a compatible version.`;
+      toast.error(errorMsg);
+      throw new Error(errorMsg);
+    }
+
+    const ext: ExtensionApp = {
+      config: {
+        id: extensionId,
+        version: version,
+        libVersion,
+        author: "Unknown",
+        description: "No description available",
+        displayName: extensionId,
+        visibility: "private",
+      },
+      isEnabled: true,
+      remoteOrigin: remoteOrigin,
+      mfVersion: remoteMFVersion,
+    };
+
+    return ext;
+  }
+
+  // Download and load the extension app if specified
+  async function loadAppFromRegistry(appId: string, inviteCode?: string) {
+    const url = getAPIUrl(`/api/extension/get`);
+    url.searchParams.set("name", appId);
+    url.searchParams.set("latest", "true");
+    if (inviteCode) url.searchParams.set("inviteCode", inviteCode);
+
+    const res = await fetchAPI(url);
+
+    if (!res.ok) {
+      // setNoAccessToApp(true);
+      throw new Error("Not authorized to access this app", {
+        cause: "not-authorized",
+      });
+    }
+
+    const fetchedExts: AppMetaData[] = await res.json();
+
+    const extensions: ExtensionApp[] = await Promise.all(
+      fetchedExts.map(async (extMeta) => {
+        // If backend does not provide mfVersion, try to load it from the manifest
+        if (!extMeta.mfVersion) {
+          console.warn(
+            `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
+          );
+        }
+        const mfVersion =
+          extMeta.mfVersion ??
+          (await getRemoteMFVersion(
+            `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+            extMeta.name,
+            extMeta.version,
+          ));
+
+        return {
+          config: {
+            id: extMeta.name,
+            version: extMeta.version,
+            libVersion: extMeta.libVersion,
+            author: extMeta.user ? extMeta.user.name : extMeta.org.name,
+            description: extMeta.description ?? "No description available",
+            displayName: extMeta.displayName ?? extMeta.name,
+            visibility: extMeta.visibility,
+          },
+          isEnabled: true,
+          remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+          mfVersion: mfVersion,
+        };
+      }),
+    );
+
+    // Get the latest version of the extension
+    const ext = extensions.sort((a, b) => {
+      return compare(b.config.version, a.config.version);
+    })[0];
+
+    if (!ext) {
+      throw new Error("Extension not found", { cause: "not-found" });
+    }
+
+    return ext;
+  }
+
+  // Load app if already installed
+  async function loadAppFromCache(appId: string) {
+    const ext = editorContext?.persistSettings?.extensions?.find(
+      (ext) => ext.config.id === appId,
+    );
+
+    return ext;
+  }
+
   return {
     installExtension,
     uninstallExtension,
@@ -195,5 +323,8 @@ export default function useExtensionManager() {
     disableExtension,
     getInstalledExtension,
     getExtensionInfoFromRemote,
+    loadAppFromCache,
+    loadAppFromRegistry,
+    loadAppFromURL,
   };
 }

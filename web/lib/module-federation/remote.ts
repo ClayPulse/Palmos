@@ -28,3 +28,35 @@ export function getRemoteServerBaseURL(
 ) {
   return `${remoteOrigin}/${id}/${version}/server`;
 }
+
+export async function getRemoteManifest(
+  remoteOrigin: string,
+  id: string,
+  version: string,
+) {
+  const mfManifest = await fetch(
+    `${getRemoteClientBaseURL(remoteOrigin, id, version)}/mf-manifest.json`,
+  )
+    .then((res) => res.json())
+    .catch((err) => {
+      console.error("Failed to fetch remote manifest:", err);
+      return null;
+    });
+  return mfManifest;
+}
+
+export function getRemoteConfig(
+  remoteOrigin: string,
+  id: string,
+  version: string,
+) {
+  const config = fetch(
+    `${getRemoteClientBaseURL(remoteOrigin, id, version)}/pulse.config.json`,
+  )
+    .then((res) => res.json())
+    .catch((err) => {
+      console.error("Failed to fetch remote config:", err);
+      return null;
+    });
+  return config;
+}

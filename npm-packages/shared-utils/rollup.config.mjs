@@ -1,7 +1,8 @@
-import resolve from "@rollup/plugin-node-resolve";
 import babel from "@rollup/plugin-babel";
-import typescript from "@rollup/plugin-typescript";
+import json from "@rollup/plugin-json";
+import resolve from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
+import typescript from "@rollup/plugin-typescript";
 
 // rollup.config.mjs
 export default {
@@ -28,5 +29,6 @@ export default {
       exclude: ["node_modules/**"],
     }),
     terser(),
+    json(),
   ],
 };

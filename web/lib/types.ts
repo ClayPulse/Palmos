@@ -1,13 +1,13 @@
-import { Dispatch, RefObject, SetStateAction } from "react";
 import {
+  Action,
   Agent,
-  CommandInfo,
-  ExtensionConfig,
+  AppConfig,
   PolyIMC,
   ViewModeEnum,
 } from "@pulse-editor/shared-utils";
-import { BaseSTT } from "./modalities/stt/stt";
+import { Dispatch, RefObject, SetStateAction } from "react";
 import { BaseLLM } from "./modalities/llm/llm";
+import { BaseSTT } from "./modalities/stt/stt";
 import { BaseTTS } from "./modalities/tts/tts";
 
 // #region Editor Context
@@ -78,8 +78,9 @@ export type EditorStates = {
   tabViews: TabView[];
   tabIndex: number;
 
-  // Command viewer
+  // Action viewer
   isCommandViewerOpen?: boolean;
+  actions?: ScopedAction[];
 
   // Side menu panel
   isSideMenuOpen?: boolean;
@@ -115,8 +116,8 @@ export type PersistentSettings = {
   projectHomePath?: string;
 
   // Note: right now extension == app -- this might change in the future for more clarity
-  extensions?: Extension[];
-  defaultFileTypeExtensionMap?: { [key: string]: Extension };
+  extensions?: ExtensionApp[];
+  defaultFileTypeExtensionMap?: { [key: string]: ExtensionApp };
   isExtensionDevMode?: boolean;
 
   extensionAgents?: ExtensionAgent[];
@@ -216,12 +217,6 @@ export type AppViewConfig = {
   // e.g. a PDF viewer app can be opened with a PDF file;
   //      a game engine app can be opened with a game project file.
   fileUri?: string;
-  // These are commands exposed by the app after the app is initialized.
-  //
-  // Editor only stores command info but do not store or run
-  // the actual command handlers.
-  dynamicCommands?: CommandInfo[];
-
   recommendedHeight?: number;
   recommendedWidth?: number;
 };
@@ -291,30 +286,12 @@ export type ChatMessage = {
   datetime: string;
 };
 
-// #region Cross platform API
-export enum PlatformEnum {
-  Capacitor = "capacitor",
-  Electron = "electron",
-  VSCode = "vscode",
-  Web = "web",
-  WebMobile = "web-mobile",
-}
-// #endregion
-
-// #region Extension
-export type Extension = {
-  config: ExtensionConfig;
+// #region Extension apps
+export type ExtensionApp = {
+  config: AppConfig;
   isEnabled: boolean;
   remoteOrigin: string;
   mfVersion?: string;
-
-  // These are commands that can be used without initializing an app.
-  // These commands are always available once the extension is loaded and enabled.
-  // When these commands are run, an instance of the app is created.
-  //
-  // Editor only stores command info but do not store or run
-  // the actual command handlers.
-  staticCommands?: CommandInfo[];
 };
 
 // #endregion
@@ -346,9 +323,10 @@ export type Session = {
   expires: string;
 };
 
-export type ExtensionMeta = {
+export type AppMetaData = {
   name: string;
   version: string;
+  libVersion: string;
   mfVersion?: string;
   description?: string;
   displayName?: string;
@@ -371,11 +349,11 @@ export type Workflow = {
 
 // #endregion
 
-// #region Command
-export type Command = {
-  type: "editor" | "static" | "dynamic";
-  commandInfo: CommandInfo;
+// #region Action
+export type ScopedAction = {
   viewId?: string;
+  type: "editor" | "app";
+  action: Action;
 };
 // #endregion
 

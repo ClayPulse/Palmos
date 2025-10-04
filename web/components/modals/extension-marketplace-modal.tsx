@@ -1,6 +1,6 @@
 import { getRemoteMFVersion } from "@/lib/module-federation/version";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { Extension, ExtensionMeta, TabItem } from "@/lib/types";
+import { ExtensionApp, AppMetaData, TabItem } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import useSWR from "swr";
 import ExtensionGallery from "../extension/extension-gallery";
@@ -15,7 +15,7 @@ export default function ExtensionMarketplaceModal({
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
 }) {
-  const [installedExtensions, setInstalledExtensions] = useState<Extension[]>(
+  const [installedExtensions, setInstalledExtensions] = useState<ExtensionApp[]>(
     [],
   );
 
@@ -44,14 +44,14 @@ export default function ExtensionMarketplaceModal({
     data: marketplaceExtensions,
     isLoading: isLoadingMarketplaceExtensions,
     mutate: mutateMarketplaceExtensions,
-  } = useSWR<Extension[]>(
+  } = useSWR<ExtensionApp[]>(
     isOpen ? `/api/extension/list` : null,
     async (url: string) => {
       const res = await fetchAPI(url);
       const body = await res.json();
 
-      const fetchedExts: ExtensionMeta[] = body;
-      const extensions: Extension[] = await Promise.all(
+      const fetchedExts: AppMetaData[] = body;
+      const extensions: ExtensionApp[] = await Promise.all(
         fetchedExts.map(async (extMeta) => {
           // If backend does not provide mfVersion, try to load it from the manifest
           if (!extMeta.mfVersion) {
@@ -71,6 +71,7 @@ export default function ExtensionMarketplaceModal({
             config: {
               id: extMeta.name,
               version: extMeta.version,
+              libVersion: extMeta.libVersion ?? "unknown",
               author: extMeta.user ? extMeta.user.name : extMeta.org.name,
               description: extMeta.description ?? "No description available",
               displayName: extMeta.displayName ?? extMeta.name,

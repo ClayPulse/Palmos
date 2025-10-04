@@ -1,3 +1,9 @@
+import { PlatformEnum } from "@/lib/enums";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import { useWorkspace } from "@/lib/hooks/use-workspace";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { MenuAction } from "@/lib/types";
 import {
   Button,
   Dropdown,
@@ -7,18 +13,13 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
-import Icon from "../../misc/icon";
-import VoiceIndicator from "../voice-indicator";
-import ProjectIndicator from "../project-indicator";
-import { useAuth } from "@/lib/hooks/use-auth";
 import { useTheme } from "next-themes";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { useSearchParams } from "next/navigation";
-import { EditorContext } from "../../providers/editor-context-provider";
 import { useContext, useEffect } from "react";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { MenuAction, PlatformEnum } from "@/lib/types";
+import Icon from "../../misc/icon";
+import { EditorContext } from "../../providers/editor-context-provider";
+import ProjectIndicator from "../project-indicator";
+import VoiceIndicator from "../voice-indicator";
 import FileMenuDropDown from "./menu-dropdown/file-menu";
 import ViewMenuDropDown from "./menu-dropdown/view-menu";
 

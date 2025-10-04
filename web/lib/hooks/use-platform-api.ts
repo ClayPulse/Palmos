@@ -1,11 +1,11 @@
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import { PlatformEnum } from "@/lib/enums";
 import { useContext, useEffect, useState } from "react";
 import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
-import { getPlatform } from "../platform-api/platform-checker";
-import { PlatformEnum } from "@/lib/types";
 import { CapacitorAPI } from "../platform-api/capacitor/capacitor-api";
-import { ElectronAPI } from "../platform-api/electron/electron-api";
 import { CloudAPI } from "../platform-api/cloud/cloud-api";
-import { EditorContext } from "@/components/providers/editor-context-provider";
+import { ElectronAPI } from "../platform-api/electron/electron-api";
+import { getPlatform } from "../platform-api/platform-checker";
 
 export function usePlatformApi() {
   const editorContext = useContext(EditorContext);

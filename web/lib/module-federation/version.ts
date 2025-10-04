@@ -1,5 +1,8 @@
+import { AppConfig } from "@pulse-editor/shared-utils";
+import { satisfies } from "semver";
 import mfRuntime from "../../../node_modules/@module-federation/runtime/package.json";
-import { getRemoteClientBaseURL } from "./remote";
+import packageJson from "../../package.json";
+import { getRemoteConfig, getRemoteManifest } from "./remote";
 
 export async function getHostMFVersion(): Promise<string> {
   return mfRuntime.version;
@@ -9,15 +12,49 @@ export async function getRemoteMFVersion(
   remoteOrigin: string,
   id: string,
   version: string,
-): Promise<string | undefined> {
-  try {
-    const mfManifest = await fetch(
-      `${getRemoteClientBaseURL(remoteOrigin, id, version)}/mf-manifest.json`,
-    );
-    const mfManifestJson = await mfManifest.json();
-    return mfManifestJson.metaData.pluginVersion;
-  } catch (error) {
-    console.warn("Error fetching remote MF version:", error);
-    return undefined;
+): Promise<string> {
+  const mfManifest = await getRemoteManifest(remoteOrigin, id, version);
+  if (!mfManifest || !mfManifest.metaData) {
+    throw new Error("Remote MF manifest or metaData is undefined");
   }
+  return mfManifest.metaData.pluginVersion;
+}
+
+export async function getHostLibVersion(): Promise<string> {
+  const version = packageJson.dependencies["@pulse-editor/shared-utils"];
+  return version;
+}
+
+export async function getRemoteLibVersion(
+  remoteOrigin: string,
+  id: string,
+  version: string,
+): Promise<string> {
+  const pulseConfig: AppConfig = await getRemoteConfig(
+    remoteOrigin,
+    id,
+    version,
+  );
+  if (!pulseConfig) {
+    throw new Error("Remote pulse.config.json  undefined");
+  }
+  const libVersion = pulseConfig.libVersion;
+  return libVersion;
+}
+
+export async function checkCompatibility(
+  hostVersion: string,
+  remoteVersion: string,
+): Promise<boolean> {
+  if (remoteVersion === "unknown") {
+    console.warn("Could not determine remote versions. ");
+    return false;
+  }
+  if (!satisfies(remoteVersion, hostVersion)) {
+    console.warn(
+      `Incompatible versions: host ${hostVersion}, remote ${remoteVersion}`,
+    );
+    return false;
+  }
+  return true;
 }

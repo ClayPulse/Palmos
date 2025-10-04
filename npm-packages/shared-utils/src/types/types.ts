@@ -15,18 +15,19 @@ export enum IMCMessageTypeEnum {
   ModalityMusicGen = "modality-music-gen",
   // #endregion
 
-  // #region Extension states
-  // Notify Pulse that extension window is available
-  ExtReady = "ext-ready",
-  // Notify Pulse that extension is closing
-  ExtClose = "ext-close",
+  // #region App states
+  // Notify Pulse that app window is available
+  AppReady = "app-ready",
+  // Notify Pulse that aoo is closing
+  AppClose = "app-close",
   // #endregion
 
   // #region Editor states
-  // Notify editor that extension is loading or loaded
-  EditorLoadingExt = "editor-loading-ext",
-  /* Extension commands*/
-  EditorRunExtCommand = "editor-run-ext-command",
+  // Notify editor that app is loading or loaded
+  EditorLoadingApp = "editor-loading-app",
+  // App actions
+  EditorRegisterAction = "editor-register-action",
+  EditorRunAppAction = "editor-run-app-action",
   // Execute agent method
   EditorRunAgentMethod = "editor-run-agent-method",
   // Get theme
@@ -85,7 +86,7 @@ export type TextFileSelection = {
 
 export type ViewModel = {
   viewId: string;
-  extensionConfig?: ExtensionConfig;
+  appConfig?: AppConfig;
 };
 
 export enum ViewModeEnum {
@@ -108,29 +109,30 @@ export enum NotificationTypeEnum {
   Warning = "warning",
 }
 
-// #region Extension settings
-export enum ExtensionTypeEnum {
+// #region App settings
+export enum AppTypeEnum {
   Generic = "generic",
   FileView = "file-view",
   ConsoleView = "console-view",
 }
 
-export type ExtensionConfig = {
+export type AppConfig = {
   id: string;
   version: string;
+  libVersion: string;
   author?: string;
   displayName?: string;
   description?: string;
   materialIcon?: string;
-  extensionType?: ExtensionTypeEnum;
+  appType?: AppTypeEnum;
   fileTypes?: string[];
   thumbnail?: string;
   enabledPlatforms?: Record<string, boolean>;
 
-  // Extension or user installed agents
+  // App installed agents
   agents?: Agent[];
-  // Exposed commands in the extension
-  commandsInfoList?: CommandInfo[];
+  // Exposed actions in the modular app
+  preRegisteredActions?: Action[];
   // Visibility
   visibility: string;
   // Recommended dimensions for app view in canvas
@@ -138,15 +140,12 @@ export type ExtensionConfig = {
   recommendedWidth?: number;
 };
 
-export type CommandInfo = {
+export type Action = {
   name: string;
   description: string;
   parameters: Record<string, TypedVariable>;
-};
-
-export type CommandDefinition = {
-  info: CommandInfo;
-  handler: (args: any) => Promise<any>;
+  returns: Record<string, TypedVariable>;
+  handler?: (args: any) => Promise<any>;
 };
 // #endregion
 
