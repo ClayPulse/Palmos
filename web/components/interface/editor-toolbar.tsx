@@ -4,7 +4,9 @@ import Icon from "@/components/misc/icon";
 import AppSettingsModal from "@/components/modals/app-settings-modal";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
-import { Button, Divider, Tooltip } from "@heroui/react";
+import useScopedActions from "@/lib/hooks/use-scoped-actions";
+import { AppNodeData } from "@/lib/types";
+import { addToast, Button, Divider, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
 import AgentConfigModal from "../modals/agent-config-modal";
@@ -16,6 +18,7 @@ export default function EditorToolbar() {
 
   const { chatWithAssistant } = usePlatformAIAssistant();
   const { isRecording, record } = useRecorder();
+  const { runAction } = useScopedActions();
 
   const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
   const [isAppSettingsModalOpen, setAppIsSettingsModalOpen] = useState(false);
@@ -78,7 +81,51 @@ export default function EditorToolbar() {
                 </Button>
               </Tooltip> */}
 
-              {/* <Divider className="mx-1" orientation="vertical" /> */}
+              <Tooltip content={"Run Workflow"}>
+                <Button
+                  variant="light"
+                  isIconOnly
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
+                  onPress={() => {
+                    const node = editorContext?.editorStates.selectedNode;
+
+                    if (!node) {
+                      addToast({
+                        title: "No Node Selected",
+                        description:
+                          "Please select a node as a starting point to run the workflow.",
+                        color: "danger",
+                      });
+                      return;
+                    }
+
+                    const { selectedAction } = node.data as AppNodeData;
+
+                    if (!selectedAction) {
+                      addToast({
+                        title: "No Action Selected",
+                        description:
+                          "Please select an action for the node to run.",
+                        color: "danger",
+                      });
+                      return;
+                    }
+
+                    runAction(
+                      {
+                        action: selectedAction,
+                        viewId: node.id,
+                        type: "app",
+                      },
+                      {},
+                    );
+                  }}
+                >
+                  <Icon name="play_arrow" variant="round" />
+                </Button>
+              </Tooltip>
+
+              <Divider className="mx-1" orientation="vertical" />
               <Tooltip content={"Open Agentic Console"}>
                 <Button
                   variant={

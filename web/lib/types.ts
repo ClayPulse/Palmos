@@ -5,6 +5,7 @@ import {
   PolyIMC,
   ViewModeEnum,
 } from "@pulse-editor/shared-utils";
+import { Node } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { BaseLLM } from "./modalities/llm/llm";
 import { BaseSTT } from "./modalities/stt/stt";
@@ -85,6 +86,8 @@ export type EditorStates = {
   // Side menu panel
   isSideMenuOpen?: boolean;
   isMarketplaceOpen?: boolean;
+
+  selectedNode?: Node;
 };
 
 /**
@@ -301,6 +304,7 @@ export type IMCContextType = {
   polyIMC: PolyIMC | undefined;
   resolveWhenViewInitialized: (viewId: string) => Promise<void>;
   markIMCInitialized: (viewId: string) => void;
+  resolveWhenActionRegistered: (action: Action) => Promise<void>;
 };
 
 // #endregion
@@ -345,6 +349,12 @@ export type AppMetaData = {
 export type Workflow = {
   nodes: any;
   edges: any;
+};
+
+export type AppNodeData = {
+  config: AppViewConfig;
+  selectedAction: Action | undefined;
+  setSelectedAction: (action: Action | undefined) => Promise<void>;
 };
 
 // #endregion

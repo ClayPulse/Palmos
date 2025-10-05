@@ -1,31 +1,44 @@
-import { AppViewConfig } from "@/lib/types";
+import BaseAppView from "@/components/views/base/base-app-view";
+import useScopedActions from "@/lib/hooks/use-scoped-actions";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { AppNodeData } from "@/lib/types";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { Node } from "@xyflow/react";
 import { memo } from "react";
+import { v4 } from "uuid";
 import CanvasNodeViewLayout from "../app-node/layout";
-import BaseAppView from "@/components/views/base/base-app-view";
 
 /* Runs backend part of pulse app. */
 const BackendNode = memo((props: any) => {
-  const nodeProps = props as Node<{ config: AppViewConfig }> & {
-    openViewInFullScreen?: (config: AppViewConfig) => void;
-  };
-  const openViewInFullScreen = nodeProps.openViewInFullScreen;
-  const { config }: { config: AppViewConfig } = nodeProps.data;
+  const nodeProps = props as Node<AppNodeData>;
+
+  const { config, selectedAction, setSelectedAction }: AppNodeData =
+    nodeProps.data;
   const viewId = config.viewId;
+
+  const { createTabView, deleteAppViewInCanvasView } = useTabViewManager();
+  const { actions } = useScopedActions(config.app);
+
+  async function openViewInFullScreen() {
+    await createTabView(ViewModeEnum.App, {
+      ...config,
+      viewId: v4(),
+    });
+  }
 
   return (
     <CanvasNodeViewLayout
       viewId={viewId}
+      actions={actions.map((a) => a.action)}
+      selectedAction={selectedAction}
+      setSelectedAction={setSelectedAction}
       controlActions={{
-        fullscreen: openViewInFullScreen
-          ? () =>
-              openViewInFullScreen({
-                viewId: viewId,
-                app: config.app,
-                recommendedHeight: config.recommendedHeight,
-                recommendedWidth: config.recommendedWidth,
-              })
-          : undefined,
+        fullscreen: () => {
+          openViewInFullScreen();
+        },
+        delete: () => {
+          deleteAppViewInCanvasView(viewId);
+        },
       }}
     >
       <BaseAppView viewId={viewId} config={config} />
