@@ -111,6 +111,10 @@ export default function EditorToolbar() {
                       return;
                     }
 
+                    editorContext.setEditorStates((prev) => ({
+                      ...prev,
+                      runningNode: node,
+                    }));
                     runAction(
                       {
                         action: selectedAction,
@@ -118,7 +122,19 @@ export default function EditorToolbar() {
                         type: "app",
                       },
                       {},
-                    );
+                    ).then((result) => {
+                      addToast({
+                        title: "Workflow Completed",
+                        description: `The workflow has completed with result: ${JSON.stringify(
+                          result,
+                        )}`,
+                        color: "success",
+                      });
+                      editorContext?.setEditorStates((prev) => ({
+                        ...prev,
+                        runningNode: undefined,
+                      }));
+                    });
                   }}
                 >
                   <Icon name="play_arrow" variant="round" />

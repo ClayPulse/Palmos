@@ -72,10 +72,7 @@ export class InterModuleCommunication {
       }
 
       const message = event.data;
-      if (
-        process.env.NODE_ENV === "development" &&
-        message.from !== undefined
-      ) {
+      if (message.from !== undefined) {
         console.log(
           `Module ${this.thisWindowId} received message from module ${
             message.from

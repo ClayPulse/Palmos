@@ -18,6 +18,7 @@ import {
   useInternalNode,
   useUpdateNodeInternals,
 } from "@xyflow/react";
+import clsx from "clsx";
 import { useContext, useEffect, useState } from "react";
 import NodeHandle from "./node-handle";
 
@@ -60,6 +61,15 @@ export default function CanvasNodeViewLayout({
       selectedNode: isSelected ? node : undefined,
     }));
   }, [node]);
+
+  useEffect(() => {
+    const runningNode = editorContext?.editorStates.runningNode;
+    if (runningNode?.id === node?.id) {
+      setIsRunning(true);
+    } else {
+      setIsRunning(false);
+    }
+  }, [editorContext?.editorStates.runningNode]);
 
   return (
     <div className="relative w-full h-full">
@@ -171,16 +181,19 @@ export default function CanvasNodeViewLayout({
       />
 
       <div className="bg-content1 relative h-full w-full rounded-lg shadow-md z-10">
-        {node?.selected || node?.dragging ? (
-          <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden selected wrapper gradient z-0" />
+        {isRunning ? (
+          <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden running wrapper gradient z-0" />
         ) : (
-          isRunning && (
-            <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden running wrapper gradient z-0" />
+          (node?.selected || node?.dragging) && (
+            <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden selected wrapper gradient z-0" />
           )
         )}
 
         <div
-          className="relative h-full w-full rounded-md overflow-hidden z-10 data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none aura"
+          className={clsx(
+            "relative h-full w-full rounded-md overflow-hidden z-10 data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none",
+            (node?.selected || node?.dragging) && !isRunning && "aura",
+          )}
           data-is-dragging={node?.dragging ? "true" : "false"}
           data-is-resizing={node?.resizing ? "true" : "false"}
         >

@@ -141,7 +141,7 @@ export default function SandboxAppLoader({
     }
   }, [isConnected]);
 
-  // Send theme update to the extension
+  // Send theme update to the extension when theme changes
   useEffect(() => {
     if (currentViewId && imcContext?.polyIMC?.hasChannel(currentViewId)) {
       imcContext?.polyIMC?.sendMessage(
@@ -166,7 +166,7 @@ export default function SandboxAppLoader({
         getHandlerMap(viewModel),
       );
     }
-  }, [viewModel, isConnected]);
+  }, [viewModel]);
 
   function getHandlerMap(model: ViewModel) {
     const newMap = new Map<IMCMessageTypeEnum, ReceiverHandler>();
@@ -187,6 +187,16 @@ export default function SandboxAppLoader({
         setIsLoadingExtension((prev) => isLoading);
         if (onInitialLoaded) {
           onInitialLoaded();
+        }
+
+        // Update with current theme
+        // TODO: pass theme directly to app along with config when creating a new view
+        if (currentViewId && imcContext?.polyIMC?.hasChannel(currentViewId)) {
+          imcContext?.polyIMC?.sendMessage(
+            currentViewId,
+            IMCMessageTypeEnum.EditorThemeUpdate,
+            resolvedTheme,
+          );
         }
       },
     );

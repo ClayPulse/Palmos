@@ -203,6 +203,7 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
                     }),
                   );
                 },
+                isRunning: false,
               },
               type: "appNode",
               height: appConfig.recommendedHeight ?? 360,

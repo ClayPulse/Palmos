@@ -96,7 +96,6 @@ export default function InterModuleCommunicationProvider({
   }
 
   function markActionRegistered(action: Action) {
-    console.log(`Action registered: ${action.name}`);
     actionRegisteredMapRef.current.set(action.name, true);
     if (actionRegisteredResolvePromisesRef.current[action.name]) {
       actionRegisteredResolvePromisesRef.current[action.name]();

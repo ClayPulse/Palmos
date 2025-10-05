@@ -87,7 +87,9 @@ export type EditorStates = {
   isSideMenuOpen?: boolean;
   isMarketplaceOpen?: boolean;
 
+  // Canvas app nodes
   selectedNode?: Node;
+  runningNode?: Node;
 };
 
 /**
