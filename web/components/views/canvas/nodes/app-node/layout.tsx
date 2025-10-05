@@ -1,5 +1,16 @@
 import Icon from "@/components/misc/icon";
-import { Button, Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import {
+  addToast,
+  Button,
+  Form,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+  Select,
+  SelectItem,
+} from "@heroui/react";
+import { Action } from "@pulse-editor/shared-utils";
 import {
   NodeResizeControl,
   NodeResizer,
@@ -7,22 +18,26 @@ import {
   useInternalNode,
   useUpdateNodeInternals,
 } from "@xyflow/react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import NodeHandle from "./node-handle";
 
 export default function CanvasNodeViewLayout({
   viewId,
-  height = "100%",
-  width = "100%",
-  children,
   controlActions = {},
+  actions,
+  selectedAction,
+  setSelectedAction,
+  children,
 }: {
   viewId: string;
-  height?: string;
-  width?: string;
-  children: React.ReactNode;
   controlActions?: Record<string, (() => void) | undefined>;
+  actions: Action[];
+  selectedAction: Action | undefined;
+  setSelectedAction: (action: Action | undefined) => void;
+  children: React.ReactNode;
 }) {
+  const editorContext = useContext(EditorContext);
+
   const updateNodeInternals = useUpdateNodeInternals();
   const node = useInternalNode(viewId);
 
@@ -34,20 +49,20 @@ export default function CanvasNodeViewLayout({
   useEffect(() => {
     // Update node internals to ensure handles are positioned correctly
     updateNodeInternals(viewId);
-  }, [updateNodeInternals, isShowingWorkflowConnector]);
+  }, [updateNodeInternals, isShowingWorkflowConnector, selectedAction]);
 
   useEffect(() => {
     console.log("Node updated:", node);
+
+    const isSelected = node?.selected || node?.dragging;
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      selectedNode: isSelected ? node : undefined,
+    }));
   }, [node]);
 
   return (
-    <div
-      className="relative"
-      style={{
-        height,
-        width,
-      }}
-    >
+    <div className="relative w-full h-full">
       {/* Control */}
       <div className="absolute -top-1.5 z-40 flex w-full justify-center">
         <div
@@ -64,77 +79,80 @@ export default function CanvasNodeViewLayout({
               <div></div>
             </PopoverTrigger>
             <PopoverContent>
-              <div className="bg-content1 flex items-center gap-x-1 rounded-md">
-                <CanvasNodeControl
-                  controlActions={controlActions}
-                  isShowingWorkflowConnector={isShowingWorkflowConnector}
-                  setIsShowingWorkflowConnector={setIsShowingWorkflowConnector}
-                />
-              </div>
+              <CanvasNodeControl
+                actions={actions}
+                selectedAction={selectedAction}
+                setSelectedAction={setSelectedAction}
+                controlActions={controlActions}
+                isShowingWorkflowConnector={isShowingWorkflowConnector}
+                setIsShowingWorkflowConnector={setIsShowingWorkflowConnector}
+              />
             </PopoverContent>
           </Popover>
         </div>
       </div>
 
       {/* Input Handles */}
-      <>
-        <div className="absolute top-0 -translate-x-[100%] h-full pointer-events-none">
-          {isShowingWorkflowConnector ? (
-            <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
-              <NodeHandle
-                id="input-1"
-                displayName="input 1"
-                position={Position.Left}
-                type="target"
-              />
-              <NodeHandle
-                id="input-2"
-                displayName="input 2"
-                position={Position.Left}
-                type="target"
-              />
-            </div>
-          ) : (
-            <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
-              <NodeHandle
-                id="input-compact"
-                displayName="Compact Input"
-                position={Position.Left}
-                type="target"
-              />
-            </div>
-          )}
-        </div>
+      {selectedAction && (
+        <>
+          <div className="absolute top-0 -translate-x-[100%] h-full pointer-events-none">
+            {isShowingWorkflowConnector ? (
+              <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
+                {Object.entries(selectedAction?.parameters ?? {}).map(
+                  ([key, param]) => (
+                    <NodeHandle
+                      key={key}
+                      id={key}
+                      param={param}
+                      position={Position.Left}
+                      type="target"
+                    />
+                  ),
+                )}
+              </div>
+            ) : (
+              Object.keys(selectedAction?.parameters ?? {}).length > 0 && (
+                <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
+                  <NodeHandle
+                    id="input-compact"
+                    position={Position.Left}
+                    type="target"
+                  />
+                </div>
+              )
+            )}
+          </div>
 
-        {/* Output Handles */}
-        <div className="absolute top-0 right-0 translate-x-[100%] h-full pointer-events-none">
-          {isShowingWorkflowConnector ? (
-            <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
-              <NodeHandle
-                id="output-1"
-                displayName="output 1"
-                position={Position.Right}
-                type="source"
-              />
-              <NodeHandle
-                id="output-2"
-                displayName="output 2"
-                position={Position.Right}
-                type="source"
-              />
-            </div>
-          ) : (
-            <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
-              <NodeHandle
-                id="output-compact"
-                displayName="Compact Output"
-                position={Position.Right}
-                type="source"
-              />
-            </div>
-          )}
-        </div>
-      </>
+          {/* Output Handles */}
+          <div className="absolute top-0 right-0 translate-x-[100%] h-full pointer-events-none">
+            {isShowingWorkflowConnector ? (
+              <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
+                {Object.entries(selectedAction?.returns ?? {}).map(
+                  ([key, param]) => (
+                    <NodeHandle
+                      key={key}
+                      id={key}
+                      param={param}
+                      position={Position.Right}
+                      type="target"
+                    />
+                  ),
+                )}
+              </div>
+            ) : (
+              Object.keys(selectedAction?.returns ?? {}).length > 0 && (
+                <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
+                  <NodeHandle
+                    id="output-compact"
+                    position={Position.Right}
+                    type="source"
+                  />
+                </div>
+              )
+            )}
+          </div>
+        </>
+      )}
 
       <NodeResizer
         minWidth={40}
@@ -174,16 +192,24 @@ export default function CanvasNodeViewLayout({
 }
 
 function CanvasNodeControl({
+  actions,
+  selectedAction,
+  setSelectedAction,
   controlActions,
   isShowingWorkflowConnector,
   setIsShowingWorkflowConnector,
 }: {
+  actions: Action[];
+  selectedAction: Action | undefined;
+  setSelectedAction: (action: Action | undefined) => void;
   controlActions: Record<string, (() => void) | undefined>;
   isShowingWorkflowConnector: boolean;
   setIsShowingWorkflowConnector: (showing: boolean) => void;
 }) {
+  const [actionError, setActionError] = useState<{ [key: string]: string }>({});
+
   return (
-    <>
+    <div className="bg-content1 flex items-center gap-x-1 rounded-md">
       <Button
         isIconOnly
         variant="light"
@@ -196,18 +222,52 @@ function CanvasNodeControl({
         <Icon name="fullscreen" />
       </Button>
 
-      <Button
-        isIconOnly
-        variant="light"
-        size="sm"
-        onPress={() => {
-          setIsShowingWorkflowConnector(!isShowingWorkflowConnector);
-        }}
-        className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
-        data-active={isShowingWorkflowConnector ? "true" : "false"}
+      <Form
+        className="flex flex-row items-center gap-x-1"
+        validationErrors={actionError}
       >
-        <Icon name="swap_calls" />
-      </Button>
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          onPress={() => {
+            if (!selectedAction) {
+              addToast({
+                title: "No action selected",
+                description: "Please select an action to toggle connectors.",
+                color: "warning",
+              });
+              setActionError({ "app-action-select": " " });
+            } else {
+              setIsShowingWorkflowConnector(!isShowingWorkflowConnector);
+            }
+          }}
+          className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
+          data-active={isShowingWorkflowConnector ? "true" : "false"}
+        >
+          <Icon name="swap_calls" />
+        </Button>
+
+        <Select
+          name="app-action-select"
+          items={actions}
+          className="w-32"
+          size="sm"
+          classNames={{
+            popoverContent: "w-fit",
+            mainWrapper: "h-8",
+            trigger: "py-0.5 min-h-8",
+          }}
+          label="Node Action"
+          selectedKeys={selectedAction ? [selectedAction.name] : []}
+          onSelectionChange={(keys) => {
+            const action = actions.find((a) => a.name === Array.from(keys)[0]);
+            setSelectedAction(action);
+          }}
+        >
+          {(item) => <SelectItem key={item.name}>{item.name}</SelectItem>}
+        </Select>
+      </Form>
 
       <div className="p-3">
         <div className="relative">
@@ -267,6 +327,6 @@ function CanvasNodeControl({
       >
         <Icon name="delete" className="text-danger!" />
       </Button>
-    </>
+    </div>
   );
 }

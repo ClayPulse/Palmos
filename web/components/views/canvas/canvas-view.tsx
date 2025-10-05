@@ -1,7 +1,13 @@
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
-import { AppInfoModalContent, CanvasViewConfig, MenuAction } from "@/lib/types";
+import {
+  AppInfoModalContent,
+  AppNodeData,
+  CanvasViewConfig,
+  MenuAction,
+} from "@/lib/types";
 import { Button } from "@heroui/react";
+import { Action } from "@pulse-editor/shared-utils";
 import {
   addEdge,
   applyEdgeChanges,
@@ -51,13 +57,16 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [nodes, setNodes] = useState<ReactFlowNode[]>([]);
+  const [nodes, setNodes] = useState<ReactFlowNode<AppNodeData>[]>([]);
   const [edges, setEdges] = useState<ReactFlowEdge[]>([]);
 
-  const onNodesChange = useCallback((changes: NodeChange<ReactFlowNode>[]) => {
-    console.log("Node changes:", changes);
-    setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
-  }, []);
+  const onNodesChange = useCallback(
+    (changes: NodeChange<ReactFlowNode<AppNodeData>>[]) => {
+      console.log("Node changes:", changes);
+      setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
+    },
+    [],
+  );
   const onEdgesChange = useCallback(
     (changes: EdgeChange<{ id: string; source: string; target: string }>[]) => {
       console.log("Edge changes:", changes);
@@ -141,6 +150,7 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
     };
   }, []);
 
+  // Add or remove nodes when config changes
   useEffect(() => {
     if (config) {
       // Added nodes
@@ -149,7 +159,7 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
       );
 
       if (newNodes && newNodes.length > 0) {
-        const newAppNodes: ReactFlowNode[] =
+        const newAppNodes: ReactFlowNode<AppNodeData>[] =
           newNodes?.map((appConfig) => {
             const containerBounds =
               containerRef.current?.getBoundingClientRect();
@@ -175,6 +185,24 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
               data: {
                 label: appConfig.app,
                 config: appConfig,
+                selectedAction: undefined,
+                setSelectedAction: async (action: Action | undefined) => {
+                  // Update the node's data
+                  setNodes((nds) =>
+                    nds.map((node) => {
+                      if (node.id === appConfig.viewId) {
+                        return {
+                          ...node,
+                          data: {
+                            ...node.data,
+                            selectedAction: action,
+                          },
+                        };
+                      }
+                      return node;
+                    }),
+                  );
+                },
               },
               type: "appNode",
               height: appConfig.recommendedHeight ?? 360,

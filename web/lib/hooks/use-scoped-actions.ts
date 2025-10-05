@@ -17,7 +17,7 @@ import { useTabViewManager } from "./use-tab-view-manager";
  *  This hook provides actions from the active tab
  *  view and static actions from all installed apps.
  */
-export default function useScopedActions() {
+export default function useScopedActions(appName?: string) {
   const imcContext = useContext(IMCContext);
   const editorContext = useContext(EditorContext);
 
@@ -66,7 +66,7 @@ export default function useScopedActions() {
 
   // Update editor actions
   useEffect(() => {
-    if (keyword) {
+    if (keyword && !appName) {
       const newEditorActions = editorActions
         .filter((action) =>
           action.name.toLowerCase().includes(keyword.toLowerCase().trim()),
@@ -81,11 +81,21 @@ export default function useScopedActions() {
         ...newEditorActions,
       ]);
     }
-  }, [keyword]);
+  }, [keyword, appName]);
 
-  // Update static actions when new apps are installed or removed
+  // Update pre-registered actions when new apps are installed or removed
   useEffect(() => {
-    const apps = editorContext?.persistSettings?.extensions ?? [];
+    function getApp(appName: string) {
+      const app = editorContext?.persistSettings?.extensions?.find(
+        (ext) => ext.config.id === appName,
+      );
+
+      return app ? [app] : [];
+    }
+
+    const apps = appName
+      ? getApp(appName)
+      : (editorContext?.persistSettings?.extensions ?? []);
     const preRegisteredAppActions: ScopedAction[] = apps.flatMap((ext) =>
       getPreRegisteredAppActions(ext, keyword).map((action) => ({
         type: "app" as const,
@@ -93,13 +103,13 @@ export default function useScopedActions() {
       })),
     );
 
-    console.log("Found static app actions:", preRegisteredAppActions);
+    console.log("Found pre-registered app actions:", preRegisteredAppActions);
 
     setActions((prev) => [
       ...prev.filter((c) => c.type !== "app"),
       ...preRegisteredAppActions,
     ]);
-  }, [editorContext?.persistSettings?.extensions, keyword]);
+  }, [editorContext?.persistSettings?.extensions, keyword, appName]);
 
   async function runAction(action: ScopedAction, args: any) {
     console.log(`Running action "${action.action.name}"`);
