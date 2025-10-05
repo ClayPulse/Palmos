@@ -16,7 +16,7 @@ const AppNode = memo((props: any) => {
   const viewId = config.viewId;
 
   const { createTabView, deleteAppViewInCanvasView } = useTabViewManager();
-  const { runAction, actions } = useScopedActions(config.app);
+  const { actions } = useScopedActions(config.app);
 
   async function openViewInFullScreen() {
     await createTabView(ViewModeEnum.App, {
