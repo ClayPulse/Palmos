@@ -7,15 +7,12 @@ import {
   AppViewConfig,
   CanvasViewConfig,
   ExtensionApp,
-  MenuAction,
   TabView,
 } from "../types";
-import { useMenuActions } from "./use-menu-actions";
 
 export function useTabViewManager() {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
-  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
 
   const [tabViews, setTabViews] = useState<TabView[]>(
     editorContext?.editorStates.tabViews ?? [],
@@ -42,28 +39,6 @@ export function useTabViewManager() {
     editorContext?.editorStates.tabViews,
     editorContext?.editorStates.tabIndex,
   ]);
-
-  useEffect(() => {
-    const action: MenuAction = {
-      name: "Close Workflow",
-      actionFunc: async () => {
-        if (activeTabView) {
-          closeTabView(activeTabView);
-        }
-      },
-      menuCategory: "file",
-      shortcut: "Ctrl+C",
-      icon: "close",
-      description: "Close the current workflow",
-    };
-    if ((tabViews.length ?? 0) > 0) {
-      // Register the action if there are tab views open
-      registerMenuAction(action, true);
-    } else {
-      // Unregister the action if no tab views are open
-      unregisterMenuAction(action);
-    }
-  }, [tabViews, activeTabView]);
 
   function selectTab(newIndex: number) {
     if (!editorContext) {

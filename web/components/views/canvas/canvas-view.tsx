@@ -1,5 +1,5 @@
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import { useRegisterMenuAction } from "@/lib/hooks/use-register-menu-action";
 import useWorkflow from "@/lib/hooks/use-workflow";
 import {
   AppInfoModalContent,
@@ -53,7 +53,6 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 
 export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
   const { openAppInfoModal } = useAppInfo();
-  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
 
   const [workflow, setWorkflow] = useState<Workflow | undefined>(undefined);
   const [entryPoint, setEntryPoint] = useState<
@@ -123,79 +122,68 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
   }, []);
 
   // Register menu actions
-  useEffect(() => {
-    console.log("CanvasView rendered: registering menu actions");
+  useRegisterMenuAction(
+    {
+      name: "Export Workflow",
+      menuCategory: "file",
+      description: "Export the current workflow as a JSON file",
+      shortcut: "Ctrl+Alt+E",
 
-    const menuActions: MenuAction[] = [
-      {
-        name: "Export Workflow",
-        menuCategory: "file",
-        description: "Export the current workflow as a JSON file",
-        shortcut: "Ctrl+Alt+E",
-        actionFunc: async () => {
-          await exportWorkflow();
-        },
-        icon: "download",
-      },
-      {
-        name: "Import Workflow",
-        menuCategory: "file",
-        description: "Import a workflow from a JSON file",
-        shortcut: "Ctrl+Alt+I",
-        actionFunc: async () => {
-          const input = document.createElement("input");
-          input.type = "file";
-          input.accept = "application/json";
-          input.onchange = (e: any) => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              try {
-                const workflow = JSON.parse(event.target?.result as string);
-                if (workflow) {
-                  setWorkflow(workflow);
-                } else {
-                  alert("Invalid workflow file");
-                }
-              } catch (err) {
-                alert("Error reading workflow file");
-              }
-            };
-            reader.readAsText(file);
-          };
-          input.click();
-        },
-        icon: "upload",
-      },
-    ];
+      icon: "download",
+    },
 
-    menuActions.forEach((action) => {
-      registerMenuAction(action);
-    });
-
-    return () => {
-      // Unregister menu actions on unmount
-      menuActions.forEach((action) => {
-        unregisterMenuAction(action);
-      });
-    };
-  }, []);
-
-  useEffect(() => {
-    const action: MenuAction = {
+    async () => {
+      await exportWorkflow();
+    },
+    [workflow],
+  );
+  useRegisterMenuAction(
+    {
+      name: "Import Workflow",
+      menuCategory: "file",
+      description: "Import a workflow from a JSON file",
+      shortcut: "Ctrl+Alt+I",
+      icon: "upload",
+    },
+    async () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json";
+      input.onchange = (e: any) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const workflow = JSON.parse(event.target?.result as string);
+            if (workflow) {
+              setWorkflow(workflow);
+            } else {
+              alert("Invalid workflow file");
+            }
+          } catch (err) {
+            alert("Error reading workflow file");
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    },
+    [],
+  );
+  useRegisterMenuAction(
+    {
       name: "Run Workflow",
       menuCategory: "view",
       description:
         "Run the current workflow from the selected or default entry point",
       shortcut: "Ctrl+Alt+R",
-      actionFunc: async () => {
-        await startWorkflow();
-      },
       icon: "play_arrow",
-    };
-
-    registerMenuAction(action, true);
-  }, [entryPoint]);
+    },
+    async () => {
+      await startWorkflow();
+    },
+    [entryPoint],
+  );
 
   // Add or remove nodes when config changes
   useEffect(() => {
