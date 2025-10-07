@@ -28,6 +28,7 @@ export default function CanvasNodeViewLayout({
   actions,
   selectedAction,
   setSelectedAction,
+  isRunning,
   children,
 }: {
   viewId: string;
@@ -35,6 +36,7 @@ export default function CanvasNodeViewLayout({
   actions: Action[];
   selectedAction: Action | undefined;
   setSelectedAction: (action: Action | undefined) => void;
+  isRunning: boolean;
   children: React.ReactNode;
 }) {
   const editorContext = useContext(EditorContext);
@@ -45,7 +47,6 @@ export default function CanvasNodeViewLayout({
   const [isShowingMenu, setIsShowingMenu] = useState(false);
   const [isShowingWorkflowConnector, setIsShowingWorkflowConnector] =
     useState(false);
-  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
     // Update node internals to ensure handles are positioned correctly
@@ -54,22 +55,7 @@ export default function CanvasNodeViewLayout({
 
   useEffect(() => {
     console.log("Node updated:", node);
-
-    const isSelected = node?.selected || node?.dragging;
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      selectedNode: isSelected ? node : undefined,
-    }));
   }, [node]);
-
-  useEffect(() => {
-    const runningNode = editorContext?.editorStates.runningNode;
-    if (runningNode?.id === node?.id) {
-      setIsRunning(true);
-    } else {
-      setIsRunning(false);
-    }
-  }, [editorContext?.editorStates.runningNode]);
 
   return (
     <div className="relative w-full h-full">

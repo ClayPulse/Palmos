@@ -1,10 +1,12 @@
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import useWorkflow from "@/lib/hooks/use-workflow";
 import {
   AppInfoModalContent,
   AppNodeData,
   CanvasViewConfig,
   MenuAction,
+  Workflow,
 } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { Action } from "@pulse-editor/shared-utils";
@@ -21,6 +23,7 @@ import {
   Edge as ReactFlowEdge,
   Node as ReactFlowNode,
   reconnectEdge,
+  useNodes,
   useReactFlow,
   useViewport,
 } from "@xyflow/react";
@@ -52,36 +55,65 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
   const { openAppInfoModal } = useAppInfo();
   const { registerMenuAction, unregisterMenuAction } = useMenuActions();
 
+  const [workflow, setWorkflow] = useState<Workflow | undefined>(undefined);
+  const [entryPoint, setEntryPoint] = useState<
+    ReactFlowNode<AppNodeData> | undefined
+  >(undefined);
+
+  const { startWorkflow, runningNodes } = useWorkflow(workflow, entryPoint);
+
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
+  const nodes = useNodes<ReactFlowNode<AppNodeData>>();
 
   const containerRef = useRef<HTMLDivElement>(null);
-
-  const [nodes, setNodes] = useState<ReactFlowNode<AppNodeData>[]>([]);
-  const [edges, setEdges] = useState<ReactFlowEdge[]>([]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange<ReactFlowNode<AppNodeData>>[]) => {
       console.log("Node changes:", changes);
-      setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
+      setWorkflow((prev) => {
+        if (!prev) return undefined;
+        return {
+          ...prev,
+          nodes: applyNodeChanges(changes, prev.nodes),
+        };
+      });
     },
     [],
   );
   const onEdgesChange = useCallback(
     (changes: EdgeChange<{ id: string; source: string; target: string }>[]) => {
       console.log("Edge changes:", changes);
-      setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot));
+      setWorkflow((prev) => {
+        if (!prev) return undefined;
+        return {
+          ...prev,
+          edges: applyEdgeChanges(changes, prev.edges),
+        };
+      });
     },
     [],
   );
   const onConnect = useCallback(
     (params: any) =>
-      setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
+      setWorkflow((prev) => {
+        if (!prev) return undefined;
+        return {
+          ...prev,
+          edges: addEdge(params, prev.edges),
+        };
+      }),
     [],
   );
   const onReconnect = useCallback(
     (oldEdge: ReactFlowEdge, newConnection: Connection) =>
-      setEdges((els) => reconnectEdge(oldEdge, newConnection, els)),
+      setWorkflow((prev) => {
+        if (!prev) return undefined;
+        return {
+          ...prev,
+          edges: reconnectEdge(oldEdge, newConnection, prev.edges),
+        };
+      }),
     [],
   );
 
@@ -120,9 +152,8 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
             reader.onload = (event) => {
               try {
                 const workflow = JSON.parse(event.target?.result as string);
-                if (workflow.nodes && workflow.edges) {
-                  setNodes(workflow.nodes);
-                  setEdges(workflow.edges);
+                if (workflow) {
+                  setWorkflow(workflow);
                 } else {
                   alert("Invalid workflow file");
                 }
@@ -150,12 +181,29 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
     };
   }, []);
 
+  useEffect(() => {
+    const action: MenuAction = {
+      name: "Run Workflow",
+      menuCategory: "view",
+      description:
+        "Run the current workflow from the selected or default entry point",
+      shortcut: "Ctrl+Alt+R",
+      actionFunc: async () => {
+        await startWorkflow();
+      },
+      icon: "play_arrow",
+    };
+
+    registerMenuAction(action, true);
+  }, [entryPoint]);
+
   // Add or remove nodes when config changes
   useEffect(() => {
     if (config) {
       // Added nodes
       const newNodes = config.nodes?.filter(
-        (newNode) => !nodes.find((node) => node.id === newNode.viewId),
+        (newNode) =>
+          !workflow?.nodes.find((node) => node.id === newNode.viewId),
       );
 
       if (newNodes && newNodes.length > 0) {
@@ -179,17 +227,15 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
 
             const flowCenter = screenToFlowPosition(screenCenter);
 
-            return {
-              id: appConfig.viewId,
-              position: flowCenter,
-              data: {
-                label: appConfig.app,
-                config: appConfig,
-                selectedAction: undefined,
-                setSelectedAction: async (action: Action | undefined) => {
-                  // Update the node's data
-                  setNodes((nds) =>
-                    nds.map((node) => {
+            const appNodeData: AppNodeData = {
+              config: appConfig,
+              selectedAction: undefined,
+              setSelectedAction: async (action: Action | undefined) => {
+                setWorkflow((prev) => {
+                  if (!prev) return undefined;
+                  return {
+                    ...prev,
+                    nodes: prev.nodes.map((node) => {
                       if (node.id === appConfig.viewId) {
                         return {
                           ...node,
@@ -201,37 +247,69 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
                       }
                       return node;
                     }),
-                  );
-                },
-                isRunning: false,
+                  };
+                });
               },
+              isRunning:
+                runningNodes?.find((n) => n.id === appConfig.viewId) !==
+                undefined,
+            };
+
+            return {
+              id: appConfig.viewId,
+              position: flowCenter,
+              data: appNodeData,
               type: "appNode",
               height: appConfig.recommendedHeight ?? 360,
               width: appConfig.recommendedWidth ?? 640,
             };
           }) ?? [];
 
-        setNodes((nds) => nds.concat(newAppNodes));
+        // Add new nodes to the workflow
+        setWorkflow((prev) => {
+          if (!prev) {
+            return {
+              nodes: newAppNodes,
+              edges: [],
+            };
+          }
+          return {
+            ...prev,
+            nodes: prev.nodes.concat(newAppNodes),
+          };
+        });
       }
 
       // Removed nodes
-      const removedNodes = nodes.filter(
+      const removedNodes = workflow?.nodes.filter(
         (node) => !config.nodes?.find((newNode) => newNode.viewId === node.id),
       );
 
       if (removedNodes && removedNodes.length > 0) {
-        setNodes((nds) =>
-          nds.filter(
-            (node) =>
-              !removedNodes.find((removedNode) => removedNode.id === node.id),
-          ),
-        );
+        setWorkflow((prev) => {
+          if (!prev) return undefined;
+          return {
+            ...prev,
+            nodes: prev.nodes.filter(
+              (node) =>
+                !removedNodes.find((removedNode) => removedNode.id === node.id),
+            ),
+          };
+        });
       }
     }
-  }, [config, viewport]);
+  }, [config, viewport, runningNodes]);
+
+  useEffect(() => {
+    const selectedNodes = nodes.filter((node) => node.selected);
+    if (selectedNodes.length > 0) {
+      setEntryPoint(selectedNodes[0]);
+    } else {
+      setEntryPoint(undefined);
+    }
+  }, [nodes]);
 
   async function exportWorkflow() {
-    const workflow = { nodes, edges };
     const blob = new Blob([JSON.stringify(workflow, null, 2)], {
       type: "application/json",
     });
@@ -250,8 +328,8 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
       id={`canvas-${config?.viewId}`}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={workflow?.nodes}
+        edges={workflow?.edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

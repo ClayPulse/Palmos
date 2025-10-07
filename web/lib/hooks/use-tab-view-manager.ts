@@ -174,7 +174,9 @@ export function useTabViewManager() {
     }
   }
 
-  function getInstalledAppByFileSuffix(suffix: string): ExtensionApp | undefined {
+  function getInstalledAppByFileSuffix(
+    suffix: string,
+  ): ExtensionApp | undefined {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }

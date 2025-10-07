@@ -11,7 +11,7 @@ import CanvasNodeViewLayout from "./layout";
 const AppNode = memo((props: any) => {
   const nodeProps = props as Node<AppNodeData>;
 
-  const { config, selectedAction, setSelectedAction }: AppNodeData =
+  const { config, selectedAction, setSelectedAction, isRunning }: AppNodeData =
     nodeProps.data;
   const viewId = config.viewId;
 
@@ -39,6 +39,7 @@ const AppNode = memo((props: any) => {
           deleteAppViewInCanvasView(viewId);
         },
       }}
+      isRunning={isRunning}
     >
       <BaseAppView viewId={viewId} config={config} />
     </CanvasNodeViewLayout>

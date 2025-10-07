@@ -3,7 +3,6 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { useMenuActions } from "@/lib/hooks/use-menu-actions";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { MenuAction } from "@/lib/types";
 import {
   Button,
   Dropdown,
@@ -46,39 +45,12 @@ export default function NavTopBar({
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
 
-  const { menuActions } = useMenuActions();
+  const { menuActions, runMenuActionByKeyboardShortcut } = useMenuActions();
 
   // Handle menu action shortcuts
   useEffect(() => {
-    async function runAction(action: MenuAction, event: KeyboardEvent) {
-      if (action.shortcut) {
-        // Parse shortcut like "Ctrl+Shift+X"
-        const keys = action.shortcut
-          .toLowerCase()
-          .split("+")
-          .map((k) => k.trim());
-        const ctrl = keys.includes("ctrl") || keys.includes("cmd");
-        const shift = keys.includes("shift");
-        const alt = keys.includes("alt");
-        const key = keys.find(
-          (k) => !["ctrl", "cmd", "shift", "alt"].includes(k),
-        );
-        if (
-          (ctrl ? event.ctrlKey || event.metaKey : true) &&
-          (shift ? event.shiftKey : true) &&
-          (alt ? event.altKey : true) &&
-          event.key.toLowerCase() === key
-        ) {
-          event.preventDefault();
-          await action.actionFunc();
-        }
-      }
-    }
-
     async function handleKeyDown(event: KeyboardEvent) {
-      for (const action of menuActions ?? []) {
-        await runAction(action, event);
-      }
+      await runMenuActionByKeyboardShortcut(event);
     }
 
     window.addEventListener("keydown", handleKeyDown);
