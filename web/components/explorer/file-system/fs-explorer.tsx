@@ -38,8 +38,7 @@ export default function FileSystemExplorer({
 
   function viewFile(uri: string, viewMode: ViewModeEnum) {
     platformApi?.readFile(uri).then((file) => {
-      const viewId = v4();
-      openFileInView(viewId, file, viewMode).then(() => {
+      openFileInView(file, viewMode).then(() => {
         if (platform === PlatformEnum.Capacitor) {
           setIsMenuOpen(false);
         }

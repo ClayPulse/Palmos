@@ -1,13 +1,17 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
-import { useRegisterMenuAction } from "@/lib/hooks/use-register-menu-action";
+import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
+import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { CanvasViewConfig, Workflow } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
+import { v4 } from "uuid";
 import NavMenuDropdown from "../nav-menu-dropdown";
 
 export default function ViewMenuDropDown() {
   const editorContext = useContext(EditorContext);
   const { menuActions } = useMenuActions("view");
 
+  // Command Viewer
   const [isCommandViewerOpen, setIsCommandViewerOpen] = useState(false);
 
   useRegisterMenuAction(
@@ -53,6 +57,51 @@ export default function ViewMenuDropDown() {
       editorContext?.editorStates.isCommandViewerOpen ?? false,
     );
   }, [editorContext?.editorStates.isCommandViewerOpen]);
+
+  // Workflow
+  const { createCanvasTabView } = useTabViewManager();
+
+  useRegisterMenuAction(
+    {
+      name: "Import Workflow",
+      menuCategory: "file",
+      description: "Import a workflow from a JSON file",
+      shortcut: "Ctrl+Alt+I",
+      icon: "upload",
+    },
+    async () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json";
+      input.onchange = (e: any) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const workflow = JSON.parse(
+              event.target?.result as string,
+            ) as Workflow;
+            if (workflow) {
+              // Create a new tab view with the imported workflow
+              const viewId = "canvas-" + v4();
+              await createCanvasTabView({
+                viewId,
+                appConfigs: workflow.nodes.map((node) => node.data.config),
+                workflow,
+              } as CanvasViewConfig);
+            } else {
+              alert("Invalid workflow file");
+            }
+          } catch (err) {
+            alert("Error reading workflow file");
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    },
+    [],
+  );
 
   return <NavMenuDropdown category="View" menuActions={menuActions} />;
 }

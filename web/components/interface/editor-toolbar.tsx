@@ -2,7 +2,7 @@
 
 import Icon from "@/components/misc/icon";
 import AppSettingsModal from "@/components/modals/app-settings-modal";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
 import { Button, Divider, Tooltip } from "@heroui/react";

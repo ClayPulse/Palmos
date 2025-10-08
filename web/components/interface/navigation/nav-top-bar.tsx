@@ -1,6 +1,6 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {

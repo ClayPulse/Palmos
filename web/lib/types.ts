@@ -86,6 +86,10 @@ export type EditorStates = {
   // Side menu panel
   isSideMenuOpen?: boolean;
   isMarketplaceOpen?: boolean;
+
+  // Maintain a list of workflows in state.
+  // Key is the canvas view's id.
+  workflows?: { [key: string]: Workflow };
 };
 
 /**
@@ -224,8 +228,9 @@ export type AppViewConfig = {
 
 export type CanvasViewConfig = {
   viewId: string;
-  workflow?: Workflow;
-  nodes?: AppViewConfig[];
+  // App configurations.
+  // This does not change once the canvas view is created.
+  appConfigs?: AppViewConfig[];
 };
 
 export type TabView = {

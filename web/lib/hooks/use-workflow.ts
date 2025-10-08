@@ -1,29 +1,75 @@
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { addToast } from "@heroui/react";
-import { Node as ReactFlowNode } from "@xyflow/react";
-import { useState } from "react";
+import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { AppNodeData, Workflow } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
-export default function useWorkflow(
-  workflow?: Workflow,
-  entryPoint?: ReactFlowNode<AppNodeData>,
-) {
+export default function useCanvasWorkflow(canvasId: string) {
+  const editorContext = useContext(EditorContext);
+
   const { runAction } = useScopedActions();
 
+  const [workflow, setWorkflow] = useState<Workflow | undefined>(undefined);
   const [pendingNodes, setPendingNodes] = useState<
     ReactFlowNode<AppNodeData>[]
   >([]);
   const [runningNodes, setRunningNodes] = useState<
     ReactFlowNode<AppNodeData>[]
   >([]);
+  const [selectedNodes, setSelectedNodes] = useState<
+    ReactFlowNode<AppNodeData>[]
+  >([]);
   const [isPaused, setIsPaused] = useState<boolean>(false);
 
+  const [entryPoint, setEntryPoint] = useState<
+    ReactFlowNode<AppNodeData> | undefined
+  >(undefined);
+
+  // Load workflow from editor context based on canvasId
+  useEffect(() => {
+    const workflow = editorContext?.editorStates.workflows?.[canvasId];
+
+    if (!workflow) {
+      addToast({
+        title: "No Workflow Found",
+        description: `No workflow found for canvas ID: ${canvasId}`,
+        color: "danger",
+      });
+    }
+
+    setWorkflow(workflow);
+  }, [canvasId]);
+
+  // Update editor context when workflow changes
+  useEffect(() => {
+    if (!editorContext) return;
+
+    if (workflow) {
+      // Update workflow in editor context
+      editorContext.setEditorStates((prev) => ({
+        ...prev,
+        workflows: {
+          ...prev.workflows,
+          [canvasId]: workflow,
+        },
+      }));
+
+      // Update selected nodes
+      const selectedNodes =
+        workflow?.nodes.filter((node) => node.selected) ?? [];
+
+      console.log("Selected nodes updated:", selectedNodes);
+      setSelectedNodes(selectedNodes);
+
+      setEntryPoint(getEntryPoint());
+    }
+  }, [workflow]);
+
   async function startWorkflow() {
-    const currentEntry = getEntryPoint();
+    console.log("Starting workflow from entry point:", entryPoint);
 
-    console.log("Starting workflow from entry point:", currentEntry);
-
-    if (!currentEntry) {
+    if (!entryPoint) {
       addToast({
         title: "No Node Selected",
         description:
@@ -33,7 +79,7 @@ export default function useWorkflow(
       return;
     }
 
-    const { selectedAction } = currentEntry.data as AppNodeData;
+    const { selectedAction } = entryPoint.data as AppNodeData;
 
     if (!selectedAction) {
       addToast({
@@ -44,11 +90,13 @@ export default function useWorkflow(
       return;
     }
 
-    setRunningNodes([currentEntry]);
+    // setRunningNodes([entryPoint]);
+
+    updateWorkflowNodeData(entryPoint.id, { isRunning: true });
     runAction(
       {
         action: selectedAction,
-        viewId: currentEntry.id,
+        viewId: entryPoint.id,
         type: "app",
       },
       {},
@@ -60,7 +108,7 @@ export default function useWorkflow(
         )}`,
         color: "success",
       });
-      setRunningNodes([]);
+      updateWorkflowNodeData(entryPoint.id, { isRunning: false });
     });
   }
 
@@ -83,9 +131,7 @@ export default function useWorkflow(
 
     setIsPaused(false);
 
-    const currentEntry = getEntryPoint();
-
-    if (!currentEntry) {
+    if (!entryPoint) {
       addToast({
         title: "No Entry Point Defined",
         description:
@@ -94,22 +140,87 @@ export default function useWorkflow(
       });
       return;
     }
-    setPendingNodes([currentEntry]);
+    setPendingNodes([entryPoint]);
   }
 
   function getEntryPoint() {
-    const entry = entryPoint
-      ? workflow?.nodes.find((n) => n.id === entryPoint.id)
-      : workflow?.defaultEntryPoint
-        ? workflow.defaultEntryPoint
-        : undefined;
+    const entry =
+      workflow?.nodes.find((node) => node.selected) ??
+      workflow?.defaultEntryPoint;
     return entry;
   }
 
+  const updateWorkflowNodeData = useCallback(
+    (nodeViewId: string, data: Partial<AppNodeData>) => {
+      setWorkflow((prev) => {
+        if (!prev) return undefined;
+        const idx = prev.nodes.findIndex((node) => node.id === nodeViewId);
+        if (idx === -1) return prev;
+        const updatedNode = {
+          ...prev.nodes[idx],
+          data: { ...prev.nodes[idx].data, ...data },
+        };
+        const newNodes = [...prev.nodes];
+        newNodes[idx] = updatedNode;
+        return { ...prev, nodes: newNodes };
+      });
+    },
+    [workflow],
+  );
+
+  const updateWorkflowNodes = useCallback(
+    (
+      updater: (
+        oldNodes: ReactFlowNode<AppNodeData>[],
+      ) => ReactFlowNode<AppNodeData>[],
+    ) => {
+      const updatedNodes = updater(workflow?.nodes ?? []);
+      setWorkflow((prev) => {
+        if (!prev) return undefined;
+        return {
+          ...prev,
+          nodes: updatedNodes,
+        };
+      });
+    },
+    [workflow],
+  );
+
+  const updateWorkflowEdges = useCallback(
+    (updater: (oldEdges: ReactFlowEdge[]) => ReactFlowEdge[]) => {
+      const updatedEdges = updater(workflow?.edges ?? []);
+      setWorkflow((prev) => {
+        if (!prev) return undefined;
+        return {
+          ...prev,
+          edges: updatedEdges,
+        };
+      });
+    },
+    [workflow],
+  );
+
+  const exportWorkflow = useCallback(() => {
+    const blob = new Blob([JSON.stringify(workflow, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "workflow.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [workflow]);
+
   return {
-    runningNodes,
+    workflow,
+    entryPoint,
     startWorkflow,
     pauseWorkflow,
     resumeWorkflow,
+    updateWorkflowNodes,
+    updateWorkflowEdges,
+    exportWorkflow,
+    updateWorkflowNodeData,
   };
 }

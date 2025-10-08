@@ -33,7 +33,7 @@ export default function AppExplorer() {
         onPress={(ext) => {
           const config: AppViewConfig = {
             app: ext.config.id,
-            viewId: v4(),
+            viewId: `${ext.config.id}-${v4()}`,
             recommendedHeight: ext.config.recommendedHeight,
             recommendedWidth: ext.config.recommendedWidth,
           };

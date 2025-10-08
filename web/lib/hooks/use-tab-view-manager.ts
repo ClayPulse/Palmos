@@ -8,6 +8,7 @@ import {
   CanvasViewConfig,
   ExtensionApp,
   TabView,
+  Workflow,
 } from "../types";
 
 export function useTabViewManager() {
@@ -50,11 +51,7 @@ export function useTabViewManager() {
     }));
   }
 
-  async function openFileInView(
-    viewId: string,
-    file: File,
-    viewMode: ViewModeEnum,
-  ) {
+  async function openFileInView(file: File, viewMode: ViewModeEnum) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -89,8 +86,8 @@ export function useTabViewManager() {
       }
 
       // Create a new tab for the app with the file
-      await createTabView(ViewModeEnum.App, {
-        viewId,
+      await createAppTabView({
+        viewId: `${installedApp.config.id}-${v4()}`,
         app: installedApp.config.id,
         fileUri: file.name,
       } as AppViewConfig);
@@ -107,7 +104,7 @@ export function useTabViewManager() {
 
       const existingAppConfig = (
         currentTab.config as CanvasViewConfig
-      ).nodes?.find(
+      ).appConfigs?.find(
         (appConfig) =>
           appConfig.app === installedApp.config.id &&
           appConfig.fileUri === file.name,
@@ -121,7 +118,7 @@ export function useTabViewManager() {
 
       // Add the app with the file to the current canvas
       const newAppConfig: AppViewConfig = {
-        viewId,
+        viewId: `${installedApp.config.id}-${v4()}`,
         app: installedApp.config.id,
         fileUri: file.name,
         recommendedHeight: installedApp.config.recommendedHeight,
@@ -129,8 +126,8 @@ export function useTabViewManager() {
       };
       const newCanvasConfig: CanvasViewConfig = {
         ...currentTab.config,
-        nodes: [
-          ...((currentTab.config as CanvasViewConfig).nodes ?? []),
+        appConfigs: [
+          ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
           newAppConfig,
         ],
       };
@@ -206,10 +203,7 @@ export function useTabViewManager() {
     return editorContext.editorStates.tabViews.length;
   }
 
-  async function createTabView(
-    type: ViewModeEnum,
-    config: AppViewConfig | CanvasViewConfig,
-  ) {
+  async function createAppTabView(appConfig: AppViewConfig) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     } else if (!imcContext) {
@@ -217,8 +211,8 @@ export function useTabViewManager() {
     }
 
     const newTabView: TabView = {
-      type,
-      config,
+      type: ViewModeEnum.App,
+      config: appConfig,
     };
 
     editorContext.setEditorStates((prev) => {
@@ -229,17 +223,53 @@ export function useTabViewManager() {
       };
     });
 
-    if (type === ViewModeEnum.App) {
-      // Wait for app view to be initialized. This is because unlike canvas views,
-      // app views need to load the app first before it can render the view.
-      await imcContext.resolveWhenViewInitialized(config.viewId);
-    } else if (type === ViewModeEnum.Canvas) {
-      // Open explorer for canvas views
-      editorContext.setEditorStates((prev) => ({
-        ...prev,
-        isSideMenuOpen: true,
-      }));
+    // Wait for app view to be initialized. This is because unlike canvas views,
+    // app views need to load the app first before it can render the view.
+    await imcContext.resolveWhenViewInitialized(appConfig.viewId);
+
+    return newTabView;
+  }
+
+  async function createCanvasTabView(
+    canvasConfig: CanvasViewConfig,
+    workflow?: Workflow,
+  ) {
+    if (!editorContext) {
+      throw new Error("Editor context is not available");
+    } else if (!imcContext) {
+      throw new Error("IMC context is not available");
     }
+
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      workflows: {
+        ...prev.workflows,
+        [canvasConfig.viewId]: workflow ?? {
+          edges: [],
+          nodes: [],
+          defaultEntryPoint: undefined,
+        },
+      },
+    }));
+
+    const newTabView: TabView = {
+      type: ViewModeEnum.Canvas,
+      config: canvasConfig,
+    };
+
+    editorContext.setEditorStates((prev) => {
+      return {
+        ...prev,
+        tabViews: [...prev.tabViews, newTabView],
+        tabIndex: prev.tabViews.length,
+      };
+    });
+
+    // Open explorer for canvas views
+    editorContext.setEditorStates((prev) => ({
+      ...prev,
+      isSideMenuOpen: true,
+    }));
 
     return newTabView;
   }
@@ -250,20 +280,16 @@ export function useTabViewManager() {
     }
     let currentTab = activeTabView;
 
-    if (!currentTab) {
-      currentTab = await createTabView(ViewModeEnum.Canvas, {
-        viewId: `canvas-${v4()}`,
-      } as CanvasViewConfig);
-    } else if (currentTab?.type !== ViewModeEnum.Canvas) {
-      currentTab = await createTabView(ViewModeEnum.Canvas, {
+    if (!currentTab || currentTab?.type !== ViewModeEnum.Canvas) {
+      currentTab = await createCanvasTabView({
         viewId: `canvas-${v4()}`,
       } as CanvasViewConfig);
     }
 
     const newCanvasConfig: CanvasViewConfig = {
       ...currentTab.config,
-      nodes: [
-        ...((currentTab.config as CanvasViewConfig).nodes ?? []),
+      appConfigs: [
+        ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
         appConfig,
       ],
     };
@@ -293,7 +319,7 @@ export function useTabViewManager() {
 
     const newCanvasConfig: CanvasViewConfig = {
       ...currentTab.config,
-      nodes: (currentTab.config as CanvasViewConfig).nodes?.filter(
+      appConfigs: (currentTab.config as CanvasViewConfig).appConfigs?.filter(
         (config) => config.viewId !== viewId,
       ),
     };
@@ -351,7 +377,7 @@ export function useTabViewManager() {
         canvasView,
         activeTabView,
       );
-      const appInstances = canvasView.nodes?.filter((app) =>
+      const appInstances = canvasView.appConfigs?.filter((app) =>
         isAppNameMatched(app.app, appId),
       );
       if ((appInstances?.length ?? 0) > 1) {
@@ -373,7 +399,8 @@ export function useTabViewManager() {
     openFileInView,
     closeTabView,
     closeAllTabViews,
-    createTabView,
+    createAppTabView,
+    createCanvasTabView,
     createAppViewInCanvasView,
     deleteAppViewInCanvasView,
     findAppInTabView,

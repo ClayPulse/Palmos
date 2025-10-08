@@ -1,5 +1,21 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.45
+
+### Patch Changes
+
+- Make action return type any
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.45
+
+## 0.1.1-alpha.44
+
+### Patch Changes
+
+- Update action register hook
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.44
+
 ## 0.1.1-alpha.43
 
 ### Patch Changes

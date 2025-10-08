@@ -52,11 +52,7 @@ export default function CanvasNodeViewLayout({
     // Update node internals to ensure handles are positioned correctly
     updateNodeInternals(viewId);
   }, [updateNodeInternals, isShowingWorkflowConnector, selectedAction]);
-
-  useEffect(() => {
-    console.log("Node updated:", node);
-  }, [node]);
-
+  
   return (
     <div className="relative w-full h-full">
       {/* Control */}
@@ -130,7 +126,7 @@ export default function CanvasNodeViewLayout({
                       id={key}
                       param={param}
                       position={Position.Right}
-                      type="target"
+                      type="source"
                     />
                   ),
                 )}

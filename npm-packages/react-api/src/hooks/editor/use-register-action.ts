@@ -29,7 +29,7 @@ export default function useRegisterAction(
     parameters?: Record<string, TypedVariable>;
     returns?: Record<string, TypedVariable>;
   },
-  callbackHandler: (args: any) => Promise<string | void>,
+  callbackHandler: (args: any) => Promise<any>,
   deps: DependencyList,
   isExtReady: boolean = true
 ) {

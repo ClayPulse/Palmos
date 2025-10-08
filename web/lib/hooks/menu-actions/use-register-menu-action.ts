@@ -1,6 +1,6 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useContext, useEffect, useState } from "react";
-import { MenuAction } from "../types";
+import { MenuAction } from "../../types";
 
 export function useRegisterMenuAction(
   actionInfo: {

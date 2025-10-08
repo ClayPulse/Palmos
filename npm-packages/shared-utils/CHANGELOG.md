@@ -1,5 +1,17 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.45
+
+### Patch Changes
+
+- Make action return type any
+
+## 0.1.1-alpha.44
+
+### Patch Changes
+
+- Update action register hook
+
 ## 0.1.1-alpha.43
 
 ### Patch Changes
