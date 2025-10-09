@@ -1,5 +1,4 @@
 import Icon from "@/components/misc/icon";
-import { EditorContext } from "@/components/providers/editor-context-provider";
 import {
   addToast,
   Button,
@@ -19,7 +18,7 @@ import {
   useUpdateNodeInternals,
 } from "@xyflow/react";
 import clsx from "clsx";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import NodeHandle from "./node-handle";
 
 export default function CanvasNodeViewLayout({
@@ -29,30 +28,30 @@ export default function CanvasNodeViewLayout({
   selectedAction,
   setSelectedAction,
   isRunning,
+  isShowingWorkflowConnector,
+  setIsShowingWorkflowConnector,
   children,
 }: {
   viewId: string;
   controlActions?: Record<string, (() => void) | undefined>;
   actions: Action[];
   selectedAction: Action | undefined;
-  setSelectedAction: (action: Action | undefined) => void;
+  setSelectedAction: (action: Action | undefined) => Promise<void>;
   isRunning: boolean;
+  isShowingWorkflowConnector: boolean;
+  setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
   children: React.ReactNode;
 }) {
-  const editorContext = useContext(EditorContext);
-
   const updateNodeInternals = useUpdateNodeInternals();
   const node = useInternalNode(viewId);
 
   const [isShowingMenu, setIsShowingMenu] = useState(false);
-  const [isShowingWorkflowConnector, setIsShowingWorkflowConnector] =
-    useState(false);
 
   useEffect(() => {
     // Update node internals to ensure handles are positioned correctly
     updateNodeInternals(viewId);
   }, [updateNodeInternals, isShowingWorkflowConnector, selectedAction]);
-  
+
   return (
     <div className="relative w-full h-full">
       {/* Control */}
@@ -196,10 +195,10 @@ function CanvasNodeControl({
 }: {
   actions: Action[];
   selectedAction: Action | undefined;
-  setSelectedAction: (action: Action | undefined) => void;
+  setSelectedAction: (action: Action | undefined) => Promise<void>;
   controlActions: Record<string, (() => void) | undefined>;
   isShowingWorkflowConnector: boolean;
-  setIsShowingWorkflowConnector: (showing: boolean) => void;
+  setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
 }) {
   const [actionError, setActionError] = useState<{ [key: string]: string }>({});
 

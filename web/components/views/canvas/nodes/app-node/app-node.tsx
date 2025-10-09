@@ -10,8 +10,14 @@ import CanvasNodeViewLayout from "./layout";
 const AppNode = memo((props: any) => {
   const nodeProps = props as Node<AppNodeData>;
 
-  const { config, selectedAction, setSelectedAction, isRunning }: AppNodeData =
-    nodeProps.data;
+  const {
+    config,
+    selectedAction,
+    setSelectedAction,
+    isRunning,
+    isShowingWorkflowConnector,
+    setIsShowingWorkflowConnector,
+  }: AppNodeData = nodeProps.data;
   const viewId = config.viewId;
 
   const { createAppTabView, deleteAppViewInCanvasView } = useTabViewManager();
@@ -39,6 +45,8 @@ const AppNode = memo((props: any) => {
         },
       }}
       isRunning={isRunning}
+      isShowingWorkflowConnector={isShowingWorkflowConnector}
+      setIsShowingWorkflowConnector={setIsShowingWorkflowConnector}
     >
       <BaseAppView viewId={viewId} config={config} />
     </CanvasNodeViewLayout>

@@ -40,6 +40,8 @@ const BackendNode = memo((props: any) => {
         },
       }}
       isRunning={isRunning}
+      isShowingWorkflowConnector={false}
+      setIsShowingWorkflowConnector={async () => {}}
     >
       <BaseAppView viewId={viewId} config={config} />
     </CanvasNodeViewLayout>

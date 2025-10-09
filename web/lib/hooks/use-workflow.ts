@@ -49,6 +49,101 @@ export default function useCanvasWorkflow(
   }, [localNodes]);
 
   async function startWorkflow() {
+    function getExecutionSequence(entryPoint: ReactFlowNode<AppNodeData>) {
+      const visited = new Set<string>();
+      const sequence: ReactFlowNode<AppNodeData>[] = [];
+
+      function dfs(nodeId: string) {
+        // If already visited, return
+        if (visited.has(nodeId)) return;
+
+        visited.add(nodeId);
+        const node = localNodes.find((n) => n.id === nodeId);
+
+        // If the node is not found, return
+        if (!node) return;
+
+        // Add the node to the execution order
+        sequence.push(node);
+        // Recur for all the nodes connected to this node
+        const outgoingEdges = localEdges.filter((e) => e.source === nodeId);
+        for (const edge of outgoingEdges) {
+          dfs(edge.target);
+        }
+      }
+
+      dfs(entryPoint.id);
+      return sequence;
+    }
+
+    function checkNodeAction(sequence: ReactFlowNode<AppNodeData>[]) {
+      let passed = true;
+      for (const node of sequence) {
+        const { selectedAction } = node.data as AppNodeData;
+        if (!selectedAction) {
+          addToast({
+            title: "No Action Selected",
+            description: `Please select an action for the node "${node.data.config.app}" to run.`,
+            color: "danger",
+          });
+          passed = false;
+        }
+      }
+      return passed;
+    }
+
+    async function runNode(node: ReactFlowNode<AppNodeData>, args: any) {
+      const { selectedAction } = node.data as AppNodeData;
+      if (!selectedAction) return;
+      updateWorkflowNodeData(node.id, { isRunning: true });
+      console.log(
+        `Running node ${node.id} with action ${selectedAction} and args`,
+        args,
+      );
+      const result = await runAction(
+        {
+          action: selectedAction,
+          viewId: node.id,
+          type: "app",
+        },
+        args,
+      );
+      updateWorkflowNodeData(node.id, { isRunning: false });
+
+      return result ? JSON.parse(result) : {};
+    }
+
+    async function runSequence(sequence: ReactFlowNode<AppNodeData>[]) {
+      const resultMap = new Map<string, any>();
+      for (const node of sequence) {
+        const inputArgs = localEdges
+          .filter((e) => e.target === node.id)
+          .map((e) => {
+            const sourceHandle = e.sourceHandle;
+            const targetHandle = e.targetHandle;
+            if (!sourceHandle || !targetHandle) return null;
+
+            const sourceResult = resultMap.get(e.source);
+            const passedData = sourceResult[sourceHandle];
+
+            return {
+              [targetHandle]: passedData,
+            };
+          })
+          .reduce((acc, curr) => {
+            if (curr) {
+              return { ...acc, ...curr };
+            }
+            return acc;
+          }, {});
+
+        const result = await runNode(node, inputArgs);
+        resultMap.set(node.id, result);
+      }
+
+      return resultMap;
+    }
+
     console.log("Starting workflow from entry point:", entryPoint);
 
     if (!entryPoint) {
@@ -61,35 +156,12 @@ export default function useCanvasWorkflow(
       return;
     }
 
-    const { selectedAction } = entryPoint.data as AppNodeData;
+    const seq = getExecutionSequence(entryPoint);
+    console.log("Execution order:", seq);
 
-    if (!selectedAction) {
-      addToast({
-        title: "No Action Selected",
-        description: "Please select an action for the node to run.",
-        color: "danger",
-      });
-      return;
-    }
+    if (!checkNodeAction(seq)) return;
 
-    updateWorkflowNodeData(entryPoint.id, { isRunning: true });
-    runAction(
-      {
-        action: selectedAction,
-        viewId: entryPoint.id,
-        type: "app",
-      },
-      {},
-    ).then((result) => {
-      addToast({
-        title: "Workflow Completed",
-        description: `The workflow has completed with result: ${JSON.stringify(
-          result,
-        )}`,
-        color: "success",
-      });
-      updateWorkflowNodeData(entryPoint.id, { isRunning: false });
-    });
+    await runSequence(seq);
   }
 
   async function pauseWorkflow() {

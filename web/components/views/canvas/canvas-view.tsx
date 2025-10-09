@@ -143,6 +143,15 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
               });
             },
             isRunning: false,
+            isShowingWorkflowConnector:
+              config.initialWorkflow?.nodes.find(
+                (n) => n.id === appConfig.viewId,
+              )?.data.isShowingWorkflowConnector ?? false,
+            setIsShowingWorkflowConnector: async (showing: boolean) => {
+              await updateWorkflowNodeData(appConfig.viewId, {
+                isShowingWorkflowConnector: showing,
+              });
+            },
           };
 
           return {
@@ -191,7 +200,7 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
     if (config) {
       // Added apps
       const addedApps = config.appConfigs?.filter(
-        (newNode) => !localNodes.find((node) => node.id === newNode.viewId),
+        (app) => !localNodes.find((node) => node.id === app.viewId),
       );
 
       if (addedApps && addedApps.length > 0) {
