@@ -242,14 +242,17 @@ export function useTabViewManager() {
 
     editorContext?.setEditorStates((prev) => ({
       ...prev,
-      workflows: {
-        ...prev.workflows,
-        [canvasConfig.viewId]: workflow ?? {
-          edges: [],
-          nodes: [],
-          defaultEntryPoint: undefined,
+      workflows: [
+        ...(prev.workflows ?? []),
+        {
+          viewId: canvasConfig.viewId,
+          workflow: workflow ?? {
+            edges: [],
+            nodes: [],
+            defaultEntryPoint: undefined,
+          },
         },
-      },
+      ],
     }));
 
     const newTabView: TabView = {
