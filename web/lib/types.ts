@@ -88,8 +88,10 @@ export type EditorStates = {
   isMarketplaceOpen?: boolean;
 
   // Maintain a list of workflows in state.
-  // Key is the canvas view's id.
-  workflows?: { [key: string]: Workflow };
+  workflows?: {
+    viewId: string;
+    workflow: Workflow;
+  }[];
 };
 
 /**

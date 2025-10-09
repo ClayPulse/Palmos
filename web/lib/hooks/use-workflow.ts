@@ -3,19 +3,15 @@ import { addToast } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { AppNodeData, Workflow } from "../types";
+import { AppNodeData } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
-export default function useCanvasWorkflow(canvasId: string) {
+export default function useCanvasWorkflow(canvasId: string | undefined) {
   const editorContext = useContext(EditorContext);
 
   const { runAction } = useScopedActions();
 
-  const [workflow, setWorkflow] = useState<Workflow | undefined>(undefined);
   const [pendingNodes, setPendingNodes] = useState<
-    ReactFlowNode<AppNodeData>[]
-  >([]);
-  const [runningNodes, setRunningNodes] = useState<
     ReactFlowNode<AppNodeData>[]
   >([]);
   const [isPaused, setIsPaused] = useState<boolean>(false);
@@ -24,28 +20,9 @@ export default function useCanvasWorkflow(canvasId: string) {
     ReactFlowNode<AppNodeData> | undefined
   >(undefined);
 
-  // Load workflow from editor context based on canvasId
-  useEffect(() => {
-    const workflow = editorContext?.editorStates.workflows?.[canvasId];
-
-    if (!workflow) {
-      addToast({
-        title: "No Workflow Found",
-        description: `No workflow found for canvas ID: ${canvasId}`,
-        color: "danger",
-      });
-    }
-
-    setWorkflow(workflow);
-  }, [canvasId]);
-
-  // Update editor context when workflow changes
-  useEffect(() => {
-    if (workflow) {
-      // Update workflow in editor context
-      debouncedSyncWorkflow(workflow);
-    }
-  }, [workflow]);
+  const workflow = editorContext?.editorStates.workflows?.find(
+    (wf) => wf.viewId === canvasId,
+  )?.workflow;
 
   // Update entry points
   useEffect(() => {
@@ -75,8 +52,6 @@ export default function useCanvasWorkflow(canvasId: string) {
       });
       return;
     }
-
-    // setRunningNodes([entryPoint]);
 
     updateWorkflowNodeData(entryPoint.id, { isRunning: true });
     runAction(
@@ -129,18 +104,6 @@ export default function useCanvasWorkflow(canvasId: string) {
     setPendingNodes([entryPoint]);
   }
 
-  const debouncedSyncWorkflow = useDebouncedCallback((wf: Workflow) => {
-    if (!editorContext) return;
-
-    editorContext.setEditorStates((prev) => ({
-      ...prev,
-      workflows: {
-        ...prev.workflows,
-        [canvasId]: wf,
-      },
-    }));
-  }, 500);
-
   const debouncedGetEntryPoint = useDebouncedCallback(() => {
     const entry =
       workflow?.nodes.find((node) => node.selected) ??
@@ -150,17 +113,26 @@ export default function useCanvasWorkflow(canvasId: string) {
 
   const updateWorkflowNodeData = useCallback(
     (nodeViewId: string, data: Partial<AppNodeData>) => {
-      setWorkflow((prev) => {
-        if (!prev) return undefined;
-        const idx = prev.nodes.findIndex((node) => node.id === nodeViewId);
-        if (idx === -1) return prev;
+      if (!canvasId) return;
+      editorContext?.setEditorStates((prev) => {
+        if (!prev.workflows) return prev;
+        const wfIdx = prev.workflows.findIndex((wf) => wf.viewId === canvasId);
+        if (wfIdx === -1) return prev;
+        const workflow = prev.workflows[wfIdx].workflow;
+        const nodeIdx = workflow.nodes.findIndex(
+          (node) => node.id === nodeViewId,
+        );
+        if (nodeIdx === -1) return prev;
         const updatedNode = {
-          ...prev.nodes[idx],
-          data: { ...prev.nodes[idx].data, ...data },
+          ...workflow.nodes[nodeIdx],
+          data: { ...workflow.nodes[nodeIdx].data, ...data },
         };
-        const newNodes = [...prev.nodes];
-        newNodes[idx] = updatedNode;
-        return { ...prev, nodes: newNodes };
+        const newNodes = [...workflow.nodes];
+        newNodes[nodeIdx] = updatedNode;
+        const newWorkflow = { ...workflow, nodes: newNodes };
+        const newWorkflows = [...prev.workflows];
+        newWorkflows[wfIdx] = { viewId: canvasId, workflow: newWorkflow };
+        return { ...prev, workflows: newWorkflows };
       });
     },
     [workflow],
@@ -172,13 +144,17 @@ export default function useCanvasWorkflow(canvasId: string) {
         oldNodes: ReactFlowNode<AppNodeData>[],
       ) => ReactFlowNode<AppNodeData>[],
     ) => {
+      if (!canvasId) return;
       const updatedNodes = updater(workflow?.nodes ?? []);
-      setWorkflow((prev) => {
-        if (!prev) return undefined;
-        return {
-          ...prev,
-          nodes: updatedNodes,
-        };
+      editorContext?.setEditorStates((prev) => {
+        if (!prev.workflows) return prev;
+        const wfIdx = prev.workflows.findIndex((wf) => wf.viewId === canvasId);
+        if (wfIdx === -1) return prev;
+        const workflow = prev.workflows[wfIdx].workflow;
+        const newWorkflow = { ...workflow, nodes: updatedNodes };
+        const newWorkflows = [...prev.workflows];
+        newWorkflows[wfIdx] = { viewId: canvasId, workflow: newWorkflow };
+        return { ...prev, workflows: newWorkflows };
       });
     },
     [workflow],
@@ -186,13 +162,17 @@ export default function useCanvasWorkflow(canvasId: string) {
 
   const updateWorkflowEdges = useCallback(
     (updater: (oldEdges: ReactFlowEdge[]) => ReactFlowEdge[]) => {
+      if (!canvasId) return;
       const updatedEdges = updater(workflow?.edges ?? []);
-      setWorkflow((prev) => {
-        if (!prev) return undefined;
-        return {
-          ...prev,
-          edges: updatedEdges,
-        };
+      editorContext?.setEditorStates((prev) => {
+        if (!prev.workflows) return prev;
+        const wfIdx = prev.workflows.findIndex((wf) => wf.viewId === canvasId);
+        if (wfIdx === -1) return prev;
+        const workflow = prev.workflows[wfIdx].workflow;
+        const newWorkflow = { ...workflow, edges: updatedEdges };
+        const newWorkflows = [...prev.workflows];
+        newWorkflows[wfIdx] = { viewId: canvasId, workflow: newWorkflow };
+        return { ...prev, workflows: newWorkflows };
       });
     },
     [workflow],
