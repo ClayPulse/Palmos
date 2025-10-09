@@ -15,6 +15,7 @@ import {
   Button,
   Divider,
   Input,
+  NumberInput,
   Select,
   SelectItem,
   Switch,
@@ -108,6 +109,20 @@ function EditorSettings({
             </Button>
           </div>
         )}
+        <p className="text-content4-foreground text-sm">Canvas Settings</p>
+        <NumberInput
+          label={"Max update per second"}
+          value={editorContext?.persistSettings?.canvasUpdatePerSec ?? 60}
+          min={15}
+          onValueChange={(value) => {
+            editorContext?.setPersistSettings((prev) => {
+              return {
+                ...prev,
+                canvasUpdatePerSec: value,
+              };
+            });
+          }}
+        />
 
         {/* Environment Variables */}
         <p className="text-content4-foreground text-sm">

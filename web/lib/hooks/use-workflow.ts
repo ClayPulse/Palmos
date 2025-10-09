@@ -1,13 +1,17 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { addToast } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { AppNodeData } from "../types";
+import { AppNodeData, Workflow } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
 export default function useCanvasWorkflow(canvasId: string | undefined) {
   const editorContext = useContext(EditorContext);
+
+  // Throttle for debounced updates.
+  // This can limit how often the updates happen to improve performance.
+  const throttle = 1000 / (editorContext?.persistSettings?.canvasUpdatePerSec ?? 60);
 
   const { runAction } = useScopedActions();
 
@@ -20,14 +24,27 @@ export default function useCanvasWorkflow(canvasId: string | undefined) {
     ReactFlowNode<AppNodeData> | undefined
   >(undefined);
 
-  const workflow = editorContext?.editorStates.workflows?.find(
-    (wf) => wf.viewId === canvasId,
-  )?.workflow;
+  const workflow = useMemo(
+    () =>
+      canvasId ? editorContext?.editorStates.workflows?.[canvasId] : undefined,
+    [editorContext?.editorStates.workflows, canvasId],
+  );
 
   // Update entry points
   useEffect(() => {
     debouncedGetEntryPoint();
   }, [workflow]);
+
+  function setWorkflow(updater: (oldWorkflow: Workflow) => Workflow) {
+    if (!canvasId) return;
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      workflows: {
+        ...prev.workflows,
+        [canvasId]: updater(prev.workflows[canvasId]),
+      },
+    }));
+  }
 
   async function startWorkflow() {
     console.log("Starting workflow from entry point:", entryPoint);
@@ -114,31 +131,25 @@ export default function useCanvasWorkflow(canvasId: string | undefined) {
   const updateWorkflowNodeData = useCallback(
     (nodeViewId: string, data: Partial<AppNodeData>) => {
       if (!canvasId) return;
-      editorContext?.setEditorStates((prev) => {
-        if (!prev.workflows) return prev;
-        const wfIdx = prev.workflows.findIndex((wf) => wf.viewId === canvasId);
-        if (wfIdx === -1) return prev;
-        const workflow = prev.workflows[wfIdx].workflow;
-        const nodeIdx = workflow.nodes.findIndex(
+      setWorkflow((oldWorkflow) => {
+        const nodeIdx = oldWorkflow.nodes.findIndex(
           (node) => node.id === nodeViewId,
         );
-        if (nodeIdx === -1) return prev;
+        if (nodeIdx === -1) return oldWorkflow;
         const updatedNode = {
-          ...workflow.nodes[nodeIdx],
-          data: { ...workflow.nodes[nodeIdx].data, ...data },
+          ...oldWorkflow.nodes[nodeIdx],
+          data: { ...oldWorkflow.nodes[nodeIdx].data, ...data },
         };
-        const newNodes = [...workflow.nodes];
+        const newNodes = [...oldWorkflow.nodes];
         newNodes[nodeIdx] = updatedNode;
-        const newWorkflow = { ...workflow, nodes: newNodes };
-        const newWorkflows = [...prev.workflows];
-        newWorkflows[wfIdx] = { viewId: canvasId, workflow: newWorkflow };
-        return { ...prev, workflows: newWorkflows };
+        return { ...oldWorkflow, nodes: newNodes };
       });
     },
     [workflow],
   );
 
-  const updateWorkflowNodes = useCallback(
+  // Debounced node update
+  const debouncedUpdateWorkflowNodes = useDebouncedCallback(
     (
       updater: (
         oldNodes: ReactFlowNode<AppNodeData>[],
@@ -146,37 +157,35 @@ export default function useCanvasWorkflow(canvasId: string | undefined) {
     ) => {
       if (!canvasId) return;
       const updatedNodes = updater(workflow?.nodes ?? []);
-      editorContext?.setEditorStates((prev) => {
-        if (!prev.workflows) return prev;
-        const wfIdx = prev.workflows.findIndex((wf) => wf.viewId === canvasId);
-        if (wfIdx === -1) return prev;
-        const workflow = prev.workflows[wfIdx].workflow;
-        const newWorkflow = { ...workflow, nodes: updatedNodes };
-        const newWorkflows = [...prev.workflows];
-        newWorkflows[wfIdx] = { viewId: canvasId, workflow: newWorkflow };
-        return { ...prev, workflows: newWorkflows };
-      });
+      setWorkflow((oldWorkflow) => ({ ...oldWorkflow, nodes: updatedNodes }));
     },
-    [workflow],
+    throttle,
+    {
+      maxWait: throttle,
+    },
   );
 
-  const updateWorkflowEdges = useCallback(
+  // Debounced edge update
+  const debouncedUpdateWorkflowEdges = useDebouncedCallback(
     (updater: (oldEdges: ReactFlowEdge[]) => ReactFlowEdge[]) => {
       if (!canvasId) return;
       const updatedEdges = updater(workflow?.edges ?? []);
-      editorContext?.setEditorStates((prev) => {
-        if (!prev.workflows) return prev;
-        const wfIdx = prev.workflows.findIndex((wf) => wf.viewId === canvasId);
-        if (wfIdx === -1) return prev;
-        const workflow = prev.workflows[wfIdx].workflow;
-        const newWorkflow = { ...workflow, edges: updatedEdges };
-        const newWorkflows = [...prev.workflows];
-        newWorkflows[wfIdx] = { viewId: canvasId, workflow: newWorkflow };
-        return { ...prev, workflows: newWorkflows };
-      });
+      setWorkflow((oldWorkflow) => ({ ...oldWorkflow, edges: updatedEdges }));
     },
-    [workflow],
+    throttle,
+    {
+      maxWait: throttle,
+    },
   );
+
+  const updateWorkflowNodes = useCallback(debouncedUpdateWorkflowNodes, [
+    canvasId,
+    workflow,
+  ]);
+  const updateWorkflowEdges = useCallback(debouncedUpdateWorkflowEdges, [
+    canvasId,
+    workflow,
+  ]);
 
   const exportWorkflow = useCallback(() => {
     const blob = new Blob([JSON.stringify(workflow, null, 2)], {
