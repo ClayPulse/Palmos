@@ -1,17 +1,26 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { addToast } from "@heroui/react";
-import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
-import { useCallback, useContext, useEffect, useMemo, useState } from "react";
+import {
+  Edge as ReactFlowEdge,
+  Node as ReactFlowNode,
+  useEdgesState,
+  useNodesState,
+} from "@xyflow/react";
+import { useCallback, useContext, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { AppNodeData, Workflow } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
-export default function useCanvasWorkflow(canvasId: string | undefined) {
+export default function useCanvasWorkflow(
+  canvasId: string,
+  initialWorkflow?: Workflow,
+) {
   const editorContext = useContext(EditorContext);
 
   // Throttle for debounced updates.
   // This can limit how often the updates happen to improve performance.
-  const throttle = 1000 / (editorContext?.persistSettings?.canvasUpdatePerSec ?? 60);
+  const throttle =
+    1000 / (editorContext?.persistSettings?.canvasUpdatePerSec ?? 60);
 
   const { runAction } = useScopedActions();
 
@@ -24,27 +33,20 @@ export default function useCanvasWorkflow(canvasId: string | undefined) {
     ReactFlowNode<AppNodeData> | undefined
   >(undefined);
 
-  const workflow = useMemo(
-    () =>
-      canvasId ? editorContext?.editorStates.workflows?.[canvasId] : undefined,
-    [editorContext?.editorStates.workflows, canvasId],
+  const [localNodes, setLocalNodes] = useNodesState(
+    initialWorkflow?.nodes ?? [],
   );
+  const [localEdges, setLocalEdges] = useEdgesState(
+    initialWorkflow?.edges ?? [],
+  );
+  const [defaultEntryPoint, setDefaultEntryPoint] = useState<
+    ReactFlowNode<AppNodeData> | undefined
+  >(initialWorkflow?.defaultEntryPoint);
 
   // Update entry points
   useEffect(() => {
     debouncedGetEntryPoint();
-  }, [workflow]);
-
-  function setWorkflow(updater: (oldWorkflow: Workflow) => Workflow) {
-    if (!canvasId) return;
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      workflows: {
-        ...prev.workflows,
-        [canvasId]: updater(prev.workflows[canvasId]),
-      },
-    }));
-  }
+  }, [localNodes]);
 
   async function startWorkflow() {
     console.log("Starting workflow from entry point:", entryPoint);
@@ -99,14 +101,6 @@ export default function useCanvasWorkflow(canvasId: string | undefined) {
   }
 
   async function resetWorkflow() {
-    if (!workflow) {
-      addToast({
-        title: "No Workflow Loaded",
-        description: "Cannot reset workflow as no workflow is loaded.",
-      });
-      return;
-    }
-
     setIsPaused(false);
 
     if (!entryPoint) {
@@ -122,85 +116,81 @@ export default function useCanvasWorkflow(canvasId: string | undefined) {
   }
 
   const debouncedGetEntryPoint = useDebouncedCallback(() => {
-    const entry =
-      workflow?.nodes.find((node) => node.selected) ??
-      workflow?.defaultEntryPoint;
+    const entry = localNodes.find((node) => node.selected) ?? defaultEntryPoint;
     setEntryPoint(entry);
   }, 200);
 
   const updateWorkflowNodeData = useCallback(
     (nodeViewId: string, data: Partial<AppNodeData>) => {
       if (!canvasId) return;
-      setWorkflow((oldWorkflow) => {
-        const nodeIdx = oldWorkflow.nodes.findIndex(
-          (node) => node.id === nodeViewId,
-        );
-        if (nodeIdx === -1) return oldWorkflow;
-        const updatedNode = {
-          ...oldWorkflow.nodes[nodeIdx],
-          data: { ...oldWorkflow.nodes[nodeIdx].data, ...data },
+      setLocalNodes((prev) => {
+        const index = prev.findIndex((n) => n.id === nodeViewId);
+        if (index === -1) return prev;
+        const node = prev[index];
+        const newNode = {
+          ...node,
+          data: {
+            ...node.data,
+            ...data,
+          },
         };
-        const newNodes = [...oldWorkflow.nodes];
-        newNodes[nodeIdx] = updatedNode;
-        return { ...oldWorkflow, nodes: newNodes };
+        const newNodes = [...prev];
+        newNodes[index] = newNode;
+        return newNodes;
       });
     },
-    [workflow],
+    [localNodes],
   );
 
-  // Debounced node update
-  const debouncedUpdateWorkflowNodes = useDebouncedCallback(
+  const updateWorkflowNodes = useCallback(
     (
       updater: (
         oldNodes: ReactFlowNode<AppNodeData>[],
       ) => ReactFlowNode<AppNodeData>[],
     ) => {
       if (!canvasId) return;
-      const updatedNodes = updater(workflow?.nodes ?? []);
-      setWorkflow((oldWorkflow) => ({ ...oldWorkflow, nodes: updatedNodes }));
+      const updatedNodes = updater(localNodes ?? []);
+      setLocalNodes(updatedNodes);
     },
-    throttle,
-    {
-      maxWait: throttle,
-    },
+    [canvasId, localNodes],
   );
-
-  // Debounced edge update
-  const debouncedUpdateWorkflowEdges = useDebouncedCallback(
+  const updateWorkflowEdges = useCallback(
     (updater: (oldEdges: ReactFlowEdge[]) => ReactFlowEdge[]) => {
       if (!canvasId) return;
-      const updatedEdges = updater(workflow?.edges ?? []);
-      setWorkflow((oldWorkflow) => ({ ...oldWorkflow, edges: updatedEdges }));
+      const updatedEdges = updater(localEdges ?? []);
+      setLocalEdges(updatedEdges);
     },
-    throttle,
-    {
-      maxWait: throttle,
-    },
+    [canvasId, localEdges],
   );
 
-  const updateWorkflowNodes = useCallback(debouncedUpdateWorkflowNodes, [
-    canvasId,
-    workflow,
-  ]);
-  const updateWorkflowEdges = useCallback(debouncedUpdateWorkflowEdges, [
-    canvasId,
-    workflow,
-  ]);
-
   const exportWorkflow = useCallback(() => {
-    const blob = new Blob([JSON.stringify(workflow, null, 2)], {
-      type: "application/json",
-    });
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          {
+            nodes: localNodes,
+            edges: localEdges,
+            defaultEntryPoint: defaultEntryPoint,
+          },
+          null,
+          2,
+        ),
+      ],
+      {
+        type: "application/json",
+      },
+    );
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
     a.download = "workflow.json";
     a.click();
     URL.revokeObjectURL(url);
-  }, [workflow]);
+  }, [localNodes, localEdges, defaultEntryPoint]);
 
   return {
-    workflow,
+    localNodes,
+    localEdges,
     entryPoint,
     startWorkflow,
     pauseWorkflow,
