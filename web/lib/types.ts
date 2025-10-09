@@ -88,10 +88,7 @@ export type EditorStates = {
   isMarketplaceOpen?: boolean;
 
   // Maintain a list of workflows in state.
-  workflows?: {
-    viewId: string;
-    workflow: Workflow;
-  }[];
+  workflows: Record<string, Workflow>;
 };
 
 /**
@@ -141,6 +138,8 @@ export type PersistentSettings = {
 
   // Environment variables
   envs?: Record<string, string>;
+
+  canvasUpdatePerSec?: number;
 };
 // #endregion
 

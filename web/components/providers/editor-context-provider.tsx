@@ -2,14 +2,14 @@
 
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
-import { decrypt } from "@/lib/security/simple-password";
 import { getSTTModel } from "@/lib/modalities/stt/stt";
 import { getTTSModel } from "@/lib/modalities/tts/tts";
+import { decrypt } from "@/lib/security/simple-password";
 import {
-  EditorStates,
-  EditorContextType,
-  PersistentSettings,
   AIModels,
+  EditorContextType,
+  EditorStates,
+  PersistentSettings,
 } from "@/lib/types";
 import React, { createContext, useEffect, useState } from "react";
 
@@ -34,6 +34,7 @@ const defaultEditorStates: EditorStates = {
   pressedKeys: [],
   tabViews: [],
   tabIndex: -1,
+  workflows: {},
 };
 
 export default function EditorContextProvider({
