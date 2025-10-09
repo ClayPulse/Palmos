@@ -34,7 +34,6 @@ const defaultEditorStates: EditorStates = {
   pressedKeys: [],
   tabViews: [],
   tabIndex: -1,
-  workflows: {},
 };
 
 export default function EditorContextProvider({

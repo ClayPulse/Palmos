@@ -232,25 +232,12 @@ export function useTabViewManager() {
 
   async function createCanvasTabView(
     canvasConfig: CanvasViewConfig,
-    workflow?: Workflow,
   ) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     } else if (!imcContext) {
       throw new Error("IMC context is not available");
     }
-
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      workflows: {
-        ...prev.workflows,
-        [canvasConfig.viewId]: workflow ?? {
-          edges: [],
-          nodes: [],
-          defaultEntryPoint: undefined,
-        },
-      },
-    }));
 
     const newTabView: TabView = {
       type: ViewModeEnum.Canvas,

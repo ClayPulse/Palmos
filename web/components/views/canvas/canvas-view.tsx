@@ -53,14 +53,15 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
   const { openAppInfoModal } = useAppInfo();
 
   const {
-    workflow,
+    localEdges,
+    localNodes,
     entryPoint,
     startWorkflow,
     updateWorkflowEdges,
     updateWorkflowNodes,
     exportWorkflow,
     updateWorkflowNodeData,
-  } = useCanvasWorkflow(config.viewId);
+  } = useCanvasWorkflow(config.viewId, config.initialWorkflow);
 
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
@@ -190,8 +191,7 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
     if (config) {
       // Added apps
       const addedApps = config.appConfigs?.filter(
-        (newNode) =>
-          !workflow?.nodes.find((node) => node.id === newNode.viewId),
+        (newNode) => !localNodes.find((node) => node.id === newNode.viewId),
       );
 
       if (addedApps && addedApps.length > 0) {
@@ -199,7 +199,7 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
       }
 
       // Removed apps
-      const removedApps = workflow?.nodes.filter(
+      const removedApps = localNodes.filter(
         (node) =>
           !config.appConfigs?.find((newNode) => newNode.viewId === node.id),
       );
@@ -217,8 +217,8 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
       id={config.viewId}
     >
       <ReactFlow
-        nodes={workflow?.nodes ?? []}
-        edges={workflow?.edges ?? []}
+        nodes={localNodes ?? []}
+        edges={localEdges ?? []}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

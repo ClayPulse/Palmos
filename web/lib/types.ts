@@ -86,9 +86,6 @@ export type EditorStates = {
   // Side menu panel
   isSideMenuOpen?: boolean;
   isMarketplaceOpen?: boolean;
-
-  // Maintain a list of workflows in state.
-  workflows: Record<string, Workflow>;
 };
 
 /**
@@ -232,6 +229,7 @@ export type CanvasViewConfig = {
   // App configurations.
   // This does not change once the canvas view is created.
   appConfigs?: AppViewConfig[];
+  initialWorkflow?: Workflow;
 };
 
 export type TabView = {
