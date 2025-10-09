@@ -1,7 +1,6 @@
 import useScopedActions from "@/lib/hooks/use-scoped-actions";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppNodeData } from "@/lib/types";
-import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { Node } from "@xyflow/react";
 import { memo } from "react";
 import { v4 } from "uuid";
@@ -11,17 +10,17 @@ import CanvasNodeViewLayout from "./layout";
 const AppNode = memo((props: any) => {
   const nodeProps = props as Node<AppNodeData>;
 
-  const { config, selectedAction, setSelectedAction }: AppNodeData =
+  const { config, selectedAction, setSelectedAction, isRunning }: AppNodeData =
     nodeProps.data;
   const viewId = config.viewId;
 
-  const { createTabView, deleteAppViewInCanvasView } = useTabViewManager();
+  const { createAppTabView, deleteAppViewInCanvasView } = useTabViewManager();
   const { actions } = useScopedActions(config.app);
 
   async function openViewInFullScreen() {
-    await createTabView(ViewModeEnum.App, {
+    await createAppTabView({
       ...config,
-      viewId: v4(),
+      viewId: `${config.app}-${v4()}`,
     });
   }
 
@@ -39,6 +38,7 @@ const AppNode = memo((props: any) => {
           deleteAppViewInCanvasView(viewId);
         },
       }}
+      isRunning={isRunning}
     >
       <BaseAppView viewId={viewId} config={config} />
     </CanvasNodeViewLayout>

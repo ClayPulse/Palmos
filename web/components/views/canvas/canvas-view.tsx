@@ -1,10 +1,11 @@
+import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
+import useCanvasWorkflow from "@/lib/hooks/use-workflow";
 import {
   AppInfoModalContent,
   AppNodeData,
+  AppViewConfig,
   CanvasViewConfig,
-  MenuAction,
 } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { Action } from "@pulse-editor/shared-utils";
@@ -25,7 +26,7 @@ import {
   useViewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import Icon from "../../misc/icon";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
@@ -48,41 +49,46 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 `,
 };
 
-export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
+export default function CanvasView({ config }: { config: CanvasViewConfig }) {
   const { openAppInfoModal } = useAppInfo();
-  const { registerMenuAction, unregisterMenuAction } = useMenuActions();
+
+  const {
+    workflow,
+    entryPoint,
+    startWorkflow,
+    updateWorkflowEdges,
+    updateWorkflowNodes,
+    exportWorkflow,
+    updateWorkflowNodeData,
+  } = useCanvasWorkflow(config.viewId);
 
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const [nodes, setNodes] = useState<ReactFlowNode<AppNodeData>[]>([]);
-  const [edges, setEdges] = useState<ReactFlowEdge[]>([]);
-
+  // this is called when new node is added below using updateWorkflowNodes
   const onNodesChange = useCallback(
-    (changes: NodeChange<ReactFlowNode<AppNodeData>>[]) => {
-      console.log("Node changes:", changes);
-      setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot));
-    },
-    [],
+    (changes: NodeChange<ReactFlowNode<AppNodeData>>[]) =>
+      updateWorkflowNodes((oldNodes) => applyNodeChanges(changes, oldNodes)),
+    [updateWorkflowNodes],
   );
   const onEdgesChange = useCallback(
-    (changes: EdgeChange<{ id: string; source: string; target: string }>[]) => {
-      console.log("Edge changes:", changes);
-      setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot));
-    },
-    [],
+    (changes: EdgeChange<{ id: string; source: string; target: string }>[]) =>
+      updateWorkflowEdges((oldEdges) => applyEdgeChanges(changes, oldEdges)),
+    [updateWorkflowEdges],
   );
   const onConnect = useCallback(
     (params: any) =>
-      setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
-    [],
+      updateWorkflowEdges((oldEdges) => addEdge(params, oldEdges)),
+    [updateWorkflowEdges],
   );
   const onReconnect = useCallback(
     (oldEdge: ReactFlowEdge, newConnection: Connection) =>
-      setEdges((els) => reconnectEdge(oldEdge, newConnection, els)),
-    [],
+      updateWorkflowEdges((oldEdges) =>
+        reconnectEdge(oldEdge, newConnection, oldEdges),
+      ),
+    [updateWorkflowEdges],
   );
 
   /* Node creator functions */
@@ -91,166 +97,128 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
   }, []);
 
   // Register menu actions
-  useEffect(() => {
-    console.log("CanvasView rendered: registering menu actions");
+  useRegisterMenuAction(
+    {
+      name: "Export Workflow",
+      menuCategory: "file",
+      description: "Export the current workflow as a JSON file",
+      shortcut: "Ctrl+Alt+E",
 
-    const menuActions: MenuAction[] = [
-      {
-        name: "Export Workflow",
-        menuCategory: "file",
-        description: "Export the current workflow as a JSON file",
-        shortcut: "Ctrl+Alt+E",
-        actionFunc: async () => {
-          await exportWorkflow();
-        },
-        icon: "download",
-      },
-      {
-        name: "Import Workflow",
-        menuCategory: "file",
-        description: "Import a workflow from a JSON file",
-        shortcut: "Ctrl+Alt+I",
-        actionFunc: async () => {
-          const input = document.createElement("input");
-          input.type = "file";
-          input.accept = "application/json";
-          input.onchange = (e: any) => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (event) => {
-              try {
-                const workflow = JSON.parse(event.target?.result as string);
-                if (workflow.nodes && workflow.edges) {
-                  setNodes(workflow.nodes);
-                  setEdges(workflow.edges);
-                } else {
-                  alert("Invalid workflow file");
-                }
-              } catch (err) {
-                alert("Error reading workflow file");
-              }
-            };
-            reader.readAsText(file);
+      icon: "download",
+    },
+
+    async () => exportWorkflow(),
+    [exportWorkflow],
+  );
+  useRegisterMenuAction(
+    {
+      name: "Run Workflow",
+      menuCategory: "view",
+      description:
+        "Run the current workflow from the selected or default entry point",
+      shortcut: "Ctrl+Alt+R",
+      icon: "play_arrow",
+    },
+    async () => {
+      await startWorkflow();
+    },
+    [entryPoint],
+  );
+
+  // Promote nodes to workflow nodes,
+  // or remove workflow nodes that are no longer in the config
+  useEffect(() => {
+    function promoteToWorkflowNode(newApps: AppViewConfig[]) {
+      const newNodes: ReactFlowNode<AppNodeData>[] =
+        newApps?.map((appConfig) => {
+          const flowCenter = getViewCenter(appConfig);
+
+          const newAppNodeData: AppNodeData = {
+            config: appConfig,
+            selectedAction: undefined,
+            setSelectedAction: async (action: Action | undefined) => {
+              await updateWorkflowNodeData(appConfig.viewId, {
+                selectedAction: action,
+              });
+            },
+            isRunning: false,
           };
-          input.click();
-        },
-        icon: "upload",
-      },
-    ];
 
-    menuActions.forEach((action) => {
-      registerMenuAction(action);
-    });
+          return {
+            id: appConfig.viewId,
+            position: flowCenter,
+            data: newAppNodeData,
+            type: "appNode",
+            height: appConfig.recommendedHeight ?? 360,
+            width: appConfig.recommendedWidth ?? 640,
+          };
+        }) ?? [];
 
-    return () => {
-      // Unregister menu actions on unmount
-      menuActions.forEach((action) => {
-        unregisterMenuAction(action);
+      // Add new nodes to the workflow
+      updateWorkflowNodes((oldNodes) => oldNodes.concat(newNodes));
+    }
+
+    function removeWorkflowNode(removedNodes: ReactFlowNode<AppNodeData>[]) {
+      updateWorkflowNodes((oldNodes) => {
+        return oldNodes.filter(
+          (node) =>
+            !removedNodes.find((removedNode) => removedNode.id === node.id),
+        );
       });
-    };
-  }, []);
+    }
 
-  // Add or remove nodes when config changes
-  useEffect(() => {
+    function getViewCenter(appConfig: AppViewConfig) {
+      const containerBounds = containerRef.current?.getBoundingClientRect();
+
+      if (!containerBounds) throw new Error("Container bounds not found");
+
+      const screenCenter = {
+        x:
+          containerBounds.left +
+          containerBounds.width / 2 -
+          ((appConfig.recommendedWidth ?? 640) / 2) * viewport.zoom,
+        y:
+          containerBounds.top +
+          containerBounds.height / 2 -
+          ((appConfig.recommendedHeight ?? 360) / 2) * viewport.zoom,
+      };
+
+      const flowCenter = screenToFlowPosition(screenCenter);
+      return flowCenter;
+    }
+
     if (config) {
-      // Added nodes
-      const newNodes = config.nodes?.filter(
-        (newNode) => !nodes.find((node) => node.id === newNode.viewId),
+      // Added apps
+      const addedApps = config.appConfigs?.filter(
+        (newNode) =>
+          !workflow?.nodes.find((node) => node.id === newNode.viewId),
       );
 
-      if (newNodes && newNodes.length > 0) {
-        const newAppNodes: ReactFlowNode<AppNodeData>[] =
-          newNodes?.map((appConfig) => {
-            const containerBounds =
-              containerRef.current?.getBoundingClientRect();
-
-            if (!containerBounds) throw new Error("Container bounds not found");
-
-            const screenCenter = {
-              x:
-                containerBounds.left +
-                containerBounds.width / 2 -
-                ((appConfig.recommendedWidth ?? 640) / 2) * viewport.zoom,
-              y:
-                containerBounds.top +
-                containerBounds.height / 2 -
-                ((appConfig.recommendedHeight ?? 360) / 2) * viewport.zoom,
-            };
-
-            const flowCenter = screenToFlowPosition(screenCenter);
-
-            return {
-              id: appConfig.viewId,
-              position: flowCenter,
-              data: {
-                label: appConfig.app,
-                config: appConfig,
-                selectedAction: undefined,
-                setSelectedAction: async (action: Action | undefined) => {
-                  // Update the node's data
-                  setNodes((nds) =>
-                    nds.map((node) => {
-                      if (node.id === appConfig.viewId) {
-                        return {
-                          ...node,
-                          data: {
-                            ...node.data,
-                            selectedAction: action,
-                          },
-                        };
-                      }
-                      return node;
-                    }),
-                  );
-                },
-              },
-              type: "appNode",
-              height: appConfig.recommendedHeight ?? 360,
-              width: appConfig.recommendedWidth ?? 640,
-            };
-          }) ?? [];
-
-        setNodes((nds) => nds.concat(newAppNodes));
+      if (addedApps && addedApps.length > 0) {
+        promoteToWorkflowNode(addedApps);
       }
 
-      // Removed nodes
-      const removedNodes = nodes.filter(
-        (node) => !config.nodes?.find((newNode) => newNode.viewId === node.id),
+      // Removed apps
+      const removedApps = workflow?.nodes.filter(
+        (node) =>
+          !config.appConfigs?.find((newNode) => newNode.viewId === node.id),
       );
 
-      if (removedNodes && removedNodes.length > 0) {
-        setNodes((nds) =>
-          nds.filter(
-            (node) =>
-              !removedNodes.find((removedNode) => removedNode.id === node.id),
-          ),
-        );
+      if (removedApps && removedApps.length > 0) {
+        removeWorkflowNode(removedApps);
       }
     }
-  }, [config, viewport]);
-
-  async function exportWorkflow() {
-    const workflow = { nodes, edges };
-    const blob = new Blob([JSON.stringify(workflow, null, 2)], {
-      type: "application/json",
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "workflow.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  }, [config, viewport, screenToFlowPosition, updateWorkflowNodes]);
 
   return (
     <div
       ref={containerRef}
       className="bg-content3 text-content3-foreground relative h-full w-full"
-      id={`canvas-${config?.viewId}`}
+      id={config.viewId}
     >
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={workflow?.nodes ?? []}
+        edges={workflow?.edges ?? []}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
@@ -271,7 +239,7 @@ export default function CanvasView({ config }: { config?: CanvasViewConfig }) {
           },
         }}
       >
-        <Background variant={BackgroundVariant.Dots} />
+        <Background id={config.viewId} variant={BackgroundVariant.Dots} />
       </ReactFlow>
       <Button
         isIconOnly

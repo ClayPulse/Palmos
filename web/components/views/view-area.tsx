@@ -3,7 +3,7 @@ import { AppViewConfig, CanvasViewConfig, ExtensionApp } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useSearchParams } from "next/navigation";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { v4 } from "uuid";
 import Tabs from "../misc/tabs";
 import CanvasView from "./canvas/canvas-view";
@@ -26,9 +26,8 @@ export default function ViewArea() {
     tabIndex,
     selectTab,
     closeTabView,
-    createTabView,
+    createAppTabView,
     createAppViewInCanvasView,
-    deleteAppViewInCanvasView,
     activeTabView,
   } = useTabViewManager();
 
@@ -63,23 +62,6 @@ export default function ViewArea() {
       };
     }) ?? [];
 
-  const openInCanvasView = useCallback(async (config: CanvasViewConfig) => {
-    await createTabView(ViewModeEnum.Canvas, config);
-  }, []);
-
-  const createNewCanvas = useCallback(async () => {
-    await createTabView(ViewModeEnum.Canvas, {
-      viewId: v4(),
-    });
-  }, []);
-
-  const removeAppFromCanvas = useCallback(
-    async (viewId: string) => {
-      await deleteAppViewInCanvasView(viewId);
-    },
-    [activeTabView],
-  );
-
   const isInitialized = useRef(false);
 
   useEffect(() => {
@@ -99,8 +81,8 @@ export default function ViewArea() {
 
         if (existingAppIndex === -1) {
           // Create new tab if not already exists
-          const viewId = v4();
-          await createTabView(ViewModeEnum.App, {
+          const viewId = `${app}-${v4()}`;
+          await createAppTabView({
             viewId,
             app,
             inviteCode,
@@ -144,7 +126,7 @@ export default function ViewArea() {
         const ext: ExtensionApp = JSON.parse(data);
         const config: AppViewConfig = {
           app: ext.config.id,
-          viewId: v4(),
+          viewId: `${ext.config.id}-${v4()}`,
           recommendedHeight: ext.config.recommendedHeight,
           recommendedWidth: ext.config.recommendedWidth,
         };
@@ -152,7 +134,7 @@ export default function ViewArea() {
       }}
     >
       {tabViews.length === 0 ? (
-        <HomeView createNewCanvas={createNewCanvas} />
+        <HomeView />
       ) : tabIndex < 0 || tabIndex >= tabViews.length ? (
         <div>No view selected</div>
       ) : (

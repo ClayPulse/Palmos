@@ -1,7 +1,7 @@
 .react-flow__node-appNode.selected .aura {
   box-shadow:
-    4px 0 15px rgba(42, 138, 246, 0.3),
-    -4px 0 15px rgba(233, 42, 103, 0.3);
+    4px 0 18px rgba(42, 138, 246, 0.5),
+    -4px 0 18px rgba(233, 42, 103, 0.5);
 }
 
 .react-flow__node-appNode .aura {
@@ -22,14 +22,14 @@
 .gradient:before {
   content: "";
   position: absolute;
-  inset: -50%; /* makes it bigger than the box */
-  border-radius: 50%; /* keep it circular */
+  inset: -50%;
+  border-radius: 50%;
   background: conic-gradient(
     from -160deg at 50% 50%,
-    #e92a67 0deg,
-    #a853ba 120deg,
-    #2a8af6 240deg,
-    #e92a67 360deg
+    #ff2a6d 0deg,      
+    #b86bff 120deg,    
+    #3a9bff 240deg, 
+    #ff2a6d 360deg
   );
   z-index: -1;
 }
@@ -38,11 +38,11 @@
   content: "";
   background: conic-gradient(
     from -160deg at 50% 50%,
-    #e92a6700 0deg,
-    #ff0035cc 20deg,
-    #a853ba 126deg,
-    #2a8af6cc 232deg,
-    #2a8af600 340deg
+    #ff2a6d00 0deg,
+    #ff0044dd 20deg,
+    #b86bff 126deg,
+    #3a9bffdd 232deg,
+    #3a9bff00 340deg
   );
   animation: spinner 4s linear infinite;
   transform: rotate(0deg);
@@ -59,8 +59,3 @@
   outline: none;
 }
 
-.react-flow__edge .react-flow__edge-path {
-  stroke: url(#edge-gradient);
-  stroke-width: 2;
-  stroke-opacity: 0.75;
-}

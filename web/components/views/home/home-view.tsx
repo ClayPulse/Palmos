@@ -1,10 +1,17 @@
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { Button } from "@heroui/react";
+import { useCallback } from "react";
+import { v4 } from "uuid";
 
-export default function HomeView({
-  createNewCanvas,
-}: {
-  createNewCanvas: () => void;
-}) {
+export default function HomeView() {
+  const { createCanvasTabView } = useTabViewManager();
+
+  const createNewCanvas = useCallback(async () => {
+    await createCanvasTabView({
+      viewId: "canvas-" + v4(),
+    });
+  }, []);
+
   return (
     <div className="text-default-foreground flex h-full w-full flex-col items-center justify-center gap-y-1 pb-12">
       <h1 className="text-center text-2xl font-bold">

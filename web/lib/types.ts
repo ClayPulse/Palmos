@@ -5,7 +5,7 @@ import {
   PolyIMC,
   ViewModeEnum,
 } from "@pulse-editor/shared-utils";
-import { Node } from "@xyflow/react";
+import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { BaseLLM } from "./modalities/llm/llm";
 import { BaseSTT } from "./modalities/stt/stt";
@@ -87,7 +87,9 @@ export type EditorStates = {
   isSideMenuOpen?: boolean;
   isMarketplaceOpen?: boolean;
 
-  selectedNode?: Node;
+  // Maintain a list of workflows in state.
+  // Key is the canvas view's id.
+  workflows?: { [key: string]: Workflow };
 };
 
 /**
@@ -226,8 +228,9 @@ export type AppViewConfig = {
 
 export type CanvasViewConfig = {
   viewId: string;
-  workflow?: Workflow;
-  nodes?: AppViewConfig[];
+  // App configurations.
+  // This does not change once the canvas view is created.
+  appConfigs?: AppViewConfig[];
 };
 
 export type TabView = {
@@ -347,14 +350,16 @@ export type AppMetaData = {
 
 // #region Workflow
 export type Workflow = {
-  nodes: any;
-  edges: any;
+  nodes: ReactFlowNode<AppNodeData>[];
+  edges: ReactFlowEdge[];
+  defaultEntryPoint?: ReactFlowNode<AppNodeData>;
 };
 
 export type AppNodeData = {
   config: AppViewConfig;
   selectedAction: Action | undefined;
   setSelectedAction: (action: Action | undefined) => Promise<void>;
+  isRunning: boolean;
 };
 
 // #endregion

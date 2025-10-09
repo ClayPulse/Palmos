@@ -1,64 +1,107 @@
-import { useMenuActions } from "@/lib/hooks/use-menu-actions";
-import NavMenuDropdown from "../nav-menu-dropdown";
-import { MenuAction } from "@/lib/types";
-import { useContext, useEffect } from "react";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
+import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { CanvasViewConfig, Workflow } from "@/lib/types";
+import { useContext, useEffect, useState } from "react";
+import { v4 } from "uuid";
+import NavMenuDropdown from "../nav-menu-dropdown";
 
 export default function ViewMenuDropDown() {
   const editorContext = useContext(EditorContext);
-  const { menuActions, registerMenuAction, unregisterMenuAction } =
-    useMenuActions("view");
+  const { menuActions } = useMenuActions("view");
 
-  const defaultMenuActions: MenuAction[] = [];
+  // Command Viewer
+  const [isCommandViewerOpen, setIsCommandViewerOpen] = useState(false);
 
-  // Register default menu actions if not already registered
-  useEffect(() => {
-    console.log("Registering default menu actions");
-    defaultMenuActions.forEach((action) => {
-      registerMenuAction(action); 
-    });
-  }, []);
-
-  useEffect(() => {
-    const closeAction: MenuAction = {
+  useRegisterMenuAction(
+    {
       name: "Close Command Viewer",
-      actionFunc: async () => {
-        console.log("Closing command viewer");
-        editorContext?.setEditorStates((prev) => ({
-          ...prev,
-          isCommandViewerOpen: false,
-        }));
-      },
       menuCategory: "view",
       shortcut: "F1",
       icon: "terminal",
       description: "Close the command viewer",
-    };
+    },
+    async () => {
+      console.log("Closing command viewer");
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        isCommandViewerOpen: false,
+      }));
+    },
+    [],
+    isCommandViewerOpen,
+  );
 
-    const openAction: MenuAction = {
+  useRegisterMenuAction(
+    {
       name: "View Command Viewer",
-      actionFunc: async () => {
-        console.log("Opening command viewer");
-        editorContext?.setEditorStates((prev) => ({
-          ...prev,
-          isCommandViewerOpen: true,
-        }));
-      },
       menuCategory: "view",
       shortcut: "F1",
       icon: "terminal",
       description: "View all commands and shortcuts",
-    };
-    if (editorContext?.editorStates.isCommandViewerOpen) {
-      // Register the close action and unregister the open action
-      unregisterMenuAction(openAction);
-      registerMenuAction(closeAction);
-    } else {
-      // Register the open action and unregister the close action
-      unregisterMenuAction(closeAction);
-      registerMenuAction(openAction);
-    }
+    },
+    async () => {
+      console.log("Opening command viewer");
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        isCommandViewerOpen: true,
+      }));
+    },
+    [],
+    !isCommandViewerOpen,
+  );
+
+  useEffect(() => {
+    setIsCommandViewerOpen(
+      editorContext?.editorStates.isCommandViewerOpen ?? false,
+    );
   }, [editorContext?.editorStates.isCommandViewerOpen]);
+
+  // Workflow
+  const { createCanvasTabView } = useTabViewManager();
+
+  useRegisterMenuAction(
+    {
+      name: "Import Workflow",
+      menuCategory: "file",
+      description: "Import a workflow from a JSON file",
+      shortcut: "Ctrl+Alt+I",
+      icon: "upload",
+    },
+    async () => {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json";
+      input.onchange = (e: any) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          try {
+            const workflow = JSON.parse(
+              event.target?.result as string,
+            ) as Workflow;
+            if (workflow) {
+              // Create a new tab view with the imported workflow
+              const viewId = "canvas-" + v4();
+              await createCanvasTabView({
+                viewId,
+                appConfigs: workflow.nodes.map((node) => node.data.config),
+                workflow,
+              } as CanvasViewConfig);
+            } else {
+              alert("Invalid workflow file");
+            }
+          } catch (err) {
+            alert("Error reading workflow file");
+          }
+        };
+        reader.readAsText(file);
+      };
+      input.click();
+    },
+    [],
+  );
 
   return <NavMenuDropdown category="View" menuActions={menuActions} />;
 }

@@ -265,8 +265,8 @@ export default function usePlatformAIAssistant() {
               ...activeTabView,
               config: {
                 ...(activeTabView?.config as CanvasViewConfig),
-                nodes:
-                  (activeTabView?.config as CanvasViewConfig)?.nodes?.map(
+                appConfigs:
+                  (activeTabView?.config as CanvasViewConfig)?.appConfigs?.map(
                     (appConfig) => ({
                       ...appConfig,
                       // Remove dynamic commands to avoid sending too large payload.

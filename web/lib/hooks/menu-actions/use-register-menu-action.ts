@@ -1,11 +1,58 @@
-import { useContext } from "react";
-import { MenuAction } from "../types";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useContext, useEffect, useState } from "react";
+import { MenuAction } from "../../types";
 
-export function useMenuActions(type?: string) {
+export function useRegisterMenuAction(
+  actionInfo: {
+    name: string;
+    menuCategory: string;
+    shortcut?: string;
+    description?: string;
+    icon?: string;
+  },
+  callbackHandler: () => Promise<void>,
+  deps: React.DependencyList,
+  isEnabled = true,
+) {
   const editorContext = useContext(EditorContext);
 
-  const menuActions = editorContext?.editorStates.menuActions;
+  const [menuAction, setMenuAction] = useState<MenuAction>({
+    name: actionInfo.name,
+    menuCategory: actionInfo.menuCategory as "file" | "edit" | "view",
+    shortcut: actionInfo.shortcut,
+    description: actionInfo.description,
+    icon: actionInfo.icon,
+    actionFunc: callbackHandler,
+  });
+
+  useEffect(() => {
+    return () => {
+      unregisterMenuAction(menuAction);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isEnabled) {
+      registerMenuAction(menuAction, true);
+    } else {
+      unregisterMenuAction(menuAction);
+    }
+  }, [menuAction, isEnabled]);
+
+  useEffect(() => {
+    if (!editorContext) {
+      return;
+    }
+
+    setMenuAction({
+      name: actionInfo.name,
+      menuCategory: actionInfo.menuCategory as "file" | "edit" | "view",
+      shortcut: actionInfo.shortcut,
+      description: actionInfo.description,
+      icon: actionInfo.icon,
+      actionFunc: callbackHandler,
+    });
+  }, [...deps]);
 
   function registerMenuAction(action: MenuAction, overwrite = false) {
     if (!editorContext) {
@@ -49,12 +96,4 @@ export function useMenuActions(type?: string) {
       };
     });
   }
-
-  return {
-    menuActions: type
-      ? menuActions?.filter((action) => action.menuCategory === type)
-      : menuActions,
-    registerMenuAction,
-    unregisterMenuAction,
-  };
 }

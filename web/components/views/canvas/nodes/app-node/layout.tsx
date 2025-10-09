@@ -18,6 +18,7 @@ import {
   useInternalNode,
   useUpdateNodeInternals,
 } from "@xyflow/react";
+import clsx from "clsx";
 import { useContext, useEffect, useState } from "react";
 import NodeHandle from "./node-handle";
 
@@ -27,6 +28,7 @@ export default function CanvasNodeViewLayout({
   actions,
   selectedAction,
   setSelectedAction,
+  isRunning,
   children,
 }: {
   viewId: string;
@@ -34,6 +36,7 @@ export default function CanvasNodeViewLayout({
   actions: Action[];
   selectedAction: Action | undefined;
   setSelectedAction: (action: Action | undefined) => void;
+  isRunning: boolean;
   children: React.ReactNode;
 }) {
   const editorContext = useContext(EditorContext);
@@ -44,23 +47,12 @@ export default function CanvasNodeViewLayout({
   const [isShowingMenu, setIsShowingMenu] = useState(false);
   const [isShowingWorkflowConnector, setIsShowingWorkflowConnector] =
     useState(false);
-  const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
     // Update node internals to ensure handles are positioned correctly
     updateNodeInternals(viewId);
   }, [updateNodeInternals, isShowingWorkflowConnector, selectedAction]);
-
-  useEffect(() => {
-    console.log("Node updated:", node);
-
-    const isSelected = node?.selected || node?.dragging;
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      selectedNode: isSelected ? node : undefined,
-    }));
-  }, [node]);
-
+  
   return (
     <div className="relative w-full h-full">
       {/* Control */}
@@ -134,7 +126,7 @@ export default function CanvasNodeViewLayout({
                       id={key}
                       param={param}
                       position={Position.Right}
-                      type="target"
+                      type="source"
                     />
                   ),
                 )}
@@ -171,16 +163,19 @@ export default function CanvasNodeViewLayout({
       />
 
       <div className="bg-content1 relative h-full w-full rounded-lg shadow-md z-10">
-        {node?.selected || node?.dragging ? (
-          <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden selected wrapper gradient z-0" />
+        {isRunning ? (
+          <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden running wrapper gradient z-0" />
         ) : (
-          isRunning && (
-            <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden running wrapper gradient z-0" />
+          (node?.selected || node?.dragging) && (
+            <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden selected wrapper gradient z-0" />
           )
         )}
 
         <div
-          className="relative h-full w-full rounded-md overflow-hidden z-10 data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none aura"
+          className={clsx(
+            "relative h-full w-full rounded-md overflow-hidden z-10 data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none",
+            (node?.selected || node?.dragging) && !isRunning && "aura",
+          )}
           data-is-dragging={node?.dragging ? "true" : "false"}
           data-is-resizing={node?.resizing ? "true" : "false"}
         >

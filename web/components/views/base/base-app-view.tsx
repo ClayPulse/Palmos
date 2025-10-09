@@ -36,7 +36,7 @@ export default function BaseAppView({
         ext.config.version,
       );
       const viewModel: ViewModel = {
-        viewId: ext.config.id + "-" + viewId,
+        viewId: viewId,
         appConfig: ext.config,
       };
       setPulseAppViewModel(viewModel);

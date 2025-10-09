@@ -9,7 +9,7 @@ import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { v4 } from "uuid";
 import { ExtensionApp, ScopedAction } from "../types";
-import { useMenuActions } from "./use-menu-actions";
+import { useMenuActions } from "./menu-actions/use-menu-actions";
 import { useTabViewManager } from "./use-tab-view-manager";
 
 /**
@@ -23,7 +23,7 @@ export default function useScopedActions(appName?: string) {
 
   const {
     activeTabView,
-    createTabView,
+    createAppTabView,
     createAppViewInCanvasView,
     findAppInTabView,
   } = useTabViewManager();
@@ -149,7 +149,7 @@ export default function useScopedActions(appName?: string) {
       if (appInView) {
         // App is already in the view, execute Action in the app's context.
         const result = await imcContext?.polyIMC?.sendMessage(
-          ext.config.id + "-" + appInView.viewId,
+          appInView.viewId,
           IMCMessageTypeEnum.EditorRunAppAction,
           { name: action.action.name, args },
         );
@@ -157,7 +157,7 @@ export default function useScopedActions(appName?: string) {
       } else {
         // Create an instance of the app that provides the static Action,
         // then execute Action in the app's context.
-        const viewId = v4();
+        const viewId = `${ext.config.id}-${v4()}`;
         if (activeTabView?.type === ViewModeEnum.Canvas) {
           await createAppViewInCanvasView({
             app: ext.config.id,
@@ -166,7 +166,7 @@ export default function useScopedActions(appName?: string) {
             recommendedWidth: ext.config.recommendedWidth,
           });
         } else {
-          await createTabView(ViewModeEnum.App, {
+          await createAppTabView({
             app: ext.config.id,
             viewId,
           });
@@ -178,7 +178,7 @@ export default function useScopedActions(appName?: string) {
         await waitForActionReady(action);
 
         const result = await imcContext?.polyIMC?.sendMessage(
-          ext.config.id + "-" + viewId,
+          viewId,
           IMCMessageTypeEnum.EditorRunAppAction,
           { name: action.action.name, args },
         );

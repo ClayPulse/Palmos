@@ -5,7 +5,7 @@ import {
   ReceiverHandler,
   TypedVariable,
 } from "@pulse-editor/shared-utils";
-import { useEffect, useRef, useState } from "react";
+import { DependencyList, useEffect, useRef, useState } from "react";
 import useIMC from "../../lib/use-imc";
 
 /**
@@ -17,7 +17,8 @@ import useIMC from "../../lib/use-imc";
  * @param parameters Parameters of the command.
  * @param returns Return values of the command.
  * @param callbackHandler Callback handler function to handle the command.
- * @param isExtReady Whether the extension is ready to receive commands. 
+ * @param deps Dependency list to re-register the action when changed.
+ * @param isExtReady Whether the extension is ready to receive commands.
  * Useful for actions that need to wait for some certain app state to be ready.
  *
  */
@@ -28,7 +29,8 @@ export default function useRegisterAction(
     parameters?: Record<string, TypedVariable>;
     returns?: Record<string, TypedVariable>;
   },
-  callbackHandler?: (args: any) => Promise<string | void>,
+  callbackHandler: (args: any) => Promise<any>,
+  deps: DependencyList,
   isExtReady: boolean = true
 ) {
   const { isReady, imc } = useIMC(getReceiverHandlerMap());
@@ -85,8 +87,9 @@ export default function useRegisterAction(
       description: actionInfo.description,
       parameters: actionInfo.parameters ?? {},
       returns: actionInfo.returns ?? {},
+      handler: callbackHandler,
     }));
-  }, [callbackHandler]);
+  }, [...deps]);
 
   async function executeAction(args: any) {
     if (!action.handler) return;
