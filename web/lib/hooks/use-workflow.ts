@@ -2,6 +2,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { addToast } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { useCallback, useContext, useEffect, useState } from "react";
+import { useDebouncedCallback } from "use-debounce";
 import { AppNodeData, Workflow } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
@@ -15,9 +16,6 @@ export default function useCanvasWorkflow(canvasId: string) {
     ReactFlowNode<AppNodeData>[]
   >([]);
   const [runningNodes, setRunningNodes] = useState<
-    ReactFlowNode<AppNodeData>[]
-  >([]);
-  const [selectedNodes, setSelectedNodes] = useState<
     ReactFlowNode<AppNodeData>[]
   >([]);
   const [isPaused, setIsPaused] = useState<boolean>(false);
@@ -43,27 +41,15 @@ export default function useCanvasWorkflow(canvasId: string) {
 
   // Update editor context when workflow changes
   useEffect(() => {
-    if (!editorContext) return;
-
     if (workflow) {
       // Update workflow in editor context
-      editorContext.setEditorStates((prev) => ({
-        ...prev,
-        workflows: {
-          ...prev.workflows,
-          [canvasId]: workflow,
-        },
-      }));
-
-      // Update selected nodes
-      const selectedNodes =
-        workflow?.nodes.filter((node) => node.selected) ?? [];
-
-      console.log("Selected nodes updated:", selectedNodes);
-      setSelectedNodes(selectedNodes);
-
-      setEntryPoint(getEntryPoint());
+      debouncedSyncWorkflow(workflow);
     }
+  }, [workflow]);
+
+  // Update entry points
+  useEffect(() => {
+    debouncedGetEntryPoint();
   }, [workflow]);
 
   async function startWorkflow() {
@@ -143,12 +129,24 @@ export default function useCanvasWorkflow(canvasId: string) {
     setPendingNodes([entryPoint]);
   }
 
-  function getEntryPoint() {
+  const debouncedSyncWorkflow = useDebouncedCallback((wf: Workflow) => {
+    if (!editorContext) return;
+
+    editorContext.setEditorStates((prev) => ({
+      ...prev,
+      workflows: {
+        ...prev.workflows,
+        [canvasId]: wf,
+      },
+    }));
+  }, 500);
+
+  const debouncedGetEntryPoint = useDebouncedCallback(() => {
     const entry =
       workflow?.nodes.find((node) => node.selected) ??
       workflow?.defaultEntryPoint;
-    return entry;
-  }
+    setEntryPoint(entry);
+  }, 200);
 
   const updateWorkflowNodeData = useCallback(
     (nodeViewId: string, data: Partial<AppNodeData>) => {

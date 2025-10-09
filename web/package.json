@@ -52,6 +52,7 @@
       "remark-gfm": "^4.0.1",
       "swr": "^2.3.6",
       "tesseract.js": "^6.0.1",
+      "use-debounce": "^10.0.6",
       "uuid": "^13.0.0"
    },
    "devDependencies": {
