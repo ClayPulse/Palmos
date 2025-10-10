@@ -135,8 +135,6 @@ export type PersistentSettings = {
 
   // Environment variables
   envs?: Record<string, string>;
-
-  canvasUpdatePerSec?: number;
 };
 // #endregion
 
