@@ -15,6 +15,7 @@ import {
   NodeResizer,
   Position,
   useInternalNode,
+  useReactFlow,
   useUpdateNodeInternals,
 } from "@xyflow/react";
 import clsx from "clsx";
@@ -26,24 +27,22 @@ export default function CanvasNodeViewLayout({
   controlActions = {},
   actions,
   selectedAction,
-  setSelectedAction,
   isRunning,
   isShowingWorkflowConnector,
-  setIsShowingWorkflowConnector,
   children,
 }: {
   viewId: string;
   controlActions?: Record<string, (() => void) | undefined>;
   actions: Action[];
   selectedAction: Action | undefined;
-  setSelectedAction: (action: Action | undefined) => Promise<void>;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;
-  setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
   children: React.ReactNode;
 }) {
   const updateNodeInternals = useUpdateNodeInternals();
   const node = useInternalNode(viewId);
+
+  const { updateNodeData } = useReactFlow();
 
   const [isShowingMenu, setIsShowingMenu] = useState(false);
 
@@ -51,6 +50,14 @@ export default function CanvasNodeViewLayout({
     // Update node internals to ensure handles are positioned correctly
     updateNodeInternals(viewId);
   }, [updateNodeInternals, isShowingWorkflowConnector, selectedAction]);
+
+  async function setSelectedAction(action: Action | undefined) {
+    await updateNodeData(viewId, { selectedAction: action });
+  }
+
+  async function setIsShowingWorkflowConnector(showing: boolean) {
+    await updateNodeData(viewId, { isShowingWorkflowConnector: showing });
+  }
 
   return (
     <div className="relative w-full h-full">
@@ -87,7 +94,7 @@ export default function CanvasNodeViewLayout({
       {selectedAction && (
         <>
           <div className="absolute top-0 -translate-x-[100%] h-full pointer-events-none">
-            {isShowingWorkflowConnector ? (
+            {isShowingWorkflowConnector && (
               <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
                 {Object.entries(selectedAction?.parameters ?? {}).map(
                   ([key, param]) => (
@@ -101,22 +108,12 @@ export default function CanvasNodeViewLayout({
                   ),
                 )}
               </div>
-            ) : (
-              Object.keys(selectedAction?.parameters ?? {}).length > 0 && (
-                <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
-                  <NodeHandle
-                    id="input-compact"
-                    position={Position.Left}
-                    type="target"
-                  />
-                </div>
-              )
             )}
           </div>
 
           {/* Output Handles */}
           <div className="absolute top-0 right-0 translate-x-[100%] h-full pointer-events-none">
-            {isShowingWorkflowConnector ? (
+            {isShowingWorkflowConnector && (
               <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
                 {Object.entries(selectedAction?.returns ?? {}).map(
                   ([key, param]) => (
@@ -130,16 +127,6 @@ export default function CanvasNodeViewLayout({
                   ),
                 )}
               </div>
-            ) : (
-              Object.keys(selectedAction?.returns ?? {}).length > 0 && (
-                <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
-                  <NodeHandle
-                    id="output-compact"
-                    position={Position.Right}
-                    type="source"
-                  />
-                </div>
-              )
             )}
           </div>
         </>

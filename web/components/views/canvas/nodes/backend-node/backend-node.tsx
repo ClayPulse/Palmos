@@ -11,7 +11,7 @@ import CanvasNodeViewLayout from "../app-node/layout";
 const BackendNode = memo((props: any) => {
   const nodeProps = props as Node<AppNodeData>;
 
-  const { config, selectedAction, setSelectedAction, isRunning }: AppNodeData =
+  const { config, selectedAction, isRunning }: AppNodeData =
     nodeProps.data;
   const viewId = config.viewId;
 
@@ -30,7 +30,6 @@ const BackendNode = memo((props: any) => {
       viewId={viewId}
       actions={actions.map((a) => a.action)}
       selectedAction={selectedAction}
-      setSelectedAction={setSelectedAction}
       controlActions={{
         fullscreen: () => {
           openViewInFullScreen();
@@ -41,7 +40,6 @@ const BackendNode = memo((props: any) => {
       }}
       isRunning={isRunning}
       isShowingWorkflowConnector={false}
-      setIsShowingWorkflowConnector={async () => {}}
     >
       <BaseAppView viewId={viewId} config={config} />
     </CanvasNodeViewLayout>

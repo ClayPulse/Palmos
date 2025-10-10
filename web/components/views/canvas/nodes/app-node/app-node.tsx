@@ -13,10 +13,8 @@ const AppNode = memo((props: any) => {
   const {
     config,
     selectedAction,
-    setSelectedAction,
     isRunning,
     isShowingWorkflowConnector,
-    setIsShowingWorkflowConnector,
   }: AppNodeData = nodeProps.data;
   const viewId = config.viewId;
 
@@ -35,7 +33,6 @@ const AppNode = memo((props: any) => {
       viewId={viewId}
       actions={actions.map((a) => a.action)}
       selectedAction={selectedAction}
-      setSelectedAction={setSelectedAction}
       controlActions={{
         fullscreen: () => {
           openViewInFullScreen();
@@ -46,7 +43,6 @@ const AppNode = memo((props: any) => {
       }}
       isRunning={isRunning}
       isShowingWorkflowConnector={isShowingWorkflowConnector}
-      setIsShowingWorkflowConnector={setIsShowingWorkflowConnector}
     >
       <BaseAppView viewId={viewId} config={config} />
     </CanvasNodeViewLayout>

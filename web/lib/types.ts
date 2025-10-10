@@ -356,10 +356,8 @@ export type Workflow = {
 export type AppNodeData = {
   config: AppViewConfig;
   selectedAction: Action | undefined;
-  setSelectedAction: (action: Action | undefined) => Promise<void>;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;
-  setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
 };
 
 // #endregion

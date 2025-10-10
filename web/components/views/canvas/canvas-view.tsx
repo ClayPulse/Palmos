@@ -145,21 +145,11 @@ export default function CanvasView({
           const newAppNodeData: AppNodeData = {
             config: appConfig,
             selectedAction: undefined,
-            setSelectedAction: async (action: Action | undefined) => {
-              await updateWorkflowNodeData(appConfig.viewId, {
-                selectedAction: action,
-              });
-            },
             isRunning: false,
             isShowingWorkflowConnector:
               config.initialWorkflow?.nodes.find(
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
-            setIsShowingWorkflowConnector: async (showing: boolean) => {
-              await updateWorkflowNodeData(appConfig.viewId, {
-                isShowingWorkflowConnector: showing,
-              });
-            },
           };
 
           return {
