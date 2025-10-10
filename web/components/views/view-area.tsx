@@ -11,11 +11,21 @@ import HomeView from "./home/home-view";
 import StandaloneAppView from "./standalone-app/standalone-app-view";
 
 const MemoizedStandaloneAppView = memo(StandaloneAppView);
-const MemoizedCanvasView = memo(({ config }: { config: CanvasViewConfig }) => (
-  <ReactFlowProvider>
-    <CanvasView config={config} />
-  </ReactFlowProvider>
-));
+const MemoizedCanvasView = memo(
+  ({
+    config,
+    isActive,
+    tabName,
+  }: {
+    config: CanvasViewConfig;
+    isActive: boolean;
+    tabName: string;
+  }) => (
+    <ReactFlowProvider>
+      <CanvasView config={config} isActive={isActive} tabName={tabName} />
+    </ReactFlowProvider>
+  ),
+);
 MemoizedCanvasView.displayName = "MemoizedCanvasView";
 
 export default function ViewArea() {
@@ -23,6 +33,7 @@ export default function ViewArea() {
 
   const {
     tabViews,
+    tabItems,
     tabIndex,
     selectTab,
     closeTabView,
@@ -32,35 +43,6 @@ export default function ViewArea() {
   } = useTabViewManager();
 
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
-
-  // Generate tab names with index suffixes for duplicates
-  const nameCounts: Record<string, number> = {};
-  tabViews.forEach((view) => {
-    const baseName =
-      view.type === ViewModeEnum.App
-        ? (view.config as AppViewConfig).app
-        : "Canvas";
-    nameCounts[baseName] = (nameCounts[baseName] || 0) + 1;
-  });
-
-  const nameIndexes: Record<string, number> = {};
-  const tabItems =
-    tabViews.map((view) => {
-      const baseName =
-        view.type === ViewModeEnum.App
-          ? (view.config as AppViewConfig).app
-          : "Canvas";
-      nameIndexes[baseName] = (nameIndexes[baseName] || 0) + 1;
-      const count = nameCounts[baseName];
-      const index = nameIndexes[baseName];
-      return {
-        name: count > 1 ? `${baseName} ${index}` : baseName,
-        description:
-          view.type === ViewModeEnum.App
-            ? `App: ${(view.config as AppViewConfig).app}`
-            : "Canvas View",
-      };
-    }) ?? [];
 
   const isInitialized = useRef(false);
 
@@ -188,6 +170,8 @@ export default function ViewArea() {
                 ) : tabView.type === ViewModeEnum.Canvas ? (
                   <MemoizedCanvasView
                     config={tabView.config as CanvasViewConfig}
+                    isActive={idx === tabIndex}
+                    tabName={tabItems[idx]?.name}
                   />
                 ) : (
                   <div>Unknown view type</div>

@@ -5,6 +5,7 @@ import AppSettingsModal from "@/components/modals/app-settings-modal";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { Button, Divider, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
@@ -18,6 +19,7 @@ export default function EditorToolbar() {
   const { chatWithAssistant } = usePlatformAIAssistant();
   const { isRecording, record } = useRecorder();
   const { runMenuActionByName } = useMenuActions();
+  const { tabItems, tabIndex } = useTabViewManager();
 
   const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
   const [isAppSettingsModalOpen, setAppIsSettingsModalOpen] = useState(false);
@@ -86,7 +88,10 @@ export default function EditorToolbar() {
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
-                    runMenuActionByName("Run Workflow", "view");
+                    runMenuActionByName(
+                      `Run Workflow (${tabItems[tabIndex].name})`,
+                      "view",
+                    );
                   }}
                 >
                   <Icon name="play_arrow" variant="round" />

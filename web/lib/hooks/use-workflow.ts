@@ -12,7 +12,6 @@ import { AppNodeData, Workflow } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
 export default function useCanvasWorkflow(
-  canvasId: string,
   initialWorkflow?: Workflow,
 ) {
   const editorContext = useContext(EditorContext);
@@ -302,7 +301,6 @@ export default function useCanvasWorkflow(
 
   const updateWorkflowNodeData = useCallback(
     (nodeViewId: string, data: Partial<AppNodeData>) => {
-      if (!canvasId) return;
       setLocalNodes((prev) => {
         const index = prev.findIndex((n) => n.id === nodeViewId);
         if (index === -1) return prev;
@@ -328,19 +326,17 @@ export default function useCanvasWorkflow(
         oldNodes: ReactFlowNode<AppNodeData>[],
       ) => ReactFlowNode<AppNodeData>[],
     ) => {
-      if (!canvasId) return;
       const updatedNodes = updater(localNodes ?? []);
       setLocalNodes(updatedNodes);
     },
-    [canvasId, localNodes],
+    [localNodes],
   );
   const updateWorkflowEdges = useCallback(
     (updater: (oldEdges: ReactFlowEdge[]) => ReactFlowEdge[]) => {
-      if (!canvasId) return;
       const updatedEdges = updater(localEdges ?? []);
       setLocalEdges(updatedEdges);
     },
-    [canvasId, localEdges],
+    [localEdges],
   );
 
   const exportWorkflow = useCallback(() => {

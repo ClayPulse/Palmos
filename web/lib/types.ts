@@ -202,6 +202,7 @@ export type AppInfoModalContent = {
 };
 
 export type MenuAction = {
+  id?: string;
   name: string;
   menuCategory: "file" | "edit" | "view";
   description?: string;

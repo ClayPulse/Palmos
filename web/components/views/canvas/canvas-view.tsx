@@ -49,7 +49,15 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 `,
 };
 
-export default function CanvasView({ config }: { config: CanvasViewConfig }) {
+export default function CanvasView({
+  config,
+  isActive,
+  tabName,
+}: {
+  config: CanvasViewConfig;
+  isActive: boolean;
+  tabName: string;
+}) {
   const { openAppInfoModal } = useAppInfo();
 
   const {
@@ -61,7 +69,7 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
     updateWorkflowNodes,
     exportWorkflow,
     updateWorkflowNodeData,
-  } = useCanvasWorkflow(config.viewId, config.initialWorkflow);
+  } = useCanvasWorkflow(config.initialWorkflow);
 
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
@@ -100,20 +108,19 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
   // Register menu actions
   useRegisterMenuAction(
     {
-      name: "Export Workflow",
+      name: `Export Workflow (${tabName})`,
       menuCategory: "file",
       description: "Export the current workflow as a JSON file",
       shortcut: "Ctrl+Alt+E",
-
       icon: "download",
     },
-
     async () => exportWorkflow(),
-    [exportWorkflow],
+    [exportWorkflow, isActive, tabName],
+    isActive,
   );
   useRegisterMenuAction(
     {
-      name: "Run Workflow",
+      name: `Run Workflow (${tabName})`,
       menuCategory: "view",
       description:
         "Run the current workflow from the selected or default entry point",
@@ -123,7 +130,8 @@ export default function CanvasView({ config }: { config: CanvasViewConfig }) {
     async () => {
       await startWorkflow();
     },
-    [entryPoint],
+    [entryPoint, isActive, tabName],
+    isActive,
   );
 
   // Promote nodes to workflow nodes,

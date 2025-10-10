@@ -1,5 +1,5 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import { MenuAction } from "../../types";
 
 export function useRegisterMenuAction(
@@ -15,46 +15,36 @@ export function useRegisterMenuAction(
   isEnabled = true,
 ) {
   const editorContext = useContext(EditorContext);
-
-  const [menuAction, setMenuAction] = useState<MenuAction>({
-    name: actionInfo.name,
-    menuCategory: actionInfo.menuCategory as "file" | "edit" | "view",
-    shortcut: actionInfo.shortcut,
-    description: actionInfo.description,
-    icon: actionInfo.icon,
-    actionFunc: callbackHandler,
-  });
-
+  
   useEffect(() => {
     return () => {
-      unregisterMenuAction(menuAction);
+      unregisterMenuAction(actionInfo.name);
     };
   }, []);
-
-  useEffect(() => {
-    if (isEnabled) {
-      registerMenuAction(menuAction, true);
-    } else {
-      unregisterMenuAction(menuAction);
-    }
-  }, [menuAction, isEnabled]);
 
   useEffect(() => {
     if (!editorContext) {
       return;
     }
+    if (isEnabled) {
+      registerMenuAction({
+        name: actionInfo.name,
+        menuCategory: actionInfo.menuCategory as "file" | "edit" | "view",
+        shortcut: actionInfo.shortcut,
+        description: actionInfo.description,
+        icon: actionInfo.icon,
+        actionFunc: callbackHandler,
+      });
+    } else {
+      unregisterMenuAction(actionInfo.name);
+    }
 
-    setMenuAction({
-      name: actionInfo.name,
-      menuCategory: actionInfo.menuCategory as "file" | "edit" | "view",
-      shortcut: actionInfo.shortcut,
-      description: actionInfo.description,
-      icon: actionInfo.icon,
-      actionFunc: callbackHandler,
-    });
-  }, [...deps]);
+    return () => {
+      unregisterMenuAction(actionInfo.name);
+    };
+  }, [...deps, isEnabled]);
 
-  function registerMenuAction(action: MenuAction, overwrite = false) {
+  function registerMenuAction(action: MenuAction) {
     if (!editorContext) {
       return;
     }
@@ -63,12 +53,6 @@ export function useRegisterMenuAction(
         prev.menuActions?.find((a) => a.name === action.name) ?? undefined;
       // Update action if it already exists
       if (existingAction) {
-        if (!overwrite) {
-          console.warn(
-            `Menu action with name "${action.name}" already exists. Use overwrite=true to replace it.`,
-          );
-          return prev;
-        }
         const updatedActions = prev.menuActions?.map((a) =>
           a.name === action.name ? action : a,
         );
@@ -84,7 +68,7 @@ export function useRegisterMenuAction(
     });
   }
 
-  function unregisterMenuAction(action: MenuAction) {
+  function unregisterMenuAction(actionName: string) {
     if (!editorContext) {
       return;
     }
@@ -92,7 +76,7 @@ export function useRegisterMenuAction(
       const existingActions = prev.menuActions || [];
       return {
         ...prev,
-        menuActions: existingActions.filter((a) => a.name !== action.name),
+        menuActions: existingActions.filter((a) => a.name !== actionName),
       };
     });
   }
