@@ -51,10 +51,10 @@ export default function ExtensionGallery({
         <Loading />
       ) : groupedExtensions.size === 0 ? (
         <div className="w-full space-y-2">
-          <p className="text-center text-lg">No extensions found</p>
+          <p className="text-center text-lg">No content found</p>
           <p>
-            You can search for extensions in the marketplace, or import a local
-            extension.
+            You can search for apps in the marketplace, or import a local
+            app.
           </p>
         </div>
       ) : (
