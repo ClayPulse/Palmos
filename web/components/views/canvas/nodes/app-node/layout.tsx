@@ -1,5 +1,4 @@
 import Icon from "@/components/misc/icon";
-import { EditorContext } from "@/components/providers/editor-context-provider";
 import {
   addToast,
   Button,
@@ -16,10 +15,11 @@ import {
   NodeResizer,
   Position,
   useInternalNode,
+  useReactFlow,
   useUpdateNodeInternals,
 } from "@xyflow/react";
 import clsx from "clsx";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import NodeHandle from "./node-handle";
 
 export default function CanvasNodeViewLayout({
@@ -27,32 +27,38 @@ export default function CanvasNodeViewLayout({
   controlActions = {},
   actions,
   selectedAction,
-  setSelectedAction,
   isRunning,
+  isShowingWorkflowConnector,
   children,
 }: {
   viewId: string;
   controlActions?: Record<string, (() => void) | undefined>;
   actions: Action[];
   selectedAction: Action | undefined;
-  setSelectedAction: (action: Action | undefined) => void;
   isRunning: boolean;
+  isShowingWorkflowConnector: boolean;
   children: React.ReactNode;
 }) {
-  const editorContext = useContext(EditorContext);
-
   const updateNodeInternals = useUpdateNodeInternals();
   const node = useInternalNode(viewId);
 
+  const { updateNodeData } = useReactFlow();
+
   const [isShowingMenu, setIsShowingMenu] = useState(false);
-  const [isShowingWorkflowConnector, setIsShowingWorkflowConnector] =
-    useState(false);
 
   useEffect(() => {
     // Update node internals to ensure handles are positioned correctly
     updateNodeInternals(viewId);
   }, [updateNodeInternals, isShowingWorkflowConnector, selectedAction]);
-  
+
+  async function setSelectedAction(action: Action | undefined) {
+    await updateNodeData(viewId, { selectedAction: action });
+  }
+
+  async function setIsShowingWorkflowConnector(showing: boolean) {
+    await updateNodeData(viewId, { isShowingWorkflowConnector: showing });
+  }
+
   return (
     <div className="relative w-full h-full">
       {/* Control */}
@@ -88,7 +94,7 @@ export default function CanvasNodeViewLayout({
       {selectedAction && (
         <>
           <div className="absolute top-0 -translate-x-[100%] h-full pointer-events-none">
-            {isShowingWorkflowConnector ? (
+            {isShowingWorkflowConnector && (
               <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
                 {Object.entries(selectedAction?.parameters ?? {}).map(
                   ([key, param]) => (
@@ -102,22 +108,12 @@ export default function CanvasNodeViewLayout({
                   ),
                 )}
               </div>
-            ) : (
-              Object.keys(selectedAction?.parameters ?? {}).length > 0 && (
-                <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
-                  <NodeHandle
-                    id="input-compact"
-                    position={Position.Left}
-                    type="target"
-                  />
-                </div>
-              )
             )}
           </div>
 
           {/* Output Handles */}
           <div className="absolute top-0 right-0 translate-x-[100%] h-full pointer-events-none">
-            {isShowingWorkflowConnector ? (
+            {isShowingWorkflowConnector && (
               <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
                 {Object.entries(selectedAction?.returns ?? {}).map(
                   ([key, param]) => (
@@ -131,16 +127,6 @@ export default function CanvasNodeViewLayout({
                   ),
                 )}
               </div>
-            ) : (
-              Object.keys(selectedAction?.returns ?? {}).length > 0 && (
-                <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
-                  <NodeHandle
-                    id="output-compact"
-                    position={Position.Right}
-                    type="source"
-                  />
-                </div>
-              )
             )}
           </div>
         </>
@@ -196,10 +182,10 @@ function CanvasNodeControl({
 }: {
   actions: Action[];
   selectedAction: Action | undefined;
-  setSelectedAction: (action: Action | undefined) => void;
+  setSelectedAction: (action: Action | undefined) => Promise<void>;
   controlActions: Record<string, (() => void) | undefined>;
   isShowingWorkflowConnector: boolean;
-  setIsShowingWorkflowConnector: (showing: boolean) => void;
+  setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
 }) {
   const [actionError, setActionError] = useState<{ [key: string]: string }>({});
 

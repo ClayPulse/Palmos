@@ -8,7 +8,6 @@ import {
   CanvasViewConfig,
   ExtensionApp,
   TabView,
-  Workflow,
 } from "../types";
 
 export function useTabViewManager() {
@@ -24,6 +23,35 @@ export function useTabViewManager() {
   const [activeTabView, setActiveTabView] = useState<TabView | undefined>(
     tabViews[tabIndex],
   );
+
+  // Generate tab names with index suffixes for duplicates
+  const nameCounts: Record<string, number> = {};
+  tabViews.forEach((view) => {
+    const baseName =
+      view.type === ViewModeEnum.App
+        ? (view.config as AppViewConfig).app
+        : "Canvas";
+    nameCounts[baseName] = (nameCounts[baseName] ?? 0) + 1;
+  });
+
+  const nameIndexes: Record<string, number> = {};
+  const tabItems =
+    tabViews.map((view) => {
+      const baseName =
+        view.type === ViewModeEnum.App
+          ? (view.config as AppViewConfig).app
+          : "Canvas";
+      nameIndexes[baseName] = (nameIndexes[baseName] ?? 0) + 1;
+      const count = nameCounts[baseName];
+      const index = nameIndexes[baseName];
+      return {
+        name: count > 1 ? `${baseName} ${index}` : baseName,
+        description:
+          view.type === ViewModeEnum.App
+            ? `App: ${(view.config as AppViewConfig).app}`
+            : "Canvas View",
+      };
+    }) ?? [];
 
   useEffect(() => {
     if (!editorContext) {
@@ -230,9 +258,7 @@ export function useTabViewManager() {
     return newTabView;
   }
 
-  async function createCanvasTabView(
-    canvasConfig: CanvasViewConfig,
-  ) {
+  async function createCanvasTabView(canvasConfig: CanvasViewConfig) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     } else if (!imcContext) {
@@ -379,6 +405,7 @@ export function useTabViewManager() {
 
   return {
     tabViews,
+    tabItems,
     tabIndex,
     activeTabView,
     selectTab,

@@ -12,16 +12,10 @@ import { AppNodeData, Workflow } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
 export default function useCanvasWorkflow(
-  canvasId: string,
   initialWorkflow?: Workflow,
 ) {
   const editorContext = useContext(EditorContext);
-
-  // Throttle for debounced updates.
-  // This can limit how often the updates happen to improve performance.
-  const throttle =
-    1000 / (editorContext?.persistSettings?.canvasUpdatePerSec ?? 60);
-
+  
   const { runAction } = useScopedActions();
 
   const [pendingNodes, setPendingNodes] = useState<
@@ -49,8 +43,208 @@ export default function useCanvasWorkflow(
   }, [localNodes]);
 
   async function startWorkflow() {
-    console.log("Starting workflow from entry point:", entryPoint);
+    // DAG traversal using Kahn's algorithm (topological sort)
+    function getExecutionSequence(entryPoint: ReactFlowNode<AppNodeData>) {
+      // Build adjacency list and in-degree map
+      const adj: Record<string, string[]> = {};
+      const inDegree: Record<string, number> = {};
+      for (const node of localNodes) {
+        adj[node.id] = [];
+        inDegree[node.id] = 0;
+      }
+      for (const edge of localEdges) {
+        if (adj[edge.source]) {
+          adj[edge.source].push(edge.target);
+        }
+        if (inDegree[edge.target] !== undefined) {
+          inDegree[edge.target]++;
+        }
+      }
 
+      // Find all nodes reachable from entryPoint
+      const reachable = new Set<string>();
+      function markReachable(nodeId: string) {
+        if (reachable.has(nodeId)) return;
+        reachable.add(nodeId);
+        for (const neighbor of adj[nodeId] || []) {
+          markReachable(neighbor);
+        }
+      }
+      markReachable(entryPoint.id);
+
+      // Kahn's algorithm: only process reachable nodes
+      const queue: string[] = [];
+      for (const nodeId of Object.keys(inDegree)) {
+        if (inDegree[nodeId] === 0 && reachable.has(nodeId)) {
+          queue.push(nodeId);
+        }
+      }
+      const sequence: ReactFlowNode<AppNodeData>[] = [];
+      const visited = new Set<string>();
+      while (queue.length > 0) {
+        const nodeId = queue.shift();
+        if (!nodeId) continue;
+        if (!reachable.has(nodeId) || visited.has(nodeId)) continue;
+        visited.add(nodeId);
+        const node = localNodes.find((n) => n.id === nodeId);
+        if (node) {
+          sequence.push(node);
+        }
+        for (const neighbor of adj[nodeId] || []) {
+          if (!reachable.has(neighbor)) continue;
+          inDegree[neighbor]--;
+          if (inDegree[neighbor] === 0) {
+            queue.push(neighbor);
+          }
+        }
+      }
+      // Cycle detection: if not all reachable nodes are in sequence, there is a cycle
+      if (sequence.length < reachable.size) {
+        addToast({
+          title: "Cycle Detected in Workflow",
+          description:
+            "A cycle was detected in the workflow graph. Please remove cycles to ensure correct execution.",
+          color: "danger",
+        });
+        throw new Error("Cycle detected in workflow graph");
+      }
+      return sequence;
+    }
+
+    function checkNodeAction(sequence: ReactFlowNode<AppNodeData>[]) {
+      let passed = true;
+      for (const node of sequence) {
+        const { selectedAction } = node.data as AppNodeData;
+        if (!selectedAction) {
+          addToast({
+            title: "No Action Selected",
+            description: `Please select an action for the node "${node.data.config.app}" to run.`,
+            color: "danger",
+          });
+          passed = false;
+        }
+      }
+      return passed;
+    }
+
+    async function runNode(node: ReactFlowNode<AppNodeData>, args: any) {
+      const { selectedAction } = node.data as AppNodeData;
+      if (!selectedAction) return;
+      updateWorkflowNodeData(node.id, { isRunning: true });
+      console.log(
+        `Running node ${node.id} with action ${selectedAction} and args`,
+        args,
+      );
+      const result = await runAction(
+        {
+          action: selectedAction,
+          viewId: node.id,
+          type: "app",
+        },
+        args,
+      );
+      updateWorkflowNodeData(node.id, { isRunning: false });
+
+      return result ? JSON.parse(result) : {};
+    }
+
+    async function runSequence(sequence: ReactFlowNode<AppNodeData>[]) {
+      // Helper to get input args for a node
+      function getInputArgs(nodeId: string) {
+        return localEdges
+          .filter((e) => e.target === nodeId)
+          .map((e) => {
+            const sourceHandle = e.sourceHandle;
+            const targetHandle = e.targetHandle;
+            if (!sourceHandle || !targetHandle) return null;
+            const sourceResult = resultMap.get(e.source);
+            const passedData = sourceResult
+              ? sourceResult[sourceHandle]
+              : undefined;
+            return {
+              [targetHandle]: passedData,
+            };
+          })
+          .reduce((acc, curr) => {
+            if (curr) {
+              return { ...acc, ...curr };
+            }
+            return acc;
+          }, {});
+      }
+
+      // Parallel execution using in-degree tracking
+      const resultMap = new Map<string, any>();
+      // Build in-degree and children map for reachable nodes
+      const inDegree: Record<string, number> = {};
+      const children: Record<string, string[]> = {};
+      for (const node of sequence) {
+        inDegree[node.id] = 0;
+        children[node.id] = [];
+      }
+      for (const edge of localEdges) {
+        if (
+          inDegree[edge.target] !== undefined &&
+          inDegree[edge.source] !== undefined
+        ) {
+          inDegree[edge.target]++;
+          children[edge.source].push(edge.target);
+        }
+      }
+
+      // Set of node ids ready to run (in-degree 0)
+      let ready = Object.keys(inDegree).filter((id) => inDegree[id] === 0);
+      const running = new Set<string>();
+
+      // Track how many nodes have completed
+      let completedCount = 0;
+      const totalNodes = sequence.length;
+
+      return new Promise<Map<string, any>>(async (resolve, reject) => {
+        async function processReady() {
+          if (ready.length === 0 && completedCount === totalNodes) {
+            resolve(resultMap);
+            return;
+          }
+          // Run all ready nodes in parallel
+          const promises = ready.map(async (nodeId) => {
+            running.add(nodeId);
+            const node = sequence.find((n) => n.id === nodeId);
+            if (!node) return;
+            const inputArgs = getInputArgs(nodeId);
+            const result = await runNode(node, inputArgs);
+            resultMap.set(nodeId, result);
+            // After running, update children
+            for (const childId of children[nodeId] || []) {
+              inDegree[childId]--;
+            }
+            completedCount++;
+            running.delete(nodeId);
+          });
+          ready = [];
+          await Promise.all(promises);
+          // Find new ready nodes
+          for (const nodeId of Object.keys(inDegree)) {
+            if (
+              inDegree[nodeId] === 0 &&
+              !running.has(nodeId) &&
+              !resultMap.has(nodeId)
+            ) {
+              ready.push(nodeId);
+            }
+          }
+          if (ready.length > 0) {
+            await processReady();
+          } else if (completedCount === totalNodes) {
+            resolve(resultMap);
+          }
+        }
+        processReady();
+      });
+    }
+
+    // Start the workflow
+    console.log("Starting workflow from entry point:", entryPoint);
     if (!entryPoint) {
       addToast({
         title: "No Node Selected",
@@ -60,36 +254,21 @@ export default function useCanvasWorkflow(
       });
       return;
     }
+    try {
+      const seq = getExecutionSequence(entryPoint);
+      console.log("Execution order:", seq);
 
-    const { selectedAction } = entryPoint.data as AppNodeData;
+      if (!checkNodeAction(seq)) return;
 
-    if (!selectedAction) {
+      await runSequence(seq);
+    } catch (error) {
+      console.error("Failed to start workflow:", error);
       addToast({
-        title: "No Action Selected",
-        description: "Please select an action for the node to run.",
+        title: "Failed to Start Workflow",
+        description: (error as Error).message,
         color: "danger",
       });
-      return;
     }
-
-    updateWorkflowNodeData(entryPoint.id, { isRunning: true });
-    runAction(
-      {
-        action: selectedAction,
-        viewId: entryPoint.id,
-        type: "app",
-      },
-      {},
-    ).then((result) => {
-      addToast({
-        title: "Workflow Completed",
-        description: `The workflow has completed with result: ${JSON.stringify(
-          result,
-        )}`,
-        color: "success",
-      });
-      updateWorkflowNodeData(entryPoint.id, { isRunning: false });
-    });
   }
 
   async function pauseWorkflow() {
@@ -122,7 +301,6 @@ export default function useCanvasWorkflow(
 
   const updateWorkflowNodeData = useCallback(
     (nodeViewId: string, data: Partial<AppNodeData>) => {
-      if (!canvasId) return;
       setLocalNodes((prev) => {
         const index = prev.findIndex((n) => n.id === nodeViewId);
         if (index === -1) return prev;
@@ -148,19 +326,17 @@ export default function useCanvasWorkflow(
         oldNodes: ReactFlowNode<AppNodeData>[],
       ) => ReactFlowNode<AppNodeData>[],
     ) => {
-      if (!canvasId) return;
       const updatedNodes = updater(localNodes ?? []);
       setLocalNodes(updatedNodes);
     },
-    [canvasId, localNodes],
+    [localNodes],
   );
   const updateWorkflowEdges = useCallback(
     (updater: (oldEdges: ReactFlowEdge[]) => ReactFlowEdge[]) => {
-      if (!canvasId) return;
       const updatedEdges = updater(localEdges ?? []);
       setLocalEdges(updatedEdges);
     },
-    [canvasId, localEdges],
+    [localEdges],
   );
 
   const exportWorkflow = useCallback(() => {

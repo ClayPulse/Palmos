@@ -8,7 +8,7 @@ export default function NodeHandle({
   type,
 }: {
   id: string;
-  param?: TypedVariable;
+  param: TypedVariable;
   position: Position;
   type: HandleType;
 }) {
@@ -17,13 +17,7 @@ export default function NodeHandle({
       className="relative h-10 w-fit bg-content1 text-content1-foreground z-40 pointer-events-none px-2 flex flex-col justify-center shadow-md data-[direction=left]:rounded-l-lg data-[direction=right]:rounded-r-lg"
       data-direction={position}
     >
-      <p>
-        {param
-          ? `${id} (${param?.type.toString()})`
-          : type === "source"
-            ? "Compact Output"
-            : "Compact Input"}
-      </p>
+      <p>{`${id} (${param?.type.toString()})`}</p>
       <Handle
         id={id}
         type={type}

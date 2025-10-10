@@ -135,8 +135,6 @@ export type PersistentSettings = {
 
   // Environment variables
   envs?: Record<string, string>;
-
-  canvasUpdatePerSec?: number;
 };
 // #endregion
 
@@ -204,6 +202,7 @@ export type AppInfoModalContent = {
 };
 
 export type MenuAction = {
+  id?: string;
   name: string;
   menuCategory: "file" | "edit" | "view";
   description?: string;
@@ -357,8 +356,8 @@ export type Workflow = {
 export type AppNodeData = {
   config: AppViewConfig;
   selectedAction: Action | undefined;
-  setSelectedAction: (action: Action | undefined) => Promise<void>;
   isRunning: boolean;
+  isShowingWorkflowConnector: boolean;
 };
 
 // #endregion

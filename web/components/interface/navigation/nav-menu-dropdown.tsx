@@ -32,30 +32,32 @@ export default function NavMenuDropdown({
         </Button>
       </DropdownTrigger>
       <DropdownMenu>
-        {menuActions?.map((action) => (
-          <DropdownItem
-            key={action.name}
-            onPress={async () => {
-              action.actionFunc();
-            }}
-            shortcut={
-              getPlatform() !== PlatformEnum.Capacitor &&
-              getPlatform() !== PlatformEnum.WebMobile
-                ? action.shortcut
-                : null
-            }
-            description={action.description}
-            startContent={
-              action.icon ? (
-                <div className="w-6">
-                  <Icon name={action.icon} variant="round" />
-                </div>
-              ) : null
-            }
-          >
-            {action.name}
-          </DropdownItem>
-        )) ?? []}
+        {menuActions
+          ?.sort((a, b) => a.name.localeCompare(b.name))
+          .map((action) => (
+            <DropdownItem
+              key={action.name}
+              onPress={async () => {
+                action.actionFunc();
+              }}
+              shortcut={
+                getPlatform() !== PlatformEnum.Capacitor &&
+                getPlatform() !== PlatformEnum.WebMobile
+                  ? action.shortcut
+                  : null
+              }
+              description={action.description}
+              startContent={
+                action.icon ? (
+                  <div className="w-6">
+                    <Icon name={action.icon} variant="round" />
+                  </div>
+                ) : null
+              }
+            >
+              {action.name}
+            </DropdownItem>
+          )) ?? []}
       </DropdownMenu>
     </Dropdown>
   );
