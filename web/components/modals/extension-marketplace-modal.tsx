@@ -21,12 +21,16 @@ export default function ExtensionMarketplaceModal({
 
   const extensionCategories: TabItem[] = [
     {
-      name: "Recommended",
-      description: "Recommended extensions",
+      name: "Featured",
+      description: "Featured apps and workflows from the community",
     },
     {
-      name: "Marketplace",
-      description: "Browse the marketplace",
+      name: "Workflows",
+      description: "Browse workflows shared by the community",
+    },
+    {
+      name: "Apps",
+      description: "Browse federated Pulse Apps developed by the community",
     },
     {
       name: "Installed",
@@ -35,7 +39,7 @@ export default function ExtensionMarketplaceModal({
   ];
 
   const [selectedCategory, setSelectedCategory] = useState<TabItem | undefined>(
-    extensionCategories[1],
+    extensionCategories[0],
   );
 
   const editorContext = useContext(EditorContext);
@@ -104,7 +108,7 @@ export default function ExtensionMarketplaceModal({
     <ModalWrapper
       isOpen={isOpen}
       setIsOpen={setIsOpen}
-      title={"Extension Marketplace"}
+      title={"Community Marketplace"}
     >
       <div className="h-full w-full space-y-2 overflow-y-auto px-2">
         <div className="flex justify-center">
@@ -121,18 +125,22 @@ export default function ExtensionMarketplaceModal({
 
         <ExtensionGallery
           extensions={
-            selectedCategory?.name === "Recommended"
+            selectedCategory?.name === "Featured"
               ? (marketplaceExtensions ?? [])
-              : selectedCategory?.name === "Marketplace"
-                ? (marketplaceExtensions ?? [])
-                : installedExtensions
+              : selectedCategory?.name === "Workflows"
+                ? []
+                : selectedCategory?.name === "Apps"
+                  ? (marketplaceExtensions ?? [])
+                  : installedExtensions
           }
           isLoading={
-            selectedCategory?.name === "Recommended"
+            selectedCategory?.name === "Featured"
               ? isLoadingMarketplaceExtensions
-              : selectedCategory?.name === "Marketplace"
-                ? isLoadingMarketplaceExtensions
-                : false
+              : selectedCategory?.name === "Workflows"
+                ? false
+                : selectedCategory?.name === "Apps"
+                  ? isLoadingMarketplaceExtensions
+                  : false
           }
           showInstalledChip={selectedCategory?.name !== "Installed"}
         />

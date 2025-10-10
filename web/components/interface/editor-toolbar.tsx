@@ -159,7 +159,7 @@ export default function EditorToolbar() {
                 setIsOpen={setIsAgentListModalOpen}
               />
 
-              <Tooltip content={"Discover Extensions"}>
+              <Tooltip content={"Marketplace"}>
                 <Button
                   variant="light"
                   isIconOnly
@@ -171,7 +171,7 @@ export default function EditorToolbar() {
                     }));
                   }}
                 >
-                  <Icon name="dashboard_customize" variant="outlined" />
+                  <Icon name="storefront" variant="outlined" />
                 </Button>
               </Tooltip>
               <ExtensionMarketplaceModal
