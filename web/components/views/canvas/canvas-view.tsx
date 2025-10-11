@@ -1,14 +1,16 @@
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import useCanvasWorkflow from "@/lib/hooks/use-workflow";
+import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
+import { captureWorkflowCanvas } from "@/lib/html2canvas/print-canvas";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import {
   AppInfoModalContent,
   AppNodeData,
   AppViewConfig,
   CanvasViewConfig,
+  Workflow,
 } from "@/lib/types";
 import { Button } from "@heroui/react";
-import { Action } from "@pulse-editor/shared-utils";
 import {
   addEdge,
   applyEdgeChanges,
@@ -68,7 +70,6 @@ export default function CanvasView({
     updateWorkflowEdges,
     updateWorkflowNodes,
     exportWorkflow,
-    updateWorkflowNodeData,
   } = useCanvasWorkflow(config.initialWorkflow);
 
   const viewport = useViewport();
@@ -105,7 +106,8 @@ export default function CanvasView({
     return <AppNode {...props} />;
   }, []);
 
-  // Register menu actions
+  /* Register menu actions */
+  // Export workflow
   useRegisterMenuAction(
     {
       name: `Export Workflow (${tabName})`,
@@ -118,6 +120,7 @@ export default function CanvasView({
     [exportWorkflow, isActive, tabName],
     isActive,
   );
+  // Run workflow
   useRegisterMenuAction(
     {
       name: `Run Workflow (${tabName})`,
@@ -131,6 +134,42 @@ export default function CanvasView({
       await startWorkflow();
     },
     [entryPoint, isActive, tabName],
+    isActive,
+  );
+  // Publish workflow
+  useRegisterMenuAction(
+    {
+      name: `Publish Workflow (${tabName})`,
+      menuCategory: "file",
+      description: "Publish the current workflow to the Pulse Marketplace",
+      shortcut: "Ctrl+Alt+P",
+      icon: "cloud_upload",
+    },
+    async () => {
+      if (containerRef.current) {
+        const canvasElement = containerRef.current;
+        const res = await captureWorkflowCanvas(canvasElement);
+        const dataUrl = res.toDataURL("image/png");
+
+        const workflow: Workflow = {
+          name: "Untitled Workflow",
+          thumbnail: dataUrl,
+          content: {
+            nodes: localNodes ?? [],
+            edges: localEdges ?? [],
+            defaultEntryPoint: entryPoint,
+          },
+          version: "1.0.0",
+          visibility: "public",
+        };
+
+        await fetchAPI("/api/workflow/publish", {
+          method: "POST",
+          body: JSON.stringify({ ...workflow }),
+        });
+      }
+    },
+    [isActive, tabName],
     isActive,
   );
 
@@ -147,7 +186,7 @@ export default function CanvasView({
             selectedAction: undefined,
             isRunning: false,
             isShowingWorkflowConnector:
-              config.initialWorkflow?.nodes.find(
+              config.initialWorkflow?.content.nodes.find(
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
           };
@@ -241,8 +280,9 @@ export default function CanvasView({
         defaultEdgeOptions={{
           markerEnd: {
             type: "arrowclosed",
-            width: 20,
-            height: 20,
+          },
+          style: {
+            strokeWidth: 2,
           },
         }}
       >

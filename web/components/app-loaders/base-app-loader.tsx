@@ -3,7 +3,7 @@ import { useRef } from "react";
 
 import { PlatformEnum } from "@/lib/enums";
 
-export default function ExtensionLoader({
+export default function BaseAppLoader({
   remoteOrigin,
   moduleId,
   moduleVersion,

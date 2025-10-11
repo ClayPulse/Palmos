@@ -335,7 +335,7 @@ export type AppMetaData = {
   mfVersion?: string;
   description?: string;
   displayName?: string;
-  user: {
+  author: {
     name: string;
   };
   org: {
@@ -348,9 +348,15 @@ export type AppMetaData = {
 
 // #region Workflow
 export type Workflow = {
-  nodes: ReactFlowNode<AppNodeData>[];
-  edges: ReactFlowEdge[];
-  defaultEntryPoint?: ReactFlowNode<AppNodeData>;
+  name: string;
+  version: string;
+  content: {
+    nodes: ReactFlowNode<AppNodeData>[];
+    edges: ReactFlowEdge[];
+    defaultEntryPoint?: ReactFlowNode<AppNodeData>;
+  };
+  thumbnail?: string;
+  visibility: "private" | "public" | "unlisted";
 };
 
 export type AppNodeData = {

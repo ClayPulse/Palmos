@@ -10,7 +10,7 @@ import { Button, Divider, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
 import AgentConfigModal from "../modals/agent-config-modal";
-import ExtensionMarketplaceModal from "../modals/extension-marketplace-modal";
+import MarketplaceModal from "../modals/marketplace-modal";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function EditorToolbar() {
@@ -174,7 +174,7 @@ export default function EditorToolbar() {
                   <Icon name="storefront" variant="outlined" />
                 </Button>
               </Tooltip>
-              <ExtensionMarketplaceModal
+              <MarketplaceModal
                 isOpen={editorContext?.editorStates.isMarketplaceOpen || false}
                 setIsOpen={(isOpen) =>
                   editorContext?.setEditorStates((prev) => ({

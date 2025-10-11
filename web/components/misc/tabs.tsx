@@ -1,9 +1,9 @@
+import { ContextMenuState, TabItem } from "@/lib/types";
 import { Button, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Dispatch, SetStateAction, useEffect, useRef, useState } from "react";
-import Icon from "./icon";
-import { ContextMenuState, TabItem } from "@/lib/types";
 import ContextMenu from "../interface/context-menu";
+import Icon from "./icon";
 
 export default function Tabs({
   tabItems,
@@ -51,7 +51,7 @@ export default function Tabs({
     ) {
       // Update the scrollable state based on current element width
       const isOverflow =
-        tabsContentRef.current.clientWidth + 2 * scrollControlWidth + 8 >=
+        tabsContentRef.current.clientWidth + 2 * scrollControlWidth + 24 >=
         tabsRootRef.current.clientWidth;
 
       const isLeftScrollable =
@@ -63,7 +63,7 @@ export default function Tabs({
         isOverflow &&
         scrollableDivRef.current.scrollLeft +
           scrollableDivRef.current.clientWidth <
-          tabsContentRef.current.clientWidth; // 8 for padding
+          tabsContentRef.current.clientWidth;
 
       setIsLeftScrollable(isLeftScrollable);
       setIsRightScrollable(isRightScrollable);
@@ -106,7 +106,7 @@ export default function Tabs({
     const targetElement = document.getElementById(selectedItem?.name || "");
 
     if (targetElement) {
-      setTargetLocation(targetElement.offsetLeft - 4); // Adjust for padding
+      setTargetLocation(targetElement.offsetLeft - 12); // Adjust for padding
       setTargetWidth(targetElement.clientWidth);
     }
   }, [selectedItem]);
@@ -138,7 +138,7 @@ export default function Tabs({
       )}
 
       <div
-        className="scrollbar-hide relative flex items-center overflow-x-auto px-1 py-1"
+        className="scrollbar-hide relative flex items-center overflow-x-auto px-3 py-2"
         onScroll={(e) => {
           updateScroll();
         }}

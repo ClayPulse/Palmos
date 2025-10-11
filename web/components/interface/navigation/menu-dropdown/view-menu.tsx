@@ -86,7 +86,7 @@ export default function ViewMenuDropDown() {
               const viewId = "canvas-" + v4();
               await createCanvasTabView({
                 viewId,
-                appConfigs: workflow.nodes.map((node) => node.data.config),
+                appConfigs: workflow.content.nodes.map((node) => node.data.config),
                 initialWorkflow: workflow,
               } as CanvasViewConfig);
             } else {
