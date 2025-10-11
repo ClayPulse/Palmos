@@ -14,7 +14,7 @@ export default function FileMenuDropDown() {
     {
       name: "New Workflow",
       menuCategory: "file",
-      shortcut: "Ctrl+N",
+      shortcut: "Ctrl+Alt+N",
       icon: "add",
       description: "Create a new Workflow",
     },
@@ -30,7 +30,7 @@ export default function FileMenuDropDown() {
     {
       name: "Close Workflow",
       menuCategory: "file",
-      shortcut: "Ctrl+C",
+      shortcut: "Ctrl+Alt+C",
       icon: "close",
       description: "Close the current workflow",
     },

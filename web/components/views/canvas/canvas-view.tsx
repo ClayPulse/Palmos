@@ -1,14 +1,12 @@
+import PublishWorkflowModal from "@/components/modals/publish-workflow-modal";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
-import { captureWorkflowCanvas } from "@/lib/html2canvas/print-canvas";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import {
   AppInfoModalContent,
   AppNodeData,
   AppViewConfig,
   CanvasViewConfig,
-  Workflow,
 } from "@/lib/types";
 import { Button } from "@heroui/react";
 import {
@@ -28,7 +26,7 @@ import {
   useViewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "../../misc/icon";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
@@ -74,6 +72,8 @@ export default function CanvasView({
 
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
+
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -146,28 +146,7 @@ export default function CanvasView({
       icon: "cloud_upload",
     },
     async () => {
-      if (containerRef.current) {
-        const canvasElement = containerRef.current;
-        const res = await captureWorkflowCanvas(canvasElement);
-        const dataUrl = res.toDataURL("image/png");
-
-        const workflow: Workflow = {
-          name: "Untitled Workflow",
-          thumbnail: dataUrl,
-          content: {
-            nodes: localNodes ?? [],
-            edges: localEdges ?? [],
-            defaultEntryPoint: entryPoint,
-          },
-          version: "1.0.0",
-          visibility: "public",
-        };
-
-        await fetchAPI("/api/workflow/publish", {
-          method: "POST",
-          body: JSON.stringify({ ...workflow }),
-        });
-      }
+      setIsPublishModalOpen(true);
     },
     [isActive, tabName],
     isActive,
@@ -298,6 +277,15 @@ export default function CanvasView({
       >
         <Icon name="info" />
       </Button>
+
+      <PublishWorkflowModal
+        isOpen={isPublishModalOpen}
+        setIsOpen={setIsPublishModalOpen}
+        workflowCanvas={containerRef.current}
+        localNodes={localNodes}
+        localEdges={localEdges}
+        entryPoint={entryPoint}
+      />
     </div>
   );
 }
