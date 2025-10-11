@@ -34,6 +34,7 @@
       "elevenlabs": "^1.59.0",
       "framer-motion": "^12.23.22",
       "html2canvas": "^1.4.1",
+      "html2canvas-pro": "^1.5.12",
       "ignore": "^7.0.5",
       "is-electron": "^2.2.2",
       "jszip": "^3.10.1",

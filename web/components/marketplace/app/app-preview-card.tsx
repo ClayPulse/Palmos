@@ -13,21 +13,19 @@ import { ContextMenuState, ExtensionApp } from "@/lib/types";
 import {
   Button,
   Chip,
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
   Skeleton,
+  Tooltip,
   tv,
   useCheckbox,
   VisuallyHidden,
 } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import ContextMenu from "../interface/context-menu";
-import Icon from "../misc/icon";
-import { EditorContext } from "../providers/editor-context-provider";
+import ContextMenu from "../../interface/context-menu";
+import Icon from "../../misc/icon";
+import { EditorContext } from "../../providers/editor-context-provider";
 
-export default function ExtensionPreview({
+export default function AppPreviewCard({
   extension,
   isShowInstalledChip = true,
   isShowUninstallButton = true,
@@ -185,33 +183,8 @@ export default function ExtensionPreview({
             {isMFCompatible !== undefined &&
               isLibCompatible !== undefined &&
               (!isMFCompatible || !isLibCompatible ? (
-                <Popover
-                  isOpen={showMFVersionInfo}
-                  onOpenChange={setShowMFVersionInfo}
-                >
-                  <PopoverTrigger>
-                    <Button
-                      isIconOnly
-                      variant="light"
-                      radius="full"
-                      size="sm"
-                      onMouseEnter={(e) => {
-                        e.stopPropagation();
-                        setShowMFVersionInfo(true);
-                      }}
-                      onMouseLeave={(e) => {
-                        e.stopPropagation();
-                        setShowMFVersionInfo(false);
-                      }}
-                    >
-                      {!isMFCompatible ? (
-                        <Icon name="warning" className="text-danger!" />
-                      ) : (
-                        <Icon name="warning" className="text-warning!" />
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent>
+                <Tooltip
+                  content={
                     <div className="max-w-xs">
                       {!isMFCompatible && (
                         <p>
@@ -235,31 +208,20 @@ export default function ExtensionPreview({
                         </p>
                       )}
                     </div>
-                  </PopoverContent>
-                </Popover>
+                  }
+                >
+                  <Button isIconOnly variant="light" radius="full" size="sm">
+                    {!isMFCompatible ? (
+                      <Icon name="warning" className="text-danger!" />
+                    ) : (
+                      <Icon name="warning" className="text-warning!" />
+                    )}
+                  </Button>
+                </Tooltip>
               ) : (
                 isShowCompatibleChip && (
-                  <Popover
-                    isOpen={showMFVersionInfo}
-                    onOpenChange={setShowMFVersionInfo}
-                  >
-                    <PopoverTrigger>
-                      <Chip
-                        variant="faded"
-                        color="success"
-                        onMouseEnter={(e) => {
-                          e.stopPropagation();
-                          setShowMFVersionInfo(true);
-                        }}
-                        onMouseLeave={(e) => {
-                          e.stopPropagation();
-                          setShowMFVersionInfo(false);
-                        }}
-                      >
-                        Compatible
-                      </Chip>
-                    </PopoverTrigger>
-                    <PopoverContent>
+                  <Tooltip
+                    content={
                       <div className="max-w-xs">
                         <p>
                           This app's module federation version ({hostMFVersion})
@@ -267,8 +229,17 @@ export default function ExtensionPreview({
                           version. The app should work correctly.
                         </p>
                       </div>
-                    </PopoverContent>
-                  </Popover>
+                    }
+                  >
+                    <Button
+                      variant="faded"
+                      color="success"
+                      size="sm"
+                      radius="full"
+                    >
+                      Compatible
+                    </Button>
+                  </Tooltip>
                 )
               ))}
           </div>

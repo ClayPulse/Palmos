@@ -1,4 +1,4 @@
-import ExtensionLoader from "@/components/extension/extension-loader";
+import BaseAppLoader from "@/components/app-loaders/base-app-loader";
 import Loading from "@/components/interface/loading";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
@@ -323,7 +323,7 @@ export default function SandboxAppLoader({
             </div>
           )}
           {currentExtension && currentViewId && (
-            <ExtensionLoader
+            <BaseAppLoader
               viewId={currentViewId}
               remoteOrigin={currentExtension.remoteOrigin}
               moduleId={currentExtension.config.id}

@@ -283,7 +283,7 @@ export default function useExtensionManager() {
             id: extMeta.name,
             version: extMeta.version,
             libVersion: extMeta.libVersion,
-            author: extMeta.user ? extMeta.user.name : extMeta.org.name,
+            author: extMeta.author ? extMeta.author.name : extMeta.org.name,
             description: extMeta.description ?? "No description available",
             displayName: extMeta.displayName ?? extMeta.name,
             visibility: extMeta.visibility,

@@ -11,11 +11,9 @@ import { useDebouncedCallback } from "use-debounce";
 import { AppNodeData, Workflow } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
-export default function useCanvasWorkflow(
-  initialWorkflow?: Workflow,
-) {
+export default function useCanvasWorkflow(initialWorkflow?: Workflow) {
   const editorContext = useContext(EditorContext);
-  
+
   const { runAction } = useScopedActions();
 
   const [pendingNodes, setPendingNodes] = useState<
@@ -28,14 +26,14 @@ export default function useCanvasWorkflow(
   >(undefined);
 
   const [localNodes, setLocalNodes] = useNodesState(
-    initialWorkflow?.nodes ?? [],
+    initialWorkflow?.content.nodes ?? [],
   );
   const [localEdges, setLocalEdges] = useEdgesState(
-    initialWorkflow?.edges ?? [],
+    initialWorkflow?.content.edges ?? [],
   );
   const [defaultEntryPoint, setDefaultEntryPoint] = useState<
     ReactFlowNode<AppNodeData> | undefined
-  >(initialWorkflow?.defaultEntryPoint);
+  >(initialWorkflow?.content.defaultEntryPoint);
 
   // Update entry points
   useEffect(() => {

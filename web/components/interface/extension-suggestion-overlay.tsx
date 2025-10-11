@@ -1,4 +1,4 @@
-import ExtensionPreview from "../extension/extension-preview";
+import AppPreviewCard from "../marketplace/app/app-preview-card";
 
 export default function ExtensionSuggestionOverlay() {
   return (
@@ -7,7 +7,7 @@ export default function ExtensionSuggestionOverlay() {
         <div className="bg-content1 responsive-content h-20 rounded-lg"></div>
         <div className="flex h-full flex-col justify-center pb-20">
           <div className="responsive-content flex gap-2">
-            <ExtensionPreview
+            <AppPreviewCard
               isShowInstalledChip
               extension={{
                 config: {
@@ -23,7 +23,7 @@ export default function ExtensionSuggestionOverlay() {
                 remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
               }}
             />
-            <ExtensionPreview
+            <AppPreviewCard
               isShowInstalledChip
               extension={{
                 config: {
@@ -39,7 +39,7 @@ export default function ExtensionSuggestionOverlay() {
                 remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
               }}
             />
-            <ExtensionPreview
+            <AppPreviewCard
               isShowInstalledChip
               extension={{
                 config: {

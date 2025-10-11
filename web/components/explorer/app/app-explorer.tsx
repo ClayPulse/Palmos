@@ -1,4 +1,4 @@
-import ExtensionPreview from "@/components/extension/extension-preview";
+import AppPreviewCard from "@/components/marketplace/app/app-preview-card";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
@@ -24,7 +24,7 @@ export default function AppExplorer() {
         e.dataTransfer.setData("text/plain", JSON.stringify(ext));
       }}
     >
-      <ExtensionPreview
+      <AppPreviewCard
         extension={ext}
         isShowInstalledChip={false}
         isShowUninstallButton={false}

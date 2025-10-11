@@ -1,6 +1,7 @@
+import PublishWorkflowModal from "@/components/modals/publish-workflow-modal";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import useCanvasWorkflow from "@/lib/hooks/use-workflow";
+import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
 import {
   AppInfoModalContent,
   AppNodeData,
@@ -8,7 +9,6 @@ import {
   CanvasViewConfig,
 } from "@/lib/types";
 import { Button } from "@heroui/react";
-import { Action } from "@pulse-editor/shared-utils";
 import {
   addEdge,
   applyEdgeChanges,
@@ -26,7 +26,7 @@ import {
   useViewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Icon from "../../misc/icon";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
@@ -68,11 +68,12 @@ export default function CanvasView({
     updateWorkflowEdges,
     updateWorkflowNodes,
     exportWorkflow,
-    updateWorkflowNodeData,
   } = useCanvasWorkflow(config.initialWorkflow);
 
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
+
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -105,7 +106,8 @@ export default function CanvasView({
     return <AppNode {...props} />;
   }, []);
 
-  // Register menu actions
+  /* Register menu actions */
+  // Export workflow
   useRegisterMenuAction(
     {
       name: `Export Workflow (${tabName})`,
@@ -118,6 +120,7 @@ export default function CanvasView({
     [exportWorkflow, isActive, tabName],
     isActive,
   );
+  // Run workflow
   useRegisterMenuAction(
     {
       name: `Run Workflow (${tabName})`,
@@ -131,6 +134,21 @@ export default function CanvasView({
       await startWorkflow();
     },
     [entryPoint, isActive, tabName],
+    isActive,
+  );
+  // Publish workflow
+  useRegisterMenuAction(
+    {
+      name: `Publish Workflow (${tabName})`,
+      menuCategory: "file",
+      description: "Publish the current workflow to the Pulse Marketplace",
+      shortcut: "Ctrl+Alt+P",
+      icon: "cloud_upload",
+    },
+    async () => {
+      setIsPublishModalOpen(true);
+    },
+    [isActive, tabName],
     isActive,
   );
 
@@ -147,7 +165,7 @@ export default function CanvasView({
             selectedAction: undefined,
             isRunning: false,
             isShowingWorkflowConnector:
-              config.initialWorkflow?.nodes.find(
+              config.initialWorkflow?.content.nodes.find(
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
           };
@@ -241,8 +259,9 @@ export default function CanvasView({
         defaultEdgeOptions={{
           markerEnd: {
             type: "arrowclosed",
-            width: 20,
-            height: 20,
+          },
+          style: {
+            strokeWidth: 2,
           },
         }}
       >
@@ -258,6 +277,15 @@ export default function CanvasView({
       >
         <Icon name="info" />
       </Button>
+
+      <PublishWorkflowModal
+        isOpen={isPublishModalOpen}
+        setIsOpen={setIsPublishModalOpen}
+        workflowCanvas={containerRef.current}
+        localNodes={localNodes}
+        localEdges={localEdges}
+        entryPoint={entryPoint}
+      />
     </div>
   );
 }
