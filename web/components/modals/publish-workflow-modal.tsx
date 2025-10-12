@@ -13,6 +13,7 @@ export default function PublishWorkflowModal({
   localNodes,
   localEdges,
   entryPoint,
+  saveAppsSnapshotStates,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
@@ -20,6 +21,9 @@ export default function PublishWorkflowModal({
   localNodes: ReactFlowNode<AppNodeData>[];
   localEdges: ReactFlowEdge[];
   entryPoint: ReactFlowNode<AppNodeData> | undefined;
+  saveAppsSnapshotStates: () => Promise<{
+    [key: string]: any;
+  }>;
 }) {
   const [name, setName] = useState("");
   const [version, setVersion] = useState("");
@@ -42,6 +46,7 @@ export default function PublishWorkflowModal({
         nodes: localNodes ?? [],
         edges: localEdges ?? [],
         defaultEntryPoint: entryPoint,
+        snapshotStates: await saveAppsSnapshotStates(),
       },
       version: version,
       visibility: "public",

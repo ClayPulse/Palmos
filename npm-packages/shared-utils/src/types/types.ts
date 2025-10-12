@@ -36,6 +36,9 @@ export enum IMCMessageTypeEnum {
   EditorShowNotification = "editor-show-notification",
   // Get environment variables
   EditorGetEnv = "editor-get-env",
+  // App state snapshot upon importing & exporting
+  EditorAppStateSnapshotRestore = "editor-app-state-snapshot-restore",
+  EditorAppStateSnapshotSave = "editor-app-state-snapshot-save",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)

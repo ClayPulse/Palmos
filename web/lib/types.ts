@@ -228,7 +228,7 @@ export type CanvasViewConfig = {
   // App configurations.
   // This does not change once the canvas view is created.
   appConfigs?: AppViewConfig[];
-  initialWorkflow?: Workflow;
+  initialWorkflowContent?: WorkflowContent;
 };
 
 export type TabView = {
@@ -350,13 +350,16 @@ export type AppMetaData = {
 export type Workflow = {
   name: string;
   version: string;
-  content: {
-    nodes: ReactFlowNode<AppNodeData>[];
-    edges: ReactFlowEdge[];
-    defaultEntryPoint?: ReactFlowNode<AppNodeData>;
-  };
+  content: WorkflowContent;
   thumbnail?: string;
   visibility: "private" | "public" | "unlisted";
+};
+
+export type WorkflowContent = {
+  nodes: ReactFlowNode<AppNodeData>[];
+  edges: ReactFlowEdge[];
+  defaultEntryPoint?: ReactFlowNode<AppNodeData>;
+  snapshotStates?: { [key: string]: any };
 };
 
 export type AppNodeData = {

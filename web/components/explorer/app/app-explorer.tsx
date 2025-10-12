@@ -57,17 +57,19 @@ export default function AppExplorer() {
       <div className="grid grid-cols-2 gap-2 h-full w-full overflow-y-auto overflow-x-hidden px-4">
         {previews}
       </div>
-      <Button
-        className="mx-4 mb-2"
-        onPress={() => {
-          editorContext?.setEditorStates((prev) => ({
-            ...prev,
-            isMarketplaceOpen: true,
-          }));
-        }}
-      >
-        Browse More Apps
-      </Button>
+      <div className="flex flex-col gap-y-1 px-4 pb-2">
+        <Button
+          color="secondary"
+          onPress={() => {
+            editorContext?.setEditorStates((prev) => ({
+              ...prev,
+              isMarketplaceOpen: true,
+            }));
+          }}
+        >
+          Explorer Community Workflows/Apps
+        </Button>
+      </div>
     </div>
   );
 }

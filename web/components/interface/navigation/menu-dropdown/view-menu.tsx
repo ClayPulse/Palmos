@@ -2,7 +2,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { CanvasViewConfig, Workflow } from "@/lib/types";
+import { CanvasViewConfig, WorkflowContent } from "@/lib/types";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import NavMenuDropdown from "../nav-menu-dropdown";
@@ -78,16 +78,18 @@ export default function ViewMenuDropDown() {
         const reader = new FileReader();
         reader.onload = async (event) => {
           try {
-            const workflow = JSON.parse(
+            const workflowContent = JSON.parse(
               event.target?.result as string,
-            ) as Workflow;
-            if (workflow) {
+            ) as WorkflowContent;
+            if (workflowContent) {
               // Create a new tab view with the imported workflow
               const viewId = "canvas-" + v4();
               await createCanvasTabView({
                 viewId,
-                appConfigs: workflow.content.nodes.map((node) => node.data.config),
-                initialWorkflow: workflow,
+                appConfigs: workflowContent.nodes.map(
+                  (node) => node.data.config,
+                ),
+                initialWorkflowContent: workflowContent,
               } as CanvasViewConfig);
             } else {
               alert("Invalid workflow file");

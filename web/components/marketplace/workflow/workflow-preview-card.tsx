@@ -41,7 +41,7 @@ export default function WorkflowPreviewCard({
     await createCanvasTabView({
       viewId: `canvas-${v4()}`,
       appConfigs: workflow.content.nodes.map((node) => node.data.config),
-      initialWorkflow: workflow,
+      initialWorkflowContent: workflow.content,
     });
 
     editorContext?.setEditorStates((prev) => ({
