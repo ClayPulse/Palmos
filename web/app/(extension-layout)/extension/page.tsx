@@ -1,7 +1,7 @@
 "use client";
 
+import { mfHost } from "@/components/providers/remote-module-provider";
 import { getRemote } from "@/lib/module-federation/remote";
-import { loadRemote, registerRemotes } from "@module-federation/runtime";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -39,13 +39,12 @@ export default function ExtensionPage({}) {
     window.viewId = viewId;
 
     if (!isRegistered) {
-      registerRemotes(
-        getRemote(remoteOrigin, moduleId, moduleVersion),
-      );
+      mfHost.registerRemotes(getRemote(remoteOrigin, moduleId, moduleVersion));
       setIsRegistered(true);
     }
 
-    loadRemote(`${moduleId}/main`)
+    mfHost
+      .loadRemote(`${moduleId}/main`)
       .then((module) => {
         console.log("Loaded remote module:", moduleId, module);
 

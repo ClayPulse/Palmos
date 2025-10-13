@@ -38,11 +38,14 @@ export default function WorkflowPreviewCard({
   }
 
   async function openWorkflow() {
-    await createCanvasTabView({
-      viewId: `canvas-${v4()}`,
-      appConfigs: workflow.content.nodes.map((node) => node.data.config),
-      initialWorkflowContent: workflow.content,
-    });
+    await createCanvasTabView(
+      {
+        viewId: `canvas-${v4()}`,
+        appConfigs: workflow.content.nodes.map((node) => node.data.config),
+        initialWorkflowContent: workflow.content,
+      },
+      false,
+    );
 
     editorContext?.setEditorStates((prev) => ({
       ...prev,
@@ -121,7 +124,9 @@ export default function WorkflowPreviewCard({
             <Button
               className="text-medium h-12 sm:h-8 sm:text-sm"
               variant="light"
-              onPress={(e) => {}}
+              onPress={() => {
+                openWorkflow();
+              }}
             >
               <p className="w-full text-start">Use</p>
             </Button>

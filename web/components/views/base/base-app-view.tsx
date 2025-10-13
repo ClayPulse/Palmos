@@ -15,18 +15,21 @@ export default function BaseAppView({
   config: AppViewConfig;
   viewId: string;
 }) {
+  const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
-  const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
   const {
     installExtension,
     loadAppFromCache,
     loadAppFromRegistry,
     loadAppFromURL,
   } = useExtensionManager();
+
+  const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
     ViewModel | undefined
   >(undefined);
+  const [isOpened, setIsOpened] = useState<boolean>(false);
 
   useEffect(() => {
     async function installAndOpenApp(ext: ExtensionApp) {
@@ -77,13 +80,19 @@ export default function BaseAppView({
       }
     }
 
-    openApp();
-  }, [config]);
+    if (!isOpened) {
+      openApp().then(() => setIsOpened(true));
+    }
+  }, [config, installExtension, isOpened]);
 
   return noAccessToApp ? (
-    <NotAuthorized />
+    <div className="bg-content1 h-full w-full">
+      <NotAuthorized />
+    </div>
   ) : !pulseAppViewModel ? (
-    <Loading text="Searching for app..." />
+    <div className="bg-content1 h-full w-full">
+      <Loading text="Searching for app..." />
+    </div>
   ) : (
     <SandboxAppLoader
       viewModel={pulseAppViewModel}

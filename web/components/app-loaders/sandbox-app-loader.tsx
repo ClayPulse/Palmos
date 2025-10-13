@@ -47,6 +47,7 @@ export default function SandboxAppLoader({
 
   const clRef = useRef<ConnectionListener | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   const { resolvedTheme } = useTheme();
   const { platformApi } = usePlatformApi();
@@ -65,7 +66,7 @@ export default function SandboxAppLoader({
 
   // Reset the connection when the view ID changes
   useEffect(() => {
-    function getExtension(model: ViewModel) {
+    function getExtension(model: ViewModel, ext: ExtensionApp) {
       // // File view type extension needs to match the file type.
       // // For example:
       // //   .txt, .md, .js for code editor extension;
@@ -98,31 +99,34 @@ export default function SandboxAppLoader({
       //   }
       // }
 
-      const extId = model.appConfig?.id;
-
-      const ext = editorContext?.persistSettings?.extensions?.find(
-        (extension) => extension.config.id === extId,
-      );
-
-      if (!ext) {
-        throw new Error("Extension not found. Something went wrong.");
-      }
-
       setCurrentExtension(ext);
     }
 
-    if (currentViewId) {
+    if (currentViewId && !isInitialized) {
+      const ext = editorContext?.persistSettings?.extensions?.find(
+        (extension) => extension.config.id === viewModel.appConfig?.id,
+      );
+
+      if (!ext) {
+        return;
+      }
+
       // Listen for an incoming extension connection
       console.log(`[${currentViewId}]: Listening for app connection...`);
+      setIsInitialized(true);
       listenForExtensionConnection();
 
       setIsLookingForExtension(true);
       setCurrentExtension(undefined);
       setIsMissingExtension(false);
-      getExtension(viewModel);
+      getExtension(viewModel, ext);
       setIsLookingForExtension(false);
     }
-  }, [currentViewId]);
+  }, [
+    currentViewId,
+    editorContext?.persistSettings?.extensions,
+    isInitialized,
+  ]);
 
   // Set is loading extension to true when current extension changes
   useEffect(() => {
@@ -308,7 +312,7 @@ export default function SandboxAppLoader({
   return (
     <div className="relative h-full w-full">
       {isLookingForExtension ? (
-        <div className="bg-content1 absolute top-0 left-0 h-full w-full">
+        <div className="bg-content1 h-full w-full">
           <Loading />
         </div>
       ) : isMissingExtension ? (
