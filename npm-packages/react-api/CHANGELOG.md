@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.47
+
+### Patch Changes
+
+- Fix snapshot restore triggers at every state changes
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.47
+
 ## 0.1.1-alpha.46
 
 ### Patch Changes

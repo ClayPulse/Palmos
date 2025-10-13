@@ -38,6 +38,8 @@ export default function useCanvasWorkflow(
     ReactFlowNode<AppNodeData> | undefined
   >(initialWorkflowContent?.defaultEntryPoint);
 
+  const [isRestored, setIsRestored] = useState(false);
+
   // Update entry points
   useEffect(() => {
     debouncedGetEntryPoint();
@@ -47,14 +49,17 @@ export default function useCanvasWorkflow(
   useEffect(() => {
     async function restore() {
       if (!imcContext) return;
+      else if (isRestored) return;
+      else if (!initialWorkflowContent) return;
+      setIsRestored(true);
 
-      if (initialWorkflowContent?.snapshotStates) {
+      if (initialWorkflowContent.snapshotStates) {
         await restoreAppsSnapshotStates(initialWorkflowContent);
       }
     }
 
     restore();
-  }, [initialWorkflowContent, imcContext]);
+  }, [initialWorkflowContent, imcContext, isRestored]);
 
   async function startWorkflow() {
     // DAG traversal using Kahn's algorithm (topological sort)
