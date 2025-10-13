@@ -1,4 +1,5 @@
 import PublishWorkflowModal from "@/components/modals/publish-workflow-modal";
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
@@ -26,7 +27,7 @@ import {
   useViewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Icon from "../../misc/icon";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
@@ -58,6 +59,8 @@ export default function CanvasView({
   isActive: boolean;
   tabName: string;
 }) {
+  const editorContext = useContext(EditorContext);
+
   const { openAppInfoModal } = useAppInfo();
 
   const {
@@ -134,7 +137,7 @@ export default function CanvasView({
     async () => {
       await startWorkflow();
     },
-    [entryPoint, isActive, tabName],
+    [entryPoint, isActive, tabName, editorContext?.persistSettings?.extensions],
     isActive,
   );
   // Publish workflow

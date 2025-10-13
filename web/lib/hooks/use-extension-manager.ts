@@ -1,13 +1,13 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { mfHost } from "@/components/providers/remote-module-provider";
 import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
-import { registerRemotes } from "@module-federation/runtime";
-import { useContext } from "react";
+import { useCallback, useContext } from "react";
 import toast from "react-hot-toast";
 import { compare } from "semver";
 import { getRemote, getRemoteClientBaseURL } from "../module-federation/remote";
 import {
-  getRemoteLibVersion,
   getHostMFVersion,
+  getRemoteLibVersion,
   getRemoteMFVersion,
 } from "../module-federation/version";
 import { AppMetaData, ExtensionApp } from "../types";
@@ -15,63 +15,79 @@ import { AppMetaData, ExtensionApp } from "../types";
 export default function useExtensionManager() {
   const editorContext = useContext(EditorContext);
 
-  async function installExtension(
-    remoteOrigin: string,
-    id: string,
-    version: string,
-  ): Promise<void> {
-    const extension = await getExtensionInfoFromRemote(
-      remoteOrigin,
-      id,
-      version,
-    );
+  const installExtension = useCallback(
+    async (
+      remoteOrigin: string,
+      id: string,
+      version: string,
+    ): Promise<void> => {
+      // Don't install if already installed
+      if (
+        editorContext?.persistSettings?.extensions?.find(
+          (ext) =>
+            ext.config.id === id &&
+            ext.config.version === version &&
+            ext.remoteOrigin === remoteOrigin,
+        )
+      ) {
+        console.log(`Extension ${id} is already installed`);
+        return;
+      }
 
-    console.log("Installing remote", extension);
-
-    const remoteMFVersion = extension.mfVersion;
-
-    const hostMFVersion = await getHostMFVersion();
-
-    if (!remoteMFVersion) {
-      throw new Error("Remote MF version is undefined");
-    } else if (compare(remoteMFVersion, hostMFVersion) !== 0) {
-      throw new Error(
-        `Extension MF version ${remoteMFVersion} is not compatible with host MF version ${hostMFVersion}`,
+      const extension = await getExtensionInfoFromRemote(
+        remoteOrigin,
+        id,
+        version,
       );
-    }
 
-    // TODO: Prevent CSS from being injected from the remote
-    // Register the frontend and backend from remote
-    registerRemotes(
-      getRemote(
-        extension.remoteOrigin,
-        extension.config.id,
-        extension.config.version,
-      ),
-    );
+      console.log("Installing remote", extension);
 
-    const installedExtensions =
-      (await editorContext?.persistSettings?.extensions) ?? [];
+      const remoteMFVersion = extension.mfVersion;
 
-    // Check if extension is already installed
-    if (
-      installedExtensions.find((ext) => ext.config.id === extension.config.id)
-    ) {
-      return;
-    }
+      const hostMFVersion = await getHostMFVersion();
 
-    const updatedExtensions = [...installedExtensions, extension];
+      if (!remoteMFVersion) {
+        throw new Error("Remote MF version is undefined");
+      } else if (compare(remoteMFVersion, hostMFVersion) !== 0) {
+        throw new Error(
+          `Extension MF version ${remoteMFVersion} is not compatible with host MF version ${hostMFVersion}`,
+        );
+      }
 
-    editorContext?.setPersistSettings((prev) => {
-      return {
-        ...prev,
-        extensions: updatedExtensions,
-      };
-    });
+      // TODO: Prevent CSS from being injected from the remote
+      // Register the frontend and backend from remote
+      mfHost.registerRemotes(
+        getRemote(
+          extension.remoteOrigin,
+          extension.config.id,
+          extension.config.version,
+        ),
+      );
 
-    // Try to set default extension for file types
-    tryAutoSetDefault(extension);
-  }
+      const installedExtensions =
+        (await editorContext?.persistSettings?.extensions) ?? [];
+
+      // Check if extension is already installed
+      if (
+        installedExtensions.find((ext) => ext.config.id === extension.config.id)
+      ) {
+        return;
+      }
+
+      const updatedExtensions = [...installedExtensions, extension];
+
+      editorContext?.setPersistSettings((prev) => {
+        return {
+          ...prev,
+          extensions: updatedExtensions,
+        };
+      });
+
+      // Try to set default extension for file types
+      tryAutoSetDefault(extension);
+    },
+    [editorContext?.persistSettings?.extensions],
+  );
 
   async function uninstallExtension(name: string): Promise<void> {
     const extensions = (await editorContext?.persistSettings?.extensions) ?? [];

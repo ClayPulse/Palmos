@@ -281,7 +281,10 @@ export function useTabViewManager() {
     return newTabView;
   }
 
-  async function createCanvasTabView(canvasConfig: CanvasViewConfig) {
+  async function createCanvasTabView(
+    canvasConfig: CanvasViewConfig,
+    openExplorer = true,
+  ) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     } else if (!imcContext) {
@@ -316,10 +319,12 @@ export function useTabViewManager() {
     });
 
     // Open explorer for canvas views
-    editorContext.setEditorStates((prev) => ({
-      ...prev,
-      isSideMenuOpen: true,
-    }));
+    if (openExplorer) {
+      editorContext.setEditorStates((prev) => ({
+        ...prev,
+        isSideMenuOpen: true,
+      }));
+    }
 
     return newTabView;
   }

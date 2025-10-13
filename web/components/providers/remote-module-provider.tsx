@@ -1,14 +1,13 @@
 "use client";
 
-import { init, registerRemotes } from "@module-federation/runtime";
-import React, { useContext, useEffect } from "react";
-import { ReactNode } from "react";
+import { getRemote } from "@/lib/module-federation/remote";
+import { ExtensionAgent, ExtensionApp } from "@/lib/types";
+import { createInstance } from "@module-federation/runtime";
+import React, { ReactNode, useContext, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { EditorContext } from "./editor-context-provider";
-import { ExtensionApp, ExtensionAgent } from "@/lib/types";
-import { getRemote } from "@/lib/module-federation/remote";
 
-const host = init({
+export const mfHost = createInstance({
   name: "pulse_editor",
   remotes: [],
   shared: {
@@ -121,7 +120,7 @@ export default function RemoteModuleProvider({
       )
       .flat();
 
-    registerRemotes(remotes);
+    mfHost.registerRemotes(remotes);
     console.log("Registered remotes", remotes);
 
     // For each extension, load their agents

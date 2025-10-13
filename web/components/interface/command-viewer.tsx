@@ -154,7 +154,7 @@ export default function CommandViewer() {
     }
 
     checkAndRunAction();
-  }, [actionReadyToRun]);
+  }, [actionReadyToRun, runActionCallback]);
 
   function handleKeyDown(e: KeyboardEvent) {
     // Prevent default behavior for certain keys
