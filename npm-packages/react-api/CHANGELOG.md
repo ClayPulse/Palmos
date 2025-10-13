@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.46
+
+### Patch Changes
+
+- Add app state snapshot during import & export
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.46
+
 ## 0.1.1-alpha.45
 
 ### Patch Changes

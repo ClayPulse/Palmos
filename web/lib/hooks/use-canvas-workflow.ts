@@ -1,5 +1,6 @@
-import { EditorContext } from "@/components/providers/editor-context-provider";
+import { IMCContext } from "@/components/providers/imc-provider";
 import { addToast } from "@heroui/react";
+import { IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import {
   Edge as ReactFlowEdge,
   Node as ReactFlowNode,
@@ -8,11 +9,13 @@ import {
 } from "@xyflow/react";
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { AppNodeData, Workflow } from "../types";
+import { AppNodeData, WorkflowContent } from "../types";
 import useScopedActions from "./use-scoped-actions";
 
-export default function useCanvasWorkflow(initialWorkflow?: Workflow) {
-  const editorContext = useContext(EditorContext);
+export default function useCanvasWorkflow(
+  initialWorkflowContent?: WorkflowContent,
+) {
+  const imcContext = useContext(IMCContext);
 
   const { runAction } = useScopedActions();
 
@@ -26,19 +29,32 @@ export default function useCanvasWorkflow(initialWorkflow?: Workflow) {
   >(undefined);
 
   const [localNodes, setLocalNodes] = useNodesState(
-    initialWorkflow?.content.nodes ?? [],
+    initialWorkflowContent?.nodes ?? [],
   );
   const [localEdges, setLocalEdges] = useEdgesState(
-    initialWorkflow?.content.edges ?? [],
+    initialWorkflowContent?.edges ?? [],
   );
   const [defaultEntryPoint, setDefaultEntryPoint] = useState<
     ReactFlowNode<AppNodeData> | undefined
-  >(initialWorkflow?.content.defaultEntryPoint);
+  >(initialWorkflowContent?.defaultEntryPoint);
 
   // Update entry points
   useEffect(() => {
     debouncedGetEntryPoint();
   }, [localNodes]);
+
+  // Restore snapshot states upon loading a workflow
+  useEffect(() => {
+    async function restore() {
+      if (!imcContext) return;
+
+      if (initialWorkflowContent?.snapshotStates) {
+        await restoreAppsSnapshotStates(initialWorkflowContent);
+      }
+    }
+
+    restore();
+  }, [initialWorkflowContent, imcContext]);
 
   async function startWorkflow() {
     // DAG traversal using Kahn's algorithm (topological sort)
@@ -337,7 +353,7 @@ export default function useCanvasWorkflow(initialWorkflow?: Workflow) {
     [localEdges],
   );
 
-  const exportWorkflow = useCallback(() => {
+  const exportWorkflow = useCallback(async () => {
     const blob = new Blob(
       [
         JSON.stringify(
@@ -345,7 +361,8 @@ export default function useCanvasWorkflow(initialWorkflow?: Workflow) {
             nodes: localNodes,
             edges: localEdges,
             defaultEntryPoint: defaultEntryPoint,
-          },
+            snapshotStates: await saveAppsSnapshotStates(),
+          } as WorkflowContent,
           null,
           2,
         ),
@@ -362,6 +379,62 @@ export default function useCanvasWorkflow(initialWorkflow?: Workflow) {
     URL.revokeObjectURL(url);
   }, [localNodes, localEdges, defaultEntryPoint]);
 
+  async function saveAppsSnapshotStates() {
+    const apps = localNodes.map((node) => node.data.config);
+
+    const appStates = await Promise.all(
+      apps.map(async (app) => {
+        if (!app.viewId) return null;
+
+        // Do a time out because the app may not use snapshot feature
+        return await Promise.race([
+          new Promise<any>((resolve) => setTimeout(() => resolve(null), 2000)),
+          (async () => {
+            const { states } = await imcContext?.polyIMC?.sendMessage(
+              app.viewId,
+              IMCMessageTypeEnum.EditorAppStateSnapshotSave,
+            );
+            return { appId: app.viewId, states: states };
+          })(),
+        ]);
+      }),
+    );
+
+    const appStatesMap = appStates
+      .filter((s) => s && s.states)
+      .reduce(
+        (acc, curr) => {
+          if (curr) {
+            acc[curr.appId] = curr.states;
+          }
+          return acc;
+        },
+        {} as { [key: string]: any },
+      );
+
+    return appStatesMap;
+  }
+
+  async function restoreAppsSnapshotStates(content: WorkflowContent) {
+    if (!imcContext) return;
+    else if (!content.snapshotStates) return;
+
+    const apps = content.nodes.map((node) => node.data.config);
+    for (const app of apps) {
+      if (!app.viewId) continue;
+      if (content.snapshotStates[app.viewId]) {
+        // Wait until the view is initialized
+        await imcContext?.resolveWhenViewInitialized(app.viewId);
+        // Send snapshot restore message
+        await imcContext?.polyIMC?.sendMessage(
+          app.viewId,
+          IMCMessageTypeEnum.EditorAppStateSnapshotRestore,
+          { states: content.snapshotStates[app.viewId] },
+        );
+      }
+    }
+  }
+
   return {
     localNodes,
     localEdges,
@@ -373,5 +446,7 @@ export default function useCanvasWorkflow(initialWorkflow?: Workflow) {
     updateWorkflowEdges,
     exportWorkflow,
     updateWorkflowNodeData,
+    saveAppsSnapshotStates,
+    restoreAppsSnapshotStates,
   };
 }

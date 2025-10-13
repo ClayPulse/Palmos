@@ -60,7 +60,7 @@ export default function WorkflowGallery() {
 
       return (
         <div key={name} className="w-full h-fit">
-          <WorkflowPreviewCard workflow={latestVersion} />
+          <WorkflowPreviewCard workflow={latestVersion} isPressable={false} />
         </div>
       );
     },

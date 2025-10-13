@@ -68,7 +68,8 @@ export default function CanvasView({
     updateWorkflowEdges,
     updateWorkflowNodes,
     exportWorkflow,
-  } = useCanvasWorkflow(config.initialWorkflow);
+    saveAppsSnapshotStates,
+  } = useCanvasWorkflow(config.initialWorkflowContent);
 
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
@@ -165,7 +166,7 @@ export default function CanvasView({
             selectedAction: undefined,
             isRunning: false,
             isShowingWorkflowConnector:
-              config.initialWorkflow?.content.nodes.find(
+              config.initialWorkflowContent?.nodes.find(
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
           };
@@ -285,6 +286,7 @@ export default function CanvasView({
         localNodes={localNodes}
         localEdges={localEdges}
         entryPoint={entryPoint}
+        saveAppsSnapshotStates={saveAppsSnapshotStates}
       />
     </div>
   );
