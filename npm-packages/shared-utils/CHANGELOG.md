@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.47
+
+### Patch Changes
+
+- Fix snapshot restore triggers at every state changes
+
 ## 0.1.1-alpha.46
 
 ### Patch Changes

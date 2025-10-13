@@ -143,6 +143,8 @@ export default function AppGallery() {
     <div className="flex flex-col gap-y-2">
       <div className="flex flex-col items-center">
         <Select
+          label="Filter apps"
+          size="sm"
           className="w-fit min-w-48"
           items={selectLabels}
           startContent={
