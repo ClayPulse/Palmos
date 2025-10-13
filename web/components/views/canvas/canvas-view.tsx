@@ -268,6 +268,8 @@ export default function CanvasView({
             strokeWidth: 2,
           },
         }}
+        maxZoom={4}
+        minZoom={0.1}
       >
         <Background id={config.viewId} variant={BackgroundVariant.Dots} />
       </ReactFlow>
