@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.48
+
+### Patch Changes
+
+- Fix simultaneous messages cause message id conflicts
+
 ## 0.1.1-alpha.47
 
 ### Patch Changes

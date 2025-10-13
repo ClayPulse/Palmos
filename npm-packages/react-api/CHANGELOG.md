@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.48
+
+### Patch Changes
+
+- Fix simultaneous messages cause message id conflicts
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.48
+
 ## 0.1.1-alpha.47
 
 ### Patch Changes

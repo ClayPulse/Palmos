@@ -1,3 +1,4 @@
+import { v4 } from "uuid";
 import { IMCMessage, IMCMessageTypeEnum } from "../types/types";
 
 export class MessageSender {
@@ -25,7 +26,7 @@ export class MessageSender {
     abortSignal?: AbortSignal
   ): Promise<any> {
     // Generate a unique id for the message using timestamp
-    const id = new Date().getTime().toString();
+    const id = v4() + new Date().getTime().toString();
     const message: IMCMessage = {
       id,
       type: handlingType,

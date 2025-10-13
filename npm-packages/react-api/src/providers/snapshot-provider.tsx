@@ -33,6 +33,7 @@ export default function SnapshotProvider({
         const { states } = message.payload;
 
         // Update all states in the context
+        console.log("Restoring snapshot states:", states);
         setStates((prev) => ({ ...states }));
       },
     ],

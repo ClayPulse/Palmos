@@ -306,6 +306,8 @@ export type IMCContextType = {
   resolveWhenViewInitialized: (viewId: string) => Promise<void>;
   markIMCInitialized: (viewId: string) => void;
   resolveWhenActionRegistered: (action: Action) => Promise<void>;
+  hasChannel: (viewId: string) => boolean;
+  removeChannel: (viewId: string) => void;
 };
 
 // #endregion
