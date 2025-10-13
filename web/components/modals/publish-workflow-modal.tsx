@@ -29,39 +29,50 @@ export default function PublishWorkflowModal({
   const [version, setVersion] = useState("");
 
   async function publishWorkflow() {
-    if (!workflowCanvas) {
-      console.error("Workflow canvas is not available");
-      return;
+    try {
+      if (!workflowCanvas) {
+        console.error("Workflow canvas is not available");
+        return;
+      }
+
+      setIsOpen(false);
+
+      const res = await captureWorkflowCanvas(workflowCanvas);
+      const dataUrl = res.toDataURL("image/png");
+
+      const snapshotStates = await saveAppsSnapshotStates();
+
+      const workflow: Workflow = {
+        name: name,
+        thumbnail: dataUrl,
+        content: {
+          nodes: localNodes ?? [],
+          edges: localEdges ?? [],
+          defaultEntryPoint: entryPoint,
+          snapshotStates: snapshotStates,
+        },
+        version: version,
+        visibility: "public",
+      };
+
+      await fetchAPI("/api/workflow/publish", {
+        method: "POST",
+        body: JSON.stringify({ ...workflow }),
+      });
+
+      addToast({
+        title: "Workflow Published",
+        description: "Your workflow has been published successfully.",
+        color: "success",
+      });
+    } catch (error) {
+      console.error("Error publishing workflow:", error);
+      addToast({
+        title: "Error",
+        description: "There was an error publishing your workflow.",
+        color: "danger",
+      });
     }
-
-    setIsOpen(false);
-
-    const res = await captureWorkflowCanvas(workflowCanvas);
-    const dataUrl = res.toDataURL("image/png");
-
-    const workflow: Workflow = {
-      name: name,
-      thumbnail: dataUrl,
-      content: {
-        nodes: localNodes ?? [],
-        edges: localEdges ?? [],
-        defaultEntryPoint: entryPoint,
-        snapshotStates: await saveAppsSnapshotStates(),
-      },
-      version: version,
-      visibility: "public",
-    };
-
-    await fetchAPI("/api/workflow/publish", {
-      method: "POST",
-      body: JSON.stringify({ ...workflow }),
-    });
-
-    addToast({
-      title: "Workflow Published",
-      description: "Your workflow has been published successfully.",
-      color: "success",
-    });
   }
 
   async function handlePress() {

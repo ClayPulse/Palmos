@@ -145,10 +145,18 @@ export class ConnectionListener {
 
   private listener: InterModuleCommunication;
 
+  /**
+   *
+   * @param polyIMC The polyIMC instance.
+   * @param newConnectionReceiverHandlerMap Receiver handler map for newly established poly-IMC channel.
+   * @param onConnection Callback function to be called when a new connection is established.
+   * @param expectedOtherWindowId Optional expected other window ID to validate incoming connections.
+   */
   constructor(
     polyIMC: PolyIMC,
     newConnectionReceiverHandlerMap: ReceiverHandlerMap,
-    onConnection?: (senderWindow: Window, message: IMCMessage) => void
+    onConnection?: (senderWindow: Window, message: IMCMessage) => void,
+    expectedOtherWindowId?: string
   ) {
     this.polyIMC = polyIMC;
     this.newConnectionReceiverHandlerMap = newConnectionReceiverHandlerMap;
@@ -156,7 +164,7 @@ export class ConnectionListener {
 
     const listener = new InterModuleCommunication();
     this.listener = listener;
-    listener.initThisWindow(window);
+    listener.initThisWindow(window, expectedOtherWindowId);
 
     listener.updateReceiverHandlerMap(
       new Map<IMCMessageTypeEnum, ReceiverHandler>([

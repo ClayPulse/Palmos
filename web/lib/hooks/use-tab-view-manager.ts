@@ -1,5 +1,6 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
+import { addToast } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
@@ -206,6 +207,15 @@ export function useTabViewManager() {
         tabIndex: newIdx,
       };
     });
+
+    if (view.type === ViewModeEnum.Canvas) {
+      // Remove the app nodes' view IDs from IMC context
+      (view.config as CanvasViewConfig).appConfigs?.forEach((appConfig) => {
+        imcContext?.polyIMC?.removeChannel(appConfig.viewId);
+      });
+    } else if (view.type === ViewModeEnum.App) {
+      imcContext?.polyIMC?.removeChannel((view.config as AppViewConfig).viewId);
+    }
   }
 
   /**
@@ -221,6 +231,19 @@ export function useTabViewManager() {
         tabViews: [],
         tabIndex: -1,
       };
+    });
+
+    // For all tab views, remove their view IDs from IMC context
+    tabViews.forEach((view) => {
+      if (view.type === ViewModeEnum.Canvas) {
+        (view.config as CanvasViewConfig).appConfigs?.forEach((appConfig) => {
+          imcContext?.polyIMC?.removeChannel(appConfig.viewId);
+        });
+      } else if (view.type === ViewModeEnum.App) {
+        imcContext?.polyIMC?.removeChannel(
+          (view.config as AppViewConfig).viewId,
+        );
+      }
     });
   }
 
@@ -265,6 +288,20 @@ export function useTabViewManager() {
       throw new Error("IMC context is not available");
     }
 
+    // Prohibit creating canvas if any app's view ID in the canvas already exists
+    const existViewId = canvasConfig.appConfigs?.find((appConfig) =>
+      imcContext?.polyIMC?.hasChannel(appConfig.viewId),
+    );
+
+    if (existViewId) {
+      addToast({
+        title: "Error creating canvas",
+        description: `Same app nodes already exist. Your workflow might already be opened in another tab.`,
+        color: "danger",
+      });
+      return undefined;
+    }
+
     const newTabView: TabView = {
       type: ViewModeEnum.Canvas,
       config: canvasConfig,
@@ -297,6 +334,10 @@ export function useTabViewManager() {
       currentTab = await createCanvasTabView({
         viewId: `canvas-${v4()}`,
       } as CanvasViewConfig);
+      if (!currentTab) {
+        console.error("Failed to create a new canvas tab");
+        return;
+      }
     }
 
     const newCanvasConfig: CanvasViewConfig = {

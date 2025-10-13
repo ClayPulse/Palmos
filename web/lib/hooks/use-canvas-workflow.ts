@@ -385,12 +385,18 @@ export default function useCanvasWorkflow(
     const appStates = await Promise.all(
       apps.map(async (app) => {
         if (!app.viewId) return null;
-        const { states } = await imcContext?.polyIMC?.sendMessage(
-          app.viewId,
-          IMCMessageTypeEnum.EditorAppStateSnapshotSave,
-        );
 
-        return { appId: app.viewId, states: states };
+        // Do a time out because the app may not use snapshot feature
+        return await Promise.race([
+          new Promise<any>((resolve) => setTimeout(() => resolve(null), 2000)),
+          (async () => {
+            const { states } = await imcContext?.polyIMC?.sendMessage(
+              app.viewId,
+              IMCMessageTypeEnum.EditorAppStateSnapshotSave,
+            );
+            return { appId: app.viewId, states: states };
+          })(),
+        ]);
       }),
     );
 

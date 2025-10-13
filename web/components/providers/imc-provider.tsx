@@ -27,7 +27,7 @@ import {
   STTConfig,
   TTSConfig,
 } from "@pulse-editor/shared-utils";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef } from "react";
 import { EditorContext } from "./editor-context-provider";
 
 export const IMCContext = createContext<IMCContextType | undefined>(undefined);
@@ -39,7 +39,7 @@ export default function InterModuleCommunicationProvider({
 }) {
   const editorContext = useContext(EditorContext);
 
-  const [polyIMC, setPolyIMC] = useState<PolyIMC | undefined>(undefined);
+  const polyIMCRef = useRef<PolyIMC | undefined>(undefined);
   const imcInitializedMapRef = useRef<Map<string, boolean>>(new Map());
   const imcInitializedResolvePromisesRef = useRef<{
     [key: string]: () => void;
@@ -53,29 +53,23 @@ export default function InterModuleCommunicationProvider({
   useEffect(() => {
     // @ts-expect-error set window viewId
     window.viewId = "Pulse Editor Main";
+    polyIMCRef.current = new PolyIMC(getHandlerMap());
 
     return () => {
       // Cleanup the polyIMC instance when the component unmounts
-      if (polyIMC) {
-        polyIMC.close();
-        setPolyIMC(undefined);
+      if (polyIMCRef) {
+        polyIMCRef.current?.close();
+        polyIMCRef.current = undefined;
       }
     };
   }, []);
 
-  useEffect(() => {
-    if (!polyIMC) {
-      const newPolyIMC = new PolyIMC(getHandlerMap());
-      setPolyIMC(newPolyIMC);
-    }
-  }, [polyIMC, setPolyIMC]);
-
   // Update the base handler map as editor context changes
   useEffect(() => {
-    if (polyIMC) {
-      polyIMC.updateBaseReceiverHandlerMap(getHandlerMap());
+    if (polyIMCRef.current) {
+      polyIMCRef.current?.updateBaseReceiverHandlerMap(getHandlerMap());
     }
-  }, [polyIMC, editorContext]);
+  }, [editorContext]);
 
   function markIMCInitialized(viewId: string) {
     imcInitializedMapRef.current.set(viewId, true);
@@ -489,7 +483,7 @@ export default function InterModuleCommunicationProvider({
   return (
     <IMCContext.Provider
       value={{
-        polyIMC,
+        polyIMC: polyIMCRef.current,
         resolveWhenViewInitialized,
         markIMCInitialized,
         resolveWhenActionRegistered,

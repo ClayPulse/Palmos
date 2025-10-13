@@ -113,7 +113,7 @@ export default function SandboxAppLoader({
 
     if (currentViewId) {
       // Listen for an incoming extension connection
-      console.log("Listening for extension connection...");
+      console.log(`[${currentViewId}]: Listening for app connection...`);
       listenForExtensionConnection();
 
       setIsLookingForExtension(true);
@@ -136,6 +136,8 @@ export default function SandboxAppLoader({
   // When IMC is connected, remove the connection listener
   useEffect(() => {
     if (isConnected && clRef.current) {
+      console.log(`[${currentViewId}]: App connected.`);
+      // Close the connection listener
       clRef.current.close();
       clRef.current = null;
     }
@@ -184,6 +186,7 @@ export default function SandboxAppLoader({
         }: {
           isLoading: boolean;
         } = message.payload;
+        console.log(`[${model.viewId}]: App is loading: `, isLoading);
         setIsLoadingExtension((prev) => isLoading);
         if (onInitialLoaded) {
           onInitialLoaded();
@@ -296,6 +299,7 @@ export default function SandboxAppLoader({
         (senderWindow: Window, message: IMCMessage) => {
           setIsConnected((prev) => true);
         },
+        viewModel.viewId,
       );
       clRef.current = cl;
     }

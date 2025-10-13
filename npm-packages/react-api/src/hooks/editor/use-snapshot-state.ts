@@ -20,15 +20,20 @@ export default function useSnapShotState<T>(
   );
 
   // Update context whenever state changes
-  const setSnapshotState = (value: T | ((prev: T) => T)) => {
+  const setSnapshotState: React.Dispatch<React.SetStateAction<T>> = (value) => {
     setState((prev) => {
-      const next =
+      const newValue =
         typeof value === "function" ? (value as (prev: T) => T)(prev) : value;
-      setStates((prevStates) => ({
-        ...prevStates,
-        [key]: next,
-      }));
-      return next;
+
+      // Defer the setStates call to next microtask, outside render phase
+      Promise.resolve().then(() => {
+        setStates((prevStates) => ({
+          ...prevStates,
+          [key]: newValue,
+        }));
+      });
+
+      return newValue;
     });
   };
 

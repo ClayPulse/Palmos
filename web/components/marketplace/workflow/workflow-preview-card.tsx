@@ -105,9 +105,7 @@ export default function WorkflowPreviewCard({
               color="primary"
               size="sm"
               onPress={() => {
-                if (isPressable) {
-                  openWorkflow();
-                }
+                openWorkflow();
               }}
             >
               Use
