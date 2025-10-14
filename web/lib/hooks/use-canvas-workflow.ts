@@ -421,17 +421,19 @@ export default function useCanvasWorkflow(
   }
 
   async function restoreAppsSnapshotStates(content: WorkflowContent) {
-    if (!imcContext) return;
-    else if (!content.snapshotStates) return;
+    if (!imcContext || !imcContext.polyIMC) {
+      console.error("IMC context not available for restoring snapshot states");
+      return;
+    } else if (!content.snapshotStates) return;
 
     const apps = content.nodes.map((node) => node.data.config);
     for (const app of apps) {
       if (!app.viewId) continue;
       if (content.snapshotStates[app.viewId]) {
         // Wait until the view is initialized
-        await imcContext?.resolveWhenViewInitialized(app.viewId);
+        await imcContext.resolveWhenViewInitialized(app.viewId);
         // Send snapshot restore message
-        await imcContext?.polyIMC?.sendMessage(
+        await imcContext.polyIMC.sendMessage(
           app.viewId,
           IMCMessageTypeEnum.EditorAppStateSnapshotRestore,
           { states: content.snapshotStates[app.viewId] },

@@ -57,7 +57,9 @@ export class InterModuleCommunication {
         type !== IMCMessageTypeEnum.SignalGetWindowId
       ) {
         console.warn(
-          `Duplicate message received with message ID: ${messageId}. Ignoring this message. Message: ${JSON.stringify(
+          `[${
+            this.thisWindowId
+          }]: Duplicate message received with message ID: ${messageId}. Ignoring this message. Message: ${JSON.stringify(
             event.data
           )}`
         );

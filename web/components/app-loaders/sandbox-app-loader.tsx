@@ -57,8 +57,8 @@ export default function SandboxAppLoader({
     // If the view Id changes (e.g. when switching file but not extension),
     // remove the old IMC channel and create a new one
     if (viewModel.viewId !== currentViewId) {
-      if (currentViewId && imcContext?.polyIMC?.hasChannel(currentViewId)) {
-        imcContext.polyIMC.removeChannel(currentViewId);
+      if (currentViewId && imcContext?.hasChannel(currentViewId)) {
+        imcContext.removeChannel(currentViewId);
       }
       setCurrentViewId(viewModel.viewId);
     }

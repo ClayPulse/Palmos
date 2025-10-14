@@ -1,6 +1,6 @@
 {
     "name": "@pulse-editor/shared-utils",
-    "version": "0.1.1-alpha.47",
+    "version": "0.1.1-alpha.48",
     "main": "dist/main.js",
     "files": [
         "dist"

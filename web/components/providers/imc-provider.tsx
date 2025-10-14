@@ -108,6 +108,18 @@ export default function InterModuleCommunicationProvider({
     });
   }
 
+  function hasChannel(viewId: string) {
+    if (!polyIMCRef.current) return false;
+    return polyIMCRef.current.hasChannel(viewId);
+  }
+
+  function removeChannel(viewId: string) {
+    if (!polyIMCRef.current) return;
+    polyIMCRef.current.removeChannel(viewId);
+    imcInitializedMapRef.current.delete(viewId);
+    delete imcInitializedResolvePromisesRef.current[viewId];
+  }
+
   /**
    * Provide a map of handlers for the IMC messages used for Pulse Editor APIs.
    */
@@ -487,6 +499,8 @@ export default function InterModuleCommunicationProvider({
         resolveWhenViewInitialized,
         markIMCInitialized,
         resolveWhenActionRegistered,
+        hasChannel,
+        removeChannel,
       }}
     >
       {children}
