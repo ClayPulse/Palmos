@@ -72,11 +72,12 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		async function publishExtension() {
 			setIsPublishing(true);
 
-			// Read package.json
-			const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf-8'));
+			// Read pulse.config.json for visibility
+			const config = JSON.parse(
+				fs.readFileSync('./dist/client/pulse.config.json', 'utf-8'),
+			);
 
-			const visibility = packageJson['pulse-editor-marketplace']
-				.visibility as string;
+			const visibility = config.visibility as string;
 
 			// Upload the zip file to the server
 			try {
