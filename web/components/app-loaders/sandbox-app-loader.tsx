@@ -1,5 +1,5 @@
 import BaseAppLoader from "@/components/app-loaders/base-app-loader";
-import Loading from "@/components/interface/loading";
+import Loading from "@/components/interface/status-screens/loading";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
 import { PlatformEnum } from "@/lib/enums";
@@ -15,7 +15,6 @@ import {
   ViewModel,
 } from "@pulse-editor/shared-utils";
 import { useTheme } from "next-themes";
-import path from "path";
 import { useContext, useEffect, useRef, useState } from "react";
 
 /**
@@ -46,7 +45,7 @@ export default function SandboxAppLoader({
   const [isLoadingExtension, setIsLoadingExtension] = useState<boolean>(false);
 
   const clRef = useRef<ConnectionListener | null>(null);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  // const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
 
   const { resolvedTheme } = useTheme();
@@ -58,7 +57,7 @@ export default function SandboxAppLoader({
     // remove the old IMC channel and create a new one
     if (viewModel.viewId !== currentViewId) {
       if (currentViewId && imcContext?.hasChannel(currentViewId)) {
-        imcContext.removeChannel(currentViewId);
+        imcContext.removeViewChannels(currentViewId);
       }
       setCurrentViewId(viewModel.viewId);
     }
@@ -128,6 +127,16 @@ export default function SandboxAppLoader({
     isInitialized,
   ]);
 
+  // Remove IMC and listener upon unmount
+  useEffect(() => {
+    return () => {
+      clRef.current?.close();
+      if (currentViewId && imcContext?.hasChannel(currentViewId)) {
+        imcContext?.removeViewChannels(currentViewId);
+      }
+    };
+  }, []);
+
   // Set is loading extension to true when current extension changes
   useEffect(() => {
     if (currentExtension) {
@@ -136,16 +145,6 @@ export default function SandboxAppLoader({
       setIsLoadingExtension(false);
     }
   }, [currentExtension]);
-
-  // When IMC is connected, remove the connection listener
-  useEffect(() => {
-    if (isConnected && clRef.current) {
-      console.log(`[${currentViewId}]: App connected.`);
-      // Close the connection listener
-      clRef.current.close();
-      clRef.current = null;
-    }
-  }, [isConnected]);
 
   // Send theme update to the extension when theme changes
   useEffect(() => {
@@ -166,7 +165,7 @@ export default function SandboxAppLoader({
     }
 
     // Update the IMC receiver handler map
-    if (isConnected && imcContext?.polyIMC?.hasChannel(viewModel.viewId)) {
+    if (imcContext?.polyIMC?.hasChannel(viewModel.viewId)) {
       imcContext.polyIMC.updateChannelReceiverHandlerMap(
         viewModel.viewId,
         getHandlerMap(viewModel),
@@ -226,15 +225,14 @@ export default function SandboxAppLoader({
               editorContext?.persistSettings?.projectHomePath +
               "/" +
               editorContext?.editorStates.project;
-            const absoluteUri = path.join(projectPath, uri);
 
             // Prevent writing to path outside the project path
-            if (!absoluteUri.startsWith(projectPath)) {
+            if (!uri.startsWith(projectPath)) {
               throw new Error(
                 "Cannot write to path outside the project directory.",
               );
             }
-            const newFile = new File([content], absoluteUri);
+            const newFile = new File([content], uri);
             await platformApi?.writeFile(newFile, content);
           }
         },
@@ -252,14 +250,15 @@ export default function SandboxAppLoader({
             editorContext?.persistSettings?.projectHomePath +
             "/" +
             editorContext?.editorStates.project;
-          const absoluteUri = path.join(projectPath, uri);
 
           // Prevent reading path outside the project path
-          if (!absoluteUri.startsWith(projectPath)) {
-            throw new Error("Cannot read file outside the project directory.");
+          if (!uri.startsWith(projectPath)) {
+            throw new Error(
+              "Cannot read file outside the project directory: " + uri,
+            );
           }
 
-          const file = await platformApi?.readFile(absoluteUri);
+          const file = await platformApi?.readFile(uri);
           return file;
         },
       );
@@ -293,15 +292,13 @@ export default function SandboxAppLoader({
   }
 
   function listenForExtensionConnection() {
-    setIsConnected(false);
-
     // Create IMC channel
     if (imcContext?.polyIMC) {
       const cl = new ConnectionListener(
         imcContext.polyIMC,
         getHandlerMap(viewModel),
         (senderWindow: Window, message: IMCMessage) => {
-          setIsConnected((prev) => true);
+          console.log(`[${currentViewId}]: App connected.`);
         },
         viewModel.viewId,
       );

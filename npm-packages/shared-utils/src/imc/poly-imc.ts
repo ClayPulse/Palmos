@@ -16,7 +16,7 @@ import { InterModuleCommunication } from "./inter-module-communication";
 export class PolyIMC {
   // A map that maps the other window ID,
   // and IMC between current window and the other window.
-  private channels: Map<string, InterModuleCommunication>;
+  private channelsMap: Map<string, InterModuleCommunication[]>;
   private baseReceiverHandlerMap: ReceiverHandlerMap;
   private channelReceiverHandlerMapMap: Map<string, ReceiverHandlerMap>;
 
@@ -26,7 +26,7 @@ export class PolyIMC {
    * E.g. Pulse Editor API handler
    */
   constructor(baseReceiverHandlerMap: ReceiverHandlerMap) {
-    this.channels = new Map();
+    this.channelsMap = new Map();
     this.baseReceiverHandlerMap = baseReceiverHandlerMap;
     this.channelReceiverHandlerMapMap = new Map();
   }
@@ -37,22 +37,31 @@ export class PolyIMC {
     payload?: any,
     abortSignal?: AbortSignal
   ) {
-    const channel = this.channels.get(targetWindowId);
-    if (!channel) {
+    const channels = this.channelsMap.get(targetWindowId);
+    if (!channels) {
       throw new Error("Channel not found for window ID " + targetWindowId);
     }
 
-    return await channel.sendMessage(handlingType, payload, abortSignal);
+    const results = await Promise.all(
+      channels.map(
+        async (channel) =>
+          await channel.sendMessage(handlingType, payload, abortSignal)
+      )
+    );
+
+    return results;
   }
 
   public updateBaseReceiverHandlerMap(handlerMap: ReceiverHandlerMap) {
     this.baseReceiverHandlerMap = handlerMap;
-    this.channels.forEach((channel, key) => {
+    this.channelsMap.forEach((channels, key) => {
       const combinedMap = this.getCombinedHandlerMap(
         this.baseReceiverHandlerMap,
         this.channelReceiverHandlerMapMap.get(key)
       );
-      channel.updateReceiverHandlerMap(combinedMap);
+      channels.forEach((channel) => {
+        channel.updateReceiverHandlerMap(combinedMap);
+      });
     });
   }
 
@@ -60,8 +69,8 @@ export class PolyIMC {
     targetWindowId: string,
     handlerMap: ReceiverHandlerMap
   ) {
-    const channel = this.channels.get(targetWindowId);
-    if (!channel) {
+    const channels = this.channelsMap.get(targetWindowId);
+    if (!channels) {
       throw new Error("Channel not found for window ID " + targetWindowId);
     }
 
@@ -70,7 +79,9 @@ export class PolyIMC {
       handlerMap
     );
 
-    channel.updateReceiverHandlerMap(combinedMap);
+    channels.forEach((channel) => {
+      channel.updateReceiverHandlerMap(combinedMap);
+    });
 
     this.channelReceiverHandlerMapMap.set(targetWindowId, handlerMap);
   }
@@ -85,7 +96,11 @@ export class PolyIMC {
     channel.initThisWindow(window, targetWindowId);
     await channel.initOtherWindow(targetWindow);
 
-    this.channels.set(targetWindowId, channel);
+    const newChannels = this.channelsMap.get(targetWindowId) ?? [];
+    // Add to existing channels
+    newChannels.push(channel);
+
+    this.channelsMap.set(targetWindowId, newChannels);
 
     // If there is a channel specific receiver handler map,
     // combine it with the base receiver handler map.
@@ -96,26 +111,28 @@ export class PolyIMC {
     }
   }
 
-  public removeChannel(targetWindowId: string) {
-    const channel = this.channels.get(targetWindowId);
-    if (!channel) {
+  public removeWindowChannels(targetWindowId: string) {
+    const channels = this.channelsMap.get(targetWindowId);
+    if (!channels) {
       throw new Error("Channel not found for window ID " + targetWindowId);
     }
 
-    channel.close();
-    this.channels.delete(targetWindowId);
+    channels.forEach((channel) => {
+      channel.close();
+    });
+    this.channelsMap.delete(targetWindowId);
     this.channelReceiverHandlerMapMap.delete(targetWindowId);
   }
 
   public hasChannel(targetWindowId: string): boolean {
-    return this.channels.has(targetWindowId);
+    return this.channelsMap.has(targetWindowId);
   }
 
   public close() {
-    this.channels.forEach((channel) => {
-      channel.close();
-    });
-    this.channels.clear();
+    this.channelsMap.forEach((channels) =>
+      channels.forEach((channel) => channel.close())
+    );
+    this.channelsMap.clear();
     this.channelReceiverHandlerMapMap.clear();
   }
 

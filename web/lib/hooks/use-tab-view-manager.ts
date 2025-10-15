@@ -211,10 +211,10 @@ export function useTabViewManager() {
     if (view.type === ViewModeEnum.Canvas) {
       // Remove the app nodes' view IDs from IMC context
       (view.config as CanvasViewConfig).appConfigs?.forEach((appConfig) => {
-        imcContext?.removeChannel(appConfig.viewId);
+        imcContext?.removeViewChannels(appConfig.viewId);
       });
     } else if (view.type === ViewModeEnum.App) {
-      imcContext?.removeChannel((view.config as AppViewConfig).viewId);
+      imcContext?.removeViewChannels((view.config as AppViewConfig).viewId);
     }
   }
 
@@ -237,10 +237,10 @@ export function useTabViewManager() {
     tabViews.forEach((view) => {
       if (view.type === ViewModeEnum.Canvas) {
         (view.config as CanvasViewConfig).appConfigs?.forEach((appConfig) => {
-          imcContext?.removeChannel(appConfig.viewId);
+          imcContext?.removeViewChannels(appConfig.viewId);
         });
       } else if (view.type === ViewModeEnum.App) {
-        imcContext?.removeChannel(
+        imcContext?.removeViewChannels(
           (view.config as AppViewConfig).viewId,
         );
       }

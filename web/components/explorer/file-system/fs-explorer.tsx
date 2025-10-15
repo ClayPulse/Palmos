@@ -1,28 +1,30 @@
 "use client";
 
+import { IMCContext } from "@/components/providers/imc-provider";
+import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { TreeViewGroupRef } from "@/lib/types";
-import { Button } from "@heroui/react";
-import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { addToast, Button } from "@heroui/react";
+import { IMCMessageTypeEnum, ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useRef } from "react";
 import toast from "react-hot-toast";
-import { v4 } from "uuid";
 import Icon from "../../misc/icon";
 import { EditorContext } from "../../providers/editor-context-provider";
 import TreeViewGroup from "./tree-view";
-import { PlatformEnum } from "@/lib/enums";
 
 export default function FileSystemExplorer({
   setIsMenuOpen,
 }: {
   setIsMenuOpen: (isOpen: boolean) => void;
 }) {
-  const platform = getPlatform();
   const editorContext = useContext(EditorContext);
+  const imcContext = useContext(IMCContext);
+
+  const platform = getPlatform();
   const { platformApi } = usePlatformApi();
-  const { openFileInView } = useTabViewManager();
+  const { activeTabView, closeAllTabViews } = useTabViewManager();
 
   const rootGroupRef = useRef<TreeViewGroupRef | null>(null);
 
@@ -36,14 +38,56 @@ export default function FileSystemExplorer({
     }
   }, [editorContext?.editorStates.explorerSelectedNodeRefs]);
 
-  function viewFile(uri: string, viewMode: ViewModeEnum) {
-    platformApi?.readFile(uri).then((file) => {
-      openFileInView(file, viewMode).then(() => {
-        if (platform === PlatformEnum.Capacitor) {
-          setIsMenuOpen(false);
-        }
+  async function viewFile(uri: string) {
+    // Simply send uri to selected app node or app view
+    if (activeTabView?.type === ViewModeEnum.App) {
+      // Send uri to app view
+      await imcContext?.polyIMC?.sendMessage(
+        activeTabView.config.viewId,
+        IMCMessageTypeEnum.EditorAppReceiveFileUri,
+        {
+          uri,
+        },
+      );
+
+      if (platform === PlatformEnum.Capacitor) {
+        setIsMenuOpen(false);
+      }
+    } else if (activeTabView?.type === ViewModeEnum.Canvas) {
+      // Get selected node and send to that node
+      const selectedViewIds = editorContext?.editorStates.selectedViewIds ?? [];
+
+      if (selectedViewIds.length === 0) {
+        addToast({
+          title: "No app selected to handle this file.",
+          description: "Please select a node in canvas to view the file",
+          color: "danger",
+        });
+        return;
+      }
+
+      // For each selected view Id, send selected file uri
+      for (const viewId of selectedViewIds) {
+        await imcContext?.polyIMC?.sendMessage(
+          viewId,
+          IMCMessageTypeEnum.EditorAppReceiveFileUri,
+          {
+            uri,
+          },
+        );
+      }
+
+      if (platform === PlatformEnum.Capacitor) {
+        setIsMenuOpen(false);
+      }
+    } else {
+      addToast({
+        title: "No app selected or opened to handle this file.",
+        description:
+          "Please open an app or select a node in canvas to view the file",
+        color: "danger",
       });
-    });
+    }
   }
 
   function startCreatingNewFolder() {
@@ -128,7 +172,26 @@ export default function FileSystemExplorer({
             </Button>
           </div>
           <div className="flex">
-            <Button isIconOnly variant="light" size="sm">
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              onPress={() => {
+                editorContext?.setEditorStates((prev) => {
+                  return {
+                    ...prev,
+                    project: "",
+                    projectContent: [],
+                  };
+                });
+
+                // Clear view manager
+                closeAllTabViews();
+              }}
+            >
+              <Icon name="close" variant="outlined" />
+            </Button>
+            {/* <Button isIconOnly variant="light" size="sm">
               <Icon name="cloud_upload" variant="outlined" />
             </Button>
             <Button isIconOnly variant="light" size="sm">
@@ -136,7 +199,7 @@ export default function FileSystemExplorer({
             </Button>
             <Button isIconOnly variant="light" size="sm">
               <Icon name="search" variant="outlined" />
-            </Button>
+            </Button> */}
           </div>
         </div>
 

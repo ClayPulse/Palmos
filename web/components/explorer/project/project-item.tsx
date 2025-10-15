@@ -1,4 +1,6 @@
+import { PlatformEnum, SideMenuTabEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
+import { getPlatform, isWeb } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState, ProjectInfo } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useContext, useState } from "react";
@@ -15,7 +17,9 @@ export default function ProjectItem({
   setSettingsProject: (project: ProjectInfo) => void;
 }) {
   const editorContext = useContext(EditorContext);
+
   const { platformApi } = usePlatformApi();
+
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
     x: 0,
     y: 0,
@@ -35,23 +39,26 @@ export default function ProjectItem({
       };
     });
 
-    // TODO: move this to when workspace is loaded
-    // const uri =
-    //   editorContext?.persistSettings?.projectHomePath + "/" + projectName;
-    // platformApi
-    //   ?.listPathContent(uri, {
-    //     include: "all",
-    //     isRecursive: true,
-    //   })
-    //   .then((objects) => {
-    //     editorContext?.setEditorStates((prev) => {
-    //       return {
-    //         ...prev,
-    //         project: projectName,
-    //         projectContent: objects,
-    //       };
-    //     });
-    //   });
+    if (getPlatform() === PlatformEnum.Electron) {
+      const uri =
+        editorContext?.persistSettings?.projectHomePath + "/" + projectName;
+      platformApi
+        ?.listPathContent(uri, {
+          include: "all",
+          isRecursive: true,
+        })
+        .then((objects) => {
+          editorContext?.setEditorStates((prev) => {
+            return {
+              ...prev,
+              project: projectName,
+              projectContent: objects,
+            };
+          });
+        });
+    } else if (isWeb()) {
+      // TODO: move this to when workspace is loaded
+    }
   }
 
   function formatDateTime(date: Date) {

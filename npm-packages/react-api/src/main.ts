@@ -1,6 +1,6 @@
 import useAgentTools from "./hooks/agent/use-agent-tools";
 import useAgents from "./hooks/agent/use-agents";
-import useFileView from "./hooks/editor/use-file-view";
+import useFile from "./hooks/editor/use-file";
 import useLoading from "./hooks/editor/use-loading";
 import useNotification from "./hooks/editor/use-notification";
 import useRegisterAction from "./hooks/editor/use-register-action";
@@ -14,21 +14,25 @@ import useSTT from "./hooks/ai-modality/use-stt";
 import useTTS from "./hooks/ai-modality/use-tts";
 import useVideoGen from "./hooks/ai-modality/use-video-gen";
 import usePulseEnv from "./hooks/editor/use-env";
+import useReceiveFile from "./hooks/editor/use-receive-file";
 import useSnapshotState from "./hooks/editor/use-snapshot-state";
 import useTerminal from "./hooks/terminal/use-terminal";
+import ReceiveFileProvider from "./providers/receive-file-provider";
 import SnapshotProvider from "./providers/snapshot-provider";
 
 export {
+  ReceiveFileProvider,
   SnapshotProvider,
   useAgentTools,
   useAgents,
-  useFileView,
+  useFile,
   useImageGen,
   useLLM,
   useLoading,
   useNotification,
   useOCR,
   usePulseEnv,
+  useReceiveFile,
   useRegisterAction,
   useSTT,
   useSnapshotState,

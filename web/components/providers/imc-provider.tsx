@@ -27,6 +27,7 @@ import {
   STTConfig,
   TTSConfig,
 } from "@pulse-editor/shared-utils";
+import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef } from "react";
 import { EditorContext } from "./editor-context-provider";
 
@@ -38,6 +39,7 @@ export default function InterModuleCommunicationProvider({
   children: React.ReactNode;
 }) {
   const editorContext = useContext(EditorContext);
+  const { resolvedTheme } = useTheme();
 
   const polyIMCRef = useRef<PolyIMC | undefined>(undefined);
   const imcInitializedMapRef = useRef<Map<string, boolean>>(new Map());
@@ -113,9 +115,9 @@ export default function InterModuleCommunicationProvider({
     return polyIMCRef.current.hasChannel(viewId);
   }
 
-  function removeChannel(viewId: string) {
+  function removeViewChannels(viewId: string) {
     if (!polyIMCRef.current) return;
-    polyIMCRef.current.removeChannel(viewId);
+    polyIMCRef.current.removeWindowChannels(viewId);
     imcInitializedMapRef.current.delete(viewId);
     delete imcInitializedResolvePromisesRef.current[viewId];
   }
@@ -488,6 +490,16 @@ export default function InterModuleCommunicationProvider({
           markActionRegistered(action);
         },
       ],
+      [
+        IMCMessageTypeEnum.EditorAppRequestTheme,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          return resolvedTheme ?? "light";
+        },
+      ],
     ]);
 
     return newMap;
@@ -500,7 +512,7 @@ export default function InterModuleCommunicationProvider({
         markIMCInitialized,
         resolveWhenActionRegistered,
         hasChannel,
-        removeChannel,
+        removeViewChannels,
       }}
     >
       {children}

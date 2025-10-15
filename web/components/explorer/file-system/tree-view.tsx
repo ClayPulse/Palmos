@@ -3,6 +3,7 @@
 import ContextMenu from "@/components/interface/context-menu";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { PlatformEnum } from "@/lib/enums";
 import { AbstractPlatformAPI } from "@/lib/platform-api/abstract-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
@@ -12,9 +13,7 @@ import {
   TreeViewGroupRef,
   TreeViewNodeRef,
 } from "@/lib/types";
-import { PlatformEnum } from "@/lib/enums";
 import { Button, Input } from "@heroui/react";
-import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import {
   forwardRef,
   Ref,
@@ -64,7 +63,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
     parentGroupRef,
   }: {
     object: FileSystemObject;
-    viewFile: (uri: string, viewMode: ViewModeEnum) => void;
+    viewFile: (uri: string) => Promise<void>;
     platformApi?: AbstractPlatformAPI;
     parentGroupRef: RefObject<TreeViewGroupRef>;
   },
@@ -282,11 +281,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                   }
                 }
                 // check if ctrl is down
-                if (isCtrlDown()) {
-                  viewFile(object.uri, ViewModeEnum.Canvas);
-                } else {
-                  viewFile(object.uri, ViewModeEnum.App);
-                }
+                viewFile(object.uri);
               }}
               onContextMenu={handleOnContextMenu}
             >
@@ -328,7 +323,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                   onPress={(e) => {
                     setContextMenuState({ x: 0, y: 0, isOpen: false });
 
-                    viewFile(object.uri, ViewModeEnum.Canvas);
+                    viewFile(object.uri);
                   }}
                 >
                   <p className="w-full text-start">Open In Canvas</p>
@@ -342,7 +337,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                   onPress={(e) => {
                     setContextMenuState({ x: 0, y: 0, isOpen: false });
 
-                    viewFile(object.uri, ViewModeEnum.App);
+                    viewFile(object.uri);
                   }}
                 >
                   <p className="w-full text-start">Open In App</p>
@@ -375,7 +370,7 @@ function TreeViewNodeWrapper({
   parentGroupRef,
 }: {
   object: FileSystemObject;
-  viewFile: (uri: string, viewMode: ViewModeEnum) => void;
+  viewFile: (uri: string) => Promise<void>;
   platformApi?: AbstractPlatformAPI;
   parentGroupRef: RefObject<TreeViewGroupRef>;
 }) {
@@ -400,7 +395,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     platformApi,
   }: {
     objects: FileSystemObject[];
-    viewFile: (uri: string, viewMode: ViewModeEnum) => void;
+    viewFile: (uri: string) => Promise<void>;
     folderUri: string;
     platformApi?: AbstractPlatformAPI;
   },

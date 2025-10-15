@@ -1,5 +1,5 @@
 import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
-import useIMC from "../../lib/use-imc";
+import useIMC from "../imc/use-imc";
 import { useEffect, useState } from "react";
 
 export default function useTerminal() {
