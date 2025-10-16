@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.49
+
+### Patch Changes
+
+- Fix platformAPI for FS
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.49
+
 ## 0.1.1-alpha.48
 
 ### Patch Changes

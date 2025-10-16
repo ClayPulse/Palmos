@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.49
+
+### Patch Changes
+
+- Fix platformAPI for FS
+
 ## 0.1.1-alpha.48
 
 ### Patch Changes

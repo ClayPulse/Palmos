@@ -76,9 +76,7 @@ export class InterModuleCommunication {
       const message = event.data;
       if (message.from !== undefined) {
         console.log(
-          `Module ${this.thisWindowId} received message from module ${
-            message.from
-          }:\n ${JSON.stringify(message)}`
+          `Module ${this.thisWindowId} received message from module ${message.from}:\n ${message}`
         );
       }
 

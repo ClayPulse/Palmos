@@ -218,8 +218,12 @@ export default function SandboxAppLoader({
           abortSignal?: AbortSignal,
         ) => {
           if (message.payload) {
-            const { uri, content }: { uri: string; content: string } =
+            const { uri, file }: { uri: string; file: File | undefined } =
               message.payload;
+
+            if (!file) {
+              throw new Error("File is undefined.");
+            }
 
             const projectPath =
               editorContext?.persistSettings?.projectHomePath +
@@ -232,8 +236,7 @@ export default function SandboxAppLoader({
                 "Cannot write to path outside the project directory.",
               );
             }
-            const newFile = new File([content], uri);
-            await platformApi?.writeFile(newFile, content);
+            await platformApi?.writeFile(file, uri);
           }
         },
       );
