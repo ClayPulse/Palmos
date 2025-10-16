@@ -12,4 +12,10 @@ export enum MarketplaceCategoryEnum {
   Workflows = "Workflows",
   Apps = "Apps",
 }
+
+export enum SideMenuTabEnum {
+  Projects = "Projects",
+  Apps = "Apps",
+  Workspaces = "Workspaces",
+}
 // #endregion

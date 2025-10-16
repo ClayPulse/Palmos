@@ -1,3 +1,4 @@
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
 import { addToast } from "@heroui/react";
 import { IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
@@ -15,6 +16,7 @@ import useScopedActions from "./use-scoped-actions";
 export default function useCanvasWorkflow(
   initialWorkflowContent?: WorkflowContent,
 ) {
+  const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
   const { runAction } = useScopedActions();
@@ -40,9 +42,92 @@ export default function useCanvasWorkflow(
 
   const [isRestored, setIsRestored] = useState(false);
 
+  const debouncedGetEntryPoint = useDebouncedCallback(() => {
+    const entry = localNodes.find((node) => node.selected) ?? defaultEntryPoint;
+    setEntryPoint(entry);
+  }, 200);
+
+  const debounceSetSelectedViews = useDebouncedCallback(() => {
+    const viewIds = localNodes
+      .filter((n) => n.selected)
+      .map((n) => n.data.config.viewId);
+
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      selectedViewIds: viewIds,
+    }));
+  }, 200);
+
+  const updateWorkflowNodeData = useCallback(
+    (nodeViewId: string, data: Partial<AppNodeData>) => {
+      setLocalNodes((prev) => {
+        const index = prev.findIndex((n) => n.id === nodeViewId);
+        if (index === -1) return prev;
+        const node = prev[index];
+        const newNode = {
+          ...node,
+          data: {
+            ...node.data,
+            ...data,
+          },
+        };
+        const newNodes = [...prev];
+        newNodes[index] = newNode;
+        return newNodes;
+      });
+    },
+    [localNodes],
+  );
+
+  const updateWorkflowNodes = useCallback(
+    (
+      updater: (
+        oldNodes: ReactFlowNode<AppNodeData>[],
+      ) => ReactFlowNode<AppNodeData>[],
+    ) => {
+      const updatedNodes = updater(localNodes ?? []);
+      setLocalNodes(updatedNodes);
+    },
+    [localNodes],
+  );
+  const updateWorkflowEdges = useCallback(
+    (updater: (oldEdges: ReactFlowEdge[]) => ReactFlowEdge[]) => {
+      const updatedEdges = updater(localEdges ?? []);
+      setLocalEdges(updatedEdges);
+    },
+    [localEdges],
+  );
+
+  const exportWorkflow = useCallback(async () => {
+    const blob = new Blob(
+      [
+        JSON.stringify(
+          {
+            nodes: localNodes,
+            edges: localEdges,
+            defaultEntryPoint: defaultEntryPoint,
+            snapshotStates: await saveAppsSnapshotStates(),
+          } as WorkflowContent,
+          null,
+          2,
+        ),
+      ],
+      {
+        type: "application/json",
+      },
+    );
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "workflow.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [localNodes, localEdges, defaultEntryPoint]);
+
   // Update entry points
   useEffect(() => {
     debouncedGetEntryPoint();
+    debounceSetSelectedViews();
   }, [localNodes]);
 
   // Restore snapshot states upon loading a workflow
@@ -313,77 +398,6 @@ export default function useCanvasWorkflow(
     setPendingNodes([entryPoint]);
   }
 
-  const debouncedGetEntryPoint = useDebouncedCallback(() => {
-    const entry = localNodes.find((node) => node.selected) ?? defaultEntryPoint;
-    setEntryPoint(entry);
-  }, 200);
-
-  const updateWorkflowNodeData = useCallback(
-    (nodeViewId: string, data: Partial<AppNodeData>) => {
-      setLocalNodes((prev) => {
-        const index = prev.findIndex((n) => n.id === nodeViewId);
-        if (index === -1) return prev;
-        const node = prev[index];
-        const newNode = {
-          ...node,
-          data: {
-            ...node.data,
-            ...data,
-          },
-        };
-        const newNodes = [...prev];
-        newNodes[index] = newNode;
-        return newNodes;
-      });
-    },
-    [localNodes],
-  );
-
-  const updateWorkflowNodes = useCallback(
-    (
-      updater: (
-        oldNodes: ReactFlowNode<AppNodeData>[],
-      ) => ReactFlowNode<AppNodeData>[],
-    ) => {
-      const updatedNodes = updater(localNodes ?? []);
-      setLocalNodes(updatedNodes);
-    },
-    [localNodes],
-  );
-  const updateWorkflowEdges = useCallback(
-    (updater: (oldEdges: ReactFlowEdge[]) => ReactFlowEdge[]) => {
-      const updatedEdges = updater(localEdges ?? []);
-      setLocalEdges(updatedEdges);
-    },
-    [localEdges],
-  );
-
-  const exportWorkflow = useCallback(async () => {
-    const blob = new Blob(
-      [
-        JSON.stringify(
-          {
-            nodes: localNodes,
-            edges: localEdges,
-            defaultEntryPoint: defaultEntryPoint,
-            snapshotStates: await saveAppsSnapshotStates(),
-          } as WorkflowContent,
-          null,
-          2,
-        ),
-      ],
-      {
-        type: "application/json",
-      },
-    );
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "workflow.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }, [localNodes, localEdges, defaultEntryPoint]);
-
   async function saveAppsSnapshotStates() {
     const apps = localNodes.map((node) => node.data.config);
 
@@ -395,10 +409,17 @@ export default function useCanvasWorkflow(
         return await Promise.race([
           new Promise<any>((resolve) => setTimeout(() => resolve(null), 2000)),
           (async () => {
-            const { states } = await imcContext?.polyIMC?.sendMessage(
+            // All IMC channels' states
+            const channelsStates = await imcContext?.polyIMC?.sendMessage(
               app.viewId,
               IMCMessageTypeEnum.EditorAppStateSnapshotSave,
             );
+
+            // Consolidate states from all channels into one for this view ID
+            const states = channelsStates?.reduce((acc, curr) => {
+              return { ...acc, ...curr };
+            }, {});
+
             return { appId: app.viewId, states: states };
           })(),
         ]);

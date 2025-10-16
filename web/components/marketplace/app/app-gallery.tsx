@@ -7,7 +7,7 @@ import { Select, SelectItem } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import { compare } from "semver";
 import useSWR from "swr";
-import Loading from "../../interface/loading";
+import Loading from "../../interface/status-screens/loading";
 import AppPreviewCard from "./app-preview-card";
 
 export default function AppGallery() {

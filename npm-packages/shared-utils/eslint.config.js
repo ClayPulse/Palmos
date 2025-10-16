@@ -1,5 +1,5 @@
-import globals from "globals";
 import pluginJs from "@eslint/js";
+import globals from "globals";
 import tseslint from "typescript-eslint";
 
 /** @type {import('eslint').Linter.Config[]} */
@@ -19,6 +19,14 @@ export default [
     rules: {
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
+  {
+    languageOptions: {
+      parserOptions: {
+        tsconfigRootDir: dirname(fileURLToPath(import.meta.url)),
+        project: "./tsconfig.json",
+      },
     },
   },
 ];

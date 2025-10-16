@@ -1,5 +1,5 @@
-import Loading from "@/components/interface/loading";
-import NotAuthorized from "@/components/interface/not-authorized";
+import Loading from "@/components/interface/status-screens/loading";
+import NotAuthorized from "@/components/interface/status-screens/not-authorized";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";

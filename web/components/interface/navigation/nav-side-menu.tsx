@@ -1,8 +1,11 @@
 import AppExplorer from "@/components/explorer/app/app-explorer";
+import FileSystemExplorer from "@/components/explorer/file-system/fs-explorer";
 import ProjectExplorer from "@/components/explorer/project/project-explorer";
+import WorkspaceExplorer from "@/components/explorer/workspace/workspace-explorer";
 import Tabs from "@/components/misc/tabs";
 import ProjectSettingsModal from "@/components/modals/project-settings-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { SideMenuTabEnum } from "@/lib/enums";
 import useExplorer from "@/lib/hooks/use-explorer";
 import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { isWeb } from "@/lib/platform-api/platform-checker";
@@ -10,7 +13,6 @@ import { TabItem } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
-import FileSystemExplorer from "../../explorer/file-system/fs-explorer";
 import Icon from "../../misc/icon";
 
 export default function NavSideMenu({
@@ -114,22 +116,32 @@ function PanelContent({
 
   const tabItems: TabItem[] = [
     {
-      name: "Projects",
+      name: SideMenuTabEnum.Projects,
       description: "List of projects",
       icon: "folder",
     },
     {
-      name: "Apps",
+      name: SideMenuTabEnum.Apps,
       description: "List of apps",
       icon: "apps",
     },
     {
-      name: "Workspace",
+      name: SideMenuTabEnum.Workspaces,
       description: "Project workspace",
       icon: "folder",
     },
   ];
-  const [selectedTabIndex, setSelectedTabIndex] = useState<number>(0);
+
+  const selectedTab =
+    editorContext?.editorStates.sideMenuTab ?? SideMenuTabEnum.Projects;
+  function setSelectedTab(tab: SideMenuTabEnum) {
+    editorContext?.setEditorStates((prev) => {
+      return {
+        ...prev,
+        sideMenuTab: tab,
+      };
+    });
+  }
 
   // Choose project home path
   if (!isWeb() && !editorContext?.persistSettings?.projectHomePath) {
@@ -157,35 +169,41 @@ function PanelContent({
         <div className="w-fit">
           <Tabs
             tabItems={tabItems}
-            selectedItem={tabItems[selectedTabIndex]}
+            selectedItem={tabItems.find((tab) => tab.name === selectedTab)}
             setSelectedItem={(item) => {
               const index = tabItems.findIndex(
                 (tab) => tab.name === item?.name,
               );
-              setSelectedTabIndex(index !== -1 ? index : 0);
+              setSelectedTab(item?.name as SideMenuTabEnum);
             }}
             isClosable={false}
           />
         </div>
       </div>
       <div className="h-full w-full overflow-y-hidden">
-        {tabItems[selectedTabIndex]?.name === "Apps" ? (
+        {selectedTab === SideMenuTabEnum.Apps ? (
           <AppExplorer />
-        ) : tabItems[selectedTabIndex]?.name === "Workspace" ? (
-          <FileSystemExplorer setIsMenuOpen={setIsMenuOpen} />
+        ) : selectedTab === SideMenuTabEnum.Workspaces ? (
+          // <FileSystemExplorer setIsMenuOpen={setIsMenuOpen} />
+          <WorkspaceExplorer />
         ) : (
-          <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto px-4">
-            <p className="text-center text-lg font-medium">View Projects</p>
-            <Button
-              className="w-full"
-              onPress={() => {
-                setIsProjectSettingsModalOpen(true);
-              }}
-            >
-              New Project
-            </Button>
-            <ProjectExplorer />
-          </div>
+          selectedTab === SideMenuTabEnum.Projects &&
+          (editorContext?.editorStates.project ? (
+            <FileSystemExplorer setIsMenuOpen={setIsMenuOpen} />
+          ) : (
+            <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto px-4">
+              <p className="text-center text-lg font-medium">View Projects</p>
+              <Button
+                className="w-full"
+                onPress={() => {
+                  setIsProjectSettingsModalOpen(true);
+                }}
+              >
+                New Project
+              </Button>
+              <ProjectExplorer />
+            </div>
+          ))
         )}
       </div>
       <ProjectSettingsModal

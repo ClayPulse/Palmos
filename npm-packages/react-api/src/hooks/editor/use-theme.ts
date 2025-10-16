@@ -1,6 +1,6 @@
 import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
-import { useState } from "react";
-import useIMC from "../../lib/use-imc";
+import { useEffect, useState } from "react";
+import useIMC from "../imc/use-imc";
 
 export default function useTheme() {
   const [theme, setTheme] = useState<string>("light");
@@ -17,7 +17,19 @@ export default function useTheme() {
     }
   );
 
-  const { imc } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap);
+
+  // Upon initial load, request theme from main app
+  useEffect(() => {
+    if (isReady) {
+      imc
+        ?.sendMessage(IMCMessageTypeEnum.EditorAppRequestTheme)
+        .then((result) => {
+          console.log("Received theme from main app:", result);
+          setTheme((prev) => result);
+        });
+    }
+  }, [isReady]);
 
   return {
     theme,

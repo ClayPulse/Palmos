@@ -6,7 +6,7 @@ import {
   TypedVariable,
 } from "@pulse-editor/shared-utils";
 import { DependencyList, useEffect, useRef, useState } from "react";
-import useIMC from "../../lib/use-imc";
+import useIMC from "../imc/use-imc";
 
 /**
  * Register an app action to listen to IMC messages from the core,

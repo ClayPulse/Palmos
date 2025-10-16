@@ -7,7 +7,7 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import useIMC from "../lib/use-imc";
+import useIMC from "../hooks/imc/use-imc";
 
 export const SnapshotContext = createContext<SnapshotContextType | undefined>(
   undefined
@@ -23,6 +23,8 @@ export default function SnapshotProvider({
 }: {
   children: ReactNode;
 }) {
+  const [states, setStates] = useState<{ [key: string]: any }>({});
+  
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<any>
@@ -47,8 +49,6 @@ export default function SnapshotProvider({
   ]);
 
   const { imc, isReady } = useIMC(receiverHandlerMap);
-
-  const [states, setStates] = useState<{ [key: string]: any }>({});
 
   useEffect(() => {
     if (isReady) {

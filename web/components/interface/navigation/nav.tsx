@@ -15,7 +15,7 @@ import PasswordModal from "../../modals/password-modal";
 import SharingModal from "../../modals/sharing-modal";
 import WorkspaceSettingsModal from "../../modals/workspace-settings-model";
 import { EditorContext } from "../../providers/editor-context-provider";
-import Loading from "../loading";
+import Loading from "../status-screens/loading";
 import NavSideMenu from "./nav-side-menu";
 import NavTopBar from "./nav-top-bar";
 

@@ -32,6 +32,7 @@ export enum IMCMessageTypeEnum {
   EditorRunAgentMethod = "editor-run-agent-method",
   // Get theme
   EditorThemeUpdate = "editor-theme-update",
+  EditorAppRequestTheme = "editor-app-request-theme",
   // Send notification
   EditorShowNotification = "editor-show-notification",
   // Get environment variables
@@ -39,6 +40,8 @@ export enum IMCMessageTypeEnum {
   // App state snapshot upon importing & exporting
   EditorAppStateSnapshotRestore = "editor-app-state-snapshot-restore",
   EditorAppStateSnapshotSave = "editor-app-state-snapshot-save",
+  // Handle editor file selection or drop
+  EditorAppReceiveFileUri = "editor-app-receive-file-uri",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)
@@ -48,6 +51,8 @@ export enum IMCMessageTypeEnum {
   PlatformWriteFile = "platform-write-file",
   // Request view file
   PlatformReadFile = "platform-read-file",
+  // File update (file watch notification from platform to view)
+  PlatformFileUpdate = "platform-file-update",
   // #endregion
 
   // #region Signal messages
@@ -123,7 +128,7 @@ export type AppConfig = {
   id: string;
   version: string;
   libVersion?: string;
-  visibility?: string;
+  visibility?: "public" | "private" | "unlisted";
   author?: string;
   displayName?: string;
   description?: string;

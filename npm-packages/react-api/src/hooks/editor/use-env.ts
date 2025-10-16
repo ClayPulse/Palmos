@@ -1,6 +1,6 @@
 import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
-import useIMC from "../../lib/use-imc";
+import useIMC from "../imc/use-imc";
 
 export default function usePulseEnv() {
   const receiverHandlerMap = new Map<

@@ -1,6 +1,6 @@
 import { generateQR } from "@/lib/share/qr-gen";
 import { useEffect, useState } from "react";
-import Loading from "../interface/loading";
+import Loading from "../interface/status-screens/loading";
 import { Button } from "@heroui/react";
 import toast from "react-hot-toast";
 import Icon from "./icon";

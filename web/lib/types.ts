@@ -7,6 +7,7 @@ import {
 } from "@pulse-editor/shared-utils";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
+import { SideMenuTabEnum } from "./enums";
 import { BaseLLM } from "./modalities/llm/llm";
 import { BaseSTT } from "./modalities/stt/stt";
 import { BaseTTS } from "./modalities/tts/tts";
@@ -86,6 +87,10 @@ export type EditorStates = {
   // Side menu panel
   isSideMenuOpen?: boolean;
   isMarketplaceOpen?: boolean;
+  sideMenuTab?: SideMenuTabEnum;
+
+  // Selected views
+  selectedViewIds?: string[];
 };
 
 /**
@@ -307,7 +312,7 @@ export type IMCContextType = {
   markIMCInitialized: (viewId: string) => void;
   resolveWhenActionRegistered: (action: Action) => Promise<void>;
   hasChannel: (viewId: string) => boolean;
-  removeChannel: (viewId: string) => void;
+  removeViewChannels: (viewId: string) => void;
 };
 
 // #endregion
@@ -343,7 +348,7 @@ export type AppMetaData = {
   org: {
     name: string;
   };
-  visibility: string;
+  visibility: "public" | "private" | "unlisted";
   thumbnail?: string;
 };
 // #endregion

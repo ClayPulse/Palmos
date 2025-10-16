@@ -17,7 +17,7 @@ export default function ProjectIndicator() {
   const editorContext = useContext(EditorContext);
   const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
     useState(false);
-  const { closeAllTabViews: closeAllFileViews } = useTabViewManager();
+  const { closeAllTabViews } = useTabViewManager();
 
   function closeProject() {
     editorContext?.setEditorStates((prev) => {
@@ -29,7 +29,7 @@ export default function ProjectIndicator() {
     });
 
     // Clear view manager
-    closeAllFileViews();
+    closeAllTabViews();
   }
 
   function handleProjectMenu(key: Key) {

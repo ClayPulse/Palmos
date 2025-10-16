@@ -4,7 +4,7 @@ import {
   IMCMessageTypeEnum,
 } from "@pulse-editor/shared-utils";
 
-import useIMC from "../../lib/use-imc";
+import useIMC from "../imc/use-imc";
 
 export default function useNotification() {
   const receiverHandlerMap = new Map<
