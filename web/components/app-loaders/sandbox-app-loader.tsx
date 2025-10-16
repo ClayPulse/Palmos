@@ -2,10 +2,11 @@ import BaseAppLoader from "@/components/app-loaders/base-app-loader";
 import Loading from "@/components/interface/status-screens/loading";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
-import { PlatformEnum } from "@/lib/enums";
+import { DragEventTypeEnum, PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { ExtensionApp } from "@/lib/types";
+import { ExtensionApp, FileDragData } from "@/lib/types";
+import { addToast } from "@heroui/react";
 import {
   AppTypeEnum,
   ConnectionListener,
@@ -310,7 +311,56 @@ export default function SandboxAppLoader({
   }
 
   return (
-    <div className="relative h-full w-full">
+    <div
+      className="relative h-full w-full"
+      onDragOver={(e) => {
+        e.stopPropagation();
+        const types = e.dataTransfer.types;
+        if (
+          types.includes(`application/${DragEventTypeEnum.File.toLowerCase()}`)
+        ) {
+          e.preventDefault(); // allow drop
+          e.dataTransfer.dropEffect = "move";
+        } else {
+          e.dataTransfer.dropEffect = "none";
+        }
+      }}
+      onDrop={async (e) => {
+        const dataText = e.dataTransfer.getData(
+          `application/${DragEventTypeEnum.File.toLowerCase()}`,
+        );
+        if (!dataText) {
+          return;
+        }
+        console.log("Dropped item:", dataText);
+        try {
+          const data = JSON.parse(dataText) as FileDragData;
+
+          e.preventDefault();
+          const uri = data.uri;
+
+          // Send uri to app view
+          await imcContext?.polyIMC?.sendMessage(
+            viewModel.viewId,
+            IMCMessageTypeEnum.EditorAppReceiveFileUri,
+            {
+              uri,
+            },
+          );
+        } catch (error) {
+          addToast({
+            title: "Failed to open file",
+            description: "The dropped file data is invalid.",
+            color: "danger",
+          });
+        } finally {
+          editorContext?.setEditorStates((prev) => ({
+            ...prev,
+            isDraggingOverCanvas: false,
+          }));
+        }
+      }}
+    >
       {isLookingForExtension ? (
         <div className="bg-content1 h-full w-full">
           <Loading />
@@ -324,7 +374,12 @@ export default function SandboxAppLoader({
           </p>
         </div>
       ) : (
-        <div className="relative h-full w-full">
+        <div
+          className="relative h-full w-full data-[is-dragging-file=true]:pointer-events-none"
+          data-is-dragging-file={
+            editorContext?.editorStates.isDraggingOverCanvas ? "true" : "false"
+          }
+        >
           {isLoadingExtension && (
             <div className="bg-content1 absolute top-0 left-0 h-full w-full">
               <Loading />

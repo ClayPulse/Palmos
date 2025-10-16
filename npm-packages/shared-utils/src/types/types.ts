@@ -208,6 +208,10 @@ export type TypedVariableType =
   | "number"
   | "boolean"
   | "any"
+  // An app instance is a reference to another app.
+  // This instance could be possessed by the owner,
+  // or it can be initialized by the caller.
+  | "app-instance"
   | TypedVariableObjectType
   | TypedVariableArrayType;
 

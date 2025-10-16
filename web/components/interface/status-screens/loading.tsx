@@ -2,10 +2,10 @@ import { Progress } from "@heroui/react";
 
 export default function Loading({ text = "Loading..." }: { text?: string }) {
   return (
-    <div className="flex h-full w-full flex-col items-center justify-center dark:bg-[#27272A]">
+    <div className="flex h-full w-full flex-col items-center justify-center">
       <Progress
         isIndeterminate={true}
-        className="w-1/2 text-black dark:text-white"
+        className="w-1/2 text-default-foreground"
         color="default"
         size="md"
         label={text}
