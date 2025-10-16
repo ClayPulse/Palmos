@@ -17,7 +17,7 @@ export default function useAgents() {
   async function runAgentMethod(
     agentName: string,
     methodName: string,
-    parameters: Record<string, any>,
+    args: Record<string, any>,
     abortSignal?: AbortSignal,
     llmConfig?: LLMConfig
   ): Promise<any> {
@@ -31,7 +31,7 @@ export default function useAgents() {
         {
           agentName,
           methodName,
-          parameters,
+          args,
           llmConfig,
         },
         abortSignal

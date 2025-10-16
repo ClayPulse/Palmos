@@ -3,12 +3,13 @@
 import ContextMenu from "@/components/interface/context-menu";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { PlatformEnum } from "@/lib/enums";
+import { DragEventTypeEnum, PlatformEnum } from "@/lib/enums";
 import { AbstractPlatformAPI } from "@/lib/platform-api/abstract-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
   ContextMenuState,
   EditorContextType,
+  FileDragData,
   FileSystemObject,
   TreeViewGroupRef,
   TreeViewNodeRef,
@@ -180,6 +181,19 @@ const TreeViewNode = forwardRef(function TreeViewNode(
     });
   }
 
+  const onDragStart = (e: React.DragEvent) => {
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isDraggingOverCanvas: true,
+    }));
+    e.dataTransfer.setData(
+      `application/${DragEventTypeEnum.File.toLowerCase()}`,
+      JSON.stringify({
+        uri: object.uri,
+      } as FileDragData),
+    );
+  };
+
   return (
     <div className="relative flex flex-col gap-y-0.5">
       {isRenaming ? (
@@ -220,6 +234,8 @@ const TreeViewNode = forwardRef(function TreeViewNode(
         <>
           {object.isFolder ? (
             <Button
+              draggable
+              onDragStart={onDragStart}
               className="w-full px-2 text-[16px]"
               variant={isSelected ? "bordered" : "solid"}
               style={{
@@ -259,6 +275,8 @@ const TreeViewNode = forwardRef(function TreeViewNode(
             </Button>
           ) : (
             <Button
+              draggable
+              onDragStart={onDragStart}
               className="w-full px-2 text-[16px]"
               variant={isSelected ? "bordered" : "light"}
               style={{

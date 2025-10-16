@@ -3,6 +3,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import {
   AppInfoModalContent,
   AppNodeData,
@@ -73,9 +74,9 @@ export default function CanvasView({
     exportWorkflow,
     saveAppsSnapshotStates,
   } = useCanvasWorkflow(config.initialWorkflowContent);
-
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
+  const { deleteAppViewInCanvasView } = useTabViewManager();
 
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
@@ -103,6 +104,31 @@ export default function CanvasView({
         reconnectEdge(oldEdge, newConnection, oldEdges),
       ),
     [updateWorkflowEdges],
+  );
+  const onDelete = useCallback(
+    async ({
+      nodes,
+      edges,
+    }: {
+      nodes: ReactFlowNode<AppNodeData>[];
+      edges: ReactFlowEdge[];
+    }) => {
+      if (nodes.length > 0) {
+        const deleteNodePromises = nodes.map(async (node) => {
+          await deleteAppViewInCanvasView(node.data.config.viewId);
+        });
+        await Promise.all(deleteNodePromises);
+      }
+
+      if (edges.length > 0) {
+        updateWorkflowEdges((oldEdges) =>
+          oldEdges.filter(
+            (edge) => !edges.find((deletedEdge) => deletedEdge.id === edge.id),
+          ),
+        );
+      }
+    },
+    [updateWorkflowEdges, updateWorkflowNodes],
   );
 
   /* Node creator functions */
@@ -259,6 +285,7 @@ export default function CanvasView({
           appNode: createAppNode,
         }}
         deleteKeyCode={["Delete", "Backspace"]}
+        onDelete={onDelete}
         onReconnect={onReconnect}
         defaultEdgeOptions={{
           markerEnd: {

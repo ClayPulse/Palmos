@@ -1,11 +1,19 @@
+import { DragEventTypeEnum } from "@/lib/enums";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { AppViewConfig, CanvasViewConfig, ExtensionApp } from "@/lib/types";
+import {
+  AppDragData,
+  AppViewConfig,
+  CanvasViewConfig,
+  ExtensionApp,
+} from "@/lib/types";
+import { addToast } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useSearchParams } from "next/navigation";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useContext, useEffect, useRef, useState } from "react";
 import { v4 } from "uuid";
 import Tabs from "../misc/tabs";
+import { EditorContext } from "../providers/editor-context-provider";
 import CanvasView from "./canvas/canvas-view";
 import HomeView from "./home/home-view";
 import StandaloneAppView from "./standalone-app/standalone-app-view";
@@ -29,6 +37,8 @@ const MemoizedCanvasView = memo(
 MemoizedCanvasView.displayName = "MemoizedCanvasView";
 
 export default function ViewArea() {
+  const editorContext = useContext(EditorContext);
+
   const params = useSearchParams();
 
   const {
@@ -99,20 +109,49 @@ export default function ViewArea() {
     <div
       className="w-full h-full"
       onDragOver={(e) => {
-        e.preventDefault();
+        const types = e.dataTransfer.types;
+        console.log("Drag over types:", e.dataTransfer.types);
+        if (
+          types.includes(`application/${DragEventTypeEnum.App.toLowerCase()}`)
+        ) {
+          e.preventDefault(); // allow drop
+          e.dataTransfer.dropEffect = "copy";
+        } else {
+          e.dataTransfer.dropEffect = "none";
+        }
       }}
       onDrop={(e) => {
-        e.preventDefault();
-        const data = e.dataTransfer.getData("text/plain");
-        console.log("Dropped item:", data);
-        const ext: ExtensionApp = JSON.parse(data);
-        const config: AppViewConfig = {
-          app: ext.config.id,
-          viewId: `${ext.config.id}-${v4()}`,
-          recommendedHeight: ext.config.recommendedHeight,
-          recommendedWidth: ext.config.recommendedWidth,
-        };
-        createAppViewInCanvasView(config);
+        const dataText = e.dataTransfer.getData(
+          `application/${DragEventTypeEnum.App.toLowerCase()}`,
+        );
+        if (!dataText) {
+          return;
+        }
+        console.log("Dropped item:", dataText);
+        try {
+          const data = JSON.parse(dataText) as AppDragData;
+
+          e.preventDefault();
+          const ext: ExtensionApp = data.app;
+          const config: AppViewConfig = {
+            app: ext.config.id,
+            viewId: `${ext.config.id}-${v4()}`,
+            recommendedHeight: ext.config.recommendedHeight,
+            recommendedWidth: ext.config.recommendedWidth,
+          };
+          createAppViewInCanvasView(config);
+        } catch (error) {
+          addToast({
+            title: "Failed to open app",
+            description: "The dropped app data is invalid.",
+            color: "danger",
+          });
+        } finally {
+          editorContext?.setEditorStates((prev) => ({
+            ...prev,
+            isDraggingOverCanvas: false,
+          }));
+        }
       }}
     >
       {tabViews.length === 0 ? (

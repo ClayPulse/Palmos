@@ -91,6 +91,9 @@ export type EditorStates = {
 
   // Selected views
   selectedViewIds?: string[];
+
+  // Drag control
+  isDraggingOverCanvas?: boolean;
 };
 
 /**
@@ -376,6 +379,13 @@ export type AppNodeData = {
   isShowingWorkflowConnector: boolean;
 };
 
+export type FileDragData = {
+  uri: string;
+};
+
+export type AppDragData = {
+  app: ExtensionApp;
+};
 // #endregion
 
 // #region Action

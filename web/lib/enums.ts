@@ -18,4 +18,9 @@ export enum SideMenuTabEnum {
   Apps = "Apps",
   Workspaces = "Workspaces",
 }
+
+export enum DragEventTypeEnum {
+  File = "File",
+  App = "App",
+}
 // #endregion

@@ -171,7 +171,7 @@ export default function SandboxAppLoader({
         getHandlerMap(viewModel),
       );
     }
-  }, [viewModel]);
+  }, [viewModel, editorContext?.editorStates, editorContext?.persistSettings]);
 
   function getHandlerMap(model: ViewModel) {
     const newMap = new Map<IMCMessageTypeEnum, ReceiverHandler>();
@@ -254,7 +254,7 @@ export default function SandboxAppLoader({
           // Prevent reading path outside the project path
           if (!uri.startsWith(projectPath)) {
             throw new Error(
-              "Cannot read file outside the project directory: " + uri,
+              `Cannot read file outside the project directory: ${uri}, project path: ${projectPath}`,
             );
           }
 

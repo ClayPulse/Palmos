@@ -1,6 +1,9 @@
 "use client";
 
-import { runAgentMethodLocal } from "@/lib/agent/agent-runner";
+import {
+  runAgentMethodCloud,
+  runAgentMethodLocal,
+} from "@/lib/agent/agent-runner";
 import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
 import { recognizeText } from "@/lib/modalities/ocr/ocr";
@@ -141,12 +144,12 @@ export default function InterModuleCommunicationProvider({
           const {
             agentName,
             methodName,
-            parameters,
+            args,
             llmConfig,
           }: {
             agentName: string;
             methodName: string;
-            parameters: Record<string, any>;
+            args: Record<string, any>;
             llmConfig?: LLMConfig;
           } = message.payload;
 
@@ -178,24 +181,30 @@ export default function InterModuleCommunicationProvider({
             throw new Error("No LLM config found for this agent method.");
           }
 
-          const provider = config.provider;
+          if (editorContext?.persistSettings?.isUseManagedCloud) {
+            const result = await runAgentMethodCloud(agent, methodName, args);
 
-          const apiKey = getAPIKey(editorContext, provider);
+            return result;
+          } else {
+            const provider = config.provider;
 
-          if (!apiKey) {
-            throw new Error(`No API key found for provider ${provider}.`);
+            const apiKey = getAPIKey(editorContext, provider);
+
+            if (!apiKey) {
+              throw new Error(`No API key found for provider ${provider}.`);
+            }
+
+            const result = await runAgentMethodLocal(
+              apiKey,
+              config,
+              agent,
+              methodName,
+              args,
+              abortSignal,
+            );
+
+            return result;
           }
-
-          const result = await runAgentMethodLocal(
-            apiKey,
-            config,
-            agent,
-            methodName,
-            parameters,
-            abortSignal,
-          );
-
-          return result;
         },
       ],
       [

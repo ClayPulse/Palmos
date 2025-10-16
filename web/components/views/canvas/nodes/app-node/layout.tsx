@@ -1,4 +1,8 @@
 import Icon from "@/components/misc/icon";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import { IMCContext } from "@/components/providers/imc-provider";
+import { DragEventTypeEnum } from "@/lib/enums";
+import { FileDragData } from "@/lib/types";
 import {
   addToast,
   Button,
@@ -9,7 +13,7 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
-import { Action } from "@pulse-editor/shared-utils";
+import { Action, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import {
   NodeResizeControl,
   NodeResizer,
@@ -19,7 +23,7 @@ import {
   useUpdateNodeInternals,
 } from "@xyflow/react";
 import clsx from "clsx";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import NodeHandle from "./node-handle";
 
 export default function CanvasNodeViewLayout({
@@ -39,6 +43,9 @@ export default function CanvasNodeViewLayout({
   isShowingWorkflowConnector: boolean;
   children: React.ReactNode;
 }) {
+  const editorContext = useContext(EditorContext);
+  const imcContext = useContext(IMCContext);
+
   const updateNodeInternals = useUpdateNodeInternals();
   const node = useInternalNode(viewId);
 
@@ -148,7 +155,59 @@ export default function CanvasNodeViewLayout({
         }}
       />
 
-      <div className="bg-content1 relative h-full w-full rounded-lg shadow-md z-10">
+      <div
+        className="bg-content1 relative h-full w-full rounded-lg shadow-md z-10"
+        onDragOver={(e) => {
+          e.stopPropagation();
+          const types = e.dataTransfer.types;
+          console.log("Drag over types:", e.dataTransfer.types);
+          if (
+            types.includes(
+              `application/${DragEventTypeEnum.File.toLowerCase()}`,
+            )
+          ) {
+            e.preventDefault(); // allow drop
+            e.dataTransfer.dropEffect = "copy";
+          } else {
+            e.dataTransfer.dropEffect = "none";
+          }
+        }}
+        onDrop={async (e) => {
+          const dataText = e.dataTransfer.getData(
+            `application/${DragEventTypeEnum.File.toLowerCase()}`,
+          );
+          if (!dataText) {
+            return;
+          }
+          console.log("Dropped item:", dataText);
+          try {
+            const data = JSON.parse(dataText) as FileDragData;
+
+            e.preventDefault();
+            const uri = data.uri;
+
+            // Send uri to app view
+            await imcContext?.polyIMC?.sendMessage(
+              viewId,
+              IMCMessageTypeEnum.EditorAppReceiveFileUri,
+              {
+                uri,
+              },
+            );
+          } catch (error) {
+            addToast({
+              title: "Failed to open file",
+              description: "The dropped file data is invalid.",
+              color: "danger",
+            });
+          } finally {
+            editorContext?.setEditorStates((prev) => ({
+              ...prev,
+              isDraggingOverCanvas: false,
+            }));
+          }
+        }}
+      >
         {isRunning ? (
           <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden running wrapper gradient z-0" />
         ) : (
@@ -159,11 +218,14 @@ export default function CanvasNodeViewLayout({
 
         <div
           className={clsx(
-            "relative h-full w-full rounded-md overflow-hidden z-10 data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none",
+            "relative h-full w-full rounded-md overflow-hidden z-10 data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none data-[is-dragging-file=true]:pointer-events-none",
             (node?.selected || node?.dragging) && !isRunning && "aura",
           )}
           data-is-dragging={node?.dragging ? "true" : "false"}
           data-is-resizing={node?.resizing ? "true" : "false"}
+          data-is-dragging-file={
+            editorContext?.editorStates.isDraggingOverCanvas ? "true" : "false"
+          }
         >
           {children}
         </div>
