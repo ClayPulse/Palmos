@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.50
+
+### Patch Changes
+
+- Revert debug information
+
 ## 0.1.1-alpha.49
 
 ### Patch Changes

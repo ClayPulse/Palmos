@@ -33,6 +33,12 @@ export default function AppExplorer() {
           } as AppDragData),
         );
       }}
+      onDragEnd={() => {
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isDraggingOverCanvas: false,
+        }));
+      }}
     >
       <AppPreviewCard
         extension={ext}

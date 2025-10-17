@@ -1,8 +1,8 @@
 import http from "http";
 import https from "https";
-import { WebSocket, WebSocketServer } from "ws";
-import os from "os";
 import { IPty, spawn } from "node-pty";
+import os from "os";
+import { WebSocket, WebSocketServer } from "ws";
 
 let sharedPtyProcess: IPty | null = null;
 let sharedTerminalMode = false;

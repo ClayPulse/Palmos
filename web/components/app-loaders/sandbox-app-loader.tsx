@@ -8,7 +8,6 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { ExtensionApp, FileDragData } from "@/lib/types";
 import { addToast } from "@heroui/react";
 import {
-  AppTypeEnum,
   ConnectionListener,
   IMCMessage,
   IMCMessageTypeEnum,
@@ -138,6 +137,13 @@ export default function SandboxAppLoader({
     };
   }, []);
 
+  useEffect(() => {
+    console.log(
+      "Is dragging over canvas: ",
+      editorContext?.editorStates.isDraggingOverCanvas,
+    );
+  }, [editorContext?.editorStates.isDraggingOverCanvas]);
+
   // Set is loading extension to true when current extension changes
   useEffect(() => {
     if (currentExtension) {
@@ -209,88 +215,85 @@ export default function SandboxAppLoader({
     );
 
     // The following message handlers require OS-like environment.
-    // This can be either local environment or remote instance.
-    if (model.appConfig?.appType === AppTypeEnum.FileView) {
-      newMap.set(
-        IMCMessageTypeEnum.PlatformWriteFile,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          if (message.payload) {
-            const { uri, file }: { uri: string; file: File | undefined } =
-              message.payload;
+    // This can be either local environment or remote workspace.
+    newMap.set(
+      IMCMessageTypeEnum.PlatformWriteFile,
+      async (
+        senderWindow: Window,
+        message: IMCMessage,
+        abortSignal?: AbortSignal,
+      ) => {
+        if (message.payload) {
+          const { uri, file }: { uri: string; file: File | undefined } =
+            message.payload;
 
-            if (!file) {
-              throw new Error("File is undefined.");
-            }
-
-            const projectPath =
-              editorContext?.persistSettings?.projectHomePath +
-              "/" +
-              editorContext?.editorStates.project;
-
-            // Prevent writing to path outside the project path
-            if (!uri.startsWith(projectPath)) {
-              throw new Error(
-                "Cannot write to path outside the project directory.",
-              );
-            }
-            await platformApi?.writeFile(file, uri);
+          if (!file) {
+            throw new Error("File is undefined.");
           }
-        },
-      );
-      newMap.set(
-        IMCMessageTypeEnum.PlatformReadFile,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const { uri }: { uri: string } = message.payload;
 
           const projectPath =
             editorContext?.persistSettings?.projectHomePath +
             "/" +
             editorContext?.editorStates.project;
 
-          // Prevent reading path outside the project path
+          // Prevent writing to path outside the project path
           if (!uri.startsWith(projectPath)) {
             throw new Error(
-              `Cannot read file outside the project directory: ${uri}, project path: ${projectPath}`,
+              "Cannot write to path outside the project directory.",
             );
           }
+          await platformApi?.writeFile(file, uri);
+        }
+      },
+    );
+    newMap.set(
+      IMCMessageTypeEnum.PlatformReadFile,
+      async (
+        senderWindow: Window,
+        message: IMCMessage,
+        abortSignal?: AbortSignal,
+      ) => {
+        const { uri }: { uri: string } = message.payload;
 
-          const file = await platformApi?.readFile(uri);
-          return file;
-        },
-      );
-    } else if (model.appConfig?.appType === AppTypeEnum.ConsoleView) {
-      newMap.set(
-        IMCMessageTypeEnum.PlatformCreateTerminal,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const platform = getPlatform();
-          // Get a shell terminal from native platform APIs
-          if (platform === PlatformEnum.Capacitor) {
-            return {
-              websocketUrl: editorContext?.persistSettings?.mobileHost,
-              projectHomePath: `~/storage/shared/${editorContext?.persistSettings?.projectHomePath}`,
-            };
-          } else {
-            const wsUrl = await platformApi?.createTerminal();
-            return {
-              websocketUrl: wsUrl,
-              projectHomePath: editorContext?.persistSettings?.projectHomePath,
-            };
-          }
-        },
-      );
-    }
+        const projectPath =
+          editorContext?.persistSettings?.projectHomePath +
+          "/" +
+          editorContext?.editorStates.project;
+
+        // Prevent reading path outside the project path
+        if (!uri.startsWith(projectPath)) {
+          throw new Error(
+            `Cannot read file outside the project directory: ${uri}, project path: ${projectPath}`,
+          );
+        }
+
+        const file = await platformApi?.readFile(uri);
+        return file;
+      },
+    );
+    newMap.set(
+      IMCMessageTypeEnum.PlatformCreateTerminal,
+      async (
+        senderWindow: Window,
+        message: IMCMessage,
+        abortSignal?: AbortSignal,
+      ) => {
+        const platform = getPlatform();
+        // Get a shell terminal from native platform APIs
+        if (platform === PlatformEnum.Capacitor) {
+          return {
+            websocketUrl: editorContext?.persistSettings?.mobileHost,
+            projectHomePath: `~/storage/shared/${editorContext?.persistSettings?.projectHomePath}`,
+          };
+        } else {
+          const wsUrl = await platformApi?.createTerminal();
+          return {
+            websocketUrl: wsUrl,
+            projectHomePath: editorContext?.persistSettings?.projectHomePath,
+          };
+        }
+      },
+    );
 
     return newMap;
   }
@@ -353,11 +356,6 @@ export default function SandboxAppLoader({
             description: "The dropped file data is invalid.",
             color: "danger",
           });
-        } finally {
-          editorContext?.setEditorStates((prev) => ({
-            ...prev,
-            isDraggingOverCanvas: false,
-          }));
         }
       }}
     >
@@ -375,8 +373,8 @@ export default function SandboxAppLoader({
         </div>
       ) : (
         <div
-          className="relative h-full w-full data-[is-dragging-file=true]:pointer-events-none"
-          data-is-dragging-file={
+          className="relative h-full w-full data-[is-dragging-over-canvas=true]:pointer-events-none"
+          data-is-dragging-over-canvas={
             editorContext?.editorStates.isDraggingOverCanvas ? "true" : "false"
           }
         >

@@ -194,6 +194,13 @@ const TreeViewNode = forwardRef(function TreeViewNode(
     );
   };
 
+  const onDragEnd = () => {
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isDraggingOverCanvas: false,
+    }));
+  };
+
   return (
     <div className="relative flex flex-col gap-y-0.5">
       {isRenaming ? (
@@ -236,6 +243,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
             <Button
               draggable
               onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
               className="w-full px-2 text-[16px]"
               variant={isSelected ? "bordered" : "solid"}
               style={{
@@ -277,6 +285,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
             <Button
               draggable
               onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
               className="w-full px-2 text-[16px]"
               variant={isSelected ? "bordered" : "light"}
               style={{

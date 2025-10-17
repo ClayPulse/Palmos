@@ -1,7 +1,7 @@
 import http from "http";
-import { WebSocketServer } from "ws";
-import os from "os";
 import pty from "node-pty";
+import os from "os";
+import { WebSocketServer } from "ws";
 
 let sharedPtyProcess = null;
 let sharedTerminalMode = false;
@@ -25,14 +25,20 @@ const setSharedTerminalMode = (useSharedTerminal) => {
 const handleTerminalConnection = (ws) => {
   let ptyProcess = sharedTerminalMode ? sharedPtyProcess : spawnShell();
 
-  ws.on("message", (command) => {
-    const processedCommand = commandProcessor(command);
-    ptyProcess.write(processedCommand);
+  ws.on("message", (data) => {
+    const dataObj = JSON.parse(data);
+
+    if (dataObj.type === "input") {
+      const command = dataObj.payload;
+      ptyProcess.write(command);
+    } else if (dataObj.type === "resize") {
+      const { cols, rows } = dataObj.payload;
+      ptyProcess.resize(cols, rows);
+    }
   });
 
   ptyProcess.on("data", (rawOutput) => {
-    const processedOutput = outputProcessor(rawOutput);
-    ws.send(processedOutput);
+    ws.send(JSON.stringify({ type: "output", payload: rawOutput }));
   });
 
   ws.on("close", () => {
@@ -40,16 +46,6 @@ const handleTerminalConnection = (ws) => {
       ptyProcess.kill();
     }
   });
-};
-
-// Utility function to process commands
-const commandProcessor = (command) => {
-  return command;
-};
-
-// Utility function to process output
-const outputProcessor = (output) => {
-  return output;
 };
 
 /* Host ws node-pty server */

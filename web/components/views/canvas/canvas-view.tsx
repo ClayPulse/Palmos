@@ -320,11 +320,6 @@ export default function CanvasView({
             description: "The dropped app data is invalid.",
             color: "danger",
           });
-        } finally {
-          editorContext?.setEditorStates((prev) => ({
-            ...prev,
-            isDraggingOverCanvas: false,
-          }));
         }
       }}
     >
