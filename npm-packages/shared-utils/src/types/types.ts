@@ -42,6 +42,8 @@ export enum IMCMessageTypeEnum {
   EditorAppStateSnapshotSave = "editor-app-state-snapshot-save",
   // Handle editor file selection or drop
   EditorAppReceiveFileUri = "editor-app-receive-file-uri",
+  // App uses owned app
+  EditorAppUseOwnedApp = "editor-app-use-owned-app",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)
@@ -69,7 +71,8 @@ export enum IMCMessageTypeEnum {
 }
 
 export type IMCMessage = {
-  id: string;
+  messageId: string;
+  channelId?: string;
   from: string;
   type: IMCMessageTypeEnum;
   payload?: any;

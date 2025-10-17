@@ -36,7 +36,7 @@ export default function usePlatformAIAssistant() {
 
   const { runSpeech2Speech, stopSpeech2Speech, isRunning } = useSpeech2Speech();
   const { readText, playAudio } = useTTS();
-  const { runAction, actions } = useScopedActions();
+  const { runScopedAction, actions } = useScopedActions();
   const { activeTabView } = useTabViewManager();
 
   const [pendingAnalysis, setPendingAnalysis] = useState("");
@@ -125,7 +125,7 @@ export default function usePlatformAIAssistant() {
         return;
       }
 
-      const cmdResult = await runAction(command, args);
+      const cmdResult = await runScopedAction(command, args);
 
       if (process.env.NODE_ENV === "development") {
         console.log("Command result:", cmdResult);

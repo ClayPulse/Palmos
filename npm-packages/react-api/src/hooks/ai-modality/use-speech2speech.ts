@@ -12,7 +12,7 @@ export default function useSpeech2Speech() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "speech2speech");
   const [userInput, setUserInput] = useState<string>("");
   const [isUserStopped, setIsUserStopped] = useState<boolean>(false);
 

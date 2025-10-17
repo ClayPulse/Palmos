@@ -48,7 +48,7 @@ export default function SnapshotProvider({
     ],
   ]);
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "snapshot-provider");
 
   useEffect(() => {
     if (isReady) {

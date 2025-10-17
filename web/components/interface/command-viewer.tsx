@@ -28,7 +28,7 @@ export default function CommandViewer() {
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant, history } = usePlatformAIAssistant();
-  const { actions, runAction, setKeywordFilter } = useScopedActions();
+  const { actions, runScopedAction, setKeywordFilter } = useScopedActions();
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectActionIndex, setSelectActionIndex] = useState(-1);
@@ -45,11 +45,12 @@ export default function CommandViewer() {
   const [actionReadyToRun, setActionReadyToRun] = useState<boolean>(false);
 
   const historyRef = useRef<HTMLDivElement>(null);
+  const isRunningCommandRef = useRef(false);
 
   const runActionCallback = useCallback(
     async (action: ScopedAction) => {
       try {
-        const result = await runAction(action, args);
+        const result = await runScopedAction(action, args);
 
         console.log("Command result:", result);
         addToast({
@@ -66,7 +67,7 @@ export default function CommandViewer() {
         console.error("Failed to run action:", error);
       }
     },
-    [runAction, args],
+    [runScopedAction, args],
   );
 
   useEffect(() => {
@@ -141,7 +142,13 @@ export default function CommandViewer() {
         const isValid = validateActionArgs(queuedAction, args);
         if (isValid) {
           // Run action directly if args are valid
+
+          if (isRunningCommandRef.current) {
+            return;
+          }
+          isRunningCommandRef.current = true;
           await runActionCallback(queuedAction);
+          isRunningCommandRef.current = false;
         } else {
           // Otherwise, open args input and wait for user
           // to fill in required args.

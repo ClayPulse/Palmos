@@ -33,10 +33,11 @@ export default function useRegisterAction(
   deps: DependencyList,
   isExtReady: boolean = true
 ) {
-  const { isReady, imc } = useIMC(getReceiverHandlerMap());
+  const { isReady, imc } = useIMC(getReceiverHandlerMap(), "register-action");
 
   // Queue to hold commands until extension is ready
   const commandQueue = useRef<{ args: any; resolve: (v: any) => void }[]>([]);
+  const isCommandExecuting = useRef(false);
 
   const [action, setAction] = useState<Action>({
     name: actionInfo.name,
@@ -48,13 +49,23 @@ export default function useRegisterAction(
 
   // Flush queued commands when isExtReady becomes true
   useEffect(() => {
-    if (isExtReady && commandQueue.current.length > 0) {
-      const pending = [...commandQueue.current];
+    async function runQueuedCommands() {
+      const pendingCMDs = [...commandQueue.current];
       commandQueue.current = [];
-      pending.forEach(async ({ args, resolve }) => {
+      for (const cmd of pendingCMDs) {
+        const { args, resolve } = cmd;
+        if (isCommandExecuting.current) {
+          return;
+        }
+        isCommandExecuting.current = true;
         const res = await executeAction(args);
+        isCommandExecuting.current = false;
         resolve(res);
-      });
+      }
+    }
+
+    if (isExtReady && commandQueue.current.length > 0) {
+      runQueuedCommands();
     }
   }, [isExtReady]);
 
@@ -95,6 +106,7 @@ export default function useRegisterAction(
     if (!action.handler) return;
 
     const res = await action.handler(args);
+
     return res;
   }
 
@@ -117,6 +129,7 @@ export default function useRegisterAction(
               );
             }
 
+            // Check types
             for (const [key, value] of Object.entries(args)) {
               if (actionParams[key] === undefined) {
                 throw new Error(`Invalid parameter: ${key}`);
@@ -132,7 +145,8 @@ export default function useRegisterAction(
 
             // If extension is ready, execute immediately
             if (isExtReady) {
-              return await executeAction(args);
+              const result = await executeAction(args);
+              return result;
             }
 
             // Otherwise, queue the command and return when executed

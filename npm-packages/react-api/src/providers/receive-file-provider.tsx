@@ -32,7 +32,7 @@ export default function ReceiveFileProvider({
       },
     ],
   ]);
-  useIMC(receiverHandlerMap);
+  useIMC(receiverHandlerMap, "receive-file-provider");
 
   return (
     <ReceiveFileContext.Provider value={{ selectedFileUri: receivedFileUri }}>

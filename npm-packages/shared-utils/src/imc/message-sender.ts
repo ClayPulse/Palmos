@@ -11,13 +11,20 @@ export class MessageSender {
   >;
 
   private moduleId: string;
+  private channelId: string | undefined;
 
-  constructor(targetWindow: Window, timeout: number, moduleId: string) {
+  constructor(
+    targetWindow: Window,
+    timeout: number,
+    moduleId: string,
+    channelId?: string
+  ) {
     this.targetWindow = targetWindow;
     this.timeout = timeout;
 
     this.pendingMessages = new Map();
     this.moduleId = moduleId;
+    this.channelId = channelId;
   }
 
   public async sendMessage(
@@ -28,7 +35,8 @@ export class MessageSender {
     // Generate a unique id for the message using timestamp
     const id = v4() + new Date().getTime().toString();
     const message: IMCMessage = {
-      id,
+      messageId: id,
+      channelId: this.channelId,
       type: handlingType,
       payload: payload,
       from: this.moduleId,

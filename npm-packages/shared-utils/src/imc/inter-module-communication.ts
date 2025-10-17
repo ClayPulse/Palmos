@@ -23,6 +23,14 @@ export class InterModuleCommunication {
 
   private messageRecords: Map<string, IMCMessage> | undefined;
 
+  public intent: string | undefined;
+  public channelId: string | undefined;
+
+  constructor(intent: string | undefined, channelId: string | undefined) {
+    this.intent = intent;
+    this.channelId = channelId;
+  }
+
   /**
    * Initialize a receiver to receive message.
    * @param window The current window.
@@ -49,8 +57,14 @@ export class InterModuleCommunication {
     this.messageRecords = new Map<string, IMCMessage>();
 
     this.listener = (event: MessageEvent<IMCMessage>) => {
-      const messageId = event.data.id;
+      const messageId = event.data.messageId;
+      const channelId = event.data.channelId;
       const type = event.data.type;
+
+      // Return if the channel ID exists but does not match the current channel ID
+      if (this.channelId !== undefined && channelId !== this.channelId) {
+        return;
+      }
 
       if (
         this.messageRecords?.has(messageId) &&
@@ -113,7 +127,8 @@ export class InterModuleCommunication {
         const sender = new MessageSender(
           window,
           messageTimeout,
-          this.thisWindowId
+          this.thisWindowId,
+          this.channelId
         );
         this.sender = sender;
 
@@ -197,7 +212,9 @@ export class InterModuleCommunication {
     this.receiverHandlerMap?.set(
       IMCMessageTypeEnum.SignalAcknowledge,
       async (senderWindow: Window, message: IMCMessage) => {
-        const pendingMessage = this.sender?.getPendingMessage(message.id);
+        const pendingMessage = this.sender?.getPendingMessage(
+          message.messageId
+        );
         if (pendingMessage) {
           pendingMessage.resolve(message.payload);
         }
@@ -208,7 +225,9 @@ export class InterModuleCommunication {
     this.receiverHandlerMap?.set(
       IMCMessageTypeEnum.SignalError,
       async (senderWindow: Window, message: IMCMessage) => {
-        const pendingMessage = this.sender?.getPendingMessage(message.id);
+        const pendingMessage = this.sender?.getPendingMessage(
+          message.messageId
+        );
         if (pendingMessage) {
           pendingMessage.reject(new Error(message.payload));
         }
@@ -227,7 +246,8 @@ export class InterModuleCommunication {
           throw new Error("This window ID is not defined.");
         }
         const msg: IMCMessage = {
-          id: message.id,
+          messageId: message.messageId,
+          channelId: message.channelId,
           type: IMCMessageTypeEnum.SignalReturnWindowId,
           payload: {
             windowId: id,

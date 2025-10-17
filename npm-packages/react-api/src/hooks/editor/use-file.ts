@@ -18,7 +18,7 @@ export default function useFile(uri: string | undefined) {
     ],
   ]);
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "file");
 
   const saveFile = useCallback(
     (fileContent: string) => {

@@ -211,6 +211,7 @@ export default function CanvasView({
               config.initialWorkflowContent?.nodes.find(
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
+            ownedApps: {}, // Initially no owned apps
           };
 
           return {

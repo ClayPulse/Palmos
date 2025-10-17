@@ -377,6 +377,12 @@ export type AppNodeData = {
   selectedAction: Action | undefined;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;
+  ownedApps: {
+    [key: string]: {
+      viewId: string;
+      config: AppConfig;
+    };
+  };
 };
 
 export type FileDragData = {

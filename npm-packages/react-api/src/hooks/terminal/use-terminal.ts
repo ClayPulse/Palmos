@@ -8,7 +8,7 @@ export default function useTerminal() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "terminal");
   const [websocketUrl, setWebsocketUrl] = useState<string | undefined>(
     undefined
   );

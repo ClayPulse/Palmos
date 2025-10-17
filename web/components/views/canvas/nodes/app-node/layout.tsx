@@ -2,7 +2,12 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import BaseAppView from "@/components/views/base/base-app-view";
 import { DragEventTypeEnum } from "@/lib/enums";
-import { AppDragData, AppViewConfig, ExtensionApp } from "@/lib/types";
+import {
+  AppDragData,
+  AppNodeData,
+  AppViewConfig,
+  ExtensionApp,
+} from "@/lib/types";
 import {
   addToast,
   Button,
@@ -19,6 +24,7 @@ import {
   NodeResizeControl,
   NodeResizer,
   Position,
+  Node as ReactFlowNode,
   useInternalNode,
   useReactFlow,
   useUpdateNodeInternals,
@@ -48,14 +54,11 @@ export default function CanvasNodeViewLayout({
   const editorContext = useContext(EditorContext);
 
   const updateNodeInternals = useUpdateNodeInternals();
-  const node = useInternalNode(viewId);
+  const node = useInternalNode<ReactFlowNode<AppNodeData>>(viewId);
 
   const { updateNodeData } = useReactFlow();
 
   const [isShowingMenu, setIsShowingMenu] = useState(false);
-  const [possessedAppConfigs, setPossessedAppConfigs] = useState<{
-    [key: string]: AppViewConfig;
-  }>({});
 
   useEffect(() => {
     // Update node internals to ensure handles are positioned correctly
@@ -68,6 +71,10 @@ export default function CanvasNodeViewLayout({
 
   async function setIsShowingWorkflowConnector(showing: boolean) {
     await updateNodeData(viewId, { isShowingWorkflowConnector: showing });
+  }
+
+  if (!node) {
+    return null;
   }
 
   return (
@@ -152,10 +159,15 @@ export default function CanvasNodeViewLayout({
                             recommendedWidth: app.config.recommendedWidth,
                           };
 
-                          setPossessedAppConfigs((prev) => ({
-                            ...prev,
-                            [paramName]: config,
-                          }));
+                          updateNodeData(viewId, {
+                            ownedApps: {
+                              ...node.data.ownedApps,
+                              [paramName]: {
+                                viewId: config.viewId,
+                                config: app.config,
+                              },
+                            },
+                          });
                         } catch (error) {
                           addToast({
                             title: "Failed to link app",
@@ -176,14 +188,14 @@ export default function CanvasNodeViewLayout({
                             }));
                           }}
                           data-exist-app={
-                            possessedAppConfigs[paramName] ? "true" : "false"
+                            node.data.ownedApps[paramName] ? "true" : "false"
                           }
                         >
                           <div className="text-center py-2">
                             <p>{paramName}</p>
                             <p>(app-instance)</p>
-                            {possessedAppConfigs[paramName] ? (
-                              <p>{possessedAppConfigs[paramName].viewId}</p>
+                            {node.data.ownedApps[paramName] ? (
+                              <p>{node.data.ownedApps[paramName].viewId}</p>
                             ) : (
                               <p>Tip: drag app here</p>
                             )}
@@ -245,7 +257,7 @@ export default function CanvasNodeViewLayout({
         {isRunning ? (
           <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden running wrapper gradient z-0" />
         ) : (
-          (node?.selected || node?.dragging) && (
+          (node.selected || node.dragging) && (
             <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden selected wrapper gradient z-0" />
           )
         )}
@@ -253,10 +265,10 @@ export default function CanvasNodeViewLayout({
         <div
           className={clsx(
             "relative h-full w-full rounded-md overflow-hidden z-10 data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none",
-            (node?.selected || node?.dragging) && !isRunning && "aura",
+            (node.selected || node.dragging) && !isRunning && "aura",
           )}
-          data-is-dragging={node?.dragging ? "true" : "false"}
-          data-is-resizing={node?.resizing ? "true" : "false"}
+          data-is-dragging={node.dragging ? "true" : "false"}
+          data-is-resizing={node.resizing ? "true" : "false"}
         >
           {children}
         </div>
@@ -264,16 +276,22 @@ export default function CanvasNodeViewLayout({
         <div
           className="flex-col gap-y-2 py-4 px-2 bg-content2 text-content2-foreground mx-2 rounded-b-lg hidden data-[visible=true]:flex"
           data-visible={
-            Object.keys(possessedAppConfigs).length > 0 &&
+            Object.keys(node.data.ownedApps ?? {}).length > 0 &&
             isShowingWorkflowConnector
           }
         >
           <p className="text-center font-semibold text-lg">Owned Apps</p>
-          {Object.entries(possessedAppConfigs).map(([key, config]) => (
+          {Object.entries(node.data.ownedApps ?? {}).map(([key, config]) => (
             <div key={config.viewId}>
               <p className="text-center">{key}</p>
               <div className="bg-content3 relative h-full w-full overflow-hidden rounded-lg shadow-md">
-                <BaseAppView config={config} viewId={config.viewId} />
+                <BaseAppView
+                  config={{
+                    app: config.config.id,
+                    viewId: config.viewId,
+                  }}
+                  viewId={config.viewId}
+                />
               </div>
             </div>
           ))}

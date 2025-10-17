@@ -89,10 +89,12 @@ export class PolyIMC {
   public async createChannel(
     targetWindow: Window,
     targetWindowId: string,
+    intent: string,
+    channelId?: string,
     receiverHandlerMap?: ReceiverHandlerMap
   ) {
     console.log("Creating channel for window ID: " + targetWindowId);
-    const channel = new InterModuleCommunication();
+    const channel = new InterModuleCommunication(intent, channelId);
     channel.initThisWindow(window, targetWindowId);
     await channel.initOtherWindow(targetWindow);
 
@@ -179,7 +181,10 @@ export class ConnectionListener {
     this.newConnectionReceiverHandlerMap = newConnectionReceiverHandlerMap;
     this.onConnection = onConnection;
 
-    const listener = new InterModuleCommunication();
+    const listener = new InterModuleCommunication(
+      "connection-listener",
+      undefined
+    );
     this.listener = listener;
     listener.initThisWindow(window, expectedOtherWindowId);
 
@@ -215,22 +220,19 @@ export class ConnectionListener {
     abortSignal?: AbortSignal
   ) {
     const targetWindowId = message.from;
+    const { intent, channelId }: { intent: string; channelId?: string } =
+      message.payload;
 
-    if (this.polyIMC.hasChannel(targetWindowId)) {
-      // Channel already exists for the target window ID,
-      // so we don't need to create a new one.
-      console.log(
-        "Channel already exists for window ID " +
-          targetWindowId +
-          ". Re-using the existing channel."
-      );
-      return;
+    if (!channelId) {
+      throw new Error("Channel ID is missing in AppReady message.");
     }
 
     // Create a new channel for the incoming connection
     await this.polyIMC.createChannel(
       senderWindow,
       targetWindowId,
+      intent,
+      channelId,
       this.newConnectionReceiverHandlerMap
     );
 

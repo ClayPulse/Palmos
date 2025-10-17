@@ -111,7 +111,7 @@ export default function useScopedActions(appName?: string) {
     ]);
   }, [editorContext?.persistSettings?.extensions, keyword, appName]);
 
-  async function runAction(action: ScopedAction, args: any) {
+  async function runScopedAction(action: ScopedAction, args: any) {
     console.log(`Running action "${action.action.name}"`);
     if (action.type === "editor") {
       const editorAction = editorActions.find(
@@ -210,7 +210,7 @@ export default function useScopedActions(appName?: string) {
   }
 
   return {
-    runAction,
+    runScopedAction,
     actions,
     setKeywordFilter,
   };

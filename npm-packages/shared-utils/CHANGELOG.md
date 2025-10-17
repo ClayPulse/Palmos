@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.51
+
+### Patch Changes
+
+- Fix polyIMC any channel would handle all channels under same window (view) ID
+
 ## 0.1.1-alpha.50
 
 ### Patch Changes

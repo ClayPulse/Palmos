@@ -509,6 +509,29 @@ export default function InterModuleCommunicationProvider({
           return resolvedTheme ?? "light";
         },
       ],
+      [
+        IMCMessageTypeEnum.EditorAppUseOwnedApp,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          // Handle the use owned app action
+          const {
+            viewId,
+            actionName,
+            args,
+          }: { viewId: string; actionName: string; args: any } =
+            message.payload;
+
+          const result = await polyIMCRef.current?.sendMessage(
+            viewId,
+            IMCMessageTypeEnum.EditorRunAppAction,
+            { name: actionName, args },
+          );
+          return result;
+        },
+      ],
     ]);
 
     return newMap;

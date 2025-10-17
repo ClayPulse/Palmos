@@ -12,7 +12,7 @@ export default function useAgents() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "agents");
 
   async function runAgentMethod(
     agentName: string,

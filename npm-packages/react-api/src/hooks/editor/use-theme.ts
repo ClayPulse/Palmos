@@ -17,7 +17,7 @@ export default function useTheme() {
     }
   );
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "theme");
 
   // Upon initial load, request theme from main app
   useEffect(() => {

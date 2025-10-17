@@ -26,7 +26,7 @@ export class MessageReceiver {
 
     // Abort the task if the message type is Abort
     if (message.type === IMCMessageTypeEnum.SignalAbort) {
-      const id = message.id;
+      const id = message.messageId;
       const pendingTask = this.pendingTasks.get(id);
 
       if (pendingTask) {
@@ -44,7 +44,7 @@ export class MessageReceiver {
       // Then save the message id and abort controller to the pending tasks.
       const controller = new AbortController();
       const signal = controller.signal;
-      this.pendingTasks.set(message.id, {
+      this.pendingTasks.set(message.messageId, {
         controller,
       });
 
@@ -56,13 +56,19 @@ export class MessageReceiver {
 
           // Acknowledge the sender with the result if the message type is not Acknowledge
           if (message.type !== IMCMessageTypeEnum.SignalAcknowledge) {
-            this.acknowledgeSender(senderWindow, message.id, result);
+            this.acknowledgeSender(
+              senderWindow,
+              message.messageId,
+              message.channelId,
+              result
+            );
           }
         })
         .catch((error) => {
           // Send the error message to the sender
           const errMsg: IMCMessage = {
-            id: message.id,
+            messageId: message.messageId,
+            channelId: message.channelId,
             type: IMCMessageTypeEnum.SignalError,
             payload: error.message,
             from: this.windowId,
@@ -73,18 +79,20 @@ export class MessageReceiver {
           senderWindow.postMessage(errMsg, "*");
         })
         .finally(() => {
-          this.pendingTasks.delete(message.id);
+          this.pendingTasks.delete(message.messageId);
         });
     }
   }
 
   private acknowledgeSender(
     senderWindow: Window,
-    id: string,
+    messageId: string,
+    channelId: string | undefined,
     payload: any
   ): void {
     const message: IMCMessage = {
-      id,
+      messageId: messageId,
+      channelId: channelId,
       type: IMCMessageTypeEnum.SignalAcknowledge,
       payload: payload,
       from: this.windowId,

@@ -8,7 +8,7 @@ export default function usePulseEnv() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "env");
   const [envs, setEnvs] = useState<Record<string, string>>({});
 
   useEffect(() => {
