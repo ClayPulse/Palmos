@@ -59,6 +59,7 @@ export default function CanvasNodeViewLayout({
   const { updateNodeData } = useReactFlow();
 
   const [isShowingMenu, setIsShowingMenu] = useState(false);
+  const [isShowingOwnedApps, setIsShowingOwnedApps] = useState(false);
 
   useEffect(() => {
     // Update node internals to ensure handles are positioned correctly
@@ -107,6 +108,8 @@ export default function CanvasNodeViewLayout({
                 controlActions={controlActions}
                 isShowingWorkflowConnector={isShowingWorkflowConnector}
                 setIsShowingWorkflowConnector={setIsShowingWorkflowConnector}
+                isShowingOwnedApps={isShowingOwnedApps}
+                setIsShowingOwnedApps={setIsShowingOwnedApps}
               />
             </PopoverContent>
           </Popover>
@@ -277,7 +280,8 @@ export default function CanvasNodeViewLayout({
           className="flex-col gap-y-2 py-4 px-2 bg-content2 text-content2-foreground mx-2 rounded-b-lg hidden data-[visible=true]:flex"
           data-visible={
             Object.keys(node.data.ownedApps ?? {}).length > 0 &&
-            isShowingWorkflowConnector
+            isShowingWorkflowConnector &&
+            isShowingOwnedApps
           }
         >
           <p className="text-center font-semibold text-lg">Owned Apps</p>
@@ -308,6 +312,8 @@ function CanvasNodeControl({
   controlActions,
   isShowingWorkflowConnector,
   setIsShowingWorkflowConnector,
+  isShowingOwnedApps,
+  setIsShowingOwnedApps,
 }: {
   actions: Action[];
   selectedAction: Action | undefined;
@@ -315,6 +321,8 @@ function CanvasNodeControl({
   controlActions: Record<string, (() => void) | undefined>;
   isShowingWorkflowConnector: boolean;
   setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
+  isShowingOwnedApps: boolean;
+  setIsShowingOwnedApps: (showing: boolean) => void;
 }) {
   const [actionError, setActionError] = useState<{ [key: string]: string }>({});
 
@@ -331,6 +339,21 @@ function CanvasNodeControl({
           }}
         >
           <Icon name="fullscreen" />
+        </Button>
+      </Tooltip>
+
+      <Tooltip content="Toggle owned apps" placement="top">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
+          data-active={isShowingOwnedApps ? "true" : "false"}
+          onPress={() => {
+            setIsShowingOwnedApps(!isShowingOwnedApps);
+          }}
+        >
+          <Icon name="arrow_drop_down_circle" variant="outlined" />
         </Button>
       </Tooltip>
 

@@ -42,11 +42,33 @@ export class PolyIMC {
       throw new Error("Channel not found for window ID " + targetWindowId);
     }
 
-    const results = await Promise.all(
-      channels.map(
-        async (channel) =>
-          await channel.sendMessage(handlingType, payload, abortSignal)
-      )
+    // - some channels here are not returning results
+    // - and the result now is an array instead of a single value
+
+    const results: any[] = [];
+
+    await Promise.all(
+      channels.map(async (channel) => {
+        try {
+          const result = await channel.sendMessage(
+            handlingType,
+            payload,
+            abortSignal
+          );
+          results.push(result);
+        } catch (error: any) {
+          // TODO: better ignore handling
+          if (error.message === "Message ignored by receiver") {
+            console.warn(
+              `Message ignored by receiver (window ID ${targetWindowId})`,
+              error
+            );
+            // nothing returned, nothing pushed — completely skipped
+            return;
+          }
+          throw error; // rethrow real errors
+        }
+      })
     );
 
     return results;

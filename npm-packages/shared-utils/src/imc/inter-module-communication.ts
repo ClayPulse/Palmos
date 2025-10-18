@@ -50,16 +50,18 @@ export class InterModuleCommunication {
 
     const receiver = new MessageReceiver(
       this.receiverHandlerMap,
-      this.thisWindowId
+      this.thisWindowId,
+      this.intent
     );
     this.receiver = receiver;
 
     this.messageRecords = new Map<string, IMCMessage>();
 
     this.listener = (event: MessageEvent<IMCMessage>) => {
-      const messageId = event.data.messageId;
-      const channelId = event.data.channelId;
-      const type = event.data.type;
+      const message = event.data;
+      const messageId = message.messageId;
+      const channelId = message.channelId;
+      const type = message.type;
 
       // Return if the channel ID exists but does not match the current channel ID
       if (this.channelId !== undefined && channelId !== this.channelId) {
@@ -74,12 +76,12 @@ export class InterModuleCommunication {
           `[${
             this.thisWindowId
           }]: Duplicate message received with message ID: ${messageId}. Ignoring this message. Message: ${JSON.stringify(
-            event.data
+            message
           )}`
         );
         return;
       }
-      this.messageRecords?.set(messageId, event.data);
+      this.messageRecords?.set(messageId, message);
 
       if (!receiver) {
         throw new Error(
@@ -87,7 +89,6 @@ export class InterModuleCommunication {
         );
       }
 
-      const message = event.data;
       if (message.from !== undefined) {
         console.log(
           `Module ${this.thisWindowId} received message from module ${
@@ -255,6 +256,22 @@ export class InterModuleCommunication {
           from: id,
         };
         senderWindow.postMessage(msg, "*");
+      }
+    );
+
+    // Handle ignore signal
+    this.receiverHandlerMap?.set(
+      IMCMessageTypeEnum.SignalIgnore,
+      async (senderWindow: Window, message: IMCMessage) => {
+        console.warn(
+          `Message ignored by receiver. Message ID: ${message.messageId}, Payload: ${message.payload}`
+        );
+        const pendingMessage = this.sender?.getPendingMessage(
+          message.messageId
+        );
+        if (pendingMessage) {
+          pendingMessage.reject(new Error("Message ignored by receiver"));
+        }
       }
     );
   }

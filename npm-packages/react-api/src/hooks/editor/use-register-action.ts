@@ -118,42 +118,43 @@ export default function useRegisterAction(
           const { name: requestedName, args }: { name: string; args: any } =
             message.payload;
 
-          if (actionInfo.name === requestedName) {
-            // Validate parameters
-            const actionParams = actionInfo.parameters ?? {};
-            if (Object.keys(args).length !== Object.keys(actionParams).length) {
+          if (actionInfo.name !== requestedName) {
+            throw new Error("Message ignored by receiver");
+          }
+          // Validate parameters
+          const actionParams = actionInfo.parameters ?? {};
+          if (Object.keys(args).length !== Object.keys(actionParams).length) {
+            throw new Error(
+              `Invalid number of parameters: expected ${
+                Object.keys(actionParams).length
+              }, got ${Object.keys(args).length}`
+            );
+          }
+
+          // Check types
+          for (const [key, value] of Object.entries(args)) {
+            if (actionParams[key] === undefined) {
+              throw new Error(`Invalid parameter: ${key}`);
+            }
+            if (typeof value !== actionParams[key].type) {
               throw new Error(
-                `Invalid number of parameters: expected ${
-                  Object.keys(actionParams).length
-                }, got ${Object.keys(args).length}`
+                `Invalid type for parameter ${key}: expected ${
+                  actionParams[key].type
+                }, got ${typeof value}. Value received: ${value}`
               );
             }
-
-            // Check types
-            for (const [key, value] of Object.entries(args)) {
-              if (actionParams[key] === undefined) {
-                throw new Error(`Invalid parameter: ${key}`);
-              }
-              if (typeof value !== actionParams[key].type) {
-                throw new Error(
-                  `Invalid type for parameter ${key}: expected ${
-                    actionParams[key].type
-                  }, got ${typeof value}. Value received: ${value}`
-                );
-              }
-            }
-
-            // If extension is ready, execute immediately
-            if (isExtReady) {
-              const result = await executeAction(args);
-              return result;
-            }
-
-            // Otherwise, queue the command and return when executed
-            return new Promise((resolve) => {
-              commandQueue.current.push({ args, resolve });
-            });
           }
+
+          // If extension is ready, execute immediately
+          if (isExtReady) {
+            const result = await executeAction(args);
+            return result;
+          }
+
+          // Otherwise, queue the command and return when executed
+          return new Promise((resolve) => {
+            commandQueue.current.push({ args, resolve });
+          });
         },
       ],
     ]);

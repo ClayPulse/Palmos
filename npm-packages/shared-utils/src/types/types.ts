@@ -67,6 +67,8 @@ export enum IMCMessageTypeEnum {
   SignalAbort = "signal-abort",
   // Error
   SignalError = "signal-error",
+  // Ignore
+  SignalIgnore = "signal-ignore",
   // #endregion
 }
 

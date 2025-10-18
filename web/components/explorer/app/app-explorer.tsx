@@ -70,7 +70,7 @@ export default function AppExplorer() {
     <div className="h-full grid grid-rows-[max-content_auto_max-content] gap-y-2">
       <p className="text-center">Tap or drag an extension to open it.</p>
 
-      <div className="grid grid-cols-2 gap-2 h-full w-full overflow-y-auto overflow-x-hidden px-4">
+      <div className="grid grid-cols-2 gap-2 h-fit w-full max-h-full overflow-y-auto overflow-x-hidden px-4">
         {previews}
       </div>
       <div className="flex flex-col gap-y-1 px-4 pb-2">

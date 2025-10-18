@@ -438,8 +438,9 @@ export default function CommandViewer() {
         {isArgsInputOpen && actions[selectActionIndex] && (
           <div className="bg-content1 w-80 rounded-2xl shadow-md p-4">
             <p className="mb-2 font-bold">Command Action Arguments</p>
-            {Object.entries(actions[selectActionIndex].action.parameters).map(
-              ([paramName, param], index) => (
+            {Object.entries(actions[selectActionIndex].action.parameters)
+              .filter(([_, param]) => param.type !== "app-instance")
+              .map(([paramName, param], index) => (
                 <div key={paramName} className="mb-2">
                   <Input
                     className="w-full"
@@ -457,8 +458,7 @@ export default function CommandViewer() {
                     size="sm"
                   />
                 </div>
-              ),
-            )}
+              ))}
             <Button
               className="w-full"
               onPress={() => {

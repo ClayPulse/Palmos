@@ -87,6 +87,7 @@ export class MessageSender {
         this.pendingMessages.delete(id);
         reject(reason);
       };
+      
       this.pendingMessages.set(id, {
         resolve: onResolve,
         reject: onReject,

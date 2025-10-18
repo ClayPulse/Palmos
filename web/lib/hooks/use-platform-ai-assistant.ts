@@ -119,16 +119,16 @@ export default function usePlatformAIAssistant() {
         thinkingText: "Executing command...",
       }));
 
-      const command = actions.find((cmd) => cmd.action.name === suggestedCmd);
-      if (!command) {
+      const action = actions.find((cmd) => cmd.action.name === suggestedCmd);
+      if (!action) {
         toast.error(`Agent suggested command ${suggestedCmd} not found.`);
         return;
       }
 
-      const cmdResult = await runScopedAction(command, args);
+      const actionResult = await runScopedAction(action, args);
 
       if (process.env.NODE_ENV === "development") {
-        console.log("Command result:", cmdResult);
+        console.log("Command result:", actionResult);
       }
 
       const previousMessage = history[history.length - 1].message.content.text;
@@ -141,7 +141,7 @@ export default function usePlatformAIAssistant() {
             userMessage: userVoiceMessage,
             suggestedCmd: suggestedCmd,
             previousSuggestion: response,
-            commandResult: cmdResult,
+            commandResult: actionResult,
           },
           (chunk) => {
             if (!chunk.analysis) {
@@ -190,7 +190,7 @@ export default function usePlatformAIAssistant() {
             userMessage: userVoiceMessage,
             suggestedCmd: suggestedCmd,
             previousSuggestion: response,
-            commandResult: cmdResult,
+            commandResult: actionResult,
           },
         );
 

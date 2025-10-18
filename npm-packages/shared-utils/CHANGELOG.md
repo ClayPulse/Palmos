@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.52
+
+### Patch Changes
+
+- Add ignore signal and improve multi-channel polyimc handling
+
 ## 0.1.1-alpha.51
 
 ### Patch Changes
