@@ -38,7 +38,7 @@ export default function MarketplaceModal({
       setIsOpen={setIsOpen}
       title={"Community Marketplace"}
     >
-      <div className="h-full w-full overflow-y-auto px-2">
+      <div className="h-full w-full px-2 grid grid-rows-[max-content_1fr]">
         <div className="flex justify-center">
           {isOpen && (
             <div>

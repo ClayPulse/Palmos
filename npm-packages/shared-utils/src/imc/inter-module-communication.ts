@@ -64,13 +64,18 @@ export class InterModuleCommunication {
       const type = message.type;
 
       // Return if the channel ID exists but does not match the current channel ID
-      if (this.channelId !== undefined && channelId !== this.channelId) {
+      // (channel ID can be undefined during initial handshake)
+      if (
+        this.channelId !== undefined &&
+        channelId !== undefined &&
+        channelId !== this.channelId
+      ) {
         return;
       }
 
       if (
         this.messageRecords?.has(messageId) &&
-        type !== IMCMessageTypeEnum.SignalGetWindowId
+        type !== IMCMessageTypeEnum.SignalRequestOtherWindowId
       ) {
         console.warn(
           `[${
@@ -89,7 +94,7 @@ export class InterModuleCommunication {
         );
       }
 
-      if (message.from !== undefined) {
+      if (message.from !== undefined && message.type !== IMCMessageTypeEnum.SignalIgnore) {
         console.log(
           `Module ${this.thisWindowId} received message from module ${
             message.from
@@ -122,7 +127,7 @@ export class InterModuleCommunication {
         }
 
         const message = event.data;
-        const otherWindowId = message.windowId;
+        const otherWindowId = message.payload;
         this.otherWindowId = otherWindowId;
 
         const sender = new MessageSender(
@@ -149,7 +154,7 @@ export class InterModuleCommunication {
       this.otherWindow = window;
       this.otherWindow.postMessage(
         {
-          type: IMCMessageTypeEnum.SignalGetWindowId,
+          type: IMCMessageTypeEnum.SignalRequestOtherWindowId,
           from: this.thisWindowId,
         },
         "*"
@@ -237,7 +242,7 @@ export class InterModuleCommunication {
 
     // Set get window ID handler in the receiver handler map.
     this.receiverHandlerMap?.set(
-      IMCMessageTypeEnum.SignalGetWindowId,
+      IMCMessageTypeEnum.SignalRequestOtherWindowId,
       async (senderWindow: Window, message: IMCMessage) => {
         console.log(
           "Received window ID request. Sending current window ID to other window: "
@@ -246,16 +251,8 @@ export class InterModuleCommunication {
         if (!id) {
           throw new Error("This window ID is not defined.");
         }
-        const msg: IMCMessage = {
-          messageId: message.messageId,
-          channelId: message.channelId,
-          type: IMCMessageTypeEnum.SignalReturnWindowId,
-          payload: {
-            windowId: id,
-          },
-          from: id,
-        };
-        senderWindow.postMessage(msg, "*");
+
+        return id;
       }
     );
 

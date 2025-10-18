@@ -58,8 +58,7 @@ export enum IMCMessageTypeEnum {
   // #endregion
 
   // #region Signal messages
-  SignalGetWindowId = "signal-get-window-id",
-  SignalReturnWindowId = "signal-return-window-id",
+  SignalRequestOtherWindowId = "signal-request-other-window-id",
   // A message to notify sender that the message
   // has been received and finished processing
   SignalAcknowledge = "signal-acknowledge",

@@ -143,7 +143,7 @@ export default function useScopedActions(appName?: string) {
         return;
       }
 
-      const appInView = findAppInTabView(ext.config.id);
+      const appInView = findAppInTabView(ext.config.id, action.viewId);
 
       console.log("App in view for static Action:", appInView);
 

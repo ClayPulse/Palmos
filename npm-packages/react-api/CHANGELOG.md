@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.53
+
+### Patch Changes
+
+- Fix IMC handshake async bug
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.53
+
 ## 0.1.1-alpha.52
 
 ### Patch Changes

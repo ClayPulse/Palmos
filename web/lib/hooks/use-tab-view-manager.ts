@@ -240,9 +240,7 @@ export function useTabViewManager() {
           imcContext?.removeViewChannels(appConfig.viewId);
         });
       } else if (view.type === ViewModeEnum.App) {
-        imcContext?.removeViewChannels(
-          (view.config as AppViewConfig).viewId,
-        );
+        imcContext?.removeViewChannels((view.config as AppViewConfig).viewId);
       }
     });
   }
@@ -413,7 +411,10 @@ export function useTabViewManager() {
     return aId === bId;
   }
 
-  function findAppInTabView(appId: string): AppViewConfig | undefined {
+  function findAppInTabView(
+    appId: string,
+    viewId?: string,
+  ): AppViewConfig | undefined {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -440,7 +441,11 @@ export function useTabViewManager() {
         isAppNameMatched(app.app, appId),
       );
       if ((appInstances?.length ?? 0) > 1) {
-        throw new Error("Multiple instances of the same app found in canvas");
+        if (!viewId) {
+          throw new Error("Multiple instances of the same app found in canvas");
+        }
+        const appInstance = appInstances?.find((app) => app.viewId === viewId);
+        return appInstance;
       }
       const appInstance = appInstances?.[0];
       return appInstance;

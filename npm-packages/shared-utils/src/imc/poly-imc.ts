@@ -219,7 +219,7 @@ export class ConnectionListener {
             message: IMCMessage,
             abortSignal?: AbortSignal
           ) => {
-            this.handleExtReady(senderWindow, message, abortSignal);
+            await this.handleExtReady(senderWindow, message, abortSignal);
           },
         ],
       ])

@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.53
+
+### Patch Changes
+
+- Fix IMC handshake async bug
+
 ## 0.1.1-alpha.52
 
 ### Patch Changes

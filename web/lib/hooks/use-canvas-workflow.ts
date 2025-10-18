@@ -248,7 +248,7 @@ export default function useCanvasWorkflow(
       );
       updateWorkflowNodeData(node.id, { isRunning: false });
 
-      return result ? JSON.parse(result) : {};
+      return result ?? {};
     }
 
     async function runSequence(sequence: ReactFlowNode<AppNodeData>[]) {
