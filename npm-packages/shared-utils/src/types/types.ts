@@ -82,7 +82,7 @@ export type IMCMessage = {
 export type ReceiverHandler = (
   senderWindow: Window,
   message: IMCMessage,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
 ) => Promise<any>;
 
 // IMC receiver handler map
@@ -98,7 +98,7 @@ export type TextFileSelection = {
 
 export type ViewModel = {
   viewId: string;
-  appConfig?: AppConfig;
+  appConfig: AppConfig;
 };
 
 export enum ViewModeEnum {
@@ -226,13 +226,13 @@ export type TypedVariableObjectType = {
 export type TypedVariableArrayType = [TypedVariableType];
 
 export function isArrayType(
-  value: TypedVariableType
+  value: TypedVariableType,
 ): value is TypedVariableArrayType {
   return Array.isArray(value) && value.length === 1;
 }
 
 export function isObjectType(
-  value: TypedVariableType
+  value: TypedVariableType,
 ): value is TypedVariableObjectType {
   return typeof value === "object" && !Array.isArray(value);
 }

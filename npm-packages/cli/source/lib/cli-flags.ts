@@ -26,6 +26,14 @@ export const flags = defineFlags({
 		type: 'boolean',
 		default: false,
 	},
+	name: {
+		type: 'string',
+		shortFlag: 'n',
+	},
+	visibility: {
+		type: 'string',
+		shortFlag: 'v',
+	},
 });
 
 export type Flags = typeof flags;

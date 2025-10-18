@@ -4,6 +4,7 @@ import {
   AppConfig,
   PolyIMC,
   ViewModeEnum,
+  ViewModel,
 } from "@pulse-editor/shared-utils";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
@@ -377,11 +378,8 @@ export type AppNodeData = {
   selectedAction: Action | undefined;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;
-  ownedApps: {
-    [key: string]: {
-      viewId: string;
-      config: AppConfig;
-    };
+  ownedAppViews: {
+    [key: string]: ViewModel;
   };
 };
 

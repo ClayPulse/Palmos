@@ -275,7 +275,7 @@ export default function useCanvasWorkflow(
             return acc;
           }, {});
 
-        const appInstanceArgs = node.data.ownedApps;
+        const appInstanceArgs = node.data.ownedAppViews;
 
         return {
           ...edgeArgs,

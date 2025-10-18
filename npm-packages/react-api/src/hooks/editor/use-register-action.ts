@@ -31,7 +31,7 @@ export default function useRegisterAction(
   },
   callbackHandler: (args: any) => Promise<any>,
   deps: DependencyList,
-  isExtReady: boolean = true
+  isExtReady: boolean = true,
 ) {
   const { isReady, imc } = useIMC(getReceiverHandlerMap(), "register-action");
 
@@ -127,7 +127,7 @@ export default function useRegisterAction(
             throw new Error(
               `Invalid number of parameters: expected ${
                 Object.keys(actionParams).length
-              }, got ${Object.keys(args).length}`
+              }, got ${Object.keys(args).length}`,
             );
           }
 
@@ -136,11 +136,16 @@ export default function useRegisterAction(
             if (actionParams[key] === undefined) {
               throw new Error(`Invalid parameter: ${key}`);
             }
-            if (typeof value !== actionParams[key].type) {
+            if (
+              typeof value !== actionParams[key].type &&
+              // Allow object for "app-instance"
+              (actionParams[key].type !== "app-instance" ||
+                typeof value !== "object")
+            ) {
               throw new Error(
                 `Invalid type for parameter ${key}: expected ${
                   actionParams[key].type
-                }, got ${typeof value}. Value received: ${value}`
+                }, got ${typeof value}. Value received: ${value}`,
               );
             }
           }

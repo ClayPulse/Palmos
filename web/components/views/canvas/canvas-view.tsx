@@ -127,6 +127,23 @@ export default function CanvasView({
       edges: ReactFlowEdge[];
     }) => {
       if (nodes.length > 0) {
+        // Delete all edges connected to the deleted nodes
+        const connectedEdgeIds = new Set<string>();
+        edges.forEach((edge) => {
+          if (nodes.find((node) => node.id === edge.source)) {
+            connectedEdgeIds.add(edge.id);
+          }
+          if (nodes.find((node) => node.id === edge.target)) {
+            connectedEdgeIds.add(edge.id);
+          }
+        });
+
+        // Delete connected edges
+        updateWorkflowEdges((oldEdges) =>
+          oldEdges.filter((edge) => !connectedEdgeIds.has(edge.id)),
+        );
+
+        // Delete nodes
         const deleteNodePromises = nodes.map(async (node) => {
           await deleteAppViewInCanvasView(node.data.config.viewId);
         });
@@ -211,7 +228,7 @@ export default function CanvasView({
               config.initialWorkflowContent?.nodes.find(
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
-            ownedApps: {}, // Initially no owned apps
+            ownedAppViews: {}, // Initially no owned apps
           };
 
           return {

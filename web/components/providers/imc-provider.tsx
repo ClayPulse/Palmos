@@ -524,12 +524,20 @@ export default function InterModuleCommunicationProvider({
           }: { viewId: string; actionName: string; args: any } =
             message.payload;
 
-          const result = await polyIMCRef.current?.sendMessage(
-            viewId,
-            IMCMessageTypeEnum.EditorRunAppAction,
-            { name: actionName, args },
-          );
-          return result;
+          const result =
+            (await polyIMCRef.current?.sendMessage(
+              viewId,
+              IMCMessageTypeEnum.EditorRunAppAction,
+              { name: actionName, args },
+            )) ?? [];
+
+          if (result.length !== 1) {
+            console.error(
+              `Expected single result from owned app view ${viewId} for action ${actionName}, but got:`,
+              result,
+            );
+          }
+          return result[0];
         },
       ],
     ]);

@@ -1,10 +1,12 @@
 "use client";
 
-import { useContext } from "react";
-import { CreditBalance, Session, Subscription } from "../types";
-import useSWR from "swr";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useContext } from "react";
+import useSWR from "swr";
+import { PlatformEnum } from "../enums";
+import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
+import { CreditBalance, Session, Subscription } from "../types";
 
 export function useAuth() {
   const editorContext = useContext(EditorContext);
@@ -58,7 +60,11 @@ export function useAuth() {
     }
 
     const url = getAPIUrl(`/api/auth/signin`);
-    url.searchParams.set("callbackUrl", window.location.href);
+    if (getPlatform() === PlatformEnum.Electron) {
+      url.searchParams.set("callbackUrl", "/");
+    } else {
+      url.searchParams.set("callbackUrl", window.location.href);
+    }
 
     window.location.href = url.toString();
   }

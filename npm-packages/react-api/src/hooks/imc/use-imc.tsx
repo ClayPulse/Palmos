@@ -30,7 +30,7 @@ export default function useIMC(handlerMap: ReceiverHandlerMap, intent: string) {
       if (!isMounted) return;
       else if (imc !== undefined) return;
 
-      const newImc = new InterModuleCommunication("use-imc", v4());
+      const newImc = new InterModuleCommunication(intent, v4());
       newImc.initThisWindow(window);
       newImc.updateReceiverHandlerMap(handlerMap);
       await newImc.initOtherWindow(targetWindow);

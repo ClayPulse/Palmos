@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-alpha.54
+
+### Patch Changes
+
+- Fix imc intent typo
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.54
+
 ## 0.1.1-alpha.53
 
 ### Patch Changes

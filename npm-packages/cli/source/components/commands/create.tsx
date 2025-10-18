@@ -57,9 +57,14 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 
 	useEffect(() => {
 		if (framework) {
-			setIsShowProjectNameInput(true);
+			const name = cli.flags.name;
+			if (name) {
+				setProjectName(name);
+			} else {
+				setIsShowProjectNameInput(true);
+			}
 		}
-	}, [framework]);
+	}, [framework, cli]);
 
 	useEffect(() => {
 		if (projectName) {
@@ -77,9 +82,14 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				return;
 			}
 
-			setIsShowVisibilitySelect(true);
+			const visibility = cli.flags.visibility;
+			if (visibility) {
+				setVisibility(visibility);
+			} else {
+				setIsShowVisibilitySelect(true);
+			}
 		}
-	}, [projectName]);
+	}, [projectName, cli]);
 
 	useEffect(() => {
 		if (visibility && projectName) {

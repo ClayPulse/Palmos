@@ -39,12 +39,12 @@ export default function useFile(uri: string | undefined) {
         });
       }
     },
-    [uri, file, isReady]
+    [uri, file, isReady],
   );
 
   // Read file when uri changes
   useEffect(() => {
-    if (isReady) {
+    if (isReady && uri) {
       imc
         ?.sendMessage(IMCMessageTypeEnum.PlatformReadFile, {
           uri,

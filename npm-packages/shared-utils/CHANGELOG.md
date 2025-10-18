@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-alpha.54
+
+### Patch Changes
+
+- Fix imc intent typo
+
 ## 0.1.1-alpha.53
 
 ### Patch Changes

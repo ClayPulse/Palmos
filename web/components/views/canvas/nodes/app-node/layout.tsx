@@ -19,7 +19,7 @@ import {
   SelectItem,
   Tooltip,
 } from "@heroui/react";
-import { Action } from "@pulse-editor/shared-utils";
+import { Action, ViewModel } from "@pulse-editor/shared-utils";
 import {
   NodeResizeControl,
   NodeResizer,
@@ -80,7 +80,7 @@ export default function CanvasNodeViewLayout({
 
   return (
     <div
-      className="relative w-full h-full"
+      className="relative h-full w-full"
       onDragOver={(e) => {
         e.stopPropagation();
       }}
@@ -88,7 +88,7 @@ export default function CanvasNodeViewLayout({
       {/* Control */}
       <div className="absolute -top-1.5 z-40 flex w-full justify-center">
         <div
-          className="flex pt-1 h-3 w-8 cursor-grab flex-col items-center justify-start active:h-16 active:w-16 active:cursor-grabbing"
+          className="flex h-3 w-8 cursor-grab flex-col items-center justify-start pt-1 active:h-16 active:w-16 active:cursor-grabbing"
           onClick={(e) => {
             e.preventDefault();
             setIsShowingMenu((prev) => !prev);
@@ -119,9 +119,9 @@ export default function CanvasNodeViewLayout({
       {/* Input Handles */}
       {selectedAction && (
         <>
-          <div className="absolute top-0 -translate-x-[100%] h-full pointer-events-none">
+          <div className="pointer-events-none absolute top-0 h-full -translate-x-[100%]">
             {isShowingWorkflowConnector && (
-              <div className="h-full w-full flex flex-col gap-y-1 relative justify-center items-end">
+              <div className="relative flex h-full w-full flex-col items-end justify-center gap-y-1">
                 {Object.entries(selectedAction?.parameters ?? {}).map(
                   ([paramName, param]) => (
                     <div
@@ -163,13 +163,13 @@ export default function CanvasNodeViewLayout({
                           };
 
                           updateNodeData(viewId, {
-                            ownedApps: {
-                              ...node.data.ownedApps,
+                            ownedAppViews: {
+                              ...node.data.ownedAppViews,
                               [paramName]: {
                                 viewId: config.viewId,
-                                config: app.config,
+                                appConfig: app.config,
                               },
-                            },
+                            } as Record<string, ViewModel>,
                           });
                         } catch (error) {
                           addToast({
@@ -183,7 +183,7 @@ export default function CanvasNodeViewLayout({
                     >
                       {param.type === "app-instance" ? (
                         <Button
-                          className="h-fit rounded-r-none data-[exist-app=true]:border-2 data-[exist-app=true]:border-success data-[exist-app=true]:bg-success/30"
+                          className="data-[exist-app=true]:border-success data-[exist-app=true]:bg-success/30 h-fit rounded-r-none data-[exist-app=true]:border-2"
                           onPress={() => {
                             editorContext?.setEditorStates((prev) => ({
                               ...prev,
@@ -191,14 +191,16 @@ export default function CanvasNodeViewLayout({
                             }));
                           }}
                           data-exist-app={
-                            node.data.ownedApps[paramName] ? "true" : "false"
+                            node.data.ownedAppViews[paramName]
+                              ? "true"
+                              : "false"
                           }
                         >
-                          <div className="text-center py-2">
+                          <div className="py-2 text-center">
                             <p>{paramName}</p>
                             <p>(app-instance)</p>
-                            {node.data.ownedApps[paramName] ? (
-                              <p>{node.data.ownedApps[paramName].viewId}</p>
+                            {node.data.ownedAppViews[paramName] ? (
+                              <p>{node.data.ownedAppViews[paramName].viewId}</p>
                             ) : (
                               <p>Tip: drag app here</p>
                             )}
@@ -220,9 +222,9 @@ export default function CanvasNodeViewLayout({
           </div>
 
           {/* Output Handles */}
-          <div className="absolute top-0 right-0 translate-x-[100%] h-full pointer-events-none">
+          <div className="pointer-events-none absolute top-0 right-0 h-full translate-x-[100%]">
             {isShowingWorkflowConnector && (
-              <div className="h-full w-full flex flex-col gap-y-1 relative justify-center">
+              <div className="relative flex h-full w-full flex-col justify-center gap-y-1">
                 {Object.entries(selectedAction?.returns ?? {}).map(
                   ([key, param]) => (
                     <NodeHandle
@@ -256,18 +258,18 @@ export default function CanvasNodeViewLayout({
         }}
       />
 
-      <div className="bg-content1 relative h-full w-full rounded-lg shadow-md z-10">
+      <div className="bg-content1 relative z-10 h-full w-full rounded-lg shadow-md">
         {isRunning ? (
-          <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden running wrapper gradient z-0" />
+          <div className="running wrapper gradient absolute top-0 left-0 z-0 h-full w-full overflow-hidden rounded-lg" />
         ) : (
           (node.selected || node.dragging) && (
-            <div className="absolute top-0 left-0 rounded-lg h-full w-full overflow-hidden selected wrapper gradient z-0" />
+            <div className="selected wrapper gradient absolute top-0 left-0 z-0 h-full w-full overflow-hidden rounded-lg" />
           )
         )}
 
         <div
           className={clsx(
-            "relative h-full w-full rounded-md overflow-hidden z-10 data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none",
+            "relative z-10 h-full w-full overflow-hidden rounded-md data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none",
             (node.selected || node.dragging) && !isRunning && "aura",
           )}
           data-is-dragging={node.dragging ? "true" : "false"}
@@ -277,28 +279,30 @@ export default function CanvasNodeViewLayout({
         </div>
 
         <div
-          className="flex-col gap-y-2 py-4 px-2 bg-content2 text-content2-foreground mx-2 rounded-b-lg hidden data-[visible=true]:flex"
+          className="bg-content2 text-content2-foreground mx-2 hidden flex-col gap-y-2 rounded-b-lg px-2 py-4 data-[visible=true]:flex"
           data-visible={
-            Object.keys(node.data.ownedApps ?? {}).length > 0 &&
+            Object.keys(node.data.ownedAppViews ?? {}).length > 0 &&
             isShowingWorkflowConnector &&
             isShowingOwnedApps
           }
         >
-          <p className="text-center font-semibold text-lg">Owned Apps</p>
-          {Object.entries(node.data.ownedApps ?? {}).map(([key, config]) => (
-            <div key={config.viewId}>
-              <p className="text-center">{key}</p>
-              <div className="bg-content3 relative h-full w-full overflow-hidden rounded-lg shadow-md">
-                <BaseAppView
-                  config={{
-                    app: config.config.id,
-                    viewId: config.viewId,
-                  }}
-                  viewId={config.viewId}
-                />
+          <p className="text-center text-lg font-semibold">Owned Apps</p>
+          {Object.entries(node.data.ownedAppViews ?? {}).map(
+            ([key, viewModel]) => (
+              <div key={viewModel.viewId}>
+                <p className="text-center">{key}</p>
+                <div className="bg-content3 relative h-80 w-full overflow-hidden rounded-lg shadow-md">
+                  <BaseAppView
+                    config={{
+                      app: viewModel.appConfig.id,
+                      viewId: viewModel.viewId,
+                    }}
+                    viewId={viewModel.viewId}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ),
+          )}
         </div>
       </div>
     </div>

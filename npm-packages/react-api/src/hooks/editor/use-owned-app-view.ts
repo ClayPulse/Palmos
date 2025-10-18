@@ -1,12 +1,12 @@
 import {
-  AppConfig,
   IMCMessage,
   IMCMessageTypeEnum,
+  ViewModel,
 } from "@pulse-editor/shared-utils";
 import { useCallback } from "react";
 import useIMC from "../imc/use-imc";
 
-export default function useOwnedApp() {
+export default function useOwnedAppView() {
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>
@@ -14,23 +14,17 @@ export default function useOwnedApp() {
 
   const { imc, isReady } = useIMC(receiverHandlerMap, "owned-app");
 
-  const runOwnedAppAction = useCallback(
-    async (
-      ownedApp: {
-        viewId: string;
-        config: AppConfig;
-      },
-      actionName: string,
-      args: any
-    ) => {
+  const runAppAction = useCallback(
+    async (ownedAppViewModel: ViewModel, actionName: string, args: any) => {
       if (isReady) {
-        const appViewId = ownedApp.viewId;
-        const preRegisteredActions = ownedApp.config.preRegisteredActions || [];
+        const appViewId = ownedAppViewModel.viewId;
+        const preRegisteredActions =
+          ownedAppViewModel.appConfig.preRegisteredActions || [];
 
         const action = preRegisteredActions.find((a) => a.name === actionName);
         if (!action) {
           throw new Error(
-            `Action ${actionName} not found in owned app ${ownedApp.config.id}`
+            `Action ${actionName} not found in owned app ${ownedAppViewModel.appConfig.id}`,
           );
         }
 
@@ -40,16 +34,16 @@ export default function useOwnedApp() {
             viewId: appViewId,
             actionName,
             args,
-          }
+          },
         );
         return result;
       }
       return undefined;
     },
-    [imc, isReady]
+    [imc, isReady],
   );
 
   return {
-    runOwnedAppAction,
+    runAppAction,
   };
 }
