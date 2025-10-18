@@ -1,16 +1,13 @@
 {
   "mode": "pre",
-  "tag": "alpha",
+  "tag": "beta",
   "initialVersions": {
-    "pulse-editor-desktop": "0.0.1",
-    "pulse-editor-mobile": "0.0.1",
-    "@pulse-editor/react-api": "0.1.1-beta.1",
-    "@pulse-editor/shared-utils": "0.1.1-beta.1",
-    "pulse-editor-vscode": "0.0.3",
-    "@pulse-editor/web": "0.1.1-beta.1",
-    "@pulse-editor/desktop": "0.0.1",
+    "@pulse-editor/capacitor-plugin": "0.0.1",
     "@pulse-editor/mobile": "0.0.1",
-    "@pulse-editor/capacitor-plugin": "0.0.1"
+    "@pulse-editor/react-api": "0.1.1-alpha.54",
+    "@pulse-editor/shared-utils": "0.1.1-alpha.54",
+    "pulse-editor-vscode": "0.0.3",
+    "@pulse-editor/web": "0.1.1-alpha.13"
   },
   "changesets": [
     "angry-llamas-smash",
@@ -55,6 +52,7 @@
     "sharp-memes-give",
     "shiny-doodles-jump",
     "silent-glasses-kick",
+    "slick-olives-wink",
     "slick-roses-fix",
     "social-donkeys-cross",
     "soft-cases-share",
