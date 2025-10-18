@@ -56,7 +56,7 @@ export default function ModalWrapper({
       placement={placement}
     >
       <ModalContent>
-        <div className="h-fit w-full grid grid-rows-[max-content_1fr]">
+        <div className="grid h-fit w-full grid-rows-[max-content_1fr]">
           {isShowGoBack && (
             <Button
               className="text-foreground-500 absolute top-1 left-1 rounded-full"
@@ -70,9 +70,11 @@ export default function ModalWrapper({
           )}
 
           <div className="h-full w-full pt-8">
-            <div className="max-h-[70vh] px-1 pb-4 grid grid-rows-[max-content_1fr] h-full">
+            <div className="grid h-full max-h-[70vh] grid-rows-[max-content_1fr] px-1 pb-4">
               <p className="pb-4 text-center text-lg font-bold">{title}</p>
-              <div className="overflow-y-auto w-full min-h-0 h-full max-h-full px-1">{children}</div>
+              <div className="h-full max-h-full min-h-0 w-full overflow-y-auto px-1">
+                {children}
+              </div>
             </div>
           </div>
         </div>
