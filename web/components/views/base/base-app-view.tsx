@@ -1,6 +1,5 @@
 import Loading from "@/components/interface/status-screens/loading";
 import NotAuthorized from "@/components/interface/status-screens/not-authorized";
-import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { AppViewConfig, ExtensionApp } from "@/lib/types";
@@ -15,7 +14,6 @@ export default function BaseAppView({
   config: AppViewConfig;
   viewId: string;
 }) {
-  const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
   const {
@@ -86,7 +84,7 @@ export default function BaseAppView({
   }, [config, installExtension, isOpened]);
 
   return noAccessToApp ? (
-    <div className="bg-content1 h-full w-full">
+    <div className="bg-content3 h-full w-full">
       <NotAuthorized />
     </div>
   ) : !pulseAppViewModel ? (

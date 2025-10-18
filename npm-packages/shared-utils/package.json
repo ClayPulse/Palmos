@@ -1,6 +1,6 @@
 {
     "name": "@pulse-editor/shared-utils",
-    "version": "0.1.1-alpha.48",
+    "version": "0.1.1-beta.55",
     "main": "dist/main.js",
     "files": [
         "dist"
@@ -22,7 +22,6 @@
         "@rollup/plugin-babel": "^6.0.4",
         "@rollup/plugin-json": "^6.1.0",
         "@rollup/plugin-node-resolve": "^16.0.1",
-        "@rollup/plugin-terser": "^0.4.4",
         "@rollup/plugin-typescript": "^12.1.2",
         "@types/node": "^22.13.1",
         "eslint": "^9.25.0",

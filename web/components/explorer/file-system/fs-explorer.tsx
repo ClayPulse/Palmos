@@ -184,9 +184,6 @@ export default function FileSystemExplorer({
                     projectContent: [],
                   };
                 });
-
-                // Clear view manager
-                closeAllTabViews();
               }}
             >
               <Icon name="close" variant="outlined" />

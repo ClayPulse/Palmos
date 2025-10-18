@@ -19,7 +19,7 @@ export default function useCanvasWorkflow(
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
-  const { runAction } = useScopedActions();
+  const { runScopedAction } = useScopedActions();
 
   const [pendingNodes, setPendingNodes] = useState<
     ReactFlowNode<AppNodeData>[]
@@ -236,10 +236,9 @@ export default function useCanvasWorkflow(
       if (!selectedAction) return;
       updateWorkflowNodeData(node.id, { isRunning: true });
       console.log(
-        `Running node ${node.id} with action ${selectedAction} and args`,
-        args,
+        `Running node ${node.id} with action \n${JSON.stringify(selectedAction)} \nand args \n${JSON.stringify(args)}`,
       );
-      const result = await runAction(
+      const result = await runScopedAction(
         {
           action: selectedAction,
           viewId: node.id,
@@ -249,14 +248,14 @@ export default function useCanvasWorkflow(
       );
       updateWorkflowNodeData(node.id, { isRunning: false });
 
-      return result ? JSON.parse(result) : {};
+      return result ?? {};
     }
 
     async function runSequence(sequence: ReactFlowNode<AppNodeData>[]) {
       // Helper to get input args for a node
-      function getInputArgs(nodeId: string) {
-        return localEdges
-          .filter((e) => e.target === nodeId)
+      function getInputArgs(node: ReactFlowNode<AppNodeData>) {
+        const edgeArgs = localEdges
+          .filter((e) => e.target === node.id)
           .map((e) => {
             const sourceHandle = e.sourceHandle;
             const targetHandle = e.targetHandle;
@@ -275,6 +274,13 @@ export default function useCanvasWorkflow(
             }
             return acc;
           }, {});
+
+        const appInstanceArgs = node.data.ownedAppViews;
+
+        return {
+          ...edgeArgs,
+          ...appInstanceArgs,
+        };
       }
 
       // Parallel execution using in-degree tracking
@@ -315,7 +321,7 @@ export default function useCanvasWorkflow(
             running.add(nodeId);
             const node = sequence.find((n) => n.id === nodeId);
             if (!node) return;
-            const inputArgs = getInputArgs(nodeId);
+            const inputArgs = getInputArgs(node);
             const result = await runNode(node, inputArgs);
             resultMap.set(nodeId, result);
             // After running, update children

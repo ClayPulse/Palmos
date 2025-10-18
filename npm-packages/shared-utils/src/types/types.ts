@@ -42,6 +42,8 @@ export enum IMCMessageTypeEnum {
   EditorAppStateSnapshotSave = "editor-app-state-snapshot-save",
   // Handle editor file selection or drop
   EditorAppReceiveFileUri = "editor-app-receive-file-uri",
+  // App uses owned app
+  EditorAppUseOwnedApp = "editor-app-use-owned-app",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)
@@ -56,8 +58,7 @@ export enum IMCMessageTypeEnum {
   // #endregion
 
   // #region Signal messages
-  SignalGetWindowId = "signal-get-window-id",
-  SignalReturnWindowId = "signal-return-window-id",
+  SignalRequestOtherWindowId = "signal-request-other-window-id",
   // A message to notify sender that the message
   // has been received and finished processing
   SignalAcknowledge = "signal-acknowledge",
@@ -65,11 +66,14 @@ export enum IMCMessageTypeEnum {
   SignalAbort = "signal-abort",
   // Error
   SignalError = "signal-error",
+  // Ignore
+  SignalIgnore = "signal-ignore",
   // #endregion
 }
 
 export type IMCMessage = {
-  id: string;
+  messageId: string;
+  channelId?: string;
   from: string;
   type: IMCMessageTypeEnum;
   payload?: any;
@@ -78,7 +82,7 @@ export type IMCMessage = {
 export type ReceiverHandler = (
   senderWindow: Window,
   message: IMCMessage,
-  abortSignal?: AbortSignal
+  abortSignal?: AbortSignal,
 ) => Promise<any>;
 
 // IMC receiver handler map
@@ -94,7 +98,7 @@ export type TextFileSelection = {
 
 export type ViewModel = {
   viewId: string;
-  appConfig?: AppConfig;
+  appConfig: AppConfig;
 };
 
 export enum ViewModeEnum {
@@ -208,6 +212,10 @@ export type TypedVariableType =
   | "number"
   | "boolean"
   | "any"
+  // An app instance is a reference to another app.
+  // This instance could be possessed by the owner,
+  // or it can be initialized by the caller.
+  | "app-instance"
   | TypedVariableObjectType
   | TypedVariableArrayType;
 
@@ -218,13 +226,13 @@ export type TypedVariableObjectType = {
 export type TypedVariableArrayType = [TypedVariableType];
 
 export function isArrayType(
-  value: TypedVariableType
+  value: TypedVariableType,
 ): value is TypedVariableArrayType {
   return Array.isArray(value) && value.length === 1;
 }
 
 export function isObjectType(
-  value: TypedVariableType
+  value: TypedVariableType,
 ): value is TypedVariableObjectType {
   return typeof value === "object" && !Array.isArray(value);
 }

@@ -12,7 +12,7 @@ export default function useNotification() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc } = useIMC(receiverHandlerMap);
+  const { imc } = useIMC(receiverHandlerMap, "notification");
 
   function openNotification(text: string, type: NotificationTypeEnum) {
     if (!imc) {

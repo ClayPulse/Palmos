@@ -38,6 +38,11 @@ const create = `\
                       The framework to use for the new app.
                       Currently available options: react.
                       Future options: vue, angular, etc.
+                    --name, -n [project-name]
+                      The name of the new project.
+                    --visibility, -v [visibility]
+                      The visibility of the new project. Options are private,
+                      public, and unlisted.
 `;
 
 export const commandsManual: Record<string, string> = {

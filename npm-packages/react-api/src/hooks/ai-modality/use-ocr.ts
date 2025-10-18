@@ -8,7 +8,7 @@ export default function useOCR() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc } = useIMC(receiverHandlerMap);
+  const { imc } = useIMC(receiverHandlerMap, "ocr");
 
   /**
    * 

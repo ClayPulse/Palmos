@@ -17,7 +17,7 @@ export default function useTheme() {
     }
   );
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "theme");
 
   // Upon initial load, request theme from main app
   useEffect(() => {
@@ -25,7 +25,6 @@ export default function useTheme() {
       imc
         ?.sendMessage(IMCMessageTypeEnum.EditorAppRequestTheme)
         .then((result) => {
-          console.log("Received theme from main app:", result);
           setTheme((prev) => result);
         });
     }

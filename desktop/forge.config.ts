@@ -1,12 +1,12 @@
 import type { ForgeConfig } from "@electron-forge/shared-types";
-import path from "path";
 import fs from "fs-extra";
+import path from "path";
 
-function moveModule(moduleList: string[], resourcePath: string) {
+function copyModule(moduleList: string[], resourcePath: string) {
   moduleList.forEach((module) => {
-    fs.moveSync(
+    fs.copySync(
       path.join("./node_modules", module),
-      path.join(resourcePath, "app/node_modules", module)
+      path.join(resourcePath, "app/node_modules", module),
     );
   });
 }
@@ -27,11 +27,11 @@ const config: ForgeConfig = {
         // We need electron-serve to exist inside the electron build's node_modules.
         // All other modules from nextjs are not needed and can be removed.
         if (platform === "win32") {
-          moveModule(electronModules, path.join(extractPath, "resources"));
+          copyModule(electronModules, path.join(extractPath, "resources"));
         } else if (platform === "darwin") {
-          moveModule(
+          copyModule(
             electronModules,
-            path.join(extractPath, "pulse-editor.app/Contents/Resources")
+            path.join(extractPath, "pulse-editor.app/Contents/Resources"),
           );
         } else if (platform === "linux") {
         }
@@ -47,7 +47,7 @@ const config: ForgeConfig = {
         options: {
           icon: path.join(
             __dirname,
-            "../shared-assets/icons/electron/pulse_logo_round"
+            "../shared-assets/icons/electron/pulse_logo_round",
           ),
         },
       },

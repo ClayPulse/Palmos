@@ -2,7 +2,6 @@ import resolve from "@rollup/plugin-node-resolve";
 import peerDepsExternal from "rollup-plugin-peer-deps-external";
 import babel from "@rollup/plugin-babel";
 import typescript from "@rollup/plugin-typescript";
-import terser from "@rollup/plugin-terser";
 
 // rollup.config.mjs
 export default {
@@ -12,6 +11,7 @@ export default {
       file: "dist/main.js",
       format: "es",
       exports: "named",
+      sourcemap: true,
     },
   ],
   plugins: [
@@ -29,6 +29,5 @@ export default {
       rootDir: "src",
       exclude: ["node_modules/**"],
     }),
-    terser(),
   ],
 };

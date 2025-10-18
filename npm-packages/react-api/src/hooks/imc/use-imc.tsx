@@ -4,8 +4,9 @@ import {
   ReceiverHandlerMap,
 } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
+import { v4 } from "uuid";
 
-export default function useIMC(handlerMap: ReceiverHandlerMap) {
+export default function useIMC(handlerMap: ReceiverHandlerMap, intent: string) {
   const [imc, setImc] = useState<InterModuleCommunication | undefined>(
     undefined
   );
@@ -29,13 +30,16 @@ export default function useIMC(handlerMap: ReceiverHandlerMap) {
       if (!isMounted) return;
       else if (imc !== undefined) return;
 
-      const newImc = new InterModuleCommunication();
+      const newImc = new InterModuleCommunication(intent, v4());
       newImc.initThisWindow(window);
       newImc.updateReceiverHandlerMap(handlerMap);
       await newImc.initOtherWindow(targetWindow);
       setImc(newImc);
 
-      await newImc.sendMessage(IMCMessageTypeEnum.AppReady);
+      await newImc.sendMessage(IMCMessageTypeEnum.AppReady, {
+        intent,
+        channelId: newImc.channelId,
+      });
       setIsReady(true);
     }
 

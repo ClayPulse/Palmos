@@ -28,7 +28,7 @@ export default function CommandViewer() {
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant, history } = usePlatformAIAssistant();
-  const { actions, runAction, setKeywordFilter } = useScopedActions();
+  const { actions, runScopedAction, setKeywordFilter } = useScopedActions();
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectActionIndex, setSelectActionIndex] = useState(-1);
@@ -45,11 +45,12 @@ export default function CommandViewer() {
   const [actionReadyToRun, setActionReadyToRun] = useState<boolean>(false);
 
   const historyRef = useRef<HTMLDivElement>(null);
+  const isRunningCommandRef = useRef(false);
 
   const runActionCallback = useCallback(
     async (action: ScopedAction) => {
       try {
-        const result = await runAction(action, args);
+        const result = await runScopedAction(action, args);
 
         console.log("Command result:", result);
         addToast({
@@ -66,7 +67,7 @@ export default function CommandViewer() {
         console.error("Failed to run action:", error);
       }
     },
-    [runAction, args],
+    [runScopedAction, args],
   );
 
   useEffect(() => {
@@ -141,7 +142,13 @@ export default function CommandViewer() {
         const isValid = validateActionArgs(queuedAction, args);
         if (isValid) {
           // Run action directly if args are valid
+
+          if (isRunningCommandRef.current) {
+            return;
+          }
+          isRunningCommandRef.current = true;
           await runActionCallback(queuedAction);
+          isRunningCommandRef.current = false;
         } else {
           // Otherwise, open args input and wait for user
           // to fill in required args.
@@ -431,8 +438,9 @@ export default function CommandViewer() {
         {isArgsInputOpen && actions[selectActionIndex] && (
           <div className="bg-content1 w-80 rounded-2xl shadow-md p-4">
             <p className="mb-2 font-bold">Command Action Arguments</p>
-            {Object.entries(actions[selectActionIndex].action.parameters).map(
-              ([paramName, param], index) => (
+            {Object.entries(actions[selectActionIndex].action.parameters)
+              .filter(([_, param]) => param.type !== "app-instance")
+              .map(([paramName, param], index) => (
                 <div key={paramName} className="mb-2">
                   <Input
                     className="w-full"
@@ -450,8 +458,7 @@ export default function CommandViewer() {
                     size="sm"
                   />
                 </div>
-              ),
-            )}
+              ))}
             <Button
               className="w-full"
               onPress={() => {

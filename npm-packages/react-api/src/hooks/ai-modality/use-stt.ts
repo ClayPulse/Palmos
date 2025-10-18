@@ -11,7 +11,7 @@ export default function useSTT() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "stt");
 
   async function runSTT(
     audio: Uint8Array,

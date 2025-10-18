@@ -1,5 +1,47 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.55
+
+### Patch Changes
+
+- Release BETA packages
+
+## 0.1.1-alpha.54
+
+### Patch Changes
+
+- Fix imc intent typo
+
+## 0.1.1-alpha.53
+
+### Patch Changes
+
+- Fix IMC handshake async bug
+
+## 0.1.1-alpha.52
+
+### Patch Changes
+
+- Add ignore signal and improve multi-channel polyimc handling
+
+## 0.1.1-alpha.51
+
+### Patch Changes
+
+- Fix polyIMC any channel would handle all channels under same window (view) ID
+
+## 0.1.1-alpha.50
+
+### Patch Changes
+
+- Revert debug information
+
+## 0.1.1-alpha.49
+
+### Patch Changes
+
+- Fix platformAPI for FS
+
 ## 0.1.1-alpha.48
 
 ### Patch Changes

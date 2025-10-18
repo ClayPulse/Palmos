@@ -11,7 +11,7 @@ export default function useVideoGen() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "video-gen");
 
   /**
    *

@@ -140,7 +140,7 @@ export default function AppGallery() {
   ]);
 
   return (
-    <div className="flex flex-col gap-y-2">
+    <div className="h-full w-full grid grid-rows-[max-content_1fr] gap-y-2 overflow-y-auto">
       <div className="flex flex-col items-center">
         <Select
           label="Filter apps"
@@ -184,7 +184,7 @@ export default function AppGallery() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 w-full">{previews}</div>
+        <div className="grid grid-cols-2 gap-2 w-full h-full overflow-y-auto overflow-x-hidden px-1">{previews}</div>
       )}
     </div>
   );

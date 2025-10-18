@@ -8,7 +8,7 @@ export default function useLoading() {
     (senderWindow: Window, message: IMCMessage) => Promise<any>
   >();
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "loading");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

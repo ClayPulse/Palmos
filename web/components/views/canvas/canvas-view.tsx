@@ -1,15 +1,19 @@
 import PublishWorkflowModal from "@/components/modals/publish-workflow-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { DragEventTypeEnum } from "@/lib/enums";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import {
+  AppDragData,
   AppInfoModalContent,
   AppNodeData,
   AppViewConfig,
   CanvasViewConfig,
+  ExtensionApp,
 } from "@/lib/types";
-import { Button } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
 import {
   addEdge,
   applyEdgeChanges,
@@ -27,7 +31,16 @@ import {
   useViewport,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { useTheme } from "next-themes";
+import {
+  memo,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { v4 } from "uuid";
 import Icon from "../../misc/icon";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
@@ -62,7 +75,7 @@ export default function CanvasView({
   const editorContext = useContext(EditorContext);
 
   const { openAppInfoModal } = useAppInfo();
-
+  const { resolvedTheme } = useTheme();
   const {
     localEdges,
     localNodes,
@@ -73,9 +86,10 @@ export default function CanvasView({
     exportWorkflow,
     saveAppsSnapshotStates,
   } = useCanvasWorkflow(config.initialWorkflowContent);
-
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
+  const { deleteAppViewInCanvasView, createAppViewInCanvasView } =
+    useTabViewManager();
 
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
@@ -103,6 +117,48 @@ export default function CanvasView({
         reconnectEdge(oldEdge, newConnection, oldEdges),
       ),
     [updateWorkflowEdges],
+  );
+  const onDelete = useCallback(
+    async ({
+      nodes,
+      edges,
+    }: {
+      nodes: ReactFlowNode<AppNodeData>[];
+      edges: ReactFlowEdge[];
+    }) => {
+      if (nodes.length > 0) {
+        // Delete all edges connected to the deleted nodes
+        const connectedEdgeIds = new Set<string>();
+        edges.forEach((edge) => {
+          if (nodes.find((node) => node.id === edge.source)) {
+            connectedEdgeIds.add(edge.id);
+          }
+          if (nodes.find((node) => node.id === edge.target)) {
+            connectedEdgeIds.add(edge.id);
+          }
+        });
+
+        // Delete connected edges
+        updateWorkflowEdges((oldEdges) =>
+          oldEdges.filter((edge) => !connectedEdgeIds.has(edge.id)),
+        );
+
+        // Delete nodes
+        const deleteNodePromises = nodes.map(async (node) => {
+          await deleteAppViewInCanvasView(node.data.config.viewId);
+        });
+        await Promise.all(deleteNodePromises);
+      }
+
+      if (edges.length > 0) {
+        updateWorkflowEdges((oldEdges) =>
+          oldEdges.filter(
+            (edge) => !edges.find((deletedEdge) => deletedEdge.id === edge.id),
+          ),
+        );
+      }
+    },
+    [updateWorkflowEdges, updateWorkflowNodes],
   );
 
   /* Node creator functions */
@@ -172,6 +228,7 @@ export default function CanvasView({
               config.initialWorkflowContent?.nodes.find(
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
+            ownedAppViews: {}, // Initially no owned apps
           };
 
           return {
@@ -244,6 +301,45 @@ export default function CanvasView({
       ref={containerRef}
       className="bg-content3 text-content3-foreground relative h-full w-full"
       id={config.viewId}
+      onDragOver={(e) => {
+        const types = e.dataTransfer.types;
+        if (
+          types.includes(`application/${DragEventTypeEnum.App.toLowerCase()}`)
+        ) {
+          e.preventDefault(); // allow drop
+          e.dataTransfer.dropEffect = "copy";
+        } else {
+          e.dataTransfer.dropEffect = "none";
+        }
+      }}
+      onDrop={(e) => {
+        const dataText = e.dataTransfer.getData(
+          `application/${DragEventTypeEnum.App.toLowerCase()}`,
+        );
+        if (!dataText) {
+          return;
+        }
+        console.log("Dropped item:", dataText);
+        try {
+          const data = JSON.parse(dataText) as AppDragData;
+          e.preventDefault();
+
+          const app: ExtensionApp = data.app;
+          const config: AppViewConfig = {
+            app: app.config.id,
+            viewId: `${app.config.id}-${v4()}`,
+            recommendedHeight: app.config.recommendedHeight,
+            recommendedWidth: app.config.recommendedWidth,
+          };
+          createAppViewInCanvasView(config);
+        } catch (error) {
+          addToast({
+            title: "Failed to open app",
+            description: "The dropped app data is invalid.",
+            color: "danger",
+          });
+        }
+      }}
     >
       <ReactFlow
         nodes={localNodes ?? []}
@@ -259,6 +355,7 @@ export default function CanvasView({
           appNode: createAppNode,
         }}
         deleteKeyCode={["Delete", "Backspace"]}
+        onDelete={onDelete}
         onReconnect={onReconnect}
         defaultEdgeOptions={{
           markerEnd: {
@@ -270,6 +367,7 @@ export default function CanvasView({
         }}
         maxZoom={4}
         minZoom={0.1}
+        colorMode={resolvedTheme === "dark" ? "dark" : "light"}
       >
         <Background id={config.viewId} variant={BackgroundVariant.Dots} />
       </ReactFlow>
@@ -296,3 +394,16 @@ export default function CanvasView({
     </div>
   );
 }
+
+export const MemoizedCanvasView = memo(
+  ({
+    config,
+    isActive,
+    tabName,
+  }: {
+    config: CanvasViewConfig;
+    isActive: boolean;
+    tabName: string;
+  }) => <CanvasView config={config} isActive={isActive} tabName={tabName} />,
+);
+MemoizedCanvasView.displayName = "MemoizedCanvasView";

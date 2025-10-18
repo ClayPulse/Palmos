@@ -11,7 +11,7 @@ export default function useLLM() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc, isReady } = useIMC(receiverHandlerMap);
+  const { imc, isReady } = useIMC(receiverHandlerMap, "llm");
 
   async function runLLM(
     prompt: string,

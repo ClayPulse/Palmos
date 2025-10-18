@@ -42,11 +42,33 @@ export class PolyIMC {
       throw new Error("Channel not found for window ID " + targetWindowId);
     }
 
-    const results = await Promise.all(
-      channels.map(
-        async (channel) =>
-          await channel.sendMessage(handlingType, payload, abortSignal)
-      )
+    // - some channels here are not returning results
+    // - and the result now is an array instead of a single value
+
+    const results: any[] = [];
+
+    await Promise.all(
+      channels.map(async (channel) => {
+        try {
+          const result = await channel.sendMessage(
+            handlingType,
+            payload,
+            abortSignal
+          );
+          results.push(result);
+        } catch (error: any) {
+          // TODO: better ignore handling
+          if (error.message === "Message ignored by receiver") {
+            console.warn(
+              `Message ignored by receiver (window ID ${targetWindowId})`,
+              error
+            );
+            // nothing returned, nothing pushed — completely skipped
+            return;
+          }
+          throw error; // rethrow real errors
+        }
+      })
     );
 
     return results;
@@ -89,10 +111,12 @@ export class PolyIMC {
   public async createChannel(
     targetWindow: Window,
     targetWindowId: string,
+    intent: string,
+    channelId?: string,
     receiverHandlerMap?: ReceiverHandlerMap
   ) {
     console.log("Creating channel for window ID: " + targetWindowId);
-    const channel = new InterModuleCommunication();
+    const channel = new InterModuleCommunication(intent, channelId);
     channel.initThisWindow(window, targetWindowId);
     await channel.initOtherWindow(targetWindow);
 
@@ -179,7 +203,10 @@ export class ConnectionListener {
     this.newConnectionReceiverHandlerMap = newConnectionReceiverHandlerMap;
     this.onConnection = onConnection;
 
-    const listener = new InterModuleCommunication();
+    const listener = new InterModuleCommunication(
+      "connection-listener",
+      undefined
+    );
     this.listener = listener;
     listener.initThisWindow(window, expectedOtherWindowId);
 
@@ -192,7 +219,7 @@ export class ConnectionListener {
             message: IMCMessage,
             abortSignal?: AbortSignal
           ) => {
-            this.handleExtReady(senderWindow, message, abortSignal);
+            await this.handleExtReady(senderWindow, message, abortSignal);
           },
         ],
       ])
@@ -215,22 +242,19 @@ export class ConnectionListener {
     abortSignal?: AbortSignal
   ) {
     const targetWindowId = message.from;
+    const { intent, channelId }: { intent: string; channelId?: string } =
+      message.payload;
 
-    if (this.polyIMC.hasChannel(targetWindowId)) {
-      // Channel already exists for the target window ID,
-      // so we don't need to create a new one.
-      console.log(
-        "Channel already exists for window ID " +
-          targetWindowId +
-          ". Re-using the existing channel."
-      );
-      return;
+    if (!channelId) {
+      throw new Error("Channel ID is missing in AppReady message.");
     }
 
     // Create a new channel for the incoming connection
     await this.polyIMC.createChannel(
       senderWindow,
       targetWindowId,
+      intent,
+      channelId,
       this.newConnectionReceiverHandlerMap
     );
 

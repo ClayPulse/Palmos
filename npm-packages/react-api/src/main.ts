@@ -14,6 +14,7 @@ import useSTT from "./hooks/ai-modality/use-stt";
 import useTTS from "./hooks/ai-modality/use-tts";
 import useVideoGen from "./hooks/ai-modality/use-video-gen";
 import usePulseEnv from "./hooks/editor/use-env";
+import useOwnedAppView from "./hooks/editor/use-owned-app-view";
 import useReceiveFile from "./hooks/editor/use-receive-file";
 import useSnapshotState from "./hooks/editor/use-snapshot-state";
 import useTerminal from "./hooks/terminal/use-terminal";
@@ -31,6 +32,7 @@ export {
   useLoading,
   useNotification,
   useOCR,
+  useOwnedAppView,
   usePulseEnv,
   useReceiveFile,
   useRegisterAction,

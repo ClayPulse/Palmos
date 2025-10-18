@@ -31,4 +31,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getInstallationPath: () => ipcRenderer.invoke("get-installation-path"),
 
   createTerminal: () => ipcRenderer.invoke("create-terminal"),
+
+  login: () => ipcRenderer.invoke("login"),
+  logout: () => ipcRenderer.invoke("logout"),
 });

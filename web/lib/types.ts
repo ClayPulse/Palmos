@@ -4,6 +4,7 @@ import {
   AppConfig,
   PolyIMC,
   ViewModeEnum,
+  ViewModel,
 } from "@pulse-editor/shared-utils";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
@@ -91,6 +92,9 @@ export type EditorStates = {
 
   // Selected views
   selectedViewIds?: string[];
+
+  // Drag control
+  isDraggingOverCanvas?: boolean;
 };
 
 /**
@@ -374,8 +378,18 @@ export type AppNodeData = {
   selectedAction: Action | undefined;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;
+  ownedAppViews: {
+    [key: string]: ViewModel;
+  };
 };
 
+export type FileDragData = {
+  uri: string;
+};
+
+export type AppDragData = {
+  app: ExtensionApp;
+};
 // #endregion
 
 // #region Action

@@ -1,10 +1,12 @@
 "use client";
 
-import { useContext } from "react";
-import { CreditBalance, Session, Subscription } from "../types";
-import useSWR from "swr";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useContext } from "react";
+import useSWR from "swr";
+import { PlatformEnum } from "../enums";
+import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
+import { CreditBalance, Session, Subscription } from "../types";
 
 export function useAuth() {
   const editorContext = useContext(EditorContext);
@@ -57,10 +59,16 @@ export function useAuth() {
       return;
     }
 
-    const url = getAPIUrl(`/api/auth/signin`);
-    url.searchParams.set("callbackUrl", window.location.href);
-
-    window.location.href = url.toString();
+    if (getPlatform() === PlatformEnum.Electron) {
+      // In Electron, open the sign-in page in the system browser.
+      // TODO: move this to the platform API layer
+      // @ts-expect-error window.electronAPI is exposed by the Electron main process
+      window.electronAPI.login();
+    } else {
+      const url = getAPIUrl(`/api/auth/signin`);
+      url.searchParams.set("callbackUrl", window.location.href);
+      window.location.href = url.toString();
+    }
   }
 
   // Open a sign-out page if the user is signed in.
@@ -69,10 +77,16 @@ export function useAuth() {
       return;
     }
 
-    const url = getAPIUrl(`/api/auth/signout`);
-    url.searchParams.set("callbackUrl", window.location.href);
-
-    window.location.href = url.toString();
+    if (getPlatform() === PlatformEnum.Electron) {
+      // In Electron, open the sign-out page in the system browser.
+      // TODO: move this to the platform API layer
+      // @ts-expect-error window.electronAPI is exposed by the Electron main process
+      window.electronAPI.logout();
+    } else {
+      const url = getAPIUrl(`/api/auth/signout`);
+      url.searchParams.set("callbackUrl", window.location.href);
+      window.location.href = url.toString();
+    }
   }
 
   return {

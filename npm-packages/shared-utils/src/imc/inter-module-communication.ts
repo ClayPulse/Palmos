@@ -23,6 +23,14 @@ export class InterModuleCommunication {
 
   private messageRecords: Map<string, IMCMessage> | undefined;
 
+  public intent: string | undefined;
+  public channelId: string | undefined;
+
+  constructor(intent: string | undefined, channelId: string | undefined) {
+    this.intent = intent;
+    this.channelId = channelId;
+  }
+
   /**
    * Initialize a receiver to receive message.
    * @param window The current window.
@@ -42,30 +50,43 @@ export class InterModuleCommunication {
 
     const receiver = new MessageReceiver(
       this.receiverHandlerMap,
-      this.thisWindowId
+      this.thisWindowId,
+      this.intent
     );
     this.receiver = receiver;
 
     this.messageRecords = new Map<string, IMCMessage>();
 
     this.listener = (event: MessageEvent<IMCMessage>) => {
-      const messageId = event.data.id;
-      const type = event.data.type;
+      const message = event.data;
+      const messageId = message.messageId;
+      const channelId = message.channelId;
+      const type = message.type;
+
+      // Return if the channel ID exists but does not match the current channel ID
+      // (channel ID can be undefined during initial handshake)
+      if (
+        this.channelId !== undefined &&
+        channelId !== undefined &&
+        channelId !== this.channelId
+      ) {
+        return;
+      }
 
       if (
         this.messageRecords?.has(messageId) &&
-        type !== IMCMessageTypeEnum.SignalGetWindowId
+        type !== IMCMessageTypeEnum.SignalRequestOtherWindowId
       ) {
         console.warn(
           `[${
             this.thisWindowId
           }]: Duplicate message received with message ID: ${messageId}. Ignoring this message. Message: ${JSON.stringify(
-            event.data
+            message
           )}`
         );
         return;
       }
-      this.messageRecords?.set(messageId, event.data);
+      this.messageRecords?.set(messageId, message);
 
       if (!receiver) {
         throw new Error(
@@ -73,8 +94,7 @@ export class InterModuleCommunication {
         );
       }
 
-      const message = event.data;
-      if (message.from !== undefined) {
+      if (message.from !== undefined && message.type !== IMCMessageTypeEnum.SignalIgnore) {
         console.log(
           `Module ${this.thisWindowId} received message from module ${
             message.from
@@ -107,13 +127,14 @@ export class InterModuleCommunication {
         }
 
         const message = event.data;
-        const otherWindowId = message.windowId;
+        const otherWindowId = message.payload;
         this.otherWindowId = otherWindowId;
 
         const sender = new MessageSender(
           window,
           messageTimeout,
-          this.thisWindowId
+          this.thisWindowId,
+          this.channelId
         );
         this.sender = sender;
 
@@ -133,7 +154,7 @@ export class InterModuleCommunication {
       this.otherWindow = window;
       this.otherWindow.postMessage(
         {
-          type: IMCMessageTypeEnum.SignalGetWindowId,
+          type: IMCMessageTypeEnum.SignalRequestOtherWindowId,
           from: this.thisWindowId,
         },
         "*"
@@ -197,7 +218,9 @@ export class InterModuleCommunication {
     this.receiverHandlerMap?.set(
       IMCMessageTypeEnum.SignalAcknowledge,
       async (senderWindow: Window, message: IMCMessage) => {
-        const pendingMessage = this.sender?.getPendingMessage(message.id);
+        const pendingMessage = this.sender?.getPendingMessage(
+          message.messageId
+        );
         if (pendingMessage) {
           pendingMessage.resolve(message.payload);
         }
@@ -208,7 +231,9 @@ export class InterModuleCommunication {
     this.receiverHandlerMap?.set(
       IMCMessageTypeEnum.SignalError,
       async (senderWindow: Window, message: IMCMessage) => {
-        const pendingMessage = this.sender?.getPendingMessage(message.id);
+        const pendingMessage = this.sender?.getPendingMessage(
+          message.messageId
+        );
         if (pendingMessage) {
           pendingMessage.reject(new Error(message.payload));
         }
@@ -217,7 +242,7 @@ export class InterModuleCommunication {
 
     // Set get window ID handler in the receiver handler map.
     this.receiverHandlerMap?.set(
-      IMCMessageTypeEnum.SignalGetWindowId,
+      IMCMessageTypeEnum.SignalRequestOtherWindowId,
       async (senderWindow: Window, message: IMCMessage) => {
         console.log(
           "Received window ID request. Sending current window ID to other window: "
@@ -226,15 +251,24 @@ export class InterModuleCommunication {
         if (!id) {
           throw new Error("This window ID is not defined.");
         }
-        const msg: IMCMessage = {
-          id: message.id,
-          type: IMCMessageTypeEnum.SignalReturnWindowId,
-          payload: {
-            windowId: id,
-          },
-          from: id,
-        };
-        senderWindow.postMessage(msg, "*");
+
+        return id;
+      }
+    );
+
+    // Handle ignore signal
+    this.receiverHandlerMap?.set(
+      IMCMessageTypeEnum.SignalIgnore,
+      async (senderWindow: Window, message: IMCMessage) => {
+        console.warn(
+          `Message ignored by receiver. Message ID: ${message.messageId}, Payload: ${message.payload}`
+        );
+        const pendingMessage = this.sender?.getPendingMessage(
+          message.messageId
+        );
+        if (pendingMessage) {
+          pendingMessage.reject(new Error("Message ignored by receiver"));
+        }
       }
     );
   }

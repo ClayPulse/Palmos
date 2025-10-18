@@ -1,7 +1,6 @@
 import babel from "@rollup/plugin-babel";
 import json from "@rollup/plugin-json";
 import resolve from "@rollup/plugin-node-resolve";
-import terser from "@rollup/plugin-terser";
 import typescript from "@rollup/plugin-typescript";
 
 // rollup.config.mjs
@@ -12,6 +11,7 @@ export default {
       file: "dist/main.js",
       format: "es",
       exports: "named",
+      sourcemap: true,
     },
   ],
   plugins: [
@@ -28,7 +28,6 @@ export default {
       rootDir: "src",
       exclude: ["node_modules/**"],
     }),
-    terser(),
     json(),
   ],
 };

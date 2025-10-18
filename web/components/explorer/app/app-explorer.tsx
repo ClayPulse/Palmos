@@ -1,8 +1,9 @@
 import AppPreviewCard from "@/components/marketplace/app/app-preview-card";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { DragEventTypeEnum } from "@/lib/enums";
 import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { AppViewConfig } from "@/lib/types";
+import { AppDragData, AppViewConfig } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useContext } from "react";
 import { v4 } from "uuid";
@@ -21,7 +22,22 @@ export default function AppExplorer() {
       className="w-full h-fit"
       draggable
       onDragStart={(e) => {
-        e.dataTransfer.setData("text/plain", JSON.stringify(ext));
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isDraggingOverCanvas: true,
+        }));
+        e.dataTransfer.setData(
+          `application/${DragEventTypeEnum.App.toLowerCase()}`,
+          JSON.stringify({
+            app: ext,
+          } as AppDragData),
+        );
+      }}
+      onDragEnd={() => {
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isDraggingOverCanvas: false,
+        }));
       }}
     >
       <AppPreviewCard
@@ -54,7 +70,7 @@ export default function AppExplorer() {
     <div className="h-full grid grid-rows-[max-content_auto_max-content] gap-y-2">
       <p className="text-center">Tap or drag an extension to open it.</p>
 
-      <div className="grid grid-cols-2 gap-2 h-full w-full overflow-y-auto overflow-x-hidden px-4">
+      <div className="grid grid-cols-2 gap-2 h-fit w-full max-h-full overflow-y-auto overflow-x-hidden px-4">
         {previews}
       </div>
       <div className="flex flex-col gap-y-1 px-4 pb-2">

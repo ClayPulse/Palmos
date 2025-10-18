@@ -1,5 +1,61 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.55
+
+### Patch Changes
+
+- Release BETA packages
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.55
+
+## 0.1.1-alpha.54
+
+### Patch Changes
+
+- Fix imc intent typo
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.54
+
+## 0.1.1-alpha.53
+
+### Patch Changes
+
+- Fix IMC handshake async bug
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.53
+
+## 0.1.1-alpha.52
+
+### Patch Changes
+
+- Add ignore signal and improve multi-channel polyimc handling
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.52
+
+## 0.1.1-alpha.51
+
+### Patch Changes
+
+- Fix polyIMC any channel would handle all channels under same window (view) ID
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.51
+
+## 0.1.1-alpha.50
+
+### Patch Changes
+
+- Revert debug information
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.50
+
+## 0.1.1-alpha.49
+
+### Patch Changes
+
+- Fix platformAPI for FS
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-alpha.49
+
 ## 0.1.1-alpha.48
 
 ### Patch Changes

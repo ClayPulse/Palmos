@@ -12,7 +12,7 @@ export default function useAgentTools() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc } = useIMC(receiverHandlerMap);
+  const { imc } = useIMC(receiverHandlerMap, "agent-tools");
 
   return {  };
 }

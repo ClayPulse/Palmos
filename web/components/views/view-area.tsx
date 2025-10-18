@@ -1,34 +1,19 @@
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { AppViewConfig, CanvasViewConfig, ExtensionApp } from "@/lib/types";
+import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useSearchParams } from "next/navigation";
-import { memo, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { v4 } from "uuid";
 import Tabs from "../misc/tabs";
-import CanvasView from "./canvas/canvas-view";
+import { EditorContext } from "../providers/editor-context-provider";
+import { MemoizedCanvasView } from "./canvas/canvas-view";
 import HomeView from "./home/home-view";
-import StandaloneAppView from "./standalone-app/standalone-app-view";
-
-const MemoizedStandaloneAppView = memo(StandaloneAppView);
-const MemoizedCanvasView = memo(
-  ({
-    config,
-    isActive,
-    tabName,
-  }: {
-    config: CanvasViewConfig;
-    isActive: boolean;
-    tabName: string;
-  }) => (
-    <ReactFlowProvider>
-      <CanvasView config={config} isActive={isActive} tabName={tabName} />
-    </ReactFlowProvider>
-  ),
-);
-MemoizedCanvasView.displayName = "MemoizedCanvasView";
+import { MemoizedStandaloneAppView } from "./standalone-app/standalone-app-view";
 
 export default function ViewArea() {
+  const editorContext = useContext(EditorContext);
+
   const params = useSearchParams();
 
   const {
@@ -96,25 +81,7 @@ export default function ViewArea() {
   }, [tabViews]);
 
   return (
-    <div
-      className="w-full h-full"
-      onDragOver={(e) => {
-        e.preventDefault();
-      }}
-      onDrop={(e) => {
-        e.preventDefault();
-        const data = e.dataTransfer.getData("text/plain");
-        console.log("Dropped item:", data);
-        const ext: ExtensionApp = JSON.parse(data);
-        const config: AppViewConfig = {
-          app: ext.config.id,
-          viewId: `${ext.config.id}-${v4()}`,
-          recommendedHeight: ext.config.recommendedHeight,
-          recommendedWidth: ext.config.recommendedWidth,
-        };
-        createAppViewInCanvasView(config);
-      }}
-    >
+    <div className="w-full h-full">
       {tabViews.length === 0 ? (
         <HomeView />
       ) : tabIndex < 0 || tabIndex >= tabViews.length ? (
@@ -168,11 +135,13 @@ export default function ViewArea() {
                     config={tabView.config as AppViewConfig}
                   />
                 ) : tabView.type === ViewModeEnum.Canvas ? (
-                  <MemoizedCanvasView
-                    config={tabView.config as CanvasViewConfig}
-                    isActive={idx === tabIndex}
-                    tabName={tabItems[idx]?.name}
-                  />
+                  <ReactFlowProvider>
+                    <MemoizedCanvasView
+                      config={tabView.config as CanvasViewConfig}
+                      isActive={idx === tabIndex}
+                      tabName={tabItems[idx]?.name}
+                    />
+                  </ReactFlowProvider>
                 ) : (
                   <div>Unknown view type</div>
                 )}

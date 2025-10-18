@@ -1,16 +1,13 @@
 {
   "mode": "pre",
-  "tag": "alpha",
+  "tag": "beta",
   "initialVersions": {
-    "pulse-editor-desktop": "0.0.1",
-    "pulse-editor-mobile": "0.0.1",
-    "@pulse-editor/react-api": "0.1.1-beta.1",
-    "@pulse-editor/shared-utils": "0.1.1-beta.1",
-    "pulse-editor-vscode": "0.0.3",
-    "@pulse-editor/web": "0.1.1-beta.1",
-    "@pulse-editor/desktop": "0.0.1",
+    "@pulse-editor/capacitor-plugin": "0.0.1",
     "@pulse-editor/mobile": "0.0.1",
-    "@pulse-editor/capacitor-plugin": "0.0.1"
+    "@pulse-editor/react-api": "0.1.1-alpha.54",
+    "@pulse-editor/shared-utils": "0.1.1-alpha.54",
+    "pulse-editor-vscode": "0.0.3",
+    "@pulse-editor/web": "0.1.1-alpha.13"
   },
   "changesets": [
     "angry-llamas-smash",
@@ -22,8 +19,10 @@
     "clean-mangos-swim",
     "cold-shrimps-give",
     "crazy-cities-stand",
+    "crisp-impalas-search",
     "cruel-waves-double",
     "cruel-zoos-play",
+    "cuddly-books-send",
     "curvy-places-wash",
     "cute-foxes-wink",
     "dirty-swans-rescue",
@@ -35,11 +34,13 @@
     "fruity-goats-look",
     "full-beans-stop",
     "fuzzy-sheep-pay",
+    "green-laws-lose",
     "hot-symbols-fry",
     "hot-windows-march",
     "large-moose-tap",
     "lazy-zebras-mate",
     "mighty-ghosts-crash",
+    "modern-stamps-learn",
     "odd-hounds-enjoy",
     "petite-memes-fix",
     "polite-lines-dance",
@@ -51,16 +52,19 @@
     "sharp-memes-give",
     "shiny-doodles-jump",
     "silent-glasses-kick",
+    "slick-olives-wink",
     "slick-roses-fix",
     "social-donkeys-cross",
     "soft-cases-share",
     "stale-groups-poke",
+    "sunny-symbols-flash",
     "tender-jeans-occur",
     "tender-phones-ring",
     "tough-aliens-appear",
     "true-suits-fly",
     "vast-places-rhyme",
     "weak-beers-watch",
-    "wicked-spoons-fry"
+    "wicked-spoons-fry",
+    "young-jeans-behave"
   ]
 }

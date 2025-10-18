@@ -1,5 +1,6 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
+import { addToast } from "@heroui/react";
 import {
   Action,
   IMCMessageTypeEnum,
@@ -111,7 +112,7 @@ export default function useScopedActions(appName?: string) {
     ]);
   }, [editorContext?.persistSettings?.extensions, keyword, appName]);
 
-  async function runAction(action: ScopedAction, args: any) {
+  async function runScopedAction(action: ScopedAction, args: any) {
     console.log(`Running action "${action.action.name}"`);
     if (action.type === "editor") {
       const editorAction = editorActions.find(
@@ -142,18 +143,27 @@ export default function useScopedActions(appName?: string) {
         return;
       }
 
-      const appInView = findAppInTabView(ext.config.id);
+      const appInView = findAppInTabView(ext.config.id, action.viewId);
 
       console.log("App in view for static Action:", appInView);
 
       if (appInView) {
         // App is already in the view, execute Action in the app's context.
-        const result = await imcContext?.polyIMC?.sendMessage(
-          appInView.viewId,
-          IMCMessageTypeEnum.EditorRunAppAction,
-          { name: action.action.name, args },
-        );
-        return result;
+        const result =
+          (await imcContext?.polyIMC?.sendMessage(
+            appInView.viewId,
+            IMCMessageTypeEnum.EditorRunAppAction,
+            { name: action.action.name, args },
+          )) ?? [];
+
+        if (result?.length !== 1) {
+          addToast({
+            title: `Unexpected result when running action "${action.action.name}"`,
+            description: `Expected single result but got ${result?.length} results.`,
+            color: "warning",
+          });
+        }
+        return result[0];
       } else {
         // Create an instance of the app that provides the static Action,
         // then execute Action in the app's context.
@@ -177,12 +187,22 @@ export default function useScopedActions(appName?: string) {
         // Wait for the action to be ready
         await waitForActionReady(action);
 
-        const result = await imcContext?.polyIMC?.sendMessage(
-          viewId,
-          IMCMessageTypeEnum.EditorRunAppAction,
-          { name: action.action.name, args },
-        );
-        return result;
+        // App is already in the view, execute Action in the app's context.
+        const result =
+          (await imcContext?.polyIMC?.sendMessage(
+            viewId,
+            IMCMessageTypeEnum.EditorRunAppAction,
+            { name: action.action.name, args },
+          )) ?? [];
+
+        if (result?.length !== 1) {
+          addToast({
+            title: `Unexpected result when running action "${action.action.name}"`,
+            description: `Expected single result but got ${result?.length} results.`,
+            color: "warning",
+          });
+        }
+        return result[0];
       }
     }
   }
@@ -210,7 +230,7 @@ export default function useScopedActions(appName?: string) {
   }
 
   return {
-    runAction,
+    runScopedAction,
     actions,
     setKeywordFilter,
   };
