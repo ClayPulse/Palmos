@@ -59,14 +59,16 @@ export function useAuth() {
       return;
     }
 
-    const url = getAPIUrl(`/api/auth/signin`);
     if (getPlatform() === PlatformEnum.Electron) {
-      url.searchParams.set("callbackUrl", "/");
+      // In Electron, open the sign-in page in the system browser.
+      // TODO: move this to the platform API layer
+      // @ts-expect-error window.electronAPI is exposed by the Electron main process
+      window.electronAPI.login();
     } else {
+      const url = getAPIUrl(`/api/auth/signin`);
       url.searchParams.set("callbackUrl", window.location.href);
+      window.location.href = url.toString();
     }
-
-    window.location.href = url.toString();
   }
 
   // Open a sign-out page if the user is signed in.
@@ -75,10 +77,16 @@ export function useAuth() {
       return;
     }
 
-    const url = getAPIUrl(`/api/auth/signout`);
-    url.searchParams.set("callbackUrl", window.location.href);
-
-    window.location.href = url.toString();
+    if (getPlatform() === PlatformEnum.Electron) {
+      // In Electron, open the sign-out page in the system browser.
+      // TODO: move this to the platform API layer
+      // @ts-expect-error window.electronAPI is exposed by the Electron main process
+      window.electronAPI.logout();
+    } else {
+      const url = getAPIUrl(`/api/auth/signout`);
+      url.searchParams.set("callbackUrl", window.location.href);
+      window.location.href = url.toString();
+    }
   }
 
   return {

@@ -1,17 +1,17 @@
-import { app, BrowserWindow, dialog, ipcMain } from "electron";
+import { app, BrowserWindow, dialog, ipcMain, session } from "electron";
 import serve from "electron-serve";
 import path from "path";
 import { fileURLToPath } from "url";
 
 import fs from "fs";
-import { createTerminalServer } from "./lib/node-pty-server.js";
 import ignore from "ignore";
+import { createTerminalServer } from "./lib/node-pty-server.js";
 
 // Change path to "Pulse Editor"
 app.setName("Pulse Editor");
 app.setPath(
   "userData",
-  app.getPath("userData").replace("pulse-editor-desktop", "Pulse Editor")
+  app.getPath("userData").replace("pulse-editor-desktop", "Pulse Editor"),
 );
 
 // Get the file path of the current module
@@ -34,7 +34,9 @@ serve({
   scheme: "extension",
 });
 
-function createWindow() {
+let mainWindow = null;
+
+function createMainWindow() {
   const win = new BrowserWindow({
     width: 960,
     height: 600,
@@ -47,6 +49,7 @@ function createWindow() {
     },
     icon: path.join(__dirname, "../shared-assets/icons/electron/pulse_editor"),
   });
+  mainWindow = win;
 
   win.menuBarVisible = false;
 
@@ -134,7 +137,7 @@ async function listPathContent(uri, options, baseUri = undefined) {
       (file) =>
         (options?.include === "folders" && file.isDirectory()) ||
         (options?.include === "files" && file.isFile()) ||
-        options?.include === "all"
+        options?.include === "all",
     )
     // Filter by gitignore
     .filter((file) => {
@@ -263,6 +266,77 @@ function handleGetInstallationPath(event) {
   return uri;
 }
 
+async function handleLogin(event) {
+  const cookieName = "pulse-editor.session-token";
+
+  // Use the default session so cookies are shared automatically
+  const loginWindow = new BrowserWindow({
+    width: 600,
+    height: 700,
+    show: true,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      session: session.defaultSession, // ← important
+    },
+  });
+
+  const signinUrl = "https://pulse-editor.com/api/auth/signin";
+  await loginWindow.loadURL(signinUrl);
+
+  const loginSession = loginWindow.webContents.session;
+
+  const interval = setInterval(async () => {
+    try {
+      const cookies = await loginSession.cookies.get({ name: cookieName });
+      if (cookies.length > 0) {
+        clearInterval(interval);
+
+        // Login successful
+        loginWindow.close();
+        console.log(`Login successful, cookie "${cookieName}" present.`);
+
+        // Reload main window
+        if (mainWindow) {
+          mainWindow.reload();
+        }
+      }
+    } catch (err) {
+      console.error("Error checking cookie:", err);
+    }
+  }, 1000);
+}
+
+async function handleLogout() {
+  const mainSession = session.defaultSession;
+  const cookieName = "pulse-editor.session-token";
+
+  try {
+    const cookies = await mainSession.cookies.get({ name: cookieName });
+
+    for (const cookie of cookies) {
+      const url = cookie.domain.startsWith(".")
+        ? `https://${cookie.domain.slice(1)}${cookie.path}`
+        : `https://${cookie.domain}${cookie.path}`;
+
+      await mainSession.cookies.remove(url, cookie.name);
+    }
+
+    console.log(`Cookie "${cookieName}" removed. Logout successful.`);
+
+    // Reload main window
+    if (mainWindow) {
+      mainWindow.reload();
+    }
+
+    // Return success to renderer
+    return { success: true };
+  } catch (err) {
+    console.error("Error during logout:", err);
+    return { success: false, error: err.message };
+  }
+}
+
 let isCreatedTerminal = false;
 function handleCreateTerminal(event) {
   if (!isCreatedTerminal) {
@@ -303,7 +377,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle("create-terminal", handleCreateTerminal);
 
-  createWindow();
+  ipcMain.handle("login", handleLogin);
+  ipcMain.handle("logout", handleLogout);
+
+  createMainWindow();
 });
 
 app.on("window-all-closed", () => {
