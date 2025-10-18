@@ -169,23 +169,23 @@ export default function InterModuleCommunicationProvider({
             throw new Error("Agent method not found.");
           }
 
-          const config = llmConfig
-            ? llmConfig
-            : method.LLMConfig
-              ? method.LLMConfig
-              : agent.LLMConfig
-                ? agent.LLMConfig
-                : undefined; // TODO: use editor level default config -- getDefaultLLMConfig();
-
-          if (!config) {
-            throw new Error("No LLM config found for this agent method.");
-          }
-
           if (editorContext?.persistSettings?.isUseManagedCloud) {
             const result = await runAgentMethodCloud(agent, methodName, args);
 
             return result;
           } else {
+            const config = llmConfig
+              ? llmConfig
+              : method.LLMConfig
+                ? method.LLMConfig
+                : agent.LLMConfig
+                  ? agent.LLMConfig
+                  : undefined; // TODO: use editor level default config -- getDefaultLLMConfig();
+
+            if (!config) {
+              throw new Error("No LLM config found for this agent method.");
+            }
+
             const provider = config.provider;
 
             const apiKey = getAPIKey(editorContext, provider);
