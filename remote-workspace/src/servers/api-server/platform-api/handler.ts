@@ -5,10 +5,12 @@ import path from "path";
 // Define a safe root directory for projects. Can be overridden by env or configured as needed.
 const PROJECTS_ROOT = process.env.PROJECTS_ROOT ?? "/srv/projects";
 
+const settingsPath = path.join(PROJECTS_ROOT, "settings.json");
+
 // Utility to resolve and validate user-supplied uri inside PROJECTS_ROOT
 function getSafePath(uri: string): string {
   // Prevent empty/undefined input
-  if (!uri || typeof uri !== 'string') {
+  if (!uri || typeof uri !== "string") {
     throw new Error("Invalid project path");
   }
   // Resolve against the root directory
@@ -45,7 +47,7 @@ async function handleListProjects(uri: string) {
 async function listPathContent(
   uri: string,
   options: any,
-  baseUri: string | undefined = undefined
+  baseUri: string | undefined = undefined,
 ) {
   const rootPath = getSafePath(uri);
   const files = await fs.promises.readdir(rootPath, { withFileTypes: true });
@@ -56,7 +58,7 @@ async function listPathContent(
       (file) =>
         (options?.include === "folders" && file.isDirectory()) ||
         (options?.include === "files" && file.isFile()) ||
-        options?.include === "all"
+        options?.include === "all",
     )
     // Filter by gitignore
     .filter((file) => {
@@ -105,6 +107,22 @@ async function handleListPathContent(uri: string, options: any) {
 async function handleCreateProject(uri: string) {
   // Create a folder at the validated path
   await fs.promises.mkdir(getSafePath(uri));
+}
+
+async function handleDeleteProject(uri: string) {
+  // Delete the folder at the validated path
+  await fs.promises.rm(uri, { recursive: true, force: true });
+}
+
+async function handleUpdateProject(
+  uri: string,
+  updatedInfo: {
+    name: string;
+    ctime?: Date;
+  },
+) {
+  const newUri = path.join(path.dirname(uri), updatedInfo.name);
+  await fs.promises.rename(uri, newUri);
 }
 
 async function handleCreateFolder(uri: string) {
@@ -173,60 +191,100 @@ async function handleGetInstallationPath() {
 export async function handlePlatformAPIRequest(
   data: any,
   host: string,
-  instanceId: string
+  instanceId: string,
 ): Promise<any> {
   const { operation, args } = data;
 
-  if (operation === "select-dir") {
-    throw new Error("Method not implemented.");
-  } else if (operation === "select-file") {
-    throw new Error("Method not implemented.");
-  } else if (operation === "list-projects") {
-    const { uri }: { uri: string } = args;
-    return await handleListProjects(uri);
-  } else if (operation === "list-path-content") {
-    const { uri, options }: { uri: string; options?: any } = args;
-
-    return await handleListPathContent(uri, options);
-  } else if (operation === "create-project") {
-    const { uri }: { uri: string } = args;
-    await handleCreateProject(uri);
-  } else if (operation === "create-folder") {
-    const { uri }: { uri: string } = args;
-    await handleCreateFolder(uri);
-  } else if (operation === "create-file") {
-    const { uri }: { uri: string } = args;
-    await handleCreateFile(uri);
-  } else if (operation === "rename") {
-    const { oldUri, newUri }: { oldUri: string; newUri: string } = args;
-    await handleRename(oldUri, newUri);
-  } else if (operation === "delete") {
-    const { uri }: { uri: string } = args;
-    await handleDelete(uri);
-  } else if (operation === "has-path") {
-    const { uri }: { uri: string } = args;
-    return await handleHasPath(uri);
-  } else if (operation === "read-file") {
-    const { uri }: { uri: string } = args;
-    return handleReadFile(uri);
-  } else if (operation === "write-file") {
-    const { data, uri }: { data: any; uri: string } = args;
-    await handleWriteFile(data, uri);
-  } else if (operation === "copy-files") {
-    const { from, to }: { from: string; to: string } = args;
-    await handleCopyFiles(from, to);
-  } else if (operation === "get-persistent-settings") {
-    return handleLoadSettings();
-  } else if (operation === "set-persistent-settings") {
-    const { settings }: { settings: any } = args;
-    await handleSaveSettings(settings);
-  } else if (operation === "reset-persistent-settings") {
-    await handleSaveSettings({});
-  } else if (operation === "get-installation-path") {
-    return await handleGetInstallationPath();
-  } else if (operation === "create-terminal") {
-    return `${host}/${instanceId}/terminal/ws`;
+  switch (operation) {
+    case "select-dir":
+      // Folder picker is done via web interface
+      throw new Error("Method not implemented.");
+    case "select-file":
+      // File picker is done via web interface
+      throw new Error("Method not implemented.");
+    case "list-projects": {
+      const { uri }: { uri: string } = args;
+      return await handleListProjects(uri);
+    }
+    case "list-path-content": {
+      const { uri, options }: { uri: string; options?: any } = args;
+      return await handleListPathContent(uri, options);
+    }
+    case "create-project": {
+      const { uri }: { uri: string } = args;
+      await handleCreateProject(uri);
+      return;
+    }
+    case "delete-project": {
+      const { uri }: { uri: string } = args;
+      await handleDeleteProject(uri);
+      return;
+    }
+    case "update-project": {
+      const {
+        uri,
+        updatedInfo,
+      }: {
+        uri: string;
+        updatedInfo: {
+          name: string;
+          ctime?: Date;
+        };
+      } = args;
+      await handleUpdateProject(uri, updatedInfo);
+      return;
+    }
+    case "create-folder": {
+      const { uri }: { uri: string } = args;
+      await handleCreateFolder(uri);
+      return;
+    }
+    case "create-file": {
+      const { uri }: { uri: string } = args;
+      await handleCreateFile(uri);
+      return;
+    }
+    case "rename": {
+      const { oldUri, newUri }: { oldUri: string; newUri: string } = args;
+      await handleRename(oldUri, newUri);
+      return;
+    }
+    case "delete": {
+      const { uri }: { uri: string } = args;
+      await handleDelete(uri);
+      return;
+    }
+    case "has-path": {
+      const { uri }: { uri: string } = args;
+      return await handleHasPath(uri);
+    }
+    case "read-file": {
+      const { uri }: { uri: string } = args;
+      return handleReadFile(uri);
+    }
+    case "write-file": {
+      const { data, uri }: { data: any; uri: string } = args;
+      await handleWriteFile(data, uri);
+      return;
+    }
+    case "copy-files": {
+      const { from, to }: { from: string; to: string } = args;
+      await handleCopyFiles(from, to);
+      return;
+    }
+    case "get-persistent-settings":
+      return handleLoadSettings();
+    case "set-persistent-settings": {
+      const { settings }: { settings: any } = args;
+      await handleSaveSettings(settings);
+      return;
+    }
+    case "get-installation-path":
+      return await handleGetInstallationPath();
+    case "create-terminal":
+      return `${host}/${instanceId}/terminal/ws`;
+    default:
+      // Do not reflect input data back to the client, return an explicit error message.
+      return { error: "Unknown operation" };
   }
-  // Do not reflect input data back to the client, return an explicit error message.
-  return { error: "Unknown operation" };
 }

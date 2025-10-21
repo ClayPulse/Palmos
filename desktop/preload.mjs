@@ -1,6 +1,7 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("electronAPI", {
+  // #region Platform API
   selectDir: () => ipcRenderer.invoke("select-dir"),
   selectFile: (fileExtension) =>
     ipcRenderer.invoke("select-file", fileExtension),
@@ -25,13 +26,17 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   copyFiles: (from, to) => ipcRenderer.invoke("copy-files", from, to),
 
-  loadSettings: () => ipcRenderer.invoke("load-settings"),
-  saveSettings: (settings) => ipcRenderer.invoke("save-settings", settings),
+  getPersistentSettings: () => ipcRenderer.invoke("get-persistent-settings"),
+  setPersistentSettings: (settings) => ipcRenderer.invoke("set-persistent-settings", settings),
 
   getInstallationPath: () => ipcRenderer.invoke("get-installation-path"),
 
   createTerminal: () => ipcRenderer.invoke("create-terminal"),
 
+  // #endregion
+
+  // #region Auth API
   login: () => ipcRenderer.invoke("login"),
   logout: () => ipcRenderer.invoke("logout"),
+  // #endregion
 });

@@ -15,7 +15,7 @@
     "fs-extra": "^7.0.1",
     "ignore": "^5.3.2",
     "node-addon-api": "^7.1.1",
-    "node-pty": "^1.1.0-beta34",
+    "node-pty": "^1.1.0-beta37",
     "ws": "^8.18.2"
   },
   "devDependencies": {

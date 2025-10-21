@@ -1,54 +1,35 @@
-import express from "express";
-import https from "https";
-import http from "http";
-import fs from "fs";
 import dotenv from "dotenv";
+import express from "express";
+import http from "http";
+import https from "https";
 import { handlePlatformAPIRequest } from "./platform-api/handler";
 
 dotenv.config();
 
-const app = express();
 const HOST = "0.0.0.0";
-const HTTP_SERVER_PORT = 6080;
-const HTTPS_SERVER_PORT = 6443;
-const certPath = process.env.SSL_CERT_PATH;
-const keyPath = process.env.SSL_KEY_PATH;
 
-export async function createAPIServer() {
-  await createEndpoints(app);
+export async function addAPIServer(
+  server: http.Server | https.Server,
+  expressApp: express.Express,
+  instanceId: string,
+  port: number,
+  frontendUrl: string,
+) {
+  await createEndpoints(expressApp, instanceId, frontendUrl);
 
-  if (
-    certPath &&
-    keyPath &&
-    fs.existsSync(certPath) &&
-    fs.existsSync(keyPath)
-  ) {
-    const server = https.createServer(
-      {
-        key: fs.readFileSync(keyPath),
-        cert: fs.readFileSync(certPath),
-      },
-      app
-    );
-    server.listen(HTTPS_SERVER_PORT, HOST, () => {
-      console.log(`HTTPS server is running on port ${HTTPS_SERVER_PORT}`);
-    });
-    return server;
-  } else {
-    const server = http.createServer(app);
-    server.listen(HTTP_SERVER_PORT, HOST, () => {
-      console.log(`HTTP server is running on port ${HTTP_SERVER_PORT}`);
-    });
-    return server;
-  }
+  server.listen(port, HOST);
 }
 
-async function createEndpoints(app: express.Express) {
+async function createEndpoints(
+  app: express.Express,
+  instanceId: string,
+  frontendUrl: string,
+) {
   app.use(express.json());
 
   app.get("/:instanceId/", (req, res) => {
-    const instanceId = req.params.instanceId;
-    if (instanceId !== process.env.INSTANCE_ID) {
+    const id = req.params.instanceId;
+    if (id !== instanceId) {
       return res.status(400).send("Invalid instance ID");
     }
     // Get the requested URL
@@ -56,24 +37,22 @@ async function createEndpoints(app: express.Express) {
 
     // Redirect to https://editor.pulse-editor.com and append
     // this instance's URL as a query parameter
-    const url = new URL(
-      process.env.FRONTEND_URL ?? "https://editor.pulse-editor.com"
-    );
+    const url = new URL(frontendUrl);
     url.searchParams.append("instance", serverUrl);
     res.redirect(url.toString());
   });
 
   app.get("/:instanceId/test", (req, res) => {
-    const instanceId = req.params.instanceId;
-    if (instanceId !== process.env.INSTANCE_ID) {
+    const id = req.params.instanceId;
+    if (id !== instanceId) {
       return res.status(400).send("Invalid instance ID");
     }
     res.send("Remote instance is running!");
   });
 
   app.post("/:instanceId/platform-api", async (req, res) => {
-    const instanceId = req.params.instanceId;
-    if (instanceId !== process.env.INSTANCE_ID) {
+    const id = req.params.instanceId;
+    if (id !== instanceId) {
       return res.status(400).send("Invalid instance ID");
     }
 
@@ -84,11 +63,7 @@ async function createEndpoints(app: express.Express) {
 
     const host = req.host;
 
-    const result = await handlePlatformAPIRequest(
-      body,
-      host,
-      instanceId
-    );
+    const result = await handlePlatformAPIRequest(body, host, id);
 
     // Process the request and send a response
     if (result && result.error) {

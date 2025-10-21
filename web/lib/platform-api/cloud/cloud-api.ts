@@ -217,10 +217,12 @@ export class CloudAPI extends AbstractPlatformAPI {
   }
 
   async createTerminal(): Promise<string> {
-    if (!this.workspace) {
-      toast.error("No workspace selected");
-      throw new Error("No workspace selected");
-    }
-    throw new Error("Method not implemented.");
+    // if (!this.workspace) {
+    //   toast.error("No workspace selected");
+    //   throw new Error("No workspace selected");
+    // }
+    // throw new Error("Method not implemented.");
+
+    return "ws://localhost:6080/test-workspace/terminal/ws";
   }
 }

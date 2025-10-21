@@ -93,7 +93,7 @@ export class ElectronAPI extends AbstractPlatformAPI {
 
   async getPersistentSettings(): Promise<PersistentSettings> {
     const persistentSettings: PersistentSettings =
-      await this.electronAPI?.loadSettings();
+      await this.electronAPI?.getPersistentSettings();
 
     return persistentSettings;
   }

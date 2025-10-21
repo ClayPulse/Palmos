@@ -37,7 +37,7 @@ const handleTerminalConnection = (ws) => {
     }
   });
 
-  ptyProcess.on("data", (rawOutput) => {
+  ptyProcess.onData((rawOutput) => {
     ws.send(JSON.stringify({ type: "output", payload: rawOutput }));
   });
 

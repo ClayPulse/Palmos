@@ -370,8 +370,8 @@ app.whenReady().then(() => {
 
   ipcMain.handle("copy-files", handleCopyFiles);
 
-  ipcMain.handle("load-settings", handleLoadSettings);
-  ipcMain.handle("save-settings", handleSaveSettings);
+  ipcMain.handle("get-persistent-settings", handleLoadSettings);
+  ipcMain.handle("set-persistent-settings", handleSaveSettings);
 
   ipcMain.handle("get-installation-path", handleGetInstallationPath);
 

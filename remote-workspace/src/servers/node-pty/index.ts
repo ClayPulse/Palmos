@@ -26,14 +26,20 @@ const setSharedTerminalMode = (useSharedTerminal: boolean) => {
 const handleTerminalConnection = (ws: WebSocket) => {
   let ptyProcess = sharedTerminalMode ? sharedPtyProcess : spawnShell();
 
-  ws.on("message", (command: string) => {
-    const processedCommand = commandProcessor(command);
-    ptyProcess?.write(processedCommand);
+  ws.on("message", (data: string) => {
+    const dataObj = JSON.parse(data);
+
+    if (dataObj.type === "input") {
+      const command = dataObj.payload;
+      ptyProcess?.write(command);
+    } else if (dataObj.type === "resize") {
+      const { cols, rows } = dataObj.payload;
+      ptyProcess?.resize(cols, rows);
+    }
   });
 
   ptyProcess?.onData((rawOutput) => {
-    const processedOutput = outputProcessor(rawOutput);
-    ws.send(processedOutput);
+    ws.send(JSON.stringify({ type: "output", payload: rawOutput }));
   });
 
   ws.on("close", () => {
@@ -56,7 +62,10 @@ const outputProcessor = (output: string) => {
 /* Host ws node-pty server */
 setSharedTerminalMode(false); // Set this to false to allow a shared session
 
-export function createTerminalServer(server: http.Server | https.Server) {
+export function addTerminalServer(
+  server: http.Server | https.Server,
+  instanceId: string,
+) {
   const wss = new WebSocketServer({ noServer: true });
 
   wss.on("connection", handleTerminalConnection);
@@ -80,8 +89,8 @@ export function createTerminalServer(server: http.Server | https.Server) {
       return;
     }
 
-    const instanceId = match?.[1];
-    if (instanceId !== process.env.INSTANCE_ID) {
+    const id = match?.[1];
+    if (id !== instanceId) {
       socket.write("HTTP/1.1 400 Bad Request: Invalid instance ID\r\n\r\n");
       socket.destroy();
       return;
