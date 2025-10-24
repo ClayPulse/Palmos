@@ -1,6 +1,6 @@
 import { PlatformEnum } from "@/lib/enums";
-import { useAuth } from "@/lib/hooks/use-auth";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
+import { useAuth } from "@/lib/hooks/use-auth";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
@@ -104,19 +104,25 @@ export default function NavTopBar({
               }
               size="sm"
               disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
+              onSelectionChange={(key) => {
+                if (
+                  key.currentKey === "__internal-create-new" ||
+                  key.currentKey === "__internal-settings"
+                ) {
+                  return;
+                }
+                const selectedWorkspace = workspaceHook.cloudWorkspaces?.find(
+                  (workspace) => workspace.id === key.currentKey,
+                );
+                workspaceHook.selectWorkspace(selectedWorkspace?.id);
+              }}
             >
               <>
                 {workspaceHook.cloudWorkspaces?.map((workspace) => (
-                  <SelectItem
-                    key={workspace.id}
-                    onPress={() => {
-                      workspaceHook.selectWorkspace(workspace.id);
-                    }}
-                  >
-                    {workspace.name}
-                  </SelectItem>
+                  <SelectItem key={workspace.id}>{workspace.name}</SelectItem>
                 )) ?? []}
                 <SelectItem
+                  key={"__internal-create-new"}
                   className="bg-primary text-primary-foreground"
                   color="primary"
                   onPress={() => {
@@ -131,7 +137,7 @@ export default function NavTopBar({
                   Create New
                 </SelectItem>
                 <SelectItem
-                  key={"settings"}
+                  key={"__internal-settings"}
                   className="bg-default"
                   onPress={() => {
                     setIsWorkspaceSettingsModalOpen(true);

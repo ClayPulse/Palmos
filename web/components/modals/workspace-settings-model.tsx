@@ -2,7 +2,6 @@
 
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
-import { RemoteWorkspace } from "@/lib/types";
 import {
   addToast,
   Button,
@@ -62,7 +61,7 @@ export default function WorkspaceSettingsModal({
     }
   }, [workspace]);
 
-  function handleUpdateWorkspace() {
+  async function handleUpdateWorkspace() {
     if (!platformApi) {
       toast.error("Unknown platform.");
       return;
@@ -74,13 +73,15 @@ export default function WorkspaceSettingsModal({
       return;
     }
 
-    const newWorkspace: RemoteWorkspace = {
-      ...workspace,
-      name: workspaceName,
-    };
-
     // Update workspace
-    updateWorkspace(newWorkspace);
+    await updateWorkspace(workspace.id, workspaceName);
+
+    addToast({
+      title: "Workspace updated",
+      description: `Workspace ${workspaceName} has been updated successfully.`,
+      color: "success",
+    });
+    setIsOpen(false);
   }
 
   async function handleDeleteWorkspace() {
@@ -99,6 +100,8 @@ export default function WorkspaceSettingsModal({
         description: `Workspace ${workspace.name} has been deleted successfully.`,
         color: "success",
       });
+
+      setIsOpen(false);
     } catch (error: any) {
       addToast({
         title: "Error deleting workspace",
@@ -136,6 +139,7 @@ export default function WorkspaceSettingsModal({
         description: `Workspace ${workspaceName} has been created successfully.`,
         color: "success",
       });
+      setIsOpen(false);
     } catch (error: any) {
       addToast({
         title: "Error creating workspace",

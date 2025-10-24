@@ -1,4 +1,5 @@
 import { PlatformEnum } from "@/lib/enums";
+import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { Button, Divider, Input } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
@@ -8,6 +9,9 @@ import ModalWrapper from "./modal-wrapper";
 
 export default function LoginModal({ signIn }: { signIn: () => void }) {
   const editorContext = useContext(EditorContext);
+
+  const { workspace } = useWorkspace();
+
   const [workspaceAddress, setWorkspaceAddress] = useState<string | undefined>(
     undefined,
   );
@@ -16,10 +20,10 @@ export default function LoginModal({ signIn }: { signIn: () => void }) {
 
   // Open remote instance selection if the current platform is web
   useEffect(() => {
-    if (!editorContext?.editorStates?.currentWorkspace) {
+    if (!workspace) {
       setIsModelOpen(true);
     }
-  }, [editorContext?.editorStates?.currentWorkspace]);
+  }, [workspace]);
 
   return (
     <ModalWrapper
@@ -53,7 +57,9 @@ export default function LoginModal({ signIn }: { signIn: () => void }) {
                   currentWorkspace: {
                     id: "self-hosted",
                     name: "Self-hosted Workspace",
-                    address: workspaceAddress,
+                    cpuLimit: "N/A",
+                    memoryLimit: "N/A",
+                    volumeSize: "N/A",
                   },
                 };
               });
