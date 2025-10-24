@@ -325,9 +325,10 @@ export type IMCContextType = {
 export type RemoteWorkspace = {
   id: string;
   name: string;
-  address: string;
+  cpuLimit: string;
+  memoryLimit: string;
+  volumeSize: string;
   createdAt?: Date;
-  updatedAt?: Date;
 };
 
 export type Session = {

@@ -49,15 +49,6 @@ const handleTerminalConnection = (ws: WebSocket) => {
   });
 };
 
-// Utility function to process commands
-const commandProcessor = (command: string) => {
-  return command;
-};
-
-// Utility function to process output
-const outputProcessor = (output: string) => {
-  return output;
-};
 
 /* Host ws node-pty server */
 setSharedTerminalMode(false); // Set this to false to allow a shared session

@@ -3,7 +3,7 @@ import { PlatformEnum } from "@/lib/enums";
 import { useContext, useEffect, useState } from "react";
 import useSWR from "swr";
 import { getPlatform } from "../platform-api/platform-checker";
-import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
+import { fetchAPI } from "../pulse-editor-website/backend";
 import { RemoteWorkspace } from "../types";
 import { useAuth } from "./use-auth";
 
@@ -38,7 +38,12 @@ export function useWorkspace() {
     }
   }, [editorContext?.editorStates?.currentWorkspace]);
 
-  async function createWorkspace(name: string) {
+  async function createWorkspace(
+    name: string,
+    cpuLimit: string,
+    memoryLimit: string,
+    volumeSize: string,
+  ) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     } else if (
@@ -53,7 +58,17 @@ export function useWorkspace() {
     }
 
     // Request to create a new workspace
-    const response = await fetchAPI(`/api/workspace/create`);
+    const response = await fetchAPI(`/api/workspace/create`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ name, cpuLimit, memoryLimit, volumeSize }),
+    });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
 
     const {
       id,
@@ -71,7 +86,9 @@ export function useWorkspace() {
         currentWorkspace: {
           id,
           name,
-          address: getAPIUrl(`/workspace/${id}`).toString(),
+          cpuLimit,
+          memoryLimit,
+          volumeSize,
           createdAt,
           updatedAt,
         },
@@ -113,11 +130,39 @@ export function useWorkspace() {
     });
   }
 
+  async function deleteWorkspace(workspaceId: string) {
+    if (!editorContext) {
+      throw new Error("Editor context is not available");
+    }
+
+    editorContext.setEditorStates((prev) => {
+      return {
+        ...prev,
+        currentWorkspace: undefined,
+      };
+    });
+
+    const response = await fetchAPI(`/api/workspace/delete`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ workspaceId }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete workspace");
+    }
+
+    setWorkspace(undefined);
+  }
+
   return {
     workspace,
     cloudWorkspaces,
     createWorkspace,
     updateWorkspace,
     selectWorkspace,
+    deleteWorkspace,
   };
 }
