@@ -13,6 +13,7 @@ const spawnShell = () => {
   return spawn(shell, [], {
     name: "xterm-color",
     env: process.env,
+    cwd: "/workspace"
   });
 };
 
@@ -51,7 +52,7 @@ const handleTerminalConnection = (ws: WebSocket) => {
 
 
 /* Host ws node-pty server */
-setSharedTerminalMode(false); // Set this to false to allow a shared session
+setSharedTerminalMode(true); 
 
 export function addTerminalServer(
   server: http.Server | https.Server,

@@ -1,3 +1,4 @@
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import {
   FileSystemObject,
   ListPathOptions,
@@ -5,9 +6,8 @@ import {
   ProjectInfo,
   RemoteWorkspace,
 } from "@/lib/types";
-import { AbstractPlatformAPI } from "../abstract-platform-api";
 import toast from "react-hot-toast";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { AbstractPlatformAPI } from "../abstract-platform-api";
 
 export class CloudAPI extends AbstractPlatformAPI {
   private workspace: RemoteWorkspace | undefined;
@@ -213,16 +213,17 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    throw new Error("Method not implemented.");
+    return "/workspace";
   }
 
   async createTerminal(): Promise<string> {
-    // if (!this.workspace) {
-    //   toast.error("No workspace selected");
-    //   throw new Error("No workspace selected");
-    // }
-    // throw new Error("Method not implemented.");
+    if (!this.workspace) {
+      toast.error("No workspace selected");
+      throw new Error("No workspace selected");
+    }
 
-    return "ws://localhost:6080/test-workspace/terminal/ws";
+    const url = `wss://${this.workspace?.id}.workspace.pulse-editor.com/${this.workspace?.id}/terminal/ws`;
+
+    return url;
   }
 }

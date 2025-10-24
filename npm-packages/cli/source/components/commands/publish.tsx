@@ -54,13 +54,23 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 	// Build the extension
 	useEffect(() => {
 		async function buildExtension() {
+			setIsBuilding(true);
 			try {
-				setIsBuilding(true);
 				await $`npm run build`;
-				// Zip the dist folder
+			}
+			catch (error) {
+				setIsBuildingError(true);
+				setIsBuilding(false);
+				setFailureMessage('Build failed. Please run `npm run build` to see the error.');
+				return;
+			}
+			// Zip the dist folder
+			try {
 				await $({cwd: 'dist'})`zip -r ../node_modules/@pulse-editor/dist.zip *`;
 			} catch (error) {
 				setIsBuildingError(true);
+				setIsBuilding(false);
+				setFailureMessage('Failed to zip the build output.');
 				return;
 			} finally {
 				setIsBuilding(false);

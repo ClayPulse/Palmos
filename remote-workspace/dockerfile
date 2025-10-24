@@ -1,7 +1,7 @@
 FROM ubuntu:latest
 ENV NODE_VERSION=20
 
-WORKDIR /app
+WORKDIR /pulse-editor/server
 
 # install curl
 RUN apt update && apt install -y curl make python3 build-essential
@@ -12,10 +12,16 @@ RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | b
 # set env
 ENV NVM_DIR=/root/.nvm
 
-COPY . /app
+COPY . /pulse-editor/server
 
 # install node
 RUN bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && npm install && npm run build"
+
+# install pulse cli
+RUN bash -c "source $NVM_DIR/nvm.sh && npm install -g @pulse-editor/cli@beta"
+
+# install git, zip, unzip
+RUN apt install -y git zip unzip
 
 # Generate self-signed certificate
 # RUN bash -c "./utils/generate-self-signed.sh"

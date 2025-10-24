@@ -63,7 +63,7 @@ export default function Voice({
     }
   }
 
-  if (isUseManagedCloud) {
+  if (isUseManagedCloud ?? true) {
     return (
       <RecorderWrapper
         onRecorderReady={onRecorderReady}
