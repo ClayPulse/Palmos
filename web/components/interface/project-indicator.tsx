@@ -1,7 +1,6 @@
 "use client";
 
-import { Key, useContext, useState } from "react";
-import { EditorContext } from "../providers/editor-context-provider";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import {
   Button,
   Dropdown,
@@ -9,9 +8,10 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/react";
+import { Key, useContext, useState } from "react";
 import Icon from "../misc/icon";
 import ProjectSettingsModal from "../modals/project-settings-modal";
-import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { EditorContext } from "../providers/editor-context-provider";
 
 export default function ProjectIndicator() {
   const editorContext = useContext(EditorContext);
@@ -24,7 +24,7 @@ export default function ProjectIndicator() {
       return {
         ...prev,
         project: "",
-        projectContent: [],
+        workspaceContent: [],
       };
     });
 

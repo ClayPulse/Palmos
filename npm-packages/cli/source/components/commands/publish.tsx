@@ -103,8 +103,8 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 				// Send the file to the server
 				const res = await fetch(
 					cli.flags.dev
-						? 'https://localhost:8080/api/extension/publish'
-						: 'https://pulse-editor.com/api/extension/publish',
+						? 'https://localhost:8080/api/app/publish'
+						: 'https://pulse-editor.com/api/app/publish',
 					{
 						method: 'POST',
 						headers: {

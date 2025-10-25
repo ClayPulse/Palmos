@@ -1,14 +1,14 @@
-import { Button, Input, Select, SelectItem } from "@heroui/react";
-import ModalWrapper from "./modal-wrapper";
-import { useSearchParams } from "next/navigation";
-import QRDisplay from "../misc/qr-display";
-import Tabs from "../misc/tabs";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { TabItem } from "@/lib/types";
+import { Button, Input, Select, SelectItem } from "@heroui/react";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
-import Icon from "../misc/icon";
 import toast from "react-hot-toast";
 import useSWR from "swr";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import Icon from "../misc/icon";
+import QRDisplay from "../misc/qr-display";
+import Tabs from "../misc/tabs";
+import ModalWrapper from "./modal-wrapper";
 
 export default function SharingModal({
   isOpen,
@@ -49,30 +49,25 @@ export default function SharingModal({
         inviteCode?: string;
       }
     | undefined
-  >(
-    app
-      ? `/api/extension/get-share-info?name=${app}`
-      : null,
-    async (url: URL) => {
-      const res = await fetchAPI(url);
+  >(app ? `/api/app/get-share-info?name=${app}` : null, async (url: URL) => {
+    const res = await fetchAPI(url);
 
-      if (!res.ok) {
-        toast.error("Failed to fetch extension share info");
-        return undefined;
-      }
+    if (!res.ok) {
+      toast.error("Failed to fetch extension share info");
+      return undefined;
+    }
 
-      const data: {
-        visibility: string;
-        canEdit: boolean;
-        inviteCode?: string;
-      } = await res.json();
+    const data: {
+      visibility: string;
+      canEdit: boolean;
+      inviteCode?: string;
+    } = await res.json();
 
-      return data;
-    },
-  );
+    return data;
+  });
 
   async function updateShareInfo(visibility: string) {
-    await fetchAPI(`/api/extension/update`, {
+    await fetchAPI(`/api/app/update`, {
       method: "PATCH",
       body: JSON.stringify({
         visibility,

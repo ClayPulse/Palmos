@@ -2,7 +2,6 @@
 
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { SafeArea } from "@capacitor-community/safe-area";
 import { addToast, Button } from "@heroui/react";
@@ -13,7 +12,6 @@ import AppInfoModal from "../../modals/app-info-modal";
 import LoginModal from "../../modals/login-modal";
 import PasswordModal from "../../modals/password-modal";
 import SharingModal from "../../modals/sharing-modal";
-import WorkspaceSettingsModal from "../../modals/workspace-settings-model";
 import { EditorContext } from "../../providers/editor-context-provider";
 import Loading from "../status-screens/loading";
 import NavSideMenu from "./nav-side-menu";
@@ -27,12 +25,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   const { setTheme, resolvedTheme } = useTheme();
   const { session, isLoading: isLoadingSession, signIn } = useAuth();
-  const workspaceHook = useWorkspace();
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isShowNavbar, setIsShowNavbar] = useState(true);
-  const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
-    useState(false);
+
   const [isSharingOpen, setIsSharingOpen] = useState(false);
 
   const [isGranted, setIsGranted] = useState(true);
@@ -155,14 +151,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           <LoginModal signIn={signIn} />
         )}
 
-      {isWorkspaceSettingsModalOpen && (
-        <WorkspaceSettingsModal
-          isOpen={isWorkspaceSettingsModalOpen}
-          setIsOpen={setIsWorkspaceSettingsModalOpen}
-          workspaceHook={workspaceHook}
-        />
-      )}
-
       {isSharingOpen && (
         <SharingModal isOpen={isSharingOpen} setIsOpen={setIsSharingOpen} />
       )}
@@ -183,7 +171,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             <NavTopBar
               isMenuOpen={isMenuOpen}
               setIsMenuOpen={setIsMenuOpen}
-              setIsWorkspaceSettingsModalOpen={setIsWorkspaceSettingsModalOpen}
               setIsSharingOpen={setIsSharingOpen}
             />
           )}

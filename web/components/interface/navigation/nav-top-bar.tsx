@@ -1,16 +1,11 @@
-import { PlatformEnum } from "@/lib/enums";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
   Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Select,
-  SelectItem,
 } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
@@ -25,20 +20,16 @@ import ViewMenuDropDown from "./menu-dropdown/view-menu";
 export default function NavTopBar({
   isMenuOpen,
   setIsMenuOpen,
-  setIsWorkspaceSettingsModalOpen,
   setIsSharingOpen,
 }: {
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
-  setIsWorkspaceSettingsModalOpen: (isOpen: boolean) => void;
   setIsSharingOpen: (isOpen: boolean) => void;
 }) {
   const editorContext = useContext(EditorContext);
 
   const { session, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
-
-  const workspaceHook = useWorkspace();
 
   // #region Load specified app if app query parameter is present
   const params = useSearchParams();
@@ -82,77 +73,6 @@ export default function NavTopBar({
 
           <FileMenuDropDown />
           <ViewMenuDropDown />
-
-          {/* Do not show workspace selector when the app is open in web, and session is not available */}
-          {(getPlatform() === PlatformEnum.Web ||
-            getPlatform() === PlatformEnum.WebMobile) &&
-          !session ? null : (
-            <Select
-              className="max-w-50"
-              classNames={{
-                mainWrapper: "h-10",
-                trigger: "py-0.5 min-h-10",
-              }}
-              label="Workspace"
-              placeholder="Select Workspace"
-              isLoading={
-                !editorContext?.editorStates?.isSigningIn &&
-                !workspaceHook.cloudWorkspaces
-              }
-              selectedKeys={
-                workspaceHook.workspace ? [workspaceHook.workspace.id] : []
-              }
-              size="sm"
-              disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
-              onSelectionChange={(key) => {
-                if (
-                  key.currentKey === "__internal-create-new" ||
-                  key.currentKey === "__internal-settings"
-                ) {
-                  return;
-                }
-                const selectedWorkspace = workspaceHook.cloudWorkspaces?.find(
-                  (workspace) => workspace.id === key.currentKey,
-                );
-                workspaceHook.selectWorkspace(selectedWorkspace?.id);
-              }}
-            >
-              <>
-                {workspaceHook.cloudWorkspaces?.map((workspace) => (
-                  <SelectItem key={workspace.id}>{workspace.name}</SelectItem>
-                )) ?? []}
-                <SelectItem
-                  key={"__internal-create-new"}
-                  className="bg-primary text-primary-foreground"
-                  color="primary"
-                  onPress={() => {
-                    setIsWorkspaceSettingsModalOpen(true);
-                  }}
-                  startContent={
-                    <div className="text-primary-foreground h-4 w-4">
-                      <Icon name="add" variant="round" />
-                    </div>
-                  }
-                >
-                  Create New
-                </SelectItem>
-                <SelectItem
-                  key={"__internal-settings"}
-                  className="bg-default"
-                  onPress={() => {
-                    setIsWorkspaceSettingsModalOpen(true);
-                  }}
-                  startContent={
-                    <div className="h-4 w-4">
-                      <Icon name="settings" variant="round" />
-                    </div>
-                  }
-                >
-                  Settings
-                </SelectItem>
-              </>
-            </Select>
-          )}
         </div>
         <div className="col-start-2 flex flex-col items-center justify-center">
           {editorContext?.editorStates.project && <ProjectIndicator />}

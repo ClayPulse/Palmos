@@ -1,7 +1,9 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
+import { addToast } from "@heroui/react";
 import { useContext } from "react";
 import useSWR from "swr";
+import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
 import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI } from "../pulse-editor-website/backend";
 import { RemoteWorkspace } from "../types";
@@ -146,6 +148,34 @@ export function useWorkspace() {
     mutateCloudWorkspaces();
   }
 
+  async function refreshWorkspaceContent(platformApi: AbstractPlatformAPI) {
+    const projectUri =
+      editorContext?.persistSettings?.projectHomePath +
+      "/" +
+      editorContext?.editorStates.project;
+    const objects = await platformApi?.listPathContent(projectUri, {
+      include: "all",
+      isRecursive: true,
+    });
+
+    editorContext?.setEditorStates((prev) => {
+      return {
+        ...prev,
+        workspaceContent: objects,
+        explorerSelectedNodeRefs: [],
+      };
+    });
+
+    console.log("Found project content:", objects);
+
+    // toast.success("Project content updated.");
+    addToast({
+      title: "Project content updated.",
+      description: "The project content has been refreshed.",
+      color: "success",
+    });
+  }
+
   return {
     workspace,
     cloudWorkspaces,
@@ -153,5 +183,6 @@ export function useWorkspace() {
     updateWorkspace,
     selectWorkspace,
     deleteWorkspace,
+    refreshWorkspaceContent,
   };
 }

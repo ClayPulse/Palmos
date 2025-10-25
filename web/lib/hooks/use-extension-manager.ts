@@ -262,7 +262,7 @@ export default function useExtensionManager() {
 
   // Download and load the extension app if specified
   async function loadAppFromRegistry(appId: string, inviteCode?: string) {
-    const url = getAPIUrl(`/api/extension/get`);
+    const url = getAPIUrl(`/api/app/get`);
     url.searchParams.set("name", appId);
     url.searchParams.set("latest", "true");
     if (inviteCode) url.searchParams.set("inviteCode", inviteCode);

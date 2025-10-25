@@ -55,7 +55,6 @@ export type EditorStates = {
   isToolbarOpen: boolean;
 
   project?: string;
-  projectContent?: FileSystemObject[];
   projectsInfo?: ProjectInfo[];
 
   explorerSelectedNodeRefs: RefObject<TreeViewNodeRef | null>[];
@@ -69,6 +68,7 @@ export type EditorStates = {
 
   // The currently selected workspace
   currentWorkspace?: RemoteWorkspace;
+  workspaceContent?: FileSystemObject[];
 
   isSigningIn?: boolean;
 
@@ -162,11 +162,6 @@ export type FileSystemObject = {
   uri: string;
   isFolder: boolean;
   subDirItems?: FileSystemObject[];
-};
-
-export type ProjectInfo = {
-  name: string;
-  ctime?: Date;
 };
 
 export type TreeViewGroupRef = {
@@ -436,4 +431,19 @@ export type PlatformAssistantMessage = {
   meta?: any;
 };
 
+// #endregion
+
+// #region Project
+
+export type ProjectInfo = {
+  name: string;
+  ctime?: Date;
+};
+
+export type ProjectAsset = {
+  name: string;
+  type: "file" | "workflow";
+  // URI to download from remote or load from local
+  uri: string;
+};
 // #endregion

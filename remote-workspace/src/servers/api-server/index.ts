@@ -57,19 +57,22 @@ async function createEndpoints(
     }
 
     // Get json body
-    const body = req.body;
+    const { operation, args } = req.body;
 
-    console.log("Received platform API request:", body);
-
-    const host = req.host;
-
-    const result = await handlePlatformAPIRequest(body, host, id);
+    const result = await handlePlatformAPIRequest(
+      {
+        operation,
+        args,
+      },
+      req.get("host") ?? "",
+      instanceId,
+    );
 
     // Process the request and send a response
     if (result && result.error) {
       res.status(400).json(result);
     } else {
-      res.send(result);
+      res.send(JSON.stringify(result));
     }
   });
 }

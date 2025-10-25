@@ -1,7 +1,9 @@
 "use client";
 
+import { SideMenuTabEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { ProjectInfo } from "@/lib/types";
+import { Button } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import ProjectSettingsModal from "../../modals/project-settings-modal";
 import { EditorContext } from "../../providers/editor-context-provider";
@@ -16,6 +18,12 @@ export default function ProjectExplorer() {
   const [settingsProject, setSettingsProject] = useState<
     ProjectInfo | undefined
   >(undefined);
+
+  useEffect(() => {
+    if (editorContext?.editorStates.project) {
+      // Get workflows stored either on cloud or locally in project/.workflows
+    }
+  }, [editorContext?.editorStates.project]);
 
   useEffect(() => {
     if (platformApi) {
@@ -34,19 +42,36 @@ export default function ProjectExplorer() {
 
   return (
     <div className="flex w-full flex-col gap-2">
-      {editorContext?.editorStates.projectsInfo?.map((project, index) => (
-        <ProjectItem
-          key={index}
-          project={project}
-          setSettingsOpen={setSettingsOpen}
-          setSettingsProject={setSettingsProject}
+      <div>
+        <p className="text-center text-lg font-medium">View Projects</p>
+        <Button
+          className="w-full"
+          onPress={() => {
+            setSettingsOpen(true);
+          }}
+        >
+          New Project
+        </Button>
+        {editorContext?.editorStates.projectsInfo?.map((project, index) => (
+          <ProjectItem
+            key={index}
+            project={project}
+            setSettingsOpen={setSettingsOpen}
+            setSettingsProject={setSettingsProject}
+            onOpen={() => {
+              editorContext.setEditorStates((prev) => ({
+                ...prev,
+                sideMenuTab: SideMenuTabEnum.Apps,
+              }));
+            }}
+          />
+        ))}
+        <ProjectSettingsModal
+          isOpen={settingsOpen}
+          setIsOpen={setSettingsOpen}
+          projectInfo={settingsProject}
         />
-      ))}
-      <ProjectSettingsModal
-        isOpen={settingsOpen}
-        setIsOpen={setSettingsOpen}
-        projectInfo={settingsProject}
-      />
+      </div>
     </div>
   );
 }

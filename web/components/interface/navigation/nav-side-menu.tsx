@@ -1,9 +1,7 @@
 import AppExplorer from "@/components/explorer/app/app-explorer";
-import FileSystemExplorer from "@/components/explorer/file-system/fs-explorer";
 import ProjectExplorer from "@/components/explorer/project/project-explorer";
 import WorkspaceExplorer from "@/components/explorer/workspace/workspace-explorer";
 import Tabs from "@/components/misc/tabs";
-import ProjectSettingsModal from "@/components/modals/project-settings-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { SideMenuTabEnum } from "@/lib/enums";
 import useExplorer from "@/lib/hooks/use-explorer";
@@ -12,7 +10,7 @@ import { isWeb } from "@/lib/platform-api/platform-checker";
 import { TabItem } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import Icon from "../../misc/icon";
 
 export default function NavSideMenu({
@@ -26,7 +24,7 @@ export default function NavSideMenu({
     <AnimatePresence>
       {isMenuOpen && (
         <MenuPanel>
-          <div className="h-full w-full min-[768px]:py-2 min-[768px]:pr-1 min-[768px]:pl-2 overflow-y-hidden">
+          <div className="h-full w-full overflow-y-hidden min-[768px]:py-2 min-[768px]:pr-1 min-[768px]:pl-2">
             <div className="bg-content2 flex h-full w-full flex-col overflow-hidden shadow-md min-[768px]:rounded-xl">
               <div className="flex w-full items-center px-2 py-1 max-[768px]:justify-end">
                 <Button
@@ -47,7 +45,7 @@ export default function NavSideMenu({
                 </Button>
               </div>
 
-              <PanelContent setIsMenuOpen={setIsMenuOpen} />
+              <PanelContent />
             </div>
           </div>
         </MenuPanel>
@@ -102,17 +100,10 @@ function MenuPanel({ children }: { children?: React.ReactNode }) {
   );
 }
 
-function PanelContent({
-  setIsMenuOpen,
-}: {
-  setIsMenuOpen: (isOpen: boolean) => void;
-}) {
+function PanelContent() {
   const editorContext = useContext(EditorContext);
 
   const { selectAndSetProjectHome } = useExplorer();
-
-  const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
-    useState(false);
 
   const tabItems: TabItem[] = [
     {
@@ -126,7 +117,7 @@ function PanelContent({
       icon: "apps",
     },
     {
-      name: SideMenuTabEnum.Workspaces,
+      name: SideMenuTabEnum.Workspace,
       description: "Project workspace",
       icon: "folder",
     },
@@ -164,7 +155,7 @@ function PanelContent({
   }
 
   return (
-    <div className="relative h-full w-full grid grid-rows-[max-content_auto] overflow-y-hidden">
+    <div className="relative grid h-full w-full grid-rows-[max-content_auto] overflow-y-hidden">
       <div className="flex w-full justify-center">
         <div className="w-fit">
           <Tabs
@@ -183,33 +174,16 @@ function PanelContent({
       <div className="h-full w-full overflow-y-hidden">
         {selectedTab === SideMenuTabEnum.Apps ? (
           <AppExplorer />
-        ) : selectedTab === SideMenuTabEnum.Workspaces ? (
-          // <FileSystemExplorer setIsMenuOpen={setIsMenuOpen} />
+        ) : selectedTab === SideMenuTabEnum.Workspace ? (
           <WorkspaceExplorer />
         ) : (
-          selectedTab === SideMenuTabEnum.Projects &&
-          (editorContext?.editorStates.project ? (
-            <FileSystemExplorer setIsMenuOpen={setIsMenuOpen} />
-          ) : (
+          selectedTab === SideMenuTabEnum.Projects && (
             <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto px-4">
-              <p className="text-center text-lg font-medium">View Projects</p>
-              <Button
-                className="w-full"
-                onPress={() => {
-                  setIsProjectSettingsModalOpen(true);
-                }}
-              >
-                New Project
-              </Button>
               <ProjectExplorer />
             </div>
-          ))
+          )
         )}
       </div>
-      <ProjectSettingsModal
-        isOpen={isProjectSettingsModalOpen}
-        setIsOpen={setIsProjectSettingsModalOpen}
-      />
     </div>
   );
 }

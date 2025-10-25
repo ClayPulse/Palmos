@@ -4,11 +4,11 @@ import ContextMenu from "@/components/interface/context-menu";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { DragEventTypeEnum, PlatformEnum } from "@/lib/enums";
+import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { AbstractPlatformAPI } from "@/lib/platform-api/abstract-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
   ContextMenuState,
-  EditorContextType,
   FileDragData,
   FileSystemObject,
   TreeViewGroupRef,
@@ -26,34 +26,6 @@ import {
   useState,
 } from "react";
 import toast from "react-hot-toast";
-
-function refreshProjectContent(
-  platformApi: AbstractPlatformAPI,
-  editorContext: EditorContextType | undefined,
-) {
-  const projectUri =
-    editorContext?.persistSettings?.projectHomePath +
-    "/" +
-    editorContext?.editorStates.project;
-  platformApi
-    ?.listPathContent(projectUri, {
-      include: "all",
-      isRecursive: true,
-    })
-    .then((objects) => {
-      editorContext?.setEditorStates((prev) => {
-        return {
-          ...prev,
-          projectContent: objects,
-          explorerSelectedNodeRefs: [],
-        };
-      });
-
-      console.log("Found project content:", objects);
-
-      toast.success("Project content updated.");
-    });
-}
 
 // A tree view node that represents a single file or folder
 const TreeViewNode = forwardRef(function TreeViewNode(
@@ -81,6 +53,8 @@ const TreeViewNode = forwardRef(function TreeViewNode(
       return object.isFolder;
     },
   }));
+
+  const { refreshWorkspaceContent } = useWorkspace();
 
   const [isFolderCollapsed, setIsFolderCollapsed] = useState(true);
   const [isSelected, setIsSelected] = useState(false);
@@ -218,7 +192,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 parentGroupRef.current?.getFolderUri() + "/" + newName;
 
               platformApi?.rename(object.uri, newUri).then(() => {
-                refreshProjectContent(platformApi, editorContext);
+                refreshWorkspaceContent(platformApi);
               });
 
               setIsRenaming(false);
@@ -230,7 +204,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 parentGroupRef.current?.getFolderUri() + "/" + newName;
 
               platformApi?.rename(object.uri, newUri).then(() => {
-                refreshProjectContent(platformApi, editorContext);
+                refreshWorkspaceContent(platformApi);
               });
 
               setIsRenaming(false);
@@ -335,7 +309,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 color="danger"
                 onPress={(e) => {
                   platformApi?.delete(object.uri).then(() => {
-                    refreshProjectContent(platformApi, editorContext);
+                    refreshWorkspaceContent(platformApi);
                   });
                   setContextMenuState({ x: 0, y: 0, isOpen: false });
                 }}
@@ -452,12 +426,13 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     },
   }));
 
+  const { refreshWorkspaceContent } = useWorkspace();
+
   const [isCreatingNewFile, setIsCreatingNewFile] = useState(false);
   const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
 
   const [folderNameInputValue, setFolderNameInputValue] = useState<string>("");
   const [fileNameInputValue, setFileNameInputValue] = useState<string>("");
-  const editorContext = useContext(EditorContext);
 
   function createNewFolder(uri: string) {
     console.log("Creating new folder with uri:", uri);
@@ -468,7 +443,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     }
 
     platformApi.createFolder(uri).then(() => {
-      refreshProjectContent(platformApi, editorContext);
+      refreshWorkspaceContent(platformApi);
     });
 
     setFolderNameInputValue("");
@@ -484,7 +459,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     }
 
     platformApi.createFile(uri).then(() => {
-      refreshProjectContent(platformApi, editorContext);
+      refreshWorkspaceContent(platformApi);
     });
 
     setFileNameInputValue("");
