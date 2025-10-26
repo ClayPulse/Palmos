@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "android-dev": "node dev.js",
-    "android-build": "npx cap run android"
+    "android-run": "npx cap run android",
+    "android-build": "npx cap build android"
   },
   "dependencies": {
     "@capacitor-community/safe-area": "^7.0.0-alpha.1",

@@ -64,6 +64,12 @@ export function useAuth() {
       // TODO: move this to the platform API layer
       // @ts-expect-error window.electronAPI is exposed by the Electron main process
       window.electronAPI.login();
+    } else if (getPlatform() === PlatformEnum.Capacitor) {
+      // In Capacitor, open the sign-in page in the system browser.
+      const url = getAPIUrl(`/api/auth/signin`);
+      // Set the callback URL to the deeplink URL that Capacitor can handle.
+      url.searchParams.set("callbackUrl", window.location.href);
+      window.location.href = url.toString();
     } else {
       const url = getAPIUrl(`/api/auth/signin`);
       url.searchParams.set("callbackUrl", window.location.href);
