@@ -1,8 +1,10 @@
 import Icon from "@/components/misc/icon";
 import WorkspaceSettingsModal from "@/components/modals/workspace-settings-model";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { Select, SelectItem } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import FileSystemExplorer from "../file-system/fs-explorer";
@@ -20,22 +22,30 @@ export default function WorkspaceExplorer() {
 
   useEffect(() => {
     async function openProjectInWorkspace() {
-      if (isCreatingWorkspace && workspaceHook.workspace && platformApi) {
-        const homePath = editorContext?.persistSettings?.projectHomePath;
-        const projectName = editorContext?.editorStates.project;
-        if (!projectName) {
-          return;
-        }
+      if (!platformApi) {
+        return;
+      }
 
-        const uri = homePath + "/" + projectName;
-        const hasPath = await platformApi.hasPath(uri);
-
-        if (!hasPath) {
-          await platformApi.createFolder(uri);
-        }
-
+      if (getPlatform() === PlatformEnum.Electron && !workspaceHook.workspace) {
         await workspaceHook.refreshWorkspaceContent(platformApi);
-        setIsCreatingWorkspace(false);
+      } else {
+        if (isCreatingWorkspace && workspaceHook.workspace) {
+          const homePath = editorContext?.persistSettings?.projectHomePath;
+          const projectName = editorContext?.editorStates.project;
+          if (!projectName) {
+            return;
+          }
+
+          const uri = homePath + "/" + projectName;
+          const hasPath = await platformApi.hasPath(uri);
+
+          if (!hasPath) {
+            await platformApi.createFolder(uri);
+          }
+
+          await workspaceHook.refreshWorkspaceContent(platformApi);
+          setIsCreatingWorkspace(false);
+        }
       }
     }
 
@@ -61,7 +71,11 @@ export default function WorkspaceExplorer() {
                 !workspaceHook.cloudWorkspaces
               }
               selectedKeys={
-                workspaceHook.workspace ? [workspaceHook.workspace.id] : []
+                workspaceHook.workspace
+                  ? [workspaceHook.workspace.id]
+                  : getPlatform() === PlatformEnum.Electron
+                    ? ["__internal-local"]
+                    : []
               }
               size="sm"
               disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
@@ -83,6 +97,11 @@ export default function WorkspaceExplorer() {
               }}
             >
               <>
+                {getPlatform() === PlatformEnum.Electron && (
+                  <SelectItem key={"__internal-local"}>
+                    Local Computer
+                  </SelectItem>
+                )}
                 {workspaceHook.cloudWorkspaces?.map((workspace) => (
                   <SelectItem key={workspace.id}>{workspace.name}</SelectItem>
                 )) ?? []}
@@ -118,7 +137,8 @@ export default function WorkspaceExplorer() {
               </>
             </Select>
           </div>
-          {workspaceHook.workspace ? (
+          {getPlatform() === PlatformEnum.Electron ||
+          workspaceHook.workspace ? (
             <FileSystemExplorer
               setIsMenuOpen={() => {
                 editorContext?.setEditorStates((prev) => ({
@@ -130,15 +150,17 @@ export default function WorkspaceExplorer() {
           ) : (
             <div className="flex h-full flex-col items-center justify-center px-4 pb-24">
               <p>
-                To browse files in workspace, please select a local or remote
-                workspace.
+                To browse files in workspace, please open in desktop client or
+                select remote workspace.
               </p>
             </div>
           )}
         </div>
       ) : (
         <div className="flex h-full flex-col items-center justify-center px-4 pb-24">
-          <p>To open project in workspace, please select a project first.</p>
+          <p>
+            To view project content in workspace, please select a project first.
+          </p>
         </div>
       )}
 

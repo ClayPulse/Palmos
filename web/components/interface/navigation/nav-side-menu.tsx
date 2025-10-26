@@ -3,10 +3,10 @@ import ProjectExplorer from "@/components/explorer/project/project-explorer";
 import WorkspaceExplorer from "@/components/explorer/workspace/workspace-explorer";
 import Tabs from "@/components/misc/tabs";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { SideMenuTabEnum } from "@/lib/enums";
+import { PlatformEnum, SideMenuTabEnum } from "@/lib/enums";
 import useExplorer from "@/lib/hooks/use-explorer";
 import { useScreenSize } from "@/lib/hooks/use-screen-size";
-import { isWeb } from "@/lib/platform-api/platform-checker";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { TabItem } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -135,7 +135,10 @@ function PanelContent() {
   }
 
   // Choose project home path
-  if (!isWeb() && !editorContext?.persistSettings?.projectHomePath) {
+  if (
+    getPlatform() === PlatformEnum.Electron &&
+    !editorContext?.persistSettings?.projectHomePath
+  ) {
     return (
       <div className="bg-content2 h-full w-full space-y-2 p-4">
         <p>

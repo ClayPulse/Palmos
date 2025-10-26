@@ -1,6 +1,5 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
-import { addToast } from "@heroui/react";
 import { useContext } from "react";
 import useSWR from "swr";
 import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
@@ -167,13 +166,6 @@ export function useWorkspace() {
     });
 
     console.log("Found project content:", objects);
-
-    // toast.success("Project content updated.");
-    addToast({
-      title: "Project content updated.",
-      description: "The project content has been refreshed.",
-      color: "success",
-    });
   }
 
   return {

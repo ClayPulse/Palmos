@@ -292,7 +292,33 @@ const TreeViewNode = forwardRef(function TreeViewNode(
             </Button>
           )}
           <ContextMenu state={contextMenuState} setState={setContextMenuState}>
-            <div className="flex flex-col">
+            <div className="flex flex-col gap-y-1">
+              {!object.isFolder && (
+                <Button
+                  className="text-medium h-12 sm:h-8 sm:text-sm"
+                  variant="solid"
+                  onPress={(e) => {
+                    setContextMenuState({ x: 0, y: 0, isOpen: false });
+
+                    viewFile(object.uri);
+                  }}
+                >
+                  <p className="w-full text-start">Open In Canvas</p>
+                </Button>
+              )}
+              {!object.isFolder && (
+                <Button
+                  className="text-medium h-12 sm:h-8 sm:text-sm"
+                  variant="solid"
+                  onPress={(e) => {
+                    setContextMenuState({ x: 0, y: 0, isOpen: false });
+
+                    viewFile(object.uri);
+                  }}
+                >
+                  <p className="w-full text-start">Open In App</p>
+                </Button>
+              )}
               <Button
                 className="text-medium h-12 sm:h-8 sm:text-sm"
                 variant="light"
@@ -316,34 +342,6 @@ const TreeViewNode = forwardRef(function TreeViewNode(
               >
                 <p className="w-full text-start">Delete</p>
               </Button>
-              {!object.isFolder && (
-                <Button
-                  className="text-medium h-12 sm:h-8 sm:text-sm"
-                  variant="solid"
-                  color="danger"
-                  onPress={(e) => {
-                    setContextMenuState({ x: 0, y: 0, isOpen: false });
-
-                    viewFile(object.uri);
-                  }}
-                >
-                  <p className="w-full text-start">Open In Canvas</p>
-                </Button>
-              )}
-              {!object.isFolder && (
-                <Button
-                  className="text-medium h-12 sm:h-8 sm:text-sm"
-                  variant="solid"
-                  color="danger"
-                  onPress={(e) => {
-                    setContextMenuState({ x: 0, y: 0, isOpen: false });
-
-                    viewFile(object.uri);
-                  }}
-                >
-                  <p className="w-full text-start">Open In App</p>
-                </Button>
-              )}
             </div>
           </ContextMenu>
         </>

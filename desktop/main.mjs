@@ -35,6 +35,8 @@ serve({
 });
 
 let mainWindow = null;
+let sharedSession = null;
+let terminalServer = null;
 
 function createMainWindow() {
   const win = new BrowserWindow({
@@ -42,6 +44,7 @@ function createMainWindow() {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.mjs"),
+      session: sharedSession,
     },
     titleBarOverlay: {
       color: "#00000000",
@@ -277,29 +280,39 @@ async function handleLogin(event) {
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
-      session: session.defaultSession, // ← important
+      // login window and main window will automatically share cookies — no manual copying needed:
+      session: sharedSession, // ← important
     },
   });
 
-  const signinUrl = "https://pulse-editor.com/api/auth/signin";
+  const signinUrl = app.isPackaged
+    ? "https://pulse-editor.com/api/auth/signin"
+    : "https://localhost:8080/api/auth/signin";
   await loginWindow.loadURL(signinUrl);
 
   const loginSession = loginWindow.webContents.session;
 
+  // clear login window cookies before starting login
+  await clearLoginCookies(loginSession);
+
   const interval = setInterval(async () => {
     try {
-      const cookies = await loginSession.cookies.get({ name: cookieName });
+      const cookies = await sharedSession.cookies.get({ name: cookieName });
+
+      // If the cookie is present, reload the main window to reflect logged-in state
       if (cookies.length > 0) {
         clearInterval(interval);
+
+        mainWindow.reload();
+
+        // Check if cookies are present in the main window session
+        const mainCookies = await sharedSession.cookies.get({
+          name: cookieName,
+        });
 
         // Login successful
         loginWindow.close();
         console.log(`Login successful, cookie "${cookieName}" present.`);
-
-        // Reload main window
-        if (mainWindow) {
-          mainWindow.reload();
-        }
       }
     } catch (err) {
       console.error("Error checking cookie:", err);
@@ -308,21 +321,8 @@ async function handleLogin(event) {
 }
 
 async function handleLogout() {
-  const mainSession = session.defaultSession;
-  const cookieName = "pulse-editor.session-token";
-
   try {
-    const cookies = await mainSession.cookies.get({ name: cookieName });
-
-    for (const cookie of cookies) {
-      const url = cookie.domain.startsWith(".")
-        ? `https://${cookie.domain.slice(1)}${cookie.path}`
-        : `https://${cookie.domain}${cookie.path}`;
-
-      await mainSession.cookies.remove(url, cookie.name);
-    }
-
-    console.log(`Cookie "${cookieName}" removed. Logout successful.`);
+    await clearLoginCookies(sharedSession);
 
     // Reload main window
     if (mainWindow) {
@@ -337,10 +337,34 @@ async function handleLogout() {
   }
 }
 
+async function clearLoginCookies(currentSession) {
+  // await currentSession.clearStorageData({ storages: ["cookies"] });
+
+  const cookieName = "pulse-editor.session-token";
+
+  const cookies = await currentSession.cookies.get({
+    name: cookieName,
+  });
+
+  for (const cookie of cookies) {
+    // Determine the scheme (secure cookies use https)
+    const protocol = cookie.secure ? "https://" : "http://";
+
+    // Build the URL using domain and path
+    // Note: cookie.domain may start with a leading dot, remove it
+    const domain = cookie.domain.startsWith(".")
+      ? cookie.domain.slice(1)
+      : cookie.domain;
+
+    const url = `${protocol}${domain}${cookie.path}`;
+    await currentSession.cookies.remove(url, cookie.name);
+  }
+}
+
 let isCreatedTerminal = false;
 function handleCreateTerminal(event) {
   if (!isCreatedTerminal) {
-    createTerminalServer();
+    terminalServer = createTerminalServer();
     isCreatedTerminal = true;
   }
 
@@ -348,6 +372,9 @@ function handleCreateTerminal(event) {
 }
 
 app.whenReady().then(() => {
+  sharedSession = session.defaultSession;
+  console.log("Shared session path:", sharedSession.storagePath);
+
   ipcMain.handle("select-dir", handleSelectDir);
   ipcMain.handle("select-file", handleSelectFile);
 
@@ -386,5 +413,10 @@ app.whenReady().then(() => {
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
+  }
+
+  // Close terminal server if running
+  if (isCreatedTerminal) {
+    terminalServer.close();
   }
 });

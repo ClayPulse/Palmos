@@ -68,4 +68,6 @@ export function createTerminalServer() {
   server.listen(port, () => {
     console.log(`HTTP and WebSocket server is running on port ${port}`);
   });
+
+  return server;
 }

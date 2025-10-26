@@ -317,15 +317,6 @@ export type IMCContextType = {
 // #endregion
 
 // #region Pulse Editor Cloud
-export type RemoteWorkspace = {
-  id: string;
-  name: string;
-  cpuLimit: string;
-  memoryLimit: string;
-  volumeSize: string;
-  createdAt?: Date;
-};
-
 export type Session = {
   user: {
     name: string;
@@ -446,4 +437,17 @@ export type ProjectAsset = {
   // URI to download from remote or load from local
   uri: string;
 };
+// #endregion
+
+// #region Workspace
+export type RemoteWorkspace = {
+  id: string;
+  name: string;
+  cpuLimit: string;
+  memoryLimit: string;
+  volumeSize: string;
+  createdAt?: Date;
+};
+
+
 // #endregion
