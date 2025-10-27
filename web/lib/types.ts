@@ -70,7 +70,9 @@ export type EditorStates = {
   currentWorkspace?: RemoteWorkspace;
   workspaceContent?: FileSystemObject[];
 
+  /* Auth */
   isSigningIn?: boolean;
+  isRefreshSession?: boolean;
 
   /* Modals */
   isAppInfoModalOpen?: boolean;
@@ -448,6 +450,5 @@ export type RemoteWorkspace = {
   volumeSize: string;
   createdAt?: Date;
 };
-
 
 // #endregion

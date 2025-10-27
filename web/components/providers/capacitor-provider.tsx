@@ -1,18 +1,18 @@
 "use client";
 
 import { App, URLOpenListenerEvent } from "@capacitor/app";
-import { Capacitor } from "@capacitor/core";
+import { Capacitor, CapacitorCookies } from "@capacitor/core";
 import { ScreenOrientation } from "@capacitor/screen-orientation";
 import { StatusBar } from "@capacitor/status-bar";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { EditorContext } from "./editor-context-provider";
 
 export default function CapacitorProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
+  const editorContext = useContext(EditorContext);
 
   // Set status bar based on orientation
   useEffect(() => {
@@ -40,14 +40,47 @@ export default function CapacitorProvider({
   // Set deep linking listener
   useEffect(() => {
     App.addListener("appUrlOpen", (event: URLOpenListenerEvent) => {
-      // Check if the url has our scheme "https://mobile.pulse-editor.com"
-      if (event.url.startsWith("https://pulse-editor.com/mobile")) {
-        const slug = event.url.replace("https://pulse-editor.com/mobile", "");
+      /* 
+        Custom Scheme
+      */
+      // check if the url has our custom scheme "pulse-editor://open"
+      if (event.url.startsWith("pulse-editor://open")) {
+        const params = new URLSearchParams(
+          event.url.replace("pulse-editor://open?", ""),
+        );
+        const token = params.get("token");
+        const exp = params.get("exp");
+
         // Navigate to the slug
-        if (slug) {
-          router.push(slug);
+        if (token) {
+          // Set token in cookie
+          CapacitorCookies.setCookie({
+            url: "https://192.168.2.103:3000", // must match your WebView origin
+            key: "pulse-editor.session-token",
+            value: token,
+            path: "/",
+            expires: exp ?? undefined,
+          }).then(() => {
+            editorContext?.setEditorStates((prev) => ({
+              ...prev,
+              isRefreshSession: true,
+              isSigningIn: false,
+            }));
+          });
         }
       }
+      /*       
+        Google Verified Links
+        Check if the url has our scheme "https://mobile.pulse-editor.com" 
+      */
+      // else if (event.url.startsWith("https://pulse-editor.com/mobile")) {
+      //   const slug = event.url.replace("https://pulse-editor.com/mobile", "");
+      //   // Navigate to the slug
+      //   if (slug) {
+      //     router.push(slug);
+      //   }
+      // }
+
       // If no match, do nothing - let regular routing
       // logic take over
     });

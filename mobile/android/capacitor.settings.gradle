@@ -5,6 +5,12 @@ project(':capacitor-android').projectDir = new File('../../node_modules/@capacit
 include ':capacitor-community-safe-area'
 project(':capacitor-community-safe-area').projectDir = new File('../node_modules/@capacitor-community/safe-area/android')
 
+include ':capacitor-app'
+project(':capacitor-app').projectDir = new File('../../node_modules/@capacitor/app/android')
+
+include ':capacitor-browser'
+project(':capacitor-browser').projectDir = new File('../../node_modules/@capacitor/browser/android')
+
 include ':capacitor-filesystem'
 project(':capacitor-filesystem').projectDir = new File('../../node_modules/@capacitor/filesystem/android')
 

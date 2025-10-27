@@ -29,7 +29,7 @@ export default function NavTopBar({
   const editorContext = useContext(EditorContext);
 
   const { session, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
+  const { resolvedTheme, setTheme } = useTheme();
 
   // #region Load specified app if app query parameter is present
   const params = useSearchParams();
@@ -99,6 +99,21 @@ export default function NavTopBar({
             <Icon name="share" variant="round" />
           </Button>
 
+          <Button
+            // Disable on hover background
+            className="data-[hover=true]:bg-transparent"
+            isIconOnly
+            variant="light"
+            onPress={() => {
+              setTheme(resolvedTheme === "dark" ? "light" : "dark");
+            }}
+          >
+            {resolvedTheme === "dark" ? (
+              <Icon name="dark_mode" variant="round" />
+            ) : (
+              <Icon name="light_mode" variant="round" />
+            )}
+          </Button>
           {!session && (
             <Button
               onPress={() => {
@@ -113,21 +128,6 @@ export default function NavTopBar({
               Sign In
             </Button>
           )}
-          <Button
-            // Disable on hover background
-            className="data-[hover=true]:bg-transparent"
-            isIconOnly
-            variant="light"
-            onPress={() => {
-              setTheme(theme === "dark" ? "light" : "dark");
-            }}
-          >
-            {theme === "dark" ? (
-              <Icon name="dark_mode" variant="round" />
-            ) : (
-              <Icon name="light_mode" variant="round" />
-            )}
-          </Button>
           {session && (
             <Dropdown>
               <DropdownTrigger>

@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
-import "./globals.css";
-import WrappedHeroUIProvider from "@/components/providers/wrapped-hero-ui-provider";
-import EditorContextProvider from "@/components/providers/editor-context-provider";
-import { Toaster } from "react-hot-toast";
-import "material-icons/iconfont/material-icons.css";
-import CapacitorProvider from "@/components/providers/capacitor-provider";
-import RemoteModuleProvider from "@/components/providers/remote-module-provider";
-import InterModuleCommunicationProvider from "@/components/providers/imc-provider";
 import Nav from "@/components/interface/navigation/nav";
-import { Suspense } from "react";
-import { Analytics } from "@vercel/analytics/next";
+import CapacitorProvider from "@/components/providers/capacitor-provider";
+import EditorContextProvider from "@/components/providers/editor-context-provider";
+import InterModuleCommunicationProvider from "@/components/providers/imc-provider";
 import PlatformAssistantProvider from "@/components/providers/platform-assistant-provider";
+import RemoteModuleProvider from "@/components/providers/remote-module-provider";
+import WrappedHeroUIProvider from "@/components/providers/wrapped-hero-ui-provider";
+import { Analytics } from "@vercel/analytics/next";
+import "material-icons/iconfont/material-icons.css";
+import type { Metadata } from "next";
+import { Suspense } from "react";
+import { Toaster } from "react-hot-toast";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Pulse Editor",
@@ -27,9 +27,9 @@ export default function RootLayout({
       <body className={`h-[100dvh] w-[100dvw] antialiased`}>
         <Analytics />
         <Suspense>
-          <CapacitorProvider>
-            <WrappedHeroUIProvider>
-              <EditorContextProvider>
+          <WrappedHeroUIProvider>
+            <EditorContextProvider>
+              <CapacitorProvider>
                 <InterModuleCommunicationProvider>
                   <RemoteModuleProvider isPreventingCSS={true}>
                     <Toaster />
@@ -40,9 +40,9 @@ export default function RootLayout({
                     </Nav>
                   </RemoteModuleProvider>
                 </InterModuleCommunicationProvider>
-              </EditorContextProvider>
-            </WrappedHeroUIProvider>
-          </CapacitorProvider>
+              </CapacitorProvider>
+            </EditorContextProvider>
+          </WrappedHeroUIProvider>
         </Suspense>
       </body>
     </html>
