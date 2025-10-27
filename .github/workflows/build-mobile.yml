@@ -42,7 +42,7 @@ jobs:
       - name: Get Keystore
         run: |
           mkdir ~/.keystore 
-          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > ~/.keystore/keystore.jks
+          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > ~/.keystore/pulse-editor.keystore
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -78,5 +78,5 @@ jobs:
         working-directory: mobile
 
       - name: Build Capacitor App
-        run: npx cap build android --keystorepath ~/.keystore/keystore.jks --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
+        run: npx cap build android --keystorepath ~/.keystore/pulse-editor.keystore --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
         working-directory: mobile
