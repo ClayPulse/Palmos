@@ -5,7 +5,6 @@
     "workspaces": [
         "web",
         "mobile",
-        "capacitor-plugin",
         "vscode-extension",
         "npm-packages/react-api",
         "npm-packages/shared-utils"
@@ -21,8 +20,7 @@
         "react-api-build": "npm run build --workspace=npm-packages/react-api",
         "shared-utils-build": "npm run build --workspace=npm-packages/shared-utils",
         "cli-dev": "npm run dev --workspace=cli",
-        "cli-build": "npm run build --workspace=cli",
-        "capacitor-plugin-build": "npm run build --workspace=capacitor-plugin"
+        "cli-build": "npm run build --workspace=cli"
     },
     "devDependencies": {
         "@changesets/cli": "^2.29.4",

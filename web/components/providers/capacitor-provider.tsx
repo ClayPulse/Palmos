@@ -55,7 +55,8 @@ export default function CapacitorProvider({
         if (token) {
           // Set token in cookie
           CapacitorCookies.setCookie({
-            url: "https://192.168.2.103:3000", // must match your WebView origin
+            // must match your WebView origin
+            url: window.location.origin,
             key: "pulse-editor.session-token",
             value: token,
             path: "/",

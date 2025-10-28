@@ -120,7 +120,7 @@ export function useAuth() {
       await Browser.open({ url: url.toString() });
 
       await CapacitorCookies.deleteCookie({
-        url: "https://192.168.2.103:3000",
+        url: window.location.origin,
         key: "pulse-editor.session-token",
       });
     } else {
