@@ -3,6 +3,7 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { Browser } from "@capacitor/browser";
 import { CapacitorCookies } from "@capacitor/core";
+import { Preferences } from "@capacitor/preferences";
 import { useContext, useEffect } from "react";
 import useSWR from "swr";
 import { PlatformEnum } from "../enums";
@@ -60,14 +61,38 @@ export function useAuth() {
   );
 
   useEffect(() => {
-    if (editorContext?.editorStates.isRefreshSession) {
-      mutate().then(() => {
+    async function refreshSession() {
+      if (editorContext?.editorStates.isRefreshSession) {
+        const token = await Preferences.get({
+          key: "pulse-editor.session-token",
+        });
+
+        /*           
+          Sometimes other hooks using useSWR are fired right after retuning from deep linking 
+          before session is refreshed (triggered by window re-focus), causing cookies to be 
+          set again between when it is removed (if removed in deep link handler) and when 
+          session is refreshed.
+
+          So a better approach is to clear cookies right here before refreshing session, but 
+          possibly after other hooks are fired.
+        */
+        if (!token.value) {
+          // CapacitorCookies.clearAllCookies();
+          CapacitorCookies.deleteCookie({
+            key: "pulse-editor.session-token",
+            url: process.env.NEXT_PUBLIC_BACKEND_URL,
+          });
+        }
+
+        await mutate();
         editorContext.setEditorStates((prev) => ({
           ...prev,
           isRefreshSession: false,
         }));
-      });
+      }
     }
+
+    refreshSession();
   }, [editorContext?.editorStates.isRefreshSession]);
 
   // Open a sign-in page if the user is not signed in.
@@ -118,11 +143,6 @@ export function useAuth() {
         process.env.NEXT_PUBLIC_BACKEND_URL + "/api/mobile",
       );
       await Browser.open({ url: url.toString() });
-
-      await CapacitorCookies.deleteCookie({
-        url: window.location.origin,
-        key: "pulse-editor.session-token",
-      });
     } else {
       const url = getAPIUrl(`/api/auth/signout`);
       url.searchParams.set("callbackUrl", window.location.href);

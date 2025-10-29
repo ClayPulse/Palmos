@@ -1,7 +1,8 @@
 "use client";
 
 import { App, URLOpenListenerEvent } from "@capacitor/app";
-import { Capacitor, CapacitorCookies } from "@capacitor/core";
+import { Capacitor } from "@capacitor/core";
+import { Preferences } from "@capacitor/preferences";
 import { ScreenOrientation } from "@capacitor/screen-orientation";
 import { StatusBar } from "@capacitor/status-bar";
 import { useContext, useEffect } from "react";
@@ -39,7 +40,7 @@ export default function CapacitorProvider({
 
   // Set deep linking listener
   useEffect(() => {
-    App.addListener("appUrlOpen", (event: URLOpenListenerEvent) => {
+    App.addListener("appUrlOpen", async (event: URLOpenListenerEvent) => {
       /* 
         Custom Scheme
       */
@@ -51,24 +52,30 @@ export default function CapacitorProvider({
         const token = params.get("token");
         const exp = params.get("exp");
 
-        // Navigate to the slug
+        // Set token in Preferences and refresh session.
+        // After refresh, the cookie will be set in the webview automatically.
+        // Hence, no need to set cookie manually here.
         if (token) {
-          // Set token in cookie
-          CapacitorCookies.setCookie({
-            // must match your WebView origin
-            url: window.location.origin,
+          await Preferences.set({
             key: "pulse-editor.session-token",
             value: token,
-            path: "/",
-            expires: exp ?? undefined,
-          }).then(() => {
-            editorContext?.setEditorStates((prev) => ({
-              ...prev,
-              isRefreshSession: true,
-              isSigningIn: false,
-            }));
+          });
+          if (exp) {
+            await Preferences.set({
+              key: "pulse-editor.session-expiration",
+              value: exp,
+            });
+          }
+        } else {
+          await Preferences.remove({
+            key: "pulse-editor.session-token",
           });
         }
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isRefreshSession: true,
+          isSigningIn: false,
+        }));
       }
       /*       
         Google Verified Links

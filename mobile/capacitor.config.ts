@@ -17,6 +17,9 @@ const config: CapacitorConfig = {
     SafeArea: {
       enabled: true,
     },
+    CapacitorHttp: {
+      enabled: true,
+    },
   },
 };
 

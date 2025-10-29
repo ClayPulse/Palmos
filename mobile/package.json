@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "android-dev": "node dev.js",
-    "android-run": "npx cap run android",
-    "android-build": "npx cap build android"
+    "android-run": "npx cap run android"
   },
   "dependencies": {
     "@capacitor-community/safe-area": "^7.0.0-alpha.1",
@@ -17,6 +16,7 @@
     "@capacitor/core": "^7.2.0",
     "@capacitor/filesystem": "^7.0.1",
     "@capacitor/keyboard": "^7.0.1",
+    "@capacitor/preferences": "^7.0.2",
     "@capacitor/screen-orientation": "^7.0.1",
     "@capacitor/status-bar": "^7.0.1",
     "@capawesome/capacitor-file-picker": "^7.0.1"
