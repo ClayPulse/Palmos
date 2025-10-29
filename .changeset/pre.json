@@ -2,7 +2,6 @@
   "mode": "pre",
   "tag": "beta",
   "initialVersions": {
-    "@pulse-editor/capacitor-plugin": "0.0.1",
     "@pulse-editor/mobile": "0.0.1",
     "@pulse-editor/react-api": "0.1.1-alpha.54",
     "@pulse-editor/shared-utils": "0.1.1-alpha.54",

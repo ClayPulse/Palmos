@@ -1,16 +1,11 @@
-import { PlatformEnum } from "@/lib/enums";
-import { useAuth } from "@/lib/hooks/use-auth";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { useAuth } from "@/lib/hooks/use-auth";
 import {
   Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
-  Select,
-  SelectItem,
 } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
@@ -25,20 +20,16 @@ import ViewMenuDropDown from "./menu-dropdown/view-menu";
 export default function NavTopBar({
   isMenuOpen,
   setIsMenuOpen,
-  setIsWorkspaceSettingsModalOpen,
   setIsSharingOpen,
 }: {
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
-  setIsWorkspaceSettingsModalOpen: (isOpen: boolean) => void;
   setIsSharingOpen: (isOpen: boolean) => void;
 }) {
   const editorContext = useContext(EditorContext);
 
   const { session, signOut } = useAuth();
-  const { theme, setTheme } = useTheme();
-
-  const workspaceHook = useWorkspace();
+  const { resolvedTheme, setTheme } = useTheme();
 
   // #region Load specified app if app query parameter is present
   const params = useSearchParams();
@@ -82,71 +73,6 @@ export default function NavTopBar({
 
           <FileMenuDropDown />
           <ViewMenuDropDown />
-
-          {/* Do not show workspace selector when the app is open in web, and session is not available */}
-          {(getPlatform() === PlatformEnum.Web ||
-            getPlatform() === PlatformEnum.WebMobile) &&
-          !session ? null : (
-            <Select
-              className="max-w-50"
-              classNames={{
-                mainWrapper: "h-10",
-                trigger: "py-0.5 min-h-10",
-              }}
-              label="Workspace"
-              placeholder="Select Workspace"
-              isLoading={
-                !editorContext?.editorStates?.isSigningIn &&
-                !workspaceHook.cloudWorkspaces
-              }
-              selectedKeys={
-                workspaceHook.workspace ? [workspaceHook.workspace.id] : []
-              }
-              size="sm"
-              disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
-            >
-              <>
-                {workspaceHook.cloudWorkspaces?.map((workspace) => (
-                  <SelectItem
-                    key={workspace.id}
-                    onPress={() => {
-                      workspaceHook.selectWorkspace(workspace.id);
-                    }}
-                  >
-                    {workspace.name}
-                  </SelectItem>
-                )) ?? []}
-                <SelectItem
-                  className="bg-primary text-primary-foreground"
-                  color="primary"
-                  onPress={() => {
-                    setIsWorkspaceSettingsModalOpen(true);
-                  }}
-                  startContent={
-                    <div className="text-primary-foreground h-4 w-4">
-                      <Icon name="add" variant="round" />
-                    </div>
-                  }
-                >
-                  Create New
-                </SelectItem>
-                <SelectItem
-                  key={"settings"}
-                  className="bg-default"
-                  onPress={() => {
-                    setIsWorkspaceSettingsModalOpen(true);
-                  }}
-                  startContent={
-                    <div className="h-4 w-4">
-                      <Icon name="settings" variant="round" />
-                    </div>
-                  }
-                >
-                  Settings
-                </SelectItem>
-              </>
-            </Select>
-          )}
         </div>
         <div className="col-start-2 flex flex-col items-center justify-center">
           {editorContext?.editorStates.project && <ProjectIndicator />}
@@ -173,6 +99,21 @@ export default function NavTopBar({
             <Icon name="share" variant="round" />
           </Button>
 
+          <Button
+            // Disable on hover background
+            className="data-[hover=true]:bg-transparent"
+            isIconOnly
+            variant="light"
+            onPress={() => {
+              setTheme(resolvedTheme === "dark" ? "light" : "dark");
+            }}
+          >
+            {resolvedTheme === "dark" ? (
+              <Icon name="dark_mode" variant="round" />
+            ) : (
+              <Icon name="light_mode" variant="round" />
+            )}
+          </Button>
           {!session && (
             <Button
               onPress={() => {
@@ -187,21 +128,6 @@ export default function NavTopBar({
               Sign In
             </Button>
           )}
-          <Button
-            // Disable on hover background
-            className="data-[hover=true]:bg-transparent"
-            isIconOnly
-            variant="light"
-            onPress={() => {
-              setTheme(theme === "dark" ? "light" : "dark");
-            }}
-          >
-            {theme === "dark" ? (
-              <Icon name="dark_mode" variant="round" />
-            ) : (
-              <Icon name="light_mode" variant="round" />
-            )}
-          </Button>
           {session && (
             <Dropdown>
               <DropdownTrigger>

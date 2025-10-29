@@ -55,7 +55,6 @@ export type EditorStates = {
   isToolbarOpen: boolean;
 
   project?: string;
-  projectContent?: FileSystemObject[];
   projectsInfo?: ProjectInfo[];
 
   explorerSelectedNodeRefs: RefObject<TreeViewNodeRef | null>[];
@@ -69,8 +68,11 @@ export type EditorStates = {
 
   // The currently selected workspace
   currentWorkspace?: RemoteWorkspace;
+  workspaceContent?: FileSystemObject[];
 
+  /* Auth */
   isSigningIn?: boolean;
+  isRefreshSession?: boolean;
 
   /* Modals */
   isAppInfoModalOpen?: boolean;
@@ -162,11 +164,6 @@ export type FileSystemObject = {
   uri: string;
   isFolder: boolean;
   subDirItems?: FileSystemObject[];
-};
-
-export type ProjectInfo = {
-  name: string;
-  ctime?: Date;
 };
 
 export type TreeViewGroupRef = {
@@ -322,14 +319,6 @@ export type IMCContextType = {
 // #endregion
 
 // #region Pulse Editor Cloud
-export type RemoteWorkspace = {
-  id: string;
-  name: string;
-  address: string;
-  createdAt?: Date;
-  updatedAt?: Date;
-};
-
 export type Session = {
   user: {
     name: string;
@@ -433,6 +422,33 @@ export type PlatformAssistantMessage = {
   };
   // Other data used to interact with the platform
   meta?: any;
+};
+
+// #endregion
+
+// #region Project
+
+export type ProjectInfo = {
+  name: string;
+  ctime?: Date;
+};
+
+export type ProjectAsset = {
+  name: string;
+  type: "file" | "workflow";
+  // URI to download from remote or load from local
+  uri: string;
+};
+// #endregion
+
+// #region Workspace
+export type RemoteWorkspace = {
+  id: string;
+  name: string;
+  cpuLimit: string;
+  memoryLimit: string;
+  volumeSize: string;
+  createdAt?: Date;
 };
 
 // #endregion

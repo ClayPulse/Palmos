@@ -133,7 +133,7 @@ export default function usePlatformAIAssistant() {
 
       const previousMessage = history[history.length - 1].message.content.text;
 
-      if (isUseManagedCloud) {
+      if (isUseManagedCloud ?? true) {
         const { analysis }: { analysis: string } = await runAgentMethodCloud(
           editorAssistantAgent,
           "analyzeCommandResult",
@@ -444,7 +444,7 @@ export default function usePlatformAIAssistant() {
     input: ReadableStream | string | undefined,
     isOutputAudio: boolean,
   ) {
-    if (isUseManagedCloud) {
+    if (isUseManagedCloud ?? true) {
       runCloudAssistant(input, isOutputAudio);
     } else {
       runLocalAssistant(input, isOutputAudio);

@@ -2,18 +2,14 @@
 
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { SafeArea } from "@capacitor-community/safe-area";
-import { addToast, Button } from "@heroui/react";
-import { PulseEditorCapacitor } from "@pulse-editor/capacitor-plugin";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
 import AppInfoModal from "../../modals/app-info-modal";
 import LoginModal from "../../modals/login-modal";
 import PasswordModal from "../../modals/password-modal";
 import SharingModal from "../../modals/sharing-modal";
-import WorkspaceSettingsModal from "../../modals/workspace-settings-model";
 import { EditorContext } from "../../providers/editor-context-provider";
 import Loading from "../status-screens/loading";
 import NavSideMenu from "./nav-side-menu";
@@ -27,63 +23,11 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   const { setTheme, resolvedTheme } = useTheme();
   const { session, isLoading: isLoadingSession, signIn } = useAuth();
-  const workspaceHook = useWorkspace();
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isShowNavbar, setIsShowNavbar] = useState(true);
-  const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
-    useState(false);
+
   const [isSharingOpen, setIsSharingOpen] = useState(false);
-
-  const [isGranted, setIsGranted] = useState(true);
-
-  useEffect(() => {
-    async function checkStoragePermission() {
-      const { isGranted }: { isGranted: boolean } =
-        await PulseEditorCapacitor.isManageStoragePermissionGranted();
-      setIsGranted(isGranted);
-    }
-
-    if (getPlatform() === PlatformEnum.Capacitor) {
-      checkStoragePermission();
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!isGranted) {
-      addToast({
-        title: "Storage Permission Required",
-        classNames: {
-          base: "flex flex-col items-start",
-        },
-        description:
-          "To use local storage management feature, please grant storage permission in settings. ",
-        icon: "warning",
-        color: "warning",
-        size: "lg",
-        shouldShowTimeoutProgress: true,
-        timeout: 30000,
-        endContent: (
-          <div className="flex w-full flex-col gap-1 pt-2">
-            <Button
-              color="primary"
-              onPress={() => PulseEditorCapacitor.startManageStorageIntent()}
-            >
-              Go to settings
-            </Button>
-            <Button
-              color="default"
-              onPress={() => {
-                addToast({ title: "🚧 Coming soon!" });
-              }}
-            >
-              Use cloud instance
-            </Button>
-          </div>
-        ),
-      });
-    }
-  }, [isGranted]);
 
   useEffect(() => {
     const platform = getPlatform();
@@ -155,14 +99,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           <LoginModal signIn={signIn} />
         )}
 
-      {isWorkspaceSettingsModalOpen && (
-        <WorkspaceSettingsModal
-          isOpen={isWorkspaceSettingsModalOpen}
-          setIsOpen={setIsWorkspaceSettingsModalOpen}
-          workspaceHook={workspaceHook}
-        />
-      )}
-
       {isSharingOpen && (
         <SharingModal isOpen={isSharingOpen} setIsOpen={setIsSharingOpen} />
       )}
@@ -183,7 +119,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             <NavTopBar
               isMenuOpen={isMenuOpen}
               setIsMenuOpen={setIsMenuOpen}
-              setIsWorkspaceSettingsModalOpen={setIsWorkspaceSettingsModalOpen}
               setIsSharingOpen={setIsSharingOpen}
             />
           )}

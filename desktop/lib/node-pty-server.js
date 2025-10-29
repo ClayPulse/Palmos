@@ -37,7 +37,7 @@ const handleTerminalConnection = (ws) => {
     }
   });
 
-  ptyProcess.on("data", (rawOutput) => {
+  ptyProcess.onData((rawOutput) => {
     ws.send(JSON.stringify({ type: "output", payload: rawOutput }));
   });
 
@@ -68,4 +68,6 @@ export function createTerminalServer() {
   server.listen(port, () => {
     console.log(`HTTP and WebSocket server is running on port ${port}`);
   });
+
+  return server;
 }

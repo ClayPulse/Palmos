@@ -1,14 +1,15 @@
-import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
 import { CapacitorAPI } from "../platform-api/capacitor/capacitor-api";
 import { CloudAPI } from "../platform-api/cloud/cloud-api";
 import { ElectronAPI } from "../platform-api/electron/electron-api";
 import { getPlatform } from "../platform-api/platform-checker";
+import { useWorkspace } from "./use-workspace";
 
 export function usePlatformApi() {
-  const editorContext = useContext(EditorContext);
+  const { workspace } = useWorkspace();
+
   const [platformApi, setPlatformApi] = useState<
     AbstractPlatformAPI | undefined
   >(undefined);
@@ -20,11 +21,11 @@ export function usePlatformApi() {
 
   // When workspace changes, reset platform API if needed
   useEffect(() => {
-    if (platformApi && editorContext?.editorStates.currentWorkspace) {
+    if (platformApi && workspace) {
       const api = getAbstractPlatformAPI();
       setPlatformApi(api);
     }
-  }, [editorContext?.editorStates.currentWorkspace]);
+  }, [workspace]);
 
   function getAbstractPlatformAPI(): AbstractPlatformAPI {
     const platform = getPlatform();
@@ -37,7 +38,6 @@ export function usePlatformApi() {
       platform === PlatformEnum.Web ||
       platform === PlatformEnum.WebMobile
     ) {
-      const workspace = editorContext?.editorStates.currentWorkspace;
       return new CloudAPI(workspace);
     } else if (platform === PlatformEnum.VSCode) {
       // platformApi.current = new VSCodeAPI();

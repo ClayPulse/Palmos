@@ -93,17 +93,17 @@ export class ElectronAPI extends AbstractPlatformAPI {
 
   async getPersistentSettings(): Promise<PersistentSettings> {
     const persistentSettings: PersistentSettings =
-      await this.electronAPI?.loadSettings();
+      await this.electronAPI?.getPersistentSettings();
 
     return persistentSettings;
   }
 
   async setPersistentSettings(settings: PersistentSettings): Promise<void> {
-    await this.electronAPI?.saveSettings(settings);
+    await this.electronAPI?.setPersistentSettings(settings);
   }
 
   async resetPersistentSettings(): Promise<void> {
-    await this.electronAPI?.saveSettings({});
+    await this.electronAPI?.setPersistentSettings({});
   }
 
   async getInstallationPath(): Promise<string> {

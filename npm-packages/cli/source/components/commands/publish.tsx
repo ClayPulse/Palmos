@@ -54,13 +54,23 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 	// Build the extension
 	useEffect(() => {
 		async function buildExtension() {
+			setIsBuilding(true);
 			try {
-				setIsBuilding(true);
 				await $`npm run build`;
-				// Zip the dist folder
+			}
+			catch (error) {
+				setIsBuildingError(true);
+				setIsBuilding(false);
+				setFailureMessage('Build failed. Please run `npm run build` to see the error.');
+				return;
+			}
+			// Zip the dist folder
+			try {
 				await $({cwd: 'dist'})`zip -r ../node_modules/@pulse-editor/dist.zip *`;
 			} catch (error) {
 				setIsBuildingError(true);
+				setIsBuilding(false);
+				setFailureMessage('Failed to zip the build output.');
 				return;
 			} finally {
 				setIsBuilding(false);
@@ -93,8 +103,8 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 				// Send the file to the server
 				const res = await fetch(
 					cli.flags.dev
-						? 'https://localhost:8080/api/extension/publish'
-						: 'https://pulse-editor.com/api/extension/publish',
+						? 'https://localhost:8080/api/app/publish'
+						: 'https://pulse-editor.com/api/app/publish',
 					{
 						method: 'POST',
 						headers: {

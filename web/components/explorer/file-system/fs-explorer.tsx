@@ -24,9 +24,16 @@ export default function FileSystemExplorer({
 
   const platform = getPlatform();
   const { platformApi } = usePlatformApi();
-  const { activeTabView, closeAllTabViews } = useTabViewManager();
+  const { activeTabView } = useTabViewManager();
 
   const rootGroupRef = useRef<TreeViewGroupRef | null>(null);
+
+  const content = editorContext?.editorStates.workspaceContent ?? [];
+
+  const fsPath =
+    editorContext?.persistSettings?.projectHomePath +
+    "/" +
+    editorContext?.editorStates.project;
 
   // Reset root group ref when there are other nodes selected
   useEffect(() => {
@@ -172,22 +179,6 @@ export default function FileSystemExplorer({
             </Button>
           </div>
           <div className="flex">
-            <Button
-              isIconOnly
-              variant="light"
-              size="sm"
-              onPress={() => {
-                editorContext?.setEditorStates((prev) => {
-                  return {
-                    ...prev,
-                    project: "",
-                    projectContent: [],
-                  };
-                });
-              }}
-            >
-              <Icon name="close" variant="outlined" />
-            </Button>
             {/* <Button isIconOnly variant="light" size="sm">
               <Icon name="cloud_upload" variant="outlined" />
             </Button>
@@ -200,24 +191,18 @@ export default function FileSystemExplorer({
           </div>
         </div>
 
-        {editorContext?.editorStates.projectContent?.length === 0 && (
-          <div className="pointer-events-none absolute top-0 left-0 m-0 flex h-full w-full flex-col items-center justify-center px-2 pb-16">
-            <p className="text-center">
-              Empty content. Create a new file to get started.
-            </p>
-          </div>
+        {content?.length === 0 && (
+          <p className="text-center">
+            Empty content. Create a new file to get started.
+          </p>
         )}
 
         <div className="overflow-y-auto">
           <TreeViewGroup
             ref={rootGroupRef}
-            objects={editorContext?.editorStates.projectContent ?? []}
+            objects={content}
             viewFile={viewFile}
-            folderUri={
-              editorContext?.persistSettings?.projectHomePath +
-              "/" +
-              editorContext?.editorStates.project
-            }
+            folderUri={fsPath}
             platformApi={platformApi}
           />
         </div>

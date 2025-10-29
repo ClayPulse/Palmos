@@ -35,7 +35,7 @@ export default function AppGallery() {
   } = useSWR<ExtensionApp[]>(
     selectLabels[selectedIndex]?.name === "All" ||
       selectLabels[selectedIndex]?.name === "Published by Me"
-      ? `/api/extension/list${selectLabels[selectedIndex].name === "Published by Me" ? "?published=true" : ""}`
+      ? `/api/app/list${selectLabels[selectedIndex].name === "Published by Me" ? "?published=true" : ""}`
       : null,
     async (url: string) => {
       const res = await fetchAPI(url);
@@ -107,7 +107,7 @@ export default function AppGallery() {
       }, extGroup[0]);
 
       return (
-        <div key={name} className="w-full h-fit">
+        <div key={name} className="h-fit w-full">
           <AppPreviewCard
             extension={latestVersion}
             isShowInstalledChip={true}
@@ -140,7 +140,7 @@ export default function AppGallery() {
   ]);
 
   return (
-    <div className="h-full w-full grid grid-rows-[max-content_1fr] gap-y-2 overflow-y-auto">
+    <div className="grid h-full w-full grid-rows-[max-content_1fr] gap-y-2 overflow-y-auto">
       <div className="flex flex-col items-center">
         <Select
           label="Filter apps"
@@ -184,7 +184,9 @@ export default function AppGallery() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 w-full h-full overflow-y-auto overflow-x-hidden px-1">{previews}</div>
+        <div className="grid h-full w-full grid-cols-2 gap-2 overflow-x-hidden overflow-y-auto px-1">
+          {previews}
+        </div>
       )}
     </div>
   );

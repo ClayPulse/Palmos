@@ -1,3 +1,4 @@
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import {
   FileSystemObject,
   ListPathOptions,
@@ -5,10 +6,20 @@ import {
   ProjectInfo,
   RemoteWorkspace,
 } from "@/lib/types";
-import { AbstractPlatformAPI } from "../abstract-platform-api";
 import toast from "react-hot-toast";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { AbstractPlatformAPI } from "../abstract-platform-api";
 
+/**
+ * Cloud Platform API
+ *
+ * This API will manage projects on the cloud server,
+ * so users can access their projects from any device.
+ *
+ * In case of need to access file system,
+ * Cloud API will interact with the remote workspace,
+ * but only limit to necessary file system operations.
+ * It will not save any project data on the remote workspace.
+ */
 export class CloudAPI extends AbstractPlatformAPI {
   private workspace: RemoteWorkspace | undefined;
 
@@ -64,8 +75,25 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    toast.error("Not implemented");
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "list-path-content",
+        args: { uri, options },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to list path content");
+    }
+
+    const data = await response.json();
+    return data;
   }
 
   async createProject(uri: string): Promise<void> {
@@ -113,8 +141,22 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    toast.error("Not implemented");
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "create-folder",
+        args: { uri },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create folder");
+    }
   }
 
   async createFile(uri: string): Promise<void> {
@@ -122,8 +164,22 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    toast.error("Not implemented");
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "create-file",
+        args: { uri },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create file");
+    }
   }
 
   async rename(oldUri: string, newUri: string): Promise<void> {
@@ -131,8 +187,22 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    toast.error("Not implemented");
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "rename",
+        args: { oldUri, newUri },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to rename file");
+    }
   }
 
   async delete(uri: string): Promise<void> {
@@ -140,8 +210,22 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    toast.error("Not implemented");
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "delete",
+        args: { uri },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete file");
+    }
   }
 
   // Reserved for cloud environment implementation
@@ -150,21 +234,79 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "has-path",
+        args: { uri },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to check if path exists");
+    }
+
+    const data = await response.json();
+    return data === true;
   }
+
   async readFile(uri: string): Promise<File> {
     if (!this.workspace) {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "read-file",
+        args: { uri },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to read file");
+    }
+
+    const data = await response.json();
+
+    return new File([data], uri);
   }
+
   async writeFile(file: File, uri: string): Promise<void> {
     if (!this.workspace) {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    throw new Error("Method not implemented.");
+
+    const text = await file.text();
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "write-file",
+        args: { data: text, uri },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to write file");
+    }
+
+    return;
   }
 
   async copyFiles(from: string, to: string): Promise<void> {
@@ -172,7 +314,22 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "copy-files",
+        args: { from, to },
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to copy files");
+    }
   }
 
   /* Persistent Settings */
@@ -186,6 +343,9 @@ export class CloudAPI extends AbstractPlatformAPI {
     }
 
     const settings: PersistentSettings = await response.json();
+
+    settings.projectHomePath = "/workspace";
+
     return settings;
   }
 
@@ -213,7 +373,7 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    throw new Error("Method not implemented.");
+    return "/workspace";
   }
 
   async createTerminal(): Promise<string> {
@@ -221,6 +381,23 @@ export class CloudAPI extends AbstractPlatformAPI {
       toast.error("No workspace selected");
       throw new Error("No workspace selected");
     }
-    throw new Error("Method not implemented.");
+
+    const response = await fetchAPI(`/api/workspace/platform-api`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        workspaceId: this.workspace.id,
+        operation: "create-terminal",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to create terminal");
+    }
+
+    const data = await response.text();
+    return data;
   }
 }

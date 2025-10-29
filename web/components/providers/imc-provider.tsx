@@ -169,7 +169,7 @@ export default function InterModuleCommunicationProvider({
             throw new Error("Agent method not found.");
           }
 
-          if (editorContext?.persistSettings?.isUseManagedCloud) {
+          if (editorContext?.persistSettings?.isUseManagedCloud ?? true) {
             const result = await runAgentMethodCloud(agent, methodName, args);
 
             return result;

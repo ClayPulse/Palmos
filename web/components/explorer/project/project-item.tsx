@@ -1,6 +1,4 @@
-import { PlatformEnum, SideMenuTabEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
-import { getPlatform, isWeb } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState, ProjectInfo } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useContext, useState } from "react";
@@ -11,10 +9,12 @@ export default function ProjectItem({
   project,
   setSettingsOpen,
   setSettingsProject,
+  onOpen,
 }: {
   project: ProjectInfo;
   setSettingsOpen: (isOpen: boolean) => void;
   setSettingsProject: (project: ProjectInfo) => void;
+  onOpen?: () => void;
 }) {
   const editorContext = useContext(EditorContext);
 
@@ -38,27 +38,6 @@ export default function ProjectItem({
         project: projectName,
       };
     });
-
-    if (getPlatform() === PlatformEnum.Electron) {
-      const uri =
-        editorContext?.persistSettings?.projectHomePath + "/" + projectName;
-      platformApi
-        ?.listPathContent(uri, {
-          include: "all",
-          isRecursive: true,
-        })
-        .then((objects) => {
-          editorContext?.setEditorStates((prev) => {
-            return {
-              ...prev,
-              project: projectName,
-              projectContent: objects,
-            };
-          });
-        });
-    } else if (isWeb()) {
-      // TODO: move this to when workspace is loaded
-    }
   }
 
   function formatDateTime(date: Date) {
@@ -80,6 +59,9 @@ export default function ProjectItem({
           // Only open project if context menu is not open
           if (!contextMenuState.isOpen) {
             openProject(projectName);
+            if (onOpen) {
+              onOpen();
+            }
           }
         }}
         onContextMenu={(e) => {

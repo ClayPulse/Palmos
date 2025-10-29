@@ -165,8 +165,9 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			try {
 				await execa(`npm install`, {
 					cwd: path.join(process.cwd(), name),
+					shell: true,
 				});
-			} catch (error) {
+			} catch (error: any) {
 				setCreateMessage(
 					<Text color="redBright">
 						❌ Failed to install dependencies. Please check your internet

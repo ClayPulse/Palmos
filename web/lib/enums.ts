@@ -7,7 +7,7 @@ export enum PlatformEnum {
   WebMobile = "web-mobile",
 }
 
-export enum MarketplaceCategoryEnum { 
+export enum MarketplaceCategoryEnum {
   Featured = "Featured",
   Workflows = "Workflows",
   Apps = "Apps",
@@ -16,7 +16,7 @@ export enum MarketplaceCategoryEnum {
 export enum SideMenuTabEnum {
   Projects = "Projects",
   Apps = "Apps",
-  Workspaces = "Workspaces",
+  Workspace = "Workspace",
 }
 
 export enum DragEventTypeEnum {

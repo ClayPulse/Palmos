@@ -1,13 +1,13 @@
 "use client";
 
-import { Button, Input, Switch } from "@heroui/react";
-import ModalWrapper from "./modal-wrapper";
+import { usePlatformApi } from "@/lib/hooks/use-platform-api";
+import { isWeb } from "@/lib/platform-api/platform-checker";
+import { ProjectInfo } from "@/lib/types";
+import { Button, Input } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { EditorContext } from "../providers/editor-context-provider";
-import { ProjectInfo } from "@/lib/types";
-import { isWeb } from "@/lib/platform-api/platform-checker";
+import ModalWrapper from "./modal-wrapper";
 
 export default function ProjectSettingsModal({
   isOpen,
@@ -93,9 +93,8 @@ export default function ProjectSettingsModal({
       return;
     }
 
-    const uri = homePath ? homePath + "/" + projectName : projectName;
     platformApi
-      .createProject(uri)
+      .createProject(projectName)
       .then(() => {
         toast.success("Project created.");
         platformApi.listProjects(homePath).then((projects) => {
@@ -128,11 +127,10 @@ export default function ProjectSettingsModal({
       toast.error("Project Home Path is not set.");
       return;
     }
-    const uri = homePath ? homePath + "/" + projectInfo.name : projectInfo.name;
     platformApi
-      .deleteProject(uri)
+      .deleteProject(projectInfo.name)
       .then(() => {
-        toast.success("Project deleted.");
+        toast.success(`Project ${projectInfo.name} deleted.`);
         platformApi.listProjects(homePath).then((projects) => {
           editorContext?.setEditorStates((prev) => {
             return {
