@@ -4,12 +4,17 @@ import {
   PersistentSettings,
   ProjectInfo,
 } from "@/lib/types";
-import { AbstractPlatformAPI } from "../abstract-platform-api";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
 import ignore from "ignore";
 import path from "path";
+import { AbstractPlatformAPI } from "../abstract-platform-api";
 
+/**
+ * @deprecated Android implementation is no longer supported due to
+ * file access restrictions. Instead, use cloud managed workspaces,
+ * or use self-hosted workspace backend in `remote-workspace/`
+ */
 export class CapacitorAPI extends AbstractPlatformAPI {
   constructor() {
     super();

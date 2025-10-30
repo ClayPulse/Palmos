@@ -125,15 +125,16 @@ export default function WorkspaceSettingsModal({
 
     // Create workspace
     try {
-      const vCPU = selectedSpec.vCPU.toString();
-      const ram = getUnitFromUnitString(selectedSpec.ram.toString(), "Gi");
+      const specs = selectedSpec.key;
       const volumeSize = getUnitFromUnitString(storage.toString(), "Gi");
 
       addToast({
         title: "Creating workspace",
-        description: `Creating workspace ${workspaceName}. Specifications: ${vCPU} vCPU, ${ram} RAM, ${volumeSize} storage.`,
+        description: `Creating workspace ${workspaceName}. Specifications: ${
+          selectedSpec.vCPU
+        } vCPU, ${selectedSpec.ram} RAM, ${volumeSize} storage.`,
       });
-      await createWorkspace(workspaceName, vCPU.toString(), ram, volumeSize);
+      await createWorkspace(workspaceName, specs, volumeSize);
       addToast({
         title: "Workspace created",
         description: `Workspace ${workspaceName} has been created successfully.`,

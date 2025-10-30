@@ -1,7 +1,6 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useEffect, useState } from "react";
 import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
-import { CapacitorAPI } from "../platform-api/capacitor/capacitor-api";
 import { CloudAPI } from "../platform-api/cloud/cloud-api";
 import { ElectronAPI } from "../platform-api/electron/electron-api";
 import { getPlatform } from "../platform-api/platform-checker";
@@ -31,7 +30,8 @@ export function usePlatformApi() {
     const platform = getPlatform();
 
     if (platform === PlatformEnum.Capacitor) {
-      return new CapacitorAPI();
+      // return new CapacitorAPI();
+      return new CloudAPI(workspace);
     } else if (platform === PlatformEnum.Electron) {
       return new ElectronAPI();
     } else if (
