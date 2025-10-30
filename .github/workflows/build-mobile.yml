@@ -1,7 +1,7 @@
 name: Build Mobile
 
 env:
-  ANDROID_SDK_VERSION: "35.0.0"
+  ANDROID_SDK_VERSION: "36.1.0"
 
 on:
   pull_request:

@@ -3,8 +3,30 @@ import ignore from "ignore";
 import path from "path";
 
 // Define a safe root directory for projects. Can be overridden by env or configured as needed.
+// All incoming URIs will be resolved and validated to ensure they don't escape this root.
+const SAFE_ROOT = path.resolve(
+  process.env.PLATFORM_API_ROOT ?? "/pulse-editor",
+);
 
-const settingsPath = path.join("/pulse-editor", "settings.json");
+const settingsPath = path.join(SAFE_ROOT, "settings.json");
+
+function safeResolve(uri: string): string {
+  if (!uri || typeof uri !== "string") {
+    throw new Error("Invalid path");
+  }
+
+  // Canonicalize the SAFE_ROOT once for this function
+  const rootPath = path.resolve(SAFE_ROOT);
+  // Combine and normalize the user input relative to the safe root
+  const candidate = path.resolve(SAFE_ROOT, uri);
+
+  // Check that candidate is strictly under rootPath (or equal to rootPath)
+  if (candidate === rootPath || candidate.startsWith(rootPath + path.sep)) {
+    return candidate;
+  }
+
+  throw new Error("Can only access paths within the project home directory.");
+}
 
 export async function handlePlatformAPIRequest(
   data: {
@@ -110,10 +132,9 @@ export async function handlePlatformAPIRequest(
   }
 }
 
-
 // List all folders in a path
 async function handleListProjects(uri: string) {
-  const rootPath = uri;
+  const rootPath = safeResolve(uri);
   const files = await fs.promises.readdir(rootPath, { withFileTypes: true });
   const folders = files
     .filter((file) => file.isDirectory())
@@ -131,7 +152,7 @@ async function listPathContent(
   options: any,
   baseUri: string | undefined = undefined,
 ) {
-  const rootPath = uri;
+  const rootPath = safeResolve(uri);
   const files = await fs.promises.readdir(rootPath, { withFileTypes: true });
 
   const promise: Promise<any>[] = files
@@ -188,12 +209,14 @@ async function handleListPathContent(uri: string, options: any) {
 
 async function handleCreateProject(uri: string) {
   // Create a folder at the validated path
-  await fs.promises.mkdir(uri);
+  const safe = safeResolve(uri);
+  await fs.promises.mkdir(safe, { recursive: true });
 }
 
 async function handleDeleteProject(uri: string) {
   // Delete the folder at the validated path
-  await fs.promises.rm(uri, { recursive: true, force: true });
+  const safe = safeResolve(uri);
+  await fs.promises.rm(safe, { recursive: true, force: true });
 }
 
 async function handleUpdateProject(
@@ -203,51 +226,59 @@ async function handleUpdateProject(
     ctime?: Date;
   },
 ) {
-  const newUri = path.join(path.dirname(uri), updatedInfo.name);
-  await fs.promises.rename(uri, newUri);
+  const safeOld = safeResolve(uri);
+  const newPathCandidate = path.join(path.dirname(safeOld), updatedInfo.name);
+  const safeNew = safeResolve(newPathCandidate);
+  await fs.promises.rename(safeOld, safeNew);
 }
 
 async function handleCreateFolder(uri: string) {
   // Create a folder at the validated path
-  await fs.promises.mkdir(uri);
+  const safe = safeResolve(uri);
+  await fs.promises.mkdir(safe, { recursive: true });
 }
 
 async function handleCreateFile(uri: string) {
   // Create a file at the validated path
-  await fs.promises.writeFile(uri, "");
+  const safe = safeResolve(uri);
+  // ensure parent exists
+  await fs.promises.mkdir(path.dirname(safe), { recursive: true });
+  await fs.promises.writeFile(safe, "");
 }
 
 async function handleRename(oldUri: string, newUri: string) {
-  await fs.promises.rename(
-    oldUri,
-    newUri,
-  );
+  const safeOld = safeResolve(oldUri);
+  const safeNew = safeResolve(newUri);
+  await fs.promises.rename(safeOld, safeNew);
 }
 
 async function handleDelete(uri: string) {
-  await fs.promises.rm(uri, {
+  const safe = safeResolve(uri);
+  await fs.promises.rm(safe, {
     recursive: true,
     force: true,
   });
 }
 
 async function handleHasPath(uri: string) {
-  return fs.existsSync(uri);
+  try {
+    const safe = safeResolve(uri);
+    return fs.existsSync(safe);
+  } catch (err) {
+    return false;
+  }
 }
 
 async function handleReadFile(uri: string) {
   // Read the file at validated path
-  const data = await fs.promises.readFile(
-    uri,
-    "utf-8",
-  );
-
+  const safe = safeResolve(uri);
+  const data = await fs.promises.readFile(safe, "utf-8");
   return data;
 }
 
 async function handleWriteFile(data: any, uri: string) {
   // Write the data at validated path
-  const safePath = uri;
+  const safePath = safeResolve(uri);
   // create parent directory if it doesn't exist
   const dir = path.dirname(safePath);
   if (!fs.existsSync(dir)) {
@@ -259,13 +290,9 @@ async function handleWriteFile(data: any, uri: string) {
 
 async function handleCopyFiles(from: string, to: string) {
   // Copy the files from the validated from path to the validated to path
-  await fs.promises.cp(
-    from,
-    to,
-    {
-      recursive: true,
-    },
-  );
+  const safeFrom = safeResolve(from);
+  const safeTo = safeResolve(to);
+  await fs.promises.cp(safeFrom, safeTo, { recursive: true });
 }
 
 async function handleLoadSettings() {

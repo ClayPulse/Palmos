@@ -28,7 +28,13 @@ export default function LoginModal({ signIn }: { signIn: () => void }) {
   return (
     <ModalWrapper
       isOpen={isModelOpen}
-      setIsOpen={setIsModelOpen}
+      setIsOpen={(open: boolean) => {
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isSigningIn: false,
+        }));
+        setIsModelOpen(open);
+      }}
       title={"Access Pulse Editor Workspace"}
       placement={"center"}
     >
