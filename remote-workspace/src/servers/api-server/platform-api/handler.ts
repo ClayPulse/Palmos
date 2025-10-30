@@ -103,7 +103,7 @@ export async function handlePlatformAPIRequest(
     case "get-installation-path":
       return await handleGetInstallationPath();
     case "create-terminal":
-      return `${host}/${instanceId}/terminal/ws`;
+      return `wss://${host}/${instanceId}/terminal/ws`;
     default:
       // Do not reflect input data back to the client, return an explicit error message.
       return { error: "Unknown operation" };
