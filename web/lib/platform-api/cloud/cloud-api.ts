@@ -397,7 +397,7 @@ export class CloudAPI extends AbstractPlatformAPI {
       throw new Error("Failed to create terminal");
     }
 
-    const data = await response.text();
+    const data = await response.json();
     return data;
   }
 }
