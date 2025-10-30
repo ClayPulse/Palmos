@@ -43,8 +43,7 @@ export function useWorkspace() {
 
   async function createWorkspace(
     name: string,
-    cpuLimit: string,
-    memoryLimit: string,
+    specs: string,
     volumeSize: string,
   ) {
     if (!editorContext) {
@@ -66,7 +65,7 @@ export function useWorkspace() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ name, cpuLimit, memoryLimit, volumeSize }),
+      body: JSON.stringify({ name, specs, volumeSize }),
     });
 
     if (!response.ok) {
