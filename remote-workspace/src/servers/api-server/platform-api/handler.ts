@@ -5,8 +5,8 @@ import path from "path";
 // Define a safe root directory for projects. Can be overridden by env or configured as needed.
 // All incoming URIs will be resolved and validated to ensure they don't escape this root.
 
+// Absolute paths
 const appRoot = "/pulse-editor";
-
 const workspaceRoot = "/workspace";
 
 const settingsPath = path.join(appRoot, "settings.json");
@@ -16,16 +16,16 @@ function safeWorkspaceResolve(uri: string): string {
     throw new Error("Invalid path");
   }
 
-  // Canonicalize the workspaceRoot once for this function
-  const rootPath = path.resolve(workspaceRoot);
-  // Combine and normalize the user input relative to the safe root
-  const candidate = path.resolve(uri);
+  // uri should be an absolute path
+  if (!path.isAbsolute(uri)) {
+    throw new Error("Path must be absolute");
+  }
 
   // Check that candidate is strictly under rootPath (or equal to rootPath)
-  const rel = path.relative(rootPath, candidate);
+  const rel = path.relative(workspaceRoot, uri);
   // Allow if candidate is rootPath itself, or a subpath (not escaping via '..', not absolute)
   if (rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel))) {
-    return candidate;
+    return uri;
   }
 
   throw new Error("Can only access paths within the project home directory.");
