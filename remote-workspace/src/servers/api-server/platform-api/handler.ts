@@ -4,7 +4,9 @@ import path from "path";
 
 // Define a safe root directory for projects. Can be overridden by env or configured as needed.
 // All incoming URIs will be resolved and validated to ensure they don't escape this root.
-const SAFE_ROOT = path.resolve(process.env.PLATFORM_API_ROOT ?? "/pulse-editor");
+const SAFE_ROOT = path.resolve(
+  process.env.PLATFORM_API_ROOT ?? "/pulse-editor",
+);
 
 const settingsPath = path.join(SAFE_ROOT, "settings.json");
 
@@ -13,15 +15,14 @@ function safeResolve(uri: string): string {
     throw new Error("Invalid path");
   }
 
-  // Resolve the input and the safe root to absolute, normalized paths.
-  const resolved = path.resolve(uri);
-  const root = SAFE_ROOT;
+  // Canonicalize the SAFE_ROOT once for this function
+  const rootPath = path.resolve(SAFE_ROOT);
+  // Combine and normalize the user input relative to the safe root
+  const candidate = path.resolve(SAFE_ROOT, uri);
 
-  const relative = path.relative(root, resolved);
-
-  // If the relative path starts with '..' or is absolute, it escapes the SAFE_ROOT.
-  if (relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative))) {
-    return resolved;
+  // Check that candidate is strictly under rootPath (or equal to rootPath)
+  if (candidate === rootPath || candidate.startsWith(rootPath + path.sep)) {
+    return candidate;
   }
 
   throw new Error("Can only access paths within the project home directory.");
@@ -130,7 +131,6 @@ export async function handlePlatformAPIRequest(
       return { error: "Unknown operation" };
   }
 }
-
 
 // List all folders in a path
 async function handleListProjects(uri: string) {
