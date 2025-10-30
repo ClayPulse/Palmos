@@ -53,7 +53,10 @@ export async function fetchAPI(
       `${url}. \n\nRequest header: ${JSON.stringify(headerObj)} \n\nNative response: ${JSON.stringify(nativeResponse)} \n\nCookie: ${document.cookie}`,
     );
 
-    const data = JSON.stringify(nativeResponse.data);
+    const data =
+      typeof nativeResponse.data === "string"
+        ? nativeResponse.data
+        : JSON.stringify(nativeResponse.data);
 
     // Convert CapacitorHttpResponse to Fetch Response
     const fetchResponse = new Response(data, {

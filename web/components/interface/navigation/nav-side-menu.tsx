@@ -79,7 +79,7 @@ function MenuPanel({ children }: { children?: React.ReactNode }) {
         </motion.div>
       ) : (
         <motion.div
-          className="absolute z-50 h-full w-full md:hidden"
+          className="absolute top-0 left-0 z-50 h-full w-full md:hidden safe-area-padding"
           initial={{
             y: "-100vh",
           }}

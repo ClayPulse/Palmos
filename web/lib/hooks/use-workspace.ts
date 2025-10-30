@@ -1,9 +1,7 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { PlatformEnum } from "@/lib/enums";
 import { useContext } from "react";
 import useSWR from "swr";
 import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
-import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI } from "../pulse-editor-website/backend";
 import { RemoteWorkspace } from "../types";
 import { useAuth } from "./use-auth";
@@ -48,13 +46,6 @@ export function useWorkspace() {
   ) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
-    } else if (
-      getPlatform() !== PlatformEnum.Web &&
-      getPlatform() !== PlatformEnum.WebMobile
-    ) {
-      throw new Error(
-        "Workspace creation is only supported on the web platform.",
-      );
     } else if (!session) {
       throw new Error("User is not authenticated.");
     }
