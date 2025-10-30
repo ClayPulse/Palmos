@@ -21,7 +21,9 @@ function safeResolve(uri: string): string {
   const candidate = path.resolve(SAFE_ROOT, uri);
 
   // Check that candidate is strictly under rootPath (or equal to rootPath)
-  if (candidate === rootPath || candidate.startsWith(rootPath + path.sep)) {
+  const rel = path.relative(rootPath, candidate);
+  // Allow if candidate is rootPath itself, or a subpath (not escaping via '..', not absolute)
+  if (rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel))) {
     return candidate;
   }
 
