@@ -63,6 +63,10 @@ jobs:
           echo NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL >> ./web/.env
           echo NEXT_PUBLIC_CDN_URL=$NEXT_PUBLIC_CDN_URL >> ./web/.env
           echo NEXT_PUBLIC_STORAGE_CONTAINER=$NEXT_PUBLIC_STORAGE_CONTAINER >> ./web/.env
+        env:
+          NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+          NEXT_PUBLIC_CDN_URL: ${{ vars.NEXT_PUBLIC_CDN_URL }}
+          NEXT_PUBLIC_STORAGE_CONTAINER: ${{ vars.NEXT_PUBLIC_STORAGE_CONTAINER }}
 
       - name: Build Web App
         run: npm run web-build
