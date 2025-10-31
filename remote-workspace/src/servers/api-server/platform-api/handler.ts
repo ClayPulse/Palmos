@@ -12,23 +12,19 @@ const workspaceRoot = "/workspace";
 const settingsPath = path.join(appRoot, "settings.json");
 
 function safeWorkspaceResolve(uri: string): string {
-  if (!uri || typeof uri !== "string") {
-    throw new Error("Invalid path");
+  const absPath = path.isAbsolute(uri)
+    ? path.resolve(uri)
+    : path.resolve(workspaceRoot, uri);
+
+  // Resolve symlinks to their actual paths
+  const realPath = fs.existsSync(absPath) ? fs.realpathSync(absPath) : absPath;
+
+  // Ensure it’s inside the workspace root
+  if (!realPath.startsWith(workspaceRoot + path.sep)) {
+    throw new Error("Cannot access path outside of workspace path.");
   }
 
-  // uri should be an absolute path
-  if (!path.isAbsolute(uri)) {
-    throw new Error("Path must be absolute");
-  }
-
-  // Check that candidate is strictly under rootPath (or equal to rootPath)
-  const rel = path.relative(workspaceRoot, uri);
-  // Allow if candidate is rootPath itself, or a subpath (not escaping via '..', not absolute)
-  if (rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel))) {
-    return uri;
-  }
-
-  throw new Error("Can only access paths within the project home directory.");
+  return realPath;
 }
 
 export async function handlePlatformAPIRequest(
@@ -50,20 +46,20 @@ export async function handlePlatformAPIRequest(
       throw new Error("Method not implemented.");
     case "list-projects": {
       const { uri }: { uri: string } = args;
-      return await handleListProjects(uri);
+      return await handleListProjects(safeWorkspaceResolve(uri));
     }
     case "list-path-content": {
       const { uri, options }: { uri: string; options?: any } = args;
-      return await handleListPathContent(uri, options);
+      return await handleListPathContent(safeWorkspaceResolve(uri), options);
     }
     case "create-project": {
       const { uri }: { uri: string } = args;
-      await handleCreateProject(uri);
+      await handleCreateProject(safeWorkspaceResolve(uri));
       return;
     }
     case "delete-project": {
       const { uri }: { uri: string } = args;
-      await handleDeleteProject(uri);
+      await handleDeleteProject(safeWorkspaceResolve(uri));
       return;
     }
     case "update-project": {
@@ -77,45 +73,51 @@ export async function handlePlatformAPIRequest(
           ctime?: Date;
         };
       } = args;
-      await handleUpdateProject(uri, updatedInfo);
+      await handleUpdateProject(safeWorkspaceResolve(uri), updatedInfo);
       return;
     }
     case "create-folder": {
       const { uri }: { uri: string } = args;
-      await handleCreateFolder(uri);
+      await handleCreateFolder(safeWorkspaceResolve(uri));
       return;
     }
     case "create-file": {
       const { uri }: { uri: string } = args;
-      await handleCreateFile(uri);
+      await handleCreateFile(safeWorkspaceResolve(uri));
       return;
     }
     case "rename": {
       const { oldUri, newUri }: { oldUri: string; newUri: string } = args;
-      await handleRename(oldUri, newUri);
+      await handleRename(
+        safeWorkspaceResolve(oldUri),
+        safeWorkspaceResolve(newUri),
+      );
       return;
     }
     case "delete": {
       const { uri }: { uri: string } = args;
-      await handleDelete(uri);
+      await handleDelete(safeWorkspaceResolve(uri));
       return;
     }
     case "has-path": {
       const { uri }: { uri: string } = args;
-      return await handleHasPath(uri);
+      return await handleHasPath(safeWorkspaceResolve(uri));
     }
     case "read-file": {
       const { uri }: { uri: string } = args;
-      return await handleReadFile(uri);
+      return await handleReadFile(safeWorkspaceResolve(uri));
     }
     case "write-file": {
       const { data, uri }: { data: any; uri: string } = args;
-      await handleWriteFile(data, uri);
+      await handleWriteFile(data, safeWorkspaceResolve(uri));
       return;
     }
     case "copy-files": {
       const { from, to }: { from: string; to: string } = args;
-      await handleCopyFiles(from, to);
+      await handleCopyFiles(
+        safeWorkspaceResolve(from),
+        safeWorkspaceResolve(to),
+      );
       return;
     }
     case "get-persistent-settings":
@@ -137,14 +139,13 @@ export async function handlePlatformAPIRequest(
 
 // List all folders in a path
 async function handleListProjects(uri: string) {
-  const rootPath = safeWorkspaceResolve(uri);
-  const files = await fs.promises.readdir(rootPath, { withFileTypes: true });
+  const files = await fs.promises.readdir(uri, { withFileTypes: true });
   const folders = files
     .filter((file) => file.isDirectory())
     .map((file) => file.name)
     .map((projectName) => ({
       name: projectName,
-      ctime: fs.statSync(path.join(rootPath, projectName)).ctime,
+      ctime: fs.statSync(path.join(uri, projectName)).ctime,
     }));
 
   return folders;
@@ -155,8 +156,7 @@ async function listPathContent(
   options: any,
   baseUri: string | undefined = undefined,
 ) {
-  const rootPath = safeWorkspaceResolve(uri);
-  const files = await fs.promises.readdir(rootPath, { withFileTypes: true });
+  const files = await fs.promises.readdir(uri, { withFileTypes: true });
 
   const promise: Promise<any>[] = files
     // Filter by file type
@@ -183,7 +183,7 @@ async function listPathContent(
     })
     .map(async (file) => {
       const name = file.name;
-      const absoluteUri = path.join(rootPath, name);
+      const absoluteUri = path.join(uri, name);
       if (file.isDirectory()) {
         return {
           name: name,
@@ -212,14 +212,12 @@ async function handleListPathContent(uri: string, options: any) {
 
 async function handleCreateProject(uri: string) {
   // Create a folder at the validated path
-  const safe = safeWorkspaceResolve(uri);
-  await fs.promises.mkdir(safe, { recursive: true });
+  await fs.promises.mkdir(uri, { recursive: true });
 }
 
 async function handleDeleteProject(uri: string) {
   // Delete the folder at the validated path
-  const safe = safeWorkspaceResolve(uri);
-  await fs.promises.rm(safe, { recursive: true, force: true });
+  await fs.promises.rm(uri, { recursive: true, force: true });
 }
 
 async function handleUpdateProject(
@@ -229,35 +227,34 @@ async function handleUpdateProject(
     ctime?: Date;
   },
 ) {
-  const safeOld = safeWorkspaceResolve(uri);
-  const newPathCandidate = path.join(path.dirname(safeOld), updatedInfo.name);
-  const safeNew = safeWorkspaceResolve(newPathCandidate);
-  await fs.promises.rename(safeOld, safeNew);
+  // Make sure updatedInfo.name is valid name, not a path
+  if (path.basename(updatedInfo.name) !== updatedInfo.name) {
+    throw new Error("Invalid project name");
+  }
+
+  // Rename the project folder
+  const newUri = path.join(path.dirname(uri), updatedInfo.name);
+  await fs.promises.rename(uri, newUri);
 }
 
 async function handleCreateFolder(uri: string) {
   // Create a folder at the validated path
-  const safe = safeWorkspaceResolve(uri);
-  await fs.promises.mkdir(safe, { recursive: true });
+  await fs.promises.mkdir(uri, { recursive: true });
 }
 
 async function handleCreateFile(uri: string) {
   // Create a file at the validated path
-  const safe = safeWorkspaceResolve(uri);
   // ensure parent exists
-  await fs.promises.mkdir(path.dirname(safe), { recursive: true });
-  await fs.promises.writeFile(safe, "");
+  await fs.promises.mkdir(path.dirname(uri), { recursive: true });
+  await fs.promises.writeFile(uri, "");
 }
 
 async function handleRename(oldUri: string, newUri: string) {
-  const safeOld = safeWorkspaceResolve(oldUri);
-  const safeNew = safeWorkspaceResolve(newUri);
-  await fs.promises.rename(safeOld, safeNew);
+  await fs.promises.rename(oldUri, newUri);
 }
 
 async function handleDelete(uri: string) {
-  const safe = safeWorkspaceResolve(uri);
-  await fs.promises.rm(safe, {
+  await fs.promises.rm(uri, {
     recursive: true,
     force: true,
   });
@@ -265,8 +262,7 @@ async function handleDelete(uri: string) {
 
 async function handleHasPath(uri: string) {
   try {
-    const safe = safeWorkspaceResolve(uri);
-    return fs.existsSync(safe);
+    return fs.existsSync(uri);
   } catch (err) {
     return false;
   }
@@ -274,28 +270,24 @@ async function handleHasPath(uri: string) {
 
 async function handleReadFile(uri: string) {
   // Read the file at validated path
-  const safe = safeWorkspaceResolve(uri);
-  const data = await fs.promises.readFile(safe, "utf-8");
+  const data = await fs.promises.readFile(uri, "utf-8");
   return data;
 }
 
 async function handleWriteFile(data: any, uri: string) {
   // Write the data at validated path
-  const safePath = safeWorkspaceResolve(uri);
   // create parent directory if it doesn't exist
-  const dir = path.dirname(safePath);
+  const dir = path.dirname(uri);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  fs.writeFileSync(safePath, data);
+  fs.writeFileSync(uri, data);
 }
 
 async function handleCopyFiles(from: string, to: string) {
   // Copy the files from the validated from path to the validated to path
-  const safeFrom = safeWorkspaceResolve(from);
-  const safeTo = safeWorkspaceResolve(to);
-  await fs.promises.cp(safeFrom, safeTo, { recursive: true });
+  await fs.promises.cp(from, to, { recursive: true });
 }
 
 async function handleLoadSettings() {
