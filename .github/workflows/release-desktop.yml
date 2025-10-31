@@ -30,6 +30,17 @@ jobs:
       - name: Build shared-utils
         run: npm run shared-utils-build
 
+      - name: Save public env variables into .env file
+        shell: bash
+        run: |
+          echo NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL >> ./web/.env
+          echo NEXT_PUBLIC_CDN_URL=$NEXT_PUBLIC_CDN_URL >> ./web/.env
+          echo NEXT_PUBLIC_STORAGE_CONTAINER=$NEXT_PUBLIC_STORAGE_CONTAINER >> ./web/.env
+        env:
+          NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+          NEXT_PUBLIC_CDN_URL: ${{ vars.NEXT_PUBLIC_CDN_URL }}
+          NEXT_PUBLIC_STORAGE_CONTAINER: ${{ vars.NEXT_PUBLIC_STORAGE_CONTAINER }}
+
       - name: Install web dependencies
         run: npm install --workspace=web
 
@@ -40,16 +51,6 @@ jobs:
       - name: Rebuild native modules
         run: npm run rebuild-native
         working-directory: desktop
-
-      - name: Save public env variables into .env file
-        run: |
-          echo NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL >> ./web/.env
-          echo NEXT_PUBLIC_CDN_URL=$NEXT_PUBLIC_CDN_URL >> ./web/.env
-          echo NEXT_PUBLIC_STORAGE_CONTAINER=$NEXT_PUBLIC_STORAGE_CONTAINER >> ./web/.env
-        env:
-          NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
-          NEXT_PUBLIC_CDN_URL: ${{ vars.NEXT_PUBLIC_CDN_URL }}
-          NEXT_PUBLIC_STORAGE_CONTAINER: ${{ vars.NEXT_PUBLIC_STORAGE_CONTAINER }}
 
       - name: Build Electron App
         run: |
