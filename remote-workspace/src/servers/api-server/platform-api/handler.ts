@@ -19,8 +19,12 @@ function safeWorkspaceResolve(uri: string): string {
   // Resolve symlinks to their actual paths
   const realPath = fs.existsSync(absPath) ? fs.realpathSync(absPath) : absPath;
 
-  // Ensure it’s inside the workspace root
-  if (!realPath.startsWith(workspaceRoot + path.sep)) {
+  // Ensure it's inside the workspace root (strict, cross-platform)
+  const rel = path.relative(workspaceRoot, realPath);
+  if (
+    rel.startsWith('..') ||
+    path.isAbsolute(rel)
+  ) {
     throw new Error("Cannot access path outside of workspace path.");
   }
 
