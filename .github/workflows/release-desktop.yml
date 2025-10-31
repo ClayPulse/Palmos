@@ -41,6 +41,12 @@ jobs:
         run: npm run rebuild-native
         working-directory: desktop
 
+      - name: Save public env variables into .env file
+        run: |
+          echo NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL >> ./web/.env
+          echo NEXT_PUBLIC_CDN_URL=$NEXT_PUBLIC_CDN_URL >> ./web/.env
+          echo NEXT_PUBLIC_STORAGE_CONTAINER=$NEXT_PUBLIC_STORAGE_CONTAINER >> ./web/.env
+
       - name: Build Electron App
         run: |
           npm run desktop-build
