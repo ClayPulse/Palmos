@@ -34,6 +34,7 @@ jobs:
         run: npm run shared-utils-build
 
       - name: Save public env variables into .env file
+        shell: bash
         run: |
           echo NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL >> ./web/.env
           echo NEXT_PUBLIC_CDN_URL=$NEXT_PUBLIC_CDN_URL >> ./web/.env
