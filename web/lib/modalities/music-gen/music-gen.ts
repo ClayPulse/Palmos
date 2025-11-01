@@ -130,6 +130,9 @@ export function getMusicGenModel(
           body: JSON.stringify({
             token: apiKey,
           }),
+          headers: {
+            "Content-Type": "application/json",
+          },
         },
       );
       console.log("Fetching prediction status:", prediction.id);

@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
       enabled: true,
     },
     CapacitorHttp: {
-      enabled: true,
+      enabled: false,
     },
   },
 };

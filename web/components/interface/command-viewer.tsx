@@ -295,7 +295,7 @@ export default function CommandViewer() {
 
   return (
     <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2">
-      <div className="flex max-h-[calc(100vh-100px)] flex-col items-center gap-y-1">
+      <div className="flex max-h-[calc(100vh-140px)] flex-col items-center gap-y-1">
         <Input
           className="w-80"
           classNames={{
@@ -356,7 +356,7 @@ export default function CommandViewer() {
         />
 
         {history.length > 0 && (
-          <div className="bg-content1 flex w-[480px] flex-col overflow-y-hidden rounded-2xl px-2 pt-2 shadow-md">
+          <div className="bg-content1 flex w-full sm:w-[480px] flex-col overflow-y-hidden rounded-2xl px-2 pt-2 shadow-md">
             <div
               className="flex flex-col gap-y-2 overflow-y-auto pb-2"
               ref={historyRef}

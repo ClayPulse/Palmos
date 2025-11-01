@@ -38,6 +38,9 @@ export async function runAgentMethodCloud(
     {
       method: "POST",
       body: JSON.stringify({ prompt }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     },
   );
 

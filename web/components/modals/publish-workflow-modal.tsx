@@ -58,6 +58,9 @@ export default function PublishWorkflowModal({
       await fetchAPI("/api/workflow/publish", {
         method: "POST",
         body: JSON.stringify({ ...workflow }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
 
       addToast({

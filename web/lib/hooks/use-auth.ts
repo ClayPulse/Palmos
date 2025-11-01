@@ -77,8 +77,7 @@ export function useAuth() {
           possibly after other hooks are fired.
         */
         if (!token.value) {
-          // CapacitorCookies.clearAllCookies();
-          CapacitorCookies.deleteCookie({
+          await CapacitorCookies.deleteCookie({
             key: "pulse-editor.session-token",
             url: process.env.NEXT_PUBLIC_BACKEND_URL,
           });
@@ -94,6 +93,17 @@ export function useAuth() {
 
     refreshSession();
   }, [editorContext?.editorStates.isRefreshSession]);
+
+  // Set is login status in Preferences in Capacitor if logged in
+  useEffect(() => {
+    if (getPlatform() === PlatformEnum.Capacitor) {
+      const isLoggedIn = session !== undefined;
+      Preferences.set({
+        key: "pulse-editor.is-logged-in",
+        value: isLoggedIn ? "true" : "false",
+      });
+    }
+  }, [session]);
 
   // Open a sign-in page if the user is not signed in.
   async function signIn() {

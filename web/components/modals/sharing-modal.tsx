@@ -73,6 +73,9 @@ export default function SharingModal({
         visibility,
         name: app,
       }),
+      headers: {
+        "Content-Type": "application/json",
+      },
     });
 
     mutate();
