@@ -79,7 +79,7 @@ jobs:
         working-directory: mobile
 
       - name: Build Capacitor App
-        run: npx cap build android --keystorepath ~/.keystore/pulse-editor.keystore --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --androidreleasetype APK
+        run: npx cap build android --keystorepath ~/.keystore/pulse-editor.keystore --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --keystorealias ${{ secrets.ANDROID_KEYSTORE_ALIAS }} --keystorealiaspass ${{ secrets.ANDROID_KEYSTORE_ALIAS_PASS }} --androidreleasetype APK
         working-directory: mobile
 
       - name: Move APK
