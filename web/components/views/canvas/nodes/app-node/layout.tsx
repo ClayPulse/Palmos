@@ -1,13 +1,8 @@
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import BaseAppView from "@/components/views/base/base-app-view";
-import { DragEventTypeEnum } from "@/lib/enums";
-import {
-  AppDragData,
-  AppNodeData,
-  AppViewConfig,
-  ExtensionApp,
-} from "@/lib/types";
+import { AppNodeData, EditorContextType } from "@/lib/types";
+import { useDroppable } from "@dnd-kit/core";
 import {
   addToast,
   Button,
@@ -19,7 +14,7 @@ import {
   SelectItem,
   Tooltip,
 } from "@heroui/react";
-import { Action, ViewModel } from "@pulse-editor/shared-utils";
+import { Action, TypedVariable } from "@pulse-editor/shared-utils";
 import {
   NodeResizeControl,
   NodeResizer,
@@ -31,7 +26,6 @@ import {
 } from "@xyflow/react";
 import clsx from "clsx";
 import { useContext, useEffect, useState } from "react";
-import { v4 } from "uuid";
 import NodeHandle from "./node-handle";
 
 export default function CanvasNodeViewLayout({
@@ -79,12 +73,7 @@ export default function CanvasNodeViewLayout({
   }
 
   return (
-    <div
-      className="relative h-full w-full"
-      onDragOver={(e) => {
-        e.stopPropagation();
-      }}
-    >
+    <div className="relative h-full w-full">
       {/* Control */}
       <div className="absolute -top-1.5 z-40 flex w-full justify-center">
         <div
@@ -121,100 +110,16 @@ export default function CanvasNodeViewLayout({
         <>
           <div className="pointer-events-none absolute top-0 h-full -translate-x-[100%]">
             {isShowingWorkflowConnector && (
-              <div className="relative flex h-full w-full flex-col items-end justify-center gap-y-1">
+              <div className="pointer-events-none relative flex h-full w-full flex-col items-end justify-center gap-y-1">
                 {Object.entries(selectedAction?.parameters ?? {}).map(
                   ([paramName, param]) => (
-                    <div
+                    <InputHandle
                       key={paramName}
-                      onDragOver={(e) => {
-                        e.stopPropagation();
-                        if (param.type !== "app-instance") {
-                          return;
-                        }
-                        const types = e.dataTransfer.types;
-                        if (
-                          types.includes(
-                            `application/${DragEventTypeEnum.App.toLowerCase()}`,
-                          )
-                        ) {
-                          e.preventDefault();
-                          e.dataTransfer.dropEffect = "link";
-                        }
-                      }}
-                      onDrop={async (e) => {
-                        const dataText = e.dataTransfer.getData(
-                          `application/${DragEventTypeEnum.App.toLowerCase()}`,
-                        );
-                        if (!dataText) {
-                          return;
-                        }
-                        console.log("Dropped item:", dataText);
-                        try {
-                          const data = JSON.parse(dataText) as AppDragData;
-                          e.stopPropagation();
-                          e.preventDefault();
-
-                          const app: ExtensionApp = data.app;
-                          const config: AppViewConfig = {
-                            app: app.config.id,
-                            viewId: `${app.config.id}-${v4()}`,
-                            recommendedHeight: app.config.recommendedHeight,
-                            recommendedWidth: app.config.recommendedWidth,
-                          };
-
-                          updateNodeData(viewId, {
-                            ownedAppViews: {
-                              ...node.data.ownedAppViews,
-                              [paramName]: {
-                                viewId: config.viewId,
-                                appConfig: app.config,
-                              },
-                            } as Record<string, ViewModel>,
-                          });
-                        } catch (error) {
-                          addToast({
-                            title: "Failed to link app",
-                            description: "The dropped app data is invalid.",
-                            color: "danger",
-                          });
-                        }
-                      }}
-                      className="pointer-events-auto"
-                    >
-                      {param.type === "app-instance" ? (
-                        <Button
-                          className="data-[exist-app=true]:border-success data-[exist-app=true]:bg-success/30 h-fit rounded-r-none data-[exist-app=true]:border-2"
-                          onPress={() => {
-                            editorContext?.setEditorStates((prev) => ({
-                              ...prev,
-                              isSideMenuOpen: true,
-                            }));
-                          }}
-                          data-exist-app={
-                            node.data.ownedAppViews[paramName]
-                              ? "true"
-                              : "false"
-                          }
-                        >
-                          <div className="py-2 text-center">
-                            <p>{paramName}</p>
-                            <p>(app-instance)</p>
-                            {node.data.ownedAppViews[paramName] ? (
-                              <p>{node.data.ownedAppViews[paramName].viewId}</p>
-                            ) : (
-                              <p>Tip: drag app here</p>
-                            )}
-                          </div>
-                        </Button>
-                      ) : (
-                        <NodeHandle
-                          id={paramName}
-                          param={param}
-                          position={Position.Left}
-                          type="target"
-                        />
-                      )}
-                    </div>
+                      paramName={paramName}
+                      param={param}
+                      editorContext={editorContext}
+                      node={node}
+                    />
                   ),
                 )}
               </div>
@@ -224,7 +129,7 @@ export default function CanvasNodeViewLayout({
           {/* Output Handles */}
           <div className="pointer-events-none absolute top-0 right-0 h-full translate-x-[100%]">
             {isShowingWorkflowConnector && (
-              <div className="relative flex h-full w-full flex-col justify-center gap-y-1">
+              <div className="pointer-events-none relative flex h-full w-full flex-col justify-center gap-y-1">
                 {Object.entries(selectedAction?.returns ?? {}).map(
                   ([key, param]) => (
                     <NodeHandle
@@ -478,5 +383,82 @@ function CanvasNodeControl({
         </Button>
       </Tooltip>
     </div>
+  );
+}
+
+function InputHandle({
+  paramName,
+  param,
+  editorContext,
+  node,
+}: {
+  paramName: string;
+  param: TypedVariable;
+  editorContext: EditorContextType | undefined;
+  node: ReactFlowNode<AppNodeData>;
+}) {
+  if (param.type === "app-instance") {
+    return (
+      <div className="pointer-events-auto">
+        <DroppableInputHandle
+          paramName={paramName}
+          node={node}
+          editorContext={editorContext}
+        />
+      </div>
+    );
+  } else {
+    return (
+      <NodeHandle
+        id={paramName}
+        param={param}
+        position={Position.Left}
+        type="target"
+      />
+    );
+  }
+}
+
+function DroppableInputHandle({
+  paramName,
+  node,
+  editorContext,
+}: {
+  paramName: string;
+  node: ReactFlowNode<AppNodeData>;
+  editorContext: EditorContextType | undefined;
+}) {
+  const { setNodeRef, isOver } = useDroppable({
+    id: `node-handle-input-${node.id}-${paramName}`,
+    data: {
+      viewId: node.id,
+      node,
+      paramName,
+    },
+  });
+
+  return (
+    <Button
+      className="data-[exist-app=true]:border-success data-[exist-app=true]:bg-success/30 data-[is-over=true]:aura h-fit rounded-r-none data-[exist-app=true]:border-2"
+      onPress={() => {
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          isSideMenuOpen: true,
+        }));
+      }}
+      data-exist-app={node.data.ownedAppViews[paramName] ? "true" : "false"}
+      ref={setNodeRef}
+      data-is-over={isOver ? "true" : "false"}
+    >
+      <div className="py-2 text-center">
+        <p>{paramName}</p>
+        <p>(app-instance)</p>
+        {node.data.ownedAppViews[paramName] ? (
+          <p>{node.data.ownedAppViews[paramName].viewId}</p>
+        ) : (
+          <p>Tip: drag app here</p>
+        )}
+      </div>
+    </Button>
   );
 }

@@ -97,6 +97,7 @@ export type EditorStates = {
 
   // Drag control
   isDraggingOverCanvas?: boolean;
+  dropMessage?: string;
 };
 
 /**
@@ -378,6 +379,11 @@ export type FileDragData = {
 
 export type AppDragData = {
   app: ExtensionApp;
+};
+
+export type DragData = {
+  type: "file" | "app";
+  data: FileDragData | AppDragData;
 };
 // #endregion
 

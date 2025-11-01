@@ -1,19 +1,17 @@
 import PublishWorkflowModal from "@/components/modals/publish-workflow-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { DragEventTypeEnum } from "@/lib/enums";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import {
-  AppDragData,
   AppInfoModalContent,
   AppNodeData,
   AppViewConfig,
   CanvasViewConfig,
-  ExtensionApp,
 } from "@/lib/types";
-import { addToast, Button } from "@heroui/react";
+import { useDroppable } from "@dnd-kit/core";
+import { Button } from "@heroui/react";
 import {
   addEdge,
   applyEdgeChanges,
@@ -40,7 +38,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { v4 } from "uuid";
 import Icon from "../../misc/icon";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
@@ -88,8 +85,7 @@ export default function CanvasView({
   } = useCanvasWorkflow(config.initialWorkflowContent);
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
-  const { deleteAppViewInCanvasView, createAppViewInCanvasView } =
-    useTabViewManager();
+  const { deleteAppViewInCanvasView } = useTabViewManager();
 
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
@@ -212,6 +208,14 @@ export default function CanvasView({
     isActive,
   );
 
+  const { setNodeRef, isOver, active } = useDroppable({
+    id: "canvas-view-" + config.viewId,
+  });
+
+  useEffect(() => {
+    console.log("CanvasView active droppable:", active);
+  }, [active]);
+
   // Promote nodes to workflow nodes,
   // or remove workflow nodes that are no longer in the config
   useEffect(() => {
@@ -298,99 +302,68 @@ export default function CanvasView({
 
   return (
     <div
-      ref={containerRef}
-      className="bg-content3 text-content3-foreground relative h-full w-full"
+      ref={setNodeRef}
       id={config.viewId}
-      onDragOver={(e) => {
-        const types = e.dataTransfer.types;
-        if (
-          types.includes(`application/${DragEventTypeEnum.App.toLowerCase()}`)
-        ) {
-          e.preventDefault(); // allow drop
-          e.dataTransfer.dropEffect = "copy";
-        } else {
-          e.dataTransfer.dropEffect = "none";
-        }
-      }}
-      onDrop={(e) => {
-        const dataText = e.dataTransfer.getData(
-          `application/${DragEventTypeEnum.App.toLowerCase()}`,
-        );
-        if (!dataText) {
-          return;
-        }
-        console.log("Dropped item:", dataText);
-        try {
-          const data = JSON.parse(dataText) as AppDragData;
-          e.preventDefault();
-
-          const app: ExtensionApp = data.app;
-          const config: AppViewConfig = {
-            app: app.config.id,
-            viewId: `${app.config.id}-${v4()}`,
-            recommendedHeight: app.config.recommendedHeight,
-            recommendedWidth: app.config.recommendedWidth,
-          };
-          createAppViewInCanvasView(config);
-        } catch (error) {
-          addToast({
-            title: "Failed to open app",
-            description: "The dropped app data is invalid.",
-            color: "danger",
-          });
-        }
+      className="bg-content3 text-content3-foreground h-full w-full"
+      style={{
+        opacity:
+          isOver && active?.id.toString().startsWith("draggable-app-")
+            ? 0.5
+            : 1,
       }}
     >
-      <ReactFlow
-        nodes={localNodes ?? []}
-        edges={localEdges ?? []}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        fitView
-        proOptions={{
-          hideAttribution: true,
-        }}
-        nodeTypes={{
-          appNode: createAppNode,
-        }}
-        deleteKeyCode={["Delete", "Backspace"]}
-        onDelete={onDelete}
-        onReconnect={onReconnect}
-        defaultEdgeOptions={{
-          markerEnd: {
-            type: "arrowclosed",
-          },
-          style: {
-            strokeWidth: 2,
-          },
-        }}
-        maxZoom={4}
-        minZoom={0.1}
-        colorMode={resolvedTheme === "dark" ? "dark" : "light"}
-      >
-        <Background id={config.viewId} variant={BackgroundVariant.Dots} />
-      </ReactFlow>
-      <Button
-        isIconOnly
-        className="absolute right-2 bottom-2"
-        variant="light"
-        onPress={() => {
-          openAppInfoModal(appInfo);
-        }}
-      >
-        <Icon name="info" />
-      </Button>
+      <div ref={containerRef} className="relative h-full w-full">
+        <ReactFlow
+          nodes={localNodes ?? []}
+          edges={localEdges ?? []}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          fitView
+          proOptions={{
+            hideAttribution: true,
+          }}
+          nodeTypes={{
+            appNode: createAppNode,
+          }}
+          deleteKeyCode={["Delete", "Backspace"]}
+          onDelete={onDelete}
+          onReconnect={onReconnect}
+          defaultEdgeOptions={{
+            markerEnd: {
+              type: "arrowclosed",
+            },
+            style: {
+              strokeWidth: 2,
+            },
+          }}
+          maxZoom={4}
+          minZoom={0.1}
+          colorMode={resolvedTheme === "dark" ? "dark" : "light"}
+        >
+          <Background id={config.viewId} variant={BackgroundVariant.Dots} />
+        </ReactFlow>
+        <Button
+          isIconOnly
+          className="absolute right-2 bottom-2"
+          variant="light"
+          onPress={() => {
+            openAppInfoModal(appInfo);
+          }}
+        >
+          <Icon name="info" />
+        </Button>
 
-      <PublishWorkflowModal
-        isOpen={isPublishModalOpen}
-        setIsOpen={setIsPublishModalOpen}
-        workflowCanvas={containerRef.current}
-        localNodes={localNodes}
-        localEdges={localEdges}
-        entryPoint={entryPoint}
-        saveAppsSnapshotStates={saveAppsSnapshotStates}
-      />
+        <PublishWorkflowModal
+          isOpen={isPublishModalOpen}
+          setIsOpen={setIsPublishModalOpen}
+          workflowCanvas={containerRef.current}
+          localNodes={localNodes}
+          localEdges={localEdges}
+          entryPoint={entryPoint}
+          saveAppsSnapshotStates={saveAppsSnapshotStates}
+        />
+      </div>
     </div>
   );
 }

@@ -18,6 +18,22 @@ export async function fetchAPI(
     the cookies are set in the webview automatically.
   */
   if (getPlatform() === PlatformEnum.Capacitor) {
+    // Fallback to web fetch if session is available for
+    // better performance and streaming support.
+    // However, do not use web fetch for session endpoint.
+    if (relativeUrl.toString() !== "/api/auth/session") {
+      const isLoggedInPref = await Preferences.get({
+        key: "pulse-editor.is-logged-in",
+      });
+      const hasSession = isLoggedInPref.value === "true";
+      if (hasSession) {
+        return await fetch(url, {
+          credentials: "include",
+          ...options,
+        });
+      }
+    }
+
     // attach cookie manually
     const tokenPref = await Preferences.get({
       key: "pulse-editor.session-token",
@@ -32,7 +48,11 @@ export async function fetchAPI(
     if (token) {
       headers.append(
         "Cookie",
-        `pulse-editor.session-token=${token}; Path=/; Expires=${exp}; SameSite=None; Secure; ${process.env.NEXT_PUBLIC_BACKEND_URL ? "Domain=" + new URL(process.env.NEXT_PUBLIC_BACKEND_URL).hostname : ""}`,
+        `pulse-editor.session-token=${token}; Path=/; Expires=${exp}; SameSite=None; Secure; ${
+          process.env.NEXT_PUBLIC_BACKEND_URL
+            ? "Domain=" + new URL(process.env.NEXT_PUBLIC_BACKEND_URL).hostname
+            : ""
+        }`,
       );
       options = {
         ...options,
@@ -47,23 +67,42 @@ export async function fetchAPI(
       method: options?.method ?? "GET",
       headers: headerObj,
       data: options?.body,
+      responseType: "text", // 👈 helps handle binary/stream responses
     });
 
-    console.log(
-      `${url}. \n\nRequest header: ${JSON.stringify(headerObj)} \n\nNative response: ${JSON.stringify(nativeResponse)} \n\nCookie: ${document.cookie}`,
-    );
+    let body: BodyInit | undefined;
 
-    const data =
-      typeof nativeResponse.data === "string"
-        ? nativeResponse.data
-        : JSON.stringify(nativeResponse.data);
+    if (nativeResponse.data instanceof Blob) {
+      // Handle binary/stream responses
+      body = nativeResponse.data;
+    } else if (typeof nativeResponse.data === "string") {
+      // Regular text response
+      body = nativeResponse.data;
+    } else if (nativeResponse.data && typeof nativeResponse.data === "object") {
+      // JSON response
+      body = JSON.stringify(nativeResponse.data);
+    } else if (nativeResponse.data?.stream) {
+      // 👇 Handle custom stream-like responses
+      const reader = nativeResponse.data.stream.getReader();
+      const stream = new ReadableStream({
+        async pull(controller) {
+          const { done, value } = await reader.read();
+          if (done) {
+            controller.close();
+          } else {
+            controller.enqueue(value);
+          }
+        },
+      });
+      body = stream;
+    } else {
+      body = undefined;
+    }
 
-    // Convert CapacitorHttpResponse to Fetch Response
-    const fetchResponse = new Response(data, {
+    const fetchResponse = new Response(body, {
       status: nativeResponse.status,
       headers: nativeResponse.headers,
     });
-
     return fetchResponse;
   }
 

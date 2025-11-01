@@ -1,7 +1,6 @@
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { ReactFlowProvider } from "@xyflow/react";
 import { useSearchParams } from "next/navigation";
 import { useContext, useEffect, useRef, useState } from "react";
 import { v4 } from "uuid";
@@ -81,23 +80,23 @@ export default function ViewArea() {
   }, [tabViews]);
 
   return (
-    <div className="w-full h-full">
+    <div className="h-full w-full">
       {tabViews.length === 0 ? (
         <HomeView />
       ) : tabIndex < 0 || tabIndex >= tabViews.length ? (
         <div>No view selected</div>
       ) : (
         <div
-          className="relative grid h-full w-full grid-rows-1 gap-y-0.5 data-[is-show-tabs=true]:data-[type=app]:grid-rows-[max-content_auto] data-[is-show-tabs=false]:data-[type=app]:pt-17"
+          className="relative grid h-full w-full grid-rows-1 gap-y-0.5 data-[is-show-tabs=false]:data-[type=app]:pt-17 data-[is-show-tabs=true]:data-[type=app]:grid-rows-[max-content_auto]"
           data-is-show-tabs={isShowTabs}
           data-type={activeTabView?.type}
         >
           {isShowTabs && (
             <div
-              className="data-[type=canvas]:absolute pt-17 px-2 w-full z-20"
+              className="z-20 w-full px-2 pt-17 data-[type=canvas]:absolute"
               data-type={activeTabView?.type}
             >
-              <div className="border-default-border bg-content2 w-full rounded-lg shadow-md py-0.5">
+              <div className="border-default-border bg-content2 w-full rounded-lg py-0.5 shadow-md">
                 <Tabs
                   tabItems={tabItems}
                   selectedItem={
@@ -135,19 +134,23 @@ export default function ViewArea() {
                     config={tabView.config as AppViewConfig}
                   />
                 ) : tabView.type === ViewModeEnum.Canvas ? (
-                  <ReactFlowProvider>
-                    <MemoizedCanvasView
-                      config={tabView.config as CanvasViewConfig}
-                      isActive={idx === tabIndex}
-                      tabName={tabItems[idx]?.name}
-                    />
-                  </ReactFlowProvider>
+                  <MemoizedCanvasView
+                    config={tabView.config as CanvasViewConfig}
+                    isActive={idx === tabIndex}
+                    tabName={tabItems[idx]?.name}
+                  />
                 ) : (
                   <div>Unknown view type</div>
                 )}
               </div>
             ))}
           </div>
+
+          {editorContext?.editorStates.dropMessage && (
+            <div className="absolute top-16 z-40 w-full text-center">
+              {editorContext?.editorStates.dropMessage}
+            </div>
+          )}
         </div>
       )}
     </div>

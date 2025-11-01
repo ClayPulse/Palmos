@@ -2,11 +2,11 @@ import BaseAppLoader from "@/components/app-loaders/base-app-loader";
 import Loading from "@/components/interface/status-screens/loading";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
-import { DragEventTypeEnum, PlatformEnum } from "@/lib/enums";
+import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { ExtensionApp, FileDragData } from "@/lib/types";
-import { addToast } from "@heroui/react";
+import { ExtensionApp } from "@/lib/types";
+import { useDroppable } from "@dnd-kit/core";
 import {
   ConnectionListener,
   IMCMessage,
@@ -32,6 +32,16 @@ export default function SandboxAppLoader({
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
+  const { resolvedTheme } = useTheme();
+  const { platformApi } = usePlatformApi();
+
+  const { setNodeRef } = useDroppable({
+    id: "app-node-view-" + viewModel.viewId,
+    data: {
+      viewId: viewModel.viewId,
+    },
+  });
+
   const [currentExtension, setCurrentExtension] = useState<
     ExtensionApp | undefined
   >();
@@ -47,9 +57,6 @@ export default function SandboxAppLoader({
   const clRef = useRef<ConnectionListener | null>(null);
   // const [isConnected, setIsConnected] = useState<boolean>(false);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-
-  const { resolvedTheme } = useTheme();
-  const { platformApi } = usePlatformApi();
 
   // Update view Id when the view model changes
   useEffect(() => {
@@ -136,13 +143,6 @@ export default function SandboxAppLoader({
       }
     };
   }, []);
-
-  useEffect(() => {
-    console.log(
-      "Is dragging over canvas: ",
-      editorContext?.editorStates.isDraggingOverCanvas,
-    );
-  }, [editorContext?.editorStates.isDraggingOverCanvas]);
 
   // Set is loading extension to true when current extension changes
   useEffect(() => {
@@ -316,48 +316,7 @@ export default function SandboxAppLoader({
   return (
     <div
       className="relative h-full w-full"
-      onDragOver={(e) => {
-        e.stopPropagation();
-        const types = e.dataTransfer.types;
-        if (
-          types.includes(`application/${DragEventTypeEnum.File.toLowerCase()}`)
-        ) {
-          e.preventDefault(); // allow drop
-          e.dataTransfer.dropEffect = "move";
-        } else {
-          e.dataTransfer.dropEffect = "none";
-        }
-      }}
-      onDrop={async (e) => {
-        const dataText = e.dataTransfer.getData(
-          `application/${DragEventTypeEnum.File.toLowerCase()}`,
-        );
-        if (!dataText) {
-          return;
-        }
-        console.log("Dropped item:", dataText);
-        try {
-          const data = JSON.parse(dataText) as FileDragData;
-
-          e.preventDefault();
-          const uri = data.uri;
-
-          // Send uri to app view
-          await imcContext?.polyIMC?.sendMessage(
-            viewModel.viewId,
-            IMCMessageTypeEnum.EditorAppReceiveFileUri,
-            {
-              uri,
-            },
-          );
-        } catch (error) {
-          addToast({
-            title: "Failed to open file",
-            description: "The dropped file data is invalid.",
-            color: "danger",
-          });
-        }
-      }}
+      ref={setNodeRef}
     >
       {isLookingForExtension ? (
         <div className="bg-content1 h-full w-full">

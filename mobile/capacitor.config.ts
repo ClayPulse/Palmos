@@ -1,7 +1,7 @@
 import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
-  appId: "com.pulse.app",
+  appId: "com.pulse_editor.app",
   appName: "Pulse Editor",
   webDir: "../build/next",
   android: {
@@ -18,7 +18,7 @@ const config: CapacitorConfig = {
       enabled: true,
     },
     CapacitorHttp: {
-      enabled: true,
+      enabled: false,
     },
   },
 };

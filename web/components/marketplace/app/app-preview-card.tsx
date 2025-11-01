@@ -10,7 +10,10 @@ import {
 } from "@/lib/module-federation/version";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState, ExtensionApp } from "@/lib/types";
+import { DraggableAttributes } from "@dnd-kit/core";
+import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import {
+  addToast,
   Button,
   Chip,
   Skeleton,
@@ -31,14 +34,22 @@ export default function AppPreviewCard({
   isShowUninstallButton = true,
   isShowUseButton = false,
   isShowCompatibleChip = true,
+  isShowContextMenu = true,
+  isDisableButtonPress = false,
   onPress,
+  attributes,
+  listeners,
 }: {
   extension: ExtensionApp;
   isShowInstalledChip?: boolean;
   isShowUninstallButton?: boolean;
   isShowUseButton?: boolean;
   isShowCompatibleChip?: boolean;
+  isShowContextMenu?: boolean;
+  isDisableButtonPress?: boolean;
   onPress?: (ext: ExtensionApp) => void;
+  attributes?: DraggableAttributes;
+  listeners?: SyntheticListenerMap;
 }) {
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -154,9 +165,9 @@ export default function AppPreviewCard({
   }
 
   return (
-    <div className="w-full h-full grid grid-rows-[auto_max-content_max-content] grid-cols-1">
+    <div className="grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content]">
       <div
-        className="relative h-full w-full min-h-32"
+        className="relative h-full min-h-32 w-full"
         onMouseEnter={() => {
           if (getPlatform() !== PlatformEnum.Capacitor) {
             setIsShowInfo(true);
@@ -169,107 +180,133 @@ export default function AppPreviewCard({
           }
         }}
       >
-        <div className="absolute top-0 right-0.5 z-10">
-          <div className="flex flex-col items-end">
+        <div className="pointer-events-none absolute top-0 right-0.5 z-10">
+          <div className="pointer-events-none flex flex-col items-end">
             {isShowInstalledChip && isInstalled && (
-              <Chip startContent={<Icon name="save_alt" />} variant="faded">
-                Installed
-              </Chip>
+              <div className="pointer-events-auto">
+                <Chip startContent={<Icon name="save_alt" />} variant="faded">
+                  Installed
+                </Chip>
+              </div>
             )}
             {isInstalled && (
-              <EnableCheckBox isActive={isEnabled} onPress={toggleExtension} />
+              <div className="pointer-events-auto">
+                <EnableCheckBox
+                  isActive={isEnabled}
+                  onPress={toggleExtension}
+                />
+              </div>
             )}
 
             {isMFCompatible !== undefined &&
               isLibCompatible !== undefined &&
               (!isMFCompatible || !isLibCompatible ? (
-                <Tooltip
-                  content={
-                    <div className="max-w-xs">
-                      {!isMFCompatible && (
-                        <p>
-                          This app is outdated and no longer a valid module
-                          federation app. Please update the app to the latest
-                          version. <br />
-                          Host MF version: {hostMFVersion}
-                          <br />
-                          App MF version: {remoteMFVersion}
-                        </p>
-                      )}
-                      {!isLibCompatible && (
-                        <p>
-                          This app's library version is outdated and may not
-                          work correctly. Please update the app to the latest
-                          version.
-                          <br />
-                          Host lib version: {hostLibVersion}
-                          <br />
-                          App lib version: {remoteLibVersion}
-                        </p>
-                      )}
-                    </div>
-                  }
-                >
-                  <Button isIconOnly variant="light" radius="full" size="sm">
-                    {!isMFCompatible ? (
-                      <Icon name="warning" className="text-danger!" />
-                    ) : (
-                      <Icon name="warning" className="text-warning!" />
-                    )}
-                  </Button>
-                </Tooltip>
-              ) : (
-                isShowCompatibleChip && (
+                <div className="pointer-events-auto">
                   <Tooltip
                     content={
                       <div className="max-w-xs">
-                        <p>
-                          This app's module federation version ({hostMFVersion})
-                          and library version ({hostLibVersion}) match the host
-                          version. The app should work correctly.
-                        </p>
+                        {!isMFCompatible && (
+                          <p>
+                            This app is outdated and no longer a valid module
+                            federation app. Please update the app to the latest
+                            version. <br />
+                            Host MF version: {hostMFVersion}
+                            <br />
+                            App MF version: {remoteMFVersion}
+                          </p>
+                        )}
+                        {!isLibCompatible && (
+                          <p>
+                            This app's library version is outdated and may not
+                            work correctly. Please update the app to the latest
+                            version.
+                            <br />
+                            Host lib version: {hostLibVersion}
+                            <br />
+                            App lib version: {remoteLibVersion}
+                          </p>
+                        )}
                       </div>
                     }
                   >
-                    <Button
-                      variant="faded"
-                      color="success"
-                      size="sm"
-                      radius="full"
-                    >
-                      Compatible
+                    <Button isIconOnly variant="light" radius="full" size="sm">
+                      {!isMFCompatible ? (
+                        <Icon name="warning" className="text-danger!" />
+                      ) : (
+                        <Icon name="warning" className="text-warning!" />
+                      )}
                     </Button>
                   </Tooltip>
+                </div>
+              ) : (
+                isShowCompatibleChip && (
+                  <div className="pointer-events-auto">
+                    <Tooltip
+                      content={
+                        <div className="max-w-xs">
+                          <p>
+                            This app's module federation version (
+                            {hostMFVersion}) and library version (
+                            {hostLibVersion}) match the host version. The app
+                            should work correctly.
+                          </p>
+                        </div>
+                      }
+                    >
+                      <Button
+                        variant="faded"
+                        color="success"
+                        size="sm"
+                        radius="full"
+                      >
+                        Compatible
+                      </Button>
+                    </Tooltip>
+                  </div>
                 )
               ))}
           </div>
         </div>
 
         <Button
-          className="relative m-0 h-full w-full rounded-md p-0"
+          className="relative m-0 h-full w-full touch-manipulation rounded-md p-0"
           onPress={() => {
+            if (isDisableButtonPress) {
+              return;
+            }
+
+            addToast({
+              title: "App Preview Clicked",
+            });
             if (onPress) {
               onPress(extension);
             } else {
               setIsShowInfo((prev) => !prev);
             }
           }}
-          onContextMenu={(e) => {
-            e.preventDefault();
-            // Get parent element position
-            const current = e.currentTarget as HTMLElement;
-            const parent = current.parentElement as HTMLElement;
-            const parentRect = parent.getBoundingClientRect();
+          {...attributes}
+          {...listeners}
+          onContextMenu={
+            isShowContextMenu
+              ? (e) => {
+                  e.preventDefault();
+                  // Get parent element position
+                  const current = e.currentTarget as HTMLElement;
+                  const parent = current.parentElement as HTMLElement;
+                  const parentRect = parent.getBoundingClientRect();
 
-            setContextMenuState(() => ({
-              x: e.clientX - parentRect.left,
-              y: e.clientY - parentRect.top,
-              isOpen: true,
-            }));
-          }}
+                  setContextMenuState(() => ({
+                    x: e.clientX - parentRect.left,
+                    y: e.clientY - parentRect.top,
+                    isOpen: true,
+                  }));
+                }
+              : undefined
+          }
         >
           {extension.config.thumbnail ? (
             <img
+              draggable={false}
               src={
                 getRemoteClientBaseURL(
                   extension.remoteOrigin,
@@ -287,7 +324,7 @@ export default function AppPreviewCard({
           )}
         </Button>
         {isShowInfo && (
-          <div className="absolute bottom-0.5 left-1/2 flex w-full -translate-x-1/2 justify-center gap-x-0.5">
+          <div className="absolute bottom-0.5 left-1/2 flex w-fit -translate-x-1/2 justify-center gap-x-0.5">
             {isShowUseButton && (
               <Button
                 color="primary"
@@ -342,47 +379,49 @@ export default function AppPreviewCard({
             )}
           </div>
         )}
-        <ContextMenu state={contextMenuState} setState={setContextMenuState}>
-          <div className="flex flex-col">
-            {isInstalled ? (
-              <Button
-                className="text-medium h-12 sm:h-8 sm:text-sm"
-                variant="light"
-                onPress={(e) => {
-                  uninstallExtension(extension.config.id).then(() => {
-                    toast.success("Extension uninstalled");
-                  });
-                  setContextMenuState({ x: 0, y: 0, isOpen: false });
-                }}
-              >
-                <p className="w-full text-start">Uninstall</p>
-              </Button>
-            ) : (
-              <Button
-                className="text-medium h-12 sm:h-8 sm:text-sm"
-                variant="light"
-                onPress={(e) => {
-                  installExtension(
-                    extension.remoteOrigin,
-                    extension.config.id,
-                    extension.config.version,
-                  )
-                    .then(() => {
-                      toast.success("Extension installed");
-                      setIsInstalled(true);
-                      setIsEnabled(extension.isEnabled);
-                    })
-                    .catch((err) => {
-                      toast.error(err.message);
+        {isShowContextMenu && (
+          <ContextMenu state={contextMenuState} setState={setContextMenuState}>
+            <div className="flex flex-col">
+              {isInstalled ? (
+                <Button
+                  className="text-medium h-12 sm:h-8 sm:text-sm"
+                  variant="light"
+                  onPress={(e) => {
+                    uninstallExtension(extension.config.id).then(() => {
+                      toast.success("Extension uninstalled");
                     });
-                  setContextMenuState({ x: 0, y: 0, isOpen: false });
-                }}
-              >
-                <p className="w-full text-start">Install</p>
-              </Button>
-            )}
-          </div>
-        </ContextMenu>
+                    setContextMenuState({ x: 0, y: 0, isOpen: false });
+                  }}
+                >
+                  <p className="w-full text-start">Uninstall</p>
+                </Button>
+              ) : (
+                <Button
+                  className="text-medium h-12 sm:h-8 sm:text-sm"
+                  variant="light"
+                  onPress={(e) => {
+                    installExtension(
+                      extension.remoteOrigin,
+                      extension.config.id,
+                      extension.config.version,
+                    )
+                      .then(() => {
+                        toast.success("Extension installed");
+                        setIsInstalled(true);
+                        setIsEnabled(extension.isEnabled);
+                      })
+                      .catch((err) => {
+                        toast.error(err.message);
+                      });
+                    setContextMenuState({ x: 0, y: 0, isOpen: false });
+                  }}
+                >
+                  <p className="w-full text-start">Install</p>
+                </Button>
+              )}
+            </div>
+          </ContextMenu>
+        )}
       </div>
       <p className="text-center break-words">{extension.config.displayName}</p>
       <p className="text-center">{extension.config.version}</p>
