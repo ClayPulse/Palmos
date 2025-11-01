@@ -1,4 +1,4 @@
-package com.pulse.app;
+package com.pulse_editor.app;
 
 import com.getcapacitor.BridgeActivity;
 
