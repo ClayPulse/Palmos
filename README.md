@@ -21,51 +21,6 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 
 </div>
 
-# Table of Contents
-
-<span style="font-size: 16px;">
-
-- [Table of Contents](#table-of-contents)
-- [Features](#features)
-  - [Cross-platform full-stack apps collaboration workflow](#cross-platform-full-stack-apps-collaboration-workflow)
-  - [Remote or local workspace](#remote-or-local-workspace)
-    - [Start a remote workspace](#start-a-remote-workspace)
-    - [Create file in workspace](#create-file-in-workspace)
-    - [Send file to app node](#send-file-to-app-node)
-    - [Open and interact with workspace terminal](#open-and-interact-with-workspace-terminal)
-- [Use Cases](#use-cases)
-  - [1. Vibe Coding](#1-vibe-coding)
-    - [Dev Server Live preview](#dev-server-live-preview)
-    - [Vibe Coding agent -- terminal control](#vibe-coding-agent----terminal-control)
-    - [Vibe Coding agent -- code modification](#vibe-coding-agent----code-modification)
-  - [2. Video Editing](#2-video-editing)
-  - [3. (More to come)](#3-more-to-come)
-- [Beta Release Roadmap](#beta-release-roadmap)
-    - [Major Beta Release 1 (June 2025):](#major-beta-release-1-june-2025)
-    - [Major Beta Release 2 (we are here)](#major-beta-release-2-we-are-here)
-    - [Major Beta Release 3 (planned for 2026 Q1)](#major-beta-release-3-planned-for-2026-q1)
-- [Documentation and Guide](#documentation-and-guide)
-- [Getting Started -- User Guide](#getting-started----user-guide)
-  - [Web Client](#web-client)
-  - [Mobile Client](#mobile-client)
-  - [Desktop Client](#desktop-client)
-  - [VSCode Extension (deprecated)](#vscode-extension-deprecated)
-- [Getting Started -- Development Guide](#getting-started----development-guide)
-  - [Recommended Nodejs version](#recommended-nodejs-version)
-  - [Install dependencies](#install-dependencies)
-  - [Install dependencies (desktop native modules)](#install-dependencies-desktop-native-modules)
-    - [For Windows](#for-windows)
-    - [For Linux](#for-linux)
-  - [Web Development](#web-development)
-  - [Mobile Development](#mobile-development)
-  - [Desktop Development](#desktop-development)
-  - [VSCode Extension Development](#vscode-extension-development)
-  - [Pulse Editor App Development](#pulse-editor-app-development)
-  - [Pulse Editor NPM libraries development](#pulse-editor-npm-libraries-development)
-    - [Versioning](#versioning)
-
-</span>
-
 # Features
 
 ## Cross-platform full-stack apps collaboration workflow
