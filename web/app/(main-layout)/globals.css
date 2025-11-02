@@ -24,14 +24,6 @@
   }
 }
 
-@utility text-balance {
-  text-wrap: balance;
-}
-
-@utility view-layout {
-  @apply bg-default flex h-full w-full flex-col items-start justify-between rounded-2xl p-3;
-}
-
 @utility responsive-content {
   @apply w-3/4 sm:w-[480px];
 }

@@ -5,6 +5,8 @@ Pulse Editor
 Pulse Editor is a modular, cross-platform, AI-powered creativity platform with federated app collaboration and extensible workflows.
 
 > [!IMPORTANT]
+> 🎉🎉Pulse Editor is now in beta 2. And we won a hackathon! Read more [here](#major-beta-release-2-we-are-here).
+>
 > Pulse Editor is still in its early development stage. We are trying hard to make sure everything works as expected for all different platforms. See [Beta Release Roadmap](#beta-release-roadmap) below.
 
 <p align="center">
@@ -24,16 +26,30 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 <span style="font-size: 16px;">
 
 - [Table of Contents](#table-of-contents)
+- [Features](#features)
+  - [Cross-platform full-stack apps collaboration workflow](#cross-platform-full-stack-apps-collaboration-workflow)
+  - [Remote or local workspace](#remote-or-local-workspace)
+    - [Start a remote workspace](#start-a-remote-workspace)
+    - [Create file in workspace](#create-file-in-workspace)
+    - [Send file to app node](#send-file-to-app-node)
+    - [Open and interact with workspace terminal](#open-and-interact-with-workspace-terminal)
+- [Use Cases](#use-cases)
+  - [1. Vibe Coding](#1-vibe-coding)
+    - [Dev Server Live preview](#dev-server-live-preview)
+    - [Vibe Coding agent -- terminal control](#vibe-coding-agent----terminal-control)
+    - [Vibe Coding agent -- code modification](#vibe-coding-agent----code-modification)
+  - [2. Video Editing](#2-video-editing)
+  - [3. (More to come)](#3-more-to-come)
 - [Beta Release Roadmap](#beta-release-roadmap)
     - [Major Beta Release 1 (June 2025):](#major-beta-release-1-june-2025)
-    - [Major Beta Release 2 (planned for 2025 Q3)](#major-beta-release-2-planned-for-2025-q3)
-    - [Major Beta Release 3 (planned for 2025 Q4)](#major-beta-release-3-planned-for-2025-q4)
+    - [Major Beta Release 2 (we are here)](#major-beta-release-2-we-are-here)
+    - [Major Beta Release 3 (planned for 2026 Q1)](#major-beta-release-3-planned-for-2026-q1)
 - [Documentation and Guide](#documentation-and-guide)
 - [Getting Started -- User Guide](#getting-started----user-guide)
   - [Web Client](#web-client)
   - [Mobile Client](#mobile-client)
   - [Desktop Client](#desktop-client)
-  - [VSCode Extension](#vscode-extension)
+  - [VSCode Extension (deprecated)](#vscode-extension-deprecated)
 - [Getting Started -- Development Guide](#getting-started----development-guide)
   - [Recommended Nodejs version](#recommended-nodejs-version)
   - [Install dependencies](#install-dependencies)
@@ -50,9 +66,87 @@ Pulse Editor is a modular, cross-platform, AI-powered creativity platform with f
 
 </span>
 
+# Features
+
+## Cross-platform full-stack apps collaboration workflow
+
+By leveraging [Module Federation](https://module-federation.io/),
+Pulse Editor allows federated app collaboration and extensible workflows with AI agents on all platform.
+
+Pulse Editor is not just another drag-and-drop backend automation tool, it is a full-stack automation platform -- a true app OS that unifies both frontend and backend in one visual environment.
+
+<table>
+  <tr>
+    <td align="center" width="50%">
+      <img src="https://cdn.pulse-editor.com/assets/App_Collaboration2.gif" alt="Demo2" width="100%">
+      <p>Full-stack app node (e.g. <a href="https://github.com/OpenCut-app/OpenCut">OpenCut</a>)</p>
+    </td>
+    <td align="center" width="50%">
+      <img src="https://cdn.pulse-editor.com/assets/App_Collaboration1.gif" alt="Demo1" width="100%">
+      <p>Full-stack app workflow</p>
+    </td>
+  </tr>
+</table>
+
+## Remote or local workspace
+
+With Pulse Editor, you can manage your file system within interface.
+
+On desktop, you can choose to open workspace in either local storage or remote container.
+
+On web/mobile, you will
+have to start a [remote workspace](#start-a-remote-workspace) first.
+
+### Start a remote workspace
+
+1. Create a new project or select a project <br/>
+   **Create project:**
+   ![Workspace_CreateProject](https://cdn.pulse-editor.com/assets/Workspace_CreateProject.gif)
+   **Select project:**
+   ![Workspace_SelectProject](https://cdn.pulse-editor.com/assets/Workspace_SelectProject.gif)
+2. Create a new workspace or select a workspace <br/>
+   **Create workspace:**
+   ![Workspace_CreateWorkspace](https://cdn.pulse-editor.com/assets/Workspace_CreateWorkspace.gif)
+   **Select workspace:**
+   ![Workspace_CreateWorkspace](https://cdn.pulse-editor.com/assets/Workspace_SelectWorkspace.gif)
+
+### Create file in workspace
+
+![Workspace_CreateFile](https://cdn.pulse-editor.com/assets/Workspace_CreateFile.gif)
+
+### Send file to app node
+
+![Workspace_OpenFile](https://cdn.pulse-editor.com/assets/Workspace_OpenFile.gif)
+
+### Open and interact with workspace terminal
+
+![Workspace_CreateTerminalInWorkspace](https://cdn.pulse-editor.com/assets/Workspace_CreateTerminalInWorkspace.gif)
+
+# Use Cases
+
+## 1. Vibe Coding
+
+Running vibe coding workflow in canvas view allows you to develop software on any device, with help of vibe coding agent.
+
+### Dev Server Live preview
+
+![VibeCoding_LivePrevew](https://cdn.pulse-editor.com/assets/VibeCode_LivePreview.gif)
+
+### Vibe Coding agent -- terminal control
+
+![VibeCoding_TerminalControl](https://cdn.pulse-editor.com/assets/VibeCode_TerminalControlAgent.gif)
+
+### Vibe Coding agent -- code modification
+
+![VibeCoding_CodeEditorControl](https://cdn.pulse-editor.com/assets/VibeCode_CodeEditorControlAgent.gif)
+
+## 2. Video Editing
+
+## 3. (More to come)
+
 # Beta Release Roadmap
 
-🎉🎉Pulse Editor is now in beta.
+🎉🎉Pulse Editor is now in beta 2.
 
 We plan to have 2-3 major beta release stages before we reach a stable release version.
 
@@ -71,21 +165,30 @@ Pulse Editor Marketplace Developer Access is now open for application. If you'd 
 
 Even if you haven't got access to publish your extensions to the marketplace, you can still explore Pulse Editor platform by developing your own extensions locally. This is a great opportunity to get an early look at Pulse Editor and start experimenting with its capabilities! See [Extension Development](#pulse-editor-extension-development) below.
 
-### Major Beta Release 2 (planned for 2025 Q3)
+### Major Beta Release 2 (we are here)
+
+Pulse Editor beta 2 is now out. Many changes are added in this new release. And, Pulse Editor won a hackathon! Big thanks to AI Hacker House in Shanghai for the hackathon opportunity for me to showcase this project in front of dozens of AI product enthusiasts and entrepreneurs!
+
+What's new in this release:
+
+1. Support frontend and backend module federation to allow developers to publish full-stack apps on Pulse Editor platform.
+2. Add workflow canvas to allow collaboration among community full-stack apps.
+3. Introduce Pulse Editor cloud platform. With the cloud platform, you can start remote dev container and use it to run automation workflows.
+4. Support web editor. Check it out at https://web.pulse-editor.com.
+5. Publish mobile app to Google Play (in-progress).
+6. Allow users to publish workflows to marketplace.
+7. Introduce Pulse Editor platform AI assistants. With the platform AI assistant, you can create productivity workflow effortless via chatting. The platform AI assistant will suggest best fitted apps for you requirements and execute the workflow on your behalf.
+8. Updates to npm packages, cli tool, and [Pulse app full-stack React template](https://github.com/claypulse/pulse-app-template).
+
+### Major Beta Release 3 (planned for 2026 Q1)
 
 Planned items:
 
-- Documentation
-- Support for web
-- Support remote Pulse Editor instance access
-- Extension app AI builder
-- ... (WIP)
-
-~~Coming Soon: [Making 100 Extension Apps Challenge](https://github.com/shellishack)~~
-
-### Major Beta Release 3 (planned for 2025 Q4)
-
-... (WIP)
+- More AI features
+- MacOS & Linux & iOS support
+- Marketplace payment system (allow extension app developers to monetize)
+- More official workflows
+- More to be announced!
 
 # Documentation and Guide
 
@@ -96,8 +199,6 @@ The documentation and user guide will be available at https://docs.pulse-editor.
 ## Web Client
 
 There is a web deployment at https://web.pulse-editor.com
-
-For detailed web user guide, check out [Web User Guide](web/README.md)
 
 ## Mobile Client
 
@@ -112,11 +213,11 @@ For detailed mobile user guide, check out [Mobile User Guide](mobile/README.md)
 Linux, MacOS, Windows clients are available in release page.
 
 > [!NOTE]
-> Only Windows is tested in alpha release.
+> Only Windows is tested in beta release.
 
 For detailed desktop user guide, check out [Desktop User Guide](desktop/README.md)
 
-## VSCode Extension
+## VSCode Extension (deprecated)
 
 A VSCode Webview Extension with limited features is available [here](https://marketplace.visualstudio.com/items?itemName=shellishack.pulse-editor).
 
@@ -244,26 +345,32 @@ Some of our official extensions are also open-source. Feel free to take examples
 - [Pulse Editor Terminal](https://github.com/ClayPulse/pulse-editor-terminal)
 
 ## Pulse Editor NPM libraries development
+
 ### Versioning
+
 Use changeset to version each release of npm library.
 
 Enter/Exit prerelease
+
 ```bash
 npx changeset pre enter alpha
 npx changeset pre exit
 ```
 
 Add a new version
+
 ```bash
 npx changeset
 ```
 
 Commit the new version
+
 ```bash
 npx changeset version
-``` 
+```
 
 Publish npm libraries
+
 ```bash
 # Run build before publishing
 npm run shared-utils-build && npm run react-api-build
@@ -271,7 +378,9 @@ npx changeset publish
 ```
 
 For developing main client and using recently modified npm libraries without publishing, you can change web/package.json to have the following:
+
 ```json
 "@pulse-editor/shared-utils": "../npm-packages/shared-utils",
 ```
+
 Make sure to change back if using published versions.
