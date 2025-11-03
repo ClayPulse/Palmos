@@ -4,7 +4,6 @@ import ContextMenu from "@/components/interface/context-menu";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { AbstractPlatformAPI } from "@/lib/platform-api/abstract-platform-api";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
@@ -36,11 +35,13 @@ const TreeViewNode = forwardRef(function TreeViewNode(
     viewFile,
     platformApi,
     parentGroupRef,
+    refreshWorkspaceContent,
   }: {
     object: FileSystemObject;
     viewFile: (uri: string) => Promise<void>;
     platformApi?: AbstractPlatformAPI;
     parentGroupRef: RefObject<TreeViewGroupRef>;
+    refreshWorkspaceContent: () => Promise<void>;
   },
   ref: Ref<TreeViewNodeRef | null>,
 ) {
@@ -56,7 +57,6 @@ const TreeViewNode = forwardRef(function TreeViewNode(
     },
   }));
 
-  const { refreshWorkspaceContent } = useWorkspace();
   const { setNodeRef, listeners } = useDraggable({
     id: `draggable-file-${object.uri}`,
     data: {
@@ -183,7 +183,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 parentGroupRef.current?.getFolderUri() + "/" + newName;
 
               platformApi?.rename(object.uri, newUri).then(() => {
-                refreshWorkspaceContent(platformApi);
+                refreshWorkspaceContent();
               });
 
               setIsRenaming(false);
@@ -195,7 +195,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 parentGroupRef.current?.getFolderUri() + "/" + newName;
 
               platformApi?.rename(object.uri, newUri).then(() => {
-                refreshWorkspaceContent(platformApi);
+                refreshWorkspaceContent();
               });
 
               setIsRenaming(false);
@@ -324,7 +324,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 color="danger"
                 onPress={(e) => {
                   platformApi?.delete(object.uri).then(() => {
-                    refreshWorkspaceContent(platformApi);
+                    refreshWorkspaceContent();
                   });
                   setContextMenuState({ x: 0, y: 0, isOpen: false });
                 }}
@@ -344,6 +344,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
             viewFile={viewFile}
             folderUri={object.uri}
             platformApi={platformApi}
+            refreshWorkspaceContent={refreshWorkspaceContent}
           />
         </div>
       )}
@@ -356,11 +357,13 @@ function TreeViewNodeWrapper({
   viewFile,
   platformApi,
   parentGroupRef,
+  refreshWorkspaceContent,
 }: {
   object: FileSystemObject;
   viewFile: (uri: string) => Promise<void>;
   platformApi?: AbstractPlatformAPI;
   parentGroupRef: RefObject<TreeViewGroupRef>;
+  refreshWorkspaceContent: () => Promise<void>;
 }) {
   const nodeRef = useRef<TreeViewNodeRef | null>(null);
 
@@ -371,6 +374,7 @@ function TreeViewNodeWrapper({
       viewFile={viewFile}
       platformApi={platformApi}
       parentGroupRef={parentGroupRef}
+      refreshWorkspaceContent={refreshWorkspaceContent}
     />
   );
 }
@@ -380,11 +384,13 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     objects,
     viewFile,
     folderUri,
+    refreshWorkspaceContent,
     platformApi,
   }: {
     objects: FileSystemObject[];
     viewFile: (uri: string) => Promise<void>;
     folderUri: string;
+    refreshWorkspaceContent: () => Promise<void>;
     platformApi?: AbstractPlatformAPI;
   },
   ref: Ref<TreeViewGroupRef>,
@@ -413,8 +419,6 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     },
   }));
 
-  const { refreshWorkspaceContent } = useWorkspace();
-
   const [isCreatingNewFile, setIsCreatingNewFile] = useState(false);
   const [isCreatingNewFolder, setIsCreatingNewFolder] = useState(false);
 
@@ -430,7 +434,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     }
 
     platformApi.createFolder(uri).then(() => {
-      refreshWorkspaceContent(platformApi);
+      refreshWorkspaceContent();
     });
 
     setFolderNameInputValue("");
@@ -446,7 +450,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     }
 
     platformApi.createFile(uri).then(() => {
-      refreshWorkspaceContent(platformApi);
+      refreshWorkspaceContent();
     });
 
     setFileNameInputValue("");
@@ -463,6 +467,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
             viewFile={viewFile}
             platformApi={platformApi}
             parentGroupRef={ref as RefObject<TreeViewGroupRef>}
+            refreshWorkspaceContent={refreshWorkspaceContent}
           />
         );
       })}
@@ -499,12 +504,24 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
           onValueChange={setFileNameInputValue}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
+              // Cancel on empty input
+              if (fileNameInputValue === "") {
+                setIsCreatingNewFile(false);
+                return;
+              }
+
               const uri = folderUri + "/" + fileNameInputValue;
               createNewFile(uri);
             }
           }}
           onFocusChange={(isFocused) => {
             if (!isFocused) {
+              // Cancel on empty input
+              if (fileNameInputValue === "") {
+                setIsCreatingNewFile(false);
+                return;
+              }
+
               const uri = folderUri + "/" + fileNameInputValue;
               createNewFile(uri);
             }

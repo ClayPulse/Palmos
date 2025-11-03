@@ -1,5 +1,5 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import useSWR from "swr";
 import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
 import { fetchAPI } from "../pulse-editor-website/backend";
@@ -38,6 +38,7 @@ export function useWorkspace() {
       };
     });
   };
+
 
   async function createWorkspace(
     name: string,
@@ -137,26 +138,7 @@ export function useWorkspace() {
     mutateCloudWorkspaces();
   }
 
-  async function refreshWorkspaceContent(platformApi: AbstractPlatformAPI) {
-    const projectUri =
-      editorContext?.persistSettings?.projectHomePath +
-      "/" +
-      editorContext?.editorStates.project;
-    const objects = await platformApi?.listPathContent(projectUri, {
-      include: "all",
-      isRecursive: true,
-    });
 
-    editorContext?.setEditorStates((prev) => {
-      return {
-        ...prev,
-        workspaceContent: objects,
-        explorerSelectedNodeRefs: [],
-      };
-    });
-
-    console.log("Found project content:", objects);
-  }
 
   return {
     workspace,
@@ -165,6 +147,6 @@ export function useWorkspace() {
     updateWorkspace,
     selectWorkspace,
     deleteWorkspace,
-    refreshWorkspaceContent,
+
   };
 }

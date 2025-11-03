@@ -13,7 +13,7 @@ export default function WorkspaceExplorer() {
   const editorContext = useContext(EditorContext);
 
   const workspaceHook = useWorkspace();
-  const { platformApi } = usePlatformApi();
+  const { platformApi, refreshWorkspaceContent } = usePlatformApi();
 
   const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
     useState(false);
@@ -27,7 +27,7 @@ export default function WorkspaceExplorer() {
       }
 
       if (getPlatform() === PlatformEnum.Electron && !workspaceHook.workspace) {
-        await workspaceHook.refreshWorkspaceContent(platformApi);
+        await refreshWorkspaceContent();
       } else {
         if (isCreatingWorkspace && workspaceHook.workspace) {
           const homePath = editorContext?.persistSettings?.projectHomePath;
@@ -43,7 +43,7 @@ export default function WorkspaceExplorer() {
             await platformApi.createFolder(uri);
           }
 
-          await workspaceHook.refreshWorkspaceContent(platformApi);
+          await refreshWorkspaceContent();
           setIsCreatingWorkspace(false);
         }
       }

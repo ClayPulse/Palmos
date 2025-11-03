@@ -94,6 +94,11 @@ export default function WorkspaceSettingsModal({
     }
     try {
       // Delete workspace
+      addToast({
+        title: "Deleting workspace",
+        description: `Deleting workspace ${workspaceName}`,
+      });
+
       await deleteWorkspace(workspace.id);
       addToast({
         title: "Workspace deleted",

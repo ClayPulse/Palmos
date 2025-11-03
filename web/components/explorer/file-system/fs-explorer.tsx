@@ -6,9 +6,9 @@ import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { TreeViewGroupRef } from "@/lib/types";
-import { addToast, Button } from "@heroui/react";
+import { addToast, Button, Spinner } from "@heroui/react";
 import { IMCMessageTypeEnum, ViewModeEnum } from "@pulse-editor/shared-utils";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../../misc/icon";
 import { EditorContext } from "../../providers/editor-context-provider";
@@ -23,8 +23,10 @@ export default function FileSystemExplorer({
   const imcContext = useContext(IMCContext);
 
   const platform = getPlatform();
-  const { platformApi } = usePlatformApi();
+  const { platformApi, refreshWorkspaceContent } = usePlatformApi();
   const { activeTabView } = useTabViewManager();
+
+  const [isLoading, setIsLoading] = useState(true);
 
   const rootGroupRef = useRef<TreeViewGroupRef | null>(null);
 
@@ -44,6 +46,14 @@ export default function FileSystemExplorer({
       rootGroupRef.current?.cancelCreating();
     }
   }, [editorContext?.editorStates.explorerSelectedNodeRefs]);
+
+  useEffect(() => {
+    if (editorContext?.editorStates.workspaceContent) {
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+    }
+  }, [editorContext?.editorStates.workspaceContent]);
 
   async function viewFile(uri: string) {
     // Simply send uri to selected app node or app view
@@ -191,12 +201,6 @@ export default function FileSystemExplorer({
           </div>
         </div>
 
-        {content?.length === 0 && (
-          <p className="text-center">
-            Empty content. Create a new file to get started.
-          </p>
-        )}
-
         <div className="overflow-y-auto">
           <TreeViewGroup
             ref={rootGroupRef}
@@ -204,8 +208,21 @@ export default function FileSystemExplorer({
             viewFile={viewFile}
             folderUri={fsPath}
             platformApi={platformApi}
+            refreshWorkspaceContent={refreshWorkspaceContent}
           />
         </div>
+
+        {isLoading && editorContext?.editorStates.currentWorkspace && (
+          <div className="flex justify-center">
+            <Spinner />
+          </div>
+        )}
+
+        {content.length === 0 && !isLoading && (
+          <p className="text-center">
+            Empty content. Create a new file to get started.
+          </p>
+        )}
       </div>
     </div>
   );
