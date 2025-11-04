@@ -329,7 +329,9 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                   setContextMenuState({ x: 0, y: 0, isOpen: false });
                 }}
               >
-                <p className="w-full text-start">Delete</p>
+                <p className="text-danger-foreground w-full text-start">
+                  Delete
+                </p>
               </Button>
             </div>
           </ContextMenu>

@@ -4,6 +4,7 @@ import { IMCContext } from "@/components/providers/imc-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { TreeViewGroupRef } from "@/lib/types";
 import { addToast, Button, Spinner } from "@heroui/react";
@@ -23,8 +24,9 @@ export default function FileSystemExplorer({
   const imcContext = useContext(IMCContext);
 
   const platform = getPlatform();
-  const { platformApi, refreshWorkspaceContent } = usePlatformApi();
+  const { platformApi } = usePlatformApi();
   const { activeTabView } = useTabViewManager();
+  const { refreshWorkspaceContent } = useWorkspace();
 
   const [isLoading, setIsLoading] = useState(true);
 

@@ -44,7 +44,7 @@ async function startServers() {
     `API server is running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/api-${workspaceId}`,
   );
 
-  await addTerminalServer(server, workspaceId);
+  await addTerminalServer(server, "api-" + workspaceId);
   console.log(
     `Terminal server is running at ${isHttps ? "wss" : "ws"}://${address}:${serverPort}/api-${workspaceId}/terminal/ws`,
   );
