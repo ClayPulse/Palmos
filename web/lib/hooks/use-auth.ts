@@ -21,16 +21,20 @@ export function useAuth() {
   } = useSWR<Session | undefined>(
     !editorContext?.editorStates.isSigningIn ? `/api/auth/session` : null,
     async (url: string) => {
-      const res = await fetchAPI(url);
-      if (!res.ok) {
-        throw new Error("Failed to fetch session data");
+      try {
+        const res = await fetchAPI(url);
+        if (!res.ok) {
+          console.error("Failed to fetch session data");
+        }
+        const data = await res.json();
+        // return undefined if data's content is empty
+        if (Object.keys(data).length === 0) {
+          return undefined;
+        }
+        return data as Session;
+      } catch (error) {
+        // noop
       }
-      const data = await res.json();
-      // return undefined if data's content is empty
-      if (Object.keys(data).length === 0) {
-        return undefined;
-      }
-      return data as Session;
     },
   );
 

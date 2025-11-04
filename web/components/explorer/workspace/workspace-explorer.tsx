@@ -14,11 +14,10 @@ export default function WorkspaceExplorer() {
 
   const workspaceHook = useWorkspace();
   const { platformApi } = usePlatformApi();
+  const { refreshWorkspaceContent, isWorkspaceRunning } = useWorkspace();
 
   const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
     useState(false);
-
-  const [isCreatingWorkspace, setIsCreatingWorkspace] = useState(false);
 
   useEffect(() => {
     async function openProjectInWorkspace() {
@@ -27,30 +26,33 @@ export default function WorkspaceExplorer() {
       }
 
       if (getPlatform() === PlatformEnum.Electron && !workspaceHook.workspace) {
-        await workspaceHook.refreshWorkspaceContent(platformApi);
-      } else {
-        if (isCreatingWorkspace && workspaceHook.workspace) {
-          const homePath = editorContext?.persistSettings?.projectHomePath;
-          const projectName = editorContext?.editorStates.project;
-          if (!projectName) {
-            return;
-          }
-
-          const uri = homePath + "/" + projectName;
-          const hasPath = await platformApi.hasPath(uri);
-
-          if (!hasPath) {
-            await platformApi.createFolder(uri);
-          }
-
-          await workspaceHook.refreshWorkspaceContent(platformApi);
-          setIsCreatingWorkspace(false);
+        await refreshWorkspaceContent();
+      } else if (workspaceHook.workspace) {
+        const homePath = editorContext?.persistSettings?.projectHomePath;
+        const projectName = editorContext?.editorStates.project;
+        if (!projectName) {
+          return;
         }
+
+        await workspaceHook.waitUntilWorkspaceRunning();
+
+        const uri = homePath + "/" + projectName;
+        const hasPath = await platformApi.hasPath(uri);
+
+        if (!hasPath) {
+          await platformApi.createFolder(uri);
+        }
+
+        await refreshWorkspaceContent();
       }
     }
 
     openProjectInWorkspace();
-  }, [platformApi]);
+  }, [
+    platformApi,
+    workspaceHook.workspace,
+    workspaceHook.waitUntilWorkspaceRunning,
+  ]);
 
   return (
     <div className="flex h-full w-full flex-col">
@@ -79,7 +81,7 @@ export default function WorkspaceExplorer() {
               }
               size="sm"
               disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
-              onSelectionChange={(key) => {
+              onSelectionChange={async (key) => {
                 if (
                   key.currentKey === "__internal-create-new" ||
                   key.currentKey === "__internal-settings"
@@ -89,11 +91,7 @@ export default function WorkspaceExplorer() {
                 const selectedWorkspace = workspaceHook.cloudWorkspaces?.find(
                   (workspace) => workspace.id === key.currentKey,
                 );
-                workspaceHook.selectWorkspace(selectedWorkspace?.id);
-                if (selectedWorkspace) {
-                  // Create project path inside workspace if it doesn't exist
-                  setIsCreatingWorkspace(true);
-                }
+                await workspaceHook.selectWorkspace(selectedWorkspace?.id);
               }}
             >
               <>
@@ -139,14 +137,18 @@ export default function WorkspaceExplorer() {
           </div>
           {getPlatform() === PlatformEnum.Electron ||
           workspaceHook.workspace ? (
-            <FileSystemExplorer
-              setIsMenuOpen={() => {
-                editorContext?.setEditorStates((prev) => ({
-                  ...prev,
-                  isSideMenuOpen: false,
-                }));
-              }}
-            />
+            !isWorkspaceRunning ? (
+              <div>Workspace is starting</div>
+            ) : (
+              <FileSystemExplorer
+                setIsMenuOpen={() => {
+                  editorContext?.setEditorStates((prev) => ({
+                    ...prev,
+                    isSideMenuOpen: false,
+                  }));
+                }}
+              />
+            )
           ) : (
             <div className="flex h-full flex-col items-center justify-center px-4 pb-24">
               <p>

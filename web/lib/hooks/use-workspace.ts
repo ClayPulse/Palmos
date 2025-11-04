@@ -1,7 +1,7 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { useContext } from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import useSWR from "swr";
-import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
+import { getAbstractPlatformAPI } from "../platform-api/get-platform-api";
 import { fetchAPI } from "../pulse-editor-website/backend";
 import { RemoteWorkspace } from "../types";
 import { useAuth } from "./use-auth";
@@ -9,6 +9,8 @@ import { useAuth } from "./use-auth";
 export function useWorkspace() {
   const editorContext = useContext(EditorContext);
   const { session } = useAuth();
+
+  const workspace = editorContext?.editorStates?.currentWorkspace;
 
   const { data: cloudWorkspaces, mutate: mutateCloudWorkspaces } = useSWR<
     RemoteWorkspace[]
@@ -26,7 +28,38 @@ export function useWorkspace() {
     return workspaces;
   });
 
-  const workspace = editorContext?.editorStates?.currentWorkspace;
+  // Check workspace status
+  const { data: isWorkspaceRunning } = useSWR<boolean>(
+    workspace
+      ? `/api/workspace/check-health?workspaceId=${workspace.id}`
+      : null,
+    async (url: string) => {
+      const res = await fetchAPI(url);
+      if (!res.ok) {
+        throw new Error("Failed to fetch workspace health status");
+      }
+
+      const {
+        status,
+      }: {
+        status: string;
+      } = await res.json();
+      return status === "ready";
+    },
+    {
+      refreshInterval: 5000,
+    },
+  );
+
+  const waitUntilRunningResolve = useRef<() => void>(null);
+
+  useEffect(() => {
+    if (isWorkspaceRunning && waitUntilRunningResolve.current) {
+      waitUntilRunningResolve.current();
+      waitUntilRunningResolve.current = null;
+    }
+  }, [isWorkspaceRunning]);
+
   const setWorkspace = (ws: RemoteWorkspace | undefined) => {
     if (!editorContext) {
       throw new Error("Editor context is not available");
@@ -94,7 +127,7 @@ export function useWorkspace() {
     await mutateCloudWorkspaces();
   }
 
-  function selectWorkspace(workspaceId: string | undefined) {
+  async function selectWorkspace(workspaceId: string | undefined) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -137,12 +170,30 @@ export function useWorkspace() {
     mutateCloudWorkspaces();
   }
 
-  async function refreshWorkspaceContent(platformApi: AbstractPlatformAPI) {
+  async function refreshWorkspaceContent(
+    ws: RemoteWorkspace | undefined = workspace,
+  ) {
+    if (!ws) {
+      // Reset all content
+      editorContext?.setEditorStates((prev) => {
+        return {
+          ...prev,
+          workspaceContent: undefined,
+          explorerSelectedNodeRefs: [],
+        };
+      });
+      return;
+    }
+
+    await waitUntilWorkspaceRunning();
+
+    const api = getAbstractPlatformAPI(ws);
+
     const projectUri =
       editorContext?.persistSettings?.projectHomePath +
       "/" +
       editorContext?.editorStates.project;
-    const objects = await platformApi?.listPathContent(projectUri, {
+    const objects = await api?.listPathContent(projectUri, {
       include: "all",
       isRecursive: true,
     });
@@ -158,13 +209,26 @@ export function useWorkspace() {
     console.log("Found project content:", objects);
   }
 
+  const waitUntilWorkspaceRunning = useCallback(async ( ) => {
+    if (isWorkspaceRunning) {
+      return;
+    }
+    return new Promise<void>((resolve, reject) => {
+      waitUntilRunningResolve.current = resolve;
+    });
+  }, [
+    isWorkspaceRunning
+  ])
+
   return {
     workspace,
+    isWorkspaceRunning,
     cloudWorkspaces,
     createWorkspace,
     updateWorkspace,
     selectWorkspace,
     deleteWorkspace,
     refreshWorkspaceContent,
+    waitUntilWorkspaceRunning,
   };
 }

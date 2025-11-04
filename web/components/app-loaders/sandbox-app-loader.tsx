@@ -178,7 +178,7 @@ export default function SandboxAppLoader({
         getHandlerMap(viewModel),
       );
     }
-  }, [viewModel, editorContext?.editorStates, editorContext?.persistSettings]);
+  }, [viewModel, editorContext?.editorStates, editorContext?.persistSettings, platformApi]);
 
   function getHandlerMap(model: ViewModel) {
     const newMap = new Map<IMCMessageTypeEnum, ReceiverHandler>();

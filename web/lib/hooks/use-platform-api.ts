@@ -1,9 +1,6 @@
-import { PlatformEnum } from "@/lib/enums";
 import { useEffect, useState } from "react";
 import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
-import { CloudAPI } from "../platform-api/cloud/cloud-api";
-import { ElectronAPI } from "../platform-api/electron/electron-api";
-import { getPlatform } from "../platform-api/platform-checker";
+import { getAbstractPlatformAPI } from "../platform-api/get-platform-api";
 import { useWorkspace } from "./use-workspace";
 
 export function usePlatformApi() {
@@ -14,38 +11,18 @@ export function usePlatformApi() {
   >(undefined);
 
   useEffect(() => {
-    const api = getAbstractPlatformAPI();
+    const api = getAbstractPlatformAPI(workspace);
     setPlatformApi(api);
   }, []);
 
-  // When workspace changes, reset platform API if needed
+  // When workspace changes, update platform API if needed.
+  // So the platform api switch to the latest workspace context.
   useEffect(() => {
-    if (platformApi && workspace) {
-      const api = getAbstractPlatformAPI();
+    if (workspace) {
+      const api = getAbstractPlatformAPI(workspace);
       setPlatformApi(api);
     }
   }, [workspace]);
-
-  function getAbstractPlatformAPI(): AbstractPlatformAPI {
-    const platform = getPlatform();
-
-    if (platform === PlatformEnum.Capacitor) {
-      // return new CapacitorAPI();
-      return new CloudAPI(workspace);
-    } else if (platform === PlatformEnum.Electron) {
-      return new ElectronAPI();
-    } else if (
-      platform === PlatformEnum.Web ||
-      platform === PlatformEnum.WebMobile
-    ) {
-      return new CloudAPI(workspace);
-    } else if (platform === PlatformEnum.VSCode) {
-      // platformApi.current = new VSCodeAPI();
-      throw new Error("VSCode API not implemented");
-    } else {
-      throw new Error("Unknown platform");
-    }
-  }
 
   return {
     platformApi,

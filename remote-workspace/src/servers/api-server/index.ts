@@ -42,7 +42,7 @@ async function createEndpoints(
     res.redirect(url.toString());
   });
 
-  app.get("/:instanceId/test", (req, res) => {
+  app.get("/:instanceId/check-health", (req, res) => {
     const id = req.params.instanceId;
     if (id !== instanceId) {
       return res.status(400).send("Invalid instance ID");

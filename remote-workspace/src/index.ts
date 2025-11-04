@@ -33,14 +33,20 @@ async function startServers() {
       ? true
       : false;
 
-  await addAPIServer(server, expressApp, workspaceId, serverPort, frontendUrl);
+  await addAPIServer(
+    server,
+    expressApp,
+    "api-" + workspaceId,
+    serverPort,
+    frontendUrl,
+  );
   console.log(
-    `API server is running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/${workspaceId}`,
+    `API server is running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/api-${workspaceId}`,
   );
 
-  await addTerminalServer(server, workspaceId);
+  await addTerminalServer(server, "api-" + workspaceId);
   console.log(
-    `Terminal server is running at ${isHttps ? "wss" : "ws"}://${address}:${serverPort}/${workspaceId}/terminal/ws`,
+    `Terminal server is running at ${isHttps ? "wss" : "ws"}://${address}:${serverPort}/api-${workspaceId}/terminal/ws`,
   );
 }
 

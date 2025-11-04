@@ -6,6 +6,7 @@ import {
   ProjectInfo,
   RemoteWorkspace,
 } from "@/lib/types";
+import { addToast } from "@heroui/react";
 import toast from "react-hot-toast";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
 
@@ -55,7 +56,14 @@ export class CloudAPI extends AbstractPlatformAPI {
     const response = await fetchAPI("/api/project/list");
 
     if (!response.ok) {
-      throw new Error("Failed to fetch projects");
+      addToast({
+        title: "Failed to fetch projects",
+        description:
+          response.status === 401
+            ? "Cannot list projects. Are you signed in?"
+            : undefined,
+        color: "danger",
+      });
     }
 
     const projects = await response.json();

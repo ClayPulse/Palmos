@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/lib/hooks/use-auth";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
 import { getSTTModel } from "@/lib/modalities/stt/stt";
@@ -41,6 +42,10 @@ export default function EditorContextProvider({
 }: {
   children: React.ReactNode;
 }) {
+  // --- Platform API ---
+  const { platformApi } = usePlatformApi();
+  const { session } = useAuth();
+
   // --- Editor States ---
   const [editorStates, setEditorStates] =
     useState<EditorStates>(defaultEditorStates);
@@ -51,9 +56,6 @@ export default function EditorContextProvider({
     undefined,
   );
   const [isSettingsLoaded, setIsSettingsLoaded] = useState(false);
-
-  // --- Platform API ---
-  const { platformApi } = usePlatformApi();
 
   // Track all pressed keys
   useEffect(() => {
@@ -84,9 +86,9 @@ export default function EditorContextProvider({
     };
   }, []);
 
-  // Load settings from local storage
+  // Load settings
   useEffect(() => {
-    if (platformApi) {
+    if (platformApi && session) {
       platformApi
         ?.getPersistentSettings()
         .then((loadedSettings: PersistentSettings) => {
@@ -94,18 +96,18 @@ export default function EditorContextProvider({
           setIsSettingsLoaded(true);
         });
     }
-  }, [platformApi]);
+  }, [platformApi, session]);
 
-  // Save settings to local storage
+  // Save settings
   useEffect(() => {
-    if (isSettingsLoaded) {
+    if (isSettingsLoaded && session) {
       if (settings) {
         platformApi?.setPersistentSettings(settings);
       } else {
         platformApi?.resetPersistentSettings();
       }
     }
-  }, [settings]);
+  }, [settings, session, isSettingsLoaded]);
 
   // Load STT
   useEffect(() => {

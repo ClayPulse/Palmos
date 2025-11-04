@@ -44,6 +44,8 @@ export enum IMCMessageTypeEnum {
   EditorAppReceiveFileUri = "editor-app-receive-file-uri",
   // App uses owned app
   EditorAppUseOwnedApp = "editor-app-use-owned-app",
+  // App requests workspace info
+  EditorAppRequestWorkspace = "editor-app-request-workspace",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)
