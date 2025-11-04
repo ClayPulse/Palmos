@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.56
+
+### Patch Changes
+
+- Add useWorkspace hook
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.56
+
 ## 0.1.1-beta.55
 
 ### Patch Changes

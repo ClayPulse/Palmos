@@ -5,7 +5,6 @@ import useLoading from "./hooks/editor/use-loading";
 import useNotification from "./hooks/editor/use-notification";
 import useRegisterAction from "./hooks/editor/use-register-action";
 import useTheme from "./hooks/editor/use-theme";
-import useToolbar from "./hooks/editor/use-toolbar";
 
 import useImageGen from "./hooks/ai-modality/use-image-gen";
 import useLLM from "./hooks/ai-modality/use-llm";
@@ -17,6 +16,7 @@ import usePulseEnv from "./hooks/editor/use-env";
 import useOwnedAppView from "./hooks/editor/use-owned-app-view";
 import useReceiveFile from "./hooks/editor/use-receive-file";
 import useSnapshotState from "./hooks/editor/use-snapshot-state";
+import useWorkspace from "./hooks/editor/use-workspace";
 import useTerminal from "./hooks/terminal/use-terminal";
 import ReceiveFileProvider from "./providers/receive-file-provider";
 import SnapshotProvider from "./providers/snapshot-provider";
@@ -41,6 +41,6 @@ export {
   useTTS,
   useTerminal,
   useTheme,
-  useToolbar,
   useVideoGen,
+  useWorkspace,
 };

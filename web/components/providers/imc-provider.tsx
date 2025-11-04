@@ -540,6 +540,18 @@ export default function InterModuleCommunicationProvider({
           return result[0];
         },
       ],
+      [
+        IMCMessageTypeEnum.EditorAppRequestWorkspace,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          return {
+            id: editorContext?.editorStates.currentWorkspace?.id,
+          };
+        },
+      ]
     ]);
 
     return newMap;
