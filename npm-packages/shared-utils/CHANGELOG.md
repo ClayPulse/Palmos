@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.57
+
+### Patch Changes
+
+- Add rebounce option for useFile hook's saveFile
+
 ## 0.1.1-beta.56
 
 ### Patch Changes
