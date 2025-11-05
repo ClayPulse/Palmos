@@ -2,7 +2,7 @@
 Pulse Editor
 </h1>
 
-Pulse Editor is a modular, cross-platform, AI-powered creativity platform with federated app collaboration and extensible workflows.
+Pulse Editor is a modular, cross-platform, AI-powered productivity platform with federated app collaboration and extensible workflows.
 
 > [!IMPORTANT]
 > 🎉🎉Pulse Editor is now in beta 2. And we won a hackathon! Read more [here](#major-beta-release-2-we-are-here).
@@ -43,6 +43,30 @@ Pulse Editor is not just another drag-and-drop backend automation tool, it is a 
   </tr>
 </table>
 
+# Use Cases
+
+## 1. Vibe Coding
+
+Running vibe coding workflow in canvas view allows you to develop software on any device, with help of vibe coding agent.
+
+### Dev Server Live preview
+
+![VibeCoding_LivePrevew](https://cdn.pulse-editor.com/assets/VibeCode_LivePreview.gif)
+
+### Vibe Coding agent -- terminal control
+
+![VibeCoding_TerminalControl](https://cdn.pulse-editor.com/assets/VibeCode_TerminalControlAgent.gif)
+
+### Vibe Coding agent -- code modification
+
+![VibeCoding_CodeEditorControl](https://cdn.pulse-editor.com/assets/VibeCode_CodeEditorControlAgent.gif)
+
+## 2. Serverless ComfyUI Image/Video Generation (WIP)
+
+You can run workflows with [Pulse App ComfyUI Workflow](https://github.com/Shellishack/pulse-app-comfyui-workflow).
+
+## 3. Video Editing (WIP)
+
 ## Remote or local workspace
 
 With Pulse Editor, you can manage your file system within interface.
@@ -76,28 +100,6 @@ have to start a [remote workspace](#start-a-remote-workspace) first.
 ### Open and interact with workspace terminal
 
 ![Workspace_CreateTerminalInWorkspace](https://cdn.pulse-editor.com/assets/Workspace_CreateTerminalInWorkspace.gif)
-
-# Use Cases
-
-## 1. Vibe Coding
-
-Running vibe coding workflow in canvas view allows you to develop software on any device, with help of vibe coding agent.
-
-### Dev Server Live preview
-
-![VibeCoding_LivePrevew](https://cdn.pulse-editor.com/assets/VibeCode_LivePreview.gif)
-
-### Vibe Coding agent -- terminal control
-
-![VibeCoding_TerminalControl](https://cdn.pulse-editor.com/assets/VibeCode_TerminalControlAgent.gif)
-
-### Vibe Coding agent -- code modification
-
-![VibeCoding_CodeEditorControl](https://cdn.pulse-editor.com/assets/VibeCode_CodeEditorControlAgent.gif)
-
-## 2. Video Editing
-
-## 3. (More to come)
 
 # Beta Release Roadmap
 
