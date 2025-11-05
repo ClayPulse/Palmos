@@ -1,6 +1,6 @@
 {
   "name": "@pulse-editor/react-api",
-  "version": "0.1.1-beta.56",
+  "version": "0.1.1-beta.57",
   "main": "dist/main.js",
   "files": [
     "dist"
@@ -37,8 +37,11 @@
     "typescript-eslint": "^8.30.1"
   },
   "peerDependencies": {
-    "@pulse-editor/shared-utils": "0.1.1-beta.56",
+    "@pulse-editor/shared-utils": "0.1.1-beta.57",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "use-debounce": "^10.0.6"
   }
 }

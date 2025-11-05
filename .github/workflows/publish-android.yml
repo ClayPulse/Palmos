@@ -1,0 +1,92 @@
+name: Publish Android
+
+env:
+  ANDROID_SDK_VERSION: "36.1.0"
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        target: [android]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: "temurin"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK build tools
+        run: |
+          sdkmanager "build-tools;${{env.ANDROID_SDK_VERSION}}"
+          echo "$ANDROID_SDK_ROOT/build-tools/${{env.ANDROID_SDK_VERSION}}" >> $GITHUB_PATH
+
+      - name: Get Keystore
+        run: |
+          mkdir ~/.keystore 
+          echo ${{ secrets.ANDROID_KEYSTORE }} | base64 --decode > ~/.keystore/pulse-editor.keystore
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install shared-utils dependencies
+        run: npm install --workspace=npm-packages/shared-utils
+
+      - name: Build shared-utils
+        run: npm run shared-utils-build
+
+      - name: Install web dependencies
+        run: npm install --workspace=web
+
+      - name: Save public env variables into .env file
+        run: |
+          echo NEXT_PUBLIC_BACKEND_URL=$NEXT_PUBLIC_BACKEND_URL >> ./web/.env
+          echo NEXT_PUBLIC_CDN_URL=$NEXT_PUBLIC_CDN_URL >> ./web/.env
+          echo NEXT_PUBLIC_STORAGE_CONTAINER=$NEXT_PUBLIC_STORAGE_CONTAINER >> ./web/.env
+        env:
+          NEXT_PUBLIC_BACKEND_URL: ${{ vars.NEXT_PUBLIC_BACKEND_URL }}
+          NEXT_PUBLIC_CDN_URL: ${{ vars.NEXT_PUBLIC_CDN_URL }}
+          NEXT_PUBLIC_STORAGE_CONTAINER: ${{ vars.NEXT_PUBLIC_STORAGE_CONTAINER }}
+
+      - name: Build Web App
+        run: npm run web-build
+
+      - name: Install mobile dependencies
+        run: npm install --workspace=mobile
+
+      - name: Change Android Project Permission
+        run: chmod +x mobile/android/gradlew
+
+      - name: Sync Capacitor App
+        run: npx cap sync
+        working-directory: mobile
+
+      - name: Build Capacitor App
+        run: npx cap build android --keystorepath ~/.keystore/pulse-editor.keystore --keystorepass ${{ secrets.ANDROID_KEYSTORE_PASS }} --keystorealias ${{ secrets.ANDROID_KEYSTORE_ALIAS }} --keystorealiaspass ${{ secrets.ANDROID_KEYSTORE_ALIAS_PASS }} --androidreleasetype AAB --signing-type jarsigner
+        working-directory: mobile
+
+      - name: Publish to Play Store
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.SERVICE_ACCOUNT_JSON }}
+          packageName: com.pulse_editor.app
+          releaseFiles: mobile/android/app/build/outputs/bundle/release/app-release-signed.aab
+          track: internal
+          status: draft

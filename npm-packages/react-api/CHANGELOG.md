@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.57
+
+### Patch Changes
+
+- Add rebounce option for useFile hook's saveFile
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.57
+
 ## 0.1.1-beta.56
 
 ### Patch Changes
