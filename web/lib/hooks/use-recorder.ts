@@ -49,6 +49,10 @@ export default function useRecorder() {
     });
   }
 
+  /**
+   * Interrupt and stop the recording
+   *
+   */
   function stopRecording() {
     if (!isRecording) {
       return;

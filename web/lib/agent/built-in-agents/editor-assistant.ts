@@ -60,7 +60,7 @@ Pulse Editor extensions and its features.`,
     },
     {
       access: AccessEnum.public,
-      name: "useExtensionCommands",
+      name: "useAppActions",
       parameters: {
         chatHistory: {
           type: "string",

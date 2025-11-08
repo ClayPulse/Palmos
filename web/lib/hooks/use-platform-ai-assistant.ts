@@ -210,7 +210,7 @@ export default function usePlatformAIAssistant() {
     processAssistantResult();
   }, [assistantResult]);
 
-  async function gatherActionArgs(userInput?: UserMessage) {
+  async function gatherAssistantArgs(userTextMessage?: string) {
     function gatherActions() {
       return actions.map((cmd) => ({
         cmdName: cmd.action.name,
@@ -286,7 +286,7 @@ export default function usePlatformAIAssistant() {
 
     return {
       chatHistory: [],
-      userMessage: userInput,
+      userMessage: userTextMessage,
       activeTabView: tabView,
       availableCommands: gatherActions(),
       projectDirTree: await gatherProjectDirTree(),
@@ -315,11 +315,13 @@ export default function usePlatformAIAssistant() {
       },
     ]);
 
-    const args = await gatherActionArgs(input);
+    const text = input.content.text ?? await 
+
+    const args = await gatherAssistantArgs(input);
 
     const result = await runAgentMethodCloud(
       editorAssistantAgent,
-      "useExtensionCommands",
+      "useAppActions",
       args,
       (chunk) => {
         // Update history as new chunks arrive
@@ -379,7 +381,7 @@ export default function usePlatformAIAssistant() {
       }
 
       const agent = editorAssistantAgent;
-      const methodName = "useExtensionCommands";
+      const methodName = "useAppActions";
 
       // Pipe the LLM result to Speech2Speech
       runSpeech2Speech(async (inputText: string) => {
@@ -394,11 +396,7 @@ export default function usePlatformAIAssistant() {
 
         setUserVoiceMessage(inputText);
 
-        const args = await gatherActionArgs({
-          content: {
-            text: inputText,
-          },
-        });
+        const args = await gatherAssistantArgs(inputText);
 
         const result = await runAgentMethodLocal(
           llmKey,

@@ -26,7 +26,7 @@ export default function VoiceIndicator() {
       {isShowingIndicator && (
         <motion.div
           initial={{ y: -56 }}
-          animate={{ y: 48 }}
+          animate={{ y: 0 }}
           exit={{ y: -56 }}
           transition={{ duration: 0.1 }}
           className="pointer-events-none absolute flex h-full w-full items-center justify-center"

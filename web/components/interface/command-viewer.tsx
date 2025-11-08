@@ -1,4 +1,5 @@
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
+import useRecorder from "@/lib/hooks/use-recorder";
 import useScopedActions from "@/lib/hooks/use-scoped-actions";
 import { ScopedAction } from "@/lib/types";
 import {
@@ -29,11 +30,12 @@ export default function CommandViewer() {
 
   const { chatWithAssistant, history } = usePlatformAIAssistant();
   const { actions, runScopedAction, setKeywordFilter } = useScopedActions();
+  const { recordVAD, stopRecording, isRecording } = useRecorder();
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectActionIndex, setSelectActionIndex] = useState(-1);
   const [inputTextValue, setInputTextValue] = useState("");
-  const [isInputVoice, setIsInputVoice] = useState(false);
+  // const [isInputVoice, setIsInputVoice] = useState(false);
   const [isOutputVoice, setIsOutputVoice] = useState(false);
   const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
 
@@ -313,11 +315,28 @@ export default function CommandViewer() {
                     isIconOnly
                     variant="light"
                     onPress={() => {
-                      setIsInputVoice((prev) => !prev);
+                      async function recordInput() {
+                        const audio = await recordVAD();
+                        console.log("Recorded audio input:", audio);
+
+                        // Send audio to backend
+                        const result = await chatWithAssistant(
+                          {
+                            content: { audio: audio },
+                          },
+                          false,
+                        );
+                      }
+
+                      if (!isRecording) {
+                        recordInput();
+                      } else {
+                        stopRecording();
+                      }
                     }}
                     size="sm"
                   >
-                    {isInputVoice ? (
+                    {isRecording ? (
                       <Icon name="mic" className="text-primary" />
                     ) : (
                       <Icon name="mic_off" variant="outlined" />
@@ -341,6 +360,7 @@ export default function CommandViewer() {
                     ...prev,
                     isCommandViewerOpen: false,
                   }));
+                  stopRecording();
                 }}
                 size="sm"
               >

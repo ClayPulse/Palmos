@@ -1,6 +1,6 @@
 import { AIProviderOption } from "@/lib/types";
 
-type ProviderName = "openai";
+type ProviderName = "openai" | "pulse-editor";
 
 export const sttProviderOptions: {
   [key in ProviderName]: AIProviderOption;
@@ -19,6 +19,16 @@ export const sttProviderOptions: {
       },
       {
         model: "gpt-4o-mini-transcribe",
+        isSupported: true,
+      },
+    ],
+  },
+  "pulse-editor": {
+    provider: "pulseEditor",
+    isSupported: false,
+    models: [
+      {
+        model: "pulse_stt",
         isSupported: true,
       },
     ],

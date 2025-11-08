@@ -10,7 +10,7 @@ import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { SideMenuTabEnum } from "./enums";
 import { BaseLLM } from "./modalities/llm/llm";
-import { BaseSTT } from "./modalities/stt/stt";
+import { BaseSTT } from "./modalities/stt/base-stt";
 import { BaseTTS } from "./modalities/tts/tts";
 
 // #region Editor Context

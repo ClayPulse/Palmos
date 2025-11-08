@@ -7,7 +7,7 @@ import {
 import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
 import { getLLMModel } from "@/lib/modalities/llm/llm";
 import { recognizeText } from "@/lib/modalities/ocr/ocr";
-import { getSTTModel } from "@/lib/modalities/stt/stt";
+import { getSTTModel } from "@/lib/modalities/stt/base-stt";
 import { getTTSModel } from "@/lib/modalities/tts/tts";
 import {
   getDefaultImageModelConfig,
