@@ -1,4 +1,4 @@
-export function parseJsonChunk(chunk: string) {
+export function parseJsonChunk(chunk: string): any[] {
   const jsonObjects = [];
   let braceCount = 0;
   let current = "";

@@ -33,9 +33,6 @@ export default function CommandViewer() {
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectActionIndex, setSelectActionIndex] = useState(-1);
   const [inputTextValue, setInputTextValue] = useState("");
-  const [inputAudioValue, setInputAudioValue] = useState<
-    ReadableStream<ArrayBuffer> | undefined
-  >(undefined);
   const [isInputVoice, setIsInputVoice] = useState(false);
   const [isOutputVoice, setIsOutputVoice] = useState(false);
   const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
@@ -239,31 +236,31 @@ export default function CommandViewer() {
     } else if (isEnterPressed && !isControlPressed) {
       // Chat with assistant if ctrl is not pressed
       console.log("Chatting with assistant");
-      if (isInputVoice) {
-        chatWithAssistant(inputAudioValue, isOutputVoice).then(() => {
-          setIsWaitingAssistant(true);
-        });
-      } else {
-        if (inputTextValue === "") {
-          if (selectActionIndex !== -1) {
-            addToast({
-              color: "warning",
-              title: "Chat input is empty",
-              description: `Did you mean to run the command: ${actions[selectActionIndex].action.name}? Use Ctrl + Enter to run the selected command.`,
-            });
-          } else {
-            addToast({
-              color: "warning",
-              title: "Chat input is empty",
-              description: "Please enter a message or use voice input.",
-            });
-          }
-          return;
+
+      if (inputTextValue === "") {
+        if (selectActionIndex !== -1) {
+          addToast({
+            color: "warning",
+            title: "Chat input is empty",
+            description: `Did you mean to run the command: ${actions[selectActionIndex].action.name}? Use Ctrl + Enter to run the selected command.`,
+          });
+        } else {
+          addToast({
+            color: "warning",
+            title: "Chat input is empty",
+            description: "Please enter a message or use voice input.",
+          });
         }
-        chatWithAssistant(inputTextValue, isOutputVoice).then(() => {
-          setIsWaitingAssistant(true);
-        });
+        return;
       }
+      chatWithAssistant(
+        {
+          content: { text: inputTextValue },
+        },
+        isOutputVoice,
+      ).then(() => {
+        setIsWaitingAssistant(true);
+      });
     } else if (isArrowUpPressed) {
       setSelectActionIndex((prev) =>
         prev === 0 ? actions.length - 1 : prev - 1,
@@ -330,7 +327,7 @@ export default function CommandViewer() {
               )}
               {inputTextValue && (
                 <Kbd>
-                  <div className="flex gap-1 items-center">
+                  <div className="flex items-center gap-1">
                     <Icon name="auto_awesome" />
                     Enter
                   </div>
@@ -356,7 +353,7 @@ export default function CommandViewer() {
         />
 
         {history.length > 0 && (
-          <div className="bg-content1 flex w-full sm:w-[480px] flex-col overflow-y-hidden rounded-2xl px-2 pt-2 shadow-md">
+          <div className="bg-content1 flex w-full flex-col overflow-y-hidden rounded-2xl px-2 pt-2 shadow-md sm:w-[480px]">
             <div
               className="flex flex-col gap-y-2 overflow-y-auto pb-2"
               ref={historyRef}
@@ -436,7 +433,7 @@ export default function CommandViewer() {
           </div>
         )}
         {isArgsInputOpen && actions[selectActionIndex] && (
-          <div className="bg-content1 w-80 rounded-2xl shadow-md p-4">
+          <div className="bg-content1 w-80 rounded-2xl p-4 shadow-md">
             <p className="mb-2 font-bold">Command Action Arguments</p>
             {Object.entries(actions[selectActionIndex].action.parameters)
               .filter(([_, param]) => param.type !== "app-instance")

@@ -1,20 +1,18 @@
 "use client";
 
+import { colors } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext } from "react";
-import { EditorContext } from "../providers/editor-context-provider";
 import {
   BounceLoader,
   ClockLoader,
   PuffLoader,
   PulseLoader,
 } from "react-spinners";
-import { colors } from "@heroui/react";
-import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
+import { EditorContext } from "../providers/editor-context-provider";
 
 export default function VoiceIndicator() {
   const editorContext = useContext(EditorContext);
-  const {} = usePlatformAIAssistant();
 
   const isShowingIndicator =
     editorContext?.editorStates?.isRecording ||
@@ -58,7 +56,7 @@ export default function VoiceIndicator() {
                   : editorContext?.editorStates.isSpeaking
                     ? "Speaking"
                     : editorContext.editorStates.isLoadingRecorder
-                      ? "Loading"
+                      ? "Loading Mic"
                       : "Waiting"}
             </p>
           </div>

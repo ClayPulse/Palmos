@@ -1,9 +1,9 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import { BaseSTT, getSTTModel } from "../modalities/stt/stt";
 import { BaseTTS, getTTSModel } from "../modalities/tts/tts";
 import { getAPIKey } from "../settings/api-manager-utils";
-import { BaseSTT, getSTTModel } from "../modalities/stt/stt";
-import toast from "react-hot-toast";
 
 export default function useSpeech2Speech() {
   const editorContext = useContext(EditorContext);
@@ -47,7 +47,7 @@ export default function useSpeech2Speech() {
         return;
       }
 
-      const audio = editorContext?.editorStates.inputAudioStream;
+      const audio = editorContext?.editorStates.inputDeviceBuffers?.audioBuffer;
       if (audio) {
         editorContext?.setEditorStates((prev) => ({
           ...prev,
@@ -91,7 +91,11 @@ export default function useSpeech2Speech() {
       toast.error("Error processing input audio. Please try again.");
       stopSpeech2Speech();
     });
-  }, [editorContext?.editorStates.inputAudioStream, sttModel, isRunning]);
+  }, [
+    editorContext?.editorStates.inputDeviceBuffers?.audioBuffer,
+    sttModel,
+    isRunning,
+  ]);
 
   // Process the transcript via a text processing function
   useEffect(() => {

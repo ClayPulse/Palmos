@@ -13,6 +13,7 @@ import {
 import toast from "react-hot-toast";
 import { getLLMModel } from "../modalities/llm/llm";
 import { fetchAPI } from "../pulse-editor-website/backend";
+import { PlatformAssistantMessage } from "../types";
 import { parseJsonChunk } from "./stream-chunk-parser";
 
 export function getAgentLLMConfig(agent: Agent, methodName: string) {
@@ -24,7 +25,7 @@ export async function runAgentMethodCloud(
   agent: Agent,
   methodName: string,
   args: Record<string, any>,
-  onChunkUpdate?: (chunk: any) => void,
+  onChunkUpdate?: (chunk: PlatformAssistantMessage) => void,
 ): Promise<any> {
   const method = agent.availableMethods.find((m) => m.name === methodName);
   if (!method) {
@@ -57,21 +58,55 @@ export async function runAgentMethodCloud(
   const reader = stream.getReader();
   const decoder = new TextDecoder("utf-8");
   let done = false;
-  let result: any;
+  const result: PlatformAssistantMessage = {
+    content: {},
+    meta: {},
+  };
 
   while (!done) {
     const { done: readerDone, value } = await reader.read();
     done = readerDone;
     if (value) {
       const chunk = decoder.decode(value, { stream: !done });
-      const parsedChunks = parseJsonChunk(chunk);
+      // The returned chunk contains raw stream data, which may include multiple JSON objects in text
+      // field; and only pieces of audio data in audio field.
+      const parsedChunk = JSON.parse(chunk) as PlatformAssistantMessage;
 
-      const latestChunkValue = parsedChunks[parsedChunks.length - 1];
+      // Update text
+      if (parsedChunk.content.text) {
+        const texts = parseJsonChunk(parsedChunk.content.text);
 
-      result = latestChunkValue;
+        const latestTextValue = texts[texts.length - 1];
+        result.content.text = JSON.stringify(latestTextValue);
+      }
 
+      // Update audio
+      if (parsedChunk.content.audio) {
+        // Append the latest audio data to the result audio buffer
+        const latestAudioValue = parsedChunk.content.audio;
+        const combinedAudio = result.content.audio
+          ? (() => {
+              if (!latestAudioValue) return result.content.audio;
+              const oldAudio = new Uint8Array(result.content.audio);
+              const newAudio = new Uint8Array(latestAudioValue);
+              const combined = new Uint8Array(
+                oldAudio.length + newAudio.length,
+              );
+              combined.set(oldAudio);
+              combined.set(newAudio, oldAudio.length);
+              return combined.buffer;
+            })()
+          : latestAudioValue;
+
+        result.content.audio = combinedAudio;
+      }
+
+      // Update meta
+      result.meta = parsedChunk.meta;
+
+      // Run update callback
       if (onChunkUpdate) {
-        onChunkUpdate(latestChunkValue);
+        onChunkUpdate(result);
       }
     }
   }

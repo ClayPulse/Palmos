@@ -29,7 +29,6 @@ const defaultEditorStates: EditorStates = {
   isListening: false,
   isThinking: false,
   isSpeaking: false,
-  inputAudioStream: undefined,
   isToolbarOpen: true,
   explorerSelectedNodeRefs: [],
   pressedKeys: [],

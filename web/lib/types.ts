@@ -44,12 +44,6 @@ export type EditorStates = {
   thinkingText?: string;
   // Is the agent speaking (reading the output)
   isSpeaking: boolean;
-  // Audio input stream
-  // This is consumed when recording is processed
-  inputAudioStream: ReadableStream | undefined;
-  // // Audio output stream
-  // // This is consumed when audio is played
-  // outputAudioStream: ReadableStream<Uint8Array> | undefined;
 
   /* Toolbar */
   isToolbarOpen: boolean;
@@ -98,6 +92,14 @@ export type EditorStates = {
   // Drag control
   isDraggingOverCanvas?: boolean;
   dropMessage?: string;
+
+  inputDeviceBuffers?: {
+    audioBuffer?: ArrayBuffer;
+  };
+
+  outputDeviceBuffers?: {
+    audioBuffer?: ArrayBuffer;
+  };
 };
 
 /**
@@ -416,7 +418,7 @@ export type PlatformAssistantHistory = {
 export type UserMessage = {
   content: {
     text?: string;
-    audio?: ReadableStream | undefined;
+    audio?: ArrayBuffer;
   };
   meta?: any;
 };
@@ -424,7 +426,7 @@ export type UserMessage = {
 export type PlatformAssistantMessage = {
   content: {
     text?: string;
-    audio?: ReadableStream | undefined;
+    audio?: ArrayBuffer;
   };
   // Other data used to interact with the platform
   meta?: any;

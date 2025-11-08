@@ -14,6 +14,7 @@ import {
   CanvasViewConfig,
   PlatformAssistantHistory,
   TabView,
+  UserMessage,
 } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
@@ -144,7 +145,12 @@ export default function usePlatformAIAssistant() {
             commandResult: actionResult,
           },
           (chunk) => {
-            if (!chunk.analysis) {
+            if (!chunk.content.text) {
+              return;
+            }
+            const textJson = JSON.parse(chunk.content.text);
+
+            if (!textJson.analysis) {
               return;
             }
             // Update this in the history
@@ -152,7 +158,7 @@ export default function usePlatformAIAssistant() {
               const newHistory = [...prev];
               if (newHistory.length > 0) {
                 newHistory[newHistory.length - 1].message.content.text =
-                  previousMessage + "\n\n### Result:\n" + chunk.analysis;
+                  previousMessage + "\n\n### Result:\n" + textJson.analysis;
               }
               return newHistory;
             });
@@ -204,8 +210,8 @@ export default function usePlatformAIAssistant() {
     processAssistantResult();
   }, [assistantResult]);
 
-  async function getUseExtensionCommandsArgs(userInput: string) {
-    function getCommandsArgs() {
+  async function gatherActionArgs(userInput?: UserMessage) {
+    function gatherActions() {
       return actions.map((cmd) => ({
         cmdName: cmd.action.name,
         parameters: Object.entries(cmd.action.parameters).map(
@@ -218,7 +224,7 @@ export default function usePlatformAIAssistant() {
       }));
     }
 
-    async function getProjectDirTree() {
+    async function gatherProjectDirTree() {
       const currentPath =
         editorContext?.persistSettings?.projectHomePath &&
         editorContext?.editorStates.project
@@ -282,87 +288,67 @@ export default function usePlatformAIAssistant() {
       chatHistory: [],
       userMessage: userInput,
       activeTabView: tabView,
-      availableCommands: getCommandsArgs(),
-      projectDirTree: await getProjectDirTree(),
+      availableCommands: gatherActions(),
+      projectDirTree: await gatherProjectDirTree(),
     };
   }
 
-  async function runCloudAssistant(
-    input: ReadableStream | string | undefined,
-    isOutputAudio: boolean,
-  ) {
+  async function runCloudAssistant(input: UserMessage, isOutputAudio: boolean) {
     if (!editorContext) {
       return;
     }
 
-    if (input instanceof ReadableStream) {
+    if (input.content.audio && getPlatform() === PlatformEnum.VSCode) {
       if (getPlatform() === PlatformEnum.VSCode) {
         toast.error(
           "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
         );
         return;
       }
-    } else if (typeof input === "string") {
-      setHistory((prev) => [
-        ...prev,
-        {
-          role: "user",
-          message: {
-            content: {
-              text: input,
-            },
-          },
-        },
-      ]);
-
-      const args = await getUseExtensionCommandsArgs(input);
-
-      const result = await runAgentMethodCloud(
-        editorAssistantAgent,
-        "useExtensionCommands",
-        args,
-        (chunk) => {
-          // Update history as new chunks arrive
-          setHistory((prev) => {
-            const newHistory = [...prev];
-            if (
-              newHistory.length > 0 &&
-              newHistory[newHistory.length - 1].role === "assistant"
-            ) {
-              newHistory[newHistory.length - 1].message.content.text =
-                chunk.response;
-              newHistory[newHistory.length - 1].message.meta = chunk;
-            } else {
-              newHistory.push({
-                role: "assistant",
-                message: {
-                  content: {
-                    text: chunk.response,
-                  },
-                  meta: chunk,
-                },
-              });
-            }
-
-            return newHistory;
-          });
-        },
-      );
-
-      // TODO: use latest history instead of raw agent result
-      setAssistantResult(result);
-
-      return result;
-    } else {
-      toast.error("Input is empty.");
-      return;
     }
+
+    setHistory((prev) => [
+      ...prev,
+      {
+        role: "user",
+        message: input,
+      },
+    ]);
+
+    const args = await gatherActionArgs(input);
+
+    const result = await runAgentMethodCloud(
+      editorAssistantAgent,
+      "useExtensionCommands",
+      args,
+      (chunk) => {
+        // Update history as new chunks arrive
+        setHistory((prev) => {
+          const newHistory = [...prev];
+          if (
+            newHistory.length > 0 &&
+            newHistory[newHistory.length - 1].role === "assistant"
+          ) {
+            newHistory[newHistory.length - 1].message = chunk;
+          } else {
+            newHistory.push({
+              role: "assistant",
+              message: chunk,
+            });
+          }
+
+          return newHistory;
+        });
+      },
+    );
+
+    // TODO: use latest history instead of raw agent result
+    setAssistantResult(result);
+
+    return result;
   }
 
-  async function runLocalAssistant(
-    input: ReadableStream | string | undefined,
-    isOutputAudio: boolean,
-  ) {
+  async function runLocalAssistant(input: UserMessage, isOutputAudio: boolean) {
     if (!editorContext) {
       return;
     }
@@ -408,7 +394,11 @@ export default function usePlatformAIAssistant() {
 
         setUserVoiceMessage(inputText);
 
-        const args = await getUseExtensionCommandsArgs(inputText);
+        const args = await gatherActionArgs({
+          content: {
+            text: inputText,
+          },
+        });
 
         const result = await runAgentMethodLocal(
           llmKey,
@@ -440,10 +430,7 @@ export default function usePlatformAIAssistant() {
    * @param input User input, can be audio (ReadableStream) or text (string).
    * @param isOutputAudio Whether the output should be audio.
    */
-  async function chatWithAssistant(
-    input: ReadableStream | string | undefined,
-    isOutputAudio: boolean,
-  ) {
+  async function chatWithAssistant(input: UserMessage, isOutputAudio: boolean) {
     if (isUseManagedCloud ?? true) {
       runCloudAssistant(input, isOutputAudio);
     } else {
