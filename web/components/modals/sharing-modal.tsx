@@ -21,6 +21,7 @@ export default function SharingModal({
   const params = useSearchParams();
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
+  const workflow = params.get("workflow");
 
   const tabItems: TabItem[] = [
     {
@@ -139,7 +140,7 @@ export default function SharingModal({
                   Share your workspace via this URL
                 </p>
 
-                <p className="font-bold break-all">{`${window.location.origin}?app=${app}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`}</p>
+                <p className="font-bold break-all">{`${window.location.origin}?${app ? `app=${app}` : workflow ? `workflow=${workflow}` : ""}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`}</p>
                 <Button
                   color="primary"
                   onPress={() => {

@@ -90,14 +90,14 @@ function DraggableAppPreviewCard({ ext }: { ext: ExtensionApp }) {
         isShowCompatibleChip={false}
         isShowContextMenu={false}
         isDisableButtonPress={!isDragFinished}
-        onPress={(ext) => {
+        onPress={async (ext) => {
           const config: AppViewConfig = {
             app: ext.config.id,
             viewId: `${ext.config.id}-${v4()}`,
             recommendedHeight: ext.config.recommendedHeight,
             recommendedWidth: ext.config.recommendedWidth,
           };
-          createAppViewInCanvasView(config);
+          await createAppViewInCanvasView(config);
           console.log("Is Landscape:", isLandscape);
           if (!isLandscape) {
             editorContext?.setEditorStates((prev) => ({

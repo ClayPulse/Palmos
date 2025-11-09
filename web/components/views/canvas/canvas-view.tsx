@@ -24,6 +24,7 @@ import {
   ReactFlow,
   Edge as ReactFlowEdge,
   Node as ReactFlowNode,
+  ReactFlowProvider,
   reconnectEdge,
   useReactFlow,
   useViewport,
@@ -377,6 +378,10 @@ export const MemoizedCanvasView = memo(
     config: CanvasViewConfig;
     isActive: boolean;
     tabName: string;
-  }) => <CanvasView config={config} isActive={isActive} tabName={tabName} />,
+  }) => (
+    <ReactFlowProvider>
+      <CanvasView config={config} isActive={isActive} tabName={tabName} />
+    </ReactFlowProvider>
+  ),
 );
 MemoizedCanvasView.displayName = "MemoizedCanvasView";

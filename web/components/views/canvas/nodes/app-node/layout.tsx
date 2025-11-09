@@ -428,12 +428,15 @@ function DroppableInputHandle({
   node: ReactFlowNode<AppNodeData>;
   editorContext: EditorContextType | undefined;
 }) {
+  const { updateNodeData } = useReactFlow();
+
   const { setNodeRef, isOver } = useDroppable({
     id: `node-handle-input-${node.id}-${paramName}`,
     data: {
       viewId: node.id,
       node,
       paramName,
+      updateNodeData,
     },
   });
 
