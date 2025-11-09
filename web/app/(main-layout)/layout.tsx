@@ -7,7 +7,6 @@ import PlatformAssistantProvider from "@/components/providers/platform-assistant
 import RemoteModuleProvider from "@/components/providers/remote-module-provider";
 import WrappedHeroUIProvider from "@/components/providers/wrapped-hero-ui-provider";
 import { Analytics } from "@vercel/analytics/next";
-import { ReactFlowProvider } from "@xyflow/react";
 import "material-icons/iconfont/material-icons.css";
 import type { Metadata } from "next";
 import { Suspense } from "react";
@@ -33,18 +32,16 @@ export default function RootLayout({
             <EditorContextProvider>
               <CapacitorProvider>
                 <InterModuleCommunicationProvider>
-                  <ReactFlowProvider>
-                    <DndProvider>
-                      <RemoteModuleProvider isPreventingCSS={true}>
-                        <Toaster />
-                        <Nav>
-                          <PlatformAssistantProvider>
-                            {children}
-                          </PlatformAssistantProvider>
-                        </Nav>
-                      </RemoteModuleProvider>
-                    </DndProvider>
-                  </ReactFlowProvider>
+                  <DndProvider>
+                    <RemoteModuleProvider isPreventingCSS={true}>
+                      <Toaster />
+                      <Nav>
+                        <PlatformAssistantProvider>
+                          {children}
+                        </PlatformAssistantProvider>
+                      </Nav>
+                    </RemoteModuleProvider>
+                  </DndProvider>
                 </InterModuleCommunicationProvider>
               </CapacitorProvider>
             </EditorContextProvider>
