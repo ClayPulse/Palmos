@@ -13,7 +13,6 @@ import { ContextMenuState, ExtensionApp } from "@/lib/types";
 import { DraggableAttributes } from "@dnd-kit/core";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import {
-  addToast,
   Button,
   Chip,
   Skeleton,
@@ -91,7 +90,7 @@ export default function AppPreviewCard({
     undefined,
   );
 
-  const [showMFVersionInfo, setShowMFVersionInfo] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
   useEffect(() => {
     async function fetchVersions() {
@@ -170,13 +169,13 @@ export default function AppPreviewCard({
         className="relative h-full min-h-32 w-full"
         onMouseEnter={() => {
           if (getPlatform() !== PlatformEnum.Capacitor) {
-            setIsShowInfo(true);
+            setIsHover(true);
           }
         }}
         // Hide show info when user taps outside of the modal
         onMouseLeave={() => {
           if (getPlatform() !== PlatformEnum.Capacitor) {
-            setIsShowInfo(false);
+            setIsHover(false);
           }
         }}
       >
@@ -275,9 +274,6 @@ export default function AppPreviewCard({
               return;
             }
 
-            addToast({
-              title: "App Preview Clicked",
-            });
             if (onPress) {
               onPress(extension);
             } else {
@@ -323,7 +319,7 @@ export default function AppPreviewCard({
             <Skeleton className="h-full w-full" isLoaded={false}></Skeleton>
           )}
         </Button>
-        {isShowInfo && (
+        {(isShowInfo || isHover) && (
           <div className="absolute bottom-0.5 left-1/2 flex w-fit -translate-x-1/2 justify-center gap-x-0.5">
             {isShowUseButton && (
               <Button

@@ -29,6 +29,8 @@ export default function WorkflowPreviewCard({
 
   const [isShowInfo, setIsShowInfo] = useState(false);
 
+  const [isHover, setIsHover] = useState(false);
+
   useEffect(() => {
     setIsLoaded(true);
   }, [workflow]);
@@ -54,18 +56,18 @@ export default function WorkflowPreviewCard({
   }
 
   return (
-    <div className="w-full h-full grid grid-rows-[auto_max-content_max-content] grid-cols-1">
+    <div className="grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content]">
       <div
-        className="relative h-full w-full min-h-32"
+        className="relative h-full min-h-32 w-full"
         onMouseEnter={() => {
           if (getPlatform() !== PlatformEnum.Capacitor) {
-            setIsShowInfo(true);
+            setIsHover(true);
           }
         }}
         // Hide show info when user taps outside of the modal
         onMouseLeave={() => {
           if (getPlatform() !== PlatformEnum.Capacitor) {
-            setIsShowInfo(false);
+            setIsHover(false);
           }
         }}
       >
@@ -102,7 +104,7 @@ export default function WorkflowPreviewCard({
             <Skeleton className="h-full w-full" isLoaded={false}></Skeleton>
           )}
         </Button>
-        {isShowInfo && (
+        {(isShowInfo || isHover) && (
           <div className="absolute bottom-0.5 left-1/2 flex w-full -translate-x-1/2 justify-center gap-x-0.5">
             <Button
               color="primary"
