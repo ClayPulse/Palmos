@@ -32,6 +32,9 @@ export default function BaseAppLoader({
       className="h-full w-full"
       src={src}
       sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      role="application"
+      title={moduleId}
+      aria-label={moduleId}
     />
   );
 }

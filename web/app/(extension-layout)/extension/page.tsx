@@ -43,6 +43,7 @@ export default function ExtensionPage({}) {
       setIsRegistered(true);
     }
 
+    // Load the remote module
     mfHost
       .loadRemote(`${moduleId}/main`)
       .then((module) => {
@@ -58,6 +59,46 @@ export default function ExtensionPage({}) {
       .catch((error) => {
         console.error("Error loading remote module:", error);
       });
+
+    // Patch fetch for Pulse App backend calling
+    const originalFetch = window.fetch;
+
+    const patchedFetch = async (
+      ...args: Parameters<typeof fetch>
+    ): Promise<Response> => {
+      const [resource, config] = args;
+      const url =
+        resource instanceof Request ? resource.url : resource.toString();
+
+      // Only patch relative URLs (not absolute http/https)
+      if (/^https?:\/\//i.test(url)) {
+        return originalFetch(resource, config);
+      }
+
+      const newUrl = remoteOrigin.startsWith(
+        process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com",
+      )
+        ? `${process.env.NEXT_PUBLIC_SERVER_FUNCTION_RUNNER_URL}/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
+        : remoteOrigin + url;
+
+      console.log(`[FETCH INTERCEPTED]: ${url} → ${newUrl}`);
+      console.log(`[App Info] ID: ${moduleId}, Version: ${moduleVersion}`);
+
+      const response = await originalFetch(newUrl, config);
+
+      if (!response.ok) {
+        console.warn(`Fetch Error (${response.status}) for ${url}`);
+      }
+
+      return response;
+    };
+
+    window.fetch = patchedFetch;
+
+    // // Cleanup on unmount or dependency change
+    // return () => {
+    //   window.fetch = originalFetch;
+    // };
   }, [remoteOrigin, moduleId, moduleVersion, isMounted]);
 
   if (!isMounted) {

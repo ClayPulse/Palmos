@@ -14,10 +14,11 @@ export default function NodeHandle({
 }) {
   return (
     <div
-      className="relative h-fit w-fit bg-content2 text-content2-foreground z-40 pointer-events-none px-2 py-1 flex flex-col justify-center shadow-md data-[direction=left]:rounded-l-lg data-[direction=right]:rounded-r-lg"
+      className="bg-content2 text-content2-foreground pointer-events-none relative z-40 flex h-fit w-fit flex-col justify-center px-2 py-1 shadow-md data-[direction=left]:rounded-l-lg data-[direction=right]:rounded-r-lg"
       data-direction={position}
+      aria-label="Click on node handle to open node menu"
     >
-      <div className="text-center text-sm ">
+      <div className="text-center text-sm">
         <p>{id}</p>
         <p>({param?.type.toString()})</p>
       </div>
