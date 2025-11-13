@@ -28,6 +28,8 @@ export function useTabViewManager() {
     tabViews[tabIndex],
   );
 
+  const [isCreatingTab, setIsCreatingTab] = useState<boolean>(true);
+
   // Generate tab names with index suffixes for duplicates
   const nameCounts: Record<string, number> = {};
   tabViews.forEach((view) => {
@@ -57,6 +59,14 @@ export function useTabViewManager() {
       };
     }) ?? [];
 
+  useEffect(() => {
+    // set isCreatingTab to false after 1 second so that initial tab creation does not trigger URL update
+    const timer = setTimeout(() => {
+      setIsCreatingTab(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
   // Update local states when editor context changes
   useEffect(() => {
     if (!editorContext) {
@@ -76,6 +86,8 @@ export function useTabViewManager() {
 
   // Pend workflow or app param when tab index changes
   useEffect(() => {
+    if (isCreatingTab) return;
+
     if (activeTabView) {
       if (activeTabView.type === ViewModeEnum.App) {
         const appConfig = activeTabView.config as AppViewConfig;
@@ -87,7 +99,7 @@ export function useTabViewManager() {
     } else {
       router.push(`/`);
     }
-  }, [activeTabView]);
+  }, [activeTabView, isCreatingTab]);
 
   function selectTab(newIndex: number) {
     if (!editorContext) {
@@ -278,6 +290,8 @@ export function useTabViewManager() {
       throw new Error("IMC context is not available");
     }
 
+    setIsCreatingTab(true);
+
     const newTabView: TabView = {
       type: ViewModeEnum.App,
       config: appConfig,
@@ -307,6 +321,8 @@ export function useTabViewManager() {
     } else if (!imcContext) {
       throw new Error("IMC context is not available");
     }
+
+    setIsCreatingTab(true);
 
     // Prohibit creating canvas if any app's view ID in the canvas already exists
     const existViewId = canvasConfig.appConfigs?.find((appConfig) =>

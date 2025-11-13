@@ -1,9 +1,13 @@
 "use client";
 
+import Icon from "@/components/misc/icon";
 import { PlatformEnum } from "@/lib/enums";
+import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { AppInfoModalContent } from "@/lib/types";
 import { SafeArea } from "@capacitor-community/safe-area";
+import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
 import AppInfoModal from "../../modals/app-info-modal";
@@ -15,6 +19,18 @@ import Loading from "../status-screens/loading";
 import NavSideMenu from "./nav-side-menu";
 import NavTopBar from "./nav-top-bar";
 
+import packageJson from "../../../../package.json";
+import readme from "../../../../README.md";
+
+const appInfo: AppInfoModalContent = {
+  name: "Pulse Editor",
+  version: packageJson.version,
+  author: "ClayPulse",
+  license: "MIT",
+  url: "https://pulse-editor.com",
+  readme: readme,
+};
+
 export default function Nav({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
 
@@ -23,6 +39,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   const { setTheme, resolvedTheme } = useTheme();
   const { session, isLoading: isLoadingSession, signIn } = useAuth();
+  const { openAppInfoModal } = useAppInfo();
 
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isShowNavbar, setIsShowNavbar] = useState(true);
@@ -103,8 +120,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         <SharingModal isOpen={isSharingOpen} setIsOpen={setIsSharingOpen} />
       )}
 
-      <AppInfoModal />
-
       <div className="grid h-full w-full grid-cols-[max-content_auto]">
         <div className="h-full w-full overflow-y-hidden">
           {isShowNavbar && (
@@ -126,6 +141,18 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           <div className={`flex h-full w-full overflow-hidden`}>{children}</div>
         </div>
       </div>
+
+      <Button
+        isIconOnly
+        className="absolute right-2 bottom-2"
+        variant="light"
+        onPress={() => {
+          openAppInfoModal(appInfo);
+        }}
+      >
+        <Icon name="info" />
+      </Button>
+      <AppInfoModal />
     </div>
   );
 }
