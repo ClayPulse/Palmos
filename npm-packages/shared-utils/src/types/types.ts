@@ -139,6 +139,8 @@ export type AppConfig = {
   displayName?: string;
   description?: string;
   materialIcon?: string;
+  license?: string;
+  repository?: string;
   appType?: AppTypeEnum;
   fileTypes?: string[];
   thumbnail?: string;

@@ -1,4 +1,5 @@
 import { PlatformEnum } from "@/lib/enums";
+import { useAppInfo } from "@/lib/hooks/use-app-info";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
 import {
@@ -50,6 +51,14 @@ export default function AppPreviewCard({
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
 }) {
+  const {
+    disableExtension,
+    enableExtension,
+    uninstallExtension,
+    installExtension,
+  } = useExtensionManager();
+  const { openAppInfoModal } = useAppInfo();
+
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -59,12 +68,6 @@ export default function AppPreviewCard({
     y: 0,
     isOpen: false,
   });
-  const {
-    disableExtension,
-    enableExtension,
-    uninstallExtension,
-    installExtension,
-  } = useExtensionManager();
 
   const editorContext = useContext(EditorContext);
 
@@ -332,7 +335,27 @@ export default function AppPreviewCard({
                 Use
               </Button>
             )}
-            <Button color="secondary" size="sm">
+            <Button
+              color="secondary"
+              size="sm"
+              onPress={() => {
+                openAppInfoModal({
+                  id: extension.config.id,
+                  name: extension.config.displayName ?? extension.config.id,
+                  version: extension.config.version,
+                  author: extension.config.author,
+                  license: extension.config.license,
+                  url: extension.config.repository,
+                  readme: extension.config.repository
+                    ? extension.config.repository + "/README.md"
+                    : undefined,
+                });
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  isMarketplaceOpen: false,
+                }));
+              }}
+            >
               Details
             </Button>
             {!isInstalled ? (

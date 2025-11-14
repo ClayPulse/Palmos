@@ -23,6 +23,7 @@ import packageJson from "../../../../package.json";
 import readme from "../../../../README.md";
 
 const appInfo: AppInfoModalContent = {
+  id: "pulse-editor",
   name: "Pulse Editor",
   version: packageJson.version,
   author: "ClayPulse",

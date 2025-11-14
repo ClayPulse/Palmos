@@ -11,6 +11,7 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 import { EditorContextType, ExtensionApp } from "@/lib/types";
 import {
+  addToast,
   Alert,
   Button,
   Divider,
@@ -37,7 +38,11 @@ export default function EditorSettingsModal({
   const editorContext = useContext(EditorContext);
 
   return (
-    <ModalWrapper isOpen={isOpen} setIsOpen={setIsOpen} title={"Editor Settings"}>
+    <ModalWrapper
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      title={"Editor Settings"}
+    >
       <div className="flex w-full flex-col gap-2">
         <GeneralSettings editorContext={editorContext} />
         <Divider />
@@ -167,7 +172,12 @@ function GeneralSettings({
             variant="light"
             onPress={() => {
               if (newEnvKey.trim() === "") {
-                toast.error("Key cannot be empty");
+                addToast({
+                  title: "Error",
+                  description: "Environment variable key cannot be empty.",
+                  color: "danger",
+                });
+                return;
                 return;
               }
               editorContext?.setPersistSettings((prev) => {
@@ -871,7 +881,11 @@ function SecuritySettings({
             days = 14;
           } else if (Number.isNaN(days)) {
             days = 14;
-            toast.error("Invalid input. Using default 14 days.");
+            addToast({
+              title: "Error",
+              description: "Invalid input. Using default 14 days.",
+              color: "danger",
+            });
           }
 
           editorContext?.setPersistSettings((prev) => {
@@ -1014,9 +1028,18 @@ function DevExtensionSettings({
             isExtensionDevMode: e.target.checked,
           }));
           if (e.target.checked) {
-            toast.success("Extension dev mode enabled");
+            addToast({
+              title: "Extension dev mode enabled",
+              description:
+                "You can now load extensions from your local dev server.",
+              color: "success",
+            });
           } else {
-            toast.success("Extension dev mode disabled");
+            addToast({
+              title: "Extension dev mode disabled",
+              description: "You have disabled extension dev mode.",
+              color: "success",
+            });
           }
         }}
       >
@@ -1061,7 +1084,11 @@ function DevExtensionSettings({
                       devExtensionId,
                       devExtensionVersion,
                     );
-                    toast.success("Extension installed");
+                    addToast({
+                      title: "Extension installed",
+                      description: `Extension ${devExtensionId} installed successfully.`,
+                      color: "success",
+                    });
                   } catch (e) {
                     toast.error((e as Error).message);
                   }
