@@ -9,12 +9,19 @@ export default function usePulseEnv() {
   >();
 
   const { imc, isReady } = useIMC(receiverHandlerMap, "env");
-  const [envs, setEnvs] = useState<Record<string, string>>({});
+  const [envs, setEnvs] = useState<Record<string, string>>(
+    // default to process env
+    process.env as Record<string, string>,
+  );
 
   useEffect(() => {
     if (isReady) {
       imc?.sendMessage(IMCMessageTypeEnum.EditorGetEnv).then((env) => {
-        setEnvs(env);
+        // Create or update envs state
+        setEnvs((prev) => ({
+          ...prev,
+          ...env,
+        }));
       });
     }
   }, [isReady]);

@@ -11,6 +11,7 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 import { EditorContextType, ExtensionApp } from "@/lib/types";
 import {
+  addToast,
   Alert,
   Button,
   Divider,
@@ -27,7 +28,7 @@ import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./modal-wrapper";
 
-export default function AppSettingsModal({
+export default function EditorSettingsModal({
   isOpen,
   setIsOpen,
 }: {
@@ -37,9 +38,13 @@ export default function AppSettingsModal({
   const editorContext = useContext(EditorContext);
 
   return (
-    <ModalWrapper isOpen={isOpen} setIsOpen={setIsOpen} title={"App Settings"}>
+    <ModalWrapper
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
+      title={"Editor Settings"}
+    >
       <div className="flex w-full flex-col gap-2">
-        <EditorSettings editorContext={editorContext} />
+        <GeneralSettings editorContext={editorContext} />
         <Divider />
         <AISettings editorContext={editorContext} />
         <Divider />
@@ -53,7 +58,7 @@ export default function AppSettingsModal({
   );
 }
 
-function EditorSettings({
+function GeneralSettings({
   editorContext,
 }: {
   editorContext?: EditorContextType;
@@ -64,7 +69,7 @@ function EditorSettings({
 
   return (
     <div>
-      <p className="text-medium pb-2 font-bold">Editor Settings</p>
+      <p className="text-medium pb-2 font-bold">General Settings</p>
       <div className="w-full space-y-2">
         {editorContext?.persistSettings?.projectHomePath ? (
           <Input
@@ -111,7 +116,11 @@ function EditorSettings({
 
         {/* Environment Variables */}
         <p className="text-content4-foreground text-sm">
-          Environment Variables:
+          Environment Variables (frontend):
+        </p>
+        <p className="text-warning text-sm">
+          To set backend environment variables, please set it in extension app's
+          settings.
         </p>
         {Object.entries(editorContext?.persistSettings?.envs ?? {}).length >
           0 && (
@@ -119,8 +128,8 @@ function EditorSettings({
             {Object.entries(editorContext?.persistSettings?.envs ?? {}).map(
               ([key, value]) => (
                 <div className="flex items-center gap-2" key={key}>
-                  <div className="w-1/3 break-all font-mono text-sm">{key}</div>
-                  <div className="w-2/3 break-all font-mono text-sm">
+                  <div className="w-1/3 font-mono text-sm break-all">{key}</div>
+                  <div className="w-2/3 font-mono text-sm break-all">
                     {value}
                   </div>
                   <Button
@@ -145,7 +154,7 @@ function EditorSettings({
           </div>
         )}
 
-        <div className="flex gap-x-1 items-center">
+        <div className="flex items-center gap-x-1">
           <Input
             label="Add New Variable"
             size="sm"
@@ -163,7 +172,12 @@ function EditorSettings({
             variant="light"
             onPress={() => {
               if (newEnvKey.trim() === "") {
-                toast.error("Key cannot be empty");
+                addToast({
+                  title: "Error",
+                  description: "Environment variable key cannot be empty.",
+                  color: "danger",
+                });
+                return;
                 return;
               }
               editorContext?.setPersistSettings((prev) => {
@@ -180,7 +194,7 @@ function EditorSettings({
             <Icon name="add" />
           </Button>
         </div>
-        <div className="flex flex-col w-full">
+        <div className="flex w-full flex-col">
           <Button
             onPress={() => {
               // Refresh page
@@ -867,7 +881,11 @@ function SecuritySettings({
             days = 14;
           } else if (Number.isNaN(days)) {
             days = 14;
-            toast.error("Invalid input. Using default 14 days.");
+            addToast({
+              title: "Error",
+              description: "Invalid input. Using default 14 days.",
+              color: "danger",
+            });
           }
 
           editorContext?.setPersistSettings((prev) => {
@@ -1010,9 +1028,18 @@ function DevExtensionSettings({
             isExtensionDevMode: e.target.checked,
           }));
           if (e.target.checked) {
-            toast.success("Extension dev mode enabled");
+            addToast({
+              title: "Extension dev mode enabled",
+              description:
+                "You can now load extensions from your local dev server.",
+              color: "success",
+            });
           } else {
-            toast.success("Extension dev mode disabled");
+            addToast({
+              title: "Extension dev mode disabled",
+              description: "You have disabled extension dev mode.",
+              color: "success",
+            });
           }
         }}
       >
@@ -1057,7 +1084,11 @@ function DevExtensionSettings({
                       devExtensionId,
                       devExtensionVersion,
                     );
-                    toast.success("Extension installed");
+                    addToast({
+                      title: "Extension installed",
+                      description: `Extension ${devExtensionId} installed successfully.`,
+                      color: "success",
+                    });
                   } catch (e) {
                     toast.error((e as Error).message);
                   }

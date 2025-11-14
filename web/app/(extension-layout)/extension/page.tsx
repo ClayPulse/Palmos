@@ -78,7 +78,7 @@ export default function ExtensionPage({}) {
       const newUrl = remoteOrigin.startsWith(
         process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com",
       )
-        ? `${process.env.NEXT_PUBLIC_SERVER_FUNCTION_RUNNER_URL}/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
         : remoteOrigin + url;
 
       console.log(`[FETCH INTERCEPTED]: ${url} → ${newUrl}`);

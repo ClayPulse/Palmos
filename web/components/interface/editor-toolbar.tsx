@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import AppSettingsModal from "@/components/modals/app-settings-modal";
+import EditorSettingsModal from "@/components/modals/editor-settings-modal";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
@@ -195,7 +195,7 @@ export default function EditorToolbar() {
                   <Icon name="settings" variant="outlined" />
                 </Button>
               </Tooltip>
-              <AppSettingsModal
+              <EditorSettingsModal
                 isOpen={isAppSettingsModalOpen}
                 setIsOpen={setAppIsSettingsModalOpen}
               />

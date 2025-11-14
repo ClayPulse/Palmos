@@ -10,7 +10,7 @@ Pulse Editor is a modular, cross-platform, AI-powered productivity platform with
 > Pulse Editor is still in its early development stage. We are trying hard to make sure everything works as expected for all different platforms. See [Beta Release Roadmap](#beta-release-roadmap) below.
 
 <p align="center">
-  <img alt="Pulse Editor" src="shared-assets/icons/pulse_logo.svg"/>
+  <img alt="Pulse Editor" src="https://raw.githubusercontent.com/ClayPulse/pulse-editor/refs/heads/main/shared-assets/icons/pulse_logo.svg"/>
 </p>
 
 <div align="center">
@@ -341,3 +341,9 @@ For developing main client and using recently modified npm libraries without pub
 ```
 
 Make sure to change back if using published versions.
+
+# Acknowledgements
+
+- Thanks to the developers and community of [Module Federation](https://module-federation.io/) for their groundbreaking work on micro-frontends.
+- Thanks to the developers and community of [Hero UI](https://www.heroui.com/) for their fantastic component library.
+- Thanks to the developers and community of [React Flow](https://reactflow.dev/) for their amazing node-based graph library.
