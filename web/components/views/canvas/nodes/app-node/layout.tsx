@@ -404,6 +404,7 @@ function InputHandle({
           paramName={paramName}
           node={node}
           editorContext={editorContext}
+          isOptional={param.optional ?? false}
         />
       </div>
     );
@@ -414,6 +415,7 @@ function InputHandle({
         param={param}
         position={Position.Left}
         type="target"
+        isOptional={param.optional ?? false}
       />
     );
   }
@@ -423,10 +425,12 @@ function DroppableInputHandle({
   paramName,
   node,
   editorContext,
+  isOptional,
 }: {
   paramName: string;
   node: ReactFlowNode<AppNodeData>;
   editorContext: EditorContextType | undefined;
+  isOptional: boolean;
 }) {
   const { updateNodeData } = useReactFlow();
 
@@ -456,6 +460,7 @@ function DroppableInputHandle({
       <div className="py-2 text-center">
         <p>{paramName}</p>
         <p>(app-instance)</p>
+        {!isOptional && <p className="text-danger">*required</p>}
         {node.data.ownedAppViews[paramName] ? (
           <p>{node.data.ownedAppViews[paramName].viewId}</p>
         ) : (

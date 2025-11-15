@@ -123,9 +123,14 @@ export default function useRegisterAction(
           }
           // Validate parameters
           const actionParams = actionInfo.parameters ?? {};
-          if (Object.keys(args).length !== Object.keys(actionParams).length) {
+
+          const requiredParamCount = Object.entries(actionParams).filter(
+            ([, paramInfo]) => !(paramInfo as TypedVariable).optional,
+          ).length;
+
+          if (Object.keys(args).length < requiredParamCount) {
             throw new Error(
-              `Invalid number of parameters: expected ${
+              `Invalid number of parameters: expected at least${
                 Object.keys(actionParams).length
               }, got ${Object.keys(args).length}`,
             );

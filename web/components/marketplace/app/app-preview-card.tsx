@@ -362,8 +362,8 @@ export default function AppPreviewCard({
               <Button
                 color="primary"
                 size="sm"
-                onPress={(e) => {
-                  installExtension(
+                onPress={async (e) => {
+                  await installExtension(
                     extension.remoteOrigin,
                     extension.config.id,
                     extension.config.version,
