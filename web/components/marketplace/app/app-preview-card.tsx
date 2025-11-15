@@ -14,6 +14,7 @@ import { ContextMenuState, ExtensionApp } from "@/lib/types";
 import { DraggableAttributes } from "@dnd-kit/core";
 import { SyntheticListenerMap } from "@dnd-kit/core/dist/hooks/utilities";
 import {
+  addToast,
   Button,
   Chip,
   Skeleton,
@@ -369,7 +370,11 @@ export default function AppPreviewCard({
                     extension.config.version,
                   )
                     .then(() => {
-                      toast.success("Extension installed");
+                      addToast({
+                        title: "Extension installed",
+                        description: `Extension ${extension.config.id} installed successfully.`,
+                        color: "success",
+                      });
                       setIsInstalled(true);
                       setIsEnabled(extension.isEnabled);
                     })
@@ -387,7 +392,11 @@ export default function AppPreviewCard({
                   size="sm"
                   onPress={(e) => {
                     uninstallExtension(extension.config.id).then(() => {
-                      toast.success("Extension uninstalled");
+                      addToast({
+                        title: "Extension uninstalled",
+                        description: `Extension ${extension.config.id} uninstalled successfully.`,
+                        color: "success",
+                      });
                       setIsInstalled(false);
                     });
                   }}
@@ -407,7 +416,11 @@ export default function AppPreviewCard({
                   variant="light"
                   onPress={(e) => {
                     uninstallExtension(extension.config.id).then(() => {
-                      toast.success("Extension uninstalled");
+                      addToast({
+                        title: "Extension uninstalled",
+                        description: `Extension ${extension.config.id} uninstalled successfully.`,
+                        color: "success",
+                      });
                     });
                     setContextMenuState({ x: 0, y: 0, isOpen: false });
                   }}
@@ -425,7 +438,11 @@ export default function AppPreviewCard({
                       extension.config.version,
                     )
                       .then(() => {
-                        toast.success("Extension installed");
+                        addToast({
+                          title: "Extension installed",
+                          description: `Extension ${extension.config.id} installed successfully.`,
+                          color: "success",
+                        });
                         setIsInstalled(true);
                         setIsEnabled(extension.isEnabled);
                       })

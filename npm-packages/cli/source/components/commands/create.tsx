@@ -125,14 +125,22 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 					<Text> Initializing project...</Text>
 				</Box>,
 			);
+
+			/* Setup pulse.config.ts */
+			const pulseConfigPath = path.join(process.cwd(), name, 'pulse.config.ts');
+			let pulseConfig = fs.readFileSync(pulseConfigPath, 'utf8');
+			// Modify visibility by matching the block that starts with 'visibility:',
+			// and replacing the entire line with the new visibility value.
+			pulseConfig = pulseConfig.replace(
+				/visibility:\s*['"`](public|unlisted|private)['"`],?/,
+				`visibility: '${visibility}',`,
+			);
+			fs.writeFileSync(pulseConfigPath, pulseConfig);
+
+			/* Setup packages.json */
 			const packageJsonPath = path.join(process.cwd(), name, 'package.json');
 			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 			packageJson.name = name.replaceAll('-', '_');
-
-			// Modify the visibility
-			packageJson['pulse-editor-marketplace'] = {
-				visibility,
-			};
 
 			// Write the modified package.json back to the file
 			fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
