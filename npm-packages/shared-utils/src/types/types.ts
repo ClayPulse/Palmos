@@ -215,7 +215,7 @@ export type TypedVariableType =
   | "string"
   | "number"
   | "boolean"
-  | "any"
+  | "object"
   // An app instance is a reference to another app.
   // This instance could be possessed by the owner,
   // or it can be initialized by the caller.

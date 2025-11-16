@@ -1,5 +1,21 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.59
+
+### Patch Changes
+
+- Fix object type issue in typed variable
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.59
+
+## 0.1.1-beta.58
+
+### Patch Changes
+
+- Allow optional args for workflow handler
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.58
+
 ## 0.1.1-beta.57
 
 ### Patch Changes

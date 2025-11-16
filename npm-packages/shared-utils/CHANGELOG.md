@@ -1,5 +1,17 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.59
+
+### Patch Changes
+
+- Fix object type issue in typed variable
+
+## 0.1.1-beta.58
+
+### Patch Changes
+
+- Allow optional args for workflow handler
+
 ## 0.1.1-beta.57
 
 ### Patch Changes

@@ -60,12 +60,16 @@ Running vibe coding workflow in canvas view allows you to develop software on an
 ### Vibe Coding agent -- code modification
 
 ![VibeCoding_CodeEditorControl](https://cdn.pulse-editor.com/assets/VibeCode_CodeEditorControlAgent.gif)
+## 2. MCP client
 
-## 2. Serverless ComfyUI Image/Video Generation (WIP)
+You can connect MCP servers and Pulse full-stack apps to agentic chat. e.g. installation-free browser agent with chrome-devtools-mcp and chrome remote debugging:
+![Browser_Controller](https://cdn.pulse-editor.com/assets/MCP_Agent.png)
+
+## 3. Serverless ComfyUI Image/Video Generation (WIP)
 
 You can run workflows with [Pulse App ComfyUI Workflow](https://github.com/Shellishack/pulse-app-comfyui-workflow).
 
-## 3. Video Editing (WIP)
+## 4. Video Editing (WIP)
 
 ## Remote or local workspace
 

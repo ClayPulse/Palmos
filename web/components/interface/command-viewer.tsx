@@ -1,5 +1,5 @@
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
-import useScopedActions from "@/lib/hooks/use-scoped-actions";
+import useActionExecutor from "@/lib/hooks/use-action-executor";
 import { ScopedAction } from "@/lib/types";
 import {
   addToast,
@@ -28,7 +28,7 @@ export default function CommandViewer() {
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant, history } = usePlatformAIAssistant();
-  const { actions, runScopedAction, setKeywordFilter } = useScopedActions();
+  const { actions, runScopedAction, setKeywordFilter } = useActionExecutor();
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectActionIndex, setSelectActionIndex] = useState(-1);

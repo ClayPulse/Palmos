@@ -6,11 +6,13 @@ export default function NodeHandle({
   param,
   position,
   type,
+  isOptional,
 }: {
   id: string;
   param: TypedVariable;
   position: Position;
   type: HandleType;
+  isOptional?: boolean;
 }) {
   return (
     <div
@@ -21,6 +23,7 @@ export default function NodeHandle({
       <div className="text-center text-sm">
         <p>{id}</p>
         <p>({param?.type.toString()})</p>
+        {isOptional !== undefined && !isOptional && <p className="text-danger">*required</p>}
       </div>
       <Handle
         id={id}
