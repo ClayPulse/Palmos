@@ -2,10 +2,10 @@ import {Result} from 'meow';
 import {Flags} from '../../lib/cli-flags.js';
 import {Text} from 'ink';
 import {useEffect} from 'react';
-import { execa } from 'execa';
+import {execa} from 'execa';
 import fs from 'fs';
 
-export default function Dev({cli}: {cli: Result<Flags>}) {
+export default function Start({cli}: {cli: Result<Flags>}) {
 	useEffect(() => {
 		async function startDevServer() {
 			// Move node_modules/@pulse-editor/cli/dist/lib/server to node_modules/.pulse/server
@@ -44,7 +44,7 @@ export default function Dev({cli}: {cli: Result<Flags>}) {
 				);
 			}
 			// Start dev server
-			await execa('npm run dev', {
+			await execa('npm run start', {
 				stdio: 'inherit',
 				shell: true,
 			});
@@ -55,7 +55,7 @@ export default function Dev({cli}: {cli: Result<Flags>}) {
 
 	return (
 		<>
-			<Text>Starting dev server...</Text>
+			<Text>Starting prod server...</Text>
 		</>
 	);
 }

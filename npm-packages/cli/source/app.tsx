@@ -10,6 +10,9 @@ import Chat from './components/commands/chat.js';
 import Logout from './components/commands/logout.js';
 import Create from './components/commands/create.js';
 import Dev from './components/commands/dev.js';
+import Build from './components/commands/build.js';
+import Preview from './components/commands/preview.js';
+import Start from './components/commands/start.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
@@ -44,6 +47,12 @@ export default function App({cli}: {cli: Result<Flags>}) {
 				<Create cli={cli} />
 			) : command === 'dev' ? (
 				<Dev cli={cli} />
+			) : command === 'build' ? (
+				<Build cli={cli} />
+			) : command === 'preview' ? (
+				<Preview cli={cli} />
+			) : command === 'start' ? (
+				<Start cli={cli} />
 			) : (
 				command !== undefined && (
 					<>
