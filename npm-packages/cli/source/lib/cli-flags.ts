@@ -22,7 +22,7 @@ export const flags = defineFlags({
 		type: 'string',
 		shortFlag: 'f',
 	},
-	dev: {
+	stage: {
 		type: 'boolean',
 		default: false,
 	},
