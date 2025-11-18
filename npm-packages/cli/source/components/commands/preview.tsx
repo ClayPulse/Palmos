@@ -47,7 +47,13 @@ export default function Preview({cli}: {cli: Result<Flags>}) {
 			// Start preview server
 			await cleanDist();
 			await execa(
-				`${getDepsBinPath('concurrently')} --prefix none "npx webpack --mode development --watch" "tsx watch --clear-screen=false node_modules/@pulse-editor/cli/dist/lib/server/express.js"`,
+				getDepsBinPath('concurrently'),
+				[
+					'--prefix',
+					'none',
+					'"npx webpack --mode development --watch"',
+					'"tsx watch --clear-screen=false node_modules/@pulse-editor/cli/dist/lib/server/express.js"',
+				],
 				{
 					stdio: 'inherit',
 					shell: true,
