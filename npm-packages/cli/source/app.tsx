@@ -9,11 +9,16 @@ import Help from './components/commands/help.js';
 import Chat from './components/commands/chat.js';
 import Logout from './components/commands/logout.js';
 import Create from './components/commands/create.js';
+import Dev from './components/commands/dev.js';
+import Build from './components/commands/build.js';
+import Preview from './components/commands/preview.js';
+import Start from './components/commands/start.js';
+import Clean from './components/commands/clean.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
 
-	if (cli.flags.dev) {
+	if (cli.flags.stage) {
 		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '0';
 	} else {
 		process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = '1';
@@ -26,7 +31,7 @@ export default function App({cli}: {cli: Result<Flags>}) {
 
 	return (
 		<>
-			{cli.flags.dev && (
+			{cli.flags.stage && (
 				<Text color={'yellow'}>⚠️ You are in development mode.</Text>
 			)}
 			{command === 'help' ? (
@@ -41,6 +46,16 @@ export default function App({cli}: {cli: Result<Flags>}) {
 				<Publish cli={cli} />
 			) : command === 'create' ? (
 				<Create cli={cli} />
+			) : command === 'dev' ? (
+				<Dev cli={cli} />
+			) : command === 'build' ? (
+				<Build cli={cli} />
+			) : command === 'preview' ? (
+				<Preview cli={cli} />
+			) : command === 'start' ? (
+				<Start cli={cli} />
+			) : command === 'clean' ? (
+				<Clean cli={cli} />
 			) : (
 				command !== undefined && (
 					<>

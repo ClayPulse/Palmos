@@ -48,7 +48,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 
 	// Check login method
 	useEffect(() => {
-		const savedToken = getToken(cli.flags.dev);
+		const savedToken = getToken(cli.flags.stage);
 		setIsShowLoginMethod(!savedToken && !cli.flags.token && !cli.flags.flow);
 
 		if (savedToken) {
@@ -66,7 +66,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 	useEffect(() => {
 		// Only check token validity when it is set
 		if (loginMethod === 'token' && token.length > 0) {
-			checkToken(token, cli.flags.dev).then(isValid => {
+			checkToken(token, cli.flags.stage).then(isValid => {
 				setIsAuthenticated(isValid);
 				setIsCheckingAuth(false);
 			});
@@ -121,8 +121,8 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 				) : isAuthenticated ? (
 					<>
 						<Text>✅ You are signed in successfully.</Text>
-						{!isTokenInEnv(cli.flags.dev) &&
-							getToken(cli.flags.dev) !== token && (
+						{!isTokenInEnv(cli.flags.stage) &&
+							getToken(cli.flags.stage) !== token && (
 								<>
 									<Text>
 										🟢 It is recommended to save your access token as an
@@ -141,7 +141,7 @@ export default function Login({cli}: {cli: Result<Flags>}) {
 													return;
 												}
 												if (value === 'y') {
-													saveToken(token, cli.flags.dev);
+													saveToken(token, cli.flags.stage);
 													setIsTokenSaved(true);
 													setTimeout(() => {
 														exit();

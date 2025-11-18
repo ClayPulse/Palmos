@@ -1,6 +1,5 @@
 import {Result} from 'meow';
 import {Flags} from '../../lib/cli-flags.js';
-import React from 'react';
 import {Text} from 'ink';
 
 export default function Chat({cli}: {cli: Result<Flags>}) {

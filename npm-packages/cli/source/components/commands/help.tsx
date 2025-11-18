@@ -1,5 +1,4 @@
 import {Result} from 'meow';
-import React from 'react';
 import {Flags} from '../../lib/cli-flags.js';
 import {Text} from 'ink';
 import {commandsManual} from '../../lib/manual.js';
@@ -11,7 +10,10 @@ export default function Help({cli}: {cli: Result<Flags>}) {
 	return (
 		<>
 			{subCommand ? (
-				<Text>{commandsManual[subCommand]}</Text>
+				<Text>
+					{commandsManual[subCommand]?.trimEnd() ??
+						`No help found for command: ${subCommand}`}
+				</Text>
 			) : (
 				<>
 					<Header />
