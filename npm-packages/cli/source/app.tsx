@@ -13,6 +13,7 @@ import Dev from './components/commands/dev.js';
 import Build from './components/commands/build.js';
 import Preview from './components/commands/preview.js';
 import Start from './components/commands/start.js';
+import Clean from './components/commands/clean.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
@@ -53,6 +54,8 @@ export default function App({cli}: {cli: Result<Flags>}) {
 				<Preview cli={cli} />
 			) : command === 'start' ? (
 				<Start cli={cli} />
+			) : command === 'clean' ? (
+				<Clean cli={cli} />
 			) : (
 				command !== undefined && (
 					<>

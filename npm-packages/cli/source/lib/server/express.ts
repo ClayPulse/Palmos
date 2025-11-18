@@ -11,6 +11,8 @@ import {networkInterfaces} from 'os';
 import {pipeline, Readable} from 'stream';
 import {promisify} from 'util';
 import {readConfigFile} from './utils.js';
+import path from 'path';
+import {pathToFileURL} from 'url';
 
 dotenv.config({
 	quiet: true,
@@ -76,10 +78,13 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
 			: JSON.stringify(req.body),
 	});
 
-	const {loadAndCall} = await import(
-		// @ts-expect-error dynamic import CJS
-		'node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/load-remote.cjs'
+	const dir = path.resolve(
+		'node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/load-remote.cjs',
 	);
+
+	const fileUrl = pathToFileURL(dir).href;
+
+	const {loadAndCall} = await import(fileUrl);
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const response = await loadAndCall(
 		func,

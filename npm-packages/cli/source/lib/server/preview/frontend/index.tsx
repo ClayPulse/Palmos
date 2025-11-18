@@ -1,13 +1,6 @@
 /* This folder contains temporary code to be moved to a different package in the future. */
 import ReactDOM from 'react-dom/client';
 
-
-// Get working directory's src/main.tsx
-// const mainPath = '../../../../../../../dist/client/main';
-
-// // Dynamically import Main
-// const {Main} = await import(mainPath);
-
 // @ts-expect-error ignore ts error for now
 import Main from "../../../../../src/main.tsx"
 

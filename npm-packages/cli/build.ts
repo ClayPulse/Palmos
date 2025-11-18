@@ -1,38 +1,43 @@
 import {execa} from 'execa';
 
+/**
+ *	Build the cli executable and copy necessary files to dist
+ */
 async function main() {
+	console.log('🚧 Building the CLI package...');
+
 	// Run the build command
 	await execa('tsc', {
 		stdio: 'inherit',
 		shell: true,
 	});
 
-	// Copy preview html file to dist
-	if (process.platform === 'linux') {
-		await execa(
-			'cp',
-			[
-				'source/lib/server/preview/frontend/index.html',
-				'dist/lib/server/preview/frontend/index.html',
-			],
-			{
-				stdio: 'inherit',
+	// Copy files to dist
+	const filesToCopy = [
+		'lib/server/preview/frontend/index.html',
+		'lib/server/preview/backend/load-remote.cjs',
+	];
+
+	for (const filePath of filesToCopy) {
+		if (process.platform === 'win32') {
+			await execa(
+				'copy',
+				[
+					`source\\${filePath.replace(/\//g, '\\')}`,
+					`dist\\${filePath.replace(/\//g, '\\')}`,
+				],
+				{
+					shell: true,
+				},
+			);
+		} else {
+			await execa('cp', [`source/${filePath}`, `dist/${filePath}`], {
 				shell: true,
-			},
-		);
-	} else if (process.platform === 'win32') {
-		await execa(
-			'copy',
-			[
-				'source\\lib\\server\\preview\\frontend\\index.html',
-				'dist\\lib\\server\\preview\\frontend\\index.html',
-			],
-			{
-				stdio: 'inherit',
-				shell: true,
-			},
-		);
+			});
+		}
 	}
+
+	console.log('✅ Build completed successfully.');
 }
 
 main();

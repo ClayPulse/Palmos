@@ -2,8 +2,10 @@ import {Result} from 'meow';
 import {Flags} from '../../lib/cli-flags.js';
 import {Text} from 'ink';
 import {useEffect} from 'react';
-import { execa } from 'execa';
+import {execa} from 'execa';
 import fs from 'fs';
+import {getDepsBinPath} from '../../lib/execa-utils/deps.js';
+import {cleanDist} from '../../lib/execa-utils/clean.js';
 
 export default function Dev({cli}: {cli: Result<Flags>}) {
 	useEffect(() => {
@@ -12,19 +14,13 @@ export default function Dev({cli}: {cli: Result<Flags>}) {
 			if (fs.existsSync('node_modules/.pulse/server')) {
 				// Remove existing directory
 				if (process.platform === 'win32') {
-					await execa(
-						'rmdir /S /Q node_modules\\.pulse\\server',
-						{
-							shell: true,
-						},
-					);
+					await execa('rmdir /S /Q node_modules\\.pulse\\server', {
+						shell: true,
+					});
 				} else {
-					await execa(
-						'rm -rf node_modules/.pulse/server',
-						{
-							shell: true,
-						},
-					);
+					await execa('rm -rf node_modules/.pulse/server', {
+						shell: true,
+					});
 				}
 			}
 
@@ -44,10 +40,18 @@ export default function Dev({cli}: {cli: Result<Flags>}) {
 				);
 			}
 			// Start dev server
-			await execa('npm run dev', {
-				stdio: 'inherit',
-				shell: true,
-			});
+			await cleanDist();
+			await execa(
+				`${getDepsBinPath('concurrently')} --prefix none "npx webpack --mode development --watch" "tsx watch --clear-screen=false node_modules/@pulse-editor/cli/dist/lib/server/express.js"`,
+				{
+					stdio: 'inherit',
+					shell: true,
+					env: {
+						NODE_OPTIONS: '--import=tsx',
+						NODE_ENV: 'development',
+					},
+				},
+			);
 		}
 
 		startDevServer();
