@@ -6,7 +6,11 @@ import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { AppInfoModalContent } from "@/lib/types";
-import { SafeArea } from "@capacitor-community/safe-area";
+import {
+  SafeArea,
+  SystemBarsStyle,
+  SystemBarsType,
+} from "@capacitor-community/safe-area";
 import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
@@ -72,21 +76,24 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   }, [editorContext?.persistSettings]);
 
   useEffect(() => {
-    if (resolvedTheme === "light") {
-      SafeArea.enable({
-        config: {
-          customColorsForSystemBars: true,
-          statusBarContent: "dark",
-          navigationBarContent: "dark",
-        },
-      });
-    } else if (resolvedTheme === "dark") {
-      SafeArea.enable({
-        config: {
-          statusBarContent: "light",
-          navigationBarContent: "light",
-        },
-      });
+    if (getPlatform() === PlatformEnum.Capacitor) {
+      if (resolvedTheme === "light") {
+        SafeArea.setSystemBarsStyle({
+          style: SystemBarsStyle.Dark,
+          type: SystemBarsType.StatusBar,
+        });
+        SafeArea.showSystemBars({
+          type: SystemBarsType.StatusBar,
+        });
+      } else if (resolvedTheme === "dark") {
+        SafeArea.setSystemBarsStyle({
+          style: SystemBarsStyle.Light,
+          type: SystemBarsType.StatusBar,
+        });
+        SafeArea.showSystemBars({
+          type: SystemBarsType.StatusBar,
+        });
+      }
     }
   }, [resolvedTheme]);
 
