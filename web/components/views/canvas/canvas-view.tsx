@@ -1,17 +1,10 @@
 import PublishWorkflowModal from "@/components/modals/publish-workflow-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
-import { useAppInfo } from "@/lib/hooks/use-app-info";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import {
-  AppInfoModalContent,
-  AppNodeData,
-  AppViewConfig,
-  CanvasViewConfig,
-} from "@/lib/types";
+import { AppNodeData, AppViewConfig, CanvasViewConfig } from "@/lib/types";
 import { useDroppable } from "@dnd-kit/core";
-import { Button } from "@heroui/react";
 import {
   addEdge,
   applyEdgeChanges,
@@ -24,6 +17,7 @@ import {
   ReactFlow,
   Edge as ReactFlowEdge,
   Node as ReactFlowNode,
+  ReactFlowProvider,
   reconnectEdge,
   useReactFlow,
   useViewport,
@@ -38,27 +32,8 @@ import {
   useRef,
   useState,
 } from "react";
-import Icon from "../../misc/icon";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
-
-const appInfo: AppInfoModalContent = {
-  name: "Pulse Editor",
-  version: "1.0.0",
-  author: "ClayPulse",
-  license: "MIT",
-  url: "https://pulse-editor.com",
-  readme: `\
-# Pulse Editor
-
-Pulse Editor is a modular, cross-platform, AI-powered creativity platform with federated app collaboration and extensible workflows.
-
-# Acknowledgements
-- Thanks to the developers and community of [Module Federation](https://module-federation.io/) for their groundbreaking work on micro-frontends.
-- Thanks to the developers and community of [Hero UI](https://www.heroui.com/) for their fantastic component library.
-- Thanks to the developers and community of [React Flow](https://reactflow.dev/) for their amazing node-based graph library.
-`,
-};
 
 export default function CanvasView({
   config,
@@ -71,7 +46,6 @@ export default function CanvasView({
 }) {
   const editorContext = useContext(EditorContext);
 
-  const { openAppInfoModal } = useAppInfo();
   const { resolvedTheme } = useTheme();
   const {
     localEdges,
@@ -343,16 +317,6 @@ export default function CanvasView({
         >
           <Background id={config.viewId} variant={BackgroundVariant.Dots} />
         </ReactFlow>
-        <Button
-          isIconOnly
-          className="absolute right-2 bottom-2"
-          variant="light"
-          onPress={() => {
-            openAppInfoModal(appInfo);
-          }}
-        >
-          <Icon name="info" />
-        </Button>
 
         <PublishWorkflowModal
           isOpen={isPublishModalOpen}
@@ -377,6 +341,10 @@ export const MemoizedCanvasView = memo(
     config: CanvasViewConfig;
     isActive: boolean;
     tabName: string;
-  }) => <CanvasView config={config} isActive={isActive} tabName={tabName} />,
+  }) => (
+    <ReactFlowProvider>
+      <CanvasView config={config} isActive={isActive} tabName={tabName} />
+    </ReactFlowProvider>
+  ),
 );
 MemoizedCanvasView.displayName = "MemoizedCanvasView";

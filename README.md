@@ -10,7 +10,7 @@ Pulse Editor is a modular, cross-platform, AI-powered productivity platform with
 > Pulse Editor is still in its early development stage. We are trying hard to make sure everything works as expected for all different platforms. See [Beta Release Roadmap](#beta-release-roadmap) below.
 
 <p align="center">
-  <img alt="Pulse Editor" src="shared-assets/icons/pulse_logo.svg"/>
+  <img alt="Pulse Editor" src="https://raw.githubusercontent.com/ClayPulse/pulse-editor/refs/heads/main/shared-assets/icons/pulse_logo.svg"/>
 </p>
 
 <div align="center">
@@ -60,12 +60,21 @@ Running vibe coding workflow in canvas view allows you to develop software on an
 ### Vibe Coding agent -- code modification
 
 ![VibeCoding_CodeEditorControl](https://cdn.pulse-editor.com/assets/VibeCode_CodeEditorControlAgent.gif)
+## 2. MCP client
 
-## 2. Serverless ComfyUI Image/Video Generation (WIP)
+You can connect MCP servers and Pulse full-stack apps to agentic chat. e.g. installation-free browser agent with chrome-devtools-mcp and chrome remote debugging:
+![Browser_Controller](https://cdn.pulse-editor.com/assets/MCP_Agent.png)
+
+## 3. Remote ComfyUI Workspace and Serverless ComfyUI Image/Video Generation (WIP)
 
 You can run workflows with [Pulse App ComfyUI Workflow](https://github.com/Shellishack/pulse-app-comfyui-workflow).
+### Remote ComfyUI Workspace
+You can even run remote ComfyUI on Pulse Editor mobile app.
+![Remote_ComfyUI](https://cdn.pulse-editor.com/assets/remote-comfyui.jpg)
 
-## 3. Video Editing (WIP)
+### Serverless ComfyUI Inference (Coming soon)
+
+## 4. Video Editing (WIP)
 
 ## Remote or local workspace
 
@@ -100,6 +109,52 @@ have to start a [remote workspace](#start-a-remote-workspace) first.
 ### Open and interact with workspace terminal
 
 ![Workspace_CreateTerminalInWorkspace](https://cdn.pulse-editor.com/assets/Workspace_CreateTerminalInWorkspace.gif)
+
+## Build your own Pulse App
+We made a MF-compatible full-stack development template (theoretically framework agnostic). For now, we have official support for developing Pulse App using React (more frameworks to come).
+
+### Development
+To get started, download our CLI tool
+```bash
+npm i -g @pulse-editor/cli
+```
+Then, create a new template using:
+```bash
+pulse create
+```
+![pulse-cli](https://cdn.pulse-editor.com/assets/pulse-cli.png)
+
+Next, select your development framework (only React is supported for now) and fill in your project name.
+
+You can also choose visibility of your app on Pulse Editor marketplace. 
+- Public: any user can discover and use your app
+- Unlisted: only users that you invite with a share link can use your app
+- Private: only you can access your app
+
+### Publishing your app to Pulse Editor marketplace
+To publish your app to marketplace, go to https://pulse-editor.com to create a developer API key.
+Then copy your key and run:
+```bash
+pulse login
+```
+After you have signed in, you can use the following command to publish your app:
+```bash
+pulse publish
+```
+
+
+For detailed guides on how to start developing and using extensions locally, check out our [React template repository](https://github.com/ClayPulse/pulse-editor-extension-template).
+
+Some of our official extensions are also open-source. Feel free to take examples from them and/or contribute to them.
+
+- [Code View (MIT)](https://github.com/ClayPulse/pulse-editor-code-view)
+- [Terminal (MIT)](https://github.com/ClayPulse/pulse-editor-terminal)
+- [Text Node (MIT)](https://github.com/Shellishack/pulse-app-text-node)
+- [Json Utils (MIT)](https://github.com/Shellishack/pulse-app-json-utils)
+- [MCP Client (MIT)](https://github.com/Shellishack/pulse-app-mcp-agent)
+- [MCP Server Connection Node (MIT)](https://github.com/Shellishack/pulse-app-mcp-server-connection)
+- [ComfyUI Workflow Node (AGPL-3.0)](https://github.com/Shellishack/pulse-app-comfyui-workflow)
+- [OpenCut Editor (MIT)](https://github.com/Shellishack/opencut-editor)
 
 # Beta Release Roadmap
 
@@ -180,7 +235,7 @@ A VSCode Webview Extension with limited features is available [here](https://mar
 
 For detailed VSCode extension user guide, check out [VSCode Extension User Guide](vscode-extension/README.md)
 
-# Getting Started -- Development Guide
+# Pulse Editor Core Development Guide
 
 ## Recommended Nodejs version
 
@@ -291,16 +346,6 @@ Pulse Editor uses VSCode Webview API to create a VSCode Extension. To develop VS
 
 Note that you will also need to run the Nextjs server locally during development.
 
-## Pulse Editor App Development
-
-Pulse Editor uses [Modular Federation](https://module-federation.io/) to deliver its modular extensions.
-For guides on how to start developing and using extensions locally, check out our [React template repository](https://github.com/ClayPulse/pulse-editor-extension-template).
-
-Some of our official extensions are also open-source. Feel free to take examples from them and/or contribute to them.
-
-- [Pulse Editor Code View](https://github.com/ClayPulse/pulse-editor-code-view)
-- [Pulse Editor Terminal](https://github.com/ClayPulse/pulse-editor-terminal)
-
 ## Pulse Editor NPM libraries development
 
 ### Versioning
@@ -341,3 +386,9 @@ For developing main client and using recently modified npm libraries without pub
 ```
 
 Make sure to change back if using published versions.
+
+# Acknowledgements
+
+- Thanks to the developers and community of [Module Federation](https://module-federation.io/) for their groundbreaking work on micro-frontends.
+- Thanks to the developers and community of [Hero UI](https://www.heroui.com/) for their fantastic component library.
+- Thanks to the developers and community of [React Flow](https://reactflow.dev/) for their amazing node-based graph library.

@@ -20,7 +20,7 @@ import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { usePlatformApi } from "./use-platform-api";
-import useScopedActions from "./use-scoped-actions";
+import useActionExecutor from "./use-action-executor";
 import useSpeech2Speech from "./use-speech2speech";
 import { useTabViewManager } from "./use-tab-view-manager";
 import useTTS from "./use-tts";
@@ -37,7 +37,7 @@ export default function usePlatformAIAssistant() {
 
   const { runSpeech2Speech, stopSpeech2Speech, isRunning } = useSpeech2Speech();
   const { readText, playAudio } = useTTS();
-  const { runScopedAction, actions } = useScopedActions();
+  const { runScopedAction, actions } = useActionExecutor();
   const { activeTabView } = useTabViewManager();
 
   const [pendingAnalysis, setPendingAnalysis] = useState("");

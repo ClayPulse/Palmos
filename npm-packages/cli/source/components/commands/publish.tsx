@@ -36,9 +36,9 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 	// Check if the user is authenticated
 	useEffect(() => {
 		async function checkAuth() {
-			const token = getToken(cli.flags.dev);
+			const token = getToken(cli.flags.stage);
 			if (token) {
-				const isValid = await checkToken(token, cli.flags.dev);
+				const isValid = await checkToken(token, cli.flags.stage);
 				if (isValid) {
 					setIsAuthenticated(true);
 				}
@@ -57,11 +57,12 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 			setIsBuilding(true);
 			try {
 				await $`npm run build`;
-			}
-			catch (error) {
+			} catch (error) {
 				setIsBuildingError(true);
 				setIsBuilding(false);
-				setFailureMessage('Build failed. Please run `npm run build` to see the error.');
+				setFailureMessage(
+					'Build failed. Please run `npm run build` to see the error.',
+				);
 				return;
 			}
 			// Zip the dist folder
@@ -102,13 +103,13 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 
 				// Send the file to the server
 				const res = await fetch(
-					cli.flags.dev
+					cli.flags.stage
 						? 'https://localhost:8080/api/app/publish'
 						: 'https://pulse-editor.com/api/app/publish',
 					{
 						method: 'POST',
 						headers: {
-							Authorization: `Bearer ${getToken(cli.flags.dev)}`,
+							Authorization: `Bearer ${getToken(cli.flags.stage)}`,
 						},
 						body: formData,
 					},

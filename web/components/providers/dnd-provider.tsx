@@ -24,7 +24,7 @@ import {
 } from "@dnd-kit/core";
 import { addToast } from "@heroui/react";
 import { IMCMessageTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
-import { Node as ReactFlowNode, useReactFlow } from "@xyflow/react";
+import { Node as ReactFlowNode } from "@xyflow/react";
 import { ReactNode, useContext, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { v4 } from "uuid";
@@ -58,7 +58,6 @@ export default function DndProvider({
   });
   const { isLandscape } = useScreenSize();
   const { createAppViewInCanvasView } = useTabViewManager();
-  const { updateNodeData } = useReactFlow();
 
   const [mounted, setMounted] = useState(false);
 
@@ -93,7 +92,7 @@ export default function DndProvider({
               recommendedHeight: app.config.recommendedHeight,
               recommendedWidth: app.config.recommendedWidth,
             };
-            createAppViewInCanvasView(config);
+            await createAppViewInCanvasView(config);
           } catch (error) {
             addToast({
               title: "Failed to open app",
@@ -112,10 +111,12 @@ export default function DndProvider({
               recommendedWidth: app.config.recommendedWidth,
             };
 
-            const { viewId, node, paramName } = over.data.current as {
+            const { viewId, node, paramName, updateNodeData } = over.data
+              .current as {
               viewId: string;
               node: ReactFlowNode<AppNodeData>;
               paramName: string;
+              updateNodeData: (id: string, data: Partial<AppNodeData>) => void;
             };
 
             updateNodeData(viewId, {

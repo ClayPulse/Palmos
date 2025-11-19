@@ -1,5 +1,6 @@
 const help = `\
   help [command]  Show help for a command.
+  
 `;
 
 const chat = `\
@@ -25,10 +26,12 @@ const login = `\
 
 const logout = `\
   logout          Logout from the Pulse Editor Platform.
+
 `;
 
 const publish = `\
   publish         Publish Pulse Editor Extension in current directory to the Pulse Editor Platform.
+
 `;
 
 const create = `\
@@ -43,6 +46,41 @@ const create = `\
                     --visibility, -v [visibility]
                       The visibility of the new project. Options are private,
                       public, and unlisted.
+
+`;
+
+const preview = `\
+  preview         Build the Pulse App in development mode and
+                  start a preview server accessible via browser
+                  with live reloading.
+
+`;
+
+const dev = `\
+  dev             Build the Pulse App in development mode and
+                  start a local development server for Pulse Editor
+                  to load the app from, with live reloading.
+
+`;
+
+const build = `\
+  build           Build the Pulse App for production deployment.
+                  Flags:
+                    --target, -t [target]
+                      The build target. Options are 'client', 'server', or
+                      unspecified (both client and server).
+
+`;
+
+const start = `\
+  start           Build the Pulse App in production mode and
+                  start a local server for Pulse Editor to load the app from.
+
+`;
+
+const clean = `\
+  clean           Clean the dist/ directory.
+
 `;
 
 export const commandsManual: Record<string, string> = {
@@ -52,4 +90,9 @@ export const commandsManual: Record<string, string> = {
 	logout,
 	publish,
 	create,
+	preview,
+	dev,
+	build,
+	start,
+	clean,
 };

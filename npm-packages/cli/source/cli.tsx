@@ -17,6 +17,7 @@ ${Object.entries(commandsManual)
 	.join('')}
 Examples
   pulse help publish
+  
 `,
 	{
 		importMeta: import.meta,

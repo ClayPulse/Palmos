@@ -22,7 +22,6 @@ export default function ViewArea() {
     selectTab,
     closeTabView,
     createAppTabView,
-    createAppViewInCanvasView,
     activeTabView,
   } = useTabViewManager();
 
@@ -76,7 +75,6 @@ export default function ViewArea() {
     } else {
       setIsShowTabs(true);
     }
-    console.log("Tab views changed:", tabViews);
   }, [tabViews]);
 
   return (

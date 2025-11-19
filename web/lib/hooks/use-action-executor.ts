@@ -18,7 +18,7 @@ import { useTabViewManager } from "./use-tab-view-manager";
  *  This hook provides actions from the active tab
  *  view and static actions from all installed apps.
  */
-export default function useScopedActions(appName?: string) {
+export default function useActionExecutor(appName?: string) {
   const imcContext = useContext(IMCContext);
   const editorContext = useContext(EditorContext);
 

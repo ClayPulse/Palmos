@@ -11,7 +11,7 @@ import {
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { AppNodeData, WorkflowContent } from "../types";
-import useScopedActions from "./use-scoped-actions";
+import useActionExecutor from "./use-action-executor";
 
 export default function useCanvasWorkflow(
   initialWorkflowContent?: WorkflowContent,
@@ -19,7 +19,7 @@ export default function useCanvasWorkflow(
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
-  const { runScopedAction } = useScopedActions();
+  const { runScopedAction } = useActionExecutor();
 
   const [pendingNodes, setPendingNodes] = useState<
     ReactFlowNode<AppNodeData>[]

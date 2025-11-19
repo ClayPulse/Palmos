@@ -99,7 +99,7 @@ Pulse Editor extensions and its features.`,
                   },
                   // CanvasViewConfig
                   workflow: {
-                    type: "any",
+                    type: "object",
                     description: `The workflow that the canvas is using. This contains nodes and edges information required for a xyflow/ReactFlow graph. \
 This field exists if the view type is 'Canvas'.`,
                     optional: true,
@@ -189,7 +189,7 @@ with Pulse Editor and extension commands.`,
                   "Whether the file system object is a folder or not.",
               },
               subDirItems: {
-                type: "any",
+                type: "object",
                 description:
                   "The sub-directory items of the file system object. ",
                 optional: true,

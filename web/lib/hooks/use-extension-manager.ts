@@ -65,7 +65,7 @@ export default function useExtensionManager() {
       );
 
       const installedExtensions =
-        (await editorContext?.persistSettings?.extensions) ?? [];
+        editorContext?.persistSettings?.extensions ?? [];
 
       // Check if extension is already installed
       if (

@@ -1,4 +1,5 @@
 import { PlatformEnum } from "@/lib/enums";
+import { useAppInfo } from "@/lib/hooks/use-app-info";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
 import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
 import {
@@ -51,6 +52,14 @@ export default function AppPreviewCard({
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
 }) {
+  const {
+    disableExtension,
+    enableExtension,
+    uninstallExtension,
+    installExtension,
+  } = useExtensionManager();
+  const { openAppInfoModal } = useAppInfo();
+
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
@@ -60,12 +69,6 @@ export default function AppPreviewCard({
     y: 0,
     isOpen: false,
   });
-  const {
-    disableExtension,
-    enableExtension,
-    uninstallExtension,
-    installExtension,
-  } = useExtensionManager();
 
   const editorContext = useContext(EditorContext);
 
@@ -91,7 +94,7 @@ export default function AppPreviewCard({
     undefined,
   );
 
-  const [showMFVersionInfo, setShowMFVersionInfo] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
   useEffect(() => {
     async function fetchVersions() {
@@ -170,13 +173,13 @@ export default function AppPreviewCard({
         className="relative h-full min-h-32 w-full"
         onMouseEnter={() => {
           if (getPlatform() !== PlatformEnum.Capacitor) {
-            setIsShowInfo(true);
+            setIsHover(true);
           }
         }}
         // Hide show info when user taps outside of the modal
         onMouseLeave={() => {
           if (getPlatform() !== PlatformEnum.Capacitor) {
-            setIsShowInfo(false);
+            setIsHover(false);
           }
         }}
       >
@@ -275,9 +278,6 @@ export default function AppPreviewCard({
               return;
             }
 
-            addToast({
-              title: "App Preview Clicked",
-            });
             if (onPress) {
               onPress(extension);
             } else {
@@ -323,7 +323,7 @@ export default function AppPreviewCard({
             <Skeleton className="h-full w-full" isLoaded={false}></Skeleton>
           )}
         </Button>
-        {isShowInfo && (
+        {(isShowInfo || isHover) && (
           <div className="absolute bottom-0.5 left-1/2 flex w-fit -translate-x-1/2 justify-center gap-x-0.5">
             {isShowUseButton && (
               <Button
@@ -336,21 +336,45 @@ export default function AppPreviewCard({
                 Use
               </Button>
             )}
-            <Button color="secondary" size="sm">
+            <Button
+              color="secondary"
+              size="sm"
+              onPress={() => {
+                openAppInfoModal({
+                  id: extension.config.id,
+                  name: extension.config.displayName ?? extension.config.id,
+                  version: extension.config.version,
+                  author: extension.config.author,
+                  license: extension.config.license,
+                  url: extension.config.repository,
+                  readme: extension.config.repository
+                    ? extension.config.repository + "/README.md"
+                    : undefined,
+                });
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  isMarketplaceOpen: false,
+                }));
+              }}
+            >
               Details
             </Button>
             {!isInstalled ? (
               <Button
                 color="primary"
                 size="sm"
-                onPress={(e) => {
-                  installExtension(
+                onPress={async (e) => {
+                  await installExtension(
                     extension.remoteOrigin,
                     extension.config.id,
                     extension.config.version,
                   )
                     .then(() => {
-                      toast.success("Extension installed");
+                      addToast({
+                        title: "Extension installed",
+                        description: `Extension ${extension.config.id} installed successfully.`,
+                        color: "success",
+                      });
                       setIsInstalled(true);
                       setIsEnabled(extension.isEnabled);
                     })
@@ -368,7 +392,11 @@ export default function AppPreviewCard({
                   size="sm"
                   onPress={(e) => {
                     uninstallExtension(extension.config.id).then(() => {
-                      toast.success("Extension uninstalled");
+                      addToast({
+                        title: "Extension uninstalled",
+                        description: `Extension ${extension.config.id} uninstalled successfully.`,
+                        color: "success",
+                      });
                       setIsInstalled(false);
                     });
                   }}
@@ -388,7 +416,11 @@ export default function AppPreviewCard({
                   variant="light"
                   onPress={(e) => {
                     uninstallExtension(extension.config.id).then(() => {
-                      toast.success("Extension uninstalled");
+                      addToast({
+                        title: "Extension uninstalled",
+                        description: `Extension ${extension.config.id} uninstalled successfully.`,
+                        color: "success",
+                      });
                     });
                     setContextMenuState({ x: 0, y: 0, isOpen: false });
                   }}
@@ -406,7 +438,11 @@ export default function AppPreviewCard({
                       extension.config.version,
                     )
                       .then(() => {
-                        toast.success("Extension installed");
+                        addToast({
+                          title: "Extension installed",
+                          description: `Extension ${extension.config.id} installed successfully.`,
+                          color: "success",
+                        });
                         setIsInstalled(true);
                         setIsEnabled(extension.isEnabled);
                       })

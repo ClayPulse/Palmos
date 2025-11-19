@@ -2,6 +2,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
 import { addToast } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import {
@@ -15,6 +16,8 @@ export function useTabViewManager() {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
+  const router = useRouter();
+
   const [tabViews, setTabViews] = useState<TabView[]>(
     editorContext?.editorStates.tabViews ?? [],
   );
@@ -24,6 +27,8 @@ export function useTabViewManager() {
   const [activeTabView, setActiveTabView] = useState<TabView | undefined>(
     tabViews[tabIndex],
   );
+
+  const [isCreatingTab, setIsCreatingTab] = useState<boolean>(true);
 
   // Generate tab names with index suffixes for duplicates
   const nameCounts: Record<string, number> = {};
@@ -55,6 +60,15 @@ export function useTabViewManager() {
     }) ?? [];
 
   useEffect(() => {
+    // set isCreatingTab to false after 1 second so that initial tab creation does not trigger URL update
+    const timer = setTimeout(() => {
+      setIsCreatingTab(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Update local states when editor context changes
+  useEffect(() => {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -69,6 +83,23 @@ export function useTabViewManager() {
     editorContext?.editorStates.tabViews,
     editorContext?.editorStates.tabIndex,
   ]);
+
+  // Pend workflow or app param when tab index changes
+  useEffect(() => {
+    if (isCreatingTab) return;
+
+    if (activeTabView) {
+      if (activeTabView.type === ViewModeEnum.App) {
+        const appConfig = activeTabView.config as AppViewConfig;
+        router.push(`/?app=${appConfig.app}`);
+      } else if (activeTabView.type === ViewModeEnum.Canvas) {
+        const canvasConfig = activeTabView.config as CanvasViewConfig;
+        router.push(`/?workflow=${canvasConfig.viewId}`);
+      }
+    } else {
+      router.push(`/`);
+    }
+  }, [activeTabView, isCreatingTab]);
 
   function selectTab(newIndex: number) {
     if (!editorContext) {
@@ -259,6 +290,8 @@ export function useTabViewManager() {
       throw new Error("IMC context is not available");
     }
 
+    setIsCreatingTab(true);
+
     const newTabView: TabView = {
       type: ViewModeEnum.App,
       config: appConfig,
@@ -288,6 +321,8 @@ export function useTabViewManager() {
     } else if (!imcContext) {
       throw new Error("IMC context is not available");
     }
+
+    setIsCreatingTab(true);
 
     // Prohibit creating canvas if any app's view ID in the canvas already exists
     const existViewId = canvasConfig.appConfigs?.find((appConfig) =>

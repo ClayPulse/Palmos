@@ -201,6 +201,7 @@ export type TabItem = {
 };
 
 export type AppInfoModalContent = {
+  id: string;
   name: string;
   version: string;
   // Markdown content

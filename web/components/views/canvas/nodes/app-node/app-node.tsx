@@ -1,4 +1,4 @@
-import useScopedActions from "@/lib/hooks/use-scoped-actions";
+import useActionExecutor from "@/lib/hooks/use-action-executor";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppNodeData } from "@/lib/types";
 import { Node } from "@xyflow/react";
@@ -19,7 +19,7 @@ const AppNode = memo((props: any) => {
   const viewId = config.viewId;
 
   const { createAppTabView, deleteAppViewInCanvasView } = useTabViewManager();
-  const { actions } = useScopedActions(config.app);
+  const { actions } = useActionExecutor(config.app);
 
   async function openViewInFullScreen() {
     await createAppTabView({
