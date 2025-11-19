@@ -1,6 +1,6 @@
 {
 	"name": "@pulse-editor/cli",
-	"version": "0.1.1-beta.6",
+	"version": "0.1.1-beta.7",
 	"license": "MIT",
 	"bin": {
 		"pulse": "dist/cli.js"
@@ -19,9 +19,6 @@
 		"dist"
 	],
 	"dependencies": {
-		"@module-federation/enhanced": "0.19.1",
-		"@module-federation/node": "2.7.17",
-		"@module-federation/runtime": "0.19.1",
 		"concurrently": "^9.2.1",
 		"connect-livereload": "^0.6.1",
 		"cors": "^2.8.5",
@@ -42,12 +39,15 @@
 		"tsx": "^4.20.6"
 	},
 	"devDependencies": {
+		"@module-federation/enhanced": "0.21.4",
+		"@module-federation/node": "2.7.23",
+		"@module-federation/runtime": "0.21.4",
 		"@sindresorhus/tsconfig": "^8.1.0",
 		"@types/connect-livereload": "^0.6.3",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.5",
 		"@types/livereload": "^0.9.5",
-		"@types/react": "^19.2.5",
+		"@types/react": "^19.2.6",
 		"@types/react-dom": "^19.2.3",
 		"@vdemedes/prettier-config": "^2.0.1",
 		"ava": "^6.4.1",

@@ -5,7 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
   output: "export",
   distDir: "../build/next",
-  webpack: (config) => {
+  webpack: (config: any) => {
     // Add external configuration
     config.externals = [...config.externals, { canvas: "canvas" }]; // required to make Konva & react-konva work
 
@@ -36,6 +36,7 @@ const nextConfig = {
     });
     return config;
   },
+  turbopack: {},
 };
 
 export default nextConfig;

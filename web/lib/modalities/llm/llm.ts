@@ -1,7 +1,6 @@
-import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
-import { TogetherAI } from "@langchain/community/llms/togetherai";
 import { BaseLanguageModel } from "@langchain/core/language_models/base";
+import { ChatOpenAI } from "@langchain/openai";
 
 export class BaseLLM {
   // The model object
@@ -77,13 +76,6 @@ export function getLLMModel(
         temperature,
       });
 
-      break;
-    case "togetherai":
-      model = new TogetherAI({
-        apiKey,
-        model: modelName,
-        temperature,
-      });
       break;
     case "local":
       throw new Error("Local model not implemented yet");
