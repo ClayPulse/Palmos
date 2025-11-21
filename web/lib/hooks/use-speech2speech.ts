@@ -1,7 +1,8 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { BaseSTT, getSTTModel } from "../modalities/stt/base-stt";
+import { BaseSTT } from "../modalities/stt/base-stt";
+import { getSTTModel } from "../modalities/stt/get-stt";
 import { BaseTTS, getTTSModel } from "../modalities/tts/tts";
 import { getAPIKey } from "../settings/api-manager-utils";
 

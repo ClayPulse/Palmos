@@ -8,14 +8,14 @@ export const editorAssistantAgent: Agent = {
 You are an AI assistant agent for a creativity platform called Pulse Editor.
 You are a helpful platform-level assistant agent who can help users with the following tasks:
 1. Answer questions about the platform and its features.
-2. Provide information about the available extensions, extension commands, and AI models.
+2. Provide information about the available apps, app actions, and AI models.
 3. Suggest relevant workflows and tools for specific tasks.
 e.g. If a user wants to create a promotional video, you can suggest first using
-a script generator extension from community marketplace, then using a video
-editor extension to edit the video, and finally using a voice generator extension to add voiceover. 
+a script generator app from community marketplace, then using a video
+editor app to edit the video, and finally using a voice generator app to add voiceover. 
 4. Assist users in troubleshooting common issues for the editor itself. If a user asks anything
-about an extension, you should suggest the user to visit the extension's marketplace page and/or
-contact the extension developer.
+about an app, you should suggest the user to visit the app's marketplace page and/or
+contact the app developer.
 5. You must return your answer in the required format.
 
 You will receive a message from user, which may contain a question or a request for assistance.
@@ -27,7 +27,7 @@ Pulse Editor is a modular, extensible, cross-platform, AI-powered creativity pla
 that helps users create and automate creative workflows for numerous tasks.
 In Pulse Editor, users can create and edit text, images, videos, audio,
 code, and many other types of content (the opportunity is endless).
-Pulse Editor enables users to create and edit content using a variety of extensions
+Pulse Editor enables users to create and edit content using a variety of apps
 published by the community. In addition, Pulse Editor embeds many AI models to help
 users create and editor content in multiple modalities. The purpose of Pulse Editor
 is to use AI tools to better assist and accelerate users' creative process.
@@ -37,7 +37,7 @@ at https://pulse-editor.com or the GitHub community https://github.com/claypulse
 
 `,
   description: `A platform-level assistant agent who can help users with Pulse Editor, \
-Pulse Editor extensions and its features.`,
+Pulse Editor apps and its features.`,
   availableMethods: [
     {
       access: AccessEnum.public,
@@ -134,7 +134,7 @@ This is an object that contains different fields based on the view type.`,
           ],
           description: `The list of opened views that are visible to the user. \
 You will need to use these as the context to suggest the user to interact \
-with Pulse Editor and extension commands.`,
+with Pulse Editor and app action commands.`,
         },
         availableCommands: {
           type: [
@@ -142,7 +142,7 @@ with Pulse Editor and extension commands.`,
               cmdName: {
                 type: "string",
                 description:
-                  "The name of the command that the user is trying to use from the extension.",
+                  "The name of the command that the user is trying to use from the app.",
               },
               parameters: {
                 type: [
@@ -150,27 +150,27 @@ with Pulse Editor and extension commands.`,
                     name: {
                       type: "string",
                       description:
-                        "The name of the parameter needed to run the command from the extension.",
+                        "The name of the parameter needed to run the command from the app.",
                     },
                     type: {
                       type: "string",
                       description:
-                        "The type of the parameter needed to run the command from the extension.",
+                        "The type of the parameter needed to run the command from the app.",
                     },
                     description: {
                       type: "string",
                       description:
-                        "The description of the parameter needed to run the command from the extension.",
+                        "The description of the parameter needed to run the command from the app.",
                     },
                   },
                 ],
                 description:
-                  "The parameters needed to run the command from the extension.",
+                  "The parameters needed to run the command from the app.",
               },
             },
           ],
           description:
-            "The commands that the user is trying to use from the extension.",
+            "The commands that the user is trying to use from the app.",
         },
         projectDirTree: {
           type: [
@@ -200,7 +200,7 @@ with Pulse Editor and extension commands.`,
         },
       },
       prompt: `\
-For this task, you will suggest extension commands that fit the user's needs.
+For this task, you will suggest app actions that fit the user's needs.
 You are given the following information about the conversation and the available commands.
 Do not assume the command knows what you know (e.g. background information about the user \
 and Pulse Editor), you need to include these knowledge in command's arguments.
@@ -242,25 +242,25 @@ Project directory tree:
               name: {
                 type: "string",
                 description:
-                  "The name of the argument needed to run the command from the extension.",
+                  "The name of the argument needed to run the command from the app.",
               },
               value: {
                 type: "string",
                 description:
-                  "The value that you suggest for the user to run the command from the extension. Add any relevant additional knowledge if possible.",
+                  "The value that you suggest for the user to run the command from the app. Add any relevant additional knowledge if possible.",
               },
             },
           ],
-          description: `The arguments that you suggested for user to run the command from the extension. \
+          description: `The arguments that you suggested for user to run the command from the app. \
 This must match the command's parameters provided earlier.`,
         },
         //         suggestedViewId: {
         //           type: "string",
         //           description:
         //             "The ID of the view (usually a uuid) that you suggest the user to run the command on. \
-        // Note, this is not the same as the module/extension ID (usually a named ID). In order to suggest a view ID, \
+        // Note, this is not the same as the module/app ID (usually a named ID). In order to suggest a view ID, \
         // you must match the commands' module ID (named ID) with the opened views' appConfig.id (named ID). \
-        // If a command and an opened view has the same extension/module ID (named ID), you can use that \
+        // If a command and an opened view has the same app/module ID (named ID), you can use that \
         // opened view's ID (uuid) as the suggested view ID.",
         //         },
         response: {
@@ -277,7 +277,7 @@ and highlight parts for better readability.`,
     },
     {
       access: AccessEnum.public,
-      name: "suggestExtensions",
+      name: "suggestapps",
       parameters: {
         chatHistory: {
           type: "string",
@@ -287,24 +287,24 @@ and highlight parts for better readability.`,
           type: "string",
           description: "The user's message.",
         },
-        relevantExtensions: {
+        relevantapps: {
           type: {
             name: {
               type: "string",
-              description: "The name of the extension",
+              description: "The name of the app",
             },
             description: {
               type: "string",
-              description: "The description of the extension",
+              description: "The description of the app",
             },
           },
           description:
-            "The relevant extensions that are available in the marketplace.",
+            "The relevant apps that are available in the marketplace.",
         },
       },
       prompt: `\
-For this task, you will suggest extensions from marketplace that fit the user's needs.
-You are given the following information about the conversation and the available extensions.
+For this task, you will suggest apps from marketplace that fit the user's needs.
+You are given the following information about the conversation and the available apps.
 
 Chat history:
 \`\`\`
@@ -314,26 +314,26 @@ User message:
 \`\`\`
 {userMessage}
 \`\`\`
-Relevant extensions:
+Relevant apps:
 \`\`\`
-{relevantExtensions}
+{relevantapps}
 \`\`\`
 `,
       returns: {
-        extensionSuggestions: {
+        appSuggestions: {
           type: [
             {
               name: {
                 type: "string",
-                description: "The name of the extension",
+                description: "The name of the app",
               },
               description: {
                 type: "string",
-                description: "The description of the extension",
+                description: "The description of the app",
               },
             },
           ],
-          description: `The extension suggestions.`,
+          description: `The app suggestions.`,
         },
         response: {
           type: "string",

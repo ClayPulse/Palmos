@@ -1,12 +1,7 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import {
-  getAgentLLMConfig,
-  runAgentMethodCloud,
-  runAgentMethodLocal,
-} from "@/lib/agent/agent-runner";
 import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
+import { runLLMAgentMethod } from "@/lib/agent/llm-agent-runner";
 import { PlatformEnum } from "@/lib/enums";
-import { getDefaultLLMConfig } from "@/lib/modalities/utils";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import {
@@ -19,8 +14,9 @@ import {
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { usePlatformApi } from "./use-platform-api";
+import { chatModels } from "../platform-assistant/chat-models";
 import useActionExecutor from "./use-action-executor";
+import { usePlatformApi } from "./use-platform-api";
 import useSpeech2Speech from "./use-speech2speech";
 import { useTabViewManager } from "./use-tab-view-manager";
 import useTTS from "./use-tts";
@@ -135,7 +131,7 @@ export default function usePlatformAIAssistant() {
       const previousMessage = history[history.length - 1].message.content.text;
 
       if (isUseManagedCloud ?? true) {
-        const { analysis }: { analysis: string } = await runAgentMethodCloud(
+        const { analysis }: { analysis: string } = await runLLMAgentMethod(
           editorAssistantAgent,
           "analyzeCommandResult",
           {
@@ -144,7 +140,7 @@ export default function usePlatformAIAssistant() {
             previousSuggestion: response,
             commandResult: actionResult,
           },
-          (chunk) => {
+          (allReceivedChunk, newReceivedChunk) => {
             if (!chunk.content.text) {
               return;
             }
@@ -293,12 +289,120 @@ export default function usePlatformAIAssistant() {
     };
   }
 
-  async function runCloudAssistant(input: UserMessage, isOutputAudio: boolean) {
+  // async function runLocalAssistant(input: UserMessage, isOutputAudio: boolean) {
+  //   if (!editorContext) {
+  //     return;
+  //   }
+
+  //   if (getPlatform() === PlatformEnum.VSCode) {
+  //     toast.error(
+  //       "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
+  //     );
+  //     return;
+  //   }
+
+  //   if (!editorContext.editorStates.isRecording) {
+  //     const llmProvider = editorContext.persistSettings?.llmProvider;
+  //     const llmModel = editorContext.persistSettings?.llmModel;
+
+  //     if (!llmProvider || !llmModel) {
+  //       toast.error("Please set your LLM provider and model in settings.");
+  //       return;
+  //     }
+  //     const llmKey = getAPIKey(
+  //       editorContext,
+  //       editorContext.persistSettings?.llmProvider,
+  //     );
+
+  //     if (!llmKey) {
+  //       toast.error("Please set your LLM API key in settings.");
+  //       return;
+  //     }
+
+  //     const agent = editorAssistantAgent;
+  //     const methodName = "useAppActions";
+
+  //     // Pipe the LLM result to Speech2Speech
+  //     runSpeech2Speech(async (inputText: string) => {
+  //       const config =
+  //         getAgentLLMConfig(agent, methodName) ??
+  //         getDefaultLLMConfig(editorContext);
+
+  //       if (!config) {
+  //         toast.error("No LLM config found for agent.");
+  //         return "No LLM config found for agent. Please configure the LLM in settings.";
+  //       }
+
+  //       setUserVoiceMessage(inputText);
+
+  //       const args = await gatherAssistantArgs(inputText);
+
+  //       const result = await runAgentMethodLocal(
+  //         llmKey,
+  //         config,
+  //         agent,
+  //         methodName,
+  //         args,
+  //       );
+
+  //       const {
+  //         response,
+  //       }: {
+  //         response: string;
+  //       } = result;
+
+  //       console.log("Agent suggestion:", result);
+
+  //       setAssistantResult(result);
+
+  //       return response;
+  //     });
+  //   } else {
+  //     stopSpeech2Speech();
+  //   }
+  // }
+
+  /**
+   * Run the assistant with the given input and output settings.
+   * @param input User input, can be one of either audio (ReadableStream) or text (string).
+   * @param isOutputAudio Whether the output should be audio.
+   */
+  async function chatWithAssistant(input: UserMessage, isOutputAudio: boolean) {
     if (!editorContext) {
       return;
     }
 
-    if (input.content.audio && getPlatform() === PlatformEnum.VSCode) {
+    // Check for currently used chat model.
+    // If it is LLM only,
+    //  - if has audio input, pipe to STT first, then send text to LLM
+    //  - if text only but audio output is disabled, send text to LLM, then return text
+    //  - if text only but audio output is enabled, send text to LLM, then pipe text to TTS
+    // If it is speech2speech model,
+    //  - if has audio, pipe to speech2speech directly
+    //  - if text only, send text to speech2speech directly
+    //  - speech2speech will return audio output, and optionally text output if audio output is enabled
+
+    // Get current model
+    const modelName =
+      editorContext?.persistSettings?.assistantChatModel ?? "pulse-ai-v1";
+
+    const chatModel = chatModels[modelName];
+
+    if (!chatModel) {
+      throw new Error(`Chat model ${modelName} not found.`);
+    }
+
+    if (chatModel.type === "speech-to-speech") {
+    } else if (chatModel.type === "text-to-text") {
+    } else {
+      throw new Error(`Unsupported chat model type: ${chatModel.type}`);
+    }
+  }
+
+  async function runSpeech2SpeechModel() {}
+
+  async function runText2TextModel() {
+    if (input.message.audio && getPlatform() === PlatformEnum.VSCode) {
       if (getPlatform() === PlatformEnum.VSCode) {
         toast.error(
           "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
@@ -315,11 +419,11 @@ export default function usePlatformAIAssistant() {
       },
     ]);
 
-    const text = input.content.text ?? await 
+    const text = input.content.text;
 
-    const args = await gatherAssistantArgs(input);
+    const args = await gatherAssistantArgs(input.content.text);
 
-    const result = await runAgentMethodCloud(
+    const result = await runLLMAgentMethod(
       editorAssistantAgent,
       "useAppActions",
       args,
@@ -348,96 +452,6 @@ export default function usePlatformAIAssistant() {
     setAssistantResult(result);
 
     return result;
-  }
-
-  async function runLocalAssistant(input: UserMessage, isOutputAudio: boolean) {
-    if (!editorContext) {
-      return;
-    }
-
-    if (getPlatform() === PlatformEnum.VSCode) {
-      toast.error(
-        "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
-      );
-      return;
-    }
-
-    if (!editorContext.editorStates.isRecording) {
-      const llmProvider = editorContext.persistSettings?.llmProvider;
-      const llmModel = editorContext.persistSettings?.llmModel;
-
-      if (!llmProvider || !llmModel) {
-        toast.error("Please set your LLM provider and model in settings.");
-        return;
-      }
-      const llmKey = getAPIKey(
-        editorContext,
-        editorContext.persistSettings?.llmProvider,
-      );
-
-      if (!llmKey) {
-        toast.error("Please set your LLM API key in settings.");
-        return;
-      }
-
-      const agent = editorAssistantAgent;
-      const methodName = "useAppActions";
-
-      // Pipe the LLM result to Speech2Speech
-      runSpeech2Speech(async (inputText: string) => {
-        const config =
-          getAgentLLMConfig(agent, methodName) ??
-          getDefaultLLMConfig(editorContext);
-
-        if (!config) {
-          toast.error("No LLM config found for agent.");
-          return "No LLM config found for agent. Please configure the LLM in settings.";
-        }
-
-        setUserVoiceMessage(inputText);
-
-        const args = await gatherAssistantArgs(inputText);
-
-        const result = await runAgentMethodLocal(
-          llmKey,
-          config,
-          agent,
-          methodName,
-          args,
-        );
-
-        const {
-          response,
-        }: {
-          response: string;
-        } = result;
-
-        console.log("Agent suggestion:", result);
-
-        setAssistantResult(result);
-
-        return response;
-      });
-    } else {
-      stopSpeech2Speech();
-    }
-  }
-
-  /**
-   * Run the assistant with the given input and output settings.
-   * @param input User input, can be audio (ReadableStream) or text (string).
-   * @param isOutputAudio Whether the output should be audio.
-   */
-  async function chatWithAssistant(input: UserMessage, isOutputAudio: boolean) {
-    if (isUseManagedCloud ?? true) {
-      runCloudAssistant(input, isOutputAudio);
-    } else {
-      runLocalAssistant(input, isOutputAudio);
-    }
-  }
-
-  function getAgentSuggestedCommands(query: string, k: number) {
-    return undefined;
   }
 
   return {

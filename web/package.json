@@ -8,7 +8,8 @@
       "build": "next build --webpack",
       "lint": "next lint",
       "start": "serve ../build/next",
-      "dev-https": "next dev --experimental-https --webpack"
+      "dev-https": "next dev --experimental-https --webpack",
+      "test": "cross-env NODE_OPTIONS=\"$NODE_OPTIONS --experimental-vm-modules\" jest"
    },
    "dependencies": {
       "@capacitor-community/safe-area": "^7.0.0-beta.4",
@@ -33,6 +34,7 @@
       "@module-federation/runtime": "^0.21.4",
       "@pulse-editor/shared-utils": "^0.1.1-beta.55",
       "@ricky0123/vad-web": "^0.0.29",
+      "@toon-format/toon": "^1.0.0",
       "@vercel/analytics": "^1.5.0",
       "@xyflow/react": "^12.9.3",
       "elevenlabs": "^1.59.0",
@@ -64,18 +66,23 @@
       "uuid": "^13.0.0"
    },
    "devDependencies": {
+      "@jest/globals": "^30.2.0",
       "@tailwindcss/postcss": "^4.1.17",
       "@tailwindcss/typography": "^0.5.19",
       "@types/node": "^24",
       "@types/react": "^19",
       "@types/react-dom": "^19",
       "@types/semver": "^7.7.1",
+      "cross-env": "^10.1.0",
+      "dotenv": "^17.2.3",
       "eslint": "^9",
       "eslint-config-next": "16.0.3",
+      "jest": "^30.2.0",
       "postcss": "^8",
       "raw-loader": "^4.0.2",
       "serve": "^14.2.5",
       "tailwindcss": "^4.1.17",
+      "ts-jest": "^29.4.5",
       "typescript": "^5",
       "workbox-webpack-plugin": "^7.3.0"
    }

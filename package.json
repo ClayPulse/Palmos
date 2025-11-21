@@ -13,6 +13,7 @@
         "web-dev": "npm run dev-https --workspace=web",
         "web-build": "npm run build --workspace=web",
         "web-start": "npm run start --workspace=web",
+        "web-test": "npm run test --workspace=web",
         "desktop-dev": "npm --prefix ./desktop run dev-https",
         "desktop-build": "npm run web-build && npm --prefix ./desktop run build",
         "android-dev": "npm run web-build && npm run android-dev --workspace=mobile",

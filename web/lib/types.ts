@@ -9,7 +9,7 @@ import {
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { SideMenuTabEnum } from "./enums";
-import { BaseLLM } from "./modalities/llm/llm";
+import { BaseLLM } from "./modalities/llm/base-llm";
 import { BaseSTT } from "./modalities/stt/base-stt";
 import { BaseTTS } from "./modalities/tts/tts";
 
@@ -149,6 +149,8 @@ export type PersistentSettings = {
 
   // Environment variables
   envs?: Record<string, string>;
+
+  assistantChatModel?: string;
 };
 // #endregion
 
@@ -300,6 +302,14 @@ export type ChatMessage = {
   datetime: string;
 };
 
+export type ModelConfig = {
+  provider: string;
+  modelName: string;
+  temperature?: number;
+  apiKey?: string;
+};
+
+
 // #region Extension apps
 export type ExtensionApp = {
   config: AppConfig;
@@ -416,21 +426,34 @@ export type PlatformAssistantHistory = {
   message: UserMessage | PlatformAssistantMessage;
 };
 
+/**
+ *  User themselves can only either talk or chat. But user may attach
+ *  additional content.
+ */
 export type UserMessage = {
-  content: {
+  message: {
     text?: string;
     audio?: ArrayBuffer;
   };
-  meta?: any;
+  attachments: Attachment[];
 };
 
+/**
+ *  Assistant's response can be in multiple modalities.
+ */
 export type PlatformAssistantMessage = {
-  content: {
+  message: {
     text?: string;
     audio?: ArrayBuffer;
   };
-  // Other data used to interact with the platform
-  meta?: any;
+  attachments: Attachment[];
+};
+
+
+export type Attachment = {
+  type: "file" | "image" | "video" | "audio" | "other";
+  uri: string;
+  name?: string;
 };
 
 // #endregion

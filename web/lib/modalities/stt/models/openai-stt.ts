@@ -1,8 +1,13 @@
 import OpenAI from "openai";
 import { BaseSTT } from "../base-stt";
 
-export class OpenAIWhisperSTT extends BaseSTT {
+export class OenAISTT_Whisper extends BaseSTT {
   constructor(apiKey: string, modelName: string) {
+    const model = new OpenAI({
+      apiKey,
+      dangerouslyAllowBrowser: true,
+    });
+
     async function openAIGenerateFunc(
       model: any,
       audio: ReadableStream<ArrayBuffer> | ArrayBuffer,
@@ -75,11 +80,6 @@ export class OpenAIWhisperSTT extends BaseSTT {
       });
       return rStream;
     }
-
-    const model = new OpenAI({
-      apiKey,
-      dangerouslyAllowBrowser: true,
-    });
 
     super(model, openAIGenerateFunc, openAIGenerateStreamFunc);
   }

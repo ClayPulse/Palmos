@@ -1,5 +1,5 @@
 import { BaseSTT } from "./base-stt";
-import { OpenAIWhisperSTT } from "./models/openai-whisper";
+import { OenAISTT_Whisper } from "./models/openai-stt";
 import { PulseEditorSTT } from "./models/pulse-editor-stt";
 
 export function getSTTModel(
@@ -9,12 +9,12 @@ export function getSTTModel(
 ): BaseSTT {
   switch (provider) {
     case "openai":
-      return new OpenAIWhisperSTT(modelName, apiKey);
+      return new OenAISTT_Whisper(modelName, apiKey);
 
     case "pulse-editor":
       return new PulseEditorSTT(modelName);
 
     default:
-      return new OpenAIWhisperSTT(modelName, apiKey);
+      return new OenAISTT_Whisper(modelName, apiKey);
   }
 }

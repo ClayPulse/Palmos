@@ -6,6 +6,7 @@ export enum PlatformEnum {
   Web = "web",
   WebMobile = "web-mobile",
 }
+// #endregion
 
 export enum MarketplaceCategoryEnum {
   Featured = "Featured",
@@ -18,4 +19,14 @@ export enum SideMenuTabEnum {
   Apps = "Apps",
   Workspace = "Workspace",
 }
-// #endregion
+
+export enum ModelDataTypeEnum {
+  Text = "text",
+  Speech = "speech",
+  Image = "image",
+  Video = "video",
+  Music = "music",
+  Audio = "Audio",
+}
+
+

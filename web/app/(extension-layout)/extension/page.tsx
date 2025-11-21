@@ -94,11 +94,6 @@ export default function ExtensionPage({}) {
     };
 
     window.fetch = patchedFetch;
-
-    // // Cleanup on unmount or dependency change
-    // return () => {
-    //   window.fetch = originalFetch;
-    // };
   }, [remoteOrigin, moduleId, moduleVersion, isMounted]);
 
   if (!isMounted) {

@@ -1,6 +1,11 @@
 import { AIProviderOption } from "@/lib/types";
 
-type ProviderName = "openai" | "anthropic" | "togetherai" | "local";
+type ProviderName =
+  | "openai"
+  | "anthropic"
+  | "togetherai"
+  | "ollama"
+  | "pulse-editor";
 
 export const llmProviderOptions: {
   [key in ProviderName]: AIProviderOption;
@@ -25,6 +30,14 @@ export const llmProviderOptions: {
         model: "gpt-4.1",
         isSupported: true,
       },
+      {
+        model: "gpt-5",
+        isSupported: true,
+      },
+      {
+        model: "gpt-5-mini",
+        isSupported: true,
+      },
     ],
   },
   anthropic: {
@@ -33,11 +46,11 @@ export const llmProviderOptions: {
     models: [
       {
         model: "claude-3-5-sonnet-latest",
-        isSupported: false,
+        isSupported: true,
       },
       {
         model: "claude-3-5-haiku-latest",
-        isSupported: false,
+        isSupported: true,
       },
     ],
   },
@@ -63,7 +76,25 @@ export const llmProviderOptions: {
       },
     ],
   },
-  local: {
+  "pulse-editor": {
+    provider: "pulse-editor",
+    isSupported: true,
+    models: [
+      {
+        model: "pulse-ai-llm-v1",
+        isSupported: true,
+      },
+      {
+        model: "pulse-ai-llm-v1-pro",
+        isSupported: true,
+      },
+      {
+        model: "pulse-ai-llm-v1-max",
+        isSupported: true,
+      },
+    ],
+  },
+  ollama: {
     provider: "local",
     isSupported: true,
     models: [

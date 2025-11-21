@@ -1,11 +1,11 @@
 "use client";
 
 import {
-  runAgentMethodCloud,
+  runLLMAgentMethod,
   runAgentMethodLocal,
-} from "@/lib/agent/agent-runner";
+} from "@/lib/agent/llm-agent-runner";
 import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
-import { getLLMModel } from "@/lib/modalities/llm/llm";
+import { getLLMModel } from "@/lib/modalities/llm/base-llm";
 import { recognizeText } from "@/lib/modalities/ocr/ocr";
 import { getSTTModel } from "@/lib/modalities/stt/base-stt";
 import { getTTSModel } from "@/lib/modalities/tts/tts";
@@ -170,7 +170,7 @@ export default function InterModuleCommunicationProvider({
           }
 
           if (editorContext?.persistSettings?.isUseManagedCloud ?? true) {
-            const result = await runAgentMethodCloud(agent, methodName, args);
+            const result = await runLLMAgentMethod(agent, methodName, args);
 
             return result;
           } else {
