@@ -2,85 +2,44 @@ import OpenAI from "openai";
 import { BaseSTT } from "../base-stt";
 
 export class OenAISTT_Whisper extends BaseSTT {
+  private modelName: string;
+  private openAIClient: OpenAI;
+
   constructor(apiKey: string, modelName: string) {
-    const model = new OpenAI({
+    super();
+
+    const client = new OpenAI({
       apiKey,
       dangerouslyAllowBrowser: true,
     });
 
-    async function openAIGenerateFunc(
-      model: any,
-      audio: ReadableStream<ArrayBuffer> | ArrayBuffer,
-    ) {
-      const data = [];
+    this.modelName = modelName;
+    this.openAIClient = client;
+  }
 
-      if (audio instanceof ArrayBuffer) {
-        data.push(audio);
-      } else {
-        const reader = audio.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            break;
+  public async generateStream(
+    audio: ArrayBuffer,
+  ): Promise<ReadableStream<string>> {
+    const audioBlob = new Blob([audio], { type: "audio/mp3" });
+    const file = new File([audioBlob], "audio.mp3");
+
+    const stream = await this.openAIClient.audio.transcriptions.create({
+      file: file,
+      model: this.modelName,
+      stream: true,
+    });
+
+    const rStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          if (chunk.type === "transcript.text.delta") {
+            controller.enqueue(chunk.delta);
           }
-          data.push(value);
         }
-      }
 
-      const audioBlob = new Blob(data, { type: "audio/wav" });
-
-      const file = new File([audioBlob], "audio.wav", { type: "audio/wav" });
-      const { text } = await model.audio.transcriptions.create({
-        file: file,
-        model: modelName,
-      });
-      return text;
-    }
-
-    async function openAIGenerateStreamFunc(
-      model: any,
-      audio: ReadableStream<ArrayBuffer> | ArrayBuffer,
-    ) {
-      const openAIModel = model as OpenAI;
-
-      const data = [];
-
-      if (audio instanceof ArrayBuffer) {
-        data.push(audio);
-      } else {
-        const reader = audio.getReader();
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) {
-            break;
-          }
-          data.push(value);
-        }
-      }
-
-      const audioBlob = new Blob(data, { type: "audio/wav" });
-      const file = new File([audioBlob], "audio.wav", { type: "audio/wav" });
-
-      const stream = await openAIModel.audio.transcriptions.create({
-        model: modelName,
-        stream: true,
-        file: file,
-      });
-
-      const rStream = new ReadableStream({
-        async start(controller) {
-          for await (const chunk of stream) {
-            if (chunk.type === "transcript.text.delta") {
-              controller.enqueue(chunk.delta);
-            }
-          }
-
-          controller.close();
-        },
-      });
-      return rStream;
-    }
-
-    super(model, openAIGenerateFunc, openAIGenerateStreamFunc);
+        controller.close();
+      },
+    });
+    return rStream;
   }
 }

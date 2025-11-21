@@ -1,20 +1,20 @@
+import { ModelConfig } from "@/lib/types";
 import { BaseSTT } from "./base-stt";
 import { OenAISTT_Whisper } from "./models/openai-stt";
 import { PulseEditorSTT } from "./models/pulse-editor-stt";
 
-export function getSTTModel(
-  provider: string,
-  modelName: string,
-  apiKey?: string,
-): BaseSTT {
-  switch (provider) {
+export function getSTTModel(modelConfig: ModelConfig): BaseSTT {
+  switch (modelConfig.provider) {
     case "openai":
-      return new OenAISTT_Whisper(modelName, apiKey);
+      if (!modelConfig.apiKey) {
+        throw new Error("OpenAI API key is required for STT model.");
+      }
+      return new OenAISTT_Whisper(modelConfig.apiKey, modelConfig.modelName);
 
     case "pulse-editor":
-      return new PulseEditorSTT(modelName);
+      return new PulseEditorSTT(modelConfig.modelName);
 
     default:
-      return new OenAISTT_Whisper(modelName, apiKey);
+      throw new Error(`Unsupported STT provider: ${modelConfig.provider}`);
   }
 }

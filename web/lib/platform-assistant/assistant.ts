@@ -5,8 +5,10 @@ import { runLLMAgentMethod } from "../agent/llm-agent-runner";
 import { ModelDataTypeEnum } from "../enums";
 import { BaseLLM } from "../modalities/llm/base-llm";
 import { getLLMModel } from "../modalities/llm/get-llm";
+import { llmProviderOptions } from "../modalities/llm/options";
 import { BaseSTS } from "../modalities/sts/base-sts";
 import { getSTSModel } from "../modalities/sts/get-sts";
+import { stsProviderOptions } from "../modalities/sts/options";
 import { getSTTModel } from "../modalities/stt/get-stt";
 import { getTTSModel } from "../modalities/tts/tts";
 import { ModelConfig, PlatformAssistantMessage, UserMessage } from "../types";
@@ -80,7 +82,7 @@ export async function chatWithAssistant(
           "useAppActions",
           {
             ...editorContextInfo,
-            userMessage: userInput.message.text,
+            userMessage: userInputArg.message.text,
           },
         ),
       },
@@ -109,16 +111,34 @@ export async function chatWithAssistant(
 }
 
 function getChatModel(modelConfig: ModelConfig): BaseLLM | BaseSTS | undefined {
-  const sts = getSTSModel(modelConfig);
+  const stsOption =
+    stsProviderOptions[modelConfig.provider as keyof typeof stsProviderOptions];
 
-  if (sts) {
-    return sts;
+  const isSupportedInSTS =
+    stsOption?.isSupported &&
+    stsOption.models.some(
+      (m) => m.model === modelConfig.modelName && m.isSupported,
+    );
+
+  if (isSupportedInSTS) {
+    return getSTSModel(modelConfig);
   }
 
   // If STS is not found, try to get LLM model
-  const llm = getLLMModel(modelConfig);
+  const llmOption =
+    llmProviderOptions[modelConfig.provider as keyof typeof llmProviderOptions];
 
-  return llm;
+  const isSupportedInLLM =
+    llmOption?.isSupported &&
+    llmOption.models.some(
+      (m) => m.model === modelConfig.modelName && m.isSupported,
+    );
+
+  if (isSupportedInLLM) {
+    return getLLMModel(modelConfig);
+  }
+
+  return undefined;
 }
 
 /* User can only enter one of text or audio */
@@ -155,11 +175,11 @@ async function processUserInput(
       throw new Error(`No model supports audio input.`);
     }
 
-    const stt = getSTTModel(
-      fallbackModels.stt.apiKey,
-      fallbackModels.stt.provider,
-      fallbackModels.stt.modelName,
-    );
+    const stt = getSTTModel({
+      provider: fallbackModels.stt.provider,
+      modelName: fallbackModels.stt.modelName,
+      apiKey: fallbackModels.stt.apiKey,
+    });
 
     const audioInput = userInput.message.audio;
 
@@ -167,12 +187,20 @@ async function processUserInput(
       throw new Error("No audio input provided.");
     }
 
-    const text = await stt.generate(audioInput);
+    const text = await stt.generateStream(audioInput);
+
+    let transcribedText = "";
+    const reader = text.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      transcribedText += value;
+    }
 
     return {
       ...userInput,
       message: {
-        text,
+        text: transcribedText,
         // audio is no longer needed
         audio: undefined,
       },
