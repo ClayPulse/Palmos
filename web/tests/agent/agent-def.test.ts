@@ -1,4 +1,4 @@
-import { describe } from "@jest/globals";
+import { describe, expect, jest } from "@jest/globals";
 import { createMockFetchAPI } from "../utils";
 createMockFetchAPI();
 
@@ -41,14 +41,15 @@ if (!apiKey) throw new Error("Missing PULSE_EDITOR_API_KEY env var");
 
 const llmConfig = {
   provider: llmProviderOptions["pulse-editor"].provider,
-  modelName: "pulse-ai-llm-v1",
-  temperature: 0.9,
+  modelName: "pulse-editor/pulse-ai-v1-turbo",
+  temperature: 1,
   apiKey: apiKey,
 };
 
-describe("Cloud Agent Tests", () => {
-  // Add your cloud agent tests here
+describe("Test agent definition", () => {
+  jest.setTimeout(20000);
 
+  // Add your cloud agent tests here
   test("Test LLM", async () => {
     const result = await runAgentMethod(
       llmConfig,

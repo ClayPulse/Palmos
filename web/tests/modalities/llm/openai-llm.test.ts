@@ -17,7 +17,7 @@ describe("OpenAILLM_GPT.generateStream (REAL OpenAI API)", () => {
       apiKey,
       provider: "openai",
       modelName: "gpt-4o-mini",
-      temperature: 0.95,
+      temperature: 1,
     } as ModelConfig);
 
     if (!llm) throw new Error("Failed to create OpenAILLM_GPT instance");

@@ -4,6 +4,9 @@ import { createMockFetchAPI } from "../../utils";
 createMockFetchAPI();
 
 // Use async import for other ESM modules so that mock ESM modules are applied correctly
+const { PulseEditorModelEnum } = await import(
+  "../../../lib/modalities/llm/models/pulse-editor-llm"
+);
 const { getLLMModel } = await import("../../../lib/modalities/llm/get-llm");
 const { llmProviderOptions } = await import(
   "../../../lib/modalities/llm/options"
@@ -20,8 +23,8 @@ describe("Pulse Editor LLM Models", () => {
     const llm = getLLMModel({
       apiKey,
       provider: llmProviderOptions["pulse-editor"].provider,
-      modelName: "pulse-ai-llm-v1",
-      temperature: 0.95,
+      modelName: PulseEditorModelEnum.PulseAIv1Turbo,
+      temperature: 1,
     } as ModelConfig);
 
     if (!llm) throw new Error("Failed to create Pulse Editor LLM instance");
