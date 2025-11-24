@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getLLMModel } from "@/lib/modalities/llm/base-llm";
 import { getSTTModel } from "@/lib/modalities/stt/base-stt";
-import { getTTSModel } from "@/lib/modalities/tts/tts";
+import { getTTSModel } from "@/lib/modalities/tts/get-tts";
 import { decrypt } from "@/lib/security/simple-password";
 import {
   AIModels,

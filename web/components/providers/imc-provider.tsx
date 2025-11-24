@@ -4,11 +4,11 @@ import {
   runLLMAgentMethod,
   runAgentMethodLocal,
 } from "@/lib/agent/llm-agent-runner";
-import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
-import { getLLMModel } from "@/lib/modalities/llm/base-llm";
+import { getImageGenModel } from "@/lib/modalities/image-gen/get-image-gen";
+import { getLLMModel } from "@/lib/modalities/llm/get-llm";
 import { recognizeText } from "@/lib/modalities/ocr/ocr";
-import { getSTTModel } from "@/lib/modalities/stt/base-stt";
-import { getTTSModel } from "@/lib/modalities/tts/tts";
+import { getSTTModel } from "@/lib/modalities/stt/get-stt";
+import { getTTSModel } from "@/lib/modalities/tts/get-tts";
 import {
   getDefaultImageModelConfig,
   getDefaultLLMConfig,
@@ -16,7 +16,7 @@ import {
   getDefaultTTSConfig,
   getDefaultVideoModelConfig,
 } from "@/lib/modalities/utils";
-import { getVideoGenModel } from "@/lib/modalities/video-gen/video-gen";
+import { getVideoGenModel } from "@/lib/modalities/video-gen/get-video-gen";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { IMCContextType } from "@/lib/types";
 import {

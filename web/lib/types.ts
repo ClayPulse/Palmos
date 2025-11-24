@@ -261,16 +261,7 @@ export type AIModels = {
 };
 
 export type AIProviderOption = {
-  provider: string;
-  isSupported: boolean;
-  models: {
-    model: string;
-    // TODO: do not enforce supported models in the future
-    // and allow users to enter any model from the provider.
-    // Available models should be displayed in a dropdown
-    // as suggestions.
-    isSupported: boolean;
-  }[];
+  models: string[];
 };
 // #endregion
 
@@ -309,6 +300,9 @@ export type ModelConfig = {
   apiKey?: string;
 };
 
+export type AudioModelConfig = ModelConfig & {
+  voiceName?: string;
+};
 
 // #region Extension apps
 export type ExtensionApp = {
@@ -448,7 +442,6 @@ export type PlatformAssistantMessage = {
   };
   attachments: Attachment[];
 };
-
 
 export type Attachment = {
   type: "file" | "image" | "video" | "audio" | "other";

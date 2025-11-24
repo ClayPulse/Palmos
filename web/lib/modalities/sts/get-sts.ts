@@ -1,12 +1,19 @@
 import { ModelConfig } from "@/lib/types";
 import { BaseSTS } from "./base-sts";
+import { OpenAISTS } from "./models/openai-sts";
+import { PulseEditorSTS } from "./models/pulse-editor-sts";
 
 export function getSTSModel(modelConfig: ModelConfig): BaseSTS | undefined {
-  switch (modelConfig.provider) {
+  const { provider, apiKey, modelName } = modelConfig;
+
+  switch (provider) {
     case "openai":
-      throw new Error("OpenAI STS model not implemented yet");
+      if (!apiKey) {
+        throw new Error("OpenAI API key is required");
+      }
+      return new OpenAISTS(apiKey, modelName);
     case "pulse-editor":
-      return undefined;
+      return new PulseEditorSTS(modelName);
     default:
       return undefined;
   }

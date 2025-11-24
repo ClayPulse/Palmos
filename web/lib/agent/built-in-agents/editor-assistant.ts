@@ -1,4 +1,4 @@
-import { llmProviderOptions } from "@/lib/modalities/llm/options";
+import { llmProviderOptions } from "@/lib/modalities/llm/registry";
 import { AccessEnum, Agent } from "@pulse-editor/shared-utils";
 
 export const editorAssistantAgent: Agent = {
@@ -406,6 +406,6 @@ This field needs to be in the same language as the original user's message.",
   LLMConfig: {
     provider: llmProviderOptions.openai.provider,
     modelName: "gpt-4o",
-    temperature: 0.95,
+    temperature: 1,
   },
 };

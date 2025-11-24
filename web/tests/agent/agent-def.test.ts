@@ -8,7 +8,9 @@ const { decode } = await import("@toon-format/toon");
 const { runLLMAgentMethod: runAgentMethod } = await import(
   "../../lib/agent/llm-agent-runner"
 );
-const { llmProviderOptions } = await import("../../lib/modalities/llm/options");
+const { llmProviderOptions } = await import(
+  "../../lib/modalities/llm/registry"
+);
 
 const testAgent: Agent = {
   name: "cloud-agent-test",
@@ -40,8 +42,8 @@ const apiKey = process.env.PULSE_EDITOR_API_KEY;
 if (!apiKey) throw new Error("Missing PULSE_EDITOR_API_KEY env var");
 
 const llmConfig = {
-  provider: llmProviderOptions["pulse-editor"].provider,
-  modelName: "pulse-editor/pulse-ai-v1-turbo",
+  provider: "pulse-editor",
+  modelName: "pulse-ai-v1-turbo",
   temperature: 1,
   apiKey: apiKey,
 };

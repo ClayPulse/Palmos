@@ -2,15 +2,15 @@ import { TypedVariableType } from "@pulse-editor/shared-utils";
 import { decode } from "@toon-format/toon";
 import { editorAssistantAgent } from "../agent/built-in-agents/editor-assistant";
 import { runLLMAgentMethod } from "../agent/llm-agent-runner";
-import { ModelDataTypeEnum } from "../enums";
+import { ModelCapabilityEnum } from "../enums";
 import { BaseLLM } from "../modalities/llm/base-llm";
 import { getLLMModel } from "../modalities/llm/get-llm";
-import { llmProviderOptions } from "../modalities/llm/options";
+import { llmProviderOptions } from "../modalities/llm/registry";
 import { BaseSTS } from "../modalities/sts/base-sts";
 import { getSTSModel } from "../modalities/sts/get-sts";
-import { stsProviderOptions } from "../modalities/sts/options";
+import { stsProviderOptions } from "../modalities/sts/registry";
 import { getSTTModel } from "../modalities/stt/get-stt";
-import { getTTSModel } from "../modalities/tts/tts";
+import { getTTSModel } from "../modalities/tts/get-tts";
 import { ModelConfig, PlatformAssistantMessage, UserMessage } from "../types";
 
 type FallbackModelConfig = {
@@ -23,6 +23,7 @@ type FallbackModelConfig = {
     provider: string;
     modelName: string;
     apiKey: string;
+    voiceName?: string;
   };
 };
 
@@ -114,11 +115,9 @@ function getChatModel(modelConfig: ModelConfig): BaseLLM | BaseSTS | undefined {
   const stsOption =
     stsProviderOptions[modelConfig.provider as keyof typeof stsProviderOptions];
 
-  const isSupportedInSTS =
-    stsOption?.isSupported &&
-    stsOption.models.some(
-      (m) => m.model === modelConfig.modelName && m.isSupported,
-    );
+  const isSupportedInSTS = stsOption.models.some(
+    (m) => m === modelConfig.modelName,
+  );
 
   if (isSupportedInSTS) {
     return getSTSModel(modelConfig);
@@ -128,11 +127,9 @@ function getChatModel(modelConfig: ModelConfig): BaseLLM | BaseSTS | undefined {
   const llmOption =
     llmProviderOptions[modelConfig.provider as keyof typeof llmProviderOptions];
 
-  const isSupportedInLLM =
-    llmOption?.isSupported &&
-    llmOption.models.some(
-      (m) => m.model === modelConfig.modelName && m.isSupported,
-    );
+  const isSupportedInLLM = llmOption.models.some(
+    (m) => m === modelConfig.modelName,
+  );
 
   if (isSupportedInLLM) {
     return getLLMModel(modelConfig);
@@ -148,8 +145,8 @@ async function processUserInput(
   fallbackModels: FallbackModelConfig,
 ): Promise<PlatformAssistantMessage> {
   const messageType = userInput.message.text
-    ? ModelDataTypeEnum.Text
-    : ModelDataTypeEnum.Audio;
+    ? ModelCapabilityEnum.Text
+    : ModelCapabilityEnum.Audio;
 
   if (model.inputCapabilities.includes(messageType)) {
     // Return input if model supports the input type
@@ -157,18 +154,18 @@ async function processUserInput(
       ...userInput,
       message: {
         text:
-          messageType === ModelDataTypeEnum.Text
+          messageType === ModelCapabilityEnum.Text
             ? userInput.message.text
             : undefined,
         audio:
-          messageType === ModelDataTypeEnum.Audio
+          messageType === ModelCapabilityEnum.Audio
             ? userInput.message.audio
             : undefined,
       },
     };
   } else if (
-    model.inputCapabilities.includes(ModelDataTypeEnum.Text) &&
-    messageType === ModelDataTypeEnum.Audio
+    model.inputCapabilities.includes(ModelCapabilityEnum.Text) &&
+    messageType === ModelCapabilityEnum.Audio
   ) {
     // Find a fallback STT model to convert audio to text
     if (!fallbackModels.stt) {
@@ -227,11 +224,17 @@ async function processModelOutput(
       if (!fallbackModels.tts) {
         throw new Error(`No model supports audio output.`);
       }
-      const tts = getTTSModel(
-        fallbackModels.tts.apiKey,
-        fallbackModels.tts.provider,
-        fallbackModels.tts.modelName,
-      );
+      const tts = getTTSModel({
+        apiKey: fallbackModels.tts.apiKey,
+        provider: fallbackModels.tts.provider,
+        modelName: fallbackModels.tts.modelName,
+        voiceName: fallbackModels.tts.voiceName,
+      });
+
+      if (!tts) {
+        throw new Error(`No model supports audio output.`);
+      }
+
       const textOutput = modelOutput.message.text;
 
       if (!textOutput) {
@@ -244,13 +247,12 @@ async function processModelOutput(
         }
       ).response;
 
-      const audio = await tts.generate(audioContent);
-      const arrayBuffer = await audio.arrayBuffer();
+      const audio = await tts.generateStream(audioContent);
 
       return {
         message: {
           text: textOutput,
-          audio: arrayBuffer,
+          audio: audio,
         },
         attachments: modelOutput.attachments,
       };

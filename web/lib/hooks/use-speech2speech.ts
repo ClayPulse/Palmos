@@ -3,7 +3,8 @@ import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { BaseSTT } from "../modalities/stt/base-stt";
 import { getSTTModel } from "../modalities/stt/get-stt";
-import { BaseTTS, getTTSModel } from "../modalities/tts/tts";
+import { BaseTTS } from "../modalities/tts/base-tts";
+import { getTTSModel } from "../modalities/tts/get-tts";
 import { getAPIKey } from "../settings/api-manager-utils";
 
 export default function useSpeech2Speech() {

@@ -1,5 +1,6 @@
 import { useContext, useEffect, useState } from "react";
-import { BaseTTS, getTTSModel } from "../modalities/tts/tts";
+import { BaseTTS } from "../modalities/tts/base-tts";
+import { getTTSModel } from "../modalities/tts/get-tts";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { getAPIKey } from "../settings/api-manager-utils";
 

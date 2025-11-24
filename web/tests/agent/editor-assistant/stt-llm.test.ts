@@ -2,22 +2,19 @@ import { describe, expect, jest } from "@jest/globals";
 import { createMockFetchAPI } from "../../utils";
 createMockFetchAPI();
 
-import { getTTSModel } from "../../../lib/modalities/tts/tts";
+import { getTTSModel } from "../../../lib/modalities/tts/get-tts";
 import { UserMessage } from "../../../lib/types";
 const { decode } = await import("@toon-format/toon");
 const { chatWithAssistant } = await import(
   "../../../lib/platform-assistant/assistant"
 );
 const fs = await import("fs");
-const { llmProviderOptions } = await import(
-  "../../../lib/modalities/llm/options"
-);
 
 const openaiApiKey = process.env.OPENAI_API_KEY;
 if (!openaiApiKey) throw new Error("Missing OPENAI_API_KEY env var");
 
 const llmConfig = {
-  provider: llmProviderOptions["openai"].provider,
+  provider: "openai",
   modelName: "gpt-4o",
   temperature: 1,
   apiKey: openaiApiKey,
@@ -28,13 +25,19 @@ describe("Platform Assistant Test", () => {
 
   test("Test stt-llm", async () => {
     // Generate audio
-    const tts = getTTSModel(openaiApiKey, "openai", "tts-1");
+    const tts = getTTSModel({
+      provider: "openai",
+      modelName: "tts-1",
+      apiKey: openaiApiKey,
+    });
+
+    if (!tts) {
+      throw new Error("Failed to get TTS model");
+    }
 
     const ttsAudio = await tts.generateStream(
       'Do not call any app action, simply repeat this in your response: "Hello, Editor Agent!"',
     );
-
-    const ttsArrayBuffer = await ttsAudio.arrayBuffer();
 
     // save the audio to file for manual verification
     if (!fs.existsSync("tests/artifacts")) {
@@ -42,14 +45,14 @@ describe("Platform Assistant Test", () => {
     }
     fs.writeFileSync(
       "tests/artifacts/assistant_input.mp3",
-      Buffer.from(ttsArrayBuffer),
+      Buffer.from(ttsAudio),
     );
 
     // Send audio to assistant
     const input: UserMessage = {
       message: {
         text: undefined,
-        audio: ttsArrayBuffer,
+        audio: ttsAudio,
       },
       attachments: [],
     };

@@ -1,12 +1,12 @@
-import { ModelDataTypeEnum } from "@/lib/enums";
+import { ModelCapabilityEnum } from "@/lib/enums";
 
 export abstract class BaseSTS {
-  public inputCapabilities: ModelDataTypeEnum[];
-  public outputCapabilities: ModelDataTypeEnum[];
+  public inputCapabilities: ModelCapabilityEnum[];
+  public outputCapabilities: ModelCapabilityEnum[];
 
   constructor(
-    inputCapabilities?: ModelDataTypeEnum[],
-    outputCapabilities?: ModelDataTypeEnum[],
+    inputCapabilities?: ModelCapabilityEnum[],
+    outputCapabilities?: ModelCapabilityEnum[],
   ) {
     this.inputCapabilities = inputCapabilities ?? [];
     this.outputCapabilities = outputCapabilities ?? [];

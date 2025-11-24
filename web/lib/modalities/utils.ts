@@ -31,7 +31,7 @@ export function getDefaultLLMConfig(
     return {
       modelName: editorContext.persistSettings.llmModel,
       provider: editorContext.persistSettings.llmProvider,
-      temperature: 0.95,
+      temperature: 1,
     };
   }
 }

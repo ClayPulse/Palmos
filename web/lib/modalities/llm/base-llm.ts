@@ -1,19 +1,19 @@
-import { ModelDataTypeEnum } from "@/lib/enums";
+import { ModelCapabilityEnum } from "@/lib/enums";
 
 export abstract class BaseLLM {
-  public inputCapabilities: ModelDataTypeEnum[];
-  public outputCapabilities: ModelDataTypeEnum[];
+  public inputCapabilities: ModelCapabilityEnum[];
+  public outputCapabilities: ModelCapabilityEnum[];
 
   constructor(
-    inputCapabilities?: ModelDataTypeEnum[],
-    outputCapabilities?: ModelDataTypeEnum[],
+    inputCapabilities?: ModelCapabilityEnum[],
+    outputCapabilities?: ModelCapabilityEnum[],
   ) {
     this.inputCapabilities = [
-      ModelDataTypeEnum.Text,
+      ModelCapabilityEnum.Text,
       ...(inputCapabilities ?? []),
     ];
     this.outputCapabilities = [
-      ModelDataTypeEnum.Text,
+      ModelCapabilityEnum.Text,
       ...(outputCapabilities ?? []),
     ];
   }

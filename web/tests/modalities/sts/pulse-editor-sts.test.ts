@@ -4,7 +4,13 @@ import { createMockFetchAPI } from "../../utils";
 createMockFetchAPI();
 
 // Use async import for other ESM modules so that mock ESM modules are applied correctly
+const { PulseEditorModelEnum } = await import(
+  "../../../lib/modalities/llm/models/pulse-editor-llm"
+);
 const { getLLMModel } = await import("../../../lib/modalities/llm/get-llm");
+const { llmProviderOptions } = await import(
+  "../../../lib/modalities/llm/registry"
+);
 
 describe("Pulse Editor LLM Models", () => {
   // streaming can take a few seconds

@@ -21,7 +21,7 @@ export class PulseEditorLLM extends BaseLLM {
     prompt: string,
     signal?: AbortSignal,
   ): Promise<ReadableStream<string>> {
-    const response = await fetchAPI(`/api/inference/pulse-editor-llm`, {
+    const response = await fetchAPI(`/api/inference/pulse-editor/run`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -29,16 +29,16 @@ export class PulseEditorLLM extends BaseLLM {
       },
       body: JSON.stringify({
         model: this.modelName,
-        prompt,
+        prompt: {
+          text: prompt,
+        },
         temperature: this.temperature,
       }),
       signal,
     });
 
     if (!response.ok) {
-      throw new Error(
-        `PulseEditorLLM API error: ${response.status} ${response.statusText}`,
-      );
+      throw new Error(`PulseEditorLLM API error: ${await response.text()}`);
     }
 
     const stream = response.body;

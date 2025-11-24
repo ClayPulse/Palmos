@@ -20,7 +20,7 @@ export enum SideMenuTabEnum {
   Workspace = "Workspace",
 }
 
-export enum ModelDataTypeEnum {
+export enum ModelCapabilityEnum {
   Text = "text",
   Speech = "speech",
   Image = "image",
@@ -28,5 +28,3 @@ export enum ModelDataTypeEnum {
   Music = "music",
   Audio = "Audio",
 }
-
-

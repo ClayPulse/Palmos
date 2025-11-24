@@ -9,14 +9,14 @@ const { chatWithAssistant } = await import(
 );
 const fs = await import("fs");
 const { llmProviderOptions } = await import(
-  "../../../lib/modalities/llm/options"
+  "../../../lib/modalities/llm/registry"
 );
 
 const openaiApiKey = process.env.OPENAI_API_KEY;
 if (!openaiApiKey) throw new Error("Missing OPENAI_API_KEY env var");
 
 const llmConfig = {
-  provider: llmProviderOptions["openai"].provider,
+  provider: "openai",
   modelName: "gpt-4o",
   temperature: 1,
   apiKey: openaiApiKey,
