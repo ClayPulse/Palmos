@@ -5,25 +5,58 @@ export const llmProviderOptions: {
 } = {
   openai: {
     models: [
-      "gpt-4o",
-      "gpt-4o-mini",
-      "gpt-4.1-mini",
-      "gpt-4.1",
-      "gpt-5",
-      "gpt-5-mini",
+      {
+        name: "gpt-4o",
+        description: "OpenAI's flagship multimodal model for complex tasks",
+      },
+      {
+        name: "gpt-4o-mini",
+        description: "Faster and more affordable version of GPT-4o",
+      },
+      {
+        name: "gpt-4.1-mini",
+        description: "GPT-4.1 mini model for efficient processing",
+      },
+      {
+        name: "gpt-4.1",
+        description: "Advanced GPT-4.1 model with improved capabilities",
+      },
+      {
+        name: "gpt-5",
+        description: "Next-generation GPT-5 model",
+      },
+      {
+        name: "gpt-5-mini",
+        description: "Compact version of GPT-5 for faster responses",
+      },
     ],
   },
   anthropic: {
     models: [
-      "claude-3-5-sonnet-latest",
-      "claude-3-5-haiku-latest",
+      {
+        name: "claude-3-5-sonnet-latest",
+        description: "Latest Claude 3.5 Sonnet with enhanced reasoning",
+      },
+      {
+        name: "claude-3-5-haiku-latest",
+        description: "Fast and efficient Claude 3.5 Haiku model",
+      },
     ],
   },
   "pulse-editor": {
     models: [
-      "pulse-ai-v1-turbo",
-      "pulse-ai-v1-pro",
-      "pulse-ai-v1-max",
+      {
+        name: "pulse-ai-v1-turbo",
+        description: "Fast Pulse AI model for quick responses",
+      },
+      {
+        name: "pulse-ai-v1-pro",
+        description: "Professional Pulse AI model with balanced performance",
+      },
+      {
+        name: "pulse-ai-v1-max",
+        description: "Maximum capability Pulse AI model for complex tasks",
+      },
     ],
   },
   ollama: {

@@ -2,8 +2,8 @@
 
 import { useAuth } from "@/lib/hooks/use-auth";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
-import { getLLMModel } from "@/lib/modalities/llm/base-llm";
-import { getSTTModel } from "@/lib/modalities/stt/base-stt";
+import { getLLMModel } from "@/lib/modalities/llm/get-llm";
+import { getSTTModel } from "@/lib/modalities/stt/get-stt";
 import { getTTSModel } from "@/lib/modalities/tts/get-tts";
 import { decrypt } from "@/lib/security/simple-password";
 import {
@@ -116,11 +116,11 @@ export default function EditorContextProvider({
       settings?.sttModel &&
       settings.apiKeys?.[settings?.sttProvider]
     ) {
-      const model = getSTTModel(
-        settings.apiKeys?.[settings?.sttProvider],
-        settings?.sttProvider,
-        settings?.sttModel,
-      );
+      const model = getSTTModel({
+        apiKey: settings.apiKeys?.[settings?.sttProvider],
+        provider: settings?.sttProvider,
+        modelName: settings?.sttModel,
+      });
 
       const aiModels: AIModels = {
         ...editorStates.aiModels,
@@ -147,12 +147,12 @@ export default function EditorContextProvider({
       settings?.llmModel &&
       settings.apiKeys?.[settings?.llmProvider]
     ) {
-      const model = getLLMModel(
-        settings.apiKeys?.[settings?.llmProvider],
-        settings?.llmProvider,
-        settings?.llmModel,
-        0.85,
-      );
+      const model = getLLMModel({
+        apiKey: settings.apiKeys?.[settings?.llmProvider],
+        provider: settings?.llmProvider,
+        modelName: settings?.llmModel,
+        temperature: 0.85,
+      });
 
       const aiModels: AIModels = {
         ...editorStates.aiModels,
@@ -180,12 +180,12 @@ export default function EditorContextProvider({
       settings?.ttsVoice &&
       settings.apiKeys?.[settings?.ttsProvider]
     ) {
-      const model = getTTSModel(
-        settings.apiKeys?.[settings?.ttsProvider],
-        settings?.ttsProvider,
-        settings?.ttsModel,
-        settings?.ttsVoice,
-      );
+      const model = getTTSModel({
+        apiKey: settings.apiKeys?.[settings?.ttsProvider],
+        provider: settings?.ttsProvider,
+        modelName: settings?.ttsModel,
+        voiceName: settings?.ttsVoice,
+      });
 
       const aiModels: AIModels = {
         ...editorStates.aiModels,
@@ -218,11 +218,11 @@ export default function EditorContextProvider({
           editorStates.password,
         );
 
-        const model = getSTTModel(
-          decryptedSTTAPIKey,
-          settings?.sttProvider,
-          settings?.sttModel,
-        );
+        const model = getSTTModel({
+          apiKey: decryptedSTTAPIKey,
+          provider: settings?.sttProvider,
+          modelName: settings?.sttModel,
+        });
 
         const aiModels: AIModels = {
           ...editorStates.aiModels,
@@ -245,12 +245,12 @@ export default function EditorContextProvider({
           editorStates.password,
         );
 
-        const model = getLLMModel(
-          decryptedLLMAPIKey,
-          settings?.llmProvider,
-          settings?.llmModel,
-          0.85,
-        );
+        const model = getLLMModel({
+          apiKey: decryptedLLMAPIKey,
+          provider: settings?.llmProvider,
+          modelName: settings?.llmModel,
+          temperature: 0.85,
+        });
 
         const aiModels: AIModels = {
           ...editorStates.aiModels,
@@ -275,10 +275,12 @@ export default function EditorContextProvider({
         );
 
         const model = getTTSModel(
-          decryptedTTSAPIKey,
-          settings?.ttsProvider,
-          settings?.ttsModel,
-          settings?.ttsVoice,
+          {
+            apiKey: decryptedTTSAPIKey,
+            provider: settings?.ttsProvider,
+            modelName: settings?.ttsModel,
+            voiceName: settings?.ttsVoice,
+          },
         );
 
         const aiModels: AIModels = {

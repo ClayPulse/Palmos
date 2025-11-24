@@ -3,9 +3,12 @@ import { AIProviderOption } from "@/lib/types";
 export const musicGenProviderOptions: {
   [key in string]: AIProviderOption;
 } = {
- "pulse-editor": {
+  "pulse-editor": {
     models: [
-      "ace-step",
+      {
+        name: "ace-step",
+        description: "AI music generation with customizable style and tempo",
+      },
     ],
   },
 };

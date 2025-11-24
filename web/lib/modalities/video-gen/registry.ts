@@ -5,10 +5,22 @@ export const videoGenProviderOptions: {
 } = {
   replicate: {
     models: [
-      "kwaivgi/kling-v1.6-standard",
-      "kwaivgi/kling-v1.6-pro",
-      "kwaivgi/kling-v2.0",
-      "google/veo-2",
+      {
+        name: "kwaivgi/kling-v1.6-standard",
+        description: "Standard quality Kling video generation model",
+      },
+      {
+        name: "kwaivgi/kling-v1.6-pro",
+        description: "Professional Kling model with enhanced video quality",
+      },
+      {
+        name: "kwaivgi/kling-v2.0",
+        description: "Latest Kling v2.0 with improved motion and coherence",
+      },
+      {
+        name: "google/veo-2",
+        description: "Google's advanced Veo 2 video generation model",
+      },
     ],
   },
 };

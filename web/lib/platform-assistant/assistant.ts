@@ -116,7 +116,7 @@ function getChatModel(modelConfig: ModelConfig): BaseLLM | BaseSTS | undefined {
     stsProviderOptions[modelConfig.provider as keyof typeof stsProviderOptions];
 
   const isSupportedInSTS = stsOption.models.some(
-    (m) => m === modelConfig.modelName,
+    (m) => m.name === modelConfig.modelName,
   );
 
   if (isSupportedInSTS) {
@@ -128,7 +128,7 @@ function getChatModel(modelConfig: ModelConfig): BaseLLM | BaseSTS | undefined {
     llmProviderOptions[modelConfig.provider as keyof typeof llmProviderOptions];
 
   const isSupportedInLLM = llmOption.models.some(
-    (m) => m === modelConfig.modelName,
+    (m) => m.name === modelConfig.modelName,
   );
 
   if (isSupportedInLLM) {

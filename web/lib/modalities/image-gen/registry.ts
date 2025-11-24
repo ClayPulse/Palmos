@@ -5,9 +5,19 @@ export const imageGenProviderOptions: {
 } = {
   replicate: {
     models: [
-      "black-forest-labs/flux-schnell",
-      "black-forest-labs/flux-1.1-pro",
-      "black-forest-labs/flux-1.1-pro-ultra",
+      {
+        name: "black-forest-labs/flux-schnell",
+        description: "Flux Schnell model for fast image generation",
+      },
+      {
+        name: "black-forest-labs/flux-1.1-pro",
+        description: "Flux 1.1 Pro model for high-quality image generation",
+      },
+      {
+        name: "black-forest-labs/flux-1.1-pro-ultra",
+        description:
+          "Flux 1.1 Pro Ultra model for ultra high-quality image generation",
+      },
     ],
   },
 };

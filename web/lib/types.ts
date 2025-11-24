@@ -261,7 +261,10 @@ export type AIModels = {
 };
 
 export type AIProviderOption = {
-  models: string[];
+  models: {
+    name: string;
+    description: string;
+  }[];
 };
 // #endregion
 
@@ -293,6 +296,7 @@ export type ChatMessage = {
   datetime: string;
 };
 
+// TODO: make model config for each modality
 export type ModelConfig = {
   provider: string;
   modelName: string;

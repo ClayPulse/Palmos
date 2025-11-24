@@ -5,9 +5,18 @@ export const sttProviderOptions: {
 } = {
   openai: {
     models: [
-      "whisper-1",
-      "gpt-4o-transcribe",
-      "gpt-4o-mini-transcribe",
+      {
+        name: "whisper-1",
+        description: "General-purpose speech recognition model",
+      },
+      {
+        name: "gpt-4o-transcribe",
+        description: "GPT-4o based transcription with advanced understanding",
+      },
+      {
+        name: "gpt-4o-mini-transcribe",
+        description: "Faster GPT-4o mini transcription model",
+      },
     ],
   },
 };

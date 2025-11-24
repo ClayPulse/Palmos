@@ -8,9 +8,18 @@ export const stsProviderOptions: {
   },
   "pulse-editor": {
     models: [
-      "pulse-ai-v1-turbo",
-      "pulse-ai-v1-pro",
-      "pulse-ai-v1-max",
+      {
+        name: "pulse-ai-v1-turbo",
+        description: "Fast speech-to-speech model for real-time conversation",
+      },
+      {
+        name: "pulse-ai-v1-pro",
+        description: "Professional speech-to-speech with balanced quality",
+      },
+      {
+        name: "pulse-ai-v1-max",
+        description: "Maximum quality speech-to-speech for natural dialogue",
+      },
     ],
   },
 };
