@@ -1,4 +1,5 @@
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { parseNDJSONStream } from "../../stream-chunk-parsers";
 import { BaseLLM } from "../base-llm";
 
 export class PulseEditorLLM extends BaseLLM {
@@ -46,15 +47,29 @@ export class PulseEditorLLM extends BaseLLM {
       throw new Error("No stream in response");
     }
 
-    const rStream = new ReadableStream({
+    // ReadableStream cannot pass JSON objects via HTTP request, so we convert them back to object here
+    const stringStream = new ReadableStream({
       async start(controller) {
         for await (const chunk of stream) {
-          controller.enqueue(new TextDecoder().decode(chunk));
+          controller.enqueue(chunk);
         }
+        controller.close();
+      },
+    }).pipeThrough(new TextDecoderStream());
+
+    const finalStream = new ReadableStream({
+      async start(controller) {
+        await parseNDJSONStream(stringStream, async (data) => {
+          const { text }: { text?: string } = data;
+          if (text) {
+            controller.enqueue(text);
+          }
+        });
+
         controller.close();
       },
     });
 
-    return rStream;
+    return finalStream;
   }
 }

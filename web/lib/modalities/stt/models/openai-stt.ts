@@ -19,9 +19,10 @@ export class OenAISTT_Whisper extends BaseSTT {
 
   public async generateStream(
     audio: ArrayBuffer,
+    format = "wav",
   ): Promise<ReadableStream<string>> {
-    const audioBlob = new Blob([audio], { type: "audio/mp3" });
-    const file = new File([audioBlob], "audio.mp3");
+    const audioBlob = new Blob([audio], { type: `audio/${format}` });
+    const file = new File([audioBlob], `audio.${format}`);
 
     const stream = await this.openAIClient.audio.transcriptions.create({
       file: file,

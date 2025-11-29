@@ -58,7 +58,7 @@ export default function useSpeech2Speech() {
         }));
 
         if (sttModel.isAllowStreaming()) {
-          const transcript = await sttModel.generateStream(audio);
+          const transcript = await sttModel.generateStream(audio, "mp3");
           const reader = transcript.getReader();
           let result = "";
           while (true) {

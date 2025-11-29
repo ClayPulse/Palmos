@@ -7,6 +7,7 @@ export class PulseEditorSTT extends BaseSTT {
 
   public async generateStream(
     audio: ReadableStream<ArrayBuffer> | ArrayBuffer,
+    format = "wav",
   ): Promise<ReadableStream<string>> {
     // // Placeholder implementation for Pulse Editor STT
     // const data = [];

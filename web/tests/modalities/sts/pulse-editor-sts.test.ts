@@ -22,14 +22,6 @@ describe("Pulse Editor LLM Models", () => {
     const openai_api_key = process.env.OPENAI_API_KEY;
     if (!openai_api_key) throw new Error("Missing OPENAI_API_KEY env var");
 
-    const stt = getSTTModel({
-      apiKey: openai_api_key,
-      provider: "openai",
-      modelName: "whisper-1",
-    } as ModelConfig);
-
-    if (!stt) throw new Error("Failed to create OpenAI STT instance");
-
     const sts = getSTSModel({
       apiKey: pulse_editor_api_key,
       provider: "pulse-editor",
@@ -40,7 +32,7 @@ describe("Pulse Editor LLM Models", () => {
     if (!sts) throw new Error("Failed to create Pulse Editor LLM instance");
 
     // Generate speech and save to local if not already present
-    if (!fs.existsSync("tests/artifacts/pulse_editor_sts_input.mp3")) {
+    if (!fs.existsSync("tests/artifacts/pulse_editor_sts_input.wav")) {
       console.log("Cannot find cached TTS audio, generating...");
       const tts = getTTSModel({
         apiKey: openai_api_key,
@@ -73,14 +65,14 @@ describe("Pulse Editor LLM Models", () => {
         fs.mkdirSync("tests/artifacts", { recursive: true });
       }
       fs.writeFileSync(
-        "tests/artifacts/pulse_editor_sts_input.mp3",
+        "tests/artifacts/pulse_editor_sts_input.wav",
         Buffer.from(speechArrayBuffer),
       );
     }
 
     // Read the audio file
     const speechBuffer = fs.readFileSync(
-      "tests/artifacts/pulse_editor_sts_input.mp3",
+      "tests/artifacts/pulse_editor_sts_input.wav",
     );
 
     const speechArrayBuffer = speechBuffer.buffer.slice(
@@ -141,9 +133,35 @@ describe("Pulse Editor LLM Models", () => {
       Buffer.from(wavArrayBuffer),
     );
 
-    // Ensure we got actual content
+    // Check text response
     expect(chunks.map((chunk) => chunk.text).join("")).toMatch(
       /The quick brown fox jumps over the lazy dog./,
     );
+
+    const stt = getSTTModel({
+      apiKey: openai_api_key,
+      provider: "openai",
+      modelName: "gpt-4o-mini-transcribe",
+    });
+
+    const sttStream = await stt?.generateStream(wavArrayBuffer, "wav");
+    if (!sttStream) throw new Error("Failed to create STT stream");
+
+    const reader3 = sttStream.getReader();
+    let finalTranscription = "";
+    while (true) {
+      const { done, value } = await reader3.read();
+      if (done) break;
+      finalTranscription += value;
+    }
+    expect(
+      finalTranscription
+        // trim whitespace
+        .trim()
+        // use lower case
+        .toLowerCase()
+        // remove all punctuation
+        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
+    ).toMatch(/the quick brown fox jumps over the lazy dog/);
   });
 });

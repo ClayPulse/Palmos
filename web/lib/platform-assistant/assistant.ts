@@ -184,7 +184,7 @@ async function processUserInput(
       throw new Error("No audio input provided.");
     }
 
-    const text = await stt.generateStream(audioInput);
+    const text = await stt.generateStream(audioInput, "mp3");
 
     let transcribedText = "";
     const reader = text.getReader();

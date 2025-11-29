@@ -5,12 +5,7 @@ createMockFetchAPI();
 import type { Agent } from "@pulse-editor/shared-utils";
 const { AccessEnum } = await import("@pulse-editor/shared-utils");
 const { decode } = await import("@toon-format/toon");
-const { runLLMAgentMethod: runAgentMethod } = await import(
-  "../../lib/agent/llm-agent-runner"
-);
-const { llmProviderOptions } = await import(
-  "../../lib/modalities/llm/registry"
-);
+const { runLLMAgentMethod } = await import("../../lib/agent/llm-agent-runner");
 
 const testAgent: Agent = {
   name: "cloud-agent-test",
@@ -53,15 +48,12 @@ describe("Test agent definition", () => {
 
   // Add your cloud agent tests here
   test("Test LLM", async () => {
-    const result = await runAgentMethod(
+    const result = await runLLMAgentMethod(
       llmConfig,
       testAgent,
       "test-method",
       { input: "Hello, Cloud Agent!" },
-      async (allReceived, newReceived) => {
-        // console.log("All received so far:", allReceived);
-        // console.log("New received chunk:", newReceived);
-      },
+      async (allReceived, newReceived) => {},
     );
 
     expect(decode(result)).toEqual({ output: "Hello, Cloud Agent!" });

@@ -53,17 +53,15 @@ export class PulseEditorSTS extends BaseSTS {
       throw new Error("No response body from PulseEditor STS");
     }
 
-    const webStream = new ReadableStream({
+    // ReadableStream cannot pass JSON objects via HTTP request, so we convert them back to object here
+    const stringStream = new ReadableStream({
       async start(controller) {
         for await (const chunk of stream) {
           controller.enqueue(chunk);
         }
         controller.close();
       },
-    });
-
-    // Convert the ReadableStream<Uint16Array> to ReadableStream<string>
-    const rStream = webStream.pipeThrough(new TextDecoderStream());
+    }).pipeThrough(new TextDecoderStream());
 
     // ReadableStream cannot pass JSON objects via HTTP request, so we convert them back to object here
     const finalStream = new ReadableStream<{
@@ -72,7 +70,7 @@ export class PulseEditorSTS extends BaseSTS {
     }>({
       async start(controller) {
         let base64AudioBuffer: string = "";
-        await parseNDJSONStream(rStream, async (data) => {
+        await parseNDJSONStream(stringStream, async (data) => {
           const { text, audio }: { text?: string; audio?: string } = data;
           const audioBuffer = audio
             ? await pcm16Base64ToArrayBuffer(audio)

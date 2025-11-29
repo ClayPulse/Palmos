@@ -90,7 +90,7 @@ describe("Platform Assistant Test", () => {
       apiKey: openaiApiKey,
     });
 
-    const transcribed = await stt.generateStream(audioArrayBuffer);
+    const transcribed = await stt.generateStream(audioArrayBuffer, "mp3");
 
     const reader2 = transcribed.getReader();
     let transcribedResult = "";

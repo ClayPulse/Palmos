@@ -33,11 +33,10 @@ describe("Pulse Editor LLM Models", () => {
     const reader = stream.getReader();
     const chunks: string[] = [];
 
-    let read;
-    while (!(read = await reader.read()).done) {
-      const v = read.value;
-      expect(typeof v).toBe("string");
-      chunks.push(v);
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
     }
 
     // Ensure we got actual content
