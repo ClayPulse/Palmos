@@ -8,13 +8,14 @@ export class PulseEditorSTT extends BaseSTT {
   public async generateStream(
     audio: ReadableStream<ArrayBuffer> | ArrayBuffer,
   ): Promise<ReadableStream<string>> {
-    // Placeholder implementation for Pulse Editor STT
-    const data = [];
-    return new ReadableStream({
-      async start(controller) {
-        controller.enqueue("Transcribed text from Pulse Editor STT.");
-        controller.close();
-      },
-    });
+    // // Placeholder implementation for Pulse Editor STT
+    // const data = [];
+    // return new ReadableStream({
+    //   async start(controller) {
+    //     controller.enqueue("Transcribed text from Pulse Editor STT.");
+    //     controller.close();
+    //   },
+    // });
+    throw new Error("Pulse Editor STT model not implemented yet");
   }
 }

@@ -16,14 +16,27 @@ export class OpenAITTS extends BaseTTS {
     this.voiceName = voiceName ?? "echo";
   }
 
-
-  public async generateStream(text: string): Promise<ArrayBuffer> {
-    const stream = await this.model.audio.speech.create({
+  public async generateStream(
+    text: string,
+  ): Promise<ReadableStream<ArrayBuffer>> {
+    const response = await this.model.audio.speech.create({
       model: this.modelName,
       voice: this.voiceName as any,
       input: text,
     });
-    const buffer = Buffer.from(await stream.arrayBuffer());
-    return buffer.buffer;
+
+    if (!response.body) {
+      throw new Error("No response body from OpenAI TTS");
+    }
+
+    // Turn the response into a ReadableStream<ArrayBuffer>
+    const stream = response.body.pipeThrough<ArrayBuffer>(
+      new TransformStream({
+        transform(chunk, controller) {
+          controller.enqueue(chunk.buffer);
+        },
+      }),
+    );
+    return stream;
   }
 }

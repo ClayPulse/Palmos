@@ -2,15 +2,12 @@ import { describe, expect, jest } from "@jest/globals";
 import { createMockFetchAPI } from "../../utils";
 createMockFetchAPI();
 
-import { getSTTModel } from "../../../lib/modalities/stt/get-stt";
 import { UserMessage } from "../../../lib/types";
+const { getSTTModel } = await import("../../../lib/modalities/stt/get-stt");
 const { chatWithAssistant } = await import(
   "../../../lib/platform-assistant/assistant"
 );
 const fs = await import("fs");
-const { llmProviderOptions } = await import(
-  "../../../lib/modalities/llm/registry"
-);
 
 const openaiApiKey = process.env.OPENAI_API_KEY;
 if (!openaiApiKey) throw new Error("Missing OPENAI_API_KEY env var");
@@ -61,8 +58,21 @@ describe("Platform Assistant Test", () => {
 
     if (!audioOutput) return;
 
+    let audioArrayBuffer: ArrayBuffer = new ArrayBuffer(0);
+    const reader1 = audioOutput.getReader();
+    while (true) {
+      const { done, value } = await reader1.read();
+      if (done) break;
+      const tmp = new Uint8Array(
+        audioArrayBuffer.byteLength + value.byteLength,
+      );
+      tmp.set(new Uint8Array(audioArrayBuffer), 0);
+      tmp.set(new Uint8Array(value), audioArrayBuffer.byteLength);
+      audioArrayBuffer = tmp.buffer;
+    }
+
     // Save audio output to file for manual verification
-    const blob = new Blob([audioOutput], { type: "audio/mp3" });
+    const blob = new Blob([audioArrayBuffer], { type: "audio/mp3" });
     const arrayBuffer = await blob.arrayBuffer();
 
     if (!fs.existsSync("tests/artifacts")) {
@@ -80,12 +90,12 @@ describe("Platform Assistant Test", () => {
       apiKey: openaiApiKey,
     });
 
-    const transcribed = await stt.generateStream(audioOutput);
+    const transcribed = await stt.generateStream(audioArrayBuffer);
 
-    const reader = transcribed.getReader();
+    const reader2 = transcribed.getReader();
     let transcribedResult = "";
     while (true) {
-      const { done, value } = await reader.read();
+      const { done, value } = await reader2.read();
       if (done) break;
       transcribedResult += value;
     }

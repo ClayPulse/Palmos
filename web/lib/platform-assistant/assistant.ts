@@ -143,7 +143,7 @@ async function processUserInput(
   userInput: UserMessage,
   model: BaseLLM | BaseSTS,
   fallbackModels: FallbackModelConfig,
-): Promise<PlatformAssistantMessage> {
+): Promise<UserMessage> {
   const messageType = userInput.message.text
     ? ModelCapabilityEnum.Text
     : ModelCapabilityEnum.Audio;

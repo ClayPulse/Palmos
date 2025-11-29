@@ -11,7 +11,7 @@ import { Dispatch, RefObject, SetStateAction } from "react";
 import { SideMenuTabEnum } from "./enums";
 import { BaseLLM } from "./modalities/llm/base-llm";
 import { BaseSTT } from "./modalities/stt/base-stt";
-import { BaseTTS } from "./modalities/tts/tts";
+import { BaseTTS } from "./modalities/tts/base-tts";
 
 // #region Editor Context
 export type EditorContextType = {
@@ -442,7 +442,7 @@ export type UserMessage = {
 export type PlatformAssistantMessage = {
   message: {
     text?: string;
-    audio?: ArrayBuffer;
+    audio?: ReadableStream<ArrayBuffer>;
   };
   attachments: Attachment[];
 };

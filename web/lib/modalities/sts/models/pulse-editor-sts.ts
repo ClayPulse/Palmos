@@ -1,3 +1,6 @@
+import { pcm16Base64ToArrayBuffer } from "@/lib/audio-utils/utils";
+import { parseNDJSONStream } from "@/lib/modalities/stream-chunk-parsers";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { BaseSTS } from "../base-sts";
 
 export class PulseEditorSTS extends BaseSTS {
@@ -18,6 +21,71 @@ export class PulseEditorSTS extends BaseSTS {
       audio?: ArrayBuffer;
     }>
   > {
-    throw new Error("Pulse Editor STS model not implemented yet");
+    // convert audio to base64
+    const audioBase64 = audio
+      ? btoa(String.fromCharCode(...new Uint8Array(audio)))
+      : undefined;
+
+    const response = await fetchAPI(`/api/inference/pulse-editor/run`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: this.modelName,
+        prompt: {
+          text,
+          audio: audioBase64,
+        },
+        temperature: 1,
+        isOutputAudio: true,
+      }),
+      signal,
+    });
+
+    if (!response.ok) {
+      throw new Error(`PulseEditorLLM API error: ${await response.text()}`);
+    }
+
+    const stream = response.body;
+
+    if (!stream) {
+      throw new Error("No response body from PulseEditor STS");
+    }
+
+    const webStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of stream) {
+          controller.enqueue(chunk);
+        }
+        controller.close();
+      },
+    });
+
+    // Convert the ReadableStream<Uint16Array> to ReadableStream<string>
+    const rStream = webStream.pipeThrough(new TextDecoderStream());
+
+    // ReadableStream cannot pass JSON objects via HTTP request, so we convert them back to object here
+    const finalStream = new ReadableStream<{
+      text?: string;
+      audio?: ArrayBuffer;
+    }>({
+      async start(controller) {
+        let base64AudioBuffer: string = "";
+        await parseNDJSONStream(rStream, async (data) => {
+          const { text, audio }: { text?: string; audio?: string } = data;
+          const audioBuffer = audio
+            ? await pcm16Base64ToArrayBuffer(audio)
+            : undefined;
+          controller.enqueue({ text, audio: audioBuffer });
+
+          base64AudioBuffer += audio;
+        });
+
+        controller.close();
+      },
+    });
+
+    return finalStream;
   }
 }

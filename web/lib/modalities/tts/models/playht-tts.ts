@@ -12,7 +12,9 @@ export class PlayHTTTS extends BaseTTS {
     this.voiceName = voiceName;
   }
 
-  public async generateStream(text: string): Promise<ArrayBuffer> {
+  public async generateStream(
+    text: string,
+  ): Promise<ReadableStream<ArrayBuffer>> {
     throw new Error("PlayHT model not implemented yet");
   }
 }

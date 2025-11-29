@@ -39,20 +39,31 @@ describe("Platform Assistant Test", () => {
       'Do not call any app action, simply repeat this in your response: "Hello, Editor Agent!"',
     );
 
+    let ttsArrayBuffer: ArrayBuffer = new ArrayBuffer(0);
+    const reader = ttsAudio.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const tmp = new Uint8Array(ttsArrayBuffer.byteLength + value.byteLength);
+      tmp.set(new Uint8Array(ttsArrayBuffer), 0);
+      tmp.set(new Uint8Array(value), ttsArrayBuffer.byteLength);
+      ttsArrayBuffer = tmp.buffer;
+    }
+
     // save the audio to file for manual verification
     if (!fs.existsSync("tests/artifacts")) {
       fs.mkdirSync("tests/artifacts");
     }
     fs.writeFileSync(
       "tests/artifacts/assistant_input.mp3",
-      Buffer.from(ttsAudio),
+      Buffer.from(ttsArrayBuffer),
     );
 
     // Send audio to assistant
     const input: UserMessage = {
       message: {
         text: undefined,
-        audio: ttsAudio,
+        audio: ttsArrayBuffer,
       },
       attachments: [],
     };

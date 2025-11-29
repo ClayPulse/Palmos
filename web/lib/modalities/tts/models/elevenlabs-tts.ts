@@ -16,8 +16,9 @@ export class ElevenLabsTTS extends BaseTTS {
     this.voiceName = voiceName;
   }
 
-
-  public async generateStream(text: string): Promise<ArrayBuffer> {
+  public async generateStream(
+    text: string,
+  ): Promise<ReadableStream<ArrayBuffer>> {
     const data: Readable = await this.client.generate({
       text: text,
       model_id: this.modelName,
@@ -26,11 +27,13 @@ export class ElevenLabsTTS extends BaseTTS {
       stream: true,
     });
 
-    const chunks = [];
-    for await (const chunk of data) {
-      chunks.push(chunk);
-    }
-    const buffer = Buffer.concat(chunks);
-    return buffer.buffer;
+    return new ReadableStream<ArrayBuffer>({
+      async start(controller) {
+        for await (const chunk of data) {
+          controller.enqueue(chunk);
+        }
+        controller.close();
+      },
+    });
   }
 }

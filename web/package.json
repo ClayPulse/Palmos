@@ -63,7 +63,8 @@
       "swr": "^2.3.6",
       "tesseract.js": "^6.0.1",
       "use-debounce": "^10.0.6",
-      "uuid": "^13.0.0"
+      "uuid": "^13.0.0",
+      "wav-encoder": "^1.3.0"
    },
    "devDependencies": {
       "@jest/globals": "^30.2.0",
@@ -73,6 +74,7 @@
       "@types/react": "^19",
       "@types/react-dom": "^19",
       "@types/semver": "^7.7.1",
+      "@types/wav-encoder": "^1.3.3",
       "cross-env": "^10.1.0",
       "dotenv": "^17.2.3",
       "eslint": "^9",
