@@ -53,10 +53,10 @@ export const llmProviderOptions: {
         name: "pulse-ai-v1-pro",
         description: "Professional Pulse AI model with balanced performance",
       },
-      {
-        name: "pulse-ai-v1-max",
-        description: "Maximum capability Pulse AI model for complex tasks",
-      },
+      // {
+      //   name: "pulse-ai-v1-max",
+      //   description: "Maximum capability Pulse AI model for complex tasks",
+      // },
     ],
   },
   ollama: {

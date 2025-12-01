@@ -19,6 +19,7 @@ import {
   PlatformAssistantMessage,
   UserMessage,
 } from "../types";
+import { parseToonToJSON } from "../agent/toon-parser";
 
 export class Assistant {
   /**
@@ -208,7 +209,7 @@ export class Assistant {
       if (!modelOutput.content.text) {
         throw new Error("No text produced by model.");
       }
-      const textOutput = decode(modelOutput.content.text) as any;
+      const textOutput = parseToonToJSON(modelOutput.content.text) as any;
 
       const audioContent = textOutput.response;
 

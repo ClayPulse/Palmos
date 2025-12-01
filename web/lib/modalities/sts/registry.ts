@@ -16,10 +16,10 @@ export const stsProviderOptions: {
         name: "pulse-ai-v1-pro",
         description: "Professional speech-to-speech with balanced quality",
       },
-      {
-        name: "pulse-ai-v1-max",
-        description: "Maximum quality speech-to-speech for natural dialogue",
-      },
+      // {
+      //   name: "pulse-ai-v1-max",
+      //   description: "Maximum quality speech-to-speech for natural dialogue",
+      // },
     ],
   },
 };

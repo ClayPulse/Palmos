@@ -3,7 +3,7 @@ import { createMockFetchAPI } from "../../utils";
 createMockFetchAPI();
 
 import { UserMessage } from "../../../lib/types";
-const { decode } = await import("@toon-format/toon");
+const { parseToonToJSON } = await import("../../../lib/agent/toon-parser");
 const { Assistant } = await import("../../../lib/editor-assistant/assistant");
 
 const openaiApiKey = process.env.OPENAI_API_KEY;
@@ -58,7 +58,7 @@ describe("Platform Assistant Test", () => {
 
     const textOutput = result.content.text;
 
-    const outputJson = decode(textOutput ?? "") as {
+    const outputJson = parseToonToJSON(textOutput ?? "") as {
       response: string;
       language: string;
       suggestedCmd: string;

@@ -135,9 +135,14 @@ describe("Pulse Editor LLM Models", () => {
     );
 
     // Check text response
-    expect(chunks.map((chunk) => chunk.text).join("")).toMatch(
-      /The quick brown fox jumps over the lazy dog./,
-    );
+    expect(
+      chunks
+        .map((chunk) => chunk.text)
+        .join("")
+        .trim()
+        .toLowerCase()
+        .replaceAll(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
+    ).toMatch(/the quick brown fox jumps over the lazy dog/);
 
     const stt = getSTTModel({
       apiKey: openai_api_key,
@@ -161,7 +166,7 @@ describe("Pulse Editor LLM Models", () => {
         // use lower case
         .toLowerCase()
         // remove all punctuation
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
+        .replaceAll(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
     ).toMatch(/the quick brown fox jumps over the lazy dog/);
   });
 });

@@ -100,7 +100,7 @@ describe("Platform Assistant Test", () => {
         // use lower case
         .toLowerCase()
         // remove all punctuation
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
+        .replaceAll(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
     ).toEqual("hello editor agent");
   });
 });

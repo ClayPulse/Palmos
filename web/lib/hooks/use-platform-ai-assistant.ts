@@ -9,9 +9,9 @@ import {
   UserMessage,
 } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { decode } from "@toon-format/toon";
 import { useContext, useState } from "react";
 import toast from "react-hot-toast";
+import { parseToonToJSON } from "../agent/toon-parser";
 import { Assistant } from "../editor-assistant/assistant";
 import useActionExecutor from "./use-action-executor";
 import { usePlatformApi } from "./use-platform-api";
@@ -114,11 +114,7 @@ export default function usePlatformAIAssistant() {
    * @param input User input, can be one of either audio (ReadableStream) or text (string).
    * @param isOutputAudio Whether the output should be audio.
    */
-  async function chatWithAssistant(
-    input: UserMessage,
-    isOutputAudio: boolean,
-    onChunkUpdate?: (chunk: PlatformAssistantMessage) => void,
-  ) {
+  async function chatWithAssistant(input: UserMessage, isOutputAudio: boolean) {
     if (!editorContext) {
       return;
     }
@@ -201,7 +197,7 @@ export default function usePlatformAIAssistant() {
       return;
     }
 
-    const decodedResult = decode(assistantResult.content.text) as {
+    const decodedResult = parseToonToJSON(assistantResult.content.text) as {
       suggestedCmd: string;
       suggestedArgs: {
         name: string;

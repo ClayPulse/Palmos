@@ -4,7 +4,7 @@ createMockFetchAPI();
 
 import type { Agent } from "@pulse-editor/shared-utils";
 const { AccessEnum } = await import("@pulse-editor/shared-utils");
-const { decode } = await import("@toon-format/toon");
+const { parseToonToJSON } = await import("../../lib/agent/toon-parser");
 const { LLMAgentRunner } = await import("../../lib/agent/llm-agent-runner");
 
 const testAgent: Agent = {
@@ -57,6 +57,6 @@ describe("Test agent definition", () => {
       async (allReceived, newReceived) => {},
     );
 
-    expect(decode(result)).toEqual({ output: "Hello, Cloud Agent!" });
+    expect(parseToonToJSON(result)).toEqual({ output: "Hello, Cloud Agent!" });
   });
 });

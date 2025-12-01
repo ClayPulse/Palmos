@@ -4,7 +4,7 @@ createMockFetchAPI();
 
 import { getTTSModel } from "../../../lib/modalities/tts/get-tts";
 import { UserMessage } from "../../../lib/types";
-const { decode } = await import("@toon-format/toon");
+const { parseToonToJSON } = await import("../../../lib/agent/toon-parser");
 const { Assistant } = await import("../../../lib/editor-assistant/assistant");
 const fs = await import("fs");
 
@@ -86,7 +86,9 @@ describe("Platform Assistant Test", () => {
       },
     );
 
-    const textOutputJson = decode(result.content.text ?? "") as {
+    console.log("Assistant result:", result.content.text);
+
+    const textOutputJson = parseToonToJSON(result.content.text ?? "") as {
       response: string;
       language: string;
       suggestedCmd: string;
@@ -103,7 +105,7 @@ describe("Platform Assistant Test", () => {
         // use lower case
         .toLowerCase()
         // remove all punctuation
-        .replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
+        .replaceAll(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
     ).toBe("hello editor agent");
   });
 });

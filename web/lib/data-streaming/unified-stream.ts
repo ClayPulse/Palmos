@@ -23,7 +23,7 @@ export function toUnifiedStream(stream: ReadableStream<Uint8Array>) {
         }
       } else {
         // Run with node.js
-        for await (const chunk of stream) {
+        for await (const chunk of stream as any) {
           controller.enqueue(chunk);
         }
         controller.close();
