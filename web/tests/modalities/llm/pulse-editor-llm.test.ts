@@ -1,6 +1,6 @@
 import { describe, expect, jest } from "@jest/globals";
-import { ModelConfig } from "../../../lib/types";
 import { createMockFetchAPI } from "../../utils";
+import { ModelConfig } from "@pulse-editor/shared-utils";
 createMockFetchAPI();
 
 // Use async import for other ESM modules so that mock ESM modules are applied correctly

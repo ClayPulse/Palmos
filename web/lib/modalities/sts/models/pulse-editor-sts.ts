@@ -1,5 +1,9 @@
-import { pcm16Base64ToArrayBuffer } from "@/lib/audio-utils/utils";
-import { parseNDJSONStream } from "@/lib/modalities/stream-chunk-parsers";
+import {
+  arrayBufferToBase64,
+  pcm16Base64ToArrayBuffer,
+} from "@/lib/audio-utils/utils";
+import { toUnifiedStream } from "@/lib/data-streaming/unified-stream";
+import { parseNDJSONStream } from "@/lib/data-streaming/stream-chunk-parsers";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { BaseSTS } from "../base-sts";
 
@@ -14,7 +18,10 @@ export class PulseEditorSTS extends BaseSTS {
   public async generateStream(
     text?: string,
     audio?: ArrayBuffer,
-    signal?: AbortSignal,
+    config?: {
+      inputAudioFormat?: string;
+    },
+    abortSignal?: AbortSignal,
   ): Promise<
     ReadableStream<{
       text?: string;
@@ -22,9 +29,7 @@ export class PulseEditorSTS extends BaseSTS {
     }>
   > {
     // convert audio to base64
-    const audioBase64 = audio
-      ? btoa(String.fromCharCode(...new Uint8Array(audio)))
-      : undefined;
+    const audioBase64 = audio ? arrayBufferToBase64(audio) : undefined;
 
     const response = await fetchAPI(`/api/inference/pulse-editor/run`, {
       method: "POST",
@@ -39,12 +44,13 @@ export class PulseEditorSTS extends BaseSTS {
         },
         temperature: 1,
         isOutputAudio: true,
+        inputAudioFormat: config?.inputAudioFormat,
       }),
-      signal,
+      signal: abortSignal,
     });
 
     if (!response.ok) {
-      throw new Error(`PulseEditorLLM API error: ${await response.text()}`);
+      throw new Error(`PulseEditorSTS API error: ${await response.text()}`);
     }
 
     const stream = response.body;
@@ -54,31 +60,13 @@ export class PulseEditorSTS extends BaseSTS {
     }
 
     // ReadableStream cannot pass JSON objects via HTTP request, so we convert them back to object here
-    const stringStream = new ReadableStream({
-      async start(controller) {
-        const reader = stream.getReader();
-
-        try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            controller.enqueue(value);
-          }
-        } finally {
-          reader.releaseLock();
-          controller.close();
-        }
-      },
-    }).pipeThrough(new TextDecoderStream());
-
-    // ReadableStream cannot pass JSON objects via HTTP request, so we convert them back to object here
     const finalStream = new ReadableStream<{
       text?: string;
       audio?: ArrayBuffer;
     }>({
       async start(controller) {
         let base64AudioBuffer: string = "";
-        await parseNDJSONStream(stringStream, async (data) => {
+        await parseNDJSONStream(toUnifiedStream(stream), async (data) => {
           const { text, audio }: { text?: string; audio?: string } = data;
           const audioBuffer = audio
             ? await pcm16Base64ToArrayBuffer(audio)

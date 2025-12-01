@@ -1,5 +1,6 @@
+import { toUnifiedStream } from "@/lib/data-streaming/unified-stream";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { parseNDJSONStream } from "../../stream-chunk-parsers";
+import { parseNDJSONStream } from "../../../data-streaming/stream-chunk-parsers";
 import { BaseLLM } from "../base-llm";
 
 export class PulseEditorLLM extends BaseLLM {
@@ -48,26 +49,9 @@ export class PulseEditorLLM extends BaseLLM {
     }
 
     // ReadableStream cannot pass JSON objects via HTTP request, so we convert them back to object here
-    const stringStream = new ReadableStream({
-      async start(controller) {
-        const reader = stream.getReader();
-
-        try {
-          while (true) {
-            const { value, done } = await reader.read();
-            if (done) break;
-            controller.enqueue(value);
-          }
-        } finally {
-          reader.releaseLock();
-          controller.close();
-        }
-      },
-    }).pipeThrough(new TextDecoderStream());
-
     const finalStream = new ReadableStream({
       async start(controller) {
-        await parseNDJSONStream(stringStream, async (data) => {
+        await parseNDJSONStream(toUnifiedStream(stream), async (data) => {
           const { text }: { text?: string } = data;
           if (text) {
             controller.enqueue(text);

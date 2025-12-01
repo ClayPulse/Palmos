@@ -1,3 +1,4 @@
+import { parseToonToJSON, removeToonCodeFences } from "@/lib/agent/toon-parser";
 import useActionExecutor from "@/lib/hooks/use-action-executor";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
@@ -294,6 +295,33 @@ export default function CommandViewer() {
     return true;
   }
 
+  const parseAssistantMessageContent = useCallback((content: string) => {
+    const toonContent = removeToonCodeFences(content);
+
+    try {
+      const jsonValue = parseToonToJSON(toonContent);
+      // Move jsonValue.response to the top for better visibility,
+      // and remove it from the JSON object.
+      const response = jsonValue.response ?? "Thinking...";
+      delete jsonValue.response;
+
+      const parsedContent = `${response}
+
+\`\`\`
+${toonContent}
+\`\`\`
+`;
+
+      return parsedContent;
+    } catch (error) {
+      return `
+\`\`\`
+${toonContent}
+\`\`\`
+`;
+    }
+  }, []);
+
   return (
     <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2">
       <div className="flex max-h-[calc(100vh-140px)] flex-col items-center gap-y-1">
@@ -396,7 +424,9 @@ export default function CommandViewer() {
                         <p className="font-bold">Assistant:</p>
                         <div className="markdown-styles -my-4">
                           <Markdown remarkPlugins={[remarkGfm]}>
-                            {entry.message.content.text}
+                            {parseAssistantMessageContent(
+                              entry.message.content.text,
+                            )}
                           </Markdown>
                         </div>
                       </div>

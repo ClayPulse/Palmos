@@ -1,6 +1,6 @@
 "use client";
 
-import { runLLMAgentMethod } from "@/lib/agent/llm-agent-runner";
+import { LLMAgentRunner } from "@/lib/agent/llm-agent-runner";
 import { getImageGenModel } from "@/lib/modalities/image-gen/get-image-gen";
 import { getLLMModel } from "@/lib/modalities/llm/get-llm";
 import { recognizeText } from "@/lib/modalities/ocr/ocr";
@@ -181,7 +181,9 @@ export default function InterModuleCommunicationProvider({
 
             const apiKey = getAPIKey(editorContext, llmConfig?.modelId);
 
-            const result = await runLLMAgentMethod(
+            const runner = new LLMAgentRunner();
+
+            const result = await runner.run(
               {
                 modelId,
                 apiKey,
@@ -212,7 +214,9 @@ export default function InterModuleCommunicationProvider({
               throw new Error(`No API key found for model ${config.modelId}.`);
             }
 
-            const result = await runLLMAgentMethod(
+            const runner = new LLMAgentRunner();
+
+            const result = await runner.run(
               {
                 modelId: config.modelId,
                 apiKey,

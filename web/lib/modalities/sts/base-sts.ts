@@ -35,12 +35,15 @@ export abstract class BaseSTS {
    * }
    * @param text
    * @param audio
-   * @param signal
+   * @param abortSignal
    */
   public abstract generateStream(
     text?: string,
     audio?: ArrayBuffer,
-    signal?: AbortSignal,
+    config?: {
+      inputAudioFormat?: string;
+    },
+    abortSignal?: AbortSignal,
   ): Promise<
     ReadableStream<{
       text?: string;

@@ -30,6 +30,8 @@ describe("Platform Assistant Test", () => {
 
     const assistant = new Assistant();
 
+    let chunkedAudio: ArrayBuffer | undefined;
+    let chunkedText: string | undefined;
     const result = await assistant.chat(
       input,
       {
@@ -48,29 +50,23 @@ describe("Platform Assistant Test", () => {
         availableCommands: [],
         projectDirTree: [],
       },
+      async (allReceived, newReceived) => {
+        chunkedText = allReceived?.text;
+        chunkedAudio = allReceived?.audio;
+      },
     );
 
     // Test against cmd usage
     const audioOutput = result.content.audio;
     expect(audioOutput).toBeDefined();
 
+    expect(result.content.audio).toEqual(chunkedAudio);
+    expect(result.content.text).toEqual(chunkedText);
+
     if (!audioOutput) return;
 
-    let audioArrayBuffer: ArrayBuffer = new ArrayBuffer(0);
-    const reader1 = audioOutput.getReader();
-    while (true) {
-      const { done, value } = await reader1.read();
-      if (done) break;
-      const tmp = new Uint8Array(
-        audioArrayBuffer.byteLength + value.byteLength,
-      );
-      tmp.set(new Uint8Array(audioArrayBuffer), 0);
-      tmp.set(new Uint8Array(value), audioArrayBuffer.byteLength);
-      audioArrayBuffer = tmp.buffer;
-    }
-
     // Save audio output to file for manual verification
-    const blob = new Blob([audioArrayBuffer], { type: "audio/mp3" });
+    const blob = new Blob([audioOutput], { type: "audio/mp3" });
     const arrayBuffer = await blob.arrayBuffer();
 
     if (!fs.existsSync("tests/artifacts")) {
@@ -87,7 +83,7 @@ describe("Platform Assistant Test", () => {
       apiKey: openaiApiKey,
     });
 
-    const transcribed = await stt.generateStream(audioArrayBuffer, "mp3");
+    const transcribed = await stt.generateStream(audioOutput, "mp3");
 
     const reader2 = transcribed.getReader();
     let transcribedResult = "";

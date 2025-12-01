@@ -5,7 +5,8 @@ import {
 } from "@pulse-editor/shared-utils";
 import { decode } from "@toon-format/toon";
 import { editorAssistantAgent } from "../agent/built-in-agents/editor-assistant";
-import { runLLMAgentMethod } from "../agent/llm-agent-runner";
+import { LLMAgentRunner } from "../agent/llm-agent-runner";
+import { STSAgentRunner } from "../agent/sts-agent-runner";
 import { ModelCapabilityEnum } from "../enums";
 import { BaseLLM } from "../modalities/llm/base-llm";
 import { getLLMModel } from "../modalities/llm/get-llm";
@@ -42,6 +43,16 @@ export class Assistant {
       tts?: TTSModelConfig;
     },
     additionalArgs: AssistantEditorContextArgs,
+    onChunkUpdate?: (
+      allReceived?: {
+        text?: string;
+        audio?: ArrayBuffer;
+      },
+      newReceived?: {
+        text?: string;
+        audio?: ArrayBuffer;
+      },
+    ) => Promise<void>,
   ): Promise<PlatformAssistantMessage> {
     const chatMode = modelConfigs.sts
       ? "sts"
@@ -74,12 +85,12 @@ export class Assistant {
       modelConfigs.stt,
     );
 
-    // const agentResult = await runSpeechAgentMethod()
     const agentResult = await this.runAssistantMethod(
       model,
       modelConfig,
       additionalArgs,
       userInputArg,
+      onChunkUpdate,
     );
 
     const outputMessage: PlatformAssistantMessage = {
@@ -92,6 +103,7 @@ export class Assistant {
       model,
       chatSettings.isOutputAudio,
       modelConfigs.tts,
+      onChunkUpdate,
     );
 
     return chatOutput;
@@ -170,6 +182,16 @@ export class Assistant {
     model: BaseLLM | BaseSTS,
     isOutputAudio: boolean,
     fallbackTTSModel?: TTSModelConfig,
+    onChunkUpdate?: (
+      allReceived?: {
+        text?: string;
+        audio?: ArrayBuffer;
+      },
+      newReceived?: {
+        text?: string;
+        audio?: ArrayBuffer;
+      },
+    ) => Promise<void>,
   ): Promise<PlatformAssistantMessage> {
     if (!isOutputAudio) {
       // Return text output only
@@ -184,9 +206,8 @@ export class Assistant {
       }
 
       if (!modelOutput.content.text) {
-        throw new Error("No text output to convert to audio.");
+        throw new Error("No text produced by model.");
       }
-
       const textOutput = decode(modelOutput.content.text) as any;
 
       const audioContent = textOutput.response;
@@ -201,15 +222,44 @@ export class Assistant {
         throw new Error(`Cannot find TTS model.`);
       }
 
+      let finalResult: PlatformAssistantMessage = modelOutput;
+
       const audio = await tts.generateStream(audioContent);
 
-      return {
-        content: {
-          text: textOutput,
-          audio: audio,
-        },
-        attachments: modelOutput.attachments,
-      };
+      let arrayBuffer = new ArrayBuffer(0);
+      const reader = audio.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const tmp = new Uint8Array(arrayBuffer.byteLength + value.byteLength);
+        tmp.set(new Uint8Array(arrayBuffer), 0);
+        tmp.set(new Uint8Array(value), arrayBuffer.byteLength);
+        arrayBuffer = tmp.buffer;
+
+        finalResult = {
+          content: {
+            text: finalResult.content.text,
+            audio: arrayBuffer,
+          },
+          attachments: modelOutput.attachments,
+        };
+
+        if (onChunkUpdate) {
+          onChunkUpdate(
+            {
+              text: finalResult.content.text,
+              audio: arrayBuffer,
+            },
+            {
+              text: undefined,
+              audio: value,
+            },
+          );
+        }
+      }
+
+      return finalResult;
     }
   }
 
@@ -218,14 +268,43 @@ export class Assistant {
     config: ModelConfig | STSModelConfig,
     editorContextInfo: AssistantEditorContextArgs,
     userInputArg: UserMessage,
-  ) {
+    onChunkUpdate?: (
+      allReceived?: {
+        text?: string;
+        audio?: ArrayBuffer;
+      },
+      newReceived?: {
+        text?: string;
+        audio?: ArrayBuffer;
+      },
+    ) => Promise<void>,
+    abortSignal?: AbortSignal,
+  ): Promise<{
+    text?: string;
+    audio?: ArrayBuffer;
+  }> {
     if (model instanceof BaseSTS) {
-      return {
-        text: "",
-        audio: undefined,
-      };
+      const runner = new STSAgentRunner();
+      const result = await runner.run(
+        config as STSModelConfig,
+        editorAssistantAgent,
+        "useAppActions",
+        {
+          audio: userInputArg.content.audio,
+          args: {
+            ...editorContextInfo,
+            userMessage: userInputArg.content.text ?? "(user sent audio)",
+          },
+        },
+        onChunkUpdate,
+        abortSignal,
+      );
+
+      return result;
     } else if (model instanceof BaseLLM) {
-      const text = await runLLMAgentMethod(
+      const runner = new LLMAgentRunner();
+
+      const text = await runner.run(
         {
           modelId: config.modelId,
           apiKey: config.apiKey,
@@ -236,6 +315,12 @@ export class Assistant {
           ...editorContextInfo,
           userMessage: userInputArg.content.text,
         },
+        async (allReceived?: string, newReceived?: string) => {
+          if (onChunkUpdate) {
+            await onChunkUpdate({ text: allReceived }, { text: newReceived });
+          }
+        },
+        abortSignal,
       );
 
       return {

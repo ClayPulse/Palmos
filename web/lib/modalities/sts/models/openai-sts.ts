@@ -13,7 +13,10 @@ export class OpenAISTS extends BaseSTS {
   public async generateStream(
     text?: string,
     audio?: ArrayBuffer,
-    signal?: AbortSignal,
+    config?: {
+      inputAudioFormat?: string;
+    },
+    abortSignal?: AbortSignal,
   ): Promise<
     ReadableStream<{
       text?: string;

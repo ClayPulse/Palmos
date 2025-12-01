@@ -1,6 +1,6 @@
 import { describe, expect, jest } from "@jest/globals";
+import { ModelConfig } from "@pulse-editor/shared-utils";
 import WavEncoder from "wav-encoder";
-import { ModelConfig } from "../../../lib/types";
 import { createMockFetchAPI } from "../../utils";
 createMockFetchAPI();
 

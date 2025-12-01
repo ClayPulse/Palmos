@@ -10,14 +10,12 @@ import {
 } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { decode } from "@toon-format/toon";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import toast from "react-hot-toast";
 import { Assistant } from "../editor-assistant/assistant";
 import useActionExecutor from "./use-action-executor";
 import { usePlatformApi } from "./use-platform-api";
-import useSpeech2Speech from "./use-speech2speech";
 import { useTabViewManager } from "./use-tab-view-manager";
-import useTTS from "./use-tts";
 
 export default function usePlatformAIAssistant() {
   const editorContext = useContext(EditorContext);
@@ -26,29 +24,8 @@ export default function usePlatformAIAssistant() {
 
   const { platformApi } = usePlatformApi();
 
-  const { runSpeech2Speech, stopSpeech2Speech, isRunning } = useSpeech2Speech();
-  const { readText, playAudio } = useTTS();
   const { runScopedAction, actions } = useActionExecutor();
   const { activeTabView } = useTabViewManager();
-
-  const [analysisAudio, setAnalysisAudio] = useState<Blob | undefined>(
-    undefined,
-  );
-
-  // Play the audio when the speech2speech is done and the analysis is done
-  useEffect(() => {
-    if (!isRunning && analysisAudio) {
-      // Show thinking indicator
-      editorContext?.setEditorStates((prev) => ({
-        ...prev,
-        isThinking: true,
-        thinkingText: "Analyzing command result...",
-      }));
-      playAudio(analysisAudio).then(() => {
-        setAnalysisAudio(undefined);
-      });
-    }
-  }, [isRunning, analysisAudio]);
 
   async function gatherAssistantArgs(): Promise<AssistantEditorContextArgs> {
     function gatherActions() {
@@ -137,7 +114,11 @@ export default function usePlatformAIAssistant() {
    * @param input User input, can be one of either audio (ReadableStream) or text (string).
    * @param isOutputAudio Whether the output should be audio.
    */
-  async function chatWithAssistant(input: UserMessage, isOutputAudio: boolean) {
+  async function chatWithAssistant(
+    input: UserMessage,
+    isOutputAudio: boolean,
+    onChunkUpdate?: (chunk: PlatformAssistantMessage) => void,
+  ) {
     if (!editorContext) {
       return;
     }
@@ -155,6 +136,19 @@ export default function usePlatformAIAssistant() {
       attachments: [],
     };
 
+    // Create new entry in history
+    setHistory((prev) => [
+      ...prev,
+      { role: "user", message: assistantInput },
+      {
+        role: "assistant",
+        message: {
+          content: {},
+          attachments: [],
+        },
+      },
+    ]);
+
     // Send to assistant
     const result = await assistant.chat(
       assistantInput,
@@ -167,6 +161,33 @@ export default function usePlatformAIAssistant() {
         },
       },
       args,
+      async (
+        allReceived?: {
+          text?: string;
+          audio?: ArrayBuffer;
+        },
+        newReceived?: {
+          text?: string;
+          audio?: ArrayBuffer;
+        },
+      ) => {
+        const chunk: PlatformAssistantMessage = {
+          content: {
+            text: allReceived?.text,
+            audio: allReceived?.audio,
+          },
+          attachments: [],
+        };
+
+        // Update history with the latest chunk
+        setHistory((prev) => {
+          const newHistory = [...prev];
+          if (newHistory.length > 0) {
+            newHistory[newHistory.length - 1].message = chunk;
+          }
+          return newHistory;
+        });
+      },
     );
 
     // Process assistant result
@@ -180,9 +201,7 @@ export default function usePlatformAIAssistant() {
       return;
     }
 
-    const { suggestedCmd, suggestedArgs } = decode(
-      assistantResult.content.text,
-    ) as {
+    const decodedResult = decode(assistantResult.content.text) as {
       suggestedCmd: string;
       suggestedArgs: {
         name: string;
@@ -191,7 +210,7 @@ export default function usePlatformAIAssistant() {
       response: string;
     };
 
-    console.log("Assistant result:", assistantResult);
+    const { suggestedCmd, suggestedArgs } = decodedResult;
 
     // TODO: The agent needs to confirm the command with the user
     // TODO: before executing it.

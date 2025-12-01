@@ -438,7 +438,7 @@ export type UserMessage = {
 export type PlatformAssistantMessage = {
   content: {
     text?: string;
-    audio?: ReadableStream<ArrayBuffer>;
+    audio?: ArrayBuffer;
   };
   attachments: Attachment[];
 };

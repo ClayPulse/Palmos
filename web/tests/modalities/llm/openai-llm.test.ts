@@ -1,7 +1,7 @@
 import { describe, expect, jest, test } from "@jest/globals";
 import dotenv from "dotenv";
 import { getLLMModel } from "../../../lib/modalities/llm/get-llm";
-import { ModelConfig } from "../../../lib/types";
+import { ModelConfig } from "@pulse-editor/shared-utils";
 
 dotenv.config();
 
