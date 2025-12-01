@@ -37,8 +37,7 @@ const apiKey = process.env.PULSE_EDITOR_API_KEY;
 if (!apiKey) throw new Error("Missing PULSE_EDITOR_API_KEY env var");
 
 const llmConfig = {
-  provider: "pulse-editor",
-  modelName: "pulse-ai-v1-turbo",
+  modelId: "pulse-editor/pulse-ai-v1-turbo",
   temperature: 1,
   apiKey: apiKey,
 };

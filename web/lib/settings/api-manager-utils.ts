@@ -2,8 +2,10 @@ import { EditorContextType } from "../types";
 
 export function getAPIKey(
   editorContext: EditorContextType | undefined,
-  provider: string | undefined,
+  modelId: string | undefined,
 ) {
+  const [provider] = modelId?.split("/") ?? [];
+
   if (!provider) {
     return undefined;
   } else if (!editorContext?.persistSettings?.apiKeys) {

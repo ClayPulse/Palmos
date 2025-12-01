@@ -4,20 +4,13 @@ createMockFetchAPI();
 
 import { UserMessage } from "../../../lib/types";
 const { decode } = await import("@toon-format/toon");
-const { chatWithAssistant } = await import(
-  "../../../lib/platform-assistant/assistant"
-);
-const fs = await import("fs");
-const { llmProviderOptions } = await import(
-  "../../../lib/modalities/llm/registry"
-);
+const { Assistant } = await import("../../../lib/editor-assistant/assistant");
 
 const openaiApiKey = process.env.OPENAI_API_KEY;
 if (!openaiApiKey) throw new Error("Missing OPENAI_API_KEY env var");
 
 const llmConfig = {
-  provider: "openai",
-  modelName: "gpt-4o",
+  modelId: "openai/gpt-4o",
   temperature: 1,
   apiKey: openaiApiKey,
 };
@@ -27,20 +20,23 @@ describe("Platform Assistant Test", () => {
 
   test("Test app action calling", async () => {
     const input: UserMessage = {
-      message: {
+      content: {
         text: "Repeat: Hello, Editor Agent!",
         audio: undefined,
       },
       attachments: [],
     };
 
-    const result = await chatWithAssistant(
+    const assistant = new Assistant();
+
+    const result = await assistant.chat(
       input,
       {
         isOutputAudio: false,
       },
-      llmConfig,
-      {},
+      {
+        llm: llmConfig,
+      },
       {
         chatHistory: [],
         activeTabView: "",
@@ -60,7 +56,7 @@ describe("Platform Assistant Test", () => {
       },
     );
 
-    const textOutput = result.message.text;
+    const textOutput = result.content.text;
 
     const outputJson = decode(textOutput ?? "") as {
       response: string;

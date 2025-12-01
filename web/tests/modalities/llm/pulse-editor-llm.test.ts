@@ -16,8 +16,7 @@ describe("Pulse Editor LLM Models", () => {
 
     const llm = getLLMModel({
       apiKey,
-      provider: "pulse-editor",
-      modelName: "pulse-ai-v1-turbo",
+      modelId: "pulse-editor/pulse-ai-v1-turbo",
       temperature: 1,
     } as ModelConfig);
 

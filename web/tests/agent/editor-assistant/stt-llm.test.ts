@@ -5,17 +5,14 @@ createMockFetchAPI();
 import { getTTSModel } from "../../../lib/modalities/tts/get-tts";
 import { UserMessage } from "../../../lib/types";
 const { decode } = await import("@toon-format/toon");
-const { chatWithAssistant } = await import(
-  "../../../lib/platform-assistant/assistant"
-);
+const { Assistant } = await import("../../../lib/editor-assistant/assistant");
 const fs = await import("fs");
 
 const openaiApiKey = process.env.OPENAI_API_KEY;
 if (!openaiApiKey) throw new Error("Missing OPENAI_API_KEY env var");
 
 const llmConfig = {
-  provider: "openai",
-  modelName: "gpt-4o",
+  modelId: "openai/gpt-4o",
   temperature: 1,
   apiKey: openaiApiKey,
 };
@@ -26,8 +23,7 @@ describe("Platform Assistant Test", () => {
   test("Test stt-llm", async () => {
     // Generate audio
     const tts = getTTSModel({
-      provider: "openai",
-      modelName: "tts-1",
+      modelId: "openai/tts-1",
       apiKey: openaiApiKey,
     });
 
@@ -61,23 +57,24 @@ describe("Platform Assistant Test", () => {
 
     // Send audio to assistant
     const input: UserMessage = {
-      message: {
+      content: {
         text: undefined,
         audio: ttsArrayBuffer,
       },
       attachments: [],
     };
 
-    const result = await chatWithAssistant(
+    const assistant = new Assistant();
+
+    const result = await assistant.chat(
       input,
       {
         isOutputAudio: false,
       },
-      llmConfig,
       {
+        llm: llmConfig,
         stt: {
-          provider: "openai",
-          modelName: "gpt-4o-mini-transcribe",
+          modelId: "openai/gpt-4o-mini-transcribe",
           apiKey: openaiApiKey,
         },
       },
@@ -89,7 +86,7 @@ describe("Platform Assistant Test", () => {
       },
     );
 
-    const textOutputJson = decode(result.message.text ?? "") as {
+    const textOutputJson = decode(result.content.text ?? "") as {
       response: string;
       language: string;
       suggestedCmd: string;

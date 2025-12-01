@@ -4,17 +4,14 @@ createMockFetchAPI();
 
 import { UserMessage } from "../../../lib/types";
 const { getSTTModel } = await import("../../../lib/modalities/stt/get-stt");
-const { chatWithAssistant } = await import(
-  "../../../lib/platform-assistant/assistant"
-);
+const { Assistant } = await import("../../../lib/editor-assistant/assistant");
 const fs = await import("fs");
 
 const openaiApiKey = process.env.OPENAI_API_KEY;
 if (!openaiApiKey) throw new Error("Missing OPENAI_API_KEY env var");
 
 const llmConfig = {
-  provider: "openai",
-  modelName: "gpt-4o",
+  modelId: "openai/gpt-4o",
   temperature: 1,
   apiKey: openaiApiKey,
 };
@@ -24,23 +21,24 @@ describe("Platform Assistant Test", () => {
 
   test("Test llm-tts", async () => {
     const input: UserMessage = {
-      message: {
+      content: {
         text: 'Do not call any app action, simply repeat this in your response: "Hello, Editor Agent!"',
         audio: undefined,
       },
       attachments: [],
     };
 
-    const result = await chatWithAssistant(
+    const assistant = new Assistant();
+
+    const result = await assistant.chat(
       input,
       {
         isOutputAudio: true,
       },
-      llmConfig,
       {
+        llm: llmConfig,
         tts: {
-          provider: "openai",
-          modelName: "tts-1",
+          modelId: "openai/tts-1",
           apiKey: openaiApiKey,
         },
       },
@@ -53,7 +51,7 @@ describe("Platform Assistant Test", () => {
     );
 
     // Test against cmd usage
-    const audioOutput = result.message.audio;
+    const audioOutput = result.content.audio;
     expect(audioOutput).toBeDefined();
 
     if (!audioOutput) return;
@@ -85,8 +83,7 @@ describe("Platform Assistant Test", () => {
 
     // Send audio output to STT for verification
     const stt = getSTTModel({
-      provider: "openai",
-      modelName: "gpt-4o-mini-transcribe",
+      modelId: "openai/gpt-4o-mini-transcribe",
       apiKey: openaiApiKey,
     });
 

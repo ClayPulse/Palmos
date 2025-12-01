@@ -1,13 +1,14 @@
-import { AudioModelConfig } from "@/lib/types";
+import { TTSModelConfig } from "@pulse-editor/shared-utils";
 import { BaseTTS } from "./base-tts";
 import { ElevenLabsTTS } from "./models/elevenlabs-tts";
 import { OpenAITTS } from "./models/openai-tts";
 import { PlayHTTTS } from "./models/playht-tts";
 
 export function getTTSModel(
-  modelConfig: AudioModelConfig,
+  modelConfig: TTSModelConfig,
 ): BaseTTS | undefined {
-  const { provider, apiKey, modelName, voiceName } = modelConfig;
+  const { apiKey, modelId, voiceName } = modelConfig;
+  const [provider, modelName] = modelId.split("/");
 
   if (!apiKey) {
     throw new Error(`${provider} API key is required`);

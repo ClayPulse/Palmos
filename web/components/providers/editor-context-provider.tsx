@@ -36,6 +36,14 @@ const defaultEditorStates: EditorStates = {
   tabIndex: -1,
 };
 
+const defaultPersistSettings: PersistentSettings = {
+  assistantChatModelConfig: {
+    sts: {
+      modelId: "pulse-editor/pulse-ai-v1-turbo",
+    },
+  },
+};
+
 export default function EditorContextProvider({
   children,
 }: {
@@ -118,8 +126,7 @@ export default function EditorContextProvider({
     ) {
       const model = getSTTModel({
         apiKey: settings.apiKeys?.[settings?.sttProvider],
-        provider: settings?.sttProvider,
-        modelName: settings?.sttModel,
+        modelId: `${settings?.sttProvider}/${settings?.sttModel}`,
       });
 
       const aiModels: AIModels = {
@@ -149,8 +156,7 @@ export default function EditorContextProvider({
     ) {
       const model = getLLMModel({
         apiKey: settings.apiKeys?.[settings?.llmProvider],
-        provider: settings?.llmProvider,
-        modelName: settings?.llmModel,
+        modelId: `${settings?.llmProvider}/${settings?.llmModel}`,
         temperature: 0.85,
       });
 
@@ -182,8 +188,7 @@ export default function EditorContextProvider({
     ) {
       const model = getTTSModel({
         apiKey: settings.apiKeys?.[settings?.ttsProvider],
-        provider: settings?.ttsProvider,
-        modelName: settings?.ttsModel,
+        modelId: `${settings?.ttsProvider}/${settings?.ttsModel}`,
         voiceName: settings?.ttsVoice,
       });
 
@@ -220,8 +225,7 @@ export default function EditorContextProvider({
 
         const model = getSTTModel({
           apiKey: decryptedSTTAPIKey,
-          provider: settings?.sttProvider,
-          modelName: settings?.sttModel,
+          modelId: `${settings?.sttProvider}/${settings?.sttModel}`,
         });
 
         const aiModels: AIModels = {
@@ -247,8 +251,7 @@ export default function EditorContextProvider({
 
         const model = getLLMModel({
           apiKey: decryptedLLMAPIKey,
-          provider: settings?.llmProvider,
-          modelName: settings?.llmModel,
+          modelId: `${settings?.llmProvider}/${settings?.llmModel}`,
           temperature: 0.85,
         });
 
@@ -274,14 +277,11 @@ export default function EditorContextProvider({
           editorStates.password,
         );
 
-        const model = getTTSModel(
-          {
-            apiKey: decryptedTTSAPIKey,
-            provider: settings?.ttsProvider,
-            modelName: settings?.ttsModel,
-            voiceName: settings?.ttsVoice,
-          },
-        );
+        const model = getTTSModel({
+          apiKey: decryptedTTSAPIKey,
+          modelId: `${settings?.ttsProvider}/${settings?.ttsModel}`,
+          voiceName: settings?.ttsVoice,
+        });
 
         const aiModels: AIModels = {
           ...editorStates.aiModels,

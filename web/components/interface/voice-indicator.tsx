@@ -2,6 +2,7 @@
 
 import { colors } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "next-themes";
 import { useContext } from "react";
 import {
   BounceLoader,
@@ -13,6 +14,8 @@ import { EditorContext } from "../providers/editor-context-provider";
 
 export default function VoiceIndicator() {
   const editorContext = useContext(EditorContext);
+
+  const { resolvedTheme } = useTheme();
 
   const isShowingIndicator =
     editorContext?.editorStates?.isRecording ||
@@ -40,7 +43,10 @@ export default function VoiceIndicator() {
               ) : editorContext?.editorStates?.isSpeaking ? (
                 <PuffLoader color={colors.green["300"]} size={24} />
               ) : editorContext?.editorStates?.isLoadingRecorder ? (
-                <PulseLoader color={colors.black} size={8} />
+                <PulseLoader
+                  color={resolvedTheme === "dark" ? colors.white : colors.black}
+                  size={8}
+                />
               ) : (
                 <ClockLoader
                   className="shadow-content2-foreground! [&>span]:bg-content2-foreground! shadow-[0px_0px_0px_2px_inset]!"

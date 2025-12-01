@@ -15,8 +15,7 @@ describe("OpenAILLM_GPT.generateStream (REAL OpenAI API)", () => {
 
     const llm = getLLMModel({
       apiKey,
-      provider: "openai",
-      modelName: "gpt-4o-mini",
+      modelId: "openai/gpt-4o-mini",
       temperature: 1,
     } as ModelConfig);
 

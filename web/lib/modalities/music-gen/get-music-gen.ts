@@ -1,11 +1,12 @@
-import { ModelConfig } from "@/lib/types";
+import { ModelConfig } from "@pulse-editor/shared-utils";
 import { BaseMusicGen } from "./base-music-gen";
 import { ClayPulseMusicGen } from "./models/claypulse-music-gen";
 
 export function getMusicGenModel(
   modelConfig: ModelConfig,
 ): BaseMusicGen | undefined {
-  const { provider, apiKey, modelName } = modelConfig;
+  const { apiKey, modelId } = modelConfig;
+  const [provider, modelName] = modelId.split("/");
 
   switch (provider) {
     case "pulse-editor":

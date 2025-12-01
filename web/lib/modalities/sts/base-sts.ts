@@ -8,8 +8,14 @@ export abstract class BaseSTS {
     inputCapabilities?: ModelCapabilityEnum[],
     outputCapabilities?: ModelCapabilityEnum[],
   ) {
-    this.inputCapabilities = inputCapabilities ?? [];
-    this.outputCapabilities = outputCapabilities ?? [];
+    this.inputCapabilities = inputCapabilities ?? [
+      ModelCapabilityEnum.Text,
+      ModelCapabilityEnum.Audio,
+    ];
+    this.outputCapabilities = outputCapabilities ?? [
+      ModelCapabilityEnum.Text,
+      ModelCapabilityEnum.Audio,
+    ];
   }
 
   /**

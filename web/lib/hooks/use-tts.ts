@@ -1,7 +1,7 @@
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useContext, useEffect, useState } from "react";
 import { BaseTTS } from "../modalities/tts/base-tts";
 import { getTTSModel } from "../modalities/tts/get-tts";
-import { EditorContext } from "@/components/providers/editor-context-provider";
 import { getAPIKey } from "../settings/api-manager-utils";
 
 export default function useTTS() {
@@ -25,7 +25,11 @@ export default function useTTS() {
     if (!ttsKey || !ttsProvider || !ttsModel || !ttsVoice) {
       return;
     }
-    const tts = getTTSModel(ttsKey, ttsProvider, ttsModel, ttsVoice);
+    const tts = getTTSModel({
+      apiKey: ttsKey,
+      modelId: `${ttsProvider}/${ttsModel}`,
+      voiceName: ttsVoice,
+    });
     if (tts) {
       setTtsModel(tts);
     } else {
@@ -39,7 +43,7 @@ export default function useTTS() {
       return;
     }
 
-    const audio = await ttsModel.generate(text);
+    const audio = await ttsModel.generateStream(text);
     return audio;
   }
 

@@ -1,11 +1,13 @@
-import { ModelConfig } from "@/lib/types";
+import { LLMModelConfig } from "@pulse-editor/shared-utils";
 import { BaseLLM } from "./base-llm";
 import { AnthropicLLM_Claude } from "./models/anthropic-llm";
 import { OpenAILLM_GPT } from "./models/openai-llm";
 import { PulseEditorLLM } from "./models/pulse-editor-llm";
 
-export function getLLMModel(modelConfig: ModelConfig): BaseLLM | undefined {
-  switch (modelConfig.provider) {
+export function getLLMModel(modelConfig: LLMModelConfig): BaseLLM | undefined {
+  const [provider, modelName] = modelConfig.modelId.split("/");
+
+  switch (provider) {
     case "openai":
       if (!modelConfig.apiKey) {
         throw new Error("OpenAI API key is required");
@@ -13,7 +15,7 @@ export function getLLMModel(modelConfig: ModelConfig): BaseLLM | undefined {
 
       return new OpenAILLM_GPT(
         modelConfig.apiKey,
-        modelConfig.modelName,
+        modelName,
         modelConfig.temperature,
       );
     case "anthropic":
@@ -23,7 +25,7 @@ export function getLLMModel(modelConfig: ModelConfig): BaseLLM | undefined {
 
       return new AnthropicLLM_Claude(
         modelConfig.apiKey,
-        modelConfig.modelName,
+        modelName,
         modelConfig.temperature,
       );
     case "togetherai":
@@ -33,7 +35,7 @@ export function getLLMModel(modelConfig: ModelConfig): BaseLLM | undefined {
     case "pulse-editor":
       return new PulseEditorLLM(
         modelConfig.apiKey,
-        modelConfig.modelName,
+        modelName,
         modelConfig.temperature,
       );
     default:

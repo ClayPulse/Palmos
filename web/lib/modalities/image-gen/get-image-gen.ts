@@ -1,11 +1,12 @@
-import { ModelConfig } from "@/lib/types";
+import { ImageModelConfig } from "@pulse-editor/shared-utils";
 import { BaseImageGen } from "./base-image-gen";
 import { ReplicateImageGen } from "./models/replicate-image-gen";
 
 export function getImageGenModel(
-  modelConfig: ModelConfig,
+  modelConfig: ImageModelConfig,
 ): BaseImageGen | undefined {
-  const { provider, apiKey, modelName } = modelConfig;
+  const { apiKey, modelId } = modelConfig;
+  const [provider, modelName] = modelId.split("/");
 
   if (!apiKey) {
     throw new Error(`${provider} API key is required`);

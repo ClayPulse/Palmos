@@ -1,6 +1,6 @@
+import useActionExecutor from "@/lib/hooks/use-action-executor";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
-import useActionExecutor from "@/lib/hooks/use-action-executor";
 import { ScopedAction } from "@/lib/types";
 import {
   addToast,
@@ -225,7 +225,7 @@ export default function CommandViewer() {
     }));
   }
 
-  function handlePressedKeys(pressedKeys: string[]) {
+  async function handlePressedKeys(pressedKeys: string[]) {
     // Run the selected command on enter key press
     const isEnterPressed = pressedKeys.includes("Enter");
     const isArrowUpPressed = pressedKeys.includes("ArrowUp");
@@ -255,14 +255,16 @@ export default function CommandViewer() {
         }
         return;
       }
-      chatWithAssistant(
+      await chatWithAssistant(
         {
-          content: { text: inputTextValue },
+          content: {
+            text: inputTextValue,
+          },
+          attachments: [],
         },
         isOutputVoice,
-      ).then(() => {
-        setIsWaitingAssistant(true);
-      });
+      );
+      setIsWaitingAssistant(true);
     } else if (isArrowUpPressed) {
       setSelectActionIndex((prev) =>
         prev === 0 ? actions.length - 1 : prev - 1,
@@ -320,9 +322,12 @@ export default function CommandViewer() {
                         console.log("Recorded audio input:", audio);
 
                         // Send audio to backend
-                        const result = await chatWithAssistant(
+                        await chatWithAssistant(
                           {
-                            content: { audio: audio },
+                            content: {
+                              audio: audio,
+                            },
+                            attachments: [],
                           },
                           false,
                         );

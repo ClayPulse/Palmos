@@ -2,6 +2,7 @@ import { ChatPromptTemplate } from "@langchain/core/prompts";
 import {
   Agent,
   AgentMethod,
+  ModelConfig,
   TypedVariable,
   TypedVariableObjectType,
   TypedVariableType,
@@ -13,6 +14,7 @@ import toast from "react-hot-toast";
 import { BaseLLM } from "../modalities/llm/base-llm";
 import { getLLMModel } from "../modalities/llm/get-llm";
 
+
 export function getAgentLLMConfig(agent: Agent, methodName: string) {
   const method = agent.availableMethods.find((m) => m.name === methodName);
   return method?.LLMConfig ? method.LLMConfig : agent.LLMConfig;
@@ -20,16 +22,12 @@ export function getAgentLLMConfig(agent: Agent, methodName: string) {
 
 /* LLM only */
 export async function runLLMAgentMethod(
-  modelConfig: {
-    provider: string;
-    modelName: string;
-    temperature?: number;
-    apiKey?: string;
-  },
+  modelConfig: ModelConfig,
   agent: Agent,
   methodName: string,
   args: Record<string, any>,
   onChunkUpdate?: (allReceived?: string, newReceived?: string) => Promise<void>,
+  abortSignal?: AbortSignal,
 ): Promise<string> {
   const method = agent.availableMethods.find((m) => m.name === methodName);
   if (!method) {
@@ -44,7 +42,7 @@ export async function runLLMAgentMethod(
     throw new Error("No suitable LLM model found.");
   }
 
-  const result = await runLLM(llm, textPrompt, onChunkUpdate);
+  const result = await runLLM(llm, textPrompt, onChunkUpdate, abortSignal);
 
   // Strip leading/trailing markdown code fences if present
   const codeFenceRegex = /^```toon\n([\s\S]*?)\n```$/;
@@ -156,13 +154,8 @@ ${encode(properties)}
   return `A ${type} value`;
 }
 
-function getLLM(llmConfig: {
-  provider: string;
-  modelName: string;
-  temperature?: number;
-  apiKey?: string;
-}) {
-  const provider = llmConfig.provider;
+function getLLM(llmConfig: ModelConfig) {
+  const [provider] = llmConfig.modelId.split("/");
 
   if (!llmConfig.apiKey) {
     toast.error(
@@ -180,21 +173,42 @@ async function runLLM(
   llm: BaseLLM,
   prompt: string,
   onChunkUpdate?: (allReceived?: string, newReceived?: string) => Promise<void>,
+  abortSignal?: AbortSignal,
 ) {
   const stream = await llm.generateStream(prompt);
   const reader = stream.getReader();
   let done = false;
   let result = "";
 
-  while (!done) {
-    const { done: readerDone, value } = await reader.read();
-    done = readerDone;
-    if (value) {
-      const chunk = value;
-      result += chunk;
-      if (onChunkUpdate) {
-        onChunkUpdate(result, chunk);
+  // Handle abort signal
+  const abortHandler = () => {
+    reader.cancel();
+    done = true;
+  };
+  
+  if (abortSignal) {
+    if (abortSignal.aborted) {
+      reader.cancel();
+      throw new Error("Request aborted");
+    }
+    abortSignal.addEventListener("abort", abortHandler);
+  }
+
+  try {
+    while (!done) {
+      const { done: readerDone, value } = await reader.read();
+      done = readerDone;
+      if (value) {
+        const chunk = value;
+        result += chunk;
+        if (onChunkUpdate) {
+          await onChunkUpdate(result, chunk);
+        }
       }
+    }
+  } finally {
+    if (abortSignal) {
+      abortSignal.removeEventListener("abort", abortHandler);
     }
   }
 

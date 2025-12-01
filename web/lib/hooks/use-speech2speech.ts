@@ -57,33 +57,23 @@ export default function useSpeech2Speech() {
           isThinking: true,
         }));
 
-        if (sttModel.isAllowStreaming()) {
-          const transcript = await sttModel.generateStream(audio, "mp3");
-          const reader = transcript.getReader();
-          let result = "";
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-              // The stream is done, so we can stop processing
-              // and set the input audio stream to undefined.
-              editorContext?.setEditorStates((prev) => ({
-                ...prev,
-                inputAudioStream: undefined,
-              }));
-              setIsSTTDone(true);
-              return;
-            }
-            result += value; // Append the new chunk to the result
-            setTranscript(result);
+        const transcript = await sttModel.generateStream(audio, "mp3");
+        const reader = transcript.getReader();
+        let result = "";
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) {
+            // The stream is done, so we can stop processing
+            // and set the input audio stream to undefined.
+            editorContext?.setEditorStates((prev) => ({
+              ...prev,
+              inputAudioStream: undefined,
+            }));
+            setIsSTTDone(true);
+            return;
           }
-        } else {
-          const text = await sttModel.generate(audio);
-          setTranscript(text);
-          setIsSTTDone(true);
-          editorContext?.setEditorStates((prev) => ({
-            ...prev,
-            inputAudioStream: undefined,
-          }));
+          result += value; // Append the new chunk to the result
+          setTranscript(result);
         }
       }
     }
@@ -164,8 +154,6 @@ export default function useSpeech2Speech() {
         return;
       }
 
-      const audio = await ttsModel.generateStream(processedText);
-
       editorContext?.setEditorStates((prev) => ({
         ...prev,
         isThinking: false,
@@ -174,11 +162,26 @@ export default function useSpeech2Speech() {
       }));
 
       // Play the audio stream
+      const audio: ReadableStream<ArrayBuffer> =
+        await ttsModel.generateStream(processedText);
+
+      let buffer = new ArrayBuffer(0);
+      const reader = audio.getReader();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) {
+          break;
+        }
+        // Append value to buffer
+        const tmp = new Uint8Array(buffer.byteLength + value.byteLength);
+        tmp.set(new Uint8Array(buffer), 0);
+        tmp.set(new Uint8Array(value), buffer.byteLength);
+        buffer = tmp.buffer;
+      }
+
       const audioContext = new AudioContext();
       const source = audioContext.createBufferSource();
-      const audioBuffer = await audioContext.decodeAudioData(
-        await audio.arrayBuffer(),
-      );
+      const audioBuffer = await audioContext.decodeAudioData(buffer);
       source.buffer = audioBuffer;
       source.connect(audioContext.destination);
       source.start(0);
@@ -216,7 +219,11 @@ export default function useSpeech2Speech() {
     if (!ttsKey || !ttsProvider || !ttsModel || !ttsVoice) {
       return;
     }
-    const tts = getTTSModel(ttsKey, ttsProvider, ttsModel, ttsVoice);
+    const tts = getTTSModel({
+      apiKey: ttsKey,
+      modelId: `${ttsProvider}/${ttsModel}`,
+      voiceName: ttsVoice,
+    });
     if (tts) {
       setTtsModel(tts);
     } else {
@@ -240,7 +247,10 @@ export default function useSpeech2Speech() {
     if (!sttKey || !sttProvider || !sttModel) {
       return;
     }
-    const stt = getSTTModel(sttKey, sttProvider, sttModel);
+    const stt = getSTTModel({
+      apiKey: sttKey,
+      modelId: `${sttProvider}/${sttModel}`,
+    });
     if (stt) {
       setSttModel(stt);
     } else {

@@ -50,10 +50,18 @@ export class PulseEditorLLM extends BaseLLM {
     // ReadableStream cannot pass JSON objects via HTTP request, so we convert them back to object here
     const stringStream = new ReadableStream({
       async start(controller) {
-        for await (const chunk of stream) {
-          controller.enqueue(chunk);
+        const reader = stream.getReader();
+
+        try {
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            controller.enqueue(value);
+          }
+        } finally {
+          reader.releaseLock();
+          controller.close();
         }
-        controller.close();
       },
     }).pipeThrough(new TextDecoderStream());
 

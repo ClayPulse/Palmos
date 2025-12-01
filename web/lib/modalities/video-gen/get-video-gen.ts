@@ -1,11 +1,12 @@
-import { ModelConfig } from "@/lib/types";
+import { VideoModelConfig } from "@pulse-editor/shared-utils";
 import { BaseVideoGen } from "./base-video-gen";
 import { ReplicateVideoGen } from "./models/replicate-video-gen";
 
 export function getVideoGenModel(
-  modelConfig: ModelConfig,
+  modelConfig: VideoModelConfig,
 ): BaseVideoGen | undefined {
-  const { provider, apiKey, modelName } = modelConfig;
+  const { apiKey, modelId } = modelConfig;
+  const [provider, modelName] = modelId.split("/");
 
   if (!apiKey) {
     throw new Error(`${provider} API key is required`);

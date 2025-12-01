@@ -1,7 +1,7 @@
 import {
   IMCMessage,
   IMCMessageTypeEnum,
-  LLMConfig,
+  LLMModelConfig,
 } from "@pulse-editor/shared-utils";
 import useIMC from "../imc/use-imc";
 
@@ -16,7 +16,7 @@ export default function useLLM() {
   async function runLLM(
     prompt: string,
     // LLM config is optional, if not provided, the default config will be used.
-    llmConfig?: LLMConfig
+    llmConfig?: LLMModelConfig
   ): Promise<string> {
     if (!imc) {
       throw new Error("IMC not initialized.");

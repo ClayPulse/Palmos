@@ -2,7 +2,10 @@ import {
   Action,
   Agent,
   AppConfig,
+  ModelConfig,
   PolyIMC,
+  TTSModelConfig,
+  TypedVariableType,
   ViewModeEnum,
   ViewModel,
 } from "@pulse-editor/shared-utils";
@@ -150,7 +153,12 @@ export type PersistentSettings = {
   // Environment variables
   envs?: Record<string, string>;
 
-  assistantChatModel?: string;
+  assistantChatModelConfig?: {
+    stt?: ModelConfig;
+    llm?: ModelConfig;
+    tts?: TTSModelConfig;
+    sts?: TTSModelConfig;
+  };
 };
 // #endregion
 
@@ -296,18 +304,6 @@ export type ChatMessage = {
   datetime: string;
 };
 
-// TODO: make model config for each modality
-export type ModelConfig = {
-  provider: string;
-  modelName: string;
-  temperature?: number;
-  apiKey?: string;
-};
-
-export type AudioModelConfig = ModelConfig & {
-  voiceName?: string;
-};
-
 // #region Extension apps
 export type ExtensionApp = {
   config: AppConfig;
@@ -429,7 +425,7 @@ export type PlatformAssistantHistory = {
  *  additional content.
  */
 export type UserMessage = {
-  message: {
+  content: {
     text?: string;
     audio?: ArrayBuffer;
   };
@@ -440,7 +436,7 @@ export type UserMessage = {
  *  Assistant's response can be in multiple modalities.
  */
 export type PlatformAssistantMessage = {
-  message: {
+  content: {
     text?: string;
     audio?: ReadableStream<ArrayBuffer>;
   };
@@ -451,6 +447,20 @@ export type Attachment = {
   type: "file" | "image" | "video" | "audio" | "other";
   uri: string;
   name?: string;
+};
+
+export type AssistantEditorContextArgs = {
+  chatHistory: PlatformAssistantMessage[];
+  activeTabView: string;
+  availableCommands: {
+    cmdName: string;
+    parameters: {
+      name: string;
+      type: TypedVariableType;
+      description: string;
+    }[];
+  }[];
+  projectDirTree: any[];
 };
 
 // #endregion

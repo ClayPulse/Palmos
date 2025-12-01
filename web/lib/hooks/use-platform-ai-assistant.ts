@@ -1,20 +1,18 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { editorAssistantAgent } from "@/lib/agent/built-in-agents/editor-assistant";
-import { runLLMAgentMethod } from "@/lib/agent/llm-agent-runner";
-import { PlatformEnum } from "@/lib/enums";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import {
   AppViewConfig,
+  AssistantEditorContextArgs,
   CanvasViewConfig,
   PlatformAssistantHistory,
+  PlatformAssistantMessage,
   TabView,
   UserMessage,
 } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { decode } from "@toon-format/toon";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { chatModels } from "../platform-assistant/chat-models";
+import { Assistant } from "../editor-assistant/assistant";
 import useActionExecutor from "./use-action-executor";
 import { usePlatformApi } from "./use-platform-api";
 import useSpeech2Speech from "./use-speech2speech";
@@ -23,9 +21,6 @@ import useTTS from "./use-tts";
 
 export default function usePlatformAIAssistant() {
   const editorContext = useContext(EditorContext);
-
-  const isUseManagedCloud =
-    editorContext?.persistSettings?.isUseManagedCloud ?? true;
 
   const [history, setHistory] = useState<PlatformAssistantHistory[]>([]);
 
@@ -36,31 +31,9 @@ export default function usePlatformAIAssistant() {
   const { runScopedAction, actions } = useActionExecutor();
   const { activeTabView } = useTabViewManager();
 
-  const [pendingAnalysis, setPendingAnalysis] = useState("");
   const [analysisAudio, setAnalysisAudio] = useState<Blob | undefined>(
     undefined,
   );
-  const [userVoiceMessage, setUserVoiceMessage] = useState<string>("");
-  const [assistantResult, setAssistantResult] = useState<any>(null);
-
-  // When the assistant agent is done analyzing the command result, we can
-  // play the analysis result to the user.
-  useEffect(() => {
-    if (pendingAnalysis.length > 0) {
-      if (!isRunning) {
-        // Show thinking indicator
-        editorContext?.setEditorStates((prev) => ({
-          ...prev,
-          isThinking: true,
-          thinkingText: "Analyzing command result...",
-        }));
-      }
-      readText(pendingAnalysis).then((blob) => {
-        setPendingAnalysis("");
-        setAnalysisAudio(blob);
-      });
-    }
-  }, [pendingAnalysis, isRunning]);
 
   // Play the audio when the speech2speech is done and the analysis is done
   useEffect(() => {
@@ -77,136 +50,7 @@ export default function usePlatformAIAssistant() {
     }
   }, [isRunning, analysisAudio]);
 
-  // When speech2speech returns assistant result, we let the assistant agent to analyze its effects
-  useEffect(() => {
-    async function processAssistantResult() {
-      if (!assistantResult) {
-        return;
-      }
-
-      const {
-        suggestedCmd,
-        suggestedArgs,
-        response,
-      }: {
-        suggestedCmd: string;
-        suggestedArgs: {
-          name: string;
-          value: any;
-        }[];
-        response: string;
-      } = assistantResult;
-
-      console.log("Assistant result:", assistantResult);
-
-      // TODO: The agent needs to confirm the command with the user
-      // TODO: before executing it.
-      const args = suggestedArgs.reduce(
-        (acc, arg) => {
-          acc[arg.name] = arg.value;
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
-
-      // Show thinking indicator
-      editorContext?.setEditorStates((prev) => ({
-        ...prev,
-        isThinking: true,
-        thinkingText: "Executing command...",
-      }));
-
-      const action = actions.find((cmd) => cmd.action.name === suggestedCmd);
-      if (!action) {
-        toast.error(`Agent suggested command ${suggestedCmd} not found.`);
-        return;
-      }
-
-      const actionResult = await runScopedAction(action, args);
-
-      if (process.env.NODE_ENV === "development") {
-        console.log("Command result:", actionResult);
-      }
-
-      const previousMessage = history[history.length - 1].message.content.text;
-
-      if (isUseManagedCloud ?? true) {
-        const { analysis }: { analysis: string } = await runLLMAgentMethod(
-          editorAssistantAgent,
-          "analyzeCommandResult",
-          {
-            userMessage: userVoiceMessage,
-            suggestedCmd: suggestedCmd,
-            previousSuggestion: response,
-            commandResult: actionResult,
-          },
-          (allReceivedChunk, newReceivedChunk) => {
-            if (!chunk.content.text) {
-              return;
-            }
-            const textJson = JSON.parse(chunk.content.text);
-
-            if (!textJson.analysis) {
-              return;
-            }
-            // Update this in the history
-            setHistory((prev) => {
-              const newHistory = [...prev];
-              if (newHistory.length > 0) {
-                newHistory[newHistory.length - 1].message.content.text =
-                  previousMessage + "\n\n### Result:\n" + textJson.analysis;
-              }
-              return newHistory;
-            });
-          },
-        );
-        if (process.env.NODE_ENV === "development") {
-          console.log("Command analysis:", analysis);
-        }
-
-        editorContext?.setEditorStates((prev) => ({
-          ...prev,
-          isThinking: false,
-        }));
-      } else {
-        if (!editorAssistantAgent.LLMConfig) {
-          toast.error("Agent is not configured to analyze command result.");
-          return;
-        }
-
-        const llmKey = getAPIKey(
-          editorContext,
-          editorContext?.persistSettings?.llmProvider,
-        );
-        if (!llmKey) {
-          toast.error("Please set your LLM API key in settings.");
-          return;
-        }
-
-        const { analysis }: { analysis: string } = await runAgentMethodLocal(
-          llmKey,
-          editorAssistantAgent.LLMConfig,
-          editorAssistantAgent,
-          "analyzeCommandResult",
-          {
-            userMessage: userVoiceMessage,
-            suggestedCmd: suggestedCmd,
-            previousSuggestion: response,
-            commandResult: actionResult,
-          },
-        );
-
-        if (process.env.NODE_ENV === "development") {
-          console.log("Command analysis:", analysis);
-        }
-        setPendingAnalysis(analysis);
-      }
-    }
-
-    processAssistantResult();
-  }, [assistantResult]);
-
-  async function gatherAssistantArgs(userTextMessage?: string) {
+  async function gatherAssistantArgs(): Promise<AssistantEditorContextArgs> {
     function gatherActions() {
       return actions.map((cmd) => ({
         cmdName: cmd.action.name,
@@ -282,85 +126,11 @@ export default function usePlatformAIAssistant() {
 
     return {
       chatHistory: [],
-      userMessage: userTextMessage,
-      activeTabView: tabView,
+      activeTabView: tabView?.config.viewId ?? "undefined",
       availableCommands: gatherActions(),
       projectDirTree: await gatherProjectDirTree(),
     };
   }
-
-  // async function runLocalAssistant(input: UserMessage, isOutputAudio: boolean) {
-  //   if (!editorContext) {
-  //     return;
-  //   }
-
-  //   if (getPlatform() === PlatformEnum.VSCode) {
-  //     toast.error(
-  //       "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
-  //     );
-  //     return;
-  //   }
-
-  //   if (!editorContext.editorStates.isRecording) {
-  //     const llmProvider = editorContext.persistSettings?.llmProvider;
-  //     const llmModel = editorContext.persistSettings?.llmModel;
-
-  //     if (!llmProvider || !llmModel) {
-  //       toast.error("Please set your LLM provider and model in settings.");
-  //       return;
-  //     }
-  //     const llmKey = getAPIKey(
-  //       editorContext,
-  //       editorContext.persistSettings?.llmProvider,
-  //     );
-
-  //     if (!llmKey) {
-  //       toast.error("Please set your LLM API key in settings.");
-  //       return;
-  //     }
-
-  //     const agent = editorAssistantAgent;
-  //     const methodName = "useAppActions";
-
-  //     // Pipe the LLM result to Speech2Speech
-  //     runSpeech2Speech(async (inputText: string) => {
-  //       const config =
-  //         getAgentLLMConfig(agent, methodName) ??
-  //         getDefaultLLMConfig(editorContext);
-
-  //       if (!config) {
-  //         toast.error("No LLM config found for agent.");
-  //         return "No LLM config found for agent. Please configure the LLM in settings.";
-  //       }
-
-  //       setUserVoiceMessage(inputText);
-
-  //       const args = await gatherAssistantArgs(inputText);
-
-  //       const result = await runAgentMethodLocal(
-  //         llmKey,
-  //         config,
-  //         agent,
-  //         methodName,
-  //         args,
-  //       );
-
-  //       const {
-  //         response,
-  //       }: {
-  //         response: string;
-  //       } = result;
-
-  //       console.log("Agent suggestion:", result);
-
-  //       setAssistantResult(result);
-
-  //       return response;
-  //     });
-  //   } else {
-  //     stopSpeech2Speech();
-  //   }
-  // }
 
   /**
    * Run the assistant with the given input and output settings.
@@ -372,90 +142,148 @@ export default function usePlatformAIAssistant() {
       return;
     }
 
-    // Check for currently used chat model.
-    // If it is LLM only,
-    //  - if has audio input, pipe to STT first, then send text to LLM
-    //  - if text only but audio output is disabled, send text to LLM, then return text
-    //  - if text only but audio output is enabled, send text to LLM, then pipe text to TTS
-    // If it is speech2speech model,
-    //  - if has audio, pipe to speech2speech directly
-    //  - if text only, send text to speech2speech directly
-    //  - speech2speech will return audio output, and optionally text output if audio output is enabled
+    const assistant = new Assistant();
 
-    // Get current model
-    const modelName =
-      editorContext?.persistSettings?.assistantChatModel ?? "pulse-ai-v1";
+    // Prepare assistant input
+    const args = await gatherAssistantArgs();
 
-    const chatModel = chatModels[modelName];
+    const assistantInput: UserMessage = {
+      content: {
+        text: input.content.text,
+        audio: input.content.audio,
+      },
+      attachments: [],
+    };
 
-    if (!chatModel) {
-      throw new Error(`Chat model ${modelName} not found.`);
-    }
-
-    if (chatModel.type === "speech-to-speech") {
-    } else if (chatModel.type === "text-to-text") {
-    } else {
-      throw new Error(`Unsupported chat model type: ${chatModel.type}`);
-    }
-  }
-
-  async function runSpeech2SpeechModel() {}
-
-  async function runText2TextModel() {
-    if (input.message.audio && getPlatform() === PlatformEnum.VSCode) {
-      if (getPlatform() === PlatformEnum.VSCode) {
-        toast.error(
-          "Voice Chat is not supported in VSCode Extension. Please use other versions for Voice Chat.",
-        );
-        return;
-      }
-    }
-
-    setHistory((prev) => [
-      ...prev,
+    // Send to assistant
+    const result = await assistant.chat(
+      assistantInput,
       {
-        role: "user",
-        message: input,
+        isOutputAudio: isOutputAudio,
       },
-    ]);
-
-    const text = input.content.text;
-
-    const args = await gatherAssistantArgs(input.content.text);
-
-    const result = await runLLMAgentMethod(
-      editorAssistantAgent,
-      "useAppActions",
+      editorContext.persistSettings?.assistantChatModelConfig ?? {
+        sts: {
+          modelId: "pulse-editor/pulse-ai-v1-turbo",
+        },
+      },
       args,
-      (chunk) => {
-        // Update history as new chunks arrive
-        setHistory((prev) => {
-          const newHistory = [...prev];
-          if (
-            newHistory.length > 0 &&
-            newHistory[newHistory.length - 1].role === "assistant"
-          ) {
-            newHistory[newHistory.length - 1].message = chunk;
-          } else {
-            newHistory.push({
-              role: "assistant",
-              message: chunk,
-            });
-          }
-
-          return newHistory;
-        });
-      },
     );
 
-    // TODO: use latest history instead of raw agent result
-    setAssistantResult(result);
-
-    return result;
+    // Process assistant result
+    await processAssistantResult(result);
   }
 
+  async function processAssistantResult(
+    assistantResult: PlatformAssistantMessage | null,
+  ) {
+    if (!assistantResult || !assistantResult.content.text) {
+      return;
+    }
+
+    const { suggestedCmd, suggestedArgs } = decode(
+      assistantResult.content.text,
+    ) as {
+      suggestedCmd: string;
+      suggestedArgs: {
+        name: string;
+        value: any;
+      }[];
+      response: string;
+    };
+
+    console.log("Assistant result:", assistantResult);
+
+    // TODO: The agent needs to confirm the command with the user
+    // TODO: before executing it.
+    const args = suggestedArgs.reduce(
+      (acc, arg) => {
+        acc[arg.name] = arg.value;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+    // Show thinking indicator
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isThinking: true,
+      thinkingText: "Executing command...",
+    }));
+
+    const action = actions.find((cmd) => cmd.action.name === suggestedCmd);
+    if (!action) {
+      toast.error(`Agent suggested command ${suggestedCmd} not found.`);
+      return;
+    }
+
+    const actionResult = await runScopedAction(action, args);
+
+    if (process.env.NODE_ENV === "development") {
+      console.log("Command result:", actionResult);
+    }
+
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isThinking: false,
+    }));
+  }
+
+  /* TODO: Let agent to review command results */
+
+  // // When the assistant agent is done analyzing the command result, we can
+  // // play the analysis result to the user.
+  // useEffect(() => {
+  //   if (pendingAnalysis.length > 0) {
+  //     if (!isRunning) {
+  //       // Show thinking indicator
+  //       editorContext?.setEditorStates((prev) => ({
+  //         ...prev,
+  //         isThinking: true,
+  //         thinkingText: "Analyzing command result...",
+  //       }));
+  //     }
+  //     readText(pendingAnalysis).then((blob) => {
+  //       setPendingAnalysis("");
+  //       setAnalysisAudio(blob);
+  //     });
+  //   }
+  // }, [pendingAnalysis, isRunning]);
+
+  // const previousMessage = history[history.length - 1].message.content.text;
+  // const { analysis }: { analysis: string } = await runLLMAgentMethod(
+  //   editorAssistantAgent,
+  //   "analyzeCommandResult",
+  //   {
+  //     userMessage: userVoiceMessage,
+  //     suggestedCmd: suggestedCmd,
+  //     previousSuggestion: response,
+  //     commandResult: actionResult,
+  //   },
+  //   (allReceivedChunk, newReceivedChunk) => {
+  //     if (!chunk.content.text) {
+  //       return;
+  //     }
+  //     const textJson = JSON.parse(chunk.content.text);
+
+  //     if (!textJson.analysis) {
+  //       return;
+  //     }
+  //     // Update this in the history
+  //     setHistory((prev) => {
+  //       const newHistory = [...prev];
+  //       if (newHistory.length > 0) {
+  //         newHistory[newHistory.length - 1].message.content.text =
+  //           previousMessage + "\n\n### Result:\n" + textJson.analysis;
+  //       }
+  //       return newHistory;
+  //     });
+  //   },
+  // );
+  // if (process.env.NODE_ENV === "development") {
+  //   console.log("Command analysis:", analysis);
+  // }
+
   return {
-    isUseManagedCloud,
     history,
     chatWithAssistant,
   };

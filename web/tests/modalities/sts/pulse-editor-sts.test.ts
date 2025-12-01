@@ -22,22 +22,12 @@ describe("Pulse Editor LLM Models", () => {
     const openai_api_key = process.env.OPENAI_API_KEY;
     if (!openai_api_key) throw new Error("Missing OPENAI_API_KEY env var");
 
-    const sts = getSTSModel({
-      apiKey: pulse_editor_api_key,
-      provider: "pulse-editor",
-      modelName: "pulse-ai-v1-turbo",
-      temperature: 1,
-    } as ModelConfig);
-
-    if (!sts) throw new Error("Failed to create Pulse Editor LLM instance");
-
     // Generate speech and save to local if not already present
     if (!fs.existsSync("tests/artifacts/pulse_editor_sts_input.wav")) {
       console.log("Cannot find cached TTS audio, generating...");
       const tts = getTTSModel({
         apiKey: openai_api_key,
-        provider: "openai",
-        modelName: "tts-1",
+        modelId: "openai/tts-1",
         voiceName: "alloy",
       } as ModelConfig);
 
@@ -80,6 +70,16 @@ describe("Pulse Editor LLM Models", () => {
       speechBuffer.byteOffset + speechBuffer.byteLength,
     );
 
+    // ----------------------------------------------------------
+    // Generate STS stream
+    const sts = getSTSModel({
+      apiKey: pulse_editor_api_key,
+      modelId: "pulse-editor/pulse-ai-v1-turbo",
+      temperature: 1,
+    } as ModelConfig);
+
+    if (!sts) throw new Error("Failed to create Pulse Editor LLM instance");
+
     const stream = await sts.generateStream(undefined, speechArrayBuffer);
 
     expect(stream).toBeInstanceOf(ReadableStream);
@@ -103,6 +103,7 @@ describe("Pulse Editor LLM Models", () => {
       chunks.push(chunk);
     }
 
+    // ----------------------------------------------------------
     // Save the audio output to a file for inspection
     const audioChunks: ArrayBuffer[] = [];
     for (const chunk of chunks) {
@@ -140,8 +141,7 @@ describe("Pulse Editor LLM Models", () => {
 
     const stt = getSTTModel({
       apiKey: openai_api_key,
-      provider: "openai",
-      modelName: "gpt-4o-mini-transcribe",
+      modelId: "openai/gpt-4o-mini-transcribe",
     });
 
     const sttStream = await stt?.generateStream(wavArrayBuffer, "wav");

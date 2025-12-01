@@ -129,11 +129,12 @@ export default function EditorToolbar() {
                   onPress={async () => {
                     if (!isRecording) {
                       const buffer = await recordVAD();
-                      chatWithAssistant(
+                      await chatWithAssistant(
                         {
                           content: {
                             audio: buffer,
                           },
+                          attachments: [],
                         },
                         true,
                       );
