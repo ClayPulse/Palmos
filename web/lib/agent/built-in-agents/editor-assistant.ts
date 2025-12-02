@@ -34,27 +34,187 @@ If the user needs to learn more about Pulse Editor, encourage them to visit the 
 at https://pulse-editor.com or the GitHub community https://github.com/claypulse/pulse-editor.
 \`\`\`
 
+The platform-level assistant agent's response to the user's input or question. \
+Explain in a friendly way to the user that you will call the command for them, and explain the reasoning behind \
+picking the command and values of the arguments. If a command is suggested, you will let the user know \
+that you will execute this command for them and wait for the response to further analyze its effects. \
+Keep your response short and concise but informative in 2-3 sentences unless the user wants a detailed \
+explanation. This field needs to be in the same language as the user's message. Use a markdown formatted value \
+and highlight parts for better readability.
 `,
   description: `A platform-level assistant agent who can help users with Pulse Editor, \
 Pulse Editor apps and its features.`,
   availableMethods: [
     {
       access: AccessEnum.public,
-      name: "determineTask",
+      name: "voiceAssistant",
       parameters: {
+        chatHistory: {
+          type: "string",
+          description: "The chat history between the user and you.",
+        },
         userMessage: {
           type: "string",
+          description: "The user's message.",
+        },
+        activeTabView: {
+          type: [
+            {
+              type: {
+                type: "string",
+                description:
+                  "The type of the view. This can be 'App' or 'Canvas'",
+              },
+              config: {
+                type: {
+                  viewId: {
+                    type: "string",
+                    description: "The ID of an opened view visible to user.",
+                  },
+                  // AppViewConfig
+                  app: {
+                    type: "string",
+                    description:
+                      "The ID of the app that the view is using. This field exists if the view type is 'App'.",
+                    optional: true,
+                  },
+                  fileUri: {
+                    type: "string",
+                    description:
+                      "The URI of the file that the app is opened with. This field exists if the view type is 'App'.",
+                    optional: true,
+                  },
+                  // CanvasViewConfig
+                  workflow: {
+                    type: "object",
+                    description: `The workflow that the canvas is using. This contains nodes and edges information required for a xyflow/ReactFlow graph. \
+This field exists if the view type is 'Canvas'.`,
+                    optional: true,
+                  },
+                  appConfigs: {
+                    type: [
+                      {
+                        // AppViewConfig
+                        app: {
+                          type: "string",
+                          description:
+                            "The ID of the app that the view is using. This field exists if the view type is 'App'.",
+                          optional: true,
+                        },
+                        fileUri: {
+                          type: "string",
+                          description:
+                            "The URI of the file that the app is opened with. This field exists if the view type is 'App'.",
+                          optional: true,
+                        },
+                      },
+                    ],
+                    description: `The list of app configurations that are opened in the canvas. \
+This field exists if the view type is 'Canvas'.`,
+                    optional: true,
+                  },
+                },
+                description: `The configuration of the view. \
+This is an object that contains different fields based on the view type.`,
+              },
+            },
+          ],
+          description: `The list of opened views that are visible to the user. \
+You will need to use these as the context to suggest the user to interact \
+with Pulse Editor and app action commands.`,
+        },
+        availableCommands: {
+          type: [
+            {
+              cmdName: {
+                type: "string",
+                description:
+                  "The name of the command that the user is trying to use from the app.",
+              },
+              parameters: {
+                type: [
+                  {
+                    name: {
+                      type: "string",
+                      description:
+                        "The name of the parameter needed to run the command from the app.",
+                    },
+                    type: {
+                      type: "string",
+                      description:
+                        "The type of the parameter needed to run the command from the app.",
+                    },
+                    description: {
+                      type: "string",
+                      description:
+                        "The description of the parameter needed to run the command from the app.",
+                    },
+                  },
+                ],
+                description:
+                  "The parameters needed to run the command from the app.",
+              },
+            },
+          ],
           description:
-            "The user's input or question about the platform or its features.",
+            "The commands that the user is trying to use from the app.",
+        },
+        projectDirTree: {
+          type: [
+            {
+              name: {
+                type: "string",
+                description: "File system object's name.",
+              },
+              uri: {
+                type: "string",
+                description: "File system object's uri.",
+              },
+              isFolder: {
+                type: "boolean",
+                description:
+                  "Whether the file system object is a folder or not.",
+              },
+              subDirItems: {
+                type: "object",
+                description:
+                  "The sub-directory items of the file system object. ",
+                optional: true,
+              },
+            },
+          ],
+          description: "The project directory structure.",
         },
       },
-      prompt: "(WIP)",
+      prompt: `\
+For this task, you will suggest app actions that fit the user's needs.
+You are given the following information about the conversation and the available commands.
+Do not assume the command knows what you know (e.g. background information about the user \
+and Pulse Editor), you need to include these knowledge in command's arguments.
+
+Chat history:
+\`\`\`
+{chatHistory}
+\`\`\`
+User message:
+\`\`\`
+{userMessage}
+\`\`\`
+Opened views:
+\`\`\`
+{activeTabView}
+\`\`\`
+Available commands:
+\`\`\`
+{availableCommands}
+\`\`\`
+Project directory tree:
+\`\`\`
+{projectDirTree}
+\`\`\`
+`,
       returns: {
-        task: {
-          type: "string",
-          description:
-            "The task that the user is trying to accomplish based on their input.",
-        },
+        // Empty for unstructured response
       },
     },
     {
@@ -253,15 +413,6 @@ Project directory tree:
           description: `The arguments that you suggested for user to run the command from the app. \
 This must match the command's parameters provided earlier.`,
         },
-        //         suggestedViewId: {
-        //           type: "string",
-        //           description:
-        //             "The ID of the view (usually a uuid) that you suggest the user to run the command on. \
-        // Note, this is not the same as the module/app ID (usually a named ID). In order to suggest a view ID, \
-        // you must match the commands' module ID (named ID) with the opened views' appConfig.id (named ID). \
-        // If a command and an opened view has the same app/module ID (named ID), you can use that \
-        // opened view's ID (uuid) as the suggested view ID.",
-        //         },
         response: {
           type: "string",
           description: `The platform-level assistant agent's response to the user's input or question. \

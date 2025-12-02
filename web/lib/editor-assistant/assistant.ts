@@ -3,10 +3,10 @@ import {
   STSModelConfig,
   TTSModelConfig,
 } from "@pulse-editor/shared-utils";
-import { decode } from "@toon-format/toon";
 import { editorAssistantAgent } from "../agent/built-in-agents/editor-assistant";
 import { LLMAgentRunner } from "../agent/llm-agent-runner";
 import { STSAgentRunner } from "../agent/sts-agent-runner";
+import { parseToonToJSON } from "../agent/toon-parser";
 import { ModelCapabilityEnum } from "../enums";
 import { BaseLLM } from "../modalities/llm/base-llm";
 import { getLLMModel } from "../modalities/llm/get-llm";
@@ -16,10 +16,9 @@ import { getSTTModel } from "../modalities/stt/get-stt";
 import { getTTSModel } from "../modalities/tts/get-tts";
 import {
   AssistantEditorContextArgs,
-  PlatformAssistantMessage,
+  EditorAssistantMessage,
   UserMessage,
 } from "../types";
-import { parseToonToJSON } from "../agent/toon-parser";
 
 export class Assistant {
   /**
@@ -43,6 +42,7 @@ export class Assistant {
       stt?: ModelConfig;
       tts?: TTSModelConfig;
     },
+    method: string,
     additionalArgs: AssistantEditorContextArgs,
     onChunkUpdate?: (
       allReceived?: {
@@ -54,7 +54,7 @@ export class Assistant {
         audio?: ArrayBuffer;
       },
     ) => Promise<void>,
-  ): Promise<PlatformAssistantMessage> {
+  ): Promise<EditorAssistantMessage> {
     const chatMode = modelConfigs.sts
       ? "sts"
       : modelConfigs.llm
@@ -86,16 +86,18 @@ export class Assistant {
       modelConfigs.stt,
     );
 
-    const agentResult = await this.runAssistantMethod(
+    const assistantResult = await this.runAssistantMethod(
       model,
       modelConfig,
+      method,
       additionalArgs,
       userInputArg,
+      chatSettings.isOutputAudio,
       onChunkUpdate,
     );
 
-    const outputMessage: PlatformAssistantMessage = {
-      content: agentResult,
+    const outputMessage: EditorAssistantMessage = {
+      content: assistantResult,
       attachments: [],
     };
 
@@ -179,7 +181,7 @@ export class Assistant {
   }
 
   private async processModelOutput(
-    modelOutput: PlatformAssistantMessage,
+    modelOutput: EditorAssistantMessage,
     model: BaseLLM | BaseSTS,
     isOutputAudio: boolean,
     fallbackTTSModel?: TTSModelConfig,
@@ -193,7 +195,7 @@ export class Assistant {
         audio?: ArrayBuffer;
       },
     ) => Promise<void>,
-  ): Promise<PlatformAssistantMessage> {
+  ): Promise<EditorAssistantMessage> {
     if (!isOutputAudio) {
       // Return text output only
       return modelOutput;
@@ -223,7 +225,7 @@ export class Assistant {
         throw new Error(`Cannot find TTS model.`);
       }
 
-      let finalResult: PlatformAssistantMessage = modelOutput;
+      let finalResult: EditorAssistantMessage = modelOutput;
 
       const audio = await tts.generateStream(audioContent);
 
@@ -267,8 +269,10 @@ export class Assistant {
   private async runAssistantMethod(
     model: BaseLLM | BaseSTS,
     config: ModelConfig | STSModelConfig,
+    method: string,
     editorContextInfo: AssistantEditorContextArgs,
     userInputArg: UserMessage,
+    isOutputAudio?: boolean,
     onChunkUpdate?: (
       allReceived?: {
         text?: string;
@@ -289,7 +293,7 @@ export class Assistant {
       const result = await runner.run(
         config as STSModelConfig,
         editorAssistantAgent,
-        "useAppActions",
+        method,
         {
           audio: userInputArg.content.audio,
           args: {
@@ -297,6 +301,7 @@ export class Assistant {
             userMessage: userInputArg.content.text ?? "(user sent audio)",
           },
         },
+        isOutputAudio,
         onChunkUpdate,
         abortSignal,
       );
@@ -311,7 +316,7 @@ export class Assistant {
           apiKey: config.apiKey,
         },
         editorAssistantAgent,
-        "useAppActions",
+        method,
         {
           ...editorContextInfo,
           userMessage: userInputArg.content.text,

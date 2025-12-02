@@ -35,6 +35,30 @@ ${encode(args).replaceAll("{", "{{").replaceAll("}", "}}")}
   const userPromptTemplate = `\
 ${methodPrompt}
 
+${createMockToonReturnTemplate(method.returns)}
+`;
+
+  const promptTemplate = ChatPromptTemplate.fromMessages([
+    ["system", agent.systemPrompt],
+    ["user", userPromptTemplate],
+  ]);
+
+  const prompt = await promptTemplate.invoke({
+    ...args,
+  });
+
+  return prompt.toString();
+}
+
+export function createMockToonReturnTemplate(
+  returnVariables: Record<string, TypedVariable>,
+): string {
+  // If no return variables, return unstructured response
+  if (Object.keys(returnVariables).length === 0) {
+    return "You will write your response below:";
+  }
+
+  return `\
 Finally, you must return a valid TOON object string in the required format. The requirements for the TOON object are as follows,
 you must make sure the TOON string is parse-able and valid.
 
@@ -69,25 +93,8 @@ Instruction on how to produce each return variable is given in parentheses.
 Use the same header format. [N] indicates number of items/rows in an array, set it accordingly. 
 Output only the code block.
 
-${createMockToonReturnTemplate(method.returns)}
-`;
 
-  const promptTemplate = ChatPromptTemplate.fromMessages([
-    ["system", agent.systemPrompt],
-    ["user", userPromptTemplate],
-  ]);
 
-  const prompt = await promptTemplate.invoke({
-    ...args,
-  });
-
-  return prompt.toString();
-}
-
-export function createMockToonReturnTemplate(
-  returnVariables: Record<string, TypedVariable>,
-): string {
-  return `\
 \`\`\`toon
 ${encode({
   ...Object.fromEntries(

@@ -2,8 +2,8 @@ import {
   arrayBufferToBase64,
   pcm16Base64ToArrayBuffer,
 } from "@/lib/audio-utils/utils";
-import { toUnifiedStream } from "@/lib/data-streaming/unified-stream";
 import { parseNDJSONStream } from "@/lib/data-streaming/stream-chunk-parsers";
+import { toUnifiedStream } from "@/lib/data-streaming/unified-stream";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { BaseSTS } from "../base-sts";
 
@@ -20,6 +20,7 @@ export class PulseEditorSTS extends BaseSTS {
     audio?: ArrayBuffer,
     config?: {
       inputAudioFormat?: string;
+      isOutputAudio?: boolean;
     },
     abortSignal?: AbortSignal,
   ): Promise<
@@ -43,7 +44,7 @@ export class PulseEditorSTS extends BaseSTS {
           audio: audioBase64,
         },
         temperature: 1,
-        isOutputAudio: true,
+        isOutputAudio: config?.isOutputAudio,
         inputAudioFormat: config?.inputAudioFormat,
       }),
       signal: abortSignal,

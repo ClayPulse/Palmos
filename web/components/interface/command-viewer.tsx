@@ -1,4 +1,8 @@
-import { parseToonToJSON, removeToonCodeFences } from "@/lib/agent/toon-parser";
+import {
+  isToonFormat,
+  parseToonToJSON,
+  removeToonCodeFences,
+} from "@/lib/agent/toon-parser";
 import useActionExecutor from "@/lib/hooks/use-action-executor";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
@@ -36,8 +40,6 @@ export default function CommandViewer() {
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectActionIndex, setSelectActionIndex] = useState(-1);
   const [inputTextValue, setInputTextValue] = useState("");
-  // const [isInputVoice, setIsInputVoice] = useState(false);
-  const [isOutputVoice, setIsOutputVoice] = useState(false);
   const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
 
   const [isArgsInputOpen, setIsArgsInputOpen] = useState(false);
@@ -263,7 +265,7 @@ export default function CommandViewer() {
           },
           attachments: [],
         },
-        isOutputVoice,
+        false,
       );
       setIsWaitingAssistant(true);
     } else if (isArrowUpPressed) {
@@ -295,7 +297,11 @@ export default function CommandViewer() {
     return true;
   }
 
-  const parseAssistantMessageContent = useCallback((content: string) => {
+  function parseAssistantMessageContent(content: string) {
+    if (!isToonFormat(content)) {
+      return content;
+    }
+
     const toonContent = removeToonCodeFences(content);
 
     try {
@@ -320,7 +326,7 @@ ${toonContent}
 \`\`\`
 `;
     }
-  }, []);
+  }
 
   return (
     <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2">
@@ -357,7 +363,7 @@ ${toonContent}
                             },
                             attachments: [],
                           },
-                          false,
+                          true,
                         );
                       }
 
@@ -413,15 +419,26 @@ ${toonContent}
             >
               {history.map((entry, index) => (
                 <div key={index}>
-                  {entry.message.content.text &&
-                    (entry.role === "user" ? (
-                      <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
-                        <div className="font-bold">You: </div>
-                        {entry.message.content.text}
-                      </div>
-                    ) : (
-                      <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
-                        <p className="font-bold">Assistant:</p>
+                  {entry.role === "user" ? (
+                    <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
+                      <div className="font-bold">You: </div>
+                      {entry.message.content.text && entry.message.content.text}
+                      {entry.message.content.audio && (
+                        <div>
+                          <audio />
+                        </div>
+                      )}
+                      {!entry.message.content.text &&
+                        !entry.message.content.audio && (
+                          <div className="flex justify-center">
+                            <Spinner />
+                          </div>
+                        )}
+                    </div>
+                  ) : (
+                    <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
+                      <p className="font-bold">Assistant:</p>
+                      {entry.message.content.text && (
                         <div className="markdown-styles -my-4">
                           <Markdown remarkPlugins={[remarkGfm]}>
                             {parseAssistantMessageContent(
@@ -429,8 +446,20 @@ ${toonContent}
                             )}
                           </Markdown>
                         </div>
-                      </div>
-                    ))}
+                      )}
+                      {entry.message.content.audio && (
+                        <div>
+                          <audio />
+                        </div>
+                      )}
+                      {!entry.message.content.text &&
+                        !entry.message.content.audio && (
+                          <div className="flex justify-center">
+                            <Spinner />
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               ))}
               {isWaitingAssistant && (

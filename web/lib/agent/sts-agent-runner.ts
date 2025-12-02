@@ -12,6 +12,7 @@ export class STSAgentRunner {
       audio?: ArrayBuffer;
       args: Record<string, any>;
     },
+    isOutputAudio?: boolean,
     onChunkUpdate?: (
       allReceived?: {
         text?: string;
@@ -44,6 +45,7 @@ export class STSAgentRunner {
       sts,
       textPrompt,
       input.audio,
+      isOutputAudio,
       onChunkUpdate,
       abortSignal,
     );
@@ -55,6 +57,7 @@ export class STSAgentRunner {
     sts: BaseSTS,
     prompt?: string,
     audioInput?: ArrayBuffer,
+    isOutputAudio?: boolean,
     onChunkUpdate?: (
       allReceived?: {
         text?: string;
@@ -72,6 +75,7 @@ export class STSAgentRunner {
       audioInput,
       {
         inputAudioFormat: "wav",
+        isOutputAudio: isOutputAudio,
       },
       abortSignal,
     );

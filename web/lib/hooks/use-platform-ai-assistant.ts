@@ -3,13 +3,13 @@ import {
   AppViewConfig,
   AssistantEditorContextArgs,
   CanvasViewConfig,
-  PlatformAssistantHistory,
-  PlatformAssistantMessage,
+  EditorAssistantMessage,
+  EditorChatMessage,
   TabView,
   UserMessage,
 } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { useContext, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import { parseToonToJSON } from "../agent/toon-parser";
 import { Assistant } from "../editor-assistant/assistant";
@@ -20,7 +20,10 @@ import { useTabViewManager } from "./use-tab-view-manager";
 export default function usePlatformAIAssistant() {
   const editorContext = useContext(EditorContext);
 
-  const [history, setHistory] = useState<PlatformAssistantHistory[]>([]);
+  const [history, setHistory] = useState<EditorChatMessage[]>([]);
+  // Use refs for precise, synchronous audio scheduling to avoid race conditions.
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const nextPlaybackTimeRef = useRef<number>(0);
 
   const { platformApi } = usePlatformApi();
 
@@ -124,6 +127,21 @@ export default function usePlatformAIAssistant() {
     // Prepare assistant input
     const args = await gatherAssistantArgs();
 
+    // Initialize audio player if needed
+    if (isOutputAudio) {
+      // Create (or resume) a single AudioContext for the session
+      const ctx =
+        audioContextRef.current ??
+        new (window.AudioContext || (window as any).webkitAudioContext)();
+      if (ctx.state === "suspended") {
+        // Best-effort resume in case the browser suspended it
+        ctx.resume().catch(() => {});
+      }
+      audioContextRef.current = ctx;
+      // Reset scheduling cursor for a fresh conversation to current time
+      nextPlaybackTimeRef.current = ctx.currentTime;
+    }
+
     const assistantInput: UserMessage = {
       content: {
         text: input.content.text,
@@ -146,7 +164,7 @@ export default function usePlatformAIAssistant() {
     ]);
 
     // Send to assistant
-    const result = await assistant.chat(
+    const assistantResult = await assistant.chat(
       assistantInput,
       {
         isOutputAudio: isOutputAudio,
@@ -156,6 +174,7 @@ export default function usePlatformAIAssistant() {
           modelId: "pulse-editor/pulse-ai-v1-turbo",
         },
       },
+      "voiceAssistant",
       args,
       async (
         allReceived?: {
@@ -167,10 +186,99 @@ export default function usePlatformAIAssistant() {
           audio?: ArrayBuffer;
         },
       ) => {
-        const chunk: PlatformAssistantMessage = {
+        const chunk: EditorAssistantMessage = {
           content: {
             text: allReceived?.text,
             audio: allReceived?.audio,
+          },
+          attachments: [],
+        };
+
+        // Update history with the latest chunk
+        setHistory((prev) => {
+          const newHistory = [...prev];
+          if (newHistory.length > 0) {
+            newHistory[newHistory.length - 1].message = chunk;
+          }
+          return newHistory;
+        });
+
+        // Play audio chunk sequentially if any
+        if (isOutputAudio && newReceived?.audio && audioContextRef.current) {
+          try {
+            const ctx = audioContextRef.current;
+            // Interpret incoming buffer as Float32 PCM (expected format). If different, conversion should be added.
+            const samples = new Float32Array(newReceived.audio);
+            if (samples.length === 0) {
+              return; // Skip empty chunk
+            }
+
+            const sampleRate = 24000; // Expected input sample rate
+            const buffer = ctx.createBuffer(1, samples.length, sampleRate);
+            buffer.copyToChannel(samples, 0, 0);
+
+            // Ensure strictly sequential (gapless) playback
+            const now = ctx.currentTime;
+            const startAt = Math.max(now, nextPlaybackTimeRef.current);
+            const source = ctx.createBufferSource();
+            source.buffer = buffer;
+            source.connect(ctx.destination);
+            source.start(startAt);
+
+            // Advance cursor immediately (no async state lag)
+            nextPlaybackTimeRef.current = startAt + buffer.duration;
+          } catch (err) {
+            if (process.env.NODE_ENV === "development") {
+              console.error("Audio chunk playback failed:", err);
+            }
+          }
+        }
+      },
+    );
+
+    // Create new entry in history for planned actions
+    setHistory((prev) => [
+      ...prev,
+      {
+        role: "assistant",
+        message: {
+          content: {},
+          attachments: [],
+        },
+      },
+    ]);
+
+    const plannerAssistant = await assistant.chat(
+      {
+        content: {
+          text: assistantResult?.content.text || "",
+        },
+        attachments: [],
+      },
+      {
+        isOutputAudio: false,
+      },
+      editorContext.persistSettings?.assistantChatModelConfig ?? {
+        sts: {
+          modelId: "pulse-editor/pulse-ai-v1-turbo",
+        },
+      },
+      "useAppActions",
+      {
+        ...args,
+        chatHistory: history,
+      },
+      async (
+        allReceived?: {
+          text?: string;
+        },
+        newReceived?: {
+          text?: string;
+        },
+      ) => {
+        const chunk: EditorAssistantMessage = {
+          content: {
+            text: allReceived?.text,
           },
           attachments: [],
         };
@@ -187,11 +295,11 @@ export default function usePlatformAIAssistant() {
     );
 
     // Process assistant result
-    await processAssistantResult(result);
+    await processAssistantResult(plannerAssistant);
   }
 
   async function processAssistantResult(
-    assistantResult: PlatformAssistantMessage | null,
+    assistantResult: EditorAssistantMessage | null,
   ) {
     if (!assistantResult || !assistantResult.content.text) {
       return;

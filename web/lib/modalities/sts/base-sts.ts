@@ -42,6 +42,7 @@ export abstract class BaseSTS {
     audio?: ArrayBuffer,
     config?: {
       inputAudioFormat?: string;
+      isOutputAudio?: boolean;
     },
     abortSignal?: AbortSignal,
   ): Promise<

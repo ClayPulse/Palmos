@@ -415,9 +415,10 @@ export type CreditBalance = {
 // #endregion
 
 // #region Platform AI Assistant
-export type PlatformAssistantHistory = {
+export type EditorChatMessage = {
   role: "user" | "assistant";
-  message: UserMessage | PlatformAssistantMessage;
+  message: UserMessage | EditorAssistantMessage;
+  isPlan?: boolean;
 };
 
 /**
@@ -435,7 +436,7 @@ export type UserMessage = {
 /**
  *  Assistant's response can be in multiple modalities.
  */
-export type PlatformAssistantMessage = {
+export type EditorAssistantMessage = {
   content: {
     text?: string;
     audio?: ArrayBuffer;
@@ -450,7 +451,7 @@ export type Attachment = {
 };
 
 export type AssistantEditorContextArgs = {
-  chatHistory: PlatformAssistantMessage[];
+  chatHistory: EditorChatMessage[];
   activeTabView: string;
   availableCommands: {
     cmdName: string;

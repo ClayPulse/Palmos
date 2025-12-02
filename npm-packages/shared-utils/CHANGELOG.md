@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.60
+
+### Patch Changes
+
+- Update model config types
+
 ## 0.1.1-beta.59
 
 ### Patch Changes

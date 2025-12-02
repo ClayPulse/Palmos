@@ -20,3 +20,8 @@ export function removeToonCodeFences(toon: string): string {
   const match = toon.match(codeFenceRegex);
   return match ? match[1] : toon;
 }
+
+export function isToonFormat(toon: string): boolean {
+  const codeFenceRegex = /^```toon\n([\s\S]*?)\n(```)?$/;
+  return codeFenceRegex.test(toon);
+}
