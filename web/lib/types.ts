@@ -2,16 +2,19 @@ import {
   Action,
   Agent,
   AppConfig,
+  ModelConfig,
   PolyIMC,
+  TTSModelConfig,
+  TypedVariableType,
   ViewModeEnum,
   ViewModel,
 } from "@pulse-editor/shared-utils";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { SideMenuTabEnum } from "./enums";
-import { BaseLLM } from "./modalities/llm/llm";
-import { BaseSTT } from "./modalities/stt/stt";
-import { BaseTTS } from "./modalities/tts/tts";
+import { BaseLLM } from "./modalities/llm/base-llm";
+import { BaseSTT } from "./modalities/stt/base-stt";
+import { BaseTTS } from "./modalities/tts/base-tts";
 
 // #region Editor Context
 export type EditorContextType = {
@@ -44,12 +47,6 @@ export type EditorStates = {
   thinkingText?: string;
   // Is the agent speaking (reading the output)
   isSpeaking: boolean;
-  // Audio input stream
-  // This is consumed when recording is processed
-  inputAudioStream: ReadableStream | undefined;
-  // // Audio output stream
-  // // This is consumed when audio is played
-  // outputAudioStream: ReadableStream<Uint8Array> | undefined;
 
   /* Toolbar */
   isToolbarOpen: boolean;
@@ -98,6 +95,14 @@ export type EditorStates = {
   // Drag control
   isDraggingOverCanvas?: boolean;
   dropMessage?: string;
+
+  inputDeviceBuffers?: {
+    audioBuffer?: ArrayBuffer;
+  };
+
+  outputDeviceBuffers?: {
+    audioBuffer?: ArrayBuffer;
+  };
 };
 
 /**
@@ -147,6 +152,13 @@ export type PersistentSettings = {
 
   // Environment variables
   envs?: Record<string, string>;
+
+  assistantChatModelConfig?: {
+    stt?: ModelConfig;
+    llm?: ModelConfig;
+    tts?: TTSModelConfig;
+    sts?: TTSModelConfig;
+  };
 };
 // #endregion
 
@@ -257,15 +269,9 @@ export type AIModels = {
 };
 
 export type AIProviderOption = {
-  provider: string;
-  isSupported: boolean;
   models: {
-    model: string;
-    // TODO: do not enforce supported models in the future
-    // and allow users to enter any model from the provider.
-    // Available models should be displayed in a dropdown
-    // as suggestions.
-    isSupported: boolean;
+    name: string;
+    description: string;
   }[];
 };
 // #endregion
@@ -409,26 +415,53 @@ export type CreditBalance = {
 // #endregion
 
 // #region Platform AI Assistant
-export type PlatformAssistantHistory = {
+export type EditorChatMessage = {
   role: "user" | "assistant";
-  message: UserMessage | PlatformAssistantMessage;
+  message: UserMessage | EditorAssistantMessage;
+  isPlan?: boolean;
 };
 
+/**
+ *  User themselves can only either talk or chat. But user may attach
+ *  additional content.
+ */
 export type UserMessage = {
   content: {
     text?: string;
-    audio?: ReadableStream | undefined;
+    audio?: ArrayBuffer;
   };
-  meta?: any;
+  attachments: Attachment[];
 };
 
-export type PlatformAssistantMessage = {
+/**
+ *  Assistant's response can be in multiple modalities.
+ */
+export type EditorAssistantMessage = {
   content: {
     text?: string;
-    audio?: ReadableStream | undefined;
+    audio?: ArrayBuffer;
   };
-  // Other data used to interact with the platform
-  meta?: any;
+  attachments: Attachment[];
+};
+
+export type Attachment = {
+  type: "file" | "image" | "video" | "audio" | "other";
+  uri: string;
+  name?: string;
+};
+
+export type AssistantEditorContextArgs = {
+  chatHistory: EditorChatMessage[];
+  activeTabView: string;
+  availableCommands: {
+    cmdName: string;
+    parameters: {
+      name: string;
+      type: TypedVariableType;
+      description: string;
+    }[];
+  }[];
+  projectDirTree: any[];
 };
 
 // #endregion

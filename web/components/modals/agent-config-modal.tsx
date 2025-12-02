@@ -1,15 +1,15 @@
 "use client";
 
-import { useContext, useEffect, useState } from "react";
-import ModalWrapper from "./modal-wrapper";
-import { EditorContext } from "../providers/editor-context-provider";
-import Icon from "../misc/icon";
-import { Button, Divider, Input, Textarea } from "@heroui/react";
 import { LLMUsage, TabItem, UserAgent } from "@/lib/types";
-import Tabs from "../misc/tabs";
-import PasswordInput from "../misc/password-input";
-import toast from "react-hot-toast";
+import { Button, Divider, Input, Textarea } from "@heroui/react";
 import { AgentMethod } from "@pulse-editor/shared-utils";
+import { useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
+import Icon from "../misc/icon";
+import PasswordInput from "../misc/password-input";
+import Tabs from "../misc/tabs";
+import { EditorContext } from "../providers/editor-context-provider";
+import ModalWrapper from "./modal-wrapper";
 
 export default function AgentConfigModal({
   isOpen,
@@ -42,8 +42,12 @@ export default function AgentConfigModal({
     const usageList: LLMUsage[] = [];
 
     for (const agent of agents) {
-      const provider = agent.LLMConfig?.provider ?? "default";
-      const modelName = agent.LLMConfig?.modelName ?? "default";
+      // const provider = agent.LLMConfig?.provider ?? "default";
+      // const modelName = agent.LLMConfig?.modelName ?? "default";
+      const [provider, modelName] = agent.LLMConfig?.modelId.split("/") ?? [
+        "default",
+        "default",
+      ];
 
       const existing = usageList.find((u) => u.provider === provider);
 
@@ -136,11 +140,7 @@ function AgentConfigs({
             <p className="pt-2 leading-4">{agent.description}</p>
             <div className="flex gap-x-1 pt-2">
               <p>LLM config:</p>
-              <p>
-                {(agent.LLMConfig?.provider ?? "default") +
-                  " " +
-                  (agent.LLMConfig?.modelName ?? "default")}
-              </p>
+              <p>{agent.LLMConfig?.modelId ?? "default/default"}</p>
             </div>
             <div className="flex w-full justify-end gap-1">
               <Button size="sm">Edit</Button>
@@ -267,8 +267,7 @@ function AgentCreation({
               publisher: "You",
             },
             LLMConfig: {
-              provider: provider,
-              modelName: modelName,
+              modelId: `${provider}/${modelName}`,
               temperature: temperature,
             },
           };

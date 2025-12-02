@@ -172,7 +172,7 @@ export type Agent = {
   availableMethods: AgentMethod[];
   description: string;
   tools?: AgentTool[];
-  LLMConfig?: LLMConfig;
+  LLMConfig?: LLMModelConfig;
 };
 
 /**
@@ -185,7 +185,7 @@ export type AgentMethod = {
   prompt: string;
   returns: Record<string, TypedVariable>;
   // If this config does not exist, use the class's LLMConfig
-  LLMConfig?: LLMConfig;
+  LLMConfig?: LLMModelConfig;
 };
 
 export type TypedVariable = {
@@ -247,32 +247,35 @@ export enum AccessEnum {
 }
 
 // #region AI settings
-export type STTConfig = {
-  provider: string;
-  modelName: string;
+
+export type ModelConfig = {
+  // Model id consists of provider and model name
+  // e.g. "openai/gpt-4", "pulse-editor/pulse-ai-v1-turbo"
+  modelId: string;
+  temperature?: number;
+  apiKey?: string;
 };
 
-export type LLMConfig = {
-  provider: string;
-  modelName: string;
-  temperature: number;
+export type STTModelConfig = ModelConfig & {};
+
+export type LLMModelConfig = ModelConfig & {};
+
+export type TTSModelConfig = ModelConfig & {
+  voiceName?: string;
 };
 
-export type TTSConfig = {
-  provider: string;
-  modelName: string;
-  voice: string;
+export type ImageModelConfig = ModelConfig & {
+  resolutionX?: number;
+  resolutionY?: number;
 };
 
-export type ImageModelConfig = {
-  provider: string;
-  modelName: string;
+export type VideoModelConfig = ModelConfig & {
+  resolutionX?: number;
+  resolutionY?: number;
+  frames?: number;
 };
 
-export type VideoModelConfig = {
-  provider: string;
-  modelName: string;
-};
+export type STSModelConfig = ModelConfig & {};
 // #endregion
 
 // TODO: In the future, add a common AI IO adapter

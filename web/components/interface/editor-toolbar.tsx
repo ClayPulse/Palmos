@@ -17,7 +17,7 @@ export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant } = usePlatformAIAssistant();
-  const { isRecording, record } = useRecorder();
+  const { isRecording, recordVAD, stopRecording } = useRecorder();
   const { runMenuActionByName } = useMenuActions();
   const { tabItems, tabIndex } = useTabViewManager();
 
@@ -126,10 +126,20 @@ export default function EditorToolbar() {
                 <Button
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
-                  onPress={() => {
+                  onPress={async () => {
                     if (!isRecording) {
-                      const stream = record();
-                      chatWithAssistant(stream, true);
+                      const buffer = await recordVAD();
+                      await chatWithAssistant(
+                        {
+                          content: {
+                            audio: buffer,
+                          },
+                          attachments: [],
+                        },
+                        true,
+                      );
+                    } else {
+                      stopRecording();
                     }
                   }}
                   variant={

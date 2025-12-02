@@ -3,7 +3,7 @@ import CapacitorProvider from "@/components/providers/capacitor-provider";
 import DndProvider from "@/components/providers/dnd-provider";
 import EditorContextProvider from "@/components/providers/editor-context-provider";
 import InterModuleCommunicationProvider from "@/components/providers/imc-provider";
-import PlatformAssistantProvider from "@/components/providers/platform-assistant-provider";
+import InputDeviceProvider from "@/components/providers/input-device-provider";
 import RemoteModuleProvider from "@/components/providers/remote-module-provider";
 import WrappedHeroUIProvider from "@/components/providers/wrapped-hero-ui-provider";
 import { Analytics } from "@vercel/analytics/next";
@@ -32,16 +32,14 @@ export default function RootLayout({
             <EditorContextProvider>
               <CapacitorProvider>
                 <InterModuleCommunicationProvider>
-                  <DndProvider>
-                    <RemoteModuleProvider isPreventingCSS={true}>
-                      <Toaster />
-                      <Nav>
-                        <PlatformAssistantProvider>
-                          {children}
-                        </PlatformAssistantProvider>
-                      </Nav>
-                    </RemoteModuleProvider>
-                  </DndProvider>
+                    <DndProvider>
+                      <RemoteModuleProvider isPreventingCSS={true}>
+                        <InputDeviceProvider>
+                          <Toaster />
+                          <Nav>{children}</Nav>
+                        </InputDeviceProvider>
+                      </RemoteModuleProvider>
+                    </DndProvider>
                 </InterModuleCommunicationProvider>
               </CapacitorProvider>
             </EditorContextProvider>

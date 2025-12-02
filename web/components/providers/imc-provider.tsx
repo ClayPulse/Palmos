@@ -1,14 +1,11 @@
 "use client";
 
-import {
-  runAgentMethodCloud,
-  runAgentMethodLocal,
-} from "@/lib/agent/agent-runner";
-import { getImageGenModel } from "@/lib/modalities/image-gen/image-gen";
-import { getLLMModel } from "@/lib/modalities/llm/llm";
+import { LLMAgentRunner } from "@/lib/agent/llm-agent-runner";
+import { getImageGenModel } from "@/lib/modalities/image-gen/get-image-gen";
+import { getLLMModel } from "@/lib/modalities/llm/get-llm";
 import { recognizeText } from "@/lib/modalities/ocr/ocr";
-import { getSTTModel } from "@/lib/modalities/stt/stt";
-import { getTTSModel } from "@/lib/modalities/tts/tts";
+import { getSTTModel } from "@/lib/modalities/stt/get-stt";
+import { getTTSModel } from "@/lib/modalities/tts/get-tts";
 import {
   getDefaultImageModelConfig,
   getDefaultLLMConfig,
@@ -16,7 +13,7 @@ import {
   getDefaultTTSConfig,
   getDefaultVideoModelConfig,
 } from "@/lib/modalities/utils";
-import { getVideoGenModel } from "@/lib/modalities/video-gen/video-gen";
+import { getVideoGenModel } from "@/lib/modalities/video-gen/get-video-gen";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { IMCContextType } from "@/lib/types";
 import {
@@ -24,11 +21,11 @@ import {
   ImageModelConfig,
   IMCMessage,
   IMCMessageTypeEnum,
-  LLMConfig,
+  LLMModelConfig,
   PolyIMC,
   ReceiverHandler,
-  STTConfig,
-  TTSConfig,
+  STTModelConfig,
+  TTSModelConfig,
 } from "@pulse-editor/shared-utils";
 import { useTheme } from "next-themes";
 import { createContext, useContext, useEffect, useRef } from "react";
@@ -150,7 +147,7 @@ export default function InterModuleCommunicationProvider({
             agentName: string;
             methodName: string;
             args: Record<string, any>;
-            llmConfig?: LLMConfig;
+            llmConfig?: LLMModelConfig;
           } = message.payload;
 
           const agent = editorContext?.persistSettings?.extensionAgents?.find(
@@ -170,7 +167,32 @@ export default function InterModuleCommunicationProvider({
           }
 
           if (editorContext?.persistSettings?.isUseManagedCloud ?? true) {
-            const result = await runAgentMethodCloud(agent, methodName, args);
+            const modelId = llmConfig
+              ? `${llmConfig.modelId}`
+              : method.LLMConfig
+                ? `${method.LLMConfig.modelId}`
+                : agent.LLMConfig
+                  ? `${agent.LLMConfig?.modelId}`
+                  : "pulse-editor/pulse-ai-v1-turbo";
+
+            if (!modelId) {
+              throw new Error("No model ID found for this agent method.");
+            }
+
+            const apiKey = getAPIKey(editorContext, llmConfig?.modelId);
+
+            const runner = new LLMAgentRunner();
+
+            const result = await runner.run(
+              {
+                modelId,
+                apiKey,
+                temperature: llmConfig?.temperature,
+              },
+              agent,
+              methodName,
+              args,
+            );
 
             return result;
           } else {
@@ -186,20 +208,24 @@ export default function InterModuleCommunicationProvider({
               throw new Error("No LLM config found for this agent method.");
             }
 
-            const provider = config.provider;
-
-            const apiKey = getAPIKey(editorContext, provider);
+            const apiKey = getAPIKey(editorContext, config.modelId);
 
             if (!apiKey) {
-              throw new Error(`No API key found for provider ${provider}.`);
+              throw new Error(`No API key found for model ${config.modelId}.`);
             }
 
-            const result = await runAgentMethodLocal(
-              apiKey,
-              config,
+            const runner = new LLMAgentRunner();
+
+            const result = await runner.run(
+              {
+                modelId: config.modelId,
+                apiKey,
+                temperature: config.temperature,
+              },
               agent,
               methodName,
               args,
+              undefined,
               abortSignal,
             );
 
@@ -232,7 +258,8 @@ export default function InterModuleCommunicationProvider({
           const {
             audio,
             sttConfig,
-          }: { audio: ArrayBuffer; sttConfig?: STTConfig } = message.payload;
+          }: { audio: ArrayBuffer; sttConfig?: STTModelConfig } =
+            message.payload;
 
           const config = sttConfig ?? getDefaultSTTConfig(editorContext);
 
@@ -240,20 +267,23 @@ export default function InterModuleCommunicationProvider({
             throw new Error("No STT config found for this agent method.");
           }
 
-          const provider = config.provider;
-          const apiKey = getAPIKey(editorContext, provider);
+          const apiKey = getAPIKey(editorContext, config.modelId);
           if (!apiKey) {
-            throw new Error(`No API key found for provider ${provider}.`);
+            throw new Error(`No API key found for model ${config.modelId}.`);
           }
 
-          const stt = getSTTModel(apiKey, provider, config.modelName);
+          const stt = getSTTModel({
+            apiKey: apiKey,
+            modelId: `${config.modelId}`,
+            temperature: config.temperature,
+          });
           if (!stt) {
             throw new Error("STT not found.");
           }
 
           const blob = new Blob([audio], { type: "audio/wav" });
 
-          const result = await stt.generate(await blob.arrayBuffer());
+          const result = await stt.generateStream(await blob.arrayBuffer());
 
           return result;
         },
@@ -273,7 +303,7 @@ export default function InterModuleCommunicationProvider({
             llmConfig,
           }: {
             prompt: string;
-            llmConfig?: LLMConfig;
+            llmConfig?: LLMModelConfig;
           } = message.payload;
 
           const config = llmConfig ?? getDefaultLLMConfig(editorContext);
@@ -282,25 +312,22 @@ export default function InterModuleCommunicationProvider({
             throw new Error("No LLM config found for this agent method.");
           }
 
-          const provider = config.provider;
-
-          const apiKey = getAPIKey(editorContext, provider);
+          const apiKey = getAPIKey(editorContext, config.modelId);
           if (!apiKey) {
-            throw new Error(`No API key found for provider ${provider}.`);
+            throw new Error(`No API key found for model ${config.modelId}.`);
           }
 
-          const llm = getLLMModel(
-            apiKey,
-            provider,
-            config.modelName,
-            config.temperature,
-          );
+          const llm = getLLMModel({
+            modelId: `${config.modelId}`,
+            apiKey: apiKey,
+            temperature: config.temperature,
+          });
 
           if (!llm) {
             throw new Error("LLM not found.");
           }
 
-          const result = await llm.generate(prompt, abortSignal);
+          const result = await llm.generateStream(prompt, abortSignal);
 
           return result;
         },
@@ -315,36 +342,35 @@ export default function InterModuleCommunicationProvider({
           // Handle the use TTS message
           console.log("Received use TTS message from extension:", message);
 
-          const { text, ttsConfig }: { text: string; ttsConfig?: TTSConfig } =
-            message.payload;
+          const {
+            text,
+            ttsConfig,
+          }: { text: string; ttsConfig?: TTSModelConfig } = message.payload;
 
           const config = ttsConfig ?? getDefaultTTSConfig(editorContext);
 
           if (!config) {
             throw new Error("No TTS config found for this agent method.");
           }
-          const provider = config.provider;
 
-          const apiKey = getAPIKey(editorContext, provider);
+          const apiKey = getAPIKey(editorContext, config.modelId);
           if (!apiKey) {
-            throw new Error(`No API key found for provider ${provider}.`);
+            throw new Error(`No API key found for model: ${config.modelId}.`);
           }
 
-          const tts = getTTSModel(
-            apiKey,
-            provider,
-            config.modelName,
-            config.voice,
-          );
+          const tts = getTTSModel({
+            modelId: `${config.modelId}`,
+            apiKey: apiKey,
+            temperature: config.temperature,
+            voiceName: config.voiceName,
+          });
           if (!tts) {
             throw new Error("TTS not found.");
           }
 
-          const result = await tts.generate(text);
-          const arrayBuffer = await result.arrayBuffer();
+          const result = await tts.generateStream(text);
 
-          const int8Array = new Uint8Array(arrayBuffer);
-          return int8Array;
+          return result;
         },
       ],
       [
@@ -379,13 +405,19 @@ export default function InterModuleCommunicationProvider({
             );
           }
 
-          const provider = config.provider;
-          const apiKey = getAPIKey(editorContext, provider);
+          const apiKey = getAPIKey(editorContext, config.modelId);
           if (!apiKey) {
-            throw new Error(`No API key found for provider ${provider}.`);
+            throw new Error(`No API key found for model ${config.modelId}.`);
           }
 
-          const model = getImageGenModel(apiKey, provider, config.modelName);
+          const model = getImageGenModel({
+            modelId: config.modelId,
+            apiKey: apiKey,
+          });
+
+          if (!model) {
+            throw new Error("Image generation model not found.");
+          }
 
           const res = await model.generate(textPrompt, imagePrompt);
 
@@ -426,13 +458,19 @@ export default function InterModuleCommunicationProvider({
             );
           }
 
-          const provider = config.provider;
-          const apiKey = getAPIKey(editorContext, provider);
+          const apiKey = getAPIKey(editorContext, config.modelId);
           if (!apiKey) {
-            throw new Error(`No API key found for provider ${provider}.`);
+            throw new Error(`No API key found for model ${config.modelId}.`);
           }
 
-          const model = getVideoGenModel(apiKey, provider, config.modelName);
+          const model = getVideoGenModel({
+            modelId: config.modelId,
+            apiKey: apiKey,
+          });
+
+          if (!model) {
+            throw new Error("Video generation model not found.");
+          }
 
           const res = await model.generate(duration, textPrompt, imagePrompt);
 
@@ -551,7 +589,7 @@ export default function InterModuleCommunicationProvider({
             id: editorContext?.editorStates.currentWorkspace?.id,
           };
         },
-      ]
+      ],
     ]);
 
     return newMap;

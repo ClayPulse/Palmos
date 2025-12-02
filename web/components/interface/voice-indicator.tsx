@@ -1,20 +1,21 @@
 "use client";
 
+import { colors } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "next-themes";
 import { useContext } from "react";
-import { EditorContext } from "../providers/editor-context-provider";
 import {
   BounceLoader,
   ClockLoader,
   PuffLoader,
   PulseLoader,
 } from "react-spinners";
-import { colors } from "@heroui/react";
-import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
+import { EditorContext } from "../providers/editor-context-provider";
 
 export default function VoiceIndicator() {
   const editorContext = useContext(EditorContext);
-  const {} = usePlatformAIAssistant();
+
+  const { resolvedTheme } = useTheme();
 
   const isShowingIndicator =
     editorContext?.editorStates?.isRecording ||
@@ -28,7 +29,7 @@ export default function VoiceIndicator() {
       {isShowingIndicator && (
         <motion.div
           initial={{ y: -56 }}
-          animate={{ y: 48 }}
+          animate={{ y: 0 }}
           exit={{ y: -56 }}
           transition={{ duration: 0.1 }}
           className="pointer-events-none absolute flex h-full w-full items-center justify-center"
@@ -42,7 +43,10 @@ export default function VoiceIndicator() {
               ) : editorContext?.editorStates?.isSpeaking ? (
                 <PuffLoader color={colors.green["300"]} size={24} />
               ) : editorContext?.editorStates?.isLoadingRecorder ? (
-                <PulseLoader color={colors.black} size={8} />
+                <PulseLoader
+                  color={resolvedTheme === "dark" ? colors.white : colors.black}
+                  size={8}
+                />
               ) : (
                 <ClockLoader
                   className="shadow-content2-foreground! [&>span]:bg-content2-foreground! shadow-[0px_0px_0px_2px_inset]!"
@@ -58,7 +62,7 @@ export default function VoiceIndicator() {
                   : editorContext?.editorStates.isSpeaking
                     ? "Speaking"
                     : editorContext.editorStates.isLoadingRecorder
-                      ? "Loading"
+                      ? "Loading Mic"
                       : "Waiting"}
             </p>
           </div>

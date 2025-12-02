@@ -2,11 +2,11 @@ import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import useExplorer from "@/lib/hooks/use-explorer";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
-import { imageGenProviderOptions } from "@/lib/modalities/image-gen/options";
-import { llmProviderOptions } from "@/lib/modalities/llm/options";
-import { sttProviderOptions } from "@/lib/modalities/stt/options";
-import { ttsProviderOptions } from "@/lib/modalities/tts/options";
-import { videoGenProviderOptions } from "@/lib/modalities/video-gen/options";
+import { imageGenProviderOptions } from "@/lib/modalities/image-gen/registry";
+import { llmProviderOptions } from "@/lib/modalities/llm/registry";
+import { sttProviderOptions } from "@/lib/modalities/stt/registry";
+import { ttsProviderOptions } from "@/lib/modalities/tts/registry";
+import { videoGenProviderOptions } from "@/lib/modalities/video-gen/registry";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 import { EditorContextType, ExtensionApp } from "@/lib/types";
@@ -259,10 +259,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
           <p className="text-medium pb-2 font-bold">STT</p>
           <div className="w-full space-y-2">
             <Select
-              items={Object.values(sttProviderOptions)}
-              disabledKeys={Object.values(sttProviderOptions)
-                .filter((provider) => !provider.isSupported)
-                .map((provider) => provider.provider)}
+              items={Object.keys(sttProviderOptions).map((key) => ({
+                provider: key,
+              }))}
               label="Provider"
               placeholder="Select a provider"
               onChange={(e) => {
@@ -290,21 +289,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             <Select
               isDisabled={!editorContext?.persistSettings?.sttProvider}
               items={
-                Object.values(sttProviderOptions).find(
-                  (provider) =>
-                    provider.provider ===
-                    editorContext?.persistSettings?.sttProvider,
-                )?.models ?? []
-              }
-              disabledKeys={
-                Object.values(sttProviderOptions)
-                  .find(
-                    (provider) =>
-                      provider.provider ===
-                      editorContext?.persistSettings?.sttProvider,
-                  )
-                  ?.models.filter((model) => !model.isSupported)
-                  .map((model) => model.model) ?? []
+                sttProviderOptions[
+                  editorContext?.persistSettings?.sttProvider ?? ""
+                ]?.models.map((model) => ({ model: model.name })) ?? []
               }
               label="Model"
               placeholder="Select a model"
@@ -367,10 +354,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             <p className="text-medium pb-2 font-bold">LLM</p>
             <div className="w-full space-y-2">
               <Select
-                items={Object.values(llmProviderOptions)}
-                disabledKeys={Object.values(llmProviderOptions)
-                  .filter((provider) => !provider.isSupported)
-                  .map((provider) => provider.provider)}
+                items={Object.keys(llmProviderOptions).map((key) => ({
+                  provider: key,
+                }))}
                 label="Provider"
                 placeholder="Select a provider"
                 onChange={(e) => {
@@ -398,21 +384,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               <Select
                 isDisabled={!editorContext?.persistSettings?.llmProvider}
                 items={
-                  Object.values(llmProviderOptions).find(
-                    (provider) =>
-                      provider.provider ===
-                      editorContext?.persistSettings?.llmProvider,
-                  )?.models ?? []
-                }
-                disabledKeys={
-                  Object.values(llmProviderOptions)
-                    .find(
-                      (provider) =>
-                        provider.provider ===
-                        editorContext?.persistSettings?.llmProvider,
-                    )
-                    ?.models.filter((model) => !model.isSupported)
-                    .map((model) => model.model) ?? []
+                  llmProviderOptions[
+                    editorContext?.persistSettings?.llmProvider ?? ""
+                  ]?.models.map((model) => ({ model: model.name })) ?? []
                 }
                 label="Model"
                 placeholder="Select a model"
@@ -476,10 +450,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             <p className="text-medium pb-2 font-bold">TTS</p>
             <div className="w-full space-y-2">
               <Select
-                items={Object.values(ttsProviderOptions)}
-                disabledKeys={Object.values(ttsProviderOptions)
-                  .filter((provider) => !provider.isSupported)
-                  .map((provider) => provider.provider)}
+                items={Object.keys(ttsProviderOptions).map((key) => ({
+                  provider: key,
+                }))}
                 label="Provider"
                 placeholder="Select a provider"
                 onChange={(e) => {
@@ -507,21 +480,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               <Select
                 isDisabled={!editorContext?.persistSettings?.ttsProvider}
                 items={
-                  Object.values(ttsProviderOptions).find(
-                    (provider) =>
-                      provider.provider ===
-                      editorContext?.persistSettings?.ttsProvider,
-                  )?.models ?? []
-                }
-                disabledKeys={
-                  Object.values(ttsProviderOptions)
-                    .find(
-                      (provider) =>
-                        provider.provider ===
-                        editorContext?.persistSettings?.ttsProvider,
-                    )
-                    ?.models.filter((model) => !model.isSupported)
-                    .map((model) => model.model) ?? []
+                  ttsProviderOptions[
+                    editorContext?.persistSettings?.ttsProvider ?? ""
+                  ]?.models.map((model) => ({ model: model.name })) ?? []
                 }
                 label="Model"
                 placeholder="Select a model"
@@ -599,10 +560,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
           <div>
             <p className="text-medium pb-2 font-bold">Image Gen</p>
             <Select
-              items={Object.values(imageGenProviderOptions)}
-              disabledKeys={Object.values(imageGenProviderOptions)
-                .filter((provider) => !provider.isSupported)
-                .map((provider) => provider.provider)}
+              items={Object.keys(imageGenProviderOptions).map((key) => ({
+                provider: key,
+              }))}
               label="Provider"
               placeholder="Select a provider"
               onChange={(e) => {
@@ -630,21 +590,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             <Select
               isDisabled={!editorContext?.persistSettings?.imageGenProvider}
               items={
-                Object.values(imageGenProviderOptions).find(
-                  (provider) =>
-                    provider.provider ===
-                    editorContext?.persistSettings?.imageGenProvider,
-                )?.models ?? []
-              }
-              disabledKeys={
-                Object.values(imageGenProviderOptions)
-                  .find(
-                    (provider) =>
-                      provider.provider ===
-                      editorContext?.persistSettings?.imageGenProvider,
-                  )
-                  ?.models.filter((model) => !model.isSupported)
-                  .map((model) => model.model) ?? []
+                imageGenProviderOptions[
+                  editorContext?.persistSettings?.imageGenProvider ?? ""
+                ]?.models.map((model) => ({ model: model.name })) ?? []
               }
               label="Model"
               placeholder="Select a model"
@@ -706,10 +654,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
           <div>
             <p className="text-medium pb-2 font-bold">Video Gen</p>
             <Select
-              items={Object.values(videoGenProviderOptions)}
-              disabledKeys={Object.values(videoGenProviderOptions)
-                .filter((provider) => !provider.isSupported)
-                .map((provider) => provider.provider)}
+              items={Object.keys(videoGenProviderOptions).map((key) => ({
+                provider: key,
+              }))}
               label="Provider"
               placeholder="Select a provider"
               onChange={(e) => {
@@ -737,21 +684,9 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             <Select
               isDisabled={!editorContext?.persistSettings?.videoGenProvider}
               items={
-                Object.values(videoGenProviderOptions).find(
-                  (provider) =>
-                    provider.provider ===
-                    editorContext?.persistSettings?.videoGenProvider,
-                )?.models ?? []
-              }
-              disabledKeys={
-                Object.values(videoGenProviderOptions)
-                  .find(
-                    (provider) =>
-                      provider.provider ===
-                      editorContext?.persistSettings?.videoGenProvider,
-                  )
-                  ?.models.filter((model) => !model.isSupported)
-                  .map((model) => model.model) ?? []
+                videoGenProviderOptions[
+                  editorContext?.persistSettings?.videoGenProvider ?? ""
+                ]?.models.map((model) => ({ model: model.name })) ?? []
               }
               label="Model"
               placeholder="Select a model"

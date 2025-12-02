@@ -1,7 +1,7 @@
 import {
   IMCMessage,
   IMCMessageTypeEnum,
-  STTConfig,
+  STTModelConfig,
 } from "@pulse-editor/shared-utils";
 import useIMC from "../imc/use-imc";
 
@@ -16,7 +16,7 @@ export default function useSTT() {
   async function runSTT(
     audio: Uint8Array,
     // Config is optional, if not provided, the default config will be used.
-    sttConfig?: STTConfig
+    sttConfig?: STTModelConfig,
   ): Promise<string> {
     if (!imc) {
       throw new Error("IMC not initialized.");

@@ -1,5 +1,11 @@
-import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
+import {
+  isToonFormat,
+  parseToonToJSON,
+  removeToonCodeFences,
+} from "@/lib/agent/toon-parser";
 import useActionExecutor from "@/lib/hooks/use-action-executor";
+import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
+import useRecorder from "@/lib/hooks/use-recorder";
 import { ScopedAction } from "@/lib/types";
 import {
   addToast,
@@ -29,15 +35,11 @@ export default function CommandViewer() {
 
   const { chatWithAssistant, history } = usePlatformAIAssistant();
   const { actions, runScopedAction, setKeywordFilter } = useActionExecutor();
+  const { recordVAD, stopRecording, isRecording } = useRecorder();
 
   const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectActionIndex, setSelectActionIndex] = useState(-1);
   const [inputTextValue, setInputTextValue] = useState("");
-  const [inputAudioValue, setInputAudioValue] = useState<
-    ReadableStream<ArrayBuffer> | undefined
-  >(undefined);
-  const [isInputVoice, setIsInputVoice] = useState(false);
-  const [isOutputVoice, setIsOutputVoice] = useState(false);
   const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
 
   const [isArgsInputOpen, setIsArgsInputOpen] = useState(false);
@@ -226,7 +228,7 @@ export default function CommandViewer() {
     }));
   }
 
-  function handlePressedKeys(pressedKeys: string[]) {
+  async function handlePressedKeys(pressedKeys: string[]) {
     // Run the selected command on enter key press
     const isEnterPressed = pressedKeys.includes("Enter");
     const isArrowUpPressed = pressedKeys.includes("ArrowUp");
@@ -239,31 +241,33 @@ export default function CommandViewer() {
     } else if (isEnterPressed && !isControlPressed) {
       // Chat with assistant if ctrl is not pressed
       console.log("Chatting with assistant");
-      if (isInputVoice) {
-        chatWithAssistant(inputAudioValue, isOutputVoice).then(() => {
-          setIsWaitingAssistant(true);
-        });
-      } else {
-        if (inputTextValue === "") {
-          if (selectActionIndex !== -1) {
-            addToast({
-              color: "warning",
-              title: "Chat input is empty",
-              description: `Did you mean to run the command: ${actions[selectActionIndex].action.name}? Use Ctrl + Enter to run the selected command.`,
-            });
-          } else {
-            addToast({
-              color: "warning",
-              title: "Chat input is empty",
-              description: "Please enter a message or use voice input.",
-            });
-          }
-          return;
+
+      if (inputTextValue === "") {
+        if (selectActionIndex !== -1) {
+          addToast({
+            color: "warning",
+            title: "Chat input is empty",
+            description: `Did you mean to run the command: ${actions[selectActionIndex].action.name}? Use Ctrl + Enter to run the selected command.`,
+          });
+        } else {
+          addToast({
+            color: "warning",
+            title: "Chat input is empty",
+            description: "Please enter a message or use voice input.",
+          });
         }
-        chatWithAssistant(inputTextValue, isOutputVoice).then(() => {
-          setIsWaitingAssistant(true);
-        });
+        return;
       }
+      await chatWithAssistant(
+        {
+          content: {
+            text: inputTextValue,
+          },
+          attachments: [],
+        },
+        false,
+      );
+      setIsWaitingAssistant(true);
     } else if (isArrowUpPressed) {
       setSelectActionIndex((prev) =>
         prev === 0 ? actions.length - 1 : prev - 1,
@@ -293,6 +297,37 @@ export default function CommandViewer() {
     return true;
   }
 
+  function parseAssistantMessageContent(content: string) {
+    if (!isToonFormat(content)) {
+      return content;
+    }
+
+    const toonContent = removeToonCodeFences(content);
+
+    try {
+      const jsonValue = parseToonToJSON(toonContent);
+      // Move jsonValue.response to the top for better visibility,
+      // and remove it from the JSON object.
+      const response = jsonValue.response ?? "Thinking...";
+      delete jsonValue.response;
+
+      const parsedContent = `${response}
+
+\`\`\`
+${toonContent}
+\`\`\`
+`;
+
+      return parsedContent;
+    } catch (error) {
+      return `
+\`\`\`
+${toonContent}
+\`\`\`
+`;
+    }
+  }
+
   return (
     <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2">
       <div className="flex max-h-[calc(100vh-140px)] flex-col items-center gap-y-1">
@@ -316,11 +351,31 @@ export default function CommandViewer() {
                     isIconOnly
                     variant="light"
                     onPress={() => {
-                      setIsInputVoice((prev) => !prev);
+                      async function recordInput() {
+                        const audio = await recordVAD();
+                        console.log("Recorded audio input:", audio);
+
+                        // Send audio to backend
+                        await chatWithAssistant(
+                          {
+                            content: {
+                              audio: audio,
+                            },
+                            attachments: [],
+                          },
+                          true,
+                        );
+                      }
+
+                      if (!isRecording) {
+                        recordInput();
+                      } else {
+                        stopRecording();
+                      }
                     }}
                     size="sm"
                   >
-                    {isInputVoice ? (
+                    {isRecording ? (
                       <Icon name="mic" className="text-primary" />
                     ) : (
                       <Icon name="mic_off" variant="outlined" />
@@ -330,7 +385,7 @@ export default function CommandViewer() {
               )}
               {inputTextValue && (
                 <Kbd>
-                  <div className="flex gap-1 items-center">
+                  <div className="flex items-center gap-1">
                     <Icon name="auto_awesome" />
                     Enter
                   </div>
@@ -344,6 +399,7 @@ export default function CommandViewer() {
                     ...prev,
                     isCommandViewerOpen: false,
                   }));
+                  stopRecording();
                 }}
                 size="sm"
               >
@@ -356,29 +412,54 @@ export default function CommandViewer() {
         />
 
         {history.length > 0 && (
-          <div className="bg-content1 flex w-full sm:w-[480px] flex-col overflow-y-hidden rounded-2xl px-2 pt-2 shadow-md">
+          <div className="bg-content1 flex w-full flex-col overflow-y-hidden rounded-2xl px-2 pt-2 shadow-md sm:w-[480px]">
             <div
               className="flex flex-col gap-y-2 overflow-y-auto pb-2"
               ref={historyRef}
             >
               {history.map((entry, index) => (
                 <div key={index}>
-                  {entry.message.content.text &&
-                    (entry.role === "user" ? (
-                      <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
-                        <div className="font-bold">You: </div>
-                        {entry.message.content.text}
-                      </div>
-                    ) : (
-                      <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
-                        <p className="font-bold">Assistant:</p>
+                  {entry.role === "user" ? (
+                    <div className="text-primary-foreground bg-primary rounded-lg p-2 text-sm">
+                      <div className="font-bold">You: </div>
+                      {entry.message.content.text && entry.message.content.text}
+                      {entry.message.content.audio && (
+                        <div>
+                          <audio />
+                        </div>
+                      )}
+                      {!entry.message.content.text &&
+                        !entry.message.content.audio && (
+                          <div className="flex justify-center">
+                            <Spinner />
+                          </div>
+                        )}
+                    </div>
+                  ) : (
+                    <div className="text-default-foreground bg-default rounded-lg p-2 text-sm">
+                      <p className="font-bold">Assistant:</p>
+                      {entry.message.content.text && (
                         <div className="markdown-styles -my-4">
                           <Markdown remarkPlugins={[remarkGfm]}>
-                            {entry.message.content.text}
+                            {parseAssistantMessageContent(
+                              entry.message.content.text,
+                            )}
                           </Markdown>
                         </div>
-                      </div>
-                    ))}
+                      )}
+                      {entry.message.content.audio && (
+                        <div>
+                          <audio />
+                        </div>
+                      )}
+                      {!entry.message.content.text &&
+                        !entry.message.content.audio && (
+                          <div className="flex justify-center">
+                            <Spinner />
+                          </div>
+                        )}
+                    </div>
+                  )}
                 </div>
               ))}
               {isWaitingAssistant && (
@@ -436,7 +517,7 @@ export default function CommandViewer() {
           </div>
         )}
         {isArgsInputOpen && actions[selectActionIndex] && (
-          <div className="bg-content1 w-80 rounded-2xl shadow-md p-4">
+          <div className="bg-content1 w-80 rounded-2xl p-4 shadow-md">
             <p className="mb-2 font-bold">Command Action Arguments</p>
             {Object.entries(actions[selectActionIndex].action.parameters)
               .filter(([_, param]) => param.type !== "app-instance")

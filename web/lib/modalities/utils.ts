@@ -1,53 +1,50 @@
 import {
   ImageModelConfig,
-  LLMConfig,
-  STTConfig,
-  TTSConfig,
+  LLMModelConfig,
+  STTModelConfig,
+  TTSModelConfig,
   VideoModelConfig,
 } from "@pulse-editor/shared-utils";
 import { EditorContextType } from "../types";
 
 export function getDefaultSTTConfig(
   editorContext: EditorContextType | undefined,
-): STTConfig | undefined {
+): STTModelConfig | undefined {
   if (
     editorContext?.persistSettings?.sttModel &&
     editorContext?.persistSettings?.sttProvider
   ) {
     return {
-      modelName: editorContext.persistSettings.sttModel,
-      provider: editorContext.persistSettings.sttProvider,
+      modelId: `${editorContext.persistSettings.sttProvider}/${editorContext.persistSettings.sttModel}`,
     };
   }
 }
 
 export function getDefaultLLMConfig(
   editorContext: EditorContextType | undefined,
-): LLMConfig | undefined {
+): LLMModelConfig | undefined {
   if (
     editorContext?.persistSettings?.llmModel &&
     editorContext?.persistSettings?.llmProvider
   ) {
     return {
-      modelName: editorContext.persistSettings.llmModel,
-      provider: editorContext.persistSettings.llmProvider,
-      temperature: 0.95,
+      modelId: `${editorContext.persistSettings.llmProvider}/${editorContext.persistSettings.llmModel}`,
+      temperature: 1,
     };
   }
 }
 
 export function getDefaultTTSConfig(
   editorContext: EditorContextType | undefined,
-): TTSConfig | undefined {
+): TTSModelConfig | undefined {
   if (
     editorContext?.persistSettings?.ttsModel &&
     editorContext?.persistSettings?.ttsProvider &&
     editorContext?.persistSettings?.ttsVoice
   ) {
     return {
-      modelName: editorContext.persistSettings.ttsModel,
-      provider: editorContext.persistSettings.ttsProvider,
-      voice: editorContext.persistSettings.ttsVoice,
+      modelId: `${editorContext.persistSettings.ttsProvider}/${editorContext.persistSettings.ttsModel}`,
+      voiceName: editorContext.persistSettings.ttsVoice,
     };
   }
 }
@@ -60,8 +57,7 @@ export function getDefaultImageModelConfig(
     editorContext?.persistSettings?.imageGenProvider
   ) {
     return {
-      modelName: editorContext.persistSettings.imageGenModel,
-      provider: editorContext.persistSettings.imageGenProvider,
+      modelId: `${editorContext.persistSettings.imageGenProvider}/${editorContext.persistSettings.imageGenModel}`,
     };
   }
 }
@@ -74,8 +70,7 @@ export function getDefaultVideoModelConfig(
     editorContext?.persistSettings?.videoGenProvider
   ) {
     return {
-      modelName: editorContext.persistSettings.videoGenModel,
-      provider: editorContext.persistSettings.videoGenProvider,
+      modelId: `${editorContext.persistSettings.videoGenProvider}/${editorContext.persistSettings.videoGenModel}`,
     };
   }
 }

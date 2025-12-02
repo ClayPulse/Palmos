@@ -1,7 +1,7 @@
 import {
   IMCMessage,
   IMCMessageTypeEnum,
-  TTSConfig,
+  TTSModelConfig,
 } from "@pulse-editor/shared-utils";
 import useIMC from "../imc/use-imc";
 
@@ -16,7 +16,7 @@ export default function useTTS() {
   async function runTTS(
     text: string,
     // Config is optional, if not provided, the default config will be used.
-    ttsConfig?: TTSConfig
+    ttsConfig?: TTSModelConfig,
   ): Promise<Uint8Array> {
     if (!imc) {
       throw new Error("IMC not initialized.");
