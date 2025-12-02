@@ -1,7 +1,10 @@
 /**
  *  Convert a HTTP response body stream to corresponding ReadableStream for nodejs or web.
  */
-export function toUnifiedStream(stream: ReadableStream<Uint8Array>) {
+export function toUnifiedStream(
+  stream: ReadableStream<Uint8Array>,
+  transform: TextDecoderStream | TransformStream = new TextDecoderStream(),
+) {
   return new ReadableStream({
     async start(controller) {
       if (
@@ -29,5 +32,5 @@ export function toUnifiedStream(stream: ReadableStream<Uint8Array>) {
         controller.close();
       }
     },
-  }).pipeThrough(new TextDecoderStream());
+  }).pipeThrough(transform);
 }

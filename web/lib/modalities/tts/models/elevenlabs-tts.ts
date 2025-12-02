@@ -18,6 +18,7 @@ export class ElevenLabsTTS extends BaseTTS {
 
   public async generateStream(
     text: string,
+    format?: string,
   ): Promise<ReadableStream<ArrayBuffer>> {
     const data: Readable = await this.client.generate({
       text: text,

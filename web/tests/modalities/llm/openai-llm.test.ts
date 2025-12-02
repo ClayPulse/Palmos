@@ -1,7 +1,7 @@
 import { describe, expect, jest, test } from "@jest/globals";
+import { ModelConfig } from "@pulse-editor/shared-utils";
 import dotenv from "dotenv";
 import { getLLMModel } from "../../../lib/modalities/llm/get-llm";
-import { ModelConfig } from "@pulse-editor/shared-utils";
 
 dotenv.config();
 
@@ -39,8 +39,15 @@ describe("OpenAILLM_GPT.generateStream (REAL OpenAI API)", () => {
     }
 
     // Ensure we got actual content
-    expect(chunks.join("")).toMatch(
-      /The quick brown fox jumps over the lazy dog./,
-    );
+    expect(
+      chunks
+        .join("")
+        // trim whitespace
+        .trim()
+        // use lower case
+        .toLowerCase()
+        // remove all punctuation
+        .replaceAll(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
+    ).toEqual("the quick brown fox jumps over the lazy dog");
   });
 });

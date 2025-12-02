@@ -1,3 +1,4 @@
+import { toUnifiedStream } from "@/lib/data-streaming/unified-stream";
 import OpenAI from "openai";
 import { BaseTTS } from "../base-tts";
 
@@ -18,11 +19,13 @@ export class OpenAITTS extends BaseTTS {
 
   public async generateStream(
     text: string,
+    format?: string,
   ): Promise<ReadableStream<ArrayBuffer>> {
     const response = await this.model.audio.speech.create({
       model: this.modelName,
       voice: this.voiceName as any,
       input: text,
+      response_format: (format ?? "wav") as any,
     });
 
     if (!response.body) {
@@ -30,13 +33,15 @@ export class OpenAITTS extends BaseTTS {
     }
 
     // Turn the response into a ReadableStream<ArrayBuffer>
-    const stream = response.body.pipeThrough<ArrayBuffer>(
+    const stream = toUnifiedStream(
+      response.body,
       new TransformStream({
         transform(chunk, controller) {
           controller.enqueue(chunk.buffer);
         },
       }),
     );
+
     return stream;
   }
 }

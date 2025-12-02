@@ -14,6 +14,7 @@ export class PlayHTTTS extends BaseTTS {
 
   public async generateStream(
     text: string,
+    format?: string,
   ): Promise<ReadableStream<ArrayBuffer>> {
     throw new Error("PlayHT model not implemented yet");
   }

@@ -1,6 +1,6 @@
 import { describe, expect, jest } from "@jest/globals";
-import { createMockFetchAPI } from "../../utils";
 import { ModelConfig } from "@pulse-editor/shared-utils";
+import { createMockFetchAPI } from "../../utils";
 createMockFetchAPI();
 
 // Use async import for other ESM modules so that mock ESM modules are applied correctly
@@ -39,8 +39,14 @@ describe("Pulse Editor LLM Models", () => {
     }
 
     // Ensure we got actual content
-    expect(chunks.join("")).toMatch(
-      /The quick brown fox jumps over the lazy dog./,
-    );
+    expect(
+      chunks
+        .join("") // trim whitespace
+        .trim()
+        // use lower case
+        .toLowerCase()
+        // remove all punctuation
+        .replaceAll(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
+    ).toEqual("the quick brown fox jumps over the lazy dog");
   });
 });

@@ -44,6 +44,7 @@ describe("Platform Assistant Test", () => {
           apiKey: openaiApiKey,
         },
       },
+      "useAppActions",
       {
         chatHistory: [],
         activeTabView: "",
@@ -66,14 +67,14 @@ describe("Platform Assistant Test", () => {
     if (!audioOutput) return;
 
     // Save audio output to file for manual verification
-    const blob = new Blob([audioOutput], { type: "audio/mp3" });
+    const blob = new Blob([audioOutput], { type: "audio/wav" });
     const arrayBuffer = await blob.arrayBuffer();
 
     if (!fs.existsSync("tests/artifacts")) {
       fs.mkdirSync("tests/artifacts");
     }
     fs.writeFileSync(
-      "tests/artifacts/assistant_output.mp3",
+      "tests/artifacts/assistant_output.wav",
       Buffer.from(arrayBuffer),
     );
 
@@ -83,7 +84,7 @@ describe("Platform Assistant Test", () => {
       apiKey: openaiApiKey,
     });
 
-    const transcribed = await stt.generateStream(audioOutput, "mp3");
+    const transcribed = await stt.generateStream(audioOutput, "wav");
 
     const reader2 = transcribed.getReader();
     let transcribedResult = "";

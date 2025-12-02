@@ -33,6 +33,7 @@ describe("Platform Assistant Test", () => {
 
     const ttsAudio = await tts.generateStream(
       'Do not call any app action, simply repeat this in your response: "Hello, Editor Agent!"',
+      "mp3",
     );
 
     let ttsArrayBuffer: ArrayBuffer = new ArrayBuffer(0);
@@ -78,6 +79,7 @@ describe("Platform Assistant Test", () => {
           apiKey: openaiApiKey,
         },
       },
+      "useAppActions",
       {
         chatHistory: [],
         activeTabView: "",

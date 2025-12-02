@@ -33,6 +33,7 @@ describe("Pulse Editor LLM Models", () => {
 
       const speech = await tts?.generateStream(
         "Repeat after me: The quick brown fox jumps over the lazy dog.",
+        "wav",
       );
 
       if (!speech) throw new Error("Failed to create TTS stream");
@@ -65,11 +66,6 @@ describe("Pulse Editor LLM Models", () => {
       "tests/artifacts/pulse_editor_sts_input.wav",
     );
 
-    const speechArrayBuffer = speechBuffer.buffer.slice(
-      speechBuffer.byteOffset,
-      speechBuffer.byteOffset + speechBuffer.byteLength,
-    );
-
     // ----------------------------------------------------------
     // Generate STS stream
     const sts = getSTSModel({
@@ -80,7 +76,10 @@ describe("Pulse Editor LLM Models", () => {
 
     if (!sts) throw new Error("Failed to create Pulse Editor LLM instance");
 
-    const stream = await sts.generateStream(undefined, speechArrayBuffer);
+    const stream = await sts.generateStream(undefined, speechBuffer.buffer, {
+      isOutputAudio: true,
+      inputAudioFormat: "wav",
+    });
 
     expect(stream).toBeInstanceOf(ReadableStream);
 
@@ -142,7 +141,7 @@ describe("Pulse Editor LLM Models", () => {
         .trim()
         .toLowerCase()
         .replaceAll(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
-    ).toMatch(/the quick brown fox jumps over the lazy dog/);
+    ).toEqual("the quick brown fox jumps over the lazy dog");
 
     const stt = getSTTModel({
       apiKey: openai_api_key,
@@ -167,6 +166,6 @@ describe("Pulse Editor LLM Models", () => {
         .toLowerCase()
         // remove all punctuation
         .replaceAll(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, ""),
-    ).toMatch(/the quick brown fox jumps over the lazy dog/);
+    ).toEqual("the quick brown fox jumps over the lazy dog");
   });
 });

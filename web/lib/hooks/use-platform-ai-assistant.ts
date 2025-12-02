@@ -8,9 +8,9 @@ import {
   TabView,
   UserMessage,
 } from "@/lib/types";
+import { addToast } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useRef, useState } from "react";
-import toast from "react-hot-toast";
 import { parseToonToJSON } from "../agent/toon-parser";
 import { Assistant } from "../editor-assistant/assistant";
 import useActionExecutor from "./use-action-executor";
@@ -335,7 +335,11 @@ export default function usePlatformAIAssistant() {
 
     const action = actions.find((cmd) => cmd.action.name === suggestedCmd);
     if (!action) {
-      toast.error(`Agent suggested command ${suggestedCmd} not found.`);
+      addToast({
+        title: "Error",
+        description: `Agent suggested command ${suggestedCmd} not found.`,
+        color: "danger",
+      });
       return;
     }
 

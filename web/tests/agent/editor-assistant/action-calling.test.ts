@@ -37,6 +37,7 @@ describe("Platform Assistant Test", () => {
       {
         llm: llmConfig,
       },
+      "useAppActions",
       {
         chatHistory: [],
         activeTabView: "",

@@ -35,7 +35,7 @@ ${encode(args).replaceAll("{", "{{").replaceAll("}", "}}")}
   const userPromptTemplate = `\
 ${methodPrompt}
 
-${createMockToonReturnTemplate(method.returns)}
+${getReturnPrompt(method.returns)}
 `;
 
   const promptTemplate = ChatPromptTemplate.fromMessages([
@@ -50,9 +50,7 @@ ${createMockToonReturnTemplate(method.returns)}
   return prompt.toString();
 }
 
-export function createMockToonReturnTemplate(
-  returnVariables: Record<string, TypedVariable>,
-): string {
+function getReturnPrompt(returnVariables: Record<string, TypedVariable>) {
   // If no return variables, return unstructured response
   if (Object.keys(returnVariables).length === 0) {
     return "You will write your response below:";
@@ -93,8 +91,14 @@ Instruction on how to produce each return variable is given in parentheses.
 Use the same header format. [N] indicates number of items/rows in an array, set it accordingly. 
 Output only the code block.
 
+${createMockToonReturnTemplate(returnVariables)}
+`;
+}
 
-
+export function createMockToonReturnTemplate(
+  returnVariables: Record<string, TypedVariable>,
+): string {
+  return `\
 \`\`\`toon
 ${encode({
   ...Object.fromEntries(
