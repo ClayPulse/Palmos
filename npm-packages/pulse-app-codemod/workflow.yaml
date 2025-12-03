@@ -1,0 +1,32 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/codemod/codemod/refs/heads/main/schemas/workflow.json
+
+version: "1"
+
+nodes:
+  - id: remove-legacy-files
+    name: Remove legacy files
+    type: automatic
+    steps:
+      - name: "Remove express.ts"
+        run: rimraf express.ts
+      - name: "Remove preview folder"
+        run: rimraf preview/
+  
+  - id: update-webpack-config
+    name: Update webpack.config.ts
+    type: automatic
+    steps:
+      - name: "Update webpack.config.ts"
+        run: curl -sL https://raw.githubusercontent.com/ClayPulse/pulse-app-template/refs/heads/main/webpack.config.ts -o webpack.config.ts
+
+  - id: update-packages
+    name: Update packages
+    type: automatic
+    steps:
+      - name: "Update CLI"
+        run: npm i -D @pulse-editor/cli@beta --silent
+      - name: "Update shared-utils and react-api"
+        run: npm i @pulse-editor/shared-utils@beta @pulse-editor/react-api@beta --silent
+      - name: "Remove unnecessary packages"
+        run: npm uninstall concurrently connect-livereload livereload express --silent
+  
