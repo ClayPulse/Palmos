@@ -27,6 +27,8 @@ nodes:
         run: npm i -D @pulse-editor/cli@beta --silent
       - name: "Update shared-utils and react-api"
         run: npm i @pulse-editor/shared-utils@beta @pulse-editor/react-api@beta --silent
+      - name: "Update module-federation"
+        run: npm i @module-federation/enhanced@0.21.6 @module-federation/node@2.7.25 @module-federation/runtime@0.21.6 --silent
       - name: "Remove unnecessary packages"
         run: npm uninstall concurrently connect-livereload livereload express --silent
   
