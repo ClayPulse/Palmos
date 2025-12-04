@@ -63,8 +63,8 @@ function VADWrapper({
 
   const vad = useMicVAD({
     startOnLoad: false,
-    baseAssetPath: "https://cdn.pulse-editor.com/assets/vad/",
-    onnxWASMBasePath: "https://cdn.pulse-editor.com/assets/vad/",
+    baseAssetPath: "/vad/",
+    onnxWASMBasePath: "/vad/",
     positiveSpeechThreshold: threshold,
     onSpeechStart: () => {
       console.log("Speech started");
