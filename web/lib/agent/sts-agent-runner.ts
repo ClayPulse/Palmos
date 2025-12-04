@@ -2,6 +2,7 @@ import { Agent, STSModelConfig } from "@pulse-editor/shared-utils";
 import { BaseSTS } from "../modalities/sts/base-sts";
 import { getSTSModel } from "../modalities/sts/get-sts";
 import { getAgentTextPrompt } from "./prompt";
+import { parseToonToJSON } from "./toon-parser";
 
 export class STSAgentRunner {
   public async run(
@@ -89,29 +90,29 @@ export class STSAgentRunner {
       const { done, value } = await reader.read();
       if (done) break;
 
+      finalText += value.text ?? "";
+      finalAudioBuffer = (() => {
+        if (!value.audio) return finalAudioBuffer;
+        const tmp = new Uint8Array(
+          finalAudioBuffer.byteLength + value.audio.byteLength,
+        );
+        tmp.set(new Uint8Array(finalAudioBuffer), 0);
+        tmp.set(new Uint8Array(value.audio), finalAudioBuffer.byteLength);
+        return tmp.buffer;
+      })();
+
       const chunk: {
         text?: string;
         audio?: ArrayBuffer;
       } = {
-        text: value.text,
+        text: JSON.stringify(value.text),
         audio: value.audio,
       };
-
-      finalText += chunk.text ?? "";
-      finalAudioBuffer = (() => {
-        if (!chunk.audio) return finalAudioBuffer;
-        const tmp = new Uint8Array(
-          finalAudioBuffer.byteLength + chunk.audio.byteLength,
-        );
-        tmp.set(new Uint8Array(finalAudioBuffer), 0);
-        tmp.set(new Uint8Array(chunk.audio), finalAudioBuffer.byteLength);
-        return tmp.buffer;
-      })();
 
       if (onChunkUpdate) {
         await onChunkUpdate(
           {
-            text: finalText,
+            text: JSON.stringify(parseToonToJSON(finalText)),
             audio: finalAudioBuffer,
           },
           chunk,
@@ -120,7 +121,7 @@ export class STSAgentRunner {
     }
 
     return {
-      text: finalText,
+      text: JSON.stringify(parseToonToJSON(finalText)),
       audio: finalAudioBuffer,
     };
   }

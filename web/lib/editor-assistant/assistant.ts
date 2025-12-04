@@ -6,7 +6,6 @@ import {
 import { editorAssistantAgent } from "../agent/built-in-agents/editor-assistant";
 import { LLMAgentRunner } from "../agent/llm-agent-runner";
 import { STSAgentRunner } from "../agent/sts-agent-runner";
-import { parseToonToJSON } from "../agent/toon-parser";
 import { ModelCapabilityEnum } from "../enums";
 import { BaseLLM } from "../modalities/llm/base-llm";
 import { getLLMModel } from "../modalities/llm/get-llm";
@@ -211,7 +210,7 @@ export class Assistant {
       if (!modelOutput.content.text) {
         throw new Error("No text produced by model.");
       }
-      const textOutput = parseToonToJSON(modelOutput.content.text) as any;
+      const textOutput = JSON.parse(modelOutput.content.text);
 
       const audioContent = textOutput.response;
 

@@ -1,7 +1,11 @@
 import { decode } from "@toon-format/toon";
 
-export function parseToonToJSON(toon: string): any {
-  const cleanedToon = removeToonCodeFences(toon);
+export function parseToonToJSON(content: string): any {
+  if (!isToonFormat(content)) {
+    return content;
+  }
+
+  const cleanedToon = removeToonCodeFences(content);
 
   try {
     const decoded = decode(cleanedToon);

@@ -41,18 +41,13 @@ export class LLMAgentRunner {
   }
 
   private getLLM(llmConfig: ModelConfig) {
-    const [provider] = llmConfig.modelId.split("/");
-
-    if (!llmConfig.apiKey) {
-      toast.error(
-        `No API key found for provider ${provider} when running the agent. Please add an API key in agent configuration.`,
-      );
-      throw new Error(`No API key found for provider ${provider}.`);
+    try {
+      const llm = getLLMModel(llmConfig);
+      return llm;
+    } catch (error) {
+      toast.error(`Error initializing LLM model: ${(error as Error).message}`);
+      return undefined;
     }
-
-    const llm = getLLMModel(llmConfig);
-
-    return llm;
   }
 
   private async runLLM(
@@ -88,10 +83,11 @@ export class LLMAgentRunner {
         const { done: readerDone, value } = await reader.read();
         done = readerDone;
         if (value) {
-          const chunk = value;
-          result += chunk;
+          result += value;
+
+          const chunk = JSON.stringify(value);
           if (onChunkUpdate) {
-            await onChunkUpdate(result, chunk);
+            await onChunkUpdate(JSON.stringify(result), chunk);
           }
         }
       }
@@ -101,6 +97,6 @@ export class LLMAgentRunner {
       }
     }
 
-    return result;
+    return JSON.stringify(parseToonToJSON(result));
   }
 }
