@@ -545,6 +545,158 @@ export default function InterModuleCommunicationProvider({
       // The following message handlers require OS-like environment.
       // This can be either local environment or remote workspace.
       [
+        IMCMessageTypeEnum.PlatformSelectDir,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const dir = await platformApi?.selectDir();
+          return dir;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformSelectFile,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { fileExtension }: { fileExtension?: string } =
+            message.payload ?? {};
+          const file = await platformApi?.selectFile(fileExtension);
+          return file;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformListProjects,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { projectHomePath }: { projectHomePath?: string } =
+            message.payload ?? {};
+          const projects = await platformApi?.listProjects(projectHomePath);
+          return projects ?? [];
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformListPath,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri, options }: { uri: string; options: any } =
+            message.payload;
+          const result = await platformApi?.listPathContent(uri, options);
+          return result ?? [];
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformCreateProject,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          await platformApi?.createProject(uri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformDeleteProject,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          await platformApi?.deleteProject(uri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformUpdateProject,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri, updatedInfo }: { uri: string; updatedInfo: any } =
+            message.payload;
+          await platformApi?.updateProject(uri, updatedInfo);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformCreateFolder,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          await platformApi?.createFolder(uri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformCreateFile,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          await platformApi?.createFile(uri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformRename,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { oldUri, newUri }: { oldUri: string; newUri: string } =
+            message.payload;
+          await platformApi?.rename(oldUri, newUri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformDelete,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          await platformApi?.delete(uri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformHasPath,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          const exists = await platformApi?.hasPath(uri);
+          return !!exists;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformCopyFiles,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { from, to }: { from: string; to: string } = message.payload;
+          await platformApi?.copyFiles(from, to);
+        },
+      ],
+      [
         IMCMessageTypeEnum.PlatformWriteFile,
         async (
           senderWindow: Window,

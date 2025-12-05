@@ -10,6 +10,9 @@ import {
 } from "@pulse-editor/shared-utils";
 import { encode } from "@toon-format/toon";
 
+
+// TODO: Add tool use instructions in the prompt
+// Each agent object has a tool list
 export async function getAgentTextPrompt(
   agent: Agent,
   method: AgentMethod | string,

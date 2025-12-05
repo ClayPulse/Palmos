@@ -51,12 +51,30 @@ export enum IMCMessageTypeEnum {
   // #region Platform API interaction messages (require OS-like environment)
   /* Terminal */
   PlatformCreateTerminal = "platform-create-terminal",
+  // File/directory selection
+  PlatformSelectDir = "platform-select-dir",
+  PlatformSelectFile = "platform-select-file",
+  // Project queries
+  PlatformListProjects = "platform-list-projects",
   // Update view file
   PlatformWriteFile = "platform-write-file",
   // Request view file
   PlatformReadFile = "platform-read-file",
   // File update (file watch notification from platform to view)
   PlatformFileUpdate = "platform-file-update",
+  // List path content
+  PlatformListPath = "platform-list-path",
+  // Project operations
+  PlatformCreateProject = "platform-create-project",
+  PlatformDeleteProject = "platform-delete-project",
+  PlatformUpdateProject = "platform-update-project",
+  // File system operations
+  PlatformCreateFolder = "platform-create-folder",
+  PlatformCreateFile = "platform-create-file",
+  PlatformRename = "platform-rename",
+  PlatformDelete = "platform-delete",
+  PlatformHasPath = "platform-has-path",
+  PlatformCopyFiles = "platform-copy-files",
   // #endregion
 
   // #region Signal messages
