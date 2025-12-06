@@ -1,7 +1,5 @@
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import {
-  FileSystemObject,
-  ListPathOptions,
   PersistentSettings,
   ProjectInfo,
   RemoteWorkspace,
@@ -9,6 +7,7 @@ import {
 import { addToast } from "@heroui/react";
 import toast from "react-hot-toast";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
+import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 
 /**
  * Cloud Platform API

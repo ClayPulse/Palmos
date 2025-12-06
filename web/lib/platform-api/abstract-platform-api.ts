@@ -1,9 +1,5 @@
-import {
-  FileSystemObject,
-  ListPathOptions,
-  PersistentSettings,
-  ProjectInfo,
-} from "../types";
+import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
+import { PersistentSettings, ProjectInfo } from "../types";
 
 export abstract class AbstractPlatformAPI {
   // Show a selection dialogue to pick a directory.

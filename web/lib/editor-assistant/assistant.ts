@@ -4,8 +4,8 @@ import {
   TTSModelConfig,
 } from "@pulse-editor/shared-utils";
 import { editorAssistantAgent } from "../agent/built-in-agents/editor-assistant";
-import { LLMAgentRunner } from "../agent/llm-agent-runner";
-import { STSAgentRunner } from "../agent/sts-agent-runner";
+import { LLMAgentRunner } from "../agent/runners/llm-agent-runner";
+import { STSAgentRunner } from "../agent/runners/sts-agent-runner";
 import { ModelCapabilityEnum } from "../enums";
 import { BaseLLM } from "../modalities/llm/base-llm";
 import { getLLMModel } from "../modalities/llm/get-llm";

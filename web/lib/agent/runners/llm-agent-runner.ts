@@ -1,9 +1,9 @@
 import { Agent, LLMModelConfig, ModelConfig } from "@pulse-editor/shared-utils";
 import toast from "react-hot-toast";
-import { BaseLLM } from "../modalities/llm/base-llm";
-import { getLLMModel } from "../modalities/llm/get-llm";
-import { getAgentTextPrompt } from "./prompt";
-import { parseToonToJSON } from "./toon-parser";
+import { BaseLLM } from "../../modalities/llm/base-llm";
+import { getLLMModel } from "../../modalities/llm/get-llm";
+import { getAgentTextPrompt } from "../prompt";
+import { parseToonToJSON } from "../toon-parser";
 
 export class LLMAgentRunner {
   public async run(

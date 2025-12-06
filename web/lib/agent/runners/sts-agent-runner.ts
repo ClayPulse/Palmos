@@ -1,8 +1,8 @@
 import { Agent, STSModelConfig } from "@pulse-editor/shared-utils";
-import { BaseSTS } from "../modalities/sts/base-sts";
-import { getSTSModel } from "../modalities/sts/get-sts";
-import { getAgentTextPrompt } from "./prompt";
-import { parseToonToJSON } from "./toon-parser";
+import { BaseSTS } from "../../modalities/sts/base-sts";
+import { getSTSModel } from "../../modalities/sts/get-sts";
+import { getAgentTextPrompt } from "../prompt";
+import { parseToonToJSON } from "../toon-parser";
 
 export class STSAgentRunner {
   public async run(

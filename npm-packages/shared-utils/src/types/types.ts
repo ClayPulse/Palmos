@@ -296,6 +296,22 @@ export type VideoModelConfig = ModelConfig & {
 export type STSModelConfig = ModelConfig & {};
 // #endregion
 
+// # File system
+export type FileSystemObject = {
+  name: string;
+  uri: string;
+  isFolder: boolean;
+  subDirItems?: FileSystemObject[];
+};
+
+export type ListPathOptions = {
+  include: "folders" | "files" | "all";
+  isRecursive?: boolean;
+  gitignore?: string[];
+};
+
+// # endregion
+
 // TODO: In the future, add a common AI IO adapter
 // where the input and output types are arbitrary
 // modalities. So we can plug in any AI model,

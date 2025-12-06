@@ -1,6 +1,6 @@
 "use client";
 
-import { LLMAgentRunner } from "@/lib/agent/llm-agent-runner";
+import { LLMAgentRunner } from "@/lib/agent/runners/llm-agent-runner";
 import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getImageGenModel } from "@/lib/modalities/image-gen/get-image-gen";
@@ -24,6 +24,7 @@ import {
   ImageModelConfig,
   IMCMessage,
   IMCMessageTypeEnum,
+  ListPathOptions,
   LLMModelConfig,
   PolyIMC,
   ReceiverHandler,
@@ -545,87 +546,16 @@ export default function InterModuleCommunicationProvider({
       // The following message handlers require OS-like environment.
       // This can be either local environment or remote workspace.
       [
-        IMCMessageTypeEnum.PlatformSelectDir,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const dir = await platformApi?.selectDir();
-          return dir;
-        },
-      ],
-      [
-        IMCMessageTypeEnum.PlatformSelectFile,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const { fileExtension }: { fileExtension?: string } =
-            message.payload ?? {};
-          const file = await platformApi?.selectFile(fileExtension);
-          return file;
-        },
-      ],
-      [
-        IMCMessageTypeEnum.PlatformListProjects,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const { projectHomePath }: { projectHomePath?: string } =
-            message.payload ?? {};
-          const projects = await platformApi?.listProjects(projectHomePath);
-          return projects ?? [];
-        },
-      ],
-      [
         IMCMessageTypeEnum.PlatformListPath,
         async (
           senderWindow: Window,
           message: IMCMessage,
           abortSignal?: AbortSignal,
         ) => {
-          const { uri, options }: { uri: string; options: any } =
+          const { uri, options }: { uri: string; options: ListPathOptions } =
             message.payload;
           const result = await platformApi?.listPathContent(uri, options);
           return result ?? [];
-        },
-      ],
-      [
-        IMCMessageTypeEnum.PlatformCreateProject,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const { uri }: { uri: string } = message.payload;
-          await platformApi?.createProject(uri);
-        },
-      ],
-      [
-        IMCMessageTypeEnum.PlatformDeleteProject,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const { uri }: { uri: string } = message.payload;
-          await platformApi?.deleteProject(uri);
-        },
-      ],
-      [
-        IMCMessageTypeEnum.PlatformUpdateProject,
-        async (
-          senderWindow: Window,
-          message: IMCMessage,
-          abortSignal?: AbortSignal,
-        ) => {
-          const { uri, updatedInfo }: { uri: string; updatedInfo: any } =
-            message.payload;
-          await platformApi?.updateProject(uri, updatedInfo);
         },
       ],
       [

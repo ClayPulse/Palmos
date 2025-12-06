@@ -10,12 +10,12 @@ import {
   ContextMenuState,
   DragData,
   FileDragData,
-  FileSystemObject,
   TreeViewGroupRef,
   TreeViewNodeRef,
 } from "@/lib/types";
 import { useDraggable } from "@dnd-kit/core";
 import { Button, Input } from "@heroui/react";
+import { FileSystemObject } from "@pulse-editor/shared-utils";
 import {
   forwardRef,
   Ref,

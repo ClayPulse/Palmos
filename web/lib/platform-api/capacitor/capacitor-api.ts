@@ -1,6 +1,4 @@
 import {
-  FileSystemObject,
-  ListPathOptions,
   PersistentSettings,
   ProjectInfo,
 } from "@/lib/types";
@@ -9,6 +7,7 @@ import { FilePicker } from "@capawesome/capacitor-file-picker";
 import ignore from "ignore";
 import path from "path";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
+import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 
 /**
  * @deprecated Android implementation is no longer supported due to
