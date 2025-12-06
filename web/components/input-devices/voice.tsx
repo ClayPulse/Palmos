@@ -1,6 +1,8 @@
 "use client";
 
+import { PlatformEnum } from "@/lib/enums";
 import { useMicVAD, utils } from "@/lib/hooks/use-mic-vad";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { useEffect, useState } from "react";
 
 export default function Voice({
@@ -63,8 +65,12 @@ function VADWrapper({
 
   const vad = useMicVAD({
     startOnLoad: false,
-    baseAssetPath: "https://cdn.pulse-editor.com/assets/vad/",
-    onnxWASMBasePath: "https://cdn.pulse-editor.com/assets/vad/",
+    baseAssetPath:
+      getPlatform() === PlatformEnum.Web &&
+      process.env.NODE_ENV === "production"
+        ? " https://cdn.pulse-editor.com/assets/vad/"
+        : "/vad/",
+    onnxWASMBasePath: "/vad/",
     positiveSpeechThreshold: threshold,
     onSpeechStart: () => {
       console.log("Speech started");

@@ -1,8 +1,3 @@
-import {
-  isToonFormat,
-  parseToonToJSON,
-  removeToonCodeFences,
-} from "@/lib/agent/toon-parser";
 import useActionExecutor from "@/lib/hooks/use-action-executor";
 import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
@@ -298,34 +293,25 @@ export default function CommandViewer() {
   }
 
   function parseAssistantMessageContent(content: string) {
-    if (!isToonFormat(content)) {
-      return content;
+    const jsonValue = JSON.parse(content);
+
+    if (typeof jsonValue === "string") {
+      return jsonValue;
     }
 
-    const toonContent = removeToonCodeFences(content);
+    // Move jsonValue.response to the top for better visibility,
+    // and remove it from the JSON object.
+    const response = jsonValue.response ?? "Thinking...";
+    delete jsonValue.response;
 
-    try {
-      const jsonValue = parseToonToJSON(toonContent);
-      // Move jsonValue.response to the top for better visibility,
-      // and remove it from the JSON object.
-      const response = jsonValue.response ?? "Thinking...";
-      delete jsonValue.response;
-
-      const parsedContent = `${response}
+    const parsedContent = `${response}
 
 \`\`\`
-${toonContent}
+${JSON.stringify(jsonValue, null, 2)}
 \`\`\`
 `;
 
-      return parsedContent;
-    } catch (error) {
-      return `
-\`\`\`
-${toonContent}
-\`\`\`
-`;
-    }
+    return parsedContent;
   }
 
   return (

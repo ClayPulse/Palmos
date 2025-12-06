@@ -11,7 +11,6 @@ import {
 import { addToast } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useRef, useState } from "react";
-import { parseToonToJSON } from "../agent/toon-parser";
 import { Assistant } from "../editor-assistant/assistant";
 import useActionExecutor from "./use-action-executor";
 import { usePlatformApi } from "./use-platform-api";
@@ -305,7 +304,7 @@ export default function usePlatformAIAssistant() {
       return;
     }
 
-    const decodedResult = parseToonToJSON(assistantResult.content.text) as {
+    const decodedResult = JSON.parse(assistantResult.content.text) as {
       suggestedCmd: string;
       suggestedArgs: {
         name: string;
