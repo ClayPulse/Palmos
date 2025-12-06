@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.62
+
+### Patch Changes
+
+- Update to react 19.2.1
+
 ## 0.1.1-beta.61
 
 ### Patch Changes
