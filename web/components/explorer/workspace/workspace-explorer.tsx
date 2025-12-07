@@ -36,7 +36,7 @@ export default function WorkspaceExplorer() {
 
         await workspaceHook.waitUntilWorkspaceRunning();
 
-        const uri = homePath + "/" + projectName;
+        const uri = homePath ?? "/workspace";
         const hasPath = await platformApi.hasPath(uri);
 
         if (!hasPath) {

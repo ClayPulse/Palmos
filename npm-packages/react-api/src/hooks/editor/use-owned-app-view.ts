@@ -44,6 +44,7 @@ export default function useOwnedAppView() {
   );
 
   return {
+    isReady,
     runAppAction,
   };
 }

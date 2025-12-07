@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.63
+
+### Patch Changes
+
+- Update packages
+
 ## 0.1.1-beta.62
 
 ### Patch Changes

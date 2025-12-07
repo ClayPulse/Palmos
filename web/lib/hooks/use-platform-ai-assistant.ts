@@ -107,7 +107,7 @@ export default function usePlatformAIAssistant() {
       chatHistory: [],
       activeTabView: tabView?.config.viewId ?? "undefined",
       availableCommands: gatherActions(),
-      projectDirTree: await gatherProjectDirTree(),
+      projectDirTree: [],
     };
   }
 

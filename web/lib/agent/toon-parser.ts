@@ -12,10 +12,13 @@ export function parseToonToJSON(content: string): any {
     return decoded;
   } catch (error) {
     // When error is "Unterminated string: missing closing quote", try add a quote at the end and decode again
-
-    const fixedToon = cleanedToon + '"';
-    const decoded = decode(fixedToon);
-    return decoded;
+    try {
+      const fixedToon = cleanedToon + '"';
+      const decoded = decode(fixedToon);
+      return decoded;
+    } catch (error) {
+      console.warn("Failed to decode TOON content:", error);
+    }
   }
 }
 
