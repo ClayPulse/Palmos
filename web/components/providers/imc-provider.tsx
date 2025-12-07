@@ -671,7 +671,7 @@ export default function InterModuleCommunicationProvider({
             editorContext?.editorStates.project;
 
           // Prevent reading path outside the project path
-          if (!uri.startsWith(projectPath)) {
+          if (!uri.startsWith(projectPath) && !uri.startsWith("/workspace")) {
             throw new Error(
               `Cannot read file outside the project directory: ${uri}, project path: ${projectPath}`,
             );

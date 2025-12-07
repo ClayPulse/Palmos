@@ -58,6 +58,15 @@ export default function useCanvasWorkflow(
     }));
   }, 200);
 
+  const debounceSaveNodesAndEdges = useDebouncedCallback(() => { 
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      workflowNodes: localNodes,
+      workflowEdges: localEdges,
+    }));
+
+  }, 500);
+
   const updateWorkflowNodeData = useCallback(
     (nodeViewId: string, data: Partial<AppNodeData>) => {
       setLocalNodes((prev) => {
@@ -129,6 +138,10 @@ export default function useCanvasWorkflow(
     debouncedGetEntryPoint();
     debounceSetSelectedViews();
   }, [localNodes]);
+
+  useEffect(() => {
+    debounceSaveNodesAndEdges();
+  }, [localNodes, localEdges]);
 
   // Restore snapshot states upon loading a workflow
   useEffect(() => {

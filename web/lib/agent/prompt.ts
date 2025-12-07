@@ -86,6 +86,16 @@ suggestedCmd: Configure MCP Server Connection
 suggestedArgs[0]{{name,value}}:
 response:"Hello, I've found a useful command for you. Let's use it to set up the MCP server connection."
 \`\`\`
+
+Example 3:
+(To create an app with Vibe Dev Flow, use this format:)
+\`\`\`toon
+language: English
+suggestedCmd: Run Vibe Dev Flow
+suggestedArgs[1]{{name,value}}:
+  prompt,"I want an app that introduces different places on earth, teaching users about foods, culture, and landmarks. You will create files that displays a 3D earth in react, the user also needs to be able to click on pins that you put on the 3D earth to learn more about different cities around the world, and find 1 combined texture image for earth's land, ocean, ice and cloud. You also need to make a beautiful dashboard landing page, then there are two tabs. One is home page for user to learn about the app,the other is the earth view for user to learn about destinations. Make sure buttons are functional and the app is visually appealing."
+response:"Sure! I'll use the Vibe Dev Flow to create a stunning landing page for you."
+\`\`\`
 \"\"\"
 
 After you have learned about the rules of TOON, format your response like this in the following template 

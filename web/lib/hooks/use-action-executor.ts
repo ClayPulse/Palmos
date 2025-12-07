@@ -149,11 +149,30 @@ export default function useActionExecutor(appName?: string) {
 
       if (appInView) {
         // App is already in the view, execute Action in the app's context.
+
+        // Attach app's app-instance inputs, as these won't be entered via command action
+        // Find if these params are already provided in args in react flow workflow
+        const nodeId = appInView.viewId;
+
+        const node = editorContext?.editorStates?.workflowNodes.find(
+          (n) => n.id === nodeId,
+        );
+
+        const appInstanceArgs = node?.data.ownedAppViews || {};
+
+        const finalArgs = {
+          ...args,
+          ...appInstanceArgs,
+        };
+
         const result =
           (await imcContext?.polyIMC?.sendMessage(
             appInView.viewId,
             IMCMessageTypeEnum.EditorRunAppAction,
-            { name: action.action.name, args },
+            {
+              name: action.action.name,
+              args: finalArgs,
+            },
           )) ?? [];
 
         if (result?.length !== 1) {

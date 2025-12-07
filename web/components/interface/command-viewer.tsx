@@ -281,7 +281,9 @@ export default function CommandViewer() {
     if (paramsEntries.length > 0) {
       const missingParams = paramsEntries.filter(
         ([key, value]) =>
-          !action.action.parameters[key].optional && args[key] === undefined,
+          // Ignore required validation for app-instance params
+          action.action.parameters[key].type !== "app-instance" &&
+          args[key] === undefined,
       );
       if (missingParams.length > 0) {
         return false;

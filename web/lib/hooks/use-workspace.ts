@@ -1,7 +1,9 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import useSWR from "swr";
+import { PlatformEnum } from "../enums";
 import { getAbstractPlatformAPI } from "../platform-api/get-platform-api";
+import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI } from "../pulse-editor-website/backend";
 import { RemoteWorkspace } from "../types";
 import { useAuth } from "./use-auth";
@@ -189,10 +191,15 @@ export function useWorkspace() {
 
     const api = getAbstractPlatformAPI(ws);
 
-    const projectUri =
-      editorContext?.persistSettings?.projectHomePath +
-      "/" +
-      editorContext?.editorStates.project;
+    let projectUri = "";
+    if (getPlatform() === PlatformEnum.Electron && !workspace) {
+      const homePath = editorContext?.persistSettings?.projectHomePath;
+      const projectName = editorContext?.editorStates.project;
+      projectUri = homePath + "/" + projectName;
+    } else {
+      projectUri = "/workspace";
+    }
+
     const objects = await api?.listPathContent(projectUri, {
       include: "all",
       isRecursive: true,
@@ -209,16 +216,14 @@ export function useWorkspace() {
     console.log("Found project content:", objects);
   }
 
-  const waitUntilWorkspaceRunning = useCallback(async ( ) => {
+  const waitUntilWorkspaceRunning = useCallback(async () => {
     if (isWorkspaceRunning) {
       return;
     }
     return new Promise<void>((resolve, reject) => {
       waitUntilRunningResolve.current = resolve;
     });
-  }, [
-    isWorkspaceRunning
-  ])
+  }, [isWorkspaceRunning]);
 
   return {
     workspace,

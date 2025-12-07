@@ -96,7 +96,7 @@ export type EditorStates = {
   // Drag control
   isDraggingOverCanvas?: boolean;
   dropMessage?: string;
-
+  
   inputDeviceBuffers?: {
     audioBuffer?: ArrayBuffer;
   };
@@ -104,6 +104,9 @@ export type EditorStates = {
   outputDeviceBuffers?: {
     audioBuffer?: ArrayBuffer;
   };
+
+  workflowNodes: ReactFlowNode<AppNodeData>[];
+  workflowEdges: ReactFlowEdge[];
 };
 
 /**
