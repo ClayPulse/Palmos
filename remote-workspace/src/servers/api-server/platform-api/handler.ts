@@ -21,10 +21,7 @@ function safeWorkspaceResolve(uri: string): string {
 
   // Ensure it's inside the workspace root (strict, cross-platform)
   const rel = path.relative(workspaceRoot, realPath);
-  if (
-    rel.startsWith('..') ||
-    path.isAbsolute(rel)
-  ) {
+  if (rel.startsWith("..") || path.isAbsolute(rel)) {
     throw new Error("Cannot access path outside of workspace path.");
   }
 
@@ -162,6 +159,10 @@ async function listPathContent(
 ) {
   const files = await fs.promises.readdir(uri, { withFileTypes: true });
 
+  // Determine if we should recurse based on depth or isRecursive
+  const shouldRecurse =
+    options.isRecursive || (options.depth !== undefined && options.depth > 0);
+
   const promise: Promise<any>[] = files
     // Filter by file type
     .filter(
@@ -192,8 +193,16 @@ async function listPathContent(
         return {
           name: name,
           isFolder: true,
-          subDirItems: options.isRecursive
-            ? await listPathContent(absoluteUri, options, baseUri ?? uri)
+          subDirItems: shouldRecurse
+            ? await listPathContent(
+                absoluteUri,
+                {
+                  ...options,
+                  depth:
+                    options.depth !== undefined ? options.depth - 1 : undefined,
+                },
+                baseUri ?? uri,
+              )
             : [],
           uri: absoluteUri.replace(/\\/g, "/"),
         };

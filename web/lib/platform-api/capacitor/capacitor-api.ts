@@ -1,13 +1,10 @@
-import {
-  PersistentSettings,
-  ProjectInfo,
-} from "@/lib/types";
+import { PersistentSettings, ProjectInfo } from "@/lib/types";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
+import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 import ignore from "ignore";
 import path from "path";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
-import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 
 /**
  * @deprecated Android implementation is no longer supported due to
@@ -101,6 +98,10 @@ export class CapacitorAPI extends AbstractPlatformAPI {
       ...pathDir,
     });
 
+    // Determine if we should recurse based on depth or isRecursive
+    const shouldRecurse =
+      options.isRecursive || (options.depth !== undefined && options.depth > 0);
+
     const promise = files.files
       // Filter by types
       .filter(
@@ -130,8 +131,18 @@ export class CapacitorAPI extends AbstractPlatformAPI {
           const dirObj: FileSystemObject = {
             name: file.name,
             isFolder: true,
-            subDirItems: options?.isRecursive
-              ? await this.listPathContent(absoluteUri, options, baseUri ?? uri)
+            subDirItems: shouldRecurse
+              ? await this.listPathContent(
+                  absoluteUri,
+                  {
+                    ...options,
+                    depth:
+                      options.depth !== undefined
+                        ? options.depth - 1
+                        : undefined,
+                  },
+                  baseUri ?? uri,
+                )
               : [],
             uri: absoluteUri,
           };

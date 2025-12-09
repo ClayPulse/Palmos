@@ -13,7 +13,12 @@ export function getAbstractPlatformAPI(
   if (platform === PlatformEnum.Capacitor) {
     return new CloudAPI(workspace);
   } else if (platform === PlatformEnum.Electron) {
-    return new ElectronAPI();
+    // Use Electron API for local workspace if no remote workspace is selected
+    if (!workspace) {
+      return new ElectronAPI();
+    }
+
+    return new CloudAPI(workspace);
   } else if (
     platform === PlatformEnum.Web ||
     platform === PlatformEnum.WebMobile
