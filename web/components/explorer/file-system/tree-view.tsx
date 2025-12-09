@@ -80,6 +80,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
   const childGroupRef = useRef<TreeViewGroupRef | null>(null);
   const [subDirItems, setSubDirItems] = useState<FileSystemObject[]>(object.subDirItems ?? []);
   const [isLoadingSubDir, setIsLoadingSubDir] = useState(false);
+  const [hasLoadedSubDir, setHasLoadedSubDir] = useState((object.subDirItems?.length ?? 0) > 0);
 
   // Unselect self if self is not in the selected nodes
   useEffect(() => {
@@ -159,8 +160,8 @@ const TreeViewNode = forwardRef(function TreeViewNode(
       return;
     }
 
-    // If subDirItems already loaded (length > 0), no need to load again
-    if (subDirItems.length > 0) {
+    // If subdirectory contents already loaded, no need to load again
+    if (hasLoadedSubDir) {
       return;
     }
 
@@ -171,6 +172,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
         depth: 1,
       });
       setSubDirItems(contents);
+      setHasLoadedSubDir(true);
     } catch (error) {
       console.error("Failed to load subdirectory contents:", error);
       toast.error("Failed to load folder contents");
