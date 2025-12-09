@@ -78,9 +78,13 @@ const TreeViewNode = forwardRef(function TreeViewNode(
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(object.name);
   const childGroupRef = useRef<TreeViewGroupRef | null>(null);
-  const [subDirItems, setSubDirItems] = useState<FileSystemObject[]>(object.subDirItems ?? []);
+  const [subDirItems, setSubDirItems] = useState<FileSystemObject[]>(
+    object.subDirItems ?? [],
+  );
   const [isLoadingSubDir, setIsLoadingSubDir] = useState(false);
-  const [hasLoadedSubDir, setHasLoadedSubDir] = useState((object.subDirItems?.length ?? 0) > 0);
+  const [hasLoadedSubDir, setHasLoadedSubDir] = useState(
+    (object.subDirItems?.length ?? 0) > 0,
+  );
 
   // Unselect self if self is not in the selected nodes
   useEffect(() => {

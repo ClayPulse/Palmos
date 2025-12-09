@@ -134,6 +134,15 @@ export function useWorkspace() {
       throw new Error("Editor context is not available");
     }
 
+    // Reset previous workspace content
+    editorContext?.setEditorStates((prev) => {
+      return {
+        ...prev,
+        workspaceContent: undefined,
+        explorerSelectedNodeRefs: [],
+      };
+    });
+
     if (!workspaceId) {
       // Unselect workspace
       setWorkspace(undefined);
@@ -175,19 +184,9 @@ export function useWorkspace() {
   async function refreshWorkspaceContent(
     ws: RemoteWorkspace | undefined = workspace,
   ) {
-    if (!ws) {
-      // Reset all content
-      editorContext?.setEditorStates((prev) => {
-        return {
-          ...prev,
-          workspaceContent: undefined,
-          explorerSelectedNodeRefs: [],
-        };
-      });
-      return;
+    if (getPlatform() !== PlatformEnum.Electron) {
+      await waitUntilWorkspaceRunning();
     }
-
-    await waitUntilWorkspaceRunning();
 
     const api = getAbstractPlatformAPI(ws);
 

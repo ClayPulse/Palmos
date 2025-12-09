@@ -1,13 +1,10 @@
-import {
-  PersistentSettings,
-  ProjectInfo,
-} from "@/lib/types";
+import { PersistentSettings, ProjectInfo } from "@/lib/types";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
+import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 import ignore from "ignore";
 import path from "path";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
-import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 
 /**
  * @deprecated Android implementation is no longer supported due to
@@ -88,7 +85,6 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     uri: string,
     options: ListPathOptions,
     baseUri?: string,
-    currentDepth: number = 0,
   ): Promise<FileSystemObject[]> {
     // Try to get permissions to read the directory
     const permission = await Filesystem.requestPermissions();
@@ -103,7 +99,8 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     });
 
     // Determine if we should recurse based on depth or isRecursive
-    const shouldRecurse = options.isRecursive || (options.depth !== undefined && currentDepth < options.depth);
+    const shouldRecurse =
+      options.isRecursive || (options.depth !== undefined && options.depth > 0);
 
     const promise = files.files
       // Filter by types
@@ -135,7 +132,17 @@ export class CapacitorAPI extends AbstractPlatformAPI {
             name: file.name,
             isFolder: true,
             subDirItems: shouldRecurse
-              ? await this.listPathContent(absoluteUri, options, baseUri ?? uri, currentDepth + 1)
+              ? await this.listPathContent(
+                  absoluteUri,
+                  {
+                    ...options,
+                    depth:
+                      options.depth !== undefined
+                        ? options.depth - 1
+                        : undefined,
+                  },
+                  baseUri ?? uri,
+                )
               : [],
             uri: absoluteUri,
           };
