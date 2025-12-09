@@ -88,6 +88,7 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     uri: string,
     options: ListPathOptions,
     baseUri?: string,
+    currentDepth: number = 0,
   ): Promise<FileSystemObject[]> {
     // Try to get permissions to read the directory
     const permission = await Filesystem.requestPermissions();
@@ -100,6 +101,9 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     const files = await Filesystem.readdir({
       ...pathDir,
     });
+
+    // Determine if we should recurse based on depth or isRecursive
+    const shouldRecurse = options.isRecursive || (options.depth !== undefined && currentDepth < options.depth);
 
     const promise = files.files
       // Filter by types
@@ -130,8 +134,8 @@ export class CapacitorAPI extends AbstractPlatformAPI {
           const dirObj: FileSystemObject = {
             name: file.name,
             isFolder: true,
-            subDirItems: options?.isRecursive
-              ? await this.listPathContent(absoluteUri, options, baseUri ?? uri)
+            subDirItems: shouldRecurse
+              ? await this.listPathContent(absoluteUri, options, baseUri ?? uri, currentDepth + 1)
               : [],
             uri: absoluteUri,
           };

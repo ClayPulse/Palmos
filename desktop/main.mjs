@@ -131,8 +131,11 @@ async function handleListProjects(event, uri) {
   return folders;
 }
 
-async function listPathContent(uri, options, baseUri = undefined) {
+async function listPathContent(uri, options, baseUri = undefined, currentDepth = 0) {
   const files = await fs.promises.readdir(uri, { withFileTypes: true });
+
+  // Determine if we should recurse based on depth or isRecursive
+  const shouldRecurse = options.isRecursive || (options.depth !== undefined && currentDepth < options.depth);
 
   const promise = files
     // Filter by file type
@@ -164,8 +167,8 @@ async function listPathContent(uri, options, baseUri = undefined) {
         return {
           name: name,
           isFolder: true,
-          subDirItems: options.isRecursive
-            ? await listPathContent(absoluteUri, options, baseUri ?? uri)
+          subDirItems: shouldRecurse
+            ? await listPathContent(absoluteUri, options, baseUri ?? uri, currentDepth + 1)
             : [],
           uri: absoluteUri.replace(/\\/g, "/"),
         };

@@ -202,7 +202,7 @@ export function useWorkspace() {
 
     const objects = await api?.listPathContent(projectUri, {
       include: "all",
-      isRecursive: true,
+      depth: 1,
     });
 
     editorContext?.setEditorStates((prev) => {

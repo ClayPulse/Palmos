@@ -159,8 +159,12 @@ async function listPathContent(
   uri: string,
   options: any,
   baseUri: string | undefined = undefined,
+  currentDepth: number = 0,
 ) {
   const files = await fs.promises.readdir(uri, { withFileTypes: true });
+
+  // Determine if we should recurse based on depth or isRecursive
+  const shouldRecurse = options.isRecursive || (options.depth !== undefined && currentDepth < options.depth);
 
   const promise: Promise<any>[] = files
     // Filter by file type
@@ -192,8 +196,8 @@ async function listPathContent(
         return {
           name: name,
           isFolder: true,
-          subDirItems: options.isRecursive
-            ? await listPathContent(absoluteUri, options, baseUri ?? uri)
+          subDirItems: shouldRecurse
+            ? await listPathContent(absoluteUri, options, baseUri ?? uri, currentDepth + 1)
             : [],
           uri: absoluteUri.replace(/\\/g, "/"),
         };
