@@ -307,6 +307,7 @@ export type FileSystemObject = {
 export type ListPathOptions = {
   include: "folders" | "files" | "all";
   isRecursive?: boolean;
+  depth?: number;
   gitignore?: string[];
 };
 

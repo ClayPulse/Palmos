@@ -72,6 +72,9 @@ function createMainWindow() {
   else {
     // Choose either http or https by trying both
     if (process.env.HTTPS === "true") {
+      app.commandLine.appendSwitch("allow-insecure-localhost", "true");
+      app.commandLine.appendSwitch("ignore-certificate-errors", "true");
+
       win.loadURL("https://localhost:3000");
     } else {
       win.loadURL("http://localhost:3000");
@@ -140,6 +143,10 @@ async function handleListProjects(event, uri) {
 async function listPathContent(uri, options, baseUri = undefined) {
   const files = await fs.promises.readdir(uri, { withFileTypes: true });
 
+  // Determine if we should recurse based on depth or isRecursive
+  const shouldRecurse =
+    options.isRecursive || (options.depth !== undefined && options.depth > 0);
+
   const promise = files
     // Filter by file type
     .filter(
@@ -170,8 +177,18 @@ async function listPathContent(uri, options, baseUri = undefined) {
         return {
           name: name,
           isFolder: true,
-          subDirItems: options.isRecursive
-            ? await listPathContent(absoluteUri, options, baseUri ?? uri)
+          subDirItems: shouldRecurse
+            ? await listPathContent(
+                absoluteUri,
+                {
+                  ...options,
+                  depth:
+                    options.depth !== undefined && options.depth > 0
+                      ? options.depth - 1
+                      : undefined,
+                },
+                baseUri ?? uri,
+              )
             : [],
           uri: absoluteUri.replace(/\\/g, "/"),
         };

@@ -181,7 +181,6 @@ function GeneralSettings({
                   color: "danger",
                 });
                 return;
-                return;
               }
               editorContext?.setPersistSettings((prev) => {
                 return {
