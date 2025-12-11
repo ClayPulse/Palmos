@@ -32,7 +32,7 @@ export default function VoiceIndicator() {
           animate={{ y: 0 }}
           exit={{ y: -56 }}
           transition={{ duration: 0.1 }}
-          className="pointer-events-none absolute flex h-full w-full items-center justify-center"
+          className="pointer-events-none absolute flex h-full w-full items-center justify-center z-50"
         >
           <div className="bg-content2 flex h-10 min-w-40 items-center rounded-full px-4">
             <div className="flex w-12 items-center justify-center">

@@ -318,7 +318,7 @@ ${JSON.stringify(jsonValue, null, 2)}
 
   return (
     <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2">
-      <div className="flex max-h-[calc(100vh-140px)] flex-col items-center gap-y-1">
+      <div className="flex max-h-[calc(100vh-140px)] max-w-screen flex-col items-center gap-y-1">
         <Input
           className="w-80"
           classNames={{
