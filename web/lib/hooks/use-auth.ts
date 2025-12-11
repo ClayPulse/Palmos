@@ -10,9 +10,11 @@ import { PlatformEnum } from "../enums";
 import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
 import { CreditBalance, Session, Subscription } from "../types";
+import useRouter from "./use-router";
 
 export function useAuth() {
   const editorContext = useContext(EditorContext);
+
   // --- Auth ---
   const {
     data: session,
@@ -63,6 +65,8 @@ export function useAuth() {
       return data as CreditBalance;
     },
   );
+
+  const router = useRouter();
 
   useEffect(() => {
     async function refreshSession() {
@@ -133,7 +137,7 @@ export function useAuth() {
     } else {
       const url = getAPIUrl(`/api/auth/signin`);
       url.searchParams.set("callbackUrl", window.location.href);
-      window.location.href = url.toString();
+      router.replace(url.toString());
     }
   }
 
@@ -160,7 +164,7 @@ export function useAuth() {
     } else {
       const url = getAPIUrl(`/api/auth/signout`);
       url.searchParams.set("callbackUrl", window.location.href);
-      window.location.href = url.toString();
+      router.replace(url.toString());
     }
   }
 

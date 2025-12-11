@@ -68,9 +68,13 @@ function VADWrapper({
     baseAssetPath:
       getPlatform() === PlatformEnum.Web &&
       process.env.NODE_ENV === "production"
-        ? " https://cdn.pulse-editor.com/assets/vad/"
+        ? "https://cdn.pulse-editor.com/assets/vad/"
         : "/vad/",
-    onnxWASMBasePath: "/vad/",
+    onnxWASMBasePath:
+      getPlatform() === PlatformEnum.Web &&
+      process.env.NODE_ENV === "production"
+        ? "https://cdn.pulse-editor.com/assets/vad/"
+        : "/vad/",
     positiveSpeechThreshold: threshold,
     onSpeechStart: () => {
       console.log("Speech started");

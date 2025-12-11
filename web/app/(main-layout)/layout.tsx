@@ -32,14 +32,14 @@ export default function RootLayout({
             <EditorContextProvider>
               <CapacitorProvider>
                 <InterModuleCommunicationProvider>
-                    <DndProvider>
-                      <RemoteModuleProvider isPreventingCSS={true}>
-                        <InputDeviceProvider>
-                          <Toaster />
-                          <Nav>{children}</Nav>
-                        </InputDeviceProvider>
-                      </RemoteModuleProvider>
-                    </DndProvider>
+                  <DndProvider>
+                    <RemoteModuleProvider isPreventingCSS={true}>
+                      <InputDeviceProvider>
+                        <Toaster />
+                        <Nav>{children}</Nav>
+                      </InputDeviceProvider>
+                    </RemoteModuleProvider>
+                  </DndProvider>
                 </InterModuleCommunicationProvider>
               </CapacitorProvider>
             </EditorContextProvider>
