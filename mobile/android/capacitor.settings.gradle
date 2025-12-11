@@ -3,7 +3,7 @@ include ':capacitor-android'
 project(':capacitor-android').projectDir = new File('../../node_modules/@capacitor/android/capacitor')
 
 include ':capacitor-community-safe-area'
-project(':capacitor-community-safe-area').projectDir = new File('../node_modules/@capacitor-community/safe-area/android')
+project(':capacitor-community-safe-area').projectDir = new File('../../node_modules/@capacitor-community/safe-area/android')
 
 include ':capacitor-app'
 project(':capacitor-app').projectDir = new File('../../node_modules/@capacitor/app/android')
@@ -22,9 +22,6 @@ project(':capacitor-preferences').projectDir = new File('../../node_modules/@cap
 
 include ':capacitor-screen-orientation'
 project(':capacitor-screen-orientation').projectDir = new File('../../node_modules/@capacitor/screen-orientation/android')
-
-include ':capacitor-status-bar'
-project(':capacitor-status-bar').projectDir = new File('../../node_modules/@capacitor/status-bar/android')
 
 include ':capawesome-capacitor-file-picker'
 project(':capawesome-capacitor-file-picker').projectDir = new File('../../node_modules/@capawesome/capacitor-file-picker/android')
