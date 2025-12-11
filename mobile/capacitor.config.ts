@@ -15,10 +15,15 @@ const config: CapacitorConfig = {
       resizeOnFullScreen: true,
     },
     SafeArea: {
-      enabled: true,
+      statusBarStyle: undefined,
+      navigationBarStyle: undefined,
+      offsetForKeyboardInsetBug: undefined,
     },
     CapacitorHttp: {
       enabled: false,
+    },
+    SystemBars: {
+      insetsHandling: "disable",
     },
   },
 };

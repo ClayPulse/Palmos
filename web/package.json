@@ -22,7 +22,6 @@
       "@capacitor/keyboard": "^8.0.0",
       "@capacitor/preferences": "^8.0.0",
       "@capacitor/screen-orientation": "^8.0.0",
-      "@capacitor/status-bar": "^8.0.0",
       "@capawesome/capacitor-file-picker": "^7.2.0",
       "@dnd-kit/core": "^6.3.1",
       "@heroui/react": "^2.8.5",

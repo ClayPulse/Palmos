@@ -239,7 +239,7 @@ For detailed VSCode extension user guide, check out [VSCode Extension User Guide
 
 ## Recommended Nodejs version
 
-Nodejs 20
+Nodejs 22
 
 ## Install dependencies
 

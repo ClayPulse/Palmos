@@ -25,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`h-[100dvh] w-[100dvw] antialiased`}>
+      <body
+        className={`bg-default h-[100dvh] w-[100dvw] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] antialiased`}
+      >
         <Analytics />
         <Suspense>
           <WrappedHeroUIProvider>
