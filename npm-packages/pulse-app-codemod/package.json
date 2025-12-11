@@ -1,0 +1,16 @@
+{
+  "name": "pulse-app-codemod",
+  "version": "1.0.0",
+  "description": "Pulse app version migration",
+  "main": "scripts/codemod.ts",
+  "scripts": {
+    "test": "node scripts/codemod.ts"
+  },
+  "dependencies": {
+    "codemod:ast-grep": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

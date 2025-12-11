@@ -1,0 +1,20 @@
+schema_version: "1.0"
+
+name: "@ClayPulse/pulse-app-codemod"
+version: "0.0.4"
+description: "Pulse app version migration"
+author: "ClayPulse <support@claypulse.ai>"
+license: "MIT"
+workflow: "workflow.yaml"
+
+
+targets:
+  languages: ["typescript"]
+
+keywords: ["transformation", "migration"]
+
+registry:
+  access: "public"
+  visibility: "public"
+
+capabilities: []
