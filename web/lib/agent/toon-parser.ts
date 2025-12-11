@@ -1,17 +1,24 @@
 import { decode } from "@toon-format/toon";
 
-export function parseToonToJSON(toon: string): any {
-  const cleanedToon = removeToonCodeFences(toon);
+export function parseToonToJSON(content: string): any {
+  if (!isToonFormat(content)) {
+    return content;
+  }
+
+  const cleanedToon = removeToonCodeFences(content);
 
   try {
     const decoded = decode(cleanedToon);
     return decoded;
   } catch (error) {
     // When error is "Unterminated string: missing closing quote", try add a quote at the end and decode again
-
-    const fixedToon = cleanedToon + '"';
-    const decoded = decode(fixedToon);
-    return decoded;
+    try {
+      const fixedToon = cleanedToon + '"';
+      const decoded = decode(fixedToon);
+      return decoded;
+    } catch (error) {
+      console.warn("Failed to decode TOON content:", error);
+    }
   }
 }
 

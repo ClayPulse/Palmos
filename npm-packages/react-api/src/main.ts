@@ -13,6 +13,7 @@ import useSTT from "./hooks/ai-modality/use-stt";
 import useTTS from "./hooks/ai-modality/use-tts";
 import useVideoGen from "./hooks/ai-modality/use-video-gen";
 import usePulseEnv from "./hooks/editor/use-env";
+import useFileSystem from "./hooks/editor/use-file-system";
 import useOwnedAppView from "./hooks/editor/use-owned-app-view";
 import useReceiveFile from "./hooks/editor/use-receive-file";
 import useSnapshotState from "./hooks/editor/use-snapshot-state";
@@ -27,6 +28,7 @@ export {
   useAgentTools,
   useAgents,
   useFile,
+  useFileSystem,
   useImageGen,
   useLLM,
   useLoading,

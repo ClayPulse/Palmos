@@ -1,10 +1,16 @@
-import { app, BrowserWindow, dialog, ipcMain, session } from "electron";
+import {
+  app,
+  BrowserWindow,
+  dialog,
+  ipcMain,
+  protocol,
+  session,
+} from "electron";
 import serve from "electron-serve";
-import path from "path";
-import { fileURLToPath } from "url";
-
 import fs from "fs";
 import ignore from "ignore";
+import path from "path";
+import { fileURLToPath } from "url";
 import { createTerminalServer } from "./lib/node-pty-server.js";
 
 // Change path to "Pulse Editor"
@@ -66,6 +72,9 @@ function createMainWindow() {
   else {
     // Choose either http or https by trying both
     if (process.env.HTTPS === "true") {
+      app.commandLine.appendSwitch("allow-insecure-localhost", "true");
+      app.commandLine.appendSwitch("ignore-certificate-errors", "true");
+
       win.loadURL("https://localhost:3000");
     } else {
       win.loadURL("http://localhost:3000");
@@ -134,6 +143,10 @@ async function handleListProjects(event, uri) {
 async function listPathContent(uri, options, baseUri = undefined) {
   const files = await fs.promises.readdir(uri, { withFileTypes: true });
 
+  // Determine if we should recurse based on depth or isRecursive
+  const shouldRecurse =
+    options.isRecursive || (options.depth !== undefined && options.depth > 0);
+
   const promise = files
     // Filter by file type
     .filter(
@@ -164,8 +177,18 @@ async function listPathContent(uri, options, baseUri = undefined) {
         return {
           name: name,
           isFolder: true,
-          subDirItems: options.isRecursive
-            ? await listPathContent(absoluteUri, options, baseUri ?? uri)
+          subDirItems: shouldRecurse
+            ? await listPathContent(
+                absoluteUri,
+                {
+                  ...options,
+                  depth:
+                    options.depth !== undefined && options.depth > 0
+                      ? options.depth - 1
+                      : undefined,
+                },
+                baseUri ?? uri,
+              )
             : [],
           uri: absoluteUri.replace(/\\/g, "/"),
         };
@@ -371,9 +394,38 @@ function handleCreateTerminal(event) {
   return "ws://localhost:6060";
 }
 
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: "app",
+    privileges: {
+      standard: true,
+      secure: true,
+      supportFetchAPI: true,
+      corsEnabled: true,
+      stream: true,
+    },
+  },
+]);
+
 app.whenReady().then(() => {
   sharedSession = session.defaultSession;
   console.log("Shared session path:", sharedSession.storagePath);
+
+  protocol.registerBufferProtocol("app", (request, respond) => {
+    const url = request.url.replace("app://", "");
+    const filePath = path.join(process.resourcesPath, url);
+
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        respond({ statusCode: 404 });
+      } else {
+        respond({
+          mimeType: "application/octet-stream",
+          data,
+        });
+      }
+    });
+  });
 
   ipcMain.handle("select-dir", handleSelectDir);
   ipcMain.handle("select-file", handleSelectFile);

@@ -34,6 +34,8 @@ const defaultEditorStates: EditorStates = {
   pressedKeys: [],
   tabViews: [],
   tabIndex: -1,
+  workflowEdges: [],
+  workflowNodes: [],
 };
 
 const defaultPersistSettings: PersistentSettings = {

@@ -29,6 +29,19 @@ export default function Build({cli}: {cli: Result<Flags>}) {
 					}
 				}
 
+				// Create node_modules/.pulse/server directory
+				if (!fs.existsSync('node_modules/.pulse/server')) {
+					if (process.platform === 'win32') {
+						await execa('mkdir node_modules\\.pulse\\server', {
+							shell: true,
+						});
+					} else {
+						await execa('mkdir -p node_modules/.pulse/server', {
+							shell: true,
+						});
+					}
+				}
+
 				if (process.platform === 'win32') {
 					await execa(
 						'xcopy /E /I node_modules\\@pulse-editor\\cli\\dist\\lib\\server node_modules\\.pulse\\server',

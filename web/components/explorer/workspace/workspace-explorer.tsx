@@ -36,7 +36,7 @@ export default function WorkspaceExplorer() {
 
         await workspaceHook.waitUntilWorkspaceRunning();
 
-        const uri = homePath + "/" + projectName;
+        const uri = homePath ?? "/workspace";
         const hasPath = await platformApi.hasPath(uri);
 
         if (!hasPath) {
@@ -87,7 +87,11 @@ export default function WorkspaceExplorer() {
                   key.currentKey === "__internal-settings"
                 ) {
                   return;
+                } else if (key.currentKey === "__internal-local") {
+                  await workspaceHook.selectWorkspace(undefined);
+                  return;
                 }
+
                 const selectedWorkspace = workspaceHook.cloudWorkspaces?.find(
                   (workspace) => workspace.id === key.currentKey,
                 );
@@ -137,7 +141,7 @@ export default function WorkspaceExplorer() {
           </div>
           {getPlatform() === PlatformEnum.Electron ||
           workspaceHook.workspace ? (
-            !isWorkspaceRunning ? (
+            !isWorkspaceRunning && getPlatform() !== PlatformEnum.Electron ? (
               <div>Workspace is starting</div>
             ) : (
               <FileSystemExplorer

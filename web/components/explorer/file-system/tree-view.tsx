@@ -10,12 +10,12 @@ import {
   ContextMenuState,
   DragData,
   FileDragData,
-  FileSystemObject,
   TreeViewGroupRef,
   TreeViewNodeRef,
 } from "@/lib/types";
 import { useDraggable } from "@dnd-kit/core";
 import { Button, Input } from "@heroui/react";
+import { FileSystemObject } from "@pulse-editor/shared-utils";
 import {
   forwardRef,
   Ref,
@@ -78,6 +78,13 @@ const TreeViewNode = forwardRef(function TreeViewNode(
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(object.name);
   const childGroupRef = useRef<TreeViewGroupRef | null>(null);
+  const [subDirItems, setSubDirItems] = useState<FileSystemObject[]>(
+    object.subDirItems ?? [],
+  );
+  const [isLoadingSubDir, setIsLoadingSubDir] = useState(false);
+  const [hasLoadedSubDir, setHasLoadedSubDir] = useState(
+    (object.subDirItems?.length ?? 0) > 0,
+  );
 
   // Unselect self if self is not in the selected nodes
   useEffect(() => {
@@ -152,6 +159,32 @@ const TreeViewNode = forwardRef(function TreeViewNode(
     return editorContext?.editorStates.pressedKeys.indexOf("Control") !== -1;
   }
 
+  async function loadSubDirContents() {
+    if (!object.isFolder || !platformApi) {
+      return;
+    }
+
+    // If subdirectory contents already loaded, no need to load again
+    if (hasLoadedSubDir) {
+      return;
+    }
+
+    setIsLoadingSubDir(true);
+    try {
+      const contents = await platformApi.listPathContent(object.uri, {
+        include: "all",
+        depth: 1,
+      });
+      setSubDirItems(contents);
+      setHasLoadedSubDir(true);
+    } catch (error) {
+      console.error("Failed to load subdirectory contents:", error);
+      toast.error("Failed to load folder contents");
+    } finally {
+      setIsLoadingSubDir(false);
+    }
+  }
+
   function handleOnContextMenu(e: React.MouseEvent) {
     e.preventDefault();
     // Get parent element position
@@ -215,7 +248,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                   getPlatform() === PlatformEnum.Capacitor ? "32px" : "24px",
               }}
               size="sm"
-              onPress={() => {
+              onPress={async () => {
                 if (contextMenuState.isOpen) {
                   return;
                 }
@@ -225,6 +258,8 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 } else {
                   if (isFolderCollapsed) {
                     selectNode();
+                    // Load subdirectory contents when expanding
+                    await loadSubDirContents();
                   } else {
                     unSelectNode();
                   }
@@ -338,16 +373,22 @@ const TreeViewNode = forwardRef(function TreeViewNode(
         </>
       )}
 
-      {object.isFolder && object.subDirItems && !isFolderCollapsed && (
+      {object.isFolder && !isFolderCollapsed && (
         <div className="ml-4">
-          <TreeViewGroup
-            ref={childGroupRef}
-            objects={object.subDirItems}
-            viewFile={viewFile}
-            folderUri={object.uri}
-            platformApi={platformApi}
-            refreshWorkspaceContent={refreshWorkspaceContent}
-          />
+          {isLoadingSubDir ? (
+            <div className="flex justify-center py-2">
+              <div className="text-sm">Loading...</div>
+            </div>
+          ) : (
+            <TreeViewGroup
+              ref={childGroupRef}
+              objects={subDirItems}
+              viewFile={viewFile}
+              folderUri={object.uri}
+              platformApi={platformApi}
+              refreshWorkspaceContent={refreshWorkspaceContent}
+            />
+          )}
         </div>
       )}
     </div>

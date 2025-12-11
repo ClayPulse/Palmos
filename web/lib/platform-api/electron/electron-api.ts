@@ -1,10 +1,9 @@
 import {
-  FileSystemObject,
-  ListPathOptions,
   PersistentSettings,
   ProjectInfo,
 } from "@/lib/types";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
+import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 
 export class ElectronAPI extends AbstractPlatformAPI {
   private electronAPI: any;

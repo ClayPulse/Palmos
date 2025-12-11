@@ -1,6 +1,7 @@
 "use client";
 
-import { LLMAgentRunner } from "@/lib/agent/llm-agent-runner";
+import { LLMAgentRunner } from "@/lib/agent/runners/llm-agent-runner";
+import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getImageGenModel } from "@/lib/modalities/image-gen/get-image-gen";
 import { getLLMModel } from "@/lib/modalities/llm/get-llm";
 import { recognizeText } from "@/lib/modalities/ocr/ocr";
@@ -21,6 +22,7 @@ import {
   ImageModelConfig,
   IMCMessage,
   IMCMessageTypeEnum,
+  ListPathOptions,
   LLMModelConfig,
   PolyIMC,
   ReceiverHandler,
@@ -38,6 +40,7 @@ export default function InterModuleCommunicationProvider({
 }: {
   children: React.ReactNode;
 }) {
+  const { platformApi } = usePlatformApi();
   const editorContext = useContext(EditorContext);
   const { resolvedTheme } = useTheme();
 
@@ -166,71 +169,34 @@ export default function InterModuleCommunicationProvider({
             throw new Error("Agent method not found.");
           }
 
-          if (editorContext?.persistSettings?.isUseManagedCloud ?? true) {
-            const modelId = llmConfig
-              ? `${llmConfig.modelId}`
-              : method.LLMConfig
-                ? `${method.LLMConfig.modelId}`
-                : agent.LLMConfig
-                  ? `${agent.LLMConfig?.modelId}`
-                  : "pulse-editor/pulse-ai-v1-turbo";
+          const modelId = llmConfig
+            ? `${llmConfig.modelId}`
+            : method.LLMConfig
+              ? `${method.LLMConfig.modelId}`
+              : agent.LLMConfig
+                ? `${agent.LLMConfig?.modelId}`
+                : "pulse-editor/pulse-ai-v1-turbo";
 
-            if (!modelId) {
-              throw new Error("No model ID found for this agent method.");
-            }
-
-            const apiKey = getAPIKey(editorContext, llmConfig?.modelId);
-
-            const runner = new LLMAgentRunner();
-
-            const result = await runner.run(
-              {
-                modelId,
-                apiKey,
-                temperature: llmConfig?.temperature,
-              },
-              agent,
-              methodName,
-              args,
-            );
-
-            return result;
-          } else {
-            const config = llmConfig
-              ? llmConfig
-              : method.LLMConfig
-                ? method.LLMConfig
-                : agent.LLMConfig
-                  ? agent.LLMConfig
-                  : undefined; // TODO: use editor level default config -- getDefaultLLMConfig();
-
-            if (!config) {
-              throw new Error("No LLM config found for this agent method.");
-            }
-
-            const apiKey = getAPIKey(editorContext, config.modelId);
-
-            if (!apiKey) {
-              throw new Error(`No API key found for model ${config.modelId}.`);
-            }
-
-            const runner = new LLMAgentRunner();
-
-            const result = await runner.run(
-              {
-                modelId: config.modelId,
-                apiKey,
-                temperature: config.temperature,
-              },
-              agent,
-              methodName,
-              args,
-              undefined,
-              abortSignal,
-            );
-
-            return result;
+          if (!modelId) {
+            throw new Error("No model ID found for this agent method.");
           }
+
+          const apiKey = getAPIKey(editorContext, llmConfig?.modelId);
+
+          const runner = new LLMAgentRunner();
+
+          const result = await runner.run(
+            {
+              modelId,
+              apiKey,
+              temperature: llmConfig?.temperature,
+            },
+            agent,
+            methodName,
+            args,
+          );
+
+          return JSON.parse(result);
         },
       ],
       [
@@ -268,9 +234,6 @@ export default function InterModuleCommunicationProvider({
           }
 
           const apiKey = getAPIKey(editorContext, config.modelId);
-          if (!apiKey) {
-            throw new Error(`No API key found for model ${config.modelId}.`);
-          }
 
           const stt = getSTTModel({
             apiKey: apiKey,
@@ -313,9 +276,6 @@ export default function InterModuleCommunicationProvider({
           }
 
           const apiKey = getAPIKey(editorContext, config.modelId);
-          if (!apiKey) {
-            throw new Error(`No API key found for model ${config.modelId}.`);
-          }
 
           const llm = getLLMModel({
             modelId: `${config.modelId}`,
@@ -354,9 +314,6 @@ export default function InterModuleCommunicationProvider({
           }
 
           const apiKey = getAPIKey(editorContext, config.modelId);
-          if (!apiKey) {
-            throw new Error(`No API key found for model: ${config.modelId}.`);
-          }
 
           const tts = getTTSModel({
             modelId: `${config.modelId}`,
@@ -406,9 +363,6 @@ export default function InterModuleCommunicationProvider({
           }
 
           const apiKey = getAPIKey(editorContext, config.modelId);
-          if (!apiKey) {
-            throw new Error(`No API key found for model ${config.modelId}.`);
-          }
 
           const model = getImageGenModel({
             modelId: config.modelId,
@@ -459,9 +413,6 @@ export default function InterModuleCommunicationProvider({
           }
 
           const apiKey = getAPIKey(editorContext, config.modelId);
-          if (!apiKey) {
-            throw new Error(`No API key found for model ${config.modelId}.`);
-          }
 
           const model = getVideoGenModel({
             modelId: config.modelId,
@@ -587,6 +538,159 @@ export default function InterModuleCommunicationProvider({
         ) => {
           return {
             id: editorContext?.editorStates.currentWorkspace?.id,
+          };
+        },
+      ],
+      // The following message handlers require OS-like environment.
+      // This can be either local environment or remote workspace.
+      [
+        IMCMessageTypeEnum.PlatformListPath,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri, options }: { uri: string; options: ListPathOptions } =
+            message.payload;
+          const result = await platformApi?.listPathContent(uri, options);
+          return result ?? [];
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformCreateFolder,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          await platformApi?.createFolder(uri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformCreateFile,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          await platformApi?.createFile(uri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformRename,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { oldUri, newUri }: { oldUri: string; newUri: string } =
+            message.payload;
+          await platformApi?.rename(oldUri, newUri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformDelete,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          await platformApi?.delete(uri);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformHasPath,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+          const exists = await platformApi?.hasPath(uri);
+          return !!exists;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformCopyFiles,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { from, to }: { from: string; to: string } = message.payload;
+          await platformApi?.copyFiles(from, to);
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformWriteFile,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          if (message.payload) {
+            const { uri, file }: { uri: string; file: File | undefined } =
+              message.payload;
+
+            if (!file) {
+              throw new Error("File is undefined.");
+            }
+
+            const projectPath =
+              editorContext?.persistSettings?.projectHomePath +
+              "/" +
+              editorContext?.editorStates.project;
+
+            // Prevent writing to path outside the project path
+            if (!uri.startsWith(projectPath)) {
+              throw new Error(
+                "Cannot write to path outside the project directory.",
+              );
+            }
+            await platformApi?.writeFile(file, uri);
+          }
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformReadFile,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { uri }: { uri: string } = message.payload;
+
+          const projectPath =
+            editorContext?.persistSettings?.projectHomePath +
+            "/" +
+            editorContext?.editorStates.project;
+
+          // Prevent reading path outside the project path
+          if (!uri.startsWith(projectPath) && !uri.startsWith("/workspace")) {
+            throw new Error(
+              `Cannot read file outside the project directory: ${uri}, project path: ${projectPath}`,
+            );
+          }
+
+          const file = await platformApi?.readFile(uri);
+          return file;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.PlatformCreateTerminal,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          // Get a shell terminal from native platform APIs
+          const wsUrl = await platformApi?.createTerminal();
+          return {
+            websocketUrl: wsUrl,
+            projectHomePath: editorContext?.persistSettings?.projectHomePath,
           };
         },
       ],

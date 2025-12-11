@@ -2,6 +2,7 @@ import {
   Action,
   Agent,
   AppConfig,
+  FileSystemObject,
   ModelConfig,
   PolyIMC,
   TTSModelConfig,
@@ -95,7 +96,7 @@ export type EditorStates = {
   // Drag control
   isDraggingOverCanvas?: boolean;
   dropMessage?: string;
-
+  
   inputDeviceBuffers?: {
     audioBuffer?: ArrayBuffer;
   };
@@ -103,6 +104,9 @@ export type EditorStates = {
   outputDeviceBuffers?: {
     audioBuffer?: ArrayBuffer;
   };
+
+  workflowNodes: ReactFlowNode<AppNodeData>[];
+  workflowEdges: ReactFlowEdge[];
 };
 
 /**
@@ -172,13 +176,6 @@ export type SaveFileDialogConfig = {
   extension?: string;
 };
 
-export type FileSystemObject = {
-  name: string;
-  uri: string;
-  isFolder: boolean;
-  subDirItems?: FileSystemObject[];
-};
-
 export type TreeViewGroupRef = {
   startCreatingNewFolder: () => void;
   startCreatingNewFile: () => void;
@@ -196,12 +193,6 @@ export type ContextMenuState = {
   x: number;
   y: number;
   isOpen: boolean;
-};
-
-export type ListPathOptions = {
-  include: "folders" | "files" | "all";
-  isRecursive?: boolean;
-  gitignore?: string[];
 };
 
 export type TabItem = {

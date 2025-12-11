@@ -2,7 +2,6 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
 import { addToast } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { useRouter } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import {
@@ -11,6 +10,7 @@ import {
   ExtensionApp,
   TabView,
 } from "../types";
+import useRouter from "./use-router";
 
 export function useTabViewManager() {
   const editorContext = useContext(EditorContext);
@@ -91,13 +91,13 @@ export function useTabViewManager() {
     if (activeTabView) {
       if (activeTabView.type === ViewModeEnum.App) {
         const appConfig = activeTabView.config as AppViewConfig;
-        router.push(`/?app=${appConfig.app}`);
+        router.replace(`/?app=${appConfig.app}`);
       } else if (activeTabView.type === ViewModeEnum.Canvas) {
         const canvasConfig = activeTabView.config as CanvasViewConfig;
-        router.push(`/?workflow=${canvasConfig.viewId}`);
+        router.replace(`/?workflow=${canvasConfig.viewId}`);
       }
     } else {
-      router.push(`/`);
+      router.replace(`/`);
     }
   }, [activeTabView, isCreatingTab]);
 

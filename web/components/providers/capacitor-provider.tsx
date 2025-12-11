@@ -1,10 +1,11 @@
 "use client";
 
+import { PlatformEnum } from "@/lib/enums";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { SafeArea, SystemBarsStyle } from "@capacitor-community/safe-area";
 import { App, URLOpenListenerEvent } from "@capacitor/app";
-import { Capacitor } from "@capacitor/core";
 import { Preferences } from "@capacitor/preferences";
-import { ScreenOrientation } from "@capacitor/screen-orientation";
-import { StatusBar } from "@capacitor/status-bar";
+import { useTheme } from "next-themes";
 import { useContext, useEffect } from "react";
 import { EditorContext } from "./editor-context-provider";
 
@@ -14,28 +15,29 @@ export default function CapacitorProvider({
   children: React.ReactNode;
 }) {
   const editorContext = useContext(EditorContext);
+  const { resolvedTheme } = useTheme();
 
-  // Set status bar based on orientation
   useEffect(() => {
-    async function setStatusBar() {
-      const orientation = await ScreenOrientation.orientation();
-      if (
-        orientation.type === "landscape-primary" ||
-        orientation.type === "landscape-secondary"
-      ) {
-        // If landscape mode is enabled full screen and hide status bar.
-        StatusBar.setOverlaysWebView({ overlay: true });
-        StatusBar.hide();
-      } else {
-        StatusBar.setOverlaysWebView({ overlay: false });
-        StatusBar.show();
+    async function setInitialSafeArea() {
+      if (getPlatform() === PlatformEnum.Capacitor) {
+        if (resolvedTheme === "light") {
+          await SafeArea.setSystemBarsStyle({
+            style: SystemBarsStyle.Light,
+          });
+        } else if (resolvedTheme === "dark") {
+          await SafeArea.setSystemBarsStyle({
+            style: SystemBarsStyle.Dark,
+          });
+        }
       }
     }
 
-    // Check if Capacitorjs is available
-    if (Capacitor.isNativePlatform()) {
-      ScreenOrientation.addListener("screenOrientationChange", setStatusBar);
-    }
+    setInitialSafeArea();
+  }, [resolvedTheme]);
+
+  useEffect(() => {
+    // Hide the navigation bar
+    SafeArea.showSystemBars({});
   }, []);
 
   // Set deep linking listener

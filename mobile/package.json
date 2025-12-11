@@ -8,17 +8,16 @@
     "android-run": "npx cap run android"
   },
   "dependencies": {
-    "@capacitor-community/safe-area": "^7.0.0-alpha.1",
-    "@capacitor/android": "^7.4.4",
-    "@capacitor/app": "^7.1.0",
-    "@capacitor/browser": "^7.0.2",
-    "@capacitor/cli": "^7.4.4",
-    "@capacitor/core": "^7.4.4",
-    "@capacitor/filesystem": "^7.1.4",
-    "@capacitor/keyboard": "^7.0.3",
-    "@capacitor/preferences": "^7.0.2",
-    "@capacitor/screen-orientation": "^7.0.2",
-    "@capacitor/status-bar": "^7.0.3",
+    "@capacitor-community/safe-area": "^7.0.0-beta.6",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/browser": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/keyboard": "^8.0.0",
+    "@capacitor/preferences": "^8.0.0",
+    "@capacitor/screen-orientation": "^8.0.0",
     "@capawesome/capacitor-file-picker": "^7.2.0"
   }
 }

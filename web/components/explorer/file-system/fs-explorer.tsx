@@ -189,6 +189,16 @@ export default function FileSystemExplorer({
                 isThemed
               />
             </Button>
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              onPress={() => {
+                refreshWorkspaceContent();
+              }}
+            >
+              <Icon name="refresh" variant="outlined" />
+            </Button>
           </div>
           <div className="flex">
             {/* <Button isIconOnly variant="light" size="sm">

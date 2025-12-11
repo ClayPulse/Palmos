@@ -4,7 +4,6 @@ createMockFetchAPI();
 
 import { getTTSModel } from "../../../lib/modalities/tts/get-tts";
 import { UserMessage } from "../../../lib/types";
-const { parseToonToJSON } = await import("../../../lib/agent/toon-parser");
 const { Assistant } = await import("../../../lib/editor-assistant/assistant");
 const fs = await import("fs");
 
@@ -90,7 +89,7 @@ describe("Platform Assistant Test", () => {
 
     console.log("Assistant result:", result.content.text);
 
-    const textOutputJson = parseToonToJSON(result.content.text ?? "") as {
+    const textOutputJson = JSON.parse(result.content.text ?? "") as {
       response: string;
       language: string;
       suggestedCmd: string;

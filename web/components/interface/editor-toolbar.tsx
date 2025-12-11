@@ -36,7 +36,7 @@ export default function EditorToolbar() {
   return (
     <div
       className={
-        "fixed bottom-0 left-1/2 z-30 flex w-fit -translate-x-1/2 flex-col items-center justify-center space-y-0.5 pb-1"
+        "fixed bottom-0 left-1/2 z-30 flex w-fit -translate-x-1/2 flex-col items-center justify-center space-y-0.5 pb-[max(env(safe-area-inset-bottom),0.25rem)]"
       }
     >
       <AnimatePresence>
@@ -217,7 +217,7 @@ export default function EditorToolbar() {
       {editorContext?.editorStates.isToolbarOpen ? (
         <Button
           isIconOnly
-          className="bg-content2 h-4 w-10"
+          className="bg-content2 h-5 w-12"
           onPress={() => {
             setIsOpen(false);
           }}
@@ -230,7 +230,7 @@ export default function EditorToolbar() {
       ) : (
         <Button
           isIconOnly
-          className="bg-content2 h-4 w-10"
+          className="bg-content2 h-5 w-12"
           onPress={() => {
             setIsOpen(true);
           }}

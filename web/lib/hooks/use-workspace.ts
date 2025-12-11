@@ -1,7 +1,9 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useCallback, useContext, useEffect, useRef } from "react";
 import useSWR from "swr";
+import { PlatformEnum } from "../enums";
 import { getAbstractPlatformAPI } from "../platform-api/get-platform-api";
+import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI } from "../pulse-editor-website/backend";
 import { RemoteWorkspace } from "../types";
 import { useAuth } from "./use-auth";
@@ -132,6 +134,15 @@ export function useWorkspace() {
       throw new Error("Editor context is not available");
     }
 
+    // Reset previous workspace content
+    editorContext?.setEditorStates((prev) => {
+      return {
+        ...prev,
+        workspaceContent: undefined,
+        explorerSelectedNodeRefs: [],
+      };
+    });
+
     if (!workspaceId) {
       // Unselect workspace
       setWorkspace(undefined);
@@ -173,29 +184,24 @@ export function useWorkspace() {
   async function refreshWorkspaceContent(
     ws: RemoteWorkspace | undefined = workspace,
   ) {
-    if (!ws) {
-      // Reset all content
-      editorContext?.setEditorStates((prev) => {
-        return {
-          ...prev,
-          workspaceContent: undefined,
-          explorerSelectedNodeRefs: [],
-        };
-      });
-      return;
+    if (getPlatform() !== PlatformEnum.Electron) {
+      await waitUntilWorkspaceRunning();
     }
-
-    await waitUntilWorkspaceRunning();
 
     const api = getAbstractPlatformAPI(ws);
 
-    const projectUri =
-      editorContext?.persistSettings?.projectHomePath +
-      "/" +
-      editorContext?.editorStates.project;
+    let projectUri = "";
+    if (getPlatform() === PlatformEnum.Electron && !workspace) {
+      const homePath = editorContext?.persistSettings?.projectHomePath;
+      const projectName = editorContext?.editorStates.project;
+      projectUri = homePath + "/" + projectName;
+    } else {
+      projectUri = "/workspace";
+    }
+
     const objects = await api?.listPathContent(projectUri, {
       include: "all",
-      isRecursive: true,
+      depth: 1,
     });
 
     editorContext?.setEditorStates((prev) => {
@@ -209,16 +215,14 @@ export function useWorkspace() {
     console.log("Found project content:", objects);
   }
 
-  const waitUntilWorkspaceRunning = useCallback(async ( ) => {
+  const waitUntilWorkspaceRunning = useCallback(async () => {
     if (isWorkspaceRunning) {
       return;
     }
     return new Promise<void>((resolve, reject) => {
       waitUntilRunningResolve.current = resolve;
     });
-  }, [
-    isWorkspaceRunning
-  ])
+  }, [isWorkspaceRunning]);
 
   return {
     workspace,

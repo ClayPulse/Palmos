@@ -2,6 +2,7 @@ import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import useExplorer from "@/lib/hooks/use-explorer";
 import useExtensionManager from "@/lib/hooks/use-extension-manager";
+import useRouter from "@/lib/hooks/use-router";
 import { imageGenProviderOptions } from "@/lib/modalities/image-gen/registry";
 import { llmProviderOptions } from "@/lib/modalities/llm/registry";
 import { sttProviderOptions } from "@/lib/modalities/stt/registry";
@@ -66,6 +67,8 @@ function GeneralSettings({
   const { selectAndSetProjectHome } = useExplorer();
   const [newEnvKey, setNewEnvKey] = useState<string>("");
   const [newEnvValue, setNewEnvValue] = useState<string>("");
+
+  const router = useRouter();
 
   return (
     <div>
@@ -178,7 +181,6 @@ function GeneralSettings({
                   color: "danger",
                 });
                 return;
-                return;
               }
               editorContext?.setPersistSettings((prev) => {
                 return {
@@ -198,7 +200,7 @@ function GeneralSettings({
           <Button
             onPress={() => {
               // Refresh page
-              window.location.reload();
+              router.refresh();
             }}
           >
             Restart to Apply
@@ -840,6 +842,8 @@ function DevExtensionSettings({
 }: {
   editorContext?: EditorContextType;
 }) {
+  const router = useRouter();
+
   const [fileTypeExtensionMap, setFileTypeExtensionMap] = useState<
     Map<string, ExtensionApp[]>
   >(new Map());
@@ -1043,7 +1047,7 @@ function DevExtensionSettings({
                     `${devExtensionRemoteOrigin}/${devExtensionId}/${devExtensionVersion}`,
                   )}`;
 
-                  window.location.href = url;
+                  router.replace(url);
                 }
               }}
             >
