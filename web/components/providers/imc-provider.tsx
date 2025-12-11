@@ -1,7 +1,6 @@
 "use client";
 
 import { LLMAgentRunner } from "@/lib/agent/runners/llm-agent-runner";
-import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getImageGenModel } from "@/lib/modalities/image-gen/get-image-gen";
 import { getLLMModel } from "@/lib/modalities/llm/get-llm";
@@ -16,7 +15,6 @@ import {
   getDefaultVideoModelConfig,
 } from "@/lib/modalities/utils";
 import { getVideoGenModel } from "@/lib/modalities/video-gen/get-video-gen";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { IMCContextType } from "@/lib/types";
 import {
@@ -688,20 +686,12 @@ export default function InterModuleCommunicationProvider({
           message: IMCMessage,
           abortSignal?: AbortSignal,
         ) => {
-          const platform = getPlatform();
           // Get a shell terminal from native platform APIs
-          if (platform === PlatformEnum.Capacitor) {
-            return {
-              websocketUrl: editorContext?.persistSettings?.mobileHost,
-              projectHomePath: `~/storage/shared/${editorContext?.persistSettings?.projectHomePath}`,
-            };
-          } else {
-            const wsUrl = await platformApi?.createTerminal();
-            return {
-              websocketUrl: wsUrl,
-              projectHomePath: editorContext?.persistSettings?.projectHomePath,
-            };
-          }
+          const wsUrl = await platformApi?.createTerminal();
+          return {
+            websocketUrl: wsUrl,
+            projectHomePath: editorContext?.persistSettings?.projectHomePath,
+          };
         },
       ],
     ]);
