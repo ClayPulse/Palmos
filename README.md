@@ -145,16 +145,15 @@ pulse publish
 
 For detailed guides on how to start developing and using extensions locally, check out our [React template repository](https://github.com/ClayPulse/pulse-editor-extension-template).
 
-Some of our official extensions are also open-source. Feel free to take examples from them and/or contribute to them.
-
-- [Code View (MIT)](https://github.com/ClayPulse/pulse-editor-code-view)
-- [Terminal (MIT)](https://github.com/ClayPulse/pulse-editor-terminal)
-- [Text Node (MIT)](https://github.com/Shellishack/pulse-app-text-node)
-- [Json Utils (MIT)](https://github.com/Shellishack/pulse-app-json-utils)
-- [MCP Client (MIT)](https://github.com/Shellishack/pulse-app-mcp-agent)
-- [MCP Server Connection Node (MIT)](https://github.com/Shellishack/pulse-app-mcp-server-connection)
-- [ComfyUI Workflow Node (AGPL-3.0)](https://github.com/Shellishack/pulse-app-comfyui-workflow)
-- [OpenCut Editor (MIT)](https://github.com/Shellishack/opencut-editor)
+Some of our official extensions are also open-source. Feel free to take examples from them and/or contribute to them. You can find a monorepo here: [Official Pulse Apps](https://github.com/ClayPulse/official-pulse-apps), which includes:
+- Code View (MIT)
+- Terminal (MIT)
+- Text Node (MIT)
+- Json Utils (MIT)
+- MCP Client (MIT)
+- MCP Server Connection Node (MIT)
+- ComfyUI Workflow Node (AGPL-3.0)
+- OpenCut Editor (MIT)
 
 # Beta Release Roadmap
 
