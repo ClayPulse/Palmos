@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import {useEffect, useState} from 'react';
 import {Box, Text} from 'ink';
 import {Result} from 'meow';
 import {Flags} from '../../lib/cli-flags.js';
@@ -6,6 +6,7 @@ import {checkToken, getToken} from '../../lib/token.js';
 import Spinner from 'ink-spinner';
 import fs from 'fs';
 import {$} from 'execa';
+import {publishApp} from '../../lib/backend/publish-app.js';
 
 export default function Publish({cli}: {cli: Result<Flags>}) {
 	const [isInProjectDir, setIsInProjectDir] = useState(false);
@@ -13,6 +14,8 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [isBuilding, setIsBuilding] = useState(false);
 	const [isBuildingError, setIsBuildingError] = useState(false);
+	const [isZipping, setIsZipping] = useState(false);
+	const [isZippingError, setIsZippingError] = useState(false);
 	const [isPublishing, setIsPublishing] = useState(false);
 	const [isPublishingError, setIsPublishingError] = useState(false);
 	const [isPublished, setIsPublished] = useState(false);
@@ -54,27 +57,31 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 	// Build the extension
 	useEffect(() => {
 		async function buildExtension() {
-			setIsBuilding(true);
-			try {
-				await $`npm run build`;
-			} catch (error) {
-				setIsBuildingError(true);
-				setIsBuilding(false);
-				setFailureMessage(
-					'Build failed. Please run `npm run build` to see the error.',
-				);
-				return;
+			if (cli.flags.build) {
+				setIsBuilding(true);
+				try {
+					await $`npm run build`;
+				} catch (error) {
+					setIsBuildingError(true);
+					setFailureMessage(
+						'Build failed. Please run `npm run build` to see the error.',
+					);
+					return;
+				} finally {
+					setIsBuilding(false);
+				}
 			}
+
+			setIsZipping(true);
 			// Zip the dist folder
 			try {
 				await $({cwd: 'dist'})`zip -r ../node_modules/@pulse-editor/dist.zip *`;
 			} catch (error) {
-				setIsBuildingError(true);
-				setIsBuilding(false);
+				setIsZippingError(true);
 				setFailureMessage('Failed to zip the build output.');
 				return;
 			} finally {
-				setIsBuilding(false);
+				setIsZipping(false);
 			}
 
 			await publishExtension();
@@ -83,37 +90,8 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		async function publishExtension() {
 			setIsPublishing(true);
 
-			// Read pulse.config.json for visibility
-			const config = JSON.parse(
-				fs.readFileSync('./dist/client/pulse.config.json', 'utf-8'),
-			);
-
-			const visibility = config.visibility as string;
-
-			// Upload the zip file to the server
 			try {
-				const formData = new FormData();
-				const buffer = fs.readFileSync('./node_modules/@pulse-editor/dist.zip');
-				// @ts-ignore Create a Blob from the buffer
-				const blob = new Blob([buffer], {
-					type: 'application/zip',
-				});
-				formData.append('file', blob, 'dist.zip');
-				formData.append('visibility', visibility);
-
-				// Send the file to the server
-				const res = await fetch(
-					cli.flags.stage
-						? 'https://localhost:8080/api/app/publish'
-						: 'https://pulse-editor.com/api/app/publish',
-					{
-						method: 'POST',
-						headers: {
-							Authorization: `Bearer ${getToken(cli.flags.stage)}`,
-						},
-						body: formData,
-					},
-				);
+				const res = await publishApp(cli.flags.stage);
 
 				if (res.status === 200) {
 					setIsPublished(true);
@@ -151,7 +129,14 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 					<Spinner type="dots" />
 					<Text> Checking authentication...</Text>
 				</Box>
-			) : isAuthenticated ? (
+			) : !isAuthenticated ? (
+				<Text>
+					You are not authenticated or your access token is invalid. Publishing
+					to Extension Marketplace is in Beta access. Please visit
+					<Text color={'blueBright'}> https://pulse-editor.com/beta </Text>to
+					apply for Beta access.
+				</Text>
+			) : (
 				<>
 					{isBuilding && (
 						<Box>
@@ -164,6 +149,15 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 							❌ Error building the extension. Please run `npm run build` to see
 							the error.
 						</Text>
+					)}
+					{isZipping && (
+						<Box>
+							<Spinner type="dots" />
+							<Text> Compressing build...</Text>
+						</Box>
+					)}
+					{isZippingError && (
+						<Text color={'redBright'}>❌ Error zipping the build output.</Text>
 					)}
 					{isPublishing && (
 						<Box>
@@ -185,13 +179,6 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 						</Text>
 					)}
 				</>
-			) : (
-				<Text>
-					You are not authenticated or your access token is invalid. Publishing
-					to Extension Marketplace is in Beta access. Please visit
-					<Text color={'blueBright'}> https://pulse-editor.com/beta </Text>to
-					apply for Beta access.
-				</Text>
 			)}
 		</>
 	);

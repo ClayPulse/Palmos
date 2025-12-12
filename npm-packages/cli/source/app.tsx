@@ -14,6 +14,7 @@ import Build from './components/commands/build.js';
 import Preview from './components/commands/preview.js';
 import Start from './components/commands/start.js';
 import Clean from './components/commands/clean.js';
+import Upgrade from './components/commands/upgrade.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
@@ -32,7 +33,7 @@ export default function App({cli}: {cli: Result<Flags>}) {
 	return (
 		<>
 			{cli.flags.stage && (
-				<Text color={'yellow'}>⚠️ You are in development mode.</Text>
+				<Text color={'yellow'}>⚠️  You are in development mode.</Text>
 			)}
 			{command === 'help' ? (
 				<Help cli={cli} />
@@ -56,6 +57,8 @@ export default function App({cli}: {cli: Result<Flags>}) {
 				<Start cli={cli} />
 			) : command === 'clean' ? (
 				<Clean cli={cli} />
+			) : command === 'upgrade' ? (
+				<Upgrade cli={cli} />
 			) : (
 				command !== undefined && (
 					<>

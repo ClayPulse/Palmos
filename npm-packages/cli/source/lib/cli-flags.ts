@@ -38,6 +38,13 @@ export const flags = defineFlags({
 		type: 'string',
 		shortFlag: 't',
 	},
+	beta: {
+		type: 'boolean',
+	},
+	build: {
+		type: 'boolean',
+		default: true,
+	},
 });
 
 export type Flags = typeof flags;

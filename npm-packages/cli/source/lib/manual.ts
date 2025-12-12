@@ -31,6 +31,9 @@ const logout = `\
 
 const publish = `\
   publish         Publish Pulse Editor Extension in current directory to the Pulse Editor Platform.
+                  Flags:
+                    --noBuild
+                      Skip the build step before publishing.
 
 `;
 
@@ -83,6 +86,14 @@ const clean = `\
 
 `;
 
+const upgrade = `\
+  upgrade         Upgrade Pulse Editor CLI and related packages to the latest version.
+                  Flags:
+                    --beta
+                      Upgrade to the latest beta version.
+
+`;
+
 export const commandsManual: Record<string, string> = {
 	help,
 	chat,
@@ -95,4 +106,5 @@ export const commandsManual: Record<string, string> = {
 	build,
 	start,
 	clean,
+	upgrade,
 };
