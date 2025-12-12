@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.66
+
+### Patch Changes
+
+- Update react versions
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.66
+
 ## 0.1.1-beta.65
 
 ### Patch Changes

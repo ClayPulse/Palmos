@@ -63,6 +63,7 @@ export default function AppPreviewCard({
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [isOutdated, setIsOutdated] = useState(false);
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
     x: 0,
@@ -143,11 +144,14 @@ export default function AppPreviewCard({
     setIsLoaded(true);
 
     const foundExt = editorContext?.persistSettings?.extensions?.find(
-      (ext) =>
-        ext.config.id === extension.config.id &&
-        ext.config.version === extension.config.version,
+      (ext) => ext.config.id === extension.config.id,
     );
     setIsInstalled(foundExt !== undefined);
+
+    const isOutdated = foundExt
+      ? foundExt.config.version !== extension.config.version
+      : false;
+    setIsOutdated(isOutdated);
     setIsEnabled(foundExt?.isEnabled ?? false);
   }, [extension]);
 
@@ -184,16 +188,20 @@ export default function AppPreviewCard({
         }}
       >
         <div className="pointer-events-none absolute top-0 right-0.5 z-10">
-          <div className="pointer-events-none flex flex-col items-end">
+          <div className="pointer-events-none flex flex-col items-end gap-y-0.5">
             {isShowInstalledChip && isInstalled && (
-              <div className="pointer-events-auto">
-                <Chip startContent={<Icon name="save_alt" />} variant="faded">
+              <div className="pointer-events-auto h-7">
+                <Chip
+                  className="h-full"
+                  startContent={<Icon name="save_alt" />}
+                  variant="faded"
+                >
                   Installed
                 </Chip>
               </div>
             )}
             {isInstalled && (
-              <div className="pointer-events-auto">
+              <div className="pointer-events-auto h-7">
                 <EnableCheckBox
                   isActive={isEnabled}
                   onPress={toggleExtension}
@@ -256,14 +264,27 @@ export default function AppPreviewCard({
                         </div>
                       }
                     >
-                      <Button
-                        variant="faded"
-                        color="success"
-                        size="sm"
-                        radius="full"
-                      >
-                        Compatible
-                      </Button>
+                      {isOutdated ? (
+                        <Button
+                          variant="faded"
+                          color="warning"
+                          size="sm"
+                          radius="full"
+                          className="h-7"
+                        >
+                          Outdated
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="faded"
+                          color="success"
+                          size="sm"
+                          radius="full"
+                          className="h-7"
+                        >
+                          Compatible
+                        </Button>
+                      )}
                     </Tooltip>
                   </div>
                 )
@@ -385,6 +406,34 @@ export default function AppPreviewCard({
               >
                 Install
               </Button>
+            ) : isOutdated ? (
+              <Button
+                color="primary"
+                size="sm"
+                onPress={async (e) => {
+                  try {
+                    await uninstallExtension(extension.config.id);
+
+                    await installExtension(
+                      extension.remoteOrigin,
+                      extension.config.id,
+                      extension.config.version,
+                    );
+
+                    addToast({
+                      title: "Extension upgraded",
+                      description: `Extension ${extension.config.id} upgraded successfully.`,
+                      color: "success",
+                    });
+                    setIsOutdated(false);
+                    setIsEnabled(extension.isEnabled);
+                  } catch (err: any) {
+                    toast.error(err.message);
+                  }
+                }}
+              >
+                Upgrade
+              </Button>
             ) : (
               isShowUninstallButton && (
                 <Button
@@ -498,7 +547,17 @@ function EnableCheckBox({
   const styles = checkbox({ isSelected });
 
   return (
-    <label {...getBaseProps()}>
+    <label
+      {...getBaseProps()}
+      style={{
+        height: "100%",
+        paddingTop: 0,
+        paddingBottom: 0,
+        marginTop: 0,
+        marginBottom: 0,
+        transform: "translateY(-3px)",
+      }}
+    >
       <VisuallyHidden>
         <input {...getInputProps()} />
       </VisuallyHidden>
@@ -520,6 +579,9 @@ function EnableCheckBox({
         }
         variant="faded"
         {...getLabelProps()}
+        style={{
+          height: "100%",
+        }}
       >
         {children ? children : isSelected ? "Enabled" : "Disabled"}
       </Chip>
