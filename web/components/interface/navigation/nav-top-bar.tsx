@@ -1,5 +1,7 @@
+import { PlatformEnum } from "@/lib/enums";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
   Button,
   Dropdown,
@@ -51,7 +53,12 @@ export default function NavTopBar({
   }, [menuActions]);
 
   return (
-    <div className="absolute z-40 w-full px-2 py-2">
+    <div
+      className="absolute z-40 w-full px-2 py-2"
+      style={{
+        paddingTop: getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
+      }}
+    >
       <div
         className={
           "text-default-foreground bg-content1 grid h-14 w-full grid-cols-3 grid-rows-1 rounded-xl px-2 py-2 shadow-md"
