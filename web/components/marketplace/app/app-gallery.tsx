@@ -4,7 +4,7 @@ import { getRemoteMFVersion } from "@/lib/module-federation/version";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppMetaData, ExtensionApp } from "@/lib/types";
 import { Select, SelectItem } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { compare } from "semver";
 import useSWR from "swr";
 import Loading from "../../interface/status-screens/loading";
@@ -85,36 +85,39 @@ export default function AppGallery() {
   );
 
   // Group extensions by name
-  const groupedExtensions = displayedApps?.reduce(
-    (acc: Map<string, ExtensionApp[]>, ext) => {
-      const key = ext.config.id;
-      if (!acc.has(key)) {
-        acc.set(key, []);
-      }
-      acc.get(key)?.push(ext);
-      return acc;
-    },
-    new Map<string, ExtensionApp[]>(),
+  const groupedExtensions = useMemo(
+    () =>
+      displayedApps?.reduce((acc: Map<string, ExtensionApp[]>, ext) => {
+        const key = ext.config.id;
+        if (!acc.has(key)) {
+          acc.set(key, []);
+        }
+        acc.get(key)?.push(ext);
+        return acc;
+      }, new Map<string, ExtensionApp[]>()),
+    [displayedApps],
   );
 
-  const previews = Array.from(groupedExtensions?.entries() ?? []).map(
-    ([name, extGroup]) => {
-      // Take the latest version of each extension group
-      const latestVersion = extGroup.reduce((latest, current) => {
-        return compare(current.config.version, latest.config.version) > 0
-          ? current
-          : latest;
-      }, extGroup[0]);
+  const previews = useMemo(
+    () =>
+      Array.from(groupedExtensions?.entries() ?? []).map(([name, extGroup]) => {
+        // Take the latest version of each extension group
+        const latestVersion = extGroup.reduce((latest, current) => {
+          return compare(current.config.version, latest.config.version) > 0
+            ? current
+            : latest;
+        }, extGroup[0]);
 
-      return (
-        <div key={name} className="h-fit w-full">
-          <AppPreviewCard
-            extension={latestVersion}
-            isShowInstalledChip={true}
-          />
-        </div>
-      );
-    },
+        return (
+          <div key={name} className="h-fit w-full">
+            <AppPreviewCard
+              extension={latestVersion}
+              isShowInstalledChip={true}
+            />
+          </div>
+        );
+      }),
+    [groupedExtensions],
   );
 
   // Get installed Apps

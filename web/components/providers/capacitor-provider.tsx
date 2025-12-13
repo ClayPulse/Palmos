@@ -36,7 +36,6 @@ export default function CapacitorProvider({
   }, [resolvedTheme]);
 
   useEffect(() => {
-    // Hide the navigation bar
     SafeArea.showSystemBars({});
   }, []);
 

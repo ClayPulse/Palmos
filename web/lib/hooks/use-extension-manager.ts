@@ -1,10 +1,9 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { mfHost } from "@/components/providers/remote-module-provider";
 import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
 import { useCallback, useContext } from "react";
 import toast from "react-hot-toast";
 import { compare } from "semver";
-import { getRemote, getRemoteClientBaseURL } from "../module-federation/remote";
+import { getRemoteClientBaseURL } from "../module-federation/remote";
 import {
   getHostMFVersion,
   getRemoteLibVersion,
@@ -54,29 +53,10 @@ export default function useExtensionManager() {
         );
       }
 
-      // TODO: Prevent CSS from being injected from the remote
-      // Register the frontend and backend from remote
-      mfHost.registerRemotes(
-        getRemote(
-          extension.remoteOrigin,
-          extension.config.id,
-          extension.config.version,
-        ),
-      );
-
-      const installedExtensions =
-        editorContext?.persistSettings?.extensions ?? [];
-
-      // Check if extension is already installed
-      if (
-        installedExtensions.find((ext) => ext.config.id === extension.config.id)
-      ) {
-        return;
-      }
-
-      const updatedExtensions = [...installedExtensions, extension];
-
       editorContext?.setPersistSettings((prev) => {
+        const installedExtensions = prev?.extensions ?? [];
+
+        const updatedExtensions = [...installedExtensions, extension];
         return {
           ...prev,
           extensions: updatedExtensions,
@@ -89,19 +69,19 @@ export default function useExtensionManager() {
     [editorContext?.persistSettings?.extensions],
   );
 
-  async function uninstallExtension(name: string): Promise<void> {
+  async function uninstallExtension(id: string): Promise<void> {
     const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
-    const ext = extensions.find((ext) => ext.config.id === name);
+    const ext = extensions.find((ext) => ext.config.id === id);
 
     if (!ext) return;
 
-    const updatedExtensions = extensions.filter(
-      (ext) => ext.config.id !== name,
+    const remainingExtensions = extensions.filter(
+      (ext) => ext.config.id !== id,
     );
 
     editorContext?.setPersistSettings((prev) => ({
       ...prev,
-      extensions: updatedExtensions,
+      extensions: remainingExtensions,
     }));
 
     // Remove default extension for file types

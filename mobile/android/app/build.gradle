@@ -7,7 +7,7 @@ android {
         applicationId "com.pulse_editor.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 6
+        versionCode 7
         versionName "v0.1.1-beta"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
