@@ -1,13 +1,8 @@
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import {
-  PersistentSettings,
-  ProjectInfo,
-  RemoteWorkspace,
-} from "@/lib/types";
-import { addToast } from "@heroui/react";
-import toast from "react-hot-toast";
-import { AbstractPlatformAPI } from "../abstract-platform-api";
+import { PersistentSettings, ProjectInfo, RemoteWorkspace } from "@/lib/types";
+import { addToast, Button } from "@heroui/react";
 import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
+import { AbstractPlatformAPI } from "../abstract-platform-api";
 
 /**
  * Cloud Platform API
@@ -29,21 +24,21 @@ export class CloudAPI extends AbstractPlatformAPI {
   }
 
   async selectDir(): Promise<string | undefined> {
-    if (!this.workspace) {
-      toast.error("No workspace selected");
-      throw new Error("No workspace selected");
-    }
+    addToast({
+      title: "Not implemented",
+      description: "Directory selection is not supported in cloud environment",
+      color: "warning",
+    });
 
-    toast.error("Not implemented");
     throw new Error("Method not implemented.");
   }
 
   async selectFile(fileExtension?: string): Promise<File> {
-    if (!this.workspace) {
-      toast.error("No workspace selected");
-      throw new Error("No workspace selected");
-    }
-    toast.error("Not implemented");
+    addToast({
+      title: "Not implemented",
+      description: "File selection is not supported in cloud environment",
+      color: "warning",
+    });
     throw new Error("Method not implemented.");
   }
 
@@ -79,7 +74,20 @@ export class CloudAPI extends AbstractPlatformAPI {
     options: ListPathOptions,
   ): Promise<FileSystemObject[]> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot list path content without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -145,7 +153,20 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async createFolder(uri: string): Promise<void> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot create folder without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -168,7 +189,20 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async createFile(uri: string): Promise<void> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot create file without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -191,7 +225,20 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async rename(oldUri: string, newUri: string): Promise<void> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot rename file without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -214,7 +261,20 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async delete(uri: string): Promise<void> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot delete file without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -238,7 +298,20 @@ export class CloudAPI extends AbstractPlatformAPI {
   // Reserved for cloud environment implementation
   async hasPath(uri: string): Promise<boolean> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot check path without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -264,7 +337,20 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async readFile(uri: string): Promise<File> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot read file without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -291,7 +377,20 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async writeFile(file: File, uri: string): Promise<void> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot write file without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -318,7 +417,20 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async copyFiles(from: string, to: string): Promise<void> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot copy files without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 
@@ -377,7 +489,21 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async getInstallationPath(): Promise<string> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description:
+          "Cannot get installation path without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
     return "/workspace";
@@ -385,7 +511,20 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async createTerminal(): Promise<string> {
     if (!this.workspace) {
-      toast.error("No workspace selected");
+      addToast({
+        title: "No workspace selected",
+        endContent: (
+          <Button
+            onPress={() => {
+              // open workspace modal
+            }}
+          >
+            Workspace
+          </Button>
+        ),
+        description: "Cannot create terminal without a selected workspace",
+        color: "danger",
+      });
       throw new Error("No workspace selected");
     }
 

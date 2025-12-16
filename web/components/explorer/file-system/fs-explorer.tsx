@@ -17,8 +17,10 @@ import TreeViewGroup from "./tree-view";
 
 export default function FileSystemExplorer({
   setIsMenuOpen,
+  openWorkspaceSettingsModal,
 }: {
   setIsMenuOpen: (isOpen: boolean) => void;
+  openWorkspaceSettingsModal: () => void;
 }) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
@@ -210,6 +212,16 @@ export default function FileSystemExplorer({
             <Button isIconOnly variant="light" size="sm">
               <Icon name="search" variant="outlined" />
             </Button> */}
+            <Button
+              isIconOnly
+              variant="light"
+              size="sm"
+              onPress={() => {
+                openWorkspaceSettingsModal();
+              }}
+            >
+              <Icon name="settings" variant="outlined" />
+            </Button>
           </div>
         </div>
 

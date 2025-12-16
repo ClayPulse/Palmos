@@ -163,6 +163,7 @@ export type AppConfig = {
   fileTypes?: string[];
   thumbnail?: string;
   enabledPlatforms?: Record<string, boolean>;
+  requireWorkspace?: boolean;
 
   // App installed agents
   agents?: Agent[];

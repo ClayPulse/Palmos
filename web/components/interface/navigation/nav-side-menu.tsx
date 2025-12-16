@@ -79,7 +79,7 @@ function MenuPanel({ children }: { children?: React.ReactNode }) {
         </motion.div>
       ) : (
         <motion.div
-          className="absolute top-0 left-0 z-50 h-full w-full md:hidden safe-area-padding"
+          className="safe-area-padding absolute top-0 left-0 z-50 h-full w-full md:hidden"
           initial={{
             y: "-100vh",
           }}
@@ -125,6 +125,7 @@ function PanelContent() {
 
   const selectedTab =
     editorContext?.editorStates.sideMenuTab ?? SideMenuTabEnum.Projects;
+
   function setSelectedTab(tab: SideMenuTabEnum) {
     editorContext?.setEditorStates((prev) => {
       return {

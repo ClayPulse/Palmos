@@ -2,7 +2,11 @@ import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
 import useIMC from "../imc/use-imc";
 
-export default function usePulseEnv() {
+/**
+ * Hook to access editor environment variables in the frontend (saved in storage).
+ * @returns
+ */
+export default function useEditorEnv() {
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>

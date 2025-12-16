@@ -2,7 +2,7 @@ import { IMCMessage, IMCMessageTypeEnum } from "@pulse-editor/shared-utils";
 import { useEffect, useState } from "react";
 import useIMC from "../imc/use-imc";
 
-export default function useWorkspace() {
+export default function useWorkspaceInfo() {
   const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined);
 
   const receiverHandlerMap = new Map<

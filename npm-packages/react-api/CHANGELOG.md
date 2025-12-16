@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.67
+
+### Patch Changes
+
+- Add requireWorkspace in AppConfig
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.67
+
 ## 0.1.1-beta.66
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.67
+
+### Patch Changes
+
+- Add requireWorkspace in AppConfig
+
 ## 0.1.1-beta.66
 
 ### Patch Changes
