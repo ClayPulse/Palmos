@@ -49,7 +49,7 @@ export default function ProjectExplorer() {
     <div className="flex h-full w-full flex-col gap-2">
       {session ? (
         <div>
-          <p className="text-center text-lg font-medium">View Projects</p>
+          <p className="text-center text-lg font-medium">Manage Projects</p>
           <Button
             className="w-full"
             onPress={() => {
