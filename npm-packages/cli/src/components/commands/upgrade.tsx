@@ -57,6 +57,9 @@ export default function Upgrade({cli}: {cli: Result<Flags>}) {
 			fs.unlinkSync(webpackConfigPath);
 		}
 
+		// Uninstall @module-federation/node html-webpack-plugin copy-webpack-plugin glob mini-css-extract-plugin webpack webpack-cli webpack-dev-server
+		await $`npm uninstall @module-federation/node html-webpack-plugin copy-webpack-plugin glob mini-css-extract-plugin webpack webpack-cli webpack-dev-server --silent --force`;
+
 		setStep('done');
 	}
 
