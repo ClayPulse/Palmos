@@ -19,7 +19,7 @@ dotenv.config({
 });
 
 const isPreview = process.env?.['PREVIEW'];
-const isDev = process.env?.['NODE_ENV'];
+const isDev = process.env?.['NODE_ENV'] === 'development';
 const workspaceId = process.env?.['WORKSPACE_ID'];
 
 const pulseConfig = await readConfigFile();
