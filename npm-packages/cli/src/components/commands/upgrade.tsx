@@ -51,6 +51,12 @@ export default function Upgrade({cli}: {cli: Result<Flags>}) {
 		await $`npm install -D @pulse-editor/cli@${tag} --silent --force`;
 		await $`npm install @pulse-editor/shared-utils@${tag} @pulse-editor/react-api@${tag} --silent --force`;
 
+		// Remove webpack.config.ts if exists
+		const webpackConfigPath = `${process.cwd()}/webpack.config.ts`;
+		if (fs.existsSync(webpackConfigPath)) {
+			fs.unlinkSync(webpackConfigPath);
+		}
+
 		setStep('done');
 	}
 

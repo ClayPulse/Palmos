@@ -1,5 +1,10 @@
 "use client";
 
+import Tabs from "@/components/misc/tabs";
+import { ExtensionApp, TabItem } from "@/lib/types";
+import { Button, Divider, Tooltip } from "@heroui/react";
+import { ViewModel } from "@pulse-editor/shared-utils";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Dispatch,
   SetStateAction,
@@ -7,16 +12,10 @@ import {
   useEffect,
   useState,
 } from "react";
-import { TabItem, ExtensionApp } from "@/lib/types";
-import { Button, Divider, select, Tooltip } from "@heroui/react";
+import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
+import Icon from "../../misc/icon";
 import AgentConfigModal from "../../modals/agent-config-modal";
 import { EditorContext } from "../../providers/editor-context-provider";
-import Tabs from "@/components/misc/tabs";
-import Icon from "../../misc/icon";
-import { AppTypeEnum, ViewModel } from "@pulse-editor/shared-utils";
-import { AnimatePresence, motion } from "framer-motion";
-import { v4 } from "uuid";
-import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 import AppViewLayout from "../standalone-app/layout";
 
 function ConsoleNavBar({
@@ -32,9 +31,9 @@ function ConsoleNavBar({
 }) {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
-  const [selectedConsole, setSelectedConsole] = useState<ExtensionApp | undefined>(
-    undefined,
-  );
+  const [selectedConsole, setSelectedConsole] = useState<
+    ExtensionApp | undefined
+  >(undefined);
 
   useEffect(() => {
     if (consoles.length > 0) {
@@ -146,27 +145,28 @@ export default function ConsolePanelView() {
     }
   }, [editorContext?.editorStates.isConsolePanelOpen]);
 
-  useEffect(() => {
-    // Load extensions from editor context
-    if (editorContext?.persistSettings?.extensions && isFirstOpened) {
-      const foundConsoles = editorContext.persistSettings?.extensions.filter(
-        (extension) =>
-          extension.config.appType === AppTypeEnum.ConsoleView,
-      );
-      console.log(
-        "Found consoles:",
-        foundConsoles.map((ext) => ext.config.displayName),
-      );
-      setConsoles(foundConsoles);
-      setViewModels(
-        foundConsoles.map((ext) => ({
-          viewId: `${ext.config.id}-${v4()}`,
-          isFocused: false,
-          appConfig: ext.config,
-        })),
-      );
-    }
-  }, [editorContext?.persistSettings?.extensions, isFirstOpened]);
+  // TODO: Load installed apps in console view.
+  // useEffect(() => {
+  //   // Load extensions from editor context
+  //   if (editorContext?.persistSettings?.extensions && isFirstOpened) {
+  //     const foundConsoles = editorContext.persistSettings?.extensions.filter(
+  //       (extension) =>
+  //         extension.config.appType === AppTypeEnum.ConsoleView,
+  //     );
+  //     console.log(
+  //       "Found consoles:",
+  //       foundConsoles.map((ext) => ext.config.displayName),
+  //     );
+  //     setConsoles(foundConsoles);
+  //     setViewModels(
+  //       foundConsoles.map((ext) => ({
+  //         viewId: `${ext.config.id}-${v4()}`,
+  //         isFocused: false,
+  //         appConfig: ext.config,
+  //       })),
+  //     );
+  //   }
+  // }, [editorContext?.persistSettings?.extensions, isFirstOpened]);
 
   return (
     <AnimatePresence>
