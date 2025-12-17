@@ -1,9 +1,10 @@
+import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState, Workflow } from "@/lib/types";
-import { Button, Skeleton } from "@heroui/react";
+import { Button, Chip, Skeleton, Tooltip } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import ContextMenu from "../../interface/context-menu";
@@ -55,6 +56,14 @@ export default function WorkflowPreviewCard({
     }));
   }
 
+  const requireWorkspace = workflow.content.nodes
+    .map((node) => node.data.config.app)
+    .some((app) =>
+      editorContext?.persistSettings?.extensions?.find(
+        (ext) => ext.config.id === app && ext.config.requireWorkspace,
+      ),
+    );
+
   return (
     <div className="grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content]">
       <div
@@ -71,6 +80,35 @@ export default function WorkflowPreviewCard({
           }
         }}
       >
+        <div className="pointer-events-none absolute top-0 right-0.5 z-10">
+          <div className="pointer-events-none flex flex-col items-end gap-y-0.5">
+            {requireWorkspace && (
+              <div className="pointer-events-auto h-7">
+                <Tooltip
+                  content={
+                    <div className="max-w-xs">
+                      <p>
+                        This app requires a workspace to be opened in order to
+                        function properly.
+                      </p>
+                    </div>
+                  }
+                >
+                  <Chip
+                    className="h-full"
+                    startContent={<Icon name="computer" />}
+                    variant="faded"
+                    color="secondary"
+                    size="sm"
+                  >
+                    Requires Workspace
+                  </Chip>
+                </Tooltip>
+              </div>
+            )}
+          </div>
+        </div>
+
         <Button
           className="relative m-0 h-full w-full rounded-md p-0"
           onPress={() => {

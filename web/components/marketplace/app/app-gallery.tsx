@@ -44,37 +44,31 @@ export default function AppGallery() {
       const fetchedExts: AppMetaData[] = body;
       try {
         const extensions: ExtensionApp[] = await Promise.all(
-          fetchedExts.map(async (extMeta) => {
-            // If backend does not provide mfVersion, try to load it from the manifest
-            if (!extMeta.mfVersion) {
-              console.warn(
-                `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
-              );
-            }
-            const mfVersion =
-              extMeta.mfVersion ??
-              (await getRemoteMFVersion(
-                `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-                extMeta.name,
-                extMeta.version,
-              ));
+          fetchedExts
+            .filter((extMeta) => extMeta.appConfig)
+            .map(async (extMeta) => {
+              // If backend does not provide mfVersion, try to load it from the manifest
+              if (!extMeta.mfVersion) {
+                console.warn(
+                  `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
+                );
+              }
 
-            return {
-              config: {
-                id: extMeta.name,
-                version: extMeta.version,
-                libVersion: extMeta.libVersion,
-                author: extMeta.author ? extMeta.author.name : extMeta.org.name,
-                description: extMeta.description ?? "No description available",
-                displayName: extMeta.displayName ?? extMeta.name,
-                visibility: extMeta.visibility,
-                thumbnail: extMeta.thumbnail,
-              },
-              isEnabled: true,
-              remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-              mfVersion: mfVersion,
-            };
-          }),
+              const mfVersion =
+                extMeta.mfVersion ??
+                (await getRemoteMFVersion(
+                  `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+                  extMeta.name,
+                  extMeta.version,
+                ));
+
+              return {
+                config: extMeta.appConfig!,
+                isEnabled: true,
+                remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+                mfVersion: mfVersion,
+              };
+            }),
         );
         return extensions;
       } catch (error) {

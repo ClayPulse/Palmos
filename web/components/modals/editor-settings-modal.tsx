@@ -1,7 +1,7 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import useExplorer from "@/lib/hooks/use-explorer";
-import useExtensionManager from "@/lib/hooks/use-extension-manager";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-manager";
 import useRouter from "@/lib/hooks/use-router";
 import { imageGenProviderOptions } from "@/lib/modalities/image-gen/registry";
 import { llmProviderOptions } from "@/lib/modalities/llm/registry";
@@ -854,7 +854,7 @@ function DevExtensionSettings({
   const [devExtensionId, setDevExtensionId] = useState<string>("");
   const [devExtensionVersion, setDevExtensionVersion] = useState<string>("");
 
-  const { installExtension } = useExtensionManager();
+  const { installExtensionApp } = useExtensionAppManager();
 
   // Load installed extensions
   useEffect(() => {
@@ -1015,7 +1015,7 @@ function DevExtensionSettings({
                   devExtensionVersion
                 ) {
                   try {
-                    await installExtension(
+                    await installExtensionApp(
                       devExtensionRemoteOrigin,
                       devExtensionId,
                       devExtensionVersion,
