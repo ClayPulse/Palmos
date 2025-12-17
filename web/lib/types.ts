@@ -96,7 +96,7 @@ export type EditorStates = {
   // Drag control
   isDraggingOverCanvas?: boolean;
   dropMessage?: string;
-  
+
   inputDeviceBuffers?: {
     audioBuffer?: ArrayBuffer;
   };
@@ -327,13 +327,12 @@ export type Session = {
   expires: string;
 };
 
+/* App meta data returned from registry backend */
 export type AppMetaData = {
   name: string;
   version: string;
-  libVersion?: string;
   mfVersion?: string;
-  description?: string;
-  displayName?: string;
+  appConfig?: AppConfig;
   author: {
     name: string;
   };
@@ -341,7 +340,6 @@ export type AppMetaData = {
     name: string;
   };
   visibility: "public" | "private" | "unlisted";
-  thumbnail?: string;
 };
 // #endregion
 

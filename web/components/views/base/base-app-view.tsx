@@ -1,7 +1,7 @@
 import Loading from "@/components/interface/status-screens/loading";
 import NotAuthorized from "@/components/interface/status-screens/not-authorized";
 import { IMCContext } from "@/components/providers/imc-provider";
-import useExtensionManager from "@/lib/hooks/use-extension-manager";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-manager";
 import { AppViewConfig, ExtensionApp } from "@/lib/types";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
@@ -17,11 +17,11 @@ export default function BaseAppView({
   const imcContext = useContext(IMCContext);
 
   const {
-    installExtension,
+    installExtensionApp,
     loadAppFromCache,
     loadAppFromRegistry,
     loadAppFromURL,
-  } = useExtensionManager();
+  } = useExtensionAppManager();
 
   const [noAccessToApp, setNoAccessToApp] = useState<boolean>(false);
   const [pulseAppViewModel, setPulseAppViewModel] = useState<
@@ -31,7 +31,7 @@ export default function BaseAppView({
 
   useEffect(() => {
     async function installAndOpenApp(ext: ExtensionApp) {
-      await installExtension(
+      await installExtensionApp(
         ext.remoteOrigin,
         ext.config.id,
         ext.config.version,
@@ -81,7 +81,7 @@ export default function BaseAppView({
     if (!isOpened) {
       openApp().then(() => setIsOpened(true));
     }
-  }, [config, installExtension, isOpened]);
+  }, [config, installExtensionApp, isOpened]);
 
   return noAccessToApp ? (
     <div className="bg-content3 h-full w-full">

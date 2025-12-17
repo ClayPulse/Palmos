@@ -11,10 +11,10 @@ import {
 } from "../module-federation/version";
 import { AppMetaData, ExtensionApp } from "../types";
 
-export default function useExtensionManager() {
+export function useExtensionAppManager() {
   const editorContext = useContext(EditorContext);
 
-  const installExtension = useCallback(
+  const installExtensionApp = useCallback(
     async (
       remoteOrigin: string,
       id: string,
@@ -64,12 +64,12 @@ export default function useExtensionManager() {
       });
 
       // Try to set default extension for file types
-      tryAutoSetDefault(extension);
+      tryAutoSetDefaultExtensionApp(extension);
     },
     [editorContext?.persistSettings?.extensions],
   );
 
-  async function uninstallExtension(id: string): Promise<void> {
+  async function uninstallExtensionApp(id: string): Promise<void> {
     const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
     const ext = extensions.find((ext) => ext.config.id === id);
 
@@ -85,10 +85,10 @@ export default function useExtensionManager() {
     }));
 
     // Remove default extension for file types
-    removeDefaultExtension(ext);
+    removeDefaultExtensionApp(ext);
   }
 
-  async function enableExtension(name: string): Promise<void> {
+  async function enableExtensionApp(name: string): Promise<void> {
     const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
     const newExtensions = extensions.map((ext) => {
       if (ext.config.id === name) {
@@ -103,7 +103,7 @@ export default function useExtensionManager() {
     }));
   }
 
-  async function disableExtension(name: string): Promise<void> {
+  async function disableExtensionApp(name: string): Promise<void> {
     const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
     const newExtensions = extensions.map((ext) => {
       if (ext.config.id === name) {
@@ -118,14 +118,14 @@ export default function useExtensionManager() {
     }));
   }
 
-  async function getInstalledExtension(
+  async function getInstalledExtensionApp(
     name: string,
   ): Promise<ExtensionApp | undefined> {
     const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
     return extensions.find((ext) => ext.config.id === name) ?? undefined;
   }
 
-  function tryAutoSetDefault(ext: ExtensionApp) {
+  function tryAutoSetDefaultExtensionApp(ext: ExtensionApp) {
     // Try to set default extension for file types
     const map =
       editorContext?.persistSettings?.defaultFileTypeExtensionMap ?? {};
@@ -143,7 +143,7 @@ export default function useExtensionManager() {
     }));
   }
 
-  function removeDefaultExtension(ext: ExtensionApp) {
+  function removeDefaultExtensionApp(ext: ExtensionApp) {
     const map = editorContext?.persistSettings?.defaultFileTypeExtensionMap;
     if (map) {
       ext.config.fileTypes?.forEach((fileType) => {
@@ -259,36 +259,31 @@ export default function useExtensionManager() {
     const fetchedExts: AppMetaData[] = await res.json();
 
     const extensions: ExtensionApp[] = await Promise.all(
-      fetchedExts.map(async (extMeta) => {
-        // If backend does not provide mfVersion, try to load it from the manifest
-        if (!extMeta.mfVersion) {
-          console.warn(
-            `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
-          );
-        }
-        const mfVersion =
-          extMeta.mfVersion ??
-          (await getRemoteMFVersion(
-            `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-            extMeta.name,
-            extMeta.version,
-          ));
+      fetchedExts
+        .filter((extMeta) => extMeta.appConfig)
+        .map(async (extMeta) => {
+          // If backend does not provide mfVersion, try to load it from the manifest
+          if (!extMeta.mfVersion) {
+            console.warn(
+              `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
+            );
+          }
 
-        return {
-          config: {
-            id: extMeta.name,
-            version: extMeta.version,
-            libVersion: extMeta.libVersion,
-            author: extMeta.author ? extMeta.author.name : extMeta.org.name,
-            description: extMeta.description ?? "No description available",
-            displayName: extMeta.displayName ?? extMeta.name,
-            visibility: extMeta.visibility,
-          },
-          isEnabled: true,
-          remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-          mfVersion: mfVersion,
-        };
-      }),
+          const mfVersion =
+            extMeta.mfVersion ??
+            (await getRemoteMFVersion(
+              `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+              extMeta.name,
+              extMeta.version,
+            ));
+
+          return {
+            config: extMeta.appConfig!,
+            isEnabled: true,
+            remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+            mfVersion: mfVersion,
+          };
+        }),
     );
 
     // Get the latest version of the extension
@@ -313,11 +308,11 @@ export default function useExtensionManager() {
   }
 
   return {
-    installExtension,
-    uninstallExtension,
-    enableExtension,
-    disableExtension,
-    getInstalledExtension,
+    installExtensionApp,
+    uninstallExtensionApp,
+    enableExtensionApp,
+    disableExtensionApp,
+    getInstalledExtensionApp,
     getExtensionInfoFromRemote,
     loadAppFromCache,
     loadAppFromRegistry,

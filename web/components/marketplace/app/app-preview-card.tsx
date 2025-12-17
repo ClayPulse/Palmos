@@ -1,6 +1,6 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import useExtensionManager from "@/lib/hooks/use-extension-manager";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-manager";
 import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
 import {
   checkCompatibility,
@@ -53,11 +53,11 @@ export default function AppPreviewCard({
   listeners?: SyntheticListenerMap;
 }) {
   const {
-    disableExtension,
-    enableExtension,
-    uninstallExtension,
-    installExtension,
-  } = useExtensionManager();
+    disableExtensionApp,
+    enableExtensionApp,
+    uninstallExtensionApp,
+    installExtensionApp,
+  } = useExtensionAppManager();
   const { openAppInfoModal } = useAppInfo();
 
   const [isEnabled, setIsEnabled] = useState(false);
@@ -157,11 +157,11 @@ export default function AppPreviewCard({
 
   function toggleExtension() {
     if (isEnabled) {
-      disableExtension(extension.config.id).then(() => {
+      disableExtensionApp(extension.config.id).then(() => {
         setIsEnabled(false);
       });
     } else {
-      enableExtension(extension.config.id).then(() => {
+      enableExtensionApp(extension.config.id).then(() => {
         setIsEnabled(true);
       });
     }
@@ -189,25 +189,50 @@ export default function AppPreviewCard({
       >
         <div className="pointer-events-none absolute top-0 right-0.5 z-10">
           <div className="pointer-events-none flex flex-col items-end gap-y-0.5">
+            {extension.config.requireWorkspace && (
+              <div className="pointer-events-auto h-7">
+                <Tooltip
+                  content={
+                    <div className="max-w-xs">
+                      <p>
+                        This app requires a workspace to be opened in order to
+                        function properly.
+                      </p>
+                    </div>
+                  }
+                >
+                  <Chip
+                    className="h-full"
+                    startContent={<Icon name="computer" />}
+                    variant="faded"
+                    color="secondary"
+                    size="sm"
+                  >
+                    Requires Workspace
+                  </Chip>
+                </Tooltip>
+              </div>
+            )}
             {isShowInstalledChip && isInstalled && (
               <div className="pointer-events-auto h-7">
                 <Chip
                   className="h-full"
                   startContent={<Icon name="save_alt" />}
                   variant="faded"
+                  size="sm"
                 >
                   Installed
                 </Chip>
               </div>
             )}
-            {isInstalled && (
+            {/* {isInstalled && (
               <div className="pointer-events-auto h-7">
                 <EnableCheckBox
                   isActive={isEnabled}
                   onPress={toggleExtension}
                 />
               </div>
-            )}
+            )} */}
 
             {isMFCompatible !== undefined &&
               isLibCompatible !== undefined &&
@@ -385,7 +410,7 @@ export default function AppPreviewCard({
                 color="primary"
                 size="sm"
                 onPress={async (e) => {
-                  await installExtension(
+                  await installExtensionApp(
                     extension.remoteOrigin,
                     extension.config.id,
                     extension.config.version,
@@ -412,9 +437,9 @@ export default function AppPreviewCard({
                 size="sm"
                 onPress={async (e) => {
                   try {
-                    await uninstallExtension(extension.config.id);
+                    await uninstallExtensionApp(extension.config.id);
 
-                    await installExtension(
+                    await installExtensionApp(
                       extension.remoteOrigin,
                       extension.config.id,
                       extension.config.version,
@@ -440,7 +465,7 @@ export default function AppPreviewCard({
                   color="danger"
                   size="sm"
                   onPress={(e) => {
-                    uninstallExtension(extension.config.id).then(() => {
+                    uninstallExtensionApp(extension.config.id).then(() => {
                       addToast({
                         title: "Extension uninstalled",
                         description: `Extension ${extension.config.id} uninstalled successfully.`,
@@ -464,7 +489,7 @@ export default function AppPreviewCard({
                   className="text-medium h-12 sm:h-8 sm:text-sm"
                   variant="light"
                   onPress={(e) => {
-                    uninstallExtension(extension.config.id).then(() => {
+                    uninstallExtensionApp(extension.config.id).then(() => {
                       addToast({
                         title: "Extension uninstalled",
                         description: `Extension ${extension.config.id} uninstalled successfully.`,
@@ -481,7 +506,7 @@ export default function AppPreviewCard({
                   className="text-medium h-12 sm:h-8 sm:text-sm"
                   variant="light"
                   onPress={(e) => {
-                    installExtension(
+                    installExtensionApp(
                       extension.remoteOrigin,
                       extension.config.id,
                       extension.config.version,
@@ -582,6 +607,7 @@ function EnableCheckBox({
         style={{
           height: "100%",
         }}
+        size="sm"
       >
         {children ? children : isSelected ? "Enabled" : "Disabled"}
       </Chip>
