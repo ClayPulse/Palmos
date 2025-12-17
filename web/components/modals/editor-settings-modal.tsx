@@ -22,7 +22,6 @@ import {
   Switch,
   Tooltip,
 } from "@heroui/react";
-import { AppTypeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -861,28 +860,26 @@ function DevExtensionSettings({
   useEffect(() => {
     const extensions = editorContext?.persistSettings?.extensions ?? [];
     extensions.forEach((extension) => {
-      if (extension.config.appType === AppTypeEnum.FileView) {
-        const fileTypes = extension.config.fileTypes;
-        console.log(fileTypes);
+      const fileTypes = extension.config.fileTypes;
+      console.log(fileTypes);
 
-        if (fileTypes) {
-          fileTypes.forEach((fileType) => {
-            if (!fileTypeExtensionMap.has(fileType)) {
-              fileTypeExtensionMap.set(fileType, []);
-            }
-            fileTypeExtensionMap.get(fileType)?.push(extension);
-          });
-        } else {
-          const fileType = "*";
+      if (fileTypes) {
+        fileTypes.forEach((fileType) => {
           if (!fileTypeExtensionMap.has(fileType)) {
             fileTypeExtensionMap.set(fileType, []);
           }
-
           fileTypeExtensionMap.get(fileType)?.push(extension);
+        });
+      } else {
+        const fileType = "*";
+        if (!fileTypeExtensionMap.has(fileType)) {
+          fileTypeExtensionMap.set(fileType, []);
         }
 
-        setFileTypeExtensionMap(new Map(fileTypeExtensionMap));
+        fileTypeExtensionMap.get(fileType)?.push(extension);
       }
+
+      setFileTypeExtensionMap(new Map(fileTypeExtensionMap));
     });
   }, []);
 

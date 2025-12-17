@@ -14,7 +14,7 @@ There are two types of extensions:
   Console View Extension is opened without a file view object. Often it does not need to interact with a file (reading/writing). You can open the console panel by clicking <Icon name="terminal"/> in the toolbar, then you can find all installed Console View Extensions.
 
 :::info
-Pulse Editor provides a set of SDK libraries for extension developers. If you are interested in building and publishing extension apps to Pulse Editor Marketplace, check out the [extension developer guide](/docs/guide/develop-extensions).
+Pulse Editor provides a set of SDK libraries for extension developers. If you are interested in building and publishing extension apps to Pulse Editor Marketplace, check out the [extension developer guide](/docs/guide/develop-extension-apps).
 :::
 
 ## Browse extension marketplace

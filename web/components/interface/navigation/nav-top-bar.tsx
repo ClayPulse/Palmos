@@ -82,7 +82,8 @@ export default function NavTopBar({
           <ViewMenuDropDown />
         </div>
         <div className="col-start-2 flex flex-col items-center justify-center">
-          {editorContext?.editorStates.project && <ProjectIndicator />}
+          {editorContext?.editorStates.project &&
+            !editorContext.editorStates.isSideMenuOpen && <ProjectIndicator />}
           <VoiceIndicator />
         </div>
         <div className="col-start-3 flex justify-end gap-x-1">

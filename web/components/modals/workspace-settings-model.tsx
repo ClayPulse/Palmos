@@ -1,20 +1,31 @@
 "use client";
 
+import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import {
   addToast,
   Button,
+  Divider,
   Input,
   NumberInput,
   Select,
   SelectItem,
 } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Icon from "../misc/icon";
+import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./modal-wrapper";
 
-const specsOptions = [
+type SpecOption = {
+  key: string;
+  vCPU: number;
+  ram: number;
+};
+
+const specsOptions: SpecOption[] = [
   { key: "cpu-1-2", vCPU: 1, ram: 2 },
   { key: "cpu-2-4", vCPU: 2, ram: 4 },
   { key: "cpu-4-8", vCPU: 4, ram: 8 },
@@ -38,13 +49,16 @@ export default function WorkspaceSettingsModal({
   setIsOpen: (val: boolean) => void;
   workspaceHook: ReturnType<typeof useWorkspace>;
 }) {
+  const editorContext = useContext(EditorContext);
+
   const { platformApi } = usePlatformApi();
   const [workspaceName, setWorkspaceName] = useState("");
   const { workspace, createWorkspace, updateWorkspace, deleteWorkspace } =
     workspaceHook;
 
   const [storage, setStorage] = useState(5);
-  const [selectedSpec, setSelectedSpec] = useState(specsOptions[0]);
+  const [selectedSpec, setSelectedSpec] = useState<SpecOption>(specsOptions[0]);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     if (workspace) {
@@ -58,6 +72,10 @@ export default function WorkspaceSettingsModal({
             option.ram === getNumberFromUnitString(workspace.memoryLimit),
         ) ?? specsOptions[0],
       );
+    } else {
+      setWorkspaceName("");
+      setStorage(5);
+      setSelectedSpec(specsOptions[0]);
     }
   }, [workspace]);
 
@@ -146,6 +164,7 @@ export default function WorkspaceSettingsModal({
         color: "success",
       });
       setIsOpen(false);
+      setIsCreating(false);
     } catch (error: any) {
       addToast({
         title: "Error creating workspace",
@@ -162,55 +181,125 @@ export default function WorkspaceSettingsModal({
       title="Workspace Settings"
     >
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
-        <Input
-          label="Workspace Name"
-          isRequired
-          value={workspaceName}
-          onValueChange={setWorkspaceName}
-        />
-        <Select
-          label="Workspace Specs"
-          selectedKeys={[selectedSpec.key]}
-          onSelectionChange={(key) => {
-            const spec = specsOptions.find(
-              (option) => option.key === key.currentKey,
-            );
-            if (spec) {
-              setSelectedSpec(spec);
+        <div className="flex w-full justify-center px-8">
+          <Select
+            color="default"
+            className="w-full"
+            classNames={{
+              mainWrapper: "h-10",
+              trigger: "py-0.5 min-h-10",
+            }}
+            label="Select Workspace"
+            placeholder="Select Workspace"
+            isLoading={
+              !editorContext?.editorStates?.isSigningIn &&
+              !workspaceHook.cloudWorkspaces
             }
-          }}
-          disabledKeys={["more to come"]}
-          isDisabled={workspace ? true : false}
-        >
-          <>
-            {specsOptions.map((option) => (
-              <SelectItem
-                key={option.key}
-              >{`${option.vCPU} vCPU, ${option.ram} GB RAM`}</SelectItem>
-            ))}
-            <SelectItem isReadOnly key={"more to come"}>
-              <p className="pl-5 text-center">More to come</p>
-            </SelectItem>
-          </>
-        </Select>
-        <NumberInput
-          label="Storage (GB)"
-          value={storage}
-          onValueChange={setStorage}
-          minValue={2}
-          maxValue={512}
-          isDisabled={workspace ? true : false}
-        />
-        {workspace ? (
-          <div className="flex gap-x-1">
-            <Button onPress={handleUpdateWorkspace}>Update</Button>
+            selectedKeys={
+              workspaceHook.workspace
+                ? [workspaceHook.workspace.id]
+                : getPlatform() === PlatformEnum.Electron
+                  ? ["__internal-local"]
+                  : []
+            }
+            size="sm"
+            disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
+            onSelectionChange={async (key) => {
+              if (key.currentKey === "__internal-create-new") {
+                await workspaceHook.selectWorkspace(undefined);
+                setIsCreating(true);
+                return;
+              } else if (key.currentKey === "__internal-settings") {
+                await workspaceHook.selectWorkspace(undefined);
+                return;
+              } else if (key.currentKey === "__internal-local") {
+                await workspaceHook.selectWorkspace(undefined);
+                return;
+              }
 
-            <Button color="danger" onPress={handleDeleteWorkspace}>
-              Delete
-            </Button>
-          </div>
-        ) : (
-          <Button onPress={handleCreateProject}>Create</Button>
+              const selectedWorkspace = workspaceHook.cloudWorkspaces?.find(
+                (workspace) => workspace.id === key.currentKey,
+              );
+              await workspaceHook.selectWorkspace(selectedWorkspace?.id);
+            }}
+          >
+            <>
+              {getPlatform() === PlatformEnum.Electron && (
+                <SelectItem key={"__internal-local"}>Local Computer</SelectItem>
+              )}
+              {workspaceHook.cloudWorkspaces?.map((workspace) => (
+                <SelectItem key={workspace.id}>{workspace.name}</SelectItem>
+              )) ?? []}
+              <SelectItem
+                key={"__internal-create-new"}
+                className="bg-primary text-primary-foreground"
+                color="primary"
+                startContent={
+                  <div className="text-primary-foreground h-4 w-4">
+                    <Icon name="add" variant="round" />
+                  </div>
+                }
+              >
+                Create New
+              </SelectItem>
+            </>
+          </Select>
+        </div>
+
+        {(isCreating || workspace) && (
+          <>
+            <Divider />
+            <Input
+              label="Workspace Name"
+              isRequired
+              value={workspaceName}
+              onValueChange={setWorkspaceName}
+            />
+            <Select
+              label="Workspace Specs"
+              selectedKeys={[selectedSpec.key]}
+              onSelectionChange={(key) => {
+                const spec = specsOptions.find(
+                  (option) => option.key === key.currentKey,
+                );
+                if (spec) {
+                  setSelectedSpec(spec);
+                }
+              }}
+              disabledKeys={["more to come"]}
+              isDisabled={workspace ? true : false}
+            >
+              <>
+                {specsOptions.map((option) => (
+                  <SelectItem
+                    key={option.key}
+                  >{`${option.vCPU} vCPU, ${option.ram} GB RAM`}</SelectItem>
+                ))}
+                <SelectItem isReadOnly key={"more to come"}>
+                  <p className="pl-5 text-center">More to come</p>
+                </SelectItem>
+              </>
+            </Select>
+            <NumberInput
+              label="Storage (GB)"
+              value={storage}
+              onValueChange={setStorage}
+              minValue={2}
+              maxValue={512}
+              isDisabled={workspace ? true : false}
+            />
+            {workspace ? (
+              <div className="flex gap-x-1">
+                <Button onPress={handleUpdateWorkspace}>Update</Button>
+
+                <Button color="danger" onPress={handleDeleteWorkspace}>
+                  Delete
+                </Button>
+              </div>
+            ) : (
+              <Button onPress={handleCreateProject}>Create</Button>
+            )}
+          </>
         )}
       </div>
     </ModalWrapper>

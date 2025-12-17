@@ -1,6 +1,6 @@
 {
 	"name": "@pulse-editor/cli",
-	"version": "0.1.1-beta.17",
+	"version": "0.1.1-beta.18",
 	"license": "MIT",
 	"bin": {
 		"pulse": "dist/cli.js"
@@ -11,7 +11,7 @@
 	},
 	"scripts": {
 		"build": "tsx build.ts",
-		"dev": "tsx watch --include \"./source/**/*\" build.ts",
+		"dev": "tsx watch --include \"./src/**/*\" build.ts",
 		"test": "prettier --check . && xo && ava",
 		"link": "npm link"
 	},
@@ -19,6 +19,10 @@
 		"dist"
 	],
 	"dependencies": {
+		"@module-federation/enhanced": "0.21.6",
+		"@module-federation/node": "^2.7.25",
+		"@module-federation/runtime": "0.21.6",
+		"@pulse-editor/shared-utils": "^0.1.1-beta.67",
 		"concurrently": "^9.2.1",
 		"connect-livereload": "^0.6.1",
 		"cors": "^2.8.5",
@@ -34,12 +38,10 @@
 		"meow": "^14.0.0",
 		"openid-client": "^6.8.1",
 		"rimraf": "^6.1.2",
-		"tsx": "^4.21.0"
+		"tsx": "^4.21.0",
+		"webpack": "^5.104.0"
 	},
 	"devDependencies": {
-		"@module-federation/enhanced": "0.21.6",
-		"@module-federation/node": "2.7.25",
-		"@module-federation/runtime": "0.21.6",
 		"@sindresorhus/tsconfig": "^8.1.0",
 		"@types/connect-livereload": "^0.6.3",
 		"@types/cors": "^2.8.19",
@@ -50,15 +52,20 @@
 		"@vdemedes/prettier-config": "^2.0.1",
 		"ava": "^6.4.1",
 		"chalk": "^5.6.2",
+		"copy-webpack-plugin": "^13.0.1",
 		"eslint-config-xo-react": "^0.29.0",
 		"eslint-plugin-react": "^7.37.5",
 		"eslint-plugin-react-hooks": "^7.0.1",
+		"glob": "^13.0.0",
+		"html-webpack-plugin": "^5.6.5",
 		"ink-testing-library": "^4.0.0",
+		"mini-css-extract-plugin": "^2.9.4",
 		"prettier": "^3.7.4",
 		"react": "19.2.3",
 		"react-dom": "19.2.3",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
+		"webpack-dev-server": "^5.2.2",
 		"xo": "^1.2.3"
 	},
 	"peerDependencies": {

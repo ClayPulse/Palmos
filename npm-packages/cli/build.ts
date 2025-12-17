@@ -23,7 +23,7 @@ async function main() {
 			await execa(
 				'copy',
 				[
-					`source\\${filePath.replace(/\//g, '\\')}`,
+					`src\\${filePath.replace(/\//g, '\\')}`,
 					`dist\\${filePath.replace(/\//g, '\\')}`,
 				],
 				{
@@ -31,7 +31,7 @@ async function main() {
 				},
 			);
 		} else {
-			await execa('cp', [`source/${filePath}`, `dist/${filePath}`], {
+			await execa('cp', [`src/${filePath}`, `dist/${filePath}`], {
 				shell: true,
 			});
 		}

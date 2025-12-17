@@ -4,7 +4,11 @@ sidebar_position: 2
 
 # Manage Projects
 
-Manage your projects with Pulse Editor on every device, and optionally on the cloud (WIP).
+Manage your projects with Pulse Editor on every device and on the cloud.
+
+
+## What is a Pulse Editor Project?
+A project in Pulse Editor refers to a productivity environment with a certain set of apps, and optionally with a [Workspace](/docs/guide/quick-start/manage-workspaces). 
 
 ## Create a project
 

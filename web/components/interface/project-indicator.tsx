@@ -41,8 +41,8 @@ export default function ProjectIndicator() {
   }
 
   return (
-    <div className="flex w-full items-center justify-center pl-8">
-      <p>{editorContext?.editorStates.project}</p>
+    <div className="flex w-full items-center justify-center pl-8 gap-x-0.5">
+      <p className="font-semibold">{editorContext?.editorStates.project}</p>
       <Dropdown>
         <DropdownTrigger>
           <Button onPress={() => {}} isIconOnly variant="light" size="sm">
