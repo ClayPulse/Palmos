@@ -72,6 +72,7 @@ export default function Dev({cli}: {cli: Result<Flags>}) {
 					shell: true,
 					env: {
 						NODE_OPTIONS: '--import=tsx',
+						NODE_ENV: 'development',
 					},
 				},
 			);
