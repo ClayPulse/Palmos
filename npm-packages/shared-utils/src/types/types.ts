@@ -142,12 +142,6 @@ export enum NotificationTypeEnum {
 }
 
 // #region App settings
-export enum AppTypeEnum {
-  Generic = "generic",
-  FileView = "file-view",
-  ConsoleView = "console-view",
-}
-
 export type AppConfig = {
   id: string;
   version: string;
@@ -159,7 +153,6 @@ export type AppConfig = {
   materialIcon?: string;
   license?: string;
   repository?: string;
-  appType?: AppTypeEnum;
   fileTypes?: string[];
   thumbnail?: string;
   enabledPlatforms?: Record<string, boolean>;

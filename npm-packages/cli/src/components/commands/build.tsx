@@ -1,15 +1,16 @@
 import {Result} from 'meow';
 import {Flags} from '../../lib/cli-flags.js';
-import {Text} from 'ink';
 import {useEffect} from 'react';
 import {execa} from 'execa';
 import fs from 'fs';
 import {cleanDist} from '../../lib/execa-utils/clean.js';
+import {webpackCompile} from '../../lib/webpack/compile.js';
 
 export default function Build({cli}: {cli: Result<Flags>}) {
 	useEffect(() => {
 		async function buildProd() {
-			const buildTarget: string | undefined = cli.flags.target;
+			const buildTarget = cli.flags.target as 'client' | 'server' | undefined;
+
 			console.log(
 				`🚧 Building for target: ${buildTarget || 'both client and server'}`,
 			);
@@ -60,37 +61,11 @@ export default function Build({cli}: {cli: Result<Flags>}) {
 			}
 
 			await cleanDist();
-			if (buildTarget === undefined) {
-				// Start building
-				await execa('npx webpack --mode production', {
-					stdio: 'inherit',
-					shell: true,
-					env: {
-						NODE_OPTIONS: '--import=tsx',
-					},
-				});
-			} else if (buildTarget === 'client') {
-				// Start building client only
-				await execa('npx webpack --mode production', {
-					stdio: 'inherit',
-					shell: true,
-					env: {
-						NODE_OPTIONS: '--import=tsx',
-						BUILD_TARGET: 'client',
-					},
-				});
-			} else if (buildTarget === 'server') {
-				// Start building server only
-				await execa('npx webpack --mode production', {
-					stdio: 'inherit',
-					shell: true,
-					env: {
-						NODE_OPTIONS: '--import=tsx',
-						BUILD_TARGET: 'server',
-					},
-				});
-			} else {
-				console.error(`❌ Unknown build target: ${buildTarget}`);
+
+			try {
+				await webpackCompile('production', buildTarget);
+			} catch (err) {
+				console.error('❌ Webpack build failed', err);
 			}
 		}
 

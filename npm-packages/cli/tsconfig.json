@@ -7,6 +7,6 @@
 		"moduleResolution": "nodenext"
 	},
 	"include": [
-		"source"
+		"src"
 	]
 }
