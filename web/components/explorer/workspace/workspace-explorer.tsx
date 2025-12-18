@@ -88,8 +88,8 @@ export default function WorkspaceExplorer() {
               )}
 
               <p className="text-center">
-                To browse files in workspace, please open in desktop client or
-                select remote workspace.
+                  To interact with OS features, please open in desktop client
+                  or configure a remote workspace.
               </p>
             </div>
           )}

@@ -1,9 +1,10 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
-import { addToast } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
+import { SideMenuTabEnum } from "../enums";
 import {
   AppViewConfig,
   CanvasViewConfig,
@@ -11,11 +12,13 @@ import {
   TabView,
 } from "../types";
 import useRouter from "./use-router";
+import { useScreenSize } from "./use-screen-size";
 
 export function useTabViewManager() {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
+  const { isLandscape } = useScreenSize();
   const router = useRouter();
 
   const [tabViews, setTabViews] = useState<TabView[]>(
@@ -320,6 +323,61 @@ export function useTabViewManager() {
       throw new Error("Editor context is not available");
     } else if (!imcContext) {
       throw new Error("IMC context is not available");
+    } else if (!editorContext.editorStates.project) {
+      addToast({
+        title: "Project Not Opened",
+        description: `No project is opened.`,
+        color: "danger",
+        endContent: (
+          <Button
+            color="danger"
+            size="sm"
+            onPress={() => {
+              editorContext?.setEditorStates((prev) => ({
+                ...prev,
+                isSideMenuOpen: true,
+                isMarketplaceOpen: false,
+              }));
+            }}
+          >
+            Open Project
+          </Button>
+        ),
+      });
+      return undefined;
+    }
+
+    const requireWorkspace = canvasConfig.appConfigs
+      ?.map((appConfig) => appConfig.app)
+      .some((app) =>
+        editorContext?.persistSettings?.extensions?.find(
+          (ext) => ext.config.id === app && ext.config.requireWorkspace,
+        ),
+      );
+
+    if (requireWorkspace && !editorContext?.editorStates.currentWorkspace) {
+      addToast({
+        title: "Workspace Required",
+        description: "This workflow requires a workspace to be opened.",
+        color: "danger",
+        endContent: (
+          <Button
+            color="danger"
+            size="sm"
+            onPress={() => {
+              editorContext?.setEditorStates((prev) => ({
+                ...prev,
+                isSideMenuOpen: true,
+                sideMenuTab: SideMenuTabEnum.Workspace,
+                isMarketplaceOpen: false,
+              }));
+            }}
+          >
+            Configure
+          </Button>
+        ),
+      });
+      return undefined;
     }
 
     setIsCreatingTab(true);
@@ -359,13 +417,74 @@ export function useTabViewManager() {
       }));
     }
 
+    // Close marketplace if open
+    editorContext.setEditorStates((prev) => ({
+      ...prev,
+      isMarketplaceOpen: false,
+    }));
+
     return newTabView;
   }
 
   async function createAppViewInCanvasView(appConfig: AppViewConfig) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
+    } else if (!editorContext.editorStates.project) {
+      addToast({
+        title: "Project Not Opened",
+        description: `No project is opened.`,
+        color: "danger",
+        endContent: (
+          <Button
+            color="danger"
+            size="sm"
+            onPress={() => {
+              editorContext?.setEditorStates((prev) => ({
+                ...prev,
+                isSideMenuOpen: true,
+                isMarketplaceOpen: false,
+              }));
+            }}
+          >
+            Open Project
+          </Button>
+        ),
+      });
+      return;
     }
+
+    const requireWorkspace = appConfig.app
+      ? editorContext?.persistSettings?.extensions?.find(
+          (ext) =>
+            ext.config.id === appConfig.app && ext.config.requireWorkspace,
+        )
+      : false;
+
+    if (requireWorkspace && !editorContext?.editorStates.currentWorkspace) {
+      addToast({
+        title: "Workspace Required",
+        description: "This workflow requires a workspace to be opened.",
+        color: "danger",
+        endContent: (
+          <Button
+            color="danger"
+            size="sm"
+            onPress={() => {
+              editorContext?.setEditorStates((prev) => ({
+                ...prev,
+                isSideMenuOpen: true,
+                sideMenuTab: SideMenuTabEnum.Workspace,
+                isMarketplaceOpen: false,
+              }));
+            }}
+          >
+            Configure
+          </Button>
+        ),
+      });
+      return undefined;
+    }
+
     let currentTab = activeTabView;
 
     if (!currentTab || currentTab?.type !== ViewModeEnum.Canvas) {
@@ -398,6 +517,13 @@ export function useTabViewManager() {
     });
 
     await imcContext?.resolveWhenViewInitialized(appConfig.viewId);
+
+    if (!isLandscape) {
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        isSideMenuOpen: false,
+      }));
+    }
   }
 
   async function deleteAppViewInCanvasView(viewId: string) {
