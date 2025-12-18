@@ -1,7 +1,7 @@
 import Loading from "@/components/interface/status-screens/loading";
 import NotAuthorized from "@/components/interface/status-screens/not-authorized";
 import { IMCContext } from "@/components/providers/imc-provider";
-import { useExtensionAppManager } from "@/lib/hooks/use-extension-manager";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { AppViewConfig, ExtensionApp } from "@/lib/types";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";

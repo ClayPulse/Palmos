@@ -1,7 +1,7 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import useExplorer from "@/lib/hooks/use-explorer";
-import { useExtensionAppManager } from "@/lib/hooks/use-extension-manager";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import useRouter from "@/lib/hooks/use-router";
 import { imageGenProviderOptions } from "@/lib/modalities/image-gen/registry";
 import { llmProviderOptions } from "@/lib/modalities/llm/registry";

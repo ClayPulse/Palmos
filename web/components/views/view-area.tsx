@@ -8,6 +8,7 @@ import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
 import { MemoizedCanvasView } from "./canvas/canvas-view";
 import HomeView from "./home/home-view";
+import ProjectView from "./project/project-view";
 import { MemoizedStandaloneAppView } from "./standalone-app/standalone-app-view";
 
 export default function ViewArea() {
@@ -79,8 +80,10 @@ export default function ViewArea() {
 
   return (
     <div className="h-full w-full">
-      {tabViews.length === 0 ? (
+      {!editorContext?.editorStates.project ? (
         <HomeView />
+      ) : tabViews.length === 0 ? (
+        <ProjectView />
       ) : tabIndex < 0 || tabIndex >= tabViews.length ? (
         <div>No view selected</div>
       ) : (

@@ -1,6 +1,6 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import { useExtensionAppManager } from "@/lib/hooks/use-extension-manager";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
 import {
   checkCompatibility,

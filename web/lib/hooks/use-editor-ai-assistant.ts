@@ -16,7 +16,7 @@ import useActionExecutor from "./use-action-executor";
 import { usePlatformApi } from "./use-platform-api";
 import { useTabViewManager } from "./use-tab-view-manager";
 
-export default function usePlatformAIAssistant() {
+export default function useEditorAIAssistant() {
   const editorContext = useContext(EditorContext);
 
   const [history, setHistory] = useState<EditorChatMessage[]>([]);

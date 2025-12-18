@@ -14,6 +14,9 @@ import { AppMetaData, ExtensionApp } from "../types";
 export function useExtensionAppManager() {
   const editorContext = useContext(EditorContext);
 
+  const installedExtensionApps =
+    editorContext?.persistSettings?.extensions ?? [];
+
   const installExtensionApp = useCallback(
     async (
       remoteOrigin: string,
@@ -308,6 +311,7 @@ export function useExtensionAppManager() {
   }
 
   return {
+    installedExtensionApps,
     installExtensionApp,
     uninstallExtensionApp,
     enableExtensionApp,
