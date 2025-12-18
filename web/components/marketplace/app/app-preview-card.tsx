@@ -533,7 +533,7 @@ export default function AppPreviewCard({
           </ContextMenu>
         )}
       </div>
-      <p className="text-center break-words">{extension.config.displayName}</p>
+      <p className="text-center wrap-break-word">{extension.config.displayName}</p>
       <p className="text-center">{extension.config.version}</p>
     </div>
   );

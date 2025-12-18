@@ -1,7 +1,6 @@
 import AppPreviewCard from "@/components/marketplace/app/app-preview-card";
 import { DraggableItem } from "@/components/misc/draggable-item";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import {
   AppDragData,
@@ -48,10 +47,7 @@ export default function AppExplorer() {
 }
 
 function DraggableAppPreviewCard({ ext }: { ext: ExtensionApp }) {
-  const editorContext = useContext(EditorContext);
-
   const { createAppViewInCanvasView } = useTabViewManager();
-  const { isLandscape } = useScreenSize();
   const { setNodeRef, listeners, isDragging } = useDraggable({
     id: `draggable-app-${ext.config.id}`,
     data: {
@@ -98,13 +94,6 @@ function DraggableAppPreviewCard({ ext }: { ext: ExtensionApp }) {
             recommendedWidth: ext.config.recommendedWidth,
           };
           await createAppViewInCanvasView(config);
-          console.log("Is Landscape:", isLandscape);
-          if (!isLandscape) {
-            editorContext?.setEditorStates((prev) => ({
-              ...prev,
-              isSideMenuOpen: false,
-            }));
-          }
         }}
         listeners={listeners}
       />

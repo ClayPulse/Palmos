@@ -40,6 +40,14 @@ export default function WorkflowPreviewCard({
     return <Skeleton className="h-full w-full" />;
   }
 
+  const requireWorkspace = workflow.content.nodes
+    .map((node) => node.data.config.app)
+    .some((app) =>
+      editorContext?.persistSettings?.extensions?.find(
+        (ext) => ext.config.id === app && ext.config.requireWorkspace,
+      ),
+    );
+
   async function openWorkflow() {
     await createCanvasTabView(
       {
@@ -49,20 +57,7 @@ export default function WorkflowPreviewCard({
       },
       false,
     );
-
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      isMarketplaceOpen: false,
-    }));
   }
-
-  const requireWorkspace = workflow.content.nodes
-    .map((node) => node.data.config.app)
-    .some((app) =>
-      editorContext?.persistSettings?.extensions?.find(
-        (ext) => ext.config.id === app && ext.config.requireWorkspace,
-      ),
-    );
 
   return (
     <div className="grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content]">
