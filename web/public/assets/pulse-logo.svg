@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   id="HQ"
+   version="1.1"
+   viewBox="0 0 214.39999 208.70001"
+   width="214.39999"
+   height="208.70001"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <!-- Generator: Adobe Illustrator 29.1.0, SVG Export Plug-In . SVG Version: 2.1.0 Build 142)  -->
+  <defs
+     id="defs4">
+    <style
+       id="style1">
+      .st0 {
+        fill: url(#linear-gradient2);
+      }
+
+      .st1 {
+        fill: url(#linear-gradient1);
+      }
+
+      .st2 {
+        fill: url(#linear-gradient3);
+      }
+
+      .st3 {
+        fill: url(#linear-gradient4);
+      }
+
+      .st4 {
+        fill: #dab49d;
+      }
+
+      .st5 {
+        fill: url(#linear-gradient);
+      }
+
+      .st6 {
+        fill: none;
+        stroke: #fff;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .st7 {
+        fill: #5e2f25;
+      }
+    </style>
+    <linearGradient
+       id="linear-gradient"
+       x1="340.10001"
+       y1="159.7"
+       x2="340.89999"
+       y2="212.10001"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#c18553"
+         id="stop1" />
+      <stop
+         offset="1"
+         stop-color="#895637"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       id="linear-gradient1"
+       x1="340"
+       y1="28.6"
+       x2="340"
+       y2="106.6"
+       xlink:href="#linear-gradient" />
+    <linearGradient
+       id="linear-gradient2"
+       x1="266.70001"
+       y1="160.89999"
+       x2="267.60001"
+       y2="213.3"
+       xlink:href="#linear-gradient" />
+    <linearGradient
+       id="linear-gradient3"
+       x1="412.29999"
+       y1="158.5"
+       x2="413.10001"
+       y2="211"
+       xlink:href="#linear-gradient" />
+    <linearGradient
+       id="linear-gradient4"
+       x1="340"
+       y1="114"
+       x2="340"
+       y2="159.5"
+       gradientUnits="userSpaceOnUse">
+      <stop
+         offset="0"
+         stop-color="#dab49d"
+         id="stop3" />
+      <stop
+         offset="1"
+         stop-color="#c18553"
+         id="stop4" />
+    </linearGradient>
+    <linearGradient
+       xlink:href="#linear-gradient"
+       id="linearGradient29"
+       gradientUnits="userSpaceOnUse"
+       x1="340.10001"
+       y1="159.7"
+       x2="340.89999"
+       y2="212.10001" />
+  </defs>
+  <g
+     id="g29"
+     style="display:inline"
+     transform="translate(-72.000001,-75.000001)">
+    <rect
+       style="fill:#5e2f25;fill-opacity:0;stroke-width:0.865512"
+       id="rect29"
+       width="360"
+       height="360"
+       x="0"
+       y="0" />
+    <g
+       id="g17"
+       transform="translate(-160.7,55)">
+      <polygon
+         class="st5"
+         points="291.5,155.5 298.6,219.6 381.4,219.6 388.5,155.5 "
+         id="polygon12"
+         style="fill:url(#linearGradient29)" />
+      <polygon
+         class="st1"
+         points="385.6,67.4 398.1,79.9 398.1,107.4 424.6,116.1 424.6,76.2 377.6,29.2 302.4,29.2 255.4,76.2 255.4,116.1 281.9,107.4 281.9,79.9 294.4,67.4 334,72 340,81.8 346,72 "
+         id="polygon13"
+         style="fill:url(#linear-gradient1)" />
+      <polygon
+         class="st0"
+         points="245.9,169.1 288.5,211.7 282.4,157.1 "
+         id="polygon14"
+         style="fill:url(#linear-gradient2)" />
+      <polygon
+         class="st2"
+         points="391.5,211.7 434.1,169.1 397.6,157.1 "
+         id="polygon15"
+         style="fill:url(#linear-gradient3)" />
+      <path
+         class="st7"
+         d="m 439.4,121 -5.7,-1.9 V 72.3 L 381.4,20 h -82.9 l -52.3,52.3 v 46.8 l -9.4,3.1 -4.1,1.3 v 45.4 l 59.8,59.8 h 94.8 l 59.8,-59.8 v -45.4 l -7.8,-2.6 z M 377.6,29.2 424.5,76.1 V 116 l -26.4,-8.7 V 79.8 l -12.6,-12.6 -39.5,4.6 -6,9.8 -6,-9.8 -39.5,-4.6 -12.6,12.6 v 27.5 L 255.5,116 V 76.1 l 46.9,-46.9 h 75.3 z M 438,130.3 v 30.4 L 394.4,146.3 H 285.7 l -43.6,14.4 v -30.4 l 10.1,-3.3 v 0 l 35.1,-11.6 h 105.8 l 35.1,11.6 v 0 l 10.1,3.3 z m -151.6,20.6 z m 12.2,68.7 -7.1,-64.1 h 96.9 l -7.1,64.1 z m 95,-68.7 z m -4.7,-44.7 H 291.1 V 83.8 l 6.7,-6.7 30.7,3.6 11.5,18.8 11.5,-18.8 30.7,-3.6 6.7,6.7 z m -106.5,50.9 6.1,54.6 -42.6,-42.6 36.5,-12.1 z m 115.2,0 36.5,12.1 -42.6,42.6 6.1,-54.6 z"
+         id="path15" />
+      <polygon
+         class="st4"
+         points="340,99.4 328.5,80.6 297.8,77 291.1,83.7 291.1,106.2 388.9,106.2 388.9,83.7 382.2,77 351.5,80.6 "
+         id="polygon16" />
+      <polygon
+         class="st3"
+         points="285.6,146.3 394.4,146.3 438,160.7 438,130.3 427.9,126.9 392.9,115.4 287.1,115.4 252.1,126.9 242,130.3 242,160.7 "
+         id="polygon17"
+         style="fill:url(#linear-gradient4)" />
+    </g>
+  </g>
+</svg>

@@ -83,7 +83,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="bg-default flex h-full w-full flex-col overflow-x-hidden">
+    <div className="bg-default flex h-full w-full flex-col overflow-hidden">
       {isPasswordModalOpen && (
         <PasswordModal
           isOpen={isPasswordModalOpen}
@@ -101,7 +101,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         <SharingModal isOpen={isSharingOpen} setIsOpen={setIsSharingOpen} />
       )}
 
-      <div className="grid h-full w-full grid-cols-[max-content_auto]">
+      <div className="grid h-full w-full grid-cols-[max-content_auto] grid-rows-1">
         <div className="h-full w-full overflow-y-hidden">
           {isShowNavbar && (
             <NavSideMenu

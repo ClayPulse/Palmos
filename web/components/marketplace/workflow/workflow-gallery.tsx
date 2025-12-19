@@ -1,9 +1,9 @@
+import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
 import Icon from "@/components/misc/icon";
 import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
 import { Select, SelectItem } from "@heroui/react";
 import { useEffect, useState } from "react";
 import Loading from "../../interface/status-screens/loading";
-import WorkflowPreviewCard from "./workflow-preview-card";
 
 export default function WorkflowGallery() {
   // const [displayedWorkflows, setDisplayedWorkflows] = useState<Workflow[]>([]);

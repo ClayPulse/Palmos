@@ -27,7 +27,9 @@ export default function ProjectView() {
 
   return (
     <div className="text-default-foreground flex h-full w-full flex-col items-center justify-center gap-y-1 pb-12">
-      <h1 className="pb-8 text-center text-4xl font-semibold">Project Overview</h1>
+      <h1 className="pb-8 text-center text-4xl font-semibold">
+        Project Overview
+      </h1>
       <div className="flex h-22 flex-col items-center gap-y-1">
         {!editorContext?.editorStates.isCommandViewerOpen && (
           <>
@@ -35,7 +37,7 @@ export default function ProjectView() {
               What's on your mind today?
             </p>
             <Input
-              className="w-80"
+              className="sm:w-80"
               onFocus={() => {
                 // Open command viewer
                 editorContext?.setEditorStates((prev) => ({
@@ -55,7 +57,7 @@ export default function ProjectView() {
         )}
       </div>
 
-      <div className="mt-4 flex gap-x-2">
+      <div className="mt-4 flex flex-col items-center gap-y-2 sm:flex-row sm:gap-x-2">
         <Button color="primary" onPress={createNewCanvas}>
           New Workflow
         </Button>

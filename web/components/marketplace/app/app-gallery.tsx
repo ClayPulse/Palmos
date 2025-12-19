@@ -8,7 +8,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { compare } from "semver";
 import useSWR from "swr";
 import Loading from "../../interface/status-screens/loading";
-import AppPreviewCard from "./app-preview-card";
+import AppPreviewCard from "../../cards/app-preview-card";
 
 export default function AppGallery() {
   const editorContext = useContext(EditorContext);

@@ -5,7 +5,7 @@ import { PlatformEnum } from "../enums";
 import { getAbstractPlatformAPI } from "../platform-api/get-platform-api";
 import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI } from "../pulse-editor-website/backend";
-import { RemoteWorkspace } from "../types";
+import { WorkspaceConfig } from "../types";
 import { useAuth } from "./use-auth";
 
 export function useWorkspace() {
@@ -15,7 +15,7 @@ export function useWorkspace() {
   const workspace = editorContext?.editorStates?.currentWorkspace;
 
   const { data: cloudWorkspaces, mutate: mutateCloudWorkspaces } = useSWR<
-    RemoteWorkspace[]
+    WorkspaceConfig[]
   >(session ? `/api/workspace/list` : null, async (url: string) => {
     const res = await fetchAPI(url);
     if (!res.ok) {
@@ -24,7 +24,7 @@ export function useWorkspace() {
     const {
       workspaces,
     }: {
-      workspaces: RemoteWorkspace[];
+      workspaces: WorkspaceConfig[];
     } = await res.json();
 
     return workspaces;
@@ -62,7 +62,7 @@ export function useWorkspace() {
     }
   }, [isWorkspaceRunning]);
 
-  const setWorkspace = (ws: RemoteWorkspace | undefined) => {
+  const setWorkspace = (ws: WorkspaceConfig | undefined) => {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -182,7 +182,7 @@ export function useWorkspace() {
   }
 
   async function refreshWorkspaceContent(
-    ws: RemoteWorkspace | undefined = workspace,
+    ws: WorkspaceConfig | undefined = workspace,
   ) {
     if (getPlatform() !== PlatformEnum.Electron) {
       await waitUntilWorkspaceRunning();

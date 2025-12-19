@@ -65,7 +65,7 @@ export type EditorStates = {
   aiModels?: AIModels;
 
   // The currently selected workspace
-  currentWorkspace?: RemoteWorkspace;
+  currentWorkspace?: WorkspaceConfig;
   workspaceContent?: FileSystemObject[];
 
   /* Auth */
@@ -471,7 +471,7 @@ export type ProjectAsset = {
 // #endregion
 
 // #region Workspace
-export type RemoteWorkspace = {
+export type WorkspaceConfig = {
   id: string;
   name: string;
   cpuLimit: string;

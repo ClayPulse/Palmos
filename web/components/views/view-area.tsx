@@ -79,7 +79,7 @@ export default function ViewArea() {
   }, [tabViews]);
 
   return (
-    <div className="h-full w-full">
+    <div className="h-full w-full overflow-hidden">
       {!editorContext?.editorStates.project ? (
         <HomeView />
       ) : tabViews.length === 0 ? (

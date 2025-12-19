@@ -1,12 +1,12 @@
 import { PlatformEnum } from "../enums";
-import { RemoteWorkspace } from "../types";
+import { WorkspaceConfig } from "../types";
 import { AbstractPlatformAPI } from "./abstract-platform-api";
 import { CloudAPI } from "./cloud/cloud-api";
 import { ElectronAPI } from "./electron/electron-api";
 import { getPlatform } from "./platform-checker";
 
 export function getAbstractPlatformAPI(
-  workspace: RemoteWorkspace | undefined,
+  workspace: WorkspaceConfig | undefined,
 ): AbstractPlatformAPI {
   const platform = getPlatform();
 
