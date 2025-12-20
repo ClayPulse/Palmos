@@ -3,6 +3,7 @@ import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
 import { useCallback, useContext } from "react";
 import toast from "react-hot-toast";
 import { compare } from "semver";
+import useSWR from "swr";
 import { getRemoteClientBaseURL } from "../module-federation/remote";
 import {
   getHostMFVersion,
@@ -11,11 +12,59 @@ import {
 } from "../module-federation/version";
 import { AppMetaData, ExtensionApp } from "../types";
 
-export function useExtensionAppManager() {
+export function useExtensionAppManager(fetchCategory?: string) {
   const editorContext = useContext(EditorContext);
 
   const installedExtensionApps =
     editorContext?.persistSettings?.extensions ?? [];
+
+  const {
+    data: marketplaceExtensions,
+    isLoading: isLoadingMarketplaceExtensions,
+  } = useSWR<ExtensionApp[]>(
+    fetchCategory === "All" || fetchCategory === "Published by Me"
+      ? `/api/app/list${fetchCategory === "Published by Me" ? "?published=true" : ""}`
+      : null,
+    async (url: string) => {
+      const res = await fetchAPI(url);
+      const body = await res.json();
+
+      const fetchedExts: AppMetaData[] = body;
+      try {
+        const extensions: ExtensionApp[] = await Promise.all(
+          fetchedExts
+            .filter((extMeta) => extMeta.appConfig)
+            .map(async (extMeta) => {
+              // If backend does not provide mfVersion, try to load it from the manifest
+              if (!extMeta.mfVersion) {
+                console.warn(
+                  `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
+                );
+              }
+
+              const mfVersion =
+                extMeta.mfVersion ??
+                (await getRemoteMFVersion(
+                  `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+                  extMeta.name,
+                  extMeta.version,
+                ));
+
+              return {
+                config: extMeta.appConfig!,
+                isEnabled: true,
+                remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+                mfVersion: mfVersion,
+              };
+            }),
+        );
+        return extensions;
+      } catch (error) {
+        console.error("Error fetching extensions:", error);
+        return [];
+      }
+    },
+  );
 
   const installExtensionApp = useCallback(
     async (
@@ -312,6 +361,8 @@ export function useExtensionAppManager() {
 
   return {
     installedExtensionApps,
+    marketplaceExtensions,
+    isLoadingMarketplaceExtensions,
     installExtensionApp,
     uninstallExtensionApp,
     enableExtensionApp,
