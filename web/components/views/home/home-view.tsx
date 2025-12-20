@@ -1,6 +1,7 @@
 import AppPreviewCard from "@/components/cards/app-preview-card";
 import { ProjectPreviewCard } from "@/components/cards/project-preview-card";
 import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
+import Loading from "@/components/interface/status-screens/loading";
 import Icon from "@/components/misc/icon";
 import Tabs from "@/components/misc/tabs";
 import ProjectSettingsModal from "@/components/modals/project-settings-modal";
@@ -21,8 +22,8 @@ export default function HomeView() {
 
   const { installedExtensionApps } = useExtensionAppManager();
   const { createAppViewInCanvasView } = useTabViewManager();
-  const { workflows } = useWorkflowManager("All");
-  const { projects } = useProjectManager();
+  const { workflows, isLoading: isLoadingWorkflow } = useWorkflowManager("All");
+  const { projects, isLoading: isLoadingProjects } = useProjectManager();
   const { session, signIn } = useAuth();
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
@@ -153,40 +154,48 @@ export default function HomeView() {
             </div>
           </div>
           <div className="relative w-full overflow-x-hidden">
-            <div className="flex items-center gap-x-4 py-1">
-              <h2 className="text-2xl font-semibold">Recent Projects</h2>
-              <Button
-                className="m-0 flex items-center gap-x-0.5 px-1 py-0"
-                variant="light"
-                size="sm"
-                onPress={() => {
-                  editorContext?.setEditorStates((prev) => ({
-                    ...prev,
-                    isSideMenuOpen: true,
-                  }));
-                }}
-              >
-                <p className="text-sm whitespace-nowrap">View All</p>
-                <div>
-                  <Icon name="arrow_outward" />
+            {session && (
+              <>
+                <div className="flex items-center gap-x-4 py-1">
+                  <h2 className="text-2xl font-semibold">Recent Projects</h2>
+                  <Button
+                    className="m-0 flex items-center gap-x-0.5 px-1 py-0"
+                    variant="light"
+                    size="sm"
+                    onPress={() => {
+                      editorContext?.setEditorStates((prev) => ({
+                        ...prev,
+                        isSideMenuOpen: true,
+                      }));
+                    }}
+                  >
+                    <p className="text-sm whitespace-nowrap">View All</p>
+                    <div>
+                      <Icon name="arrow_outward" />
+                    </div>
+                  </Button>
                 </div>
-              </Button>
-            </div>
-            <div className="flex h-60 items-stretch gap-x-2 overflow-x-auto overflow-y-hidden">
-              {projects?.map((project, index) => (
-                <div key={index} className="h-full min-w-40 shrink-0">
-                  <ProjectPreviewCard
-                    project={project}
-                    workspaceConfig={undefined}
-                  />
+                <div className="flex h-60 items-stretch gap-x-2 overflow-x-auto overflow-y-hidden">
+                  {isLoadingProjects && !projects && (
+                    <Loading text="Loading projects" />
+                  )}
+
+                  {projects?.map((project, index) => (
+                    <div key={index} className="h-full min-w-40 shrink-0">
+                      <ProjectPreviewCard
+                        project={project}
+                        workspaceConfig={undefined}
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </>
+            )}
           </div>
 
           <div className="relative w-full gap-y-1 overflow-x-hidden rounded-sm">
             <div className="flex w-full justify-center">
-              <div>
+              <div className="bg-content3/75 rounded-2xl">
                 <Tabs
                   tabItems={tabItems}
                   selectedItem={tabItems.find(
@@ -272,6 +281,8 @@ export default function HomeView() {
                   </Button>
                 </div>
                 <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
+                  {isLoadingWorkflow && <Loading text="Loading workflows" />}
+
                   {workflows?.map((wf, index) => (
                     <div
                       key={index}
