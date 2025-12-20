@@ -1,4 +1,3 @@
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { ContextMenuState, ProjectInfo } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useContext, useState } from "react";
@@ -17,8 +16,6 @@ export default function ProjectItem({
   onOpen?: () => void;
 }) {
   const editorContext = useContext(EditorContext);
-
-  const { platformApi } = usePlatformApi();
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
     x: 0,

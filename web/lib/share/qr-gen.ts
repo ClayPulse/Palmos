@@ -33,7 +33,7 @@ function getConfig(theme: "dark" | "light") {
       color: "#ffffff00",
       gradient: undefined,
     },
-    image: "/pulse_logo.svg",
+    image: "/assets/pulse-logo.svg",
     cornersSquareOptions: {
       type: "extra-rounded",
       color: "#7e5002",

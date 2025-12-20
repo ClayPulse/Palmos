@@ -1,5 +1,6 @@
 import useActionExecutor from "@/lib/hooks/use-action-executor";
-import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
+import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
+import { useEditorAIAssistantHint } from "@/lib/hooks/use-editor-ai-assistant-hint";
 import useRecorder from "@/lib/hooks/use-recorder";
 import { ScopedAction } from "@/lib/types";
 import {
@@ -17,22 +18,14 @@ import remarkGfm from "remark-gfm";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 
-const inputPlaceholders = [
-  "Type anything...",
-  "Search commands...",
-  "Looking for something?",
-  "Need help? Type here...",
-  "Got a creative idea? Type it out...",
-];
-
 export default function CommandViewer() {
   const editorContext = useContext(EditorContext);
 
-  const { chatWithAssistant, history } = usePlatformAIAssistant();
+  const { chatWithAssistant, history } = useEditorAIAssistant();
   const { actions, runScopedAction, setKeywordFilter } = useActionExecutor();
   const { recordVAD, stopRecording, isRecording } = useRecorder();
+  const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
-  const [inputPlaceholder, setInputPlaceholder] = useState("");
   const [selectActionIndex, setSelectActionIndex] = useState(-1);
   const [inputTextValue, setInputTextValue] = useState("");
   const [isWaitingAssistant, setIsWaitingAssistant] = useState(false);
@@ -66,24 +59,6 @@ export default function CommandViewer() {
     },
     [runScopedAction, args],
   );
-
-  useEffect(() => {
-    // Choose a random label from the list every 3 seconds
-    const interval = setInterval(() => {
-      const randomLabel =
-        inputPlaceholders[Math.floor(Math.random() * inputPlaceholders.length)];
-      setInputPlaceholder(randomLabel);
-    }, 3000);
-
-    // Set an initial label
-    setInputPlaceholder(
-      inputPlaceholders[Math.floor(Math.random() * inputPlaceholders.length)],
-    );
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
 
   useEffect(() => {
     if (inputTextValue !== "") {

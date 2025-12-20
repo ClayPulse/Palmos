@@ -1,5 +1,5 @@
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { PersistentSettings, ProjectInfo, RemoteWorkspace } from "@/lib/types";
+import { PersistentSettings, ProjectInfo, WorkspaceConfig } from "@/lib/types";
 import { addToast, Button } from "@heroui/react";
 import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
@@ -16,9 +16,9 @@ import { AbstractPlatformAPI } from "../abstract-platform-api";
  * It will not save any project data on the remote workspace.
  */
 export class CloudAPI extends AbstractPlatformAPI {
-  private workspace: RemoteWorkspace | undefined;
+  private workspace: WorkspaceConfig | undefined;
 
-  constructor(workspace: RemoteWorkspace | undefined) {
+  constructor(workspace: WorkspaceConfig | undefined) {
     super();
     this.workspace = workspace;
   }

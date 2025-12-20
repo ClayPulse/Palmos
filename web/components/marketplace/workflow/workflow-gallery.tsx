@@ -1,17 +1,15 @@
+import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
 import Icon from "@/components/misc/icon";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { Workflow } from "@/lib/types";
+import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
 import { Select, SelectItem } from "@heroui/react";
 import { useEffect, useState } from "react";
-import { compare } from "semver";
-import useSWR from "swr";
 import Loading from "../../interface/status-screens/loading";
-import WorkflowPreviewCard from "./workflow-preview-card";
 
 export default function WorkflowGallery() {
-  const [displayedWorkflows, setDisplayedWorkflows] = useState<Workflow[]>([]);
+  // const [displayedWorkflows, setDisplayedWorkflows] = useState<Workflow[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(false);
+  const [label, setLabel] = useState<"All" | "Published by Me">("All");
+  const { isLoading, workflows } = useWorkflowManager(label);
 
   const selectLabels = [
     {
@@ -22,63 +20,18 @@ export default function WorkflowGallery() {
     },
   ];
 
-  const { data: marketplaceWorkflows, isLoading: isLoadingWorkflows } = useSWR<
-    Workflow[]
-  >(
-    selectLabels[selectedIndex]?.name === "All" ||
-      selectLabels[selectedIndex]?.name === "Published by Me"
-      ? `/api/workflow/list${selectLabels[selectedIndex].name === "Published by Me" ? "?published=true" : ""}`
-      : null,
-    async (url: string) => {
-      const res = await fetchAPI(url);
-      const body = await res.json();
+  const previews = workflows?.map((workflow, index) => {
+    return (
+      <div key={index} className="h-fit w-full">
+        <WorkflowPreviewCard workflow={workflow} isPressable={false} />
+      </div>
+    );
+  });
 
-      const fetchedWorkflows: Workflow[] = body;
-      return fetchedWorkflows;
-    },
-  );
-
-  // Group workflows by name
-  const groupedWorkflows = displayedWorkflows?.reduce(
-    (acc: Map<string, Workflow[]>, wf) => {
-      const key = wf.name;
-      if (!acc.has(key)) {
-        acc.set(key, []);
-      }
-      acc.get(key)?.push(wf);
-      return acc;
-    },
-    new Map<string, Workflow[]>(),
-  );
-
-  const previews = Array.from(groupedWorkflows?.entries() ?? []).map(
-    ([name, workflowGroup]) => {
-      // Take the latest version of each workflow group
-      const latestVersion = workflowGroup.reduce((latest, current) => {
-        return compare(current.version, latest.version) > 0 ? current : latest;
-      }, workflowGroup[0]);
-
-      return (
-        <div key={name} className="w-full h-fit">
-          <WorkflowPreviewCard workflow={latestVersion} isPressable={false} />
-        </div>
-      );
-    },
-  );
-
-  // Get installed Apps
   useEffect(() => {
     const selectedLabel = selectLabels[selectedIndex];
-    if (
-      selectedLabel.name === "All" ||
-      selectedLabel.name === "Published by Me"
-    ) {
-      setIsLoading(isLoadingWorkflows);
-      setDisplayedWorkflows(marketplaceWorkflows ?? []);
-    } else {
-      console.warn("Unknown filter selected:", selectedLabel.name);
-    }
-  }, [selectedIndex, marketplaceWorkflows, isLoadingWorkflows]);
+    setLabel(selectedLabel.name as "All" | "Published by Me");
+  }, [selectedIndex]);
 
   return (
     <div className="flex flex-col gap-y-2">
@@ -117,7 +70,7 @@ export default function WorkflowGallery() {
 
       {isLoading ? (
         <Loading />
-      ) : groupedWorkflows?.size === 0 ? (
+      ) : workflows?.length === 0 ? (
         <div className="w-full space-y-2">
           <p className="text-center text-lg">No content found</p>
           <p>
@@ -125,7 +78,7 @@ export default function WorkflowGallery() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-2 w-full">{previews}</div>
+        <div className="grid w-full grid-cols-2 gap-2">{previews}</div>
       )}
     </div>
   );

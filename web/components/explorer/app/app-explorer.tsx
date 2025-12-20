@@ -1,4 +1,4 @@
-import AppPreviewCard from "@/components/marketplace/app/app-preview-card";
+import AppPreviewCard from "@/components/cards/app-preview-card";
 import { DraggableItem } from "@/components/misc/draggable-item";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";

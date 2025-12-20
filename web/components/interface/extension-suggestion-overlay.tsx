@@ -1,4 +1,4 @@
-import AppPreviewCard from "../marketplace/app/app-preview-card";
+import AppPreviewCard from "../cards/app-preview-card";
 
 export default function ExtensionSuggestionOverlay() {
   return (

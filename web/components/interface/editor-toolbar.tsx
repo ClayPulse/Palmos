@@ -3,7 +3,7 @@
 import Icon from "@/components/misc/icon";
 import EditorSettingsModal from "@/components/modals/editor-settings-modal";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
-import usePlatformAIAssistant from "@/lib/hooks/use-platform-ai-assistant";
+import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { Button, Divider, Tooltip } from "@heroui/react";
@@ -16,7 +16,7 @@ import { EditorContext } from "../providers/editor-context-provider";
 export default function EditorToolbar() {
   const editorContext = useContext(EditorContext);
 
-  const { chatWithAssistant } = usePlatformAIAssistant();
+  const { chatWithAssistant } = useEditorAIAssistant();
   const { isRecording, recordVAD, stopRecording } = useRecorder();
   const { runMenuActionByName } = useMenuActions();
   const { tabItems, tabIndex } = useTabViewManager();

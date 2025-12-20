@@ -10,8 +10,10 @@ export default function WrappedHeroUIProvider({
 }) {
   return (
     <ThemeProvider attribute={["class", "data-theme"]}>
-      <HeroUIProvider className="h-full w-full">
-        <div className="h-full w-full bg-white dark:bg-black">{children}</div>
+      <HeroUIProvider className="h-full w-full overflow-hidden">
+        <div className="h-full w-full overflow-hidden bg-white dark:bg-black">
+          {children}
+        </div>
         <ToastProvider />
       </HeroUIProvider>
     </ThemeProvider>
