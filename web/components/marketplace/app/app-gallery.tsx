@@ -1,14 +1,12 @@
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import { getRemoteMFVersion } from "@/lib/module-federation/version";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { AppMetaData, ExtensionApp } from "@/lib/types";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
+import { ExtensionApp } from "@/lib/types";
 import { Select, SelectItem } from "@heroui/react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { compare } from "semver";
-import useSWR from "swr";
-import Loading from "../../interface/status-screens/loading";
 import AppPreviewCard from "../../cards/app-preview-card";
+import Loading from "../../interface/status-screens/loading";
 
 export default function AppGallery() {
   const editorContext = useContext(EditorContext);
@@ -29,54 +27,8 @@ export default function AppGallery() {
     },
   ];
 
-  const {
-    data: marketplaceExtensions,
-    isLoading: isLoadingMarketplaceExtensions,
-  } = useSWR<ExtensionApp[]>(
-    selectLabels[selectedIndex]?.name === "All" ||
-      selectLabels[selectedIndex]?.name === "Published by Me"
-      ? `/api/app/list${selectLabels[selectedIndex].name === "Published by Me" ? "?published=true" : ""}`
-      : null,
-    async (url: string) => {
-      const res = await fetchAPI(url);
-      const body = await res.json();
-
-      const fetchedExts: AppMetaData[] = body;
-      try {
-        const extensions: ExtensionApp[] = await Promise.all(
-          fetchedExts
-            .filter((extMeta) => extMeta.appConfig)
-            .map(async (extMeta) => {
-              // If backend does not provide mfVersion, try to load it from the manifest
-              if (!extMeta.mfVersion) {
-                console.warn(
-                  `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
-                );
-              }
-
-              const mfVersion =
-                extMeta.mfVersion ??
-                (await getRemoteMFVersion(
-                  `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-                  extMeta.name,
-                  extMeta.version,
-                ));
-
-              return {
-                config: extMeta.appConfig!,
-                isEnabled: true,
-                remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-                mfVersion: mfVersion,
-              };
-            }),
-        );
-        return extensions;
-      } catch (error) {
-        console.error("Error fetching extensions:", error);
-        return [];
-      }
-    },
-  );
+  const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
+    useExtensionAppManager(selectLabels[selectedIndex]?.name);
 
   // Group extensions by name
   const groupedExtensions = useMemo(

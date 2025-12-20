@@ -20,7 +20,8 @@ import { v4 } from "uuid";
 export default function HomeView() {
   const editorContext = useContext(EditorContext);
 
-  const { installedExtensionApps } = useExtensionAppManager();
+  const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
+    useExtensionAppManager("All");
   const { createAppViewInCanvasView } = useTabViewManager();
   const { workflows, isLoading: isLoadingWorkflow } = useWorkflowManager("All");
   const { projects, isLoading: isLoadingProjects } = useProjectManager();
@@ -49,7 +50,7 @@ export default function HomeView() {
   return (
     <div className="text-default-foreground h-full w-full px-2 pt-18 pb-2">
       <div className="bg-content1 h-full w-full overflow-hidden rounded-lg">
-        <div className="relative grid h-full w-full grid-rows-[max-content_max-content_max-content_1fr] gap-y-1 overflow-y-auto py-2 pt-2 pb-6 px-2 sm:px-8 md:px-12 lg:px-48">
+        <div className="relative grid h-full w-full grid-rows-[max-content_max-content_max-content_1fr] gap-y-2 overflow-y-auto px-2 py-2 pt-2 pb-6 sm:px-8 md:px-12 lg:px-48">
           <div className="absolute -top-full flex h-full w-full translate-y-48 items-end blur-[100px]">
             <img
               src={"/assets/dashboard-dark-gradient.png"}
@@ -62,54 +63,65 @@ export default function HomeView() {
             />
           </div>
 
-          <div className="relative flex justify-center">
-            <div className="bg-content2/40 flex flex-col items-center gap-y-1 rounded-lg px-1 py-2 sm:px-16">
+          <div className="relative flex flex-col items-center justify-center">
+            <div className="flex w-full flex-col items-center gap-y-1 rounded-lg px-1 py-2 sm:w-fit sm:px-16">
               {session ? (
-                <p className="text-xl">Hello, {session?.user.name}</p>
-              ) : (
-                <Button onPress={() => signIn()}>Sign in</Button>
-              )}
-              <p className="text-xl">What is on your mind today?</p>
-              <div className="flex gap-x-1">
-                <Button
-                  size="sm"
-                  color="primary"
-                  onPress={() => {
-                    setSettingsOpen(true);
-                  }}
-                >
-                  New Project
-                </Button>
-                <Button
-                  size="sm"
-                  color="secondary"
-                  onPress={() => {
-                    editorContext?.setEditorStates((prev) => ({
-                      ...prev,
-                      isMarketplaceOpen: true,
-                    }));
-                  }}
-                >
-                  Marketplace
-                </Button>
-              </div>
-              <Input
-                className="sm:w-80"
-                onFocus={() => {
-                  // Open command viewer
-                  editorContext?.setEditorStates((prev) => ({
-                    ...prev,
-                    isCommandViewerOpen: true,
-                  }));
-                }}
-                placeholder={inputPlaceholder}
-                label="AI Assistant"
-                startContent={
-                  <div>
-                    <Icon name="auto_awesome" />
+                <>
+                  <p className="text-xl">Hello, {session?.user.name}</p>
+                  <p className="text-xl">What is on your mind today?</p>
+                  <div className="flex gap-x-1">
+                    <Button
+                      size="sm"
+                      color="primary"
+                      onPress={() => {
+                        setSettingsOpen(true);
+                      }}
+                    >
+                      New Project
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="secondary"
+                      onPress={() => {
+                        editorContext?.setEditorStates((prev) => ({
+                          ...prev,
+                          isMarketplaceOpen: true,
+                        }));
+                      }}
+                    >
+                      Marketplace
+                    </Button>
                   </div>
-                }
-              />
+                  <Input
+                    className="sm:w-120"
+                    onFocus={() => {
+                      // Open command viewer
+                      editorContext?.setEditorStates((prev) => ({
+                        ...prev,
+                        isCommandViewerOpen: true,
+                      }));
+                    }}
+                    placeholder={inputPlaceholder}
+                    label="AI Assistant"
+                    startContent={
+                      <div>
+                        <Icon name="auto_awesome" />
+                      </div>
+                    }
+                  />
+                </>
+              ) : (
+                <>
+                  <p className="text-xl font-semibold">
+                    Welcome to Pulse Editor
+                  </p>
+                  <p className="text-xl">Sign in to access your projects</p>
+                  <Button onPress={() => signIn()} color="primary">
+                    Sign in
+                  </Button>
+                </>
+              )}
+
               <p>Need help?</p>
               <div className="flex gap-x-1">
                 <Button
@@ -230,7 +242,11 @@ export default function HomeView() {
                   </Button>
                 </div>
                 <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
-                  {installedExtensionApps.map((app, index) => (
+                  {isLoadingMarketplaceExtensions && (
+                    <Loading text="Loading apps" />
+                  )}
+
+                  {marketplaceExtensions?.map((app, index) => (
                     <div
                       key={index}
                       className="h-full max-w-60 min-w-40 shrink-0"
