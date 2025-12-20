@@ -4,7 +4,7 @@ import { PlatformEnum } from "@/lib/enums";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState, Workflow } from "@/lib/types";
-import { Button, Chip, Skeleton, Tooltip } from "@heroui/react";
+import { Button, Chip, Divider, Skeleton, Tooltip } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
 import ContextMenu from "../interface/context-menu";
@@ -60,7 +60,7 @@ export default function WorkflowPreviewCard({
   }
 
   return (
-    <div className="grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content]">
+    <div className="bg-content2 border-divider grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content] rounded-lg border p-2">
       <div
         className="relative h-full min-h-32 w-full"
         onMouseEnter={() => {
@@ -168,8 +168,31 @@ export default function WorkflowPreviewCard({
           </div>
         </ContextMenu>
       </div>
-      <p className="text-center break-words">{workflow.name}</p>
-      <p className="text-center">{workflow.version}</p>
+      <div className="w-full">
+        <div className="grid w-full grid-cols-[auto_max-content] items-center gap-x-2">
+          <p className="font-semibold wrap-break-word">{workflow.name}</p>
+          <p className="text-center">{workflow.version}</p>
+        </div>
+
+        <div className="py-1">
+          <Divider />
+        </div>
+
+        <div className="flex justify-end gap-x-2">
+          <div className="flex gap-x-1">
+            <div>
+              <Icon name="comment" />
+            </div>
+            <p>0</p>
+          </div>
+          <div className="flex gap-x-1">
+            <div>
+              <Icon name="favorite" />
+            </div>
+            <p>0</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

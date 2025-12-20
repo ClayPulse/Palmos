@@ -17,13 +17,14 @@ import {
   addToast,
   Button,
   Chip,
+  Divider,
   Skeleton,
   Tooltip,
   tv,
   useCheckbox,
   VisuallyHidden,
 } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import ContextMenu from "../interface/context-menu";
 import Icon from "../misc/icon";
@@ -155,6 +156,7 @@ export default function AppPreviewCard({
     setIsEnabled(foundExt?.isEnabled ?? false);
   }, [extension]);
 
+
   function toggleExtension() {
     if (isEnabled) {
       disableExtensionApp(extension.config.id).then(() => {
@@ -167,12 +169,32 @@ export default function AppPreviewCard({
     }
   }
 
+  function showDetails() {
+    openAppInfoModal({
+      id: extension.config.id,
+      name: extension.config.displayName ?? extension.config.id,
+      version: extension.config.version,
+      author: extension.config.author,
+      license: extension.config.license,
+      url: extension.config.repository,
+      readme: extension.config.repository
+        ? extension.config.repository + "/README.md"
+        : undefined,
+    });
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isMarketplaceOpen: false,
+    }));
+  }
+
   if (!isLoaded) {
     return <Skeleton className="h-full w-full" />;
   }
 
   return (
-    <div className="grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content]">
+    <div
+      className="bg-content2 border-divider grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content] rounded-lg border p-2"
+    >
       <div
         className="relative h-full min-h-32 w-full"
         onMouseEnter={() => {
@@ -386,21 +408,7 @@ export default function AppPreviewCard({
               color="secondary"
               size="sm"
               onPress={() => {
-                openAppInfoModal({
-                  id: extension.config.id,
-                  name: extension.config.displayName ?? extension.config.id,
-                  version: extension.config.version,
-                  author: extension.config.author,
-                  license: extension.config.license,
-                  url: extension.config.repository,
-                  readme: extension.config.repository
-                    ? extension.config.repository + "/README.md"
-                    : undefined,
-                });
-                editorContext?.setEditorStates((prev) => ({
-                  ...prev,
-                  isMarketplaceOpen: false,
-                }));
+                showDetails();
               }}
             >
               Details
@@ -533,8 +541,54 @@ export default function AppPreviewCard({
           </ContextMenu>
         )}
       </div>
-      <p className="text-center wrap-break-word">{extension.config.displayName}</p>
-      <p className="text-center">{extension.config.version}</p>
+      <div className="w-full">
+        <div className="grid w-full grid-cols-[auto_max-content_32px] items-center gap-x-2">
+          <p className="font-semibold wrap-break-word">
+            {extension.config.displayName}
+          </p>
+          <p className="text-center">{extension.config.version}</p>
+
+          <div className="flex justify-end">
+            <Button
+              variant="light"
+              isIconOnly
+              size="sm"
+              onPress={() => {
+                showDetails();
+              }}
+            >
+              <div>
+                <Icon name="unfold_more" />
+              </div>
+            </Button>
+          </div>
+        </div>
+
+
+          <p className="line-clamp-3 w-full overflow-y-hidden wrap-break-word whitespace-pre-line">
+            {extension.config.description}
+          </p>
+
+
+        <div className="py-1">
+          <Divider />
+        </div>
+
+        <div className="flex justify-end gap-x-2">
+          <div className="flex gap-x-1">
+            <div>
+              <Icon name="comment" />
+            </div>
+            <p>0</p>
+          </div>
+          <div className="flex gap-x-1">
+            <div>
+              <Icon name="favorite" />
+            </div>
+            <p>0</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
