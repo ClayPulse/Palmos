@@ -3,6 +3,7 @@ import { Button } from "@heroui/react";
 import { useContext, useState } from "react";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
+import { SideMenuTabEnum } from "@/lib/enums";
 
 export function ProjectPreviewCard({
   project,
@@ -26,6 +27,10 @@ export function ProjectPreviewCard({
         project: projectName,
       };
     });
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      sideMenuTab: SideMenuTabEnum.Apps,
+    }));
   }
 
   return (

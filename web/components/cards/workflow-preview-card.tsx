@@ -1,24 +1,20 @@
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
-import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState, Workflow } from "@/lib/types";
 import { Button, Chip, Divider, Skeleton, Tooltip } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
-import { v4 } from "uuid";
 import ContextMenu from "../interface/context-menu";
 
 export default function WorkflowPreviewCard({
   workflow,
-  isPressable = true,
+  onPress,
 }: {
   workflow: Workflow;
-  isPressable?: boolean;
+  onPress?: (workflow: Workflow) => void;
 }) {
   const editorContext = useContext(EditorContext);
-
-  const { createCanvasTabView } = useTabViewManager();
 
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -40,24 +36,7 @@ export default function WorkflowPreviewCard({
     return <Skeleton className="h-full w-full" />;
   }
 
-  const requireWorkspace = workflow.content.nodes
-    .map((node) => node.data.config.app)
-    .some((app) =>
-      editorContext?.persistSettings?.extensions?.find(
-        (ext) => ext.config.id === app && ext.config.requireWorkspace,
-      ),
-    );
-
-  async function openWorkflow() {
-    await createCanvasTabView(
-      {
-        viewId: `canvas-${v4()}`,
-        appConfigs: workflow.content.nodes.map((node) => node.data.config),
-        initialWorkflowContent: workflow.content,
-      },
-      false,
-    );
-  }
+  const requireWorkspace = workflow.requireWorkspace;
 
   return (
     <div className="bg-content2 border-divider grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content] rounded-lg border p-2">
@@ -107,8 +86,8 @@ export default function WorkflowPreviewCard({
         <Button
           className="relative m-0 h-full w-full rounded-md p-0"
           onPress={() => {
-            if (isPressable) {
-              openWorkflow();
+            if (onPress) {
+              onPress(workflow);
             } else {
               setIsShowInfo((prev) => !prev);
             }
@@ -143,7 +122,9 @@ export default function WorkflowPreviewCard({
               color="primary"
               size="sm"
               onPress={() => {
-                openWorkflow();
+                if (onPress) {
+                  onPress(workflow);
+                }
               }}
             >
               Use
@@ -160,7 +141,9 @@ export default function WorkflowPreviewCard({
               className="text-medium h-12 sm:h-8 sm:text-sm"
               variant="light"
               onPress={() => {
-                openWorkflow();
+                if (onPress) {
+                  onPress(workflow);
+                }
               }}
             >
               <p className="w-full text-start">Use</p>

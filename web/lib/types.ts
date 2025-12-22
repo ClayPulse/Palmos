@@ -23,6 +23,7 @@ export type EditorContextType = {
   setEditorStates: Dispatch<SetStateAction<EditorStates>>;
   persistSettings: PersistentSettings | undefined;
   setPersistSettings: Dispatch<SetStateAction<PersistentSettings | undefined>>;
+  updateModalStates: (patchedState: ModalStates) => void;
 };
 
 export type EditorStates = {
@@ -72,10 +73,6 @@ export type EditorStates = {
   isSigningIn?: boolean;
   isRefreshSession?: boolean;
 
-  /* Modals */
-  isAppInfoModalOpen?: boolean;
-  appInfoModalContent?: AppInfoModalContent;
-
   menuActions?: MenuAction[];
 
   tabViews: TabView[];
@@ -87,7 +84,6 @@ export type EditorStates = {
 
   // Side menu panel
   isSideMenuOpen?: boolean;
-  isMarketplaceOpen?: boolean;
   sideMenuTab?: SideMenuTabEnum;
 
   // Selected views
@@ -107,6 +103,8 @@ export type EditorStates = {
 
   workflowNodes: ReactFlowNode<AppNodeData>[];
   workflowEdges: ReactFlowEdge[];
+
+  modalStates?: ModalStates;
 };
 
 /**
@@ -167,6 +165,21 @@ export type PersistentSettings = {
 // #endregion
 
 // #region Interface
+export type ModalStates = {
+  marketplace?: {
+    isOpen?: boolean;
+  };
+  appInfo?: {
+    isOpen?: boolean;
+    content?: AppInfoModalContent;
+  };
+  openInProject?: {
+    isOpen?: boolean;
+    app?: ExtensionApp;
+    workflow?: Workflow;
+  };
+};
+
 export type OpenFileDialogConfig = {
   isFolder?: boolean;
   isMultiple?: boolean;
@@ -350,6 +363,7 @@ export type Workflow = {
   content: WorkflowContent;
   thumbnail?: string;
   visibility: "private" | "public" | "unlisted";
+  requireWorkspace: boolean;
 };
 
 export type WorkflowContent = {
@@ -478,6 +492,12 @@ export type WorkspaceConfig = {
   memoryLimit: string;
   volumeSize: string;
   createdAt?: Date;
+};
+
+export type SpecOption = {
+  key: string;
+  vCPU: number;
+  ram: number;
 };
 
 // #endregion

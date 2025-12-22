@@ -14,7 +14,7 @@ export default function AppInfoModal() {
 
   const [isDeveloperSettingsOpen, setIsDeveloperSettingsOpen] = useState(false);
 
-  const appInfo = editorContext?.editorStates.appInfoModalContent;
+  const appInfo = editorContext?.editorStates.modalStates?.appInfo?.content;
 
   if (!appInfo) {
     return null;
@@ -22,12 +22,9 @@ export default function AppInfoModal() {
 
   return (
     <ModalWrapper
-      isOpen={editorContext?.editorStates.isAppInfoModalOpen ?? false}
+      isOpen={editorContext?.editorStates.modalStates?.appInfo?.isOpen ?? false}
       setIsOpen={(open: boolean) => {
-        editorContext?.setEditorStates((prev) => ({
-          ...prev,
-          isAppInfoModalOpen: open,
-        }));
+        editorContext?.updateModalStates({ appInfo: { isOpen: open } });
       }}
       title={isDeveloperSettingsOpen ? "Developer Settings" : appInfo.name}
       isShowGoBack
@@ -35,11 +32,10 @@ export default function AppInfoModal() {
         if (isDeveloperSettingsOpen) {
           setIsDeveloperSettingsOpen(false);
         } else {
-          editorContext?.setEditorStates((prev) => ({
-            ...prev,
-            isAppInfoModalOpen: false,
-            isMarketplaceOpen: true,
-          }));
+          editorContext?.updateModalStates({
+            appInfo: { isOpen: false },
+            marketplace: { isOpen: true },
+          });
         }
       }}
     >

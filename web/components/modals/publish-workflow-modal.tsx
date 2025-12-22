@@ -3,7 +3,8 @@ import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppNodeData, Workflow } from "@/lib/types";
 import { addToast, Button, closeToast, Input } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./modal-wrapper";
 
 export default function PublishWorkflowModal({
@@ -25,6 +26,8 @@ export default function PublishWorkflowModal({
     [key: string]: any;
   }>;
 }) {
+  const editorContext = useContext(EditorContext);
+
   const [name, setName] = useState("");
   const [version, setVersion] = useState("");
 
@@ -53,6 +56,13 @@ export default function PublishWorkflowModal({
         },
         version: version,
         visibility: "public",
+        requireWorkspace: localNodes
+          .map((node) => node.data.config.app)
+          .some((appId) =>
+            editorContext?.persistSettings?.extensions?.find(
+              (ext) => ext.config.id === appId && ext.config.requireWorkspace,
+            ),
+          ),
       };
 
       await fetchAPI("/api/workflow/publish", {

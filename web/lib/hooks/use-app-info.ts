@@ -8,8 +8,14 @@ export function useAppInfo() {
   function openAppInfoModal(content: AppInfoModalContent) {
     editorContext?.setEditorStates((prev) => ({
       ...prev,
-      isAppInfoModalOpen: true,
-      appInfoModalContent: content,
+      modalStates: {
+        ...prev.modalStates,
+        appInfo: {
+          ...prev.modalStates?.appInfo,
+          isOpen: true,
+          content: content,
+        },
+      },
     }));
   }
 

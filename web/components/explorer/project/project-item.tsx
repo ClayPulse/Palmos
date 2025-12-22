@@ -13,7 +13,7 @@ export default function ProjectItem({
   project: ProjectInfo;
   setSettingsOpen: (isOpen: boolean) => void;
   setSettingsProject: (project: ProjectInfo) => void;
-  onOpen?: () => void;
+  onOpen?: (project: ProjectInfo) => void;
 }) {
   const editorContext = useContext(EditorContext);
 
@@ -27,15 +27,6 @@ export default function ProjectItem({
   const projectCtime = project.ctime
     ? formatDateTime(project.ctime)
     : "Unknown";
-
-  function openProject(projectName: string) {
-    editorContext?.setEditorStates((prev) => {
-      return {
-        ...prev,
-        project: projectName,
-      };
-    });
-  }
 
   function formatDateTime(date: Date) {
     const year = date.getFullYear();
@@ -55,9 +46,8 @@ export default function ProjectItem({
         onPress={(e) => {
           // Only open project if context menu is not open
           if (!contextMenuState.isOpen) {
-            openProject(projectName);
             if (onOpen) {
-              onOpen();
+              onOpen(project);
             }
           }
         }}

@@ -336,7 +336,12 @@ export function useTabViewManager() {
               editorContext?.setEditorStates((prev) => ({
                 ...prev,
                 isSideMenuOpen: true,
-                isMarketplaceOpen: false,
+                modalStates: {
+                  ...prev.modalStates,
+                  marketplace: {
+                    isOpen: false,
+                  },
+                },
               }));
             }}
           >
@@ -369,7 +374,12 @@ export function useTabViewManager() {
                 ...prev,
                 isSideMenuOpen: true,
                 sideMenuTab: SideMenuTabEnum.Workspace,
-                isMarketplaceOpen: false,
+                modalStates: {
+                  ...prev.modalStates,
+                  marketplace: {
+                    isOpen: false,
+                  },
+                },
               }));
             }}
           >
@@ -420,7 +430,12 @@ export function useTabViewManager() {
     // Close marketplace if open
     editorContext.setEditorStates((prev) => ({
       ...prev,
-      isMarketplaceOpen: false,
+      modalStates: {
+        ...prev.modalStates,
+        marketplace: {
+          isOpen: false,
+        },
+      },
     }));
 
     return newTabView;
@@ -442,7 +457,12 @@ export function useTabViewManager() {
               editorContext?.setEditorStates((prev) => ({
                 ...prev,
                 isSideMenuOpen: true,
-                isMarketplaceOpen: false,
+                modalStates: {
+                  ...prev.modalStates,
+                  marketplace: {
+                    isOpen: false,
+                  },
+                },
               }));
             }}
           >
@@ -474,7 +494,12 @@ export function useTabViewManager() {
                 ...prev,
                 isSideMenuOpen: true,
                 sideMenuTab: SideMenuTabEnum.Workspace,
-                isMarketplaceOpen: false,
+                modalStates: {
+                  ...prev.modalStates,
+                  marketplace: {
+                    isOpen: false,
+                  },
+                },
               }));
             }}
           >

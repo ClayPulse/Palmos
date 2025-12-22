@@ -24,7 +24,7 @@ import {
   useCheckbox,
   VisuallyHidden,
 } from "@heroui/react";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import ContextMenu from "../interface/context-menu";
 import Icon from "../misc/icon";
@@ -37,6 +37,7 @@ export default function AppPreviewCard({
   isShowUseButton = false,
   isShowCompatibleChip = true,
   isShowContextMenu = true,
+  isShowInstallationButtons = true,
   isDisableButtonPress = false,
   onPress,
   attributes,
@@ -48,6 +49,7 @@ export default function AppPreviewCard({
   isShowUseButton?: boolean;
   isShowCompatibleChip?: boolean;
   isShowContextMenu?: boolean;
+  isShowInstallationButtons?: boolean;
   isDisableButtonPress?: boolean;
   onPress?: (ext: ExtensionApp) => void;
   attributes?: DraggableAttributes;
@@ -156,7 +158,6 @@ export default function AppPreviewCard({
     setIsEnabled(foundExt?.isEnabled ?? false);
   }, [extension]);
 
-
   function toggleExtension() {
     if (isEnabled) {
       disableExtensionApp(extension.config.id).then(() => {
@@ -181,10 +182,7 @@ export default function AppPreviewCard({
         ? extension.config.repository + "/README.md"
         : undefined,
     });
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      isMarketplaceOpen: false,
-    }));
+    editorContext?.updateModalStates({ marketplace: { isOpen: false } });
   }
 
   if (!isLoaded) {
@@ -192,9 +190,7 @@ export default function AppPreviewCard({
   }
 
   return (
-    <div
-      className="bg-content2 border-divider grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content] rounded-lg border p-2"
-    >
+    <div className="bg-content2 border-divider grid h-full w-full grid-cols-1 grid-rows-[auto_max-content_max-content] rounded-lg border p-2">
       <div
         className="relative h-full min-h-32 w-full"
         onMouseEnter={() => {
@@ -413,80 +409,81 @@ export default function AppPreviewCard({
             >
               Details
             </Button>
-            {!isInstalled ? (
-              <Button
-                color="primary"
-                size="sm"
-                onPress={async (e) => {
-                  await installExtensionApp(
-                    extension.remoteOrigin,
-                    extension.config.id,
-                    extension.config.version,
-                  )
-                    .then(() => {
-                      addToast({
-                        title: "Extension installed",
-                        description: `Extension ${extension.config.id} installed successfully.`,
-                        color: "success",
-                      });
-                      setIsInstalled(true);
-                      setIsEnabled(extension.isEnabled);
-                    })
-                    .catch((err) => {
-                      toast.error(err.message);
-                    });
-                }}
-              >
-                Install
-              </Button>
-            ) : isOutdated ? (
-              <Button
-                color="primary"
-                size="sm"
-                onPress={async (e) => {
-                  try {
-                    await uninstallExtensionApp(extension.config.id);
-
+            {isShowInstallationButtons &&
+              (!isInstalled ? (
+                <Button
+                  color="primary"
+                  size="sm"
+                  onPress={async (e) => {
                     await installExtensionApp(
                       extension.remoteOrigin,
                       extension.config.id,
                       extension.config.version,
-                    );
-
-                    addToast({
-                      title: "Extension upgraded",
-                      description: `Extension ${extension.config.id} upgraded successfully.`,
-                      color: "success",
-                    });
-                    setIsOutdated(false);
-                    setIsEnabled(extension.isEnabled);
-                  } catch (err: any) {
-                    toast.error(err.message);
-                  }
-                }}
-              >
-                Upgrade
-              </Button>
-            ) : (
-              isShowUninstallButton && (
-                <Button
-                  color="danger"
-                  size="sm"
-                  onPress={(e) => {
-                    uninstallExtensionApp(extension.config.id).then(() => {
-                      addToast({
-                        title: "Extension uninstalled",
-                        description: `Extension ${extension.config.id} uninstalled successfully.`,
-                        color: "success",
+                    )
+                      .then(() => {
+                        addToast({
+                          title: "Extension installed",
+                          description: `Extension ${extension.config.id} installed successfully.`,
+                          color: "success",
+                        });
+                        setIsInstalled(true);
+                        setIsEnabled(extension.isEnabled);
+                      })
+                      .catch((err) => {
+                        toast.error(err.message);
                       });
-                      setIsInstalled(false);
-                    });
                   }}
                 >
-                  Uninstall
+                  Install
                 </Button>
-              )
-            )}
+              ) : isOutdated ? (
+                <Button
+                  color="primary"
+                  size="sm"
+                  onPress={async (e) => {
+                    try {
+                      await uninstallExtensionApp(extension.config.id);
+
+                      await installExtensionApp(
+                        extension.remoteOrigin,
+                        extension.config.id,
+                        extension.config.version,
+                      );
+
+                      addToast({
+                        title: "Extension upgraded",
+                        description: `Extension ${extension.config.id} upgraded successfully.`,
+                        color: "success",
+                      });
+                      setIsOutdated(false);
+                      setIsEnabled(extension.isEnabled);
+                    } catch (err: any) {
+                      toast.error(err.message);
+                    }
+                  }}
+                >
+                  Upgrade
+                </Button>
+              ) : (
+                isShowUninstallButton && (
+                  <Button
+                    color="danger"
+                    size="sm"
+                    onPress={(e) => {
+                      uninstallExtensionApp(extension.config.id).then(() => {
+                        addToast({
+                          title: "Extension uninstalled",
+                          description: `Extension ${extension.config.id} uninstalled successfully.`,
+                          color: "success",
+                        });
+                        setIsInstalled(false);
+                      });
+                    }}
+                  >
+                    Uninstall
+                  </Button>
+                )
+              ))}
           </div>
         )}
         {isShowContextMenu && (
@@ -564,11 +561,9 @@ export default function AppPreviewCard({
           </div>
         </div>
 
-
-          <p className="line-clamp-3 w-full overflow-y-hidden wrap-break-word whitespace-pre-line">
-            {extension.config.description}
-          </p>
-
+        <p className="line-clamp-3 w-full overflow-y-hidden wrap-break-word whitespace-pre-line">
+          {extension.config.description}
+        </p>
 
         <div className="py-1">
           <Divider />

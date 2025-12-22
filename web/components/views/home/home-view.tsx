@@ -1,7 +1,6 @@
 import AppPreviewCard from "@/components/cards/app-preview-card";
 import { ProjectPreviewCard } from "@/components/cards/project-preview-card";
 import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
-import Loading from "@/components/interface/status-screens/loading";
 import Icon from "@/components/misc/icon";
 import Tabs from "@/components/misc/tabs";
 import ProjectSettingsModal from "@/components/modals/project-settings-modal";
@@ -12,17 +11,16 @@ import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
-import { AppViewConfig, TabItem } from "@/lib/types";
-import { Button, Input } from "@heroui/react";
+import { ExtensionApp, TabItem, Workflow } from "@/lib/types";
+import { Button, Input, Skeleton } from "@heroui/react";
 import { useContext, useState } from "react";
-import { v4 } from "uuid";
 
 export default function HomeView() {
   const editorContext = useContext(EditorContext);
 
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
     useExtensionAppManager("All");
-  const { createAppViewInCanvasView } = useTabViewManager();
+  const { createCanvasTabView } = useTabViewManager();
   const { workflows, isLoading: isLoadingWorkflow } = useWorkflowManager("All");
   const { projects, isLoading: isLoadingProjects } = useProjectManager();
   const { session, signIn } = useAuth();
@@ -46,6 +44,24 @@ export default function HomeView() {
   const [selectedTab, setSelectedTab] = useState<"Apps" | "Workflows">(
     "Workflows",
   );
+
+  async function openAppInProject(ext: ExtensionApp) {
+    editorContext?.updateModalStates({
+      openInProject: {
+        isOpen: true,
+        app: ext,
+      },
+    });
+  }
+
+  async function openWorkflowInProject(workflow: Workflow) {
+    editorContext?.updateModalStates({
+      openInProject: {
+        isOpen: true,
+        workflow: workflow,
+      },
+    });
+  }
 
   return (
     <div className="text-default-foreground h-full w-full px-2 pt-18 pb-2">
@@ -85,7 +101,12 @@ export default function HomeView() {
                       onPress={() => {
                         editorContext?.setEditorStates((prev) => ({
                           ...prev,
-                          isMarketplaceOpen: true,
+                          modalStates: {
+                            ...prev.modalStates,
+                            marketplace: {
+                              isOpen: true,
+                            },
+                          },
                         }));
                       }}
                     >
@@ -187,9 +208,16 @@ export default function HomeView() {
                     </div>
                   </Button>
                 </div>
-                <div className="flex h-60 items-stretch gap-x-2 overflow-x-auto overflow-y-hidden">
+                <div className="flex h-60 items-start gap-x-2 overflow-x-auto overflow-y-hidden">
                   {isLoadingProjects && !projects && (
-                    <Loading text="Loading projects" />
+                    <>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                    </>
                   )}
 
                   {projects?.map((project, index) => (
@@ -231,7 +259,12 @@ export default function HomeView() {
                     onPress={() => {
                       editorContext?.setEditorStates((prev) => ({
                         ...prev,
-                        isMarketplaceOpen: true,
+                        modalStates: {
+                          ...prev.modalStates,
+                          marketplace: {
+                            isOpen: true,
+                          },
+                        },
                       }));
                     }}
                   >
@@ -243,13 +276,20 @@ export default function HomeView() {
                 </div>
                 <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
                   {isLoadingMarketplaceExtensions && (
-                    <Loading text="Loading apps" />
+                    <>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                    </>
                   )}
 
                   {marketplaceExtensions?.map((app, index) => (
                     <div
                       key={index}
-                      className="h-full max-w-60 min-w-40 shrink-0"
+                      className="h-full max-w-80 min-w-40 shrink-0"
                     >
                       <AppPreviewCard
                         extension={app}
@@ -258,16 +298,8 @@ export default function HomeView() {
                         isShowUninstallButton={false}
                         isShowUseButton
                         isShowContextMenu={false}
-                        onPress={async (ext) => {
-                          // TODO: implement open this in project modal
-                          const config: AppViewConfig = {
-                            app: ext.config.id,
-                            viewId: `${ext.config.id}-${v4()}`,
-                            recommendedHeight: ext.config.recommendedHeight,
-                            recommendedWidth: ext.config.recommendedWidth,
-                          };
-                          await createAppViewInCanvasView(config);
-                        }}
+                        isShowInstallationButtons={false}
+                        onPress={openAppInProject}
                       />
                     </div>
                   ))}
@@ -286,7 +318,12 @@ export default function HomeView() {
                     onPress={() => {
                       editorContext?.setEditorStates((prev) => ({
                         ...prev,
-                        isMarketplaceOpen: true,
+                        modalStates: {
+                          ...prev.modalStates,
+                          marketplace: {
+                            isOpen: true,
+                          },
+                        },
                       }));
                     }}
                   >
@@ -297,14 +334,26 @@ export default function HomeView() {
                   </Button>
                 </div>
                 <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
-                  {isLoadingWorkflow && <Loading text="Loading workflows" />}
+                  {isLoadingWorkflow && (
+                    <>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                      <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                    </>
+                  )}
 
                   {workflows?.map((wf, index) => (
                     <div
                       key={index}
-                      className="h-full max-w-60 min-w-40 shrink-0"
+                      className="h-full max-w-80 min-w-40 shrink-0"
                     >
-                      <WorkflowPreviewCard workflow={wf} />
+                      <WorkflowPreviewCard
+                        workflow={wf}
+                        onPress={openWorkflowInProject}
+                      />
                     </div>
                   ))}
                 </div>

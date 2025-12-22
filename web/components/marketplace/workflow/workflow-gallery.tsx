@@ -1,8 +1,11 @@
 import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
 import Icon from "@/components/misc/icon";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
+import { Workflow } from "@/lib/types";
 import { Select, SelectItem } from "@heroui/react";
 import { useEffect, useState } from "react";
+import { v4 } from "uuid";
 import Loading from "../../interface/status-screens/loading";
 
 export default function WorkflowGallery() {
@@ -10,6 +13,7 @@ export default function WorkflowGallery() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [label, setLabel] = useState<"All" | "Published by Me">("All");
   const { isLoading, workflows } = useWorkflowManager(label);
+  const { createCanvasTabView } = useTabViewManager();
 
   const selectLabels = [
     {
@@ -20,18 +24,29 @@ export default function WorkflowGallery() {
     },
   ];
 
-  const previews = workflows?.map((workflow, index) => {
-    return (
-      <div key={index} className="h-fit w-full">
-        <WorkflowPreviewCard workflow={workflow} isPressable={false} />
-      </div>
-    );
-  });
-
   useEffect(() => {
     const selectedLabel = selectLabels[selectedIndex];
     setLabel(selectedLabel.name as "All" | "Published by Me");
   }, [selectedIndex]);
+
+  async function openWorkflow(workflow: Workflow) {
+    await createCanvasTabView(
+      {
+        viewId: `canvas-${v4()}`,
+        appConfigs: workflow.content.nodes.map((node) => node.data.config),
+        initialWorkflowContent: workflow.content,
+      },
+      false,
+    );
+  }
+
+  const previews = workflows?.map((workflow, index) => {
+    return (
+      <div key={index} className="h-fit w-full">
+        <WorkflowPreviewCard workflow={workflow} onPress={openWorkflow} />
+      </div>
+    );
+  });
 
   return (
     <div className="flex flex-col gap-y-2">
