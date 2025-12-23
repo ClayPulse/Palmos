@@ -4,6 +4,12 @@ import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { SpecOption } from "@/lib/types";
+import {
+  getNumberFromUnitString,
+  getUnitFromUnitString,
+  specsOptions,
+} from "@/lib/workspace/specs";
 import {
   addToast,
   Button,
@@ -19,27 +25,6 @@ import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./modal-wrapper";
 
-type SpecOption = {
-  key: string;
-  vCPU: number;
-  ram: number;
-};
-
-const specsOptions: SpecOption[] = [
-  { key: "cpu-1-2", vCPU: 1, ram: 2 },
-  { key: "cpu-2-4", vCPU: 2, ram: 4 },
-  { key: "cpu-4-8", vCPU: 4, ram: 8 },
-];
-
-function getNumberFromUnitString(value: string) {
-  // Assumes the value is in the format "10Gi", "512Mi", etc.
-  return parseInt(value.replace(/\D/g, ""));
-}
-
-function getUnitFromUnitString(value: string, unit: string) {
-  return `${value}${unit}`;
-}
-
 export default function WorkspaceSettingsModal({
   isOpen,
   setIsOpen,
@@ -52,13 +37,19 @@ export default function WorkspaceSettingsModal({
   const editorContext = useContext(EditorContext);
 
   const { platformApi } = usePlatformApi();
-  const [workspaceName, setWorkspaceName] = useState("");
-  const { workspace, createWorkspace, updateWorkspace, deleteWorkspace } =
-    workspaceHook;
+  const {
+    workspace,
+    createWorkspace,
+    updateWorkspace,
+    deleteWorkspace,
+    selectWorkspace,
+    cloudWorkspaces,
+  } = workspaceHook;
 
+  const [workspaceName, setWorkspaceName] = useState("");
   const [storage, setStorage] = useState(5);
   const [selectedSpec, setSelectedSpec] = useState<SpecOption>(specsOptions[0]);
-  const [isCreating, setIsCreating] = useState(false);
+  const [isCreateNew, setIsCreateNew] = useState(false);
 
   useEffect(() => {
     if (workspace) {
@@ -87,7 +78,7 @@ export default function WorkspaceSettingsModal({
       toast.error("Workspace is not available.");
       return;
     } else if (workspaceName === "") {
-      toast.error("Project Name is required.");
+      toast.error("Workspace Name is required.");
       return;
     }
 
@@ -134,7 +125,7 @@ export default function WorkspaceSettingsModal({
     }
   }
 
-  async function handleCreateProject() {
+  async function handleCreateWorkspace() {
     if (!platformApi) {
       toast.error("Unknown platform.");
       return;
@@ -142,7 +133,7 @@ export default function WorkspaceSettingsModal({
       toast.error("Workspace already exists. Please update it instead.");
       return;
     } else if (workspaceName === "") {
-      toast.error("Project Name is required.");
+      toast.error("Workspace Name is required.");
       return;
     }
 
@@ -164,7 +155,7 @@ export default function WorkspaceSettingsModal({
         color: "success",
       });
       setIsOpen(false);
-      setIsCreating(false);
+      setIsCreateNew(false);
     } catch (error: any) {
       addToast({
         title: "Error creating workspace",
@@ -192,42 +183,43 @@ export default function WorkspaceSettingsModal({
             label="Select Workspace"
             placeholder="Select Workspace"
             isLoading={
-              !editorContext?.editorStates?.isSigningIn &&
-              !workspaceHook.cloudWorkspaces
+              !editorContext?.editorStates?.isSigningIn && !cloudWorkspaces
             }
             selectedKeys={
-              workspaceHook.workspace
-                ? [workspaceHook.workspace.id]
+              workspace
+                ? [workspace.id]
                 : getPlatform() === PlatformEnum.Electron
                   ? ["__internal-local"]
                   : []
             }
             size="sm"
-            disabledKeys={workspaceHook.workspace ? [] : ["settings"]}
+            disabledKeys={workspace ? [] : ["settings"]}
             onSelectionChange={async (key) => {
               if (key.currentKey === "__internal-create-new") {
-                await workspaceHook.selectWorkspace(undefined);
-                setIsCreating(true);
+                await selectWorkspace(undefined);
+                setIsCreateNew(true);
                 return;
               } else if (key.currentKey === "__internal-settings") {
-                await workspaceHook.selectWorkspace(undefined);
+                await selectWorkspace(undefined);
                 return;
               } else if (key.currentKey === "__internal-local") {
-                await workspaceHook.selectWorkspace(undefined);
+                await selectWorkspace(undefined);
                 return;
               }
 
-              const selectedWorkspace = workspaceHook.cloudWorkspaces?.find(
+              setIsCreateNew(false);
+
+              const selectedWorkspace = cloudWorkspaces?.find(
                 (workspace) => workspace.id === key.currentKey,
               );
-              await workspaceHook.selectWorkspace(selectedWorkspace?.id);
+              await selectWorkspace(selectedWorkspace?.id);
             }}
           >
             <>
               {getPlatform() === PlatformEnum.Electron && (
                 <SelectItem key={"__internal-local"}>Local Computer</SelectItem>
               )}
-              {workspaceHook.cloudWorkspaces?.map((workspace) => (
+              {cloudWorkspaces?.map((workspace) => (
                 <SelectItem key={workspace.id}>{workspace.name}</SelectItem>
               )) ?? []}
               <SelectItem
@@ -246,7 +238,7 @@ export default function WorkspaceSettingsModal({
           </Select>
         </div>
 
-        {(isCreating || workspace) && (
+        {(isCreateNew || workspace) && (
           <>
             <Divider />
             <Input
@@ -297,7 +289,7 @@ export default function WorkspaceSettingsModal({
                 </Button>
               </div>
             ) : (
-              <Button onPress={handleCreateProject}>Create</Button>
+              <Button onPress={handleCreateWorkspace}>Create</Button>
             )}
           </>
         )}

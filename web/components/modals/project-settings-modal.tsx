@@ -1,12 +1,9 @@
 "use client";
 
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
-import { isWeb } from "@/lib/platform-api/platform-checker";
+import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
-import { Button, Input } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { EditorContext } from "../providers/editor-context-provider";
+import { addToast, Button, Input } from "@heroui/react";
+import { useEffect, useState } from "react";
 import ModalWrapper from "./modal-wrapper";
 
 export default function ProjectSettingsModal({
@@ -18,10 +15,10 @@ export default function ProjectSettingsModal({
   setIsOpen: (val: boolean) => void;
   projectInfo?: ProjectInfo;
 }) {
-  const [projectName, setProjectName] = useState("");
+  const { createProject, updateProject, deleteProject, refreshProjects } =
+    useProjectManager();
 
-  const { platformApi } = usePlatformApi();
-  const editorContext = useContext(EditorContext);
+  const [projectName, setProjectName] = useState("");
 
   useEffect(() => {
     if (projectInfo) {
@@ -29,121 +26,38 @@ export default function ProjectSettingsModal({
     }
   }, [projectInfo]);
 
-  function handleUpdateProject() {
-    if (!platformApi) {
-      toast.error("Unknown platform.");
-      return;
-    }
-
-    if (projectName === "") {
-      toast.error("Project Name is required.");
-      return;
-    }
-
-    // Update project
-    const homePath = editorContext?.persistSettings?.projectHomePath;
-    if (!homePath && !isWeb()) {
-      toast.error("Project Home Path is not set.");
-      return;
-    }
-
+  async function handleUpdateProject() {
     if (!projectInfo) {
-      toast.error("No project selected.");
+      addToast({
+        title: "No project selected.",
+        color: "danger",
+      });
       return;
     }
 
-    const uri = homePath
-      ? homePath + "/" + projectInfo?.name
-      : projectInfo?.name;
-
-    platformApi
-      .updateProject(uri, { name: projectName })
-      .then(() => {
-        toast.success("Project updated.");
-        platformApi.listProjects(homePath).then((projects) => {
-          editorContext?.setEditorStates((prev) => {
-            return {
-              ...prev,
-              projectsInfo: projects,
-            };
-          });
-        });
-        setIsOpen(false);
-      })
-      .catch((err) => {
-        toast.error("Failed to update project.");
-      });
+    await updateProject(projectInfo.name, { name: projectName });
+    setIsOpen(false);
+    await refreshProjects();
   }
 
-  function handleCreateProject() {
-    if (!platformApi) {
-      toast.error("Unknown platform.");
-      return;
-    }
-
-    if (projectName === "") {
-      toast.error("Project Name is required.");
-      return;
-    }
-
-    // Create project
-    const homePath = editorContext?.persistSettings?.projectHomePath;
-    if (!homePath && !isWeb()) {
-      toast.error("Project Home Path is not set.");
-      return;
-    }
-
-    platformApi
-      .createProject(projectName)
-      .then(() => {
-        toast.success("Project created.");
-        platformApi.listProjects(homePath).then((projects) => {
-          editorContext?.setEditorStates((prev) => {
-            return {
-              ...prev,
-              projectsInfo: projects,
-            };
-          });
-        });
-        setIsOpen(false);
-      })
-      .catch((err) => {
-        toast.error("Failed to create project.");
-      });
+  async function handleCreateProject() {
+    await createProject({ name: projectName });
+    setIsOpen(false);
+    await refreshProjects();
   }
 
-  function handleDeleteProject() {
-    if (!platformApi) {
-      toast.error("Unknown platform.");
-      return;
-    }
+  async function handleDeleteProject() {
     if (!projectInfo) {
-      toast.error("No project selected.");
+      addToast({
+        title: "No project selected.",
+        color: "danger",
+      });
       return;
     }
 
-    const homePath = editorContext?.persistSettings?.projectHomePath;
-    if (!homePath && !isWeb()) {
-      toast.error("Project Home Path is not set.");
-      return;
-    }
-    platformApi
-      .deleteProject(projectInfo.name)
-      .then(() => {
-        toast.success(`Project ${projectInfo.name} deleted.`);
-        platformApi.listProjects(homePath).then((projects) => {
-          editorContext?.setEditorStates((prev) => {
-            return {
-              ...prev,
-              projectsInfo: projects,
-            };
-          });
-        });
-        setIsOpen(false);
-      })
-      .catch((err) => {
-        toast.error("Failed to delete project.");
-      });
+    await deleteProject(projectInfo.name);
+    setIsOpen(false);
+    await refreshProjects();
   }
 
   return (

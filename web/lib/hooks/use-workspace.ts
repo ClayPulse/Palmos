@@ -8,7 +8,7 @@ import { fetchAPI } from "../pulse-editor-website/backend";
 import { WorkspaceConfig } from "../types";
 import { useAuth } from "./use-auth";
 
-export function useWorkspace() {
+export function useWorkspace(isFetchContent: boolean = true) {
   const editorContext = useContext(EditorContext);
   const { session } = useAuth();
 
@@ -16,19 +16,22 @@ export function useWorkspace() {
 
   const { data: cloudWorkspaces, mutate: mutateCloudWorkspaces } = useSWR<
     WorkspaceConfig[]
-  >(session ? `/api/workspace/list` : null, async (url: string) => {
-    const res = await fetchAPI(url);
-    if (!res.ok) {
-      throw new Error("Failed to fetch workspace data");
-    }
-    const {
-      workspaces,
-    }: {
-      workspaces: WorkspaceConfig[];
-    } = await res.json();
+  >(
+    session && isFetchContent ? `/api/workspace/list` : null,
+    async (url: string) => {
+      const res = await fetchAPI(url);
+      if (!res.ok) {
+        throw new Error("Failed to fetch workspace data");
+      }
+      const {
+        workspaces,
+      }: {
+        workspaces: WorkspaceConfig[];
+      } = await res.json();
 
-    return workspaces;
-  });
+      return workspaces;
+    },
+  );
 
   // Check workspace status
   const { data: isWorkspaceRunning } = useSWR<boolean>(

@@ -5,7 +5,7 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
 import { Button, Spinner } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import ProjectSettingsModal from "../../modals/project-settings-modal";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ProjectItem from "./project-item";
@@ -14,7 +14,7 @@ export default function ProjectExplorer() {
   const editorContext = useContext(EditorContext);
 
   const { session } = useAuth();
-  const { projects, isLoading } = useProjectManager();
+  const { projects, isLoading, openProject } = useProjectManager();
 
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [settingsProject, setSettingsProject] = useState<
@@ -45,7 +45,8 @@ export default function ProjectExplorer() {
               project={project}
               setSettingsOpen={setSettingsOpen}
               setSettingsProject={setSettingsProject}
-              onOpen={() => {
+              onOpen={(project: ProjectInfo) => {
+                openProject(project.name);
                 editorContext?.setEditorStates((prev) => ({
                   ...prev,
                   sideMenuTab: SideMenuTabEnum.Apps,

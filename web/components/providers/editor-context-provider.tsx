@@ -10,8 +10,10 @@ import {
   AIModels,
   EditorContextType,
   EditorStates,
+  ModalStates,
   PersistentSettings,
 } from "@/lib/types";
+import { merge } from "lodash";
 import React, { createContext, useEffect, useState } from "react";
 
 export const EditorContext = createContext<EditorContextType | undefined>(
@@ -312,6 +314,15 @@ export default function EditorContextProvider({
     settings?.apiKeys,
   ]);
 
+  function updateModalStates(patchedState: ModalStates) {
+    setEditorStates((prev) => ({
+      ...prev,
+      modalStates: {
+        ...merge({}, prev.modalStates, patchedState),
+      },
+    }));
+  }
+
   return (
     <EditorContext.Provider
       value={{
@@ -319,6 +330,7 @@ export default function EditorContextProvider({
         setEditorStates,
         persistSettings: settings,
         setPersistSettings: setSettings,
+        updateModalStates,
       }}
     >
       {children}

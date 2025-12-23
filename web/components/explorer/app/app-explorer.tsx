@@ -33,10 +33,7 @@ export default function AppExplorer() {
         <Button
           color="secondary"
           onPress={() => {
-            editorContext?.setEditorStates((prev) => ({
-              ...prev,
-              isMarketplaceOpen: true,
-            }));
+            editorContext?.updateModalStates({ marketplace: { isOpen: true } });
           }}
         >
           Explorer Community Workflows/Apps

@@ -102,7 +102,10 @@ export default function ViewMenuDropDown() {
       };
       input.click();
     },
-    [],
+    [
+      editorContext?.editorStates.project,
+      editorContext?.editorStates.currentWorkspace,
+    ],
   );
 
   return <NavMenuDropdown category="View" menuActions={menuActions} />;

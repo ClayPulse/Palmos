@@ -21,7 +21,12 @@ export default function ProjectView() {
   const openMarketplace = useCallback(() => {
     editorContext?.setEditorStates((prev) => ({
       ...prev,
-      isMarketplaceOpen: true,
+      modalStates: {
+        ...prev.modalStates,
+        marketplace: {
+          isOpen: true,
+        },
+      },
     }));
   }, [editorContext]);
 
