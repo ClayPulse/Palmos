@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import useRouter from "@/lib/hooks/use-router";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIUrl } from "@/lib/pulse-editor-website/backend";
+import { Browser } from "@capacitor/browser";
 import {
   Button,
   Dropdown,
@@ -223,7 +224,19 @@ export default function NavTopBar({
                   <DropdownItem
                     key={"manage-plan"}
                     onPress={() => {
-                      router.replace(getAPIUrl("/pricing").toString());
+                      if (getPlatform() === PlatformEnum.Capacitor) {
+                        const url = getAPIUrl("/pricing");
+                        url.searchParams.set(
+                          "callbackUrl",
+                          process.env.NEXT_PUBLIC_BACKEND_URL + "/api/mobile",
+                        );
+
+                        Browser.open({
+                          url: url.toString(),
+                        });
+                      } else {
+                        router.replace(getAPIUrl("/pricing").toString());
+                      }
                     }}
                   >
                     Manage Plan
