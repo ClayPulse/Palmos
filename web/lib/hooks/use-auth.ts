@@ -9,7 +9,7 @@ import useSWR from "swr";
 import { PlatformEnum } from "../enums";
 import { getPlatform } from "../platform-api/platform-checker";
 import { fetchAPI, getAPIUrl } from "../pulse-editor-website/backend";
-import { CreditBalance, Session, Subscription } from "../types";
+import { PlanUsage, Session, SubscriptionPlan } from "../types";
 import useRouter from "./use-router";
 
 export function useAuth() {
@@ -41,30 +41,23 @@ export function useAuth() {
   );
 
   // --- Subscription ---
-  const { data: subscription } = useSWR<Subscription | undefined>(
-    session ? `/api/subscription` : null,
-    async (url: string) => {
-      const res = await fetchAPI(url);
-      if (!res.ok) {
-        throw new Error("Failed to fetch subscription data");
+  const { data: planAndUsage } = useSWR<
+    | {
+        plan: SubscriptionPlan;
+        usage: PlanUsage;
       }
-      const data = await res.json();
-      return data as Subscription;
-    },
-  );
-
-  // --- Credits ---
-  const { data: creditBalance } = useSWR<CreditBalance | undefined>(
-    session ? `/api/credits` : null,
-    async (url: string) => {
-      const res = await fetchAPI(url);
-      if (!res.ok) {
-        throw new Error("Failed to fetch credit balance");
-      }
-      const data = await res.json();
-      return data as CreditBalance;
-    },
-  );
+    | undefined
+  >(session ? `/api/billing/plan-and-usage` : null, async (url: string) => {
+    const res = await fetchAPI(url);
+    if (!res.ok) {
+      throw new Error("Failed to fetch subscription data");
+    }
+    const data = await res.json();
+    return data as {
+      plan: SubscriptionPlan;
+      usage: PlanUsage;
+    };
+  });
 
   const router = useRouter();
 
@@ -170,8 +163,8 @@ export function useAuth() {
 
   return {
     session,
-    subscription,
-    creditBalance,
+    subscription: planAndUsage?.plan,
+    usage: planAndUsage?.usage,
     isLoading,
     signIn,
     signOut,

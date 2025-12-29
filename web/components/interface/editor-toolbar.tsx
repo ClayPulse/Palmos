@@ -1,7 +1,6 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import EditorSettingsModal from "@/components/modals/editor-settings-modal";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
@@ -21,7 +20,6 @@ export default function EditorToolbar() {
   const { tabItems, tabIndex } = useTabViewManager();
 
   const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
-  const [isAppSettingsModalOpen, setAppIsSettingsModalOpen] = useState(false);
 
   function setIsOpen(val: boolean) {
     if (editorContext) {
@@ -174,7 +172,9 @@ export default function EditorToolbar() {
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
-                    editorContext?.updateModalStates({ marketplace: { isOpen: true } });
+                    editorContext?.updateModalStates({
+                      marketplace: { isOpen: true },
+                    });
                   }}
                 >
                   <Icon name="storefront" variant="outlined" />
@@ -187,15 +187,15 @@ export default function EditorToolbar() {
                   variant="light"
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
-                  onPress={() => setAppIsSettingsModalOpen(true)}
+                  onPress={() =>
+                    editorContext?.updateModalStates({
+                      editorSettings: { isOpen: true },
+                    })
+                  }
                 >
                   <Icon name="settings" variant="outlined" />
                 </Button>
               </Tooltip>
-              <EditorSettingsModal
-                isOpen={isAppSettingsModalOpen}
-                setIsOpen={setAppIsSettingsModalOpen}
-              />
             </div>
           </motion.div>
         )}

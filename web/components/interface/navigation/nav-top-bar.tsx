@@ -1,12 +1,16 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useAuth } from "@/lib/hooks/use-auth";
+import useRouter from "@/lib/hooks/use-router";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { getAPIUrl } from "@/lib/pulse-editor-website/backend";
+import { Browser } from "@capacitor/browser";
 import {
   Button,
   Dropdown,
   DropdownItem,
   DropdownMenu,
+  DropdownSection,
   DropdownTrigger,
 } from "@heroui/react";
 import { useTheme } from "next-themes";
@@ -30,13 +34,15 @@ export default function NavTopBar({
 }) {
   const editorContext = useContext(EditorContext);
 
-  const { session, signOut } = useAuth();
+  const { session, signOut, subscription, usage } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
+  const router = useRouter();
 
   // #region Load specified app if app query parameter is present
   const params = useSearchParams();
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
+  const workflow = params.get("workflow");
 
   const { menuActions, runMenuActionByKeyboardShortcut } = useMenuActions();
 
@@ -51,6 +57,26 @@ export default function NavTopBar({
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [menuActions]);
+
+  const CloudIndicator = ({ onClick }: { onClick?: () => void }) =>
+    session &&
+    (editorContext?.persistSettings?.isUseManagedCloud ? (
+      <div
+        className="flex items-center gap-x-1 hover:cursor-pointer"
+        onClick={onClick}
+      >
+        <div className="bg-success h-2 w-2 rounded-full"></div>
+        <p className="text-success text-sm">Connected to Cloud AI</p>
+      </div>
+    ) : (
+      <div
+        className="flex items-center gap-x-1 hover:cursor-pointer"
+        onClick={onClick}
+      >
+        <div className="bg-warning h-2 w-2 rounded-full"></div>
+        <p className="text-warning text-sm">Offline</p>
+      </div>
+    ));
 
   return (
     <div
@@ -87,15 +113,29 @@ export default function NavTopBar({
           <VoiceIndicator />
         </div>
         <div className="col-start-3 flex justify-end gap-x-1">
-          <Button
-            className="hidden sm:block"
-            color="primary"
-            onPress={() => {
-              setIsSharingOpen(true);
-            }}
-          >
-            {app ? <span>Share App</span> : <span>Share</span>}
-          </Button>
+          <div className="hidden items-center sm:flex">
+            <CloudIndicator
+              onClick={() => {
+                editorContext?.updateModalStates({
+                  editorSettings: {
+                    isOpen: true,
+                  },
+                });
+              }}
+            />
+          </div>
+
+          {(app || workflow) && (
+            <Button
+              className="hidden sm:block"
+              color="primary"
+              onPress={() => {
+                setIsSharingOpen(true);
+              }}
+            >
+              {app ? <span>Share App</span> : <span>Share</span>}
+            </Button>
+          )}
           <Button
             className="block sm:hidden"
             isIconOnly
@@ -149,20 +189,71 @@ export default function NavTopBar({
               </DropdownTrigger>
               <DropdownMenu
                 topContent={
-                  <p className="text-medium w-full px-2">
-                    Welcome,{" "}
-                    <span className="font-semibold">{session.user.name}</span>
+                  <p className="text-medium w-full text-center font-semibold">
+                    {session.user.name}
                   </p>
                 }
               >
-                <DropdownItem
-                  key={"sign-out"}
-                  onPress={() => {
-                    signOut();
-                  }}
-                >
-                  Sign out
-                </DropdownItem>
+                <DropdownSection showDivider title="Subscription">
+                  <DropdownItem
+                    key={"subscription-plan"}
+                    isReadOnly
+                    variant="faded"
+                  >
+                    <div>
+                      <p className="text-medium text-center">
+                        Subscription Plan
+                      </p>
+                      <p className="text-center font-semibold">
+                        {subscription?.name}
+                      </p>
+                      <p className="text-medium text-center">
+                        Credits Remaining
+                      </p>
+                      <p className="text-center font-semibold">
+                        {usage?.remainingCredit}
+                      </p>
+                      <div className="flex items-center justify-center">
+                        <CloudIndicator />
+                      </div>
+                    </div>
+                  </DropdownItem>
+                </DropdownSection>
+
+                <DropdownSection title={"Account"}>
+                  <DropdownItem
+                    key={"manage-plan"}
+                    onPress={() => {
+                      const url = getAPIUrl("/pricing");
+                      if (getPlatform() === PlatformEnum.Capacitor) {
+                        url.searchParams.set(
+                          "callbackUrl",
+                          process.env.NEXT_PUBLIC_BACKEND_URL + "/api/mobile",
+                        );
+
+                        Browser.open({
+                          url: url.toString(),
+                        });
+                      } else if (getPlatform() === PlatformEnum.Electron) {
+                        // open in a new external browser window
+                        window.open(url.toString(), "_blank");
+                      } else {
+                        router.replace(url.toString());
+                      }
+                    }}
+                  >
+                    Manage Plan
+                  </DropdownItem>
+                  <DropdownItem
+                    key={"sign-out"}
+                    onPress={() => {
+                      signOut();
+                    }}
+                    className="text-danger"
+                  >
+                    Sign out
+                  </DropdownItem>
+                </DropdownSection>
               </DropdownMenu>
             </Dropdown>
           )}

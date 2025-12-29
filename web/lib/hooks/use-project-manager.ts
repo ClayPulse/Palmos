@@ -31,7 +31,7 @@ export function useProjectManager() {
         setIsLoading(false);
       });
     }
-  }, [editorContext?.persistSettings, platformApi, session]);
+  }, [editorContext?.persistSettings?.projectHomePath, platformApi, session]);
 
   function openProject(projectName: string) {
     editorContext?.setEditorStates((prev) => {
