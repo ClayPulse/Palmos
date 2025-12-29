@@ -224,8 +224,8 @@ export default function NavTopBar({
                   <DropdownItem
                     key={"manage-plan"}
                     onPress={() => {
+                      const url = getAPIUrl("/pricing");
                       if (getPlatform() === PlatformEnum.Capacitor) {
-                        const url = getAPIUrl("/pricing");
                         url.searchParams.set(
                           "callbackUrl",
                           process.env.NEXT_PUBLIC_BACKEND_URL + "/api/mobile",
@@ -234,8 +234,11 @@ export default function NavTopBar({
                         Browser.open({
                           url: url.toString(),
                         });
+                      } else if (getPlatform() === PlatformEnum.Electron) {
+                        // open in a new external browser window
+                        window.open(url.toString(), "_blank");
                       } else {
-                        router.replace(getAPIUrl("/pricing").toString());
+                        router.replace(url.toString());
                       }
                     }}
                   >
