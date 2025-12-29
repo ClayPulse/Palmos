@@ -65,7 +65,7 @@ export default function PublishWorkflowModal({
           ),
       };
 
-      await fetchAPI("/api/workflow/publish", {
+      const response = await fetchAPI("/api/workflow/publish", {
         method: "POST",
         body: JSON.stringify({ ...workflow }),
         headers: {
@@ -73,16 +73,22 @@ export default function PublishWorkflowModal({
         },
       });
 
+      if (!response.ok) {
+        throw new Error(
+          "Failed to publish workflow. " + (await response.text()),
+        );
+      }
+
       addToast({
         title: "Workflow Published",
         description: "Your workflow has been published successfully.",
         color: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error publishing workflow:", error);
       addToast({
-        title: "Error",
-        description: "There was an error publishing your workflow.",
+        title: "Failed to Publish Workflow",
+        description: error.message,
         color: "danger",
       });
     }
