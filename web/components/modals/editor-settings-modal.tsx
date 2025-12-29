@@ -211,7 +211,7 @@ function GeneralSettings({
 }
 
 function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
-  const { subscription, creditBalance } = useAuth();
+  const { subscription, usage } = useAuth();
 
   return (
     <>
@@ -247,11 +247,11 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
       {(editorContext?.persistSettings?.isUseManagedCloud ?? true) ? (
         <div className="flex flex-col items-center">
           <p className="text-medium pb-2 font-bold">
-            Your Plan: {subscription?.plan}
+            Your Plan: {subscription?.name}
           </p>
           <Button color="primary">Upgrade/Manage Plan</Button>
           <p className="text-medium pb-2 font-bold">
-            Credits: {creditBalance?.balance}
+            Credits: {usage?.remainingCredit}
           </p>
           <Button color="primary">Top Up Credits</Button>
         </div>

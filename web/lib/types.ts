@@ -178,6 +178,9 @@ export type ModalStates = {
     app?: ExtensionApp;
     workflow?: Workflow;
   };
+  editorSettings?: {
+    isOpen?: boolean;
+  };
 };
 
 export type OpenFileDialogConfig = {
@@ -406,14 +409,32 @@ export type ScopedAction = {
 // #endregion
 
 // #region Pulse Editor Cloud
-export type Subscription = {
-  plan: string;
-  status: string;
-  current_period_end: number;
-};
 
 export type CreditBalance = {
   balance: number;
+};
+
+export type SubscriptionPlan = {
+  name: string;
+  description: string;
+  price: number;
+  interval: string;
+  maxWorkspaces: number;
+  monthlyCredits: number;
+  maxWorkspaceSpecs: string | null;
+  maxWorkspaceStorageGB: number | null;
+  maxAIModelName: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+export type PlanUsage = {
+  id: string;
+  createdAt: Date;
+  updatedAt: Date;
+  userId: string | null;
+  remainingWorkspaceCount: number;
+  remainingCredit: number;
 };
 // #endregion
 

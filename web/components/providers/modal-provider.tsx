@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, useContext } from "react";
+import EditorSettingsModal from "../modals/editor-settings-modal";
 import MarketplaceModal from "../modals/marketplace-modal";
 import OpenInProjectModal from "../modals/open-in-project-modal";
 import { EditorContext } from "./editor-context-provider";
@@ -16,17 +17,26 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
 
       {/* TODO: Move more modals here */}
       <MarketplaceModal
-        isOpen={modalStates?.marketplace?.isOpen || false}
+        isOpen={modalStates?.marketplace?.isOpen ?? false}
         setIsOpen={(isOpen) =>
           editorContext?.updateModalStates({ marketplace: { isOpen } })
         }
       />
 
       <OpenInProjectModal
-        isOpen={modalStates?.openInProject?.isOpen || false}
+        isOpen={modalStates?.openInProject?.isOpen ?? false}
         setIsOpen={(isOpen) =>
           editorContext?.updateModalStates({
             openInProject: { isOpen },
+          })
+        }
+      />
+
+      <EditorSettingsModal
+        isOpen={modalStates?.editorSettings?.isOpen ?? false}
+        setIsOpen={(isOpen) =>
+          editorContext?.updateModalStates({
+            editorSettings: { isOpen },
           })
         }
       />
