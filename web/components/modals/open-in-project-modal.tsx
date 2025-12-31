@@ -27,7 +27,7 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { v4 } from "uuid";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function OpenInProjectModal({
   isOpen,

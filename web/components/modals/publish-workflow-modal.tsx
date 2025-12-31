@@ -5,7 +5,7 @@ import { addToast, Button, closeToast, Input } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { useContext, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function PublishWorkflowModal({
   isOpen,

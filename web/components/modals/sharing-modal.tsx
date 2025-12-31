@@ -8,7 +8,7 @@ import useSWR from "swr";
 import Icon from "../misc/icon";
 import QRDisplay from "../misc/qr-display";
 import Tabs from "../misc/tabs";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function SharingModal({
   isOpen,

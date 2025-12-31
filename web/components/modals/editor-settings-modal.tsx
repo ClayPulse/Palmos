@@ -26,7 +26,7 @@ import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function EditorSettingsModal({
   isOpen,

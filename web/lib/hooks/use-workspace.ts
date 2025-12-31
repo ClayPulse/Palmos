@@ -76,15 +76,12 @@ export function useWorkspace(isFetchContent: boolean = true) {
         JSON.stringify(updatedWorkspace) !== JSON.stringify(workspace);
 
       if (updatedWorkspace && hasChange) {
-        editorContext?.setEditorStates((prev) => ({
-          ...prev,
-          currentWorkspace: updatedWorkspace,
-        }));
+        setGlobalWorkspace(updatedWorkspace);
       }
     }
   }, [cloudWorkspaces, workspace]);
 
-  const setWorkspace = (ws: WorkspaceConfig | undefined) => {
+  const setGlobalWorkspace = (ws: WorkspaceConfig | undefined) => {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -128,7 +125,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
 
     const updated = await mutateCloudWorkspaces();
     const newWorkspace = updated?.find((ws) => ws.id === id);
-    setWorkspace(newWorkspace);
+    setGlobalWorkspace(newWorkspace);
   }
 
   async function updateWorkspace(workspaceId: string, name: string) {
@@ -167,7 +164,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
 
     if (!workspaceId) {
       // Unselect workspace
-      setWorkspace(undefined);
+      setGlobalWorkspace(undefined);
       return;
     }
 
@@ -179,7 +176,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
       throw new Error("Workspace not found");
     }
 
-    setWorkspace(selectedWorkspace);
+    setGlobalWorkspace(selectedWorkspace);
   }
 
   async function deleteWorkspace(workspaceId: string) {
@@ -199,7 +196,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
       throw new Error("Failed to delete workspace");
     }
 
-    setWorkspace(undefined);
+    setGlobalWorkspace(undefined);
     mutateCloudWorkspaces();
   }
 

@@ -38,7 +38,7 @@ function useDelayedUnmount(isOpen: boolean, delay = 1000) {
   return shouldRender;
 }
 
-const delaySeconds = 1000;
+const delaySeconds = 300;
 
 export default function ModalProvider({ children }: { children: ReactNode }) {
   const editorContext = useContext(EditorContext);
@@ -103,6 +103,8 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
               workspaceSettings: { isOpen: false },
             })
           }
+          initialWorkspace={modalStates?.workspaceSettings?.initialWorkspace}
+          isShowUseButton={modalStates?.workspaceSettings?.isShowUseButton}
         />
       )}
 

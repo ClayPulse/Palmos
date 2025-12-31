@@ -4,7 +4,7 @@ import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { SpecOption } from "@/lib/types";
+import { SpecOption, WorkspaceConfig } from "@/lib/types";
 import {
   getNumberFromUnitString,
   getUnitFromUnitString,
@@ -19,25 +19,28 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function WorkspaceSettingsModal({
   isOpen,
   onClose,
+  initialWorkspace,
+  isShowUseButton = false,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  initialWorkspace?: WorkspaceConfig;
+  isShowUseButton?: boolean;
 }) {
   const editorContext = useContext(EditorContext);
 
   const { platformApi } = usePlatformApi();
   const {
-    workspace,
-    isWorkspaceHealthy,
+    // workspace,
     createWorkspace,
     updateWorkspace,
     deleteWorkspace,
@@ -51,17 +54,41 @@ export default function WorkspaceSettingsModal({
   const [storage, setStorage] = useState(5);
   const [selectedSpec, setSelectedSpec] = useState<SpecOption>(specsOptions[0]);
   const [isCreateNew, setIsCreateNew] = useState(false);
+  const [selectedWorkspace, setSelectedWorkspace] = useState<
+    WorkspaceConfig | undefined
+  >(initialWorkspace);
+
+  const isWorkspaceRunning = useMemo(() => {
+    return (
+      cloudWorkspaces?.some(
+        (ws) => ws.id === selectedWorkspace?.id && ws.status === "running",
+      ) ?? false
+    );
+  }, [selectedWorkspace, cloudWorkspaces]);
+
+  const isEdited = useMemo(() => {
+    return workspaceName !== selectedWorkspace?.name;
+  }, [workspaceName]);
+
+  const isWorkspaceCurrentlyOpen = useMemo(() => {
+    return (
+      editorContext?.editorStates.currentWorkspace?.id === selectedWorkspace?.id
+    );
+  }, [selectedWorkspace, editorContext?.editorStates.currentWorkspace]);
 
   useEffect(() => {
-    if (workspace) {
-      console.log("Workspace loaded:", workspace);
-      setWorkspaceName(workspace.name);
-      setStorage(getNumberFromUnitString(workspace.volumeSize));
+    console.log("initialWorkspace", initialWorkspace);
+
+    if (selectedWorkspace) {
+      setWorkspaceName(selectedWorkspace.name);
+      setStorage(getNumberFromUnitString(selectedWorkspace.volumeSize));
       setSelectedSpec(
         specsOptions.find(
           (option) =>
-            option.vCPU === getNumberFromUnitString(workspace.cpuLimit) &&
-            option.ram === getNumberFromUnitString(workspace.memoryLimit),
+            option.vCPU ===
+              getNumberFromUnitString(selectedWorkspace.cpuLimit) &&
+            option.ram ===
+              getNumberFromUnitString(selectedWorkspace.memoryLimit),
         ) ?? specsOptions[0],
       );
     } else {
@@ -69,13 +96,13 @@ export default function WorkspaceSettingsModal({
       setStorage(5);
       setSelectedSpec(specsOptions[0]);
     }
-  }, [workspace]);
+  }, [selectedWorkspace]);
 
   async function handleUpdateWorkspace() {
     if (!platformApi) {
       toast.error("Unknown platform.");
       return;
-    } else if (!workspace) {
+    } else if (!selectedWorkspace) {
       toast.error("Workspace is not available.");
       return;
     } else if (workspaceName === "") {
@@ -84,7 +111,12 @@ export default function WorkspaceSettingsModal({
     }
 
     // Update workspace
-    await updateWorkspace(workspace.id, workspaceName);
+    addToast({
+      title: "Updating workspace",
+      description: `Updating workspace ${workspaceName}.`,
+    });
+
+    await updateWorkspace(selectedWorkspace.id, workspaceName);
 
     addToast({
       title: "Workspace updated",
@@ -98,7 +130,7 @@ export default function WorkspaceSettingsModal({
     if (!platformApi) {
       toast.error("Unknown platform.");
       return;
-    } else if (!workspace) {
+    } else if (!selectedWorkspace) {
       toast.error("Workspace is not available.");
       return;
     }
@@ -109,10 +141,10 @@ export default function WorkspaceSettingsModal({
         description: `Deleting workspace ${workspaceName}`,
       });
 
-      await deleteWorkspace(workspace.id);
+      await deleteWorkspace(selectedWorkspace.id);
       addToast({
         title: "Workspace deleted",
-        description: `Workspace ${workspace.name} has been deleted successfully.`,
+        description: `Workspace ${selectedWorkspace.name} has been deleted successfully.`,
         color: "success",
       });
 
@@ -130,7 +162,7 @@ export default function WorkspaceSettingsModal({
     if (!platformApi) {
       toast.error("Unknown platform.");
       return;
-    } else if (workspace) {
+    } else if (selectedWorkspace) {
       toast.error("Workspace already exists. Please update it instead.");
       return;
     } else if (workspaceName === "") {
@@ -167,37 +199,52 @@ export default function WorkspaceSettingsModal({
   }
 
   async function handleStopWorkspace() {
-    if (!workspace) {
+    if (!selectedWorkspace) {
       toast.error("Workspace is not available.");
       return;
     }
     addToast({
       title: "Stopping workspace",
-      description: `Stopping workspace ${workspace.name}.`,
+      description: `Stopping workspace ${selectedWorkspace.name}.`,
     });
-    await stopWorkspace(workspace.id);
+    await stopWorkspace(selectedWorkspace.id);
     addToast({
       title: "Workspace stopped",
-      description: `Workspace ${workspace.name} has been stopped successfully.`,
+      description: `Workspace ${selectedWorkspace.name} has been stopped successfully.`,
       color: "success",
     });
   }
 
   async function handleResumeWorkspace() {
-    if (!workspace) {
+    if (!selectedWorkspace) {
       toast.error("Workspace is not available.");
       return;
     }
     addToast({
       title: "Starting workspace",
-      description: `Starting workspace ${workspace.name}.`,
+      description: `Starting workspace ${selectedWorkspace.name}.`,
     });
-    await startWorkspace(workspace.id);
+    await startWorkspace(selectedWorkspace.id);
     addToast({
       title: "Workspace started",
-      description: `Workspace ${workspace.name} has been started successfully.`,
+      description: `Workspace ${selectedWorkspace.name} has been started successfully.`,
       color: "success",
     });
+  }
+
+  async function handleUseWorkspace() {
+    if (!selectedWorkspace) {
+      toast.error("Workspace is not available.");
+      return;
+    }
+
+    await selectWorkspace(selectedWorkspace.id);
+    onClose();
+  }
+
+  async function handleExitWorkspace() {
+    await selectWorkspace(undefined);
+    onClose();
   }
 
   return (
@@ -217,41 +264,38 @@ export default function WorkspaceSettingsModal({
               !editorContext?.editorStates?.isSigningIn && !cloudWorkspaces
             }
             selectedKeys={
-              workspace
-                ? [workspace.id]
+              selectedWorkspace
+                ? [selectedWorkspace.id]
                 : getPlatform() === PlatformEnum.Electron
                   ? ["__internal-local"]
                   : []
             }
             size="sm"
-            disabledKeys={workspace ? [] : ["settings"]}
+            disabledKeys={selectedWorkspace ? [] : ["settings"]}
             onSelectionChange={async (key) => {
               if (key.currentKey === "__internal-create-new") {
-                await selectWorkspace(undefined);
                 setIsCreateNew(true);
+                setSelectedWorkspace(undefined);
                 return;
               } else if (key.currentKey === "__internal-settings") {
-                await selectWorkspace(undefined);
                 return;
               } else if (key.currentKey === "__internal-local") {
-                await selectWorkspace(undefined);
                 return;
               }
 
               setIsCreateNew(false);
 
-              const selectedWorkspace = cloudWorkspaces?.find(
-                (workspace) => workspace.id === key.currentKey,
+              setSelectedWorkspace(
+                cloudWorkspaces?.find((ws) => ws.id === key.currentKey),
               );
-              await selectWorkspace(selectedWorkspace?.id);
             }}
           >
             <>
               {getPlatform() === PlatformEnum.Electron && (
                 <SelectItem key={"__internal-local"}>Local Computer</SelectItem>
               )}
-              {cloudWorkspaces?.map((workspace) => (
-                <SelectItem key={workspace.id}>{workspace.name}</SelectItem>
+              {cloudWorkspaces?.map((ws) => (
+                <SelectItem key={ws.id}>{ws.name}</SelectItem>
               )) ?? []}
               <SelectItem
                 key={"__internal-create-new"}
@@ -269,7 +313,7 @@ export default function WorkspaceSettingsModal({
           </Select>
         </div>
 
-        {(isCreateNew || workspace) && (
+        {(isCreateNew || selectedWorkspace) && (
           <>
             <Divider />
             <Input
@@ -290,7 +334,7 @@ export default function WorkspaceSettingsModal({
                 }
               }}
               disabledKeys={["more to come"]}
-              isDisabled={workspace ? true : false}
+              isDisabled={selectedWorkspace ? true : false}
             >
               <>
                 {specsOptions.map((option) => (
@@ -309,13 +353,24 @@ export default function WorkspaceSettingsModal({
               onValueChange={setStorage}
               minValue={2}
               maxValue={512}
-              isDisabled={workspace ? true : false}
+              isDisabled={selectedWorkspace ? true : false}
             />
-            {workspace ? (
+            {selectedWorkspace ? (
               <div className="flex gap-x-1">
-                <Button onPress={handleUpdateWorkspace}>Update</Button>
+                {isShowUseButton &&
+                  (isWorkspaceCurrentlyOpen ? (
+                    <Button onPress={handleExitWorkspace}>
+                      Exit Workspace
+                    </Button>
+                  ) : (
+                    <Button onPress={handleUseWorkspace}>Use Workspace</Button>
+                  ))}
 
-                {isWorkspaceHealthy ? (
+                {isEdited && (
+                  <Button onPress={handleUpdateWorkspace}>Update</Button>
+                )}
+
+                {isWorkspaceRunning ? (
                   <Button onPress={handleStopWorkspace} color="warning">
                     Stop
                   </Button>

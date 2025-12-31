@@ -7,7 +7,7 @@ import EnvInput from "../misc/env-input";
 import Icon from "../misc/icon";
 import MarkdownRender from "../misc/markdown-render";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function AppInfoModal({
   isOpen,

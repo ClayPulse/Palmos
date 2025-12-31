@@ -51,6 +51,18 @@ export default function WorkspaceExplorer() {
     workspaceHook.waitUntilWorkspaceRunning,
   ]);
 
+  async function handleOpenWorkspaceSettingsModal() {
+    console.log(workspaceHook.workspace);
+
+    editorContext?.updateModalStates({
+      workspaceSettings: {
+        isOpen: true,
+        isShowUseButton: true,
+        initialWorkspace: workspaceHook.workspace,
+      },
+    });
+  }
+
   return (
     <div className="flex h-full w-full flex-col">
       {editorContext?.editorStates.project ? (
@@ -58,7 +70,7 @@ export default function WorkspaceExplorer() {
           {getPlatform() === PlatformEnum.Electron ||
           workspaceHook.workspace ? (
             workspaceHook.workspace?.status === "paused" ? (
-              <div className="flex h-full flex-col items-center justify-center px-4 pb-24">
+              <div className="flex h-full flex-col items-center justify-center px-4 pb-24 gap-y-1">
                 <p className="text-center">
                   The workspace is currently paused. Please resume the workspace
                   to access project files.
@@ -88,6 +100,10 @@ export default function WorkspaceExplorer() {
                 >
                   Start Workspace
                 </Button>
+                <Button onPress={handleOpenWorkspaceSettingsModal}>
+                  <Icon name="settings" variant="round" />
+                  <p>Workspace Settings</p>
+                </Button>
               </div>
             ) : !isWorkspaceHealthy &&
               getPlatform() !== PlatformEnum.Electron ? (
@@ -102,23 +118,13 @@ export default function WorkspaceExplorer() {
                     isSideMenuOpen: false,
                   }));
                 }}
-                openWorkspaceSettingsModal={() => {
-                  editorContext.updateModalStates({
-                    workspaceSettings: { isOpen: true },
-                  });
-                }}
+                openWorkspaceSettingsModal={handleOpenWorkspaceSettingsModal}
               />
             )
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-y-2 px-4 pb-24">
               {!workspaceHook.workspace && (
-                <Button
-                  onPress={() =>
-                    editorContext.updateModalStates({
-                      workspaceSettings: { isOpen: true },
-                    })
-                  }
-                >
+                <Button onPress={handleOpenWorkspaceSettingsModal}>
                   <Icon name="settings" variant="round" />
                   <p>Workspace Settings</p>
                 </Button>

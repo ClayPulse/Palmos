@@ -23,7 +23,7 @@ export type EditorContextType = {
   setEditorStates: Dispatch<SetStateAction<EditorStates>>;
   persistSettings: PersistentSettings | undefined;
   setPersistSettings: Dispatch<SetStateAction<PersistentSettings | undefined>>;
-  updateModalStates: (patchedState: ModalStates) => void;
+  updateModalStates: Dispatch<SetStateAction<ModalStates | undefined>>;
 };
 
 export type EditorStates = {
@@ -183,6 +183,8 @@ export type ModalStates = {
   };
   workspaceSettings?: {
     isOpen?: boolean;
+    initialWorkspace?: WorkspaceConfig;
+    isShowUseButton?: boolean;
   };
   agentConfig?: {
     isOpen?: boolean;

@@ -3,7 +3,7 @@ import { useContext, useState } from "react";
 import toast from "react-hot-toast";
 import { encrypt } from "@/lib/security/simple-password";
 import Icon from "../misc/icon";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 import { EditorContext } from "../providers/editor-context-provider";
 import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 

@@ -4,7 +4,7 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
 import { addToast, Button, Input } from "@heroui/react";
 import { useEffect, useState } from "react";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function ProjectSettingsModal({
   isOpen,

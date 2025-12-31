@@ -4,7 +4,7 @@ import { Button, Divider, Input } from "@heroui/react";
 import { useContext, useState } from "react";
 import toast from "react-hot-toast";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function LoginModal({
   signIn,

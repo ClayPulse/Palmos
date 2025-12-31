@@ -4,7 +4,7 @@ import { useState } from "react";
 import AppGallery from "../marketplace/app/app-gallery";
 import WorkflowGallery from "../marketplace/workflow/workflow-gallery";
 import Tabs from "../misc/tabs";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function MarketplaceModal({
   isOpen,

@@ -39,16 +39,6 @@ export default function ProjectExplorer() {
             <ProjectItem
               key={index}
               project={project}
-              setSettingsOpen={() => {
-                editorContext?.updateModalStates({
-                  projectSettings: { isOpen: true },
-                });
-              }}
-              setSettingsProject={() => {
-                editorContext?.updateModalStates({
-                  projectSettings: { projectInfo: project },
-                });
-              }}
               onOpen={(project: ProjectInfo) => {
                 openProject(project.name);
                 editorContext?.setEditorStates((prev) => ({

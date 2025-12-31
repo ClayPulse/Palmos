@@ -1,7 +1,7 @@
 import { Button } from "@heroui/react";
 import Link from "next/link";
 import Icon from "../misc/icon";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 export default function OpenSourceInfoModal({
   isOpen,
   onClose,

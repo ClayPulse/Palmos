@@ -6,13 +6,9 @@ import { EditorContext } from "../../providers/editor-context-provider";
 
 export default function ProjectItem({
   project,
-  setSettingsOpen,
-  setSettingsProject,
   onOpen,
 }: {
   project: ProjectInfo;
-  setSettingsOpen: (isOpen: boolean) => void;
-  setSettingsProject: (project: ProjectInfo) => void;
   onOpen?: (project: ProjectInfo) => void;
 }) {
   const editorContext = useContext(EditorContext);
@@ -76,8 +72,9 @@ export default function ProjectItem({
             className="text-medium h-12 sm:h-8 sm:text-sm"
             variant="light"
             onPress={(e) => {
-              setSettingsOpen(true);
-              setSettingsProject(project);
+              editorContext?.updateModalStates({
+                projectSettings: { isOpen: true, projectInfo: project },
+              });
               setContextMenuState({ x: 0, y: 0, isOpen: false });
             }}
           >
