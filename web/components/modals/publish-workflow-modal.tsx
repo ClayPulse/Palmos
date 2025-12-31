@@ -5,11 +5,11 @@ import { addToast, Button, closeToast, Input } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { useContext, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function PublishWorkflowModal({
   isOpen,
-  setIsOpen,
+  onClose,
   workflowCanvas,
   localNodes,
   localEdges,
@@ -17,12 +17,12 @@ export default function PublishWorkflowModal({
   saveAppsSnapshotStates,
 }: {
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  onClose: () => void;
   workflowCanvas: HTMLElement | null;
   localNodes: ReactFlowNode<AppNodeData>[];
   localEdges: ReactFlowEdge[];
   entryPoint: ReactFlowNode<AppNodeData> | undefined;
-  saveAppsSnapshotStates: () => Promise<{
+  saveAppsSnapshotStates?: () => Promise<{
     [key: string]: any;
   }>;
 }) {
@@ -38,12 +38,14 @@ export default function PublishWorkflowModal({
         return;
       }
 
-      setIsOpen(false);
+      onClose();
 
       const res = await captureWorkflowCanvas(workflowCanvas);
       const dataUrl = res.toDataURL("image/png");
 
-      const snapshotStates = await saveAppsSnapshotStates();
+      const snapshotStates = saveAppsSnapshotStates
+        ? await saveAppsSnapshotStates()
+        : undefined;
 
       const workflow: Workflow = {
         name: name,
@@ -109,7 +111,7 @@ export default function PublishWorkflowModal({
   return (
     <ModalWrapper
       isOpen={isOpen}
-      setIsOpen={setIsOpen}
+      onClose={onClose}
       title={"Publish Workflow"}
       placement={"center"}
     >

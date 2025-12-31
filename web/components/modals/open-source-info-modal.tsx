@@ -1,38 +1,86 @@
 import { Button } from "@heroui/react";
 import Link from "next/link";
-import ModalWrapper from "./modal-wrapper";
+import Icon from "../misc/icon";
+import ModalWrapper from "./wrapper";
 export default function OpenSourceInfoModal({
   isOpen,
-  setIsOpen,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  onClose: () => void;
 }) {
   return (
     <ModalWrapper
       isOpen={isOpen}
-      setIsOpen={(open: boolean) => {
-        setIsOpen(open);
-      }}
+      onClose={onClose}
       title={"Open Source Information"}
     >
-      <div className="flex w-full flex-col">
-        We believe in open software. Pulse Editor’s core and many of its
-        official apps are fully open source, built to empower developers
-        everywhere.
+      <div className="flex w-full flex-col items-center gap-y-1">
+        We believe in open software. Pulse Editor's core client and many of its
+        official apps and workflows are fully open source, built to empower
+        developers everywhere.
+        <div className="flex gap-x-1">
+          <Link href="https://github.com/claypulse/pulse-editor">
+            <Button>
+              <div className="flex items-center gap-0.5">
+                <div>
+                  <Icon
+                    uri="/assets/github-mark"
+                    extension=".svg"
+                    isThemed
+                    className="p-0.5 pl-0"
+                  />
+                </div>
+                <p>Pulse Editor Core</p>
+              </div>
+            </Button>
+          </Link>
+          <Link href="https://github.com/claypulse/official-pulse-apps">
+            <Button>
+              <div className="flex items-center gap-0.5">
+                <div>
+                  <Icon
+                    uri="/assets/github-mark"
+                    extension=".svg"
+                    isThemed
+                    className="p-0.5 pl-0"
+                  />
+                </div>
+                <p>Official Apps</p>
+              </div>
+            </Button>
+          </Link>
+        </div>
+        Meanwhile, we offer cloud hosted services like remote workspaces and AI
+        inference to make Pulse Editor easier to use at scale. Some of these
+        services are closed source and require a subscription to access.
         <br />
-        While we offer hosted services like remote workspaces and AI inference
-        to make it easier to use at scale, we also believe in giving users full
-        control so that you can self-host or bring your own keys anytime. Check
-        out tutorials:
-        <Link href="https://docs.pulse-editor.com/docs/self-hosting">
-          <Button>Self-Hosting and BYOK</Button>
-        </Link>
-        Love what we are doing? Please consider ⭐ starring us on GitHub or
-        donating to support open source development.
-        <Link href="https://github.com/claypulse/pulse-editor">
-          <Button>GitHub</Button>
-        </Link>
+        <br />
+        Love what we are doing? Please consider ⭐ starring us on GitHub,
+        downloading and giving feedback on Google Play.
+        <div className="flex gap-x-1">
+          <Link href="https://github.com/claypulse/pulse-editor">
+            <Button>
+              <div>
+                <Icon
+                  uri="/assets/github-mark"
+                  extension=".svg"
+                  isThemed
+                  className="p-0.5 pl-0"
+                />
+              </div>
+              <p> Give us a star</p>
+            </Button>
+          </Link>
+          <Link href="https://play.google.com/store/apps/details?id=com.pulse_editor.app">
+            <Button>
+              <div>
+                <Icon name="phone_android" />
+              </div>
+              <p>Google Play</p>
+            </Button>
+          </Link>
+        </div>
       </div>
     </ModalWrapper>
   );

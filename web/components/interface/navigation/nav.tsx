@@ -3,16 +3,11 @@
 import Icon from "@/components/misc/icon";
 import { PlatformEnum } from "@/lib/enums";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
-import { useAuth } from "@/lib/hooks/use-auth";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { AppInfoModalContent } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
-import AppInfoModal from "../../modals/app-info-modal";
-import LoginModal from "../../modals/login-modal";
-import PasswordModal from "../../modals/password-modal";
-import SharingModal from "../../modals/sharing-modal";
 import { EditorContext } from "../../providers/editor-context-provider";
 import Loading from "../status-screens/loading";
 import NavSideMenu from "./nav-side-menu";
@@ -37,14 +32,11 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const editorContext = useContext(EditorContext);
   const isMenuOpen = editorContext?.editorStates.isSideMenuOpen ?? false;
 
-  const { setTheme, resolvedTheme } = useTheme();
-  const { session, isLoading: isLoadingSession, signIn } = useAuth();
+  const { setTheme } = useTheme();
+
   const { openAppInfoModal } = useAppInfo();
 
-  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isShowNavbar, setIsShowNavbar] = useState(true);
-
-  const [isSharingOpen, setIsSharingOpen] = useState(false);
 
   useEffect(() => {
     const platform = getPlatform();
@@ -66,7 +58,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   // Open PasswordScreen if password is used
   useEffect(() => {
     if (editorContext?.persistSettings?.isUsePassword) {
-      setIsPasswordModalOpen(true);
+      editorContext?.updateModalStates({ password: { isOpen: true } });
     }
   }, [editorContext?.persistSettings]);
 
@@ -84,23 +76,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="bg-default flex h-full w-full flex-col overflow-hidden">
-      {isPasswordModalOpen && (
-        <PasswordModal
-          isOpen={isPasswordModalOpen}
-          setIsOpen={setIsPasswordModalOpen}
-        />
-      )}
-
-      {!isLoadingSession &&
-        !session &&
-        editorContext?.editorStates.isSigningIn && (
-          <LoginModal signIn={signIn} />
-        )}
-
-      {isSharingOpen && (
-        <SharingModal isOpen={isSharingOpen} setIsOpen={setIsSharingOpen} />
-      )}
-
       <div className="grid h-full w-full grid-cols-[max-content_auto] grid-rows-1">
         <div className="h-full w-full overflow-y-hidden">
           {isShowNavbar && (
@@ -115,7 +90,11 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             <NavTopBar
               isMenuOpen={isMenuOpen}
               setIsMenuOpen={setIsMenuOpen}
-              setIsSharingOpen={setIsSharingOpen}
+              setIsSharingOpen={() => {
+                editorContext?.updateModalStates({
+                  sharing: { isOpen: true },
+                });
+              }}
             />
           )}
 
@@ -133,7 +112,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       >
         <Icon name="info" />
       </Button>
-      <AppInfoModal />
     </div>
   );
 }

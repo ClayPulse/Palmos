@@ -1,39 +1,35 @@
 import { PlatformEnum } from "@/lib/enums";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { Button, Divider, Input } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import toast from "react-hot-toast";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
-export default function LoginModal({ signIn }: { signIn: () => void }) {
+export default function LoginModal({
+  signIn,
+  isOpen,
+  onClose,
+}: {
+    signIn: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const editorContext = useContext(EditorContext);
-
-  const { workspace } = useWorkspace();
 
   const [workspaceAddress, setWorkspaceAddress] = useState<string | undefined>(
     undefined,
   );
 
-  const [isModelOpen, setIsModelOpen] = useState(false);
-
-  // Open remote instance selection if the current platform is web
-  useEffect(() => {
-    if (!workspace) {
-      setIsModelOpen(true);
-    }
-  }, [workspace]);
-
   return (
     <ModalWrapper
-      isOpen={isModelOpen}
-      setIsOpen={(open: boolean) => {
+      isOpen={isOpen}
+      onClose={() => {
         editorContext?.setEditorStates((prev) => ({
           ...prev,
           isSigningIn: false,
         }));
-        setIsModelOpen(open);
+        onClose();
       }}
       title={"Access Pulse Editor Workspace"}
       placement={"center"}
@@ -84,7 +80,7 @@ export default function LoginModal({ signIn }: { signIn: () => void }) {
               );
             }
 
-            setIsModelOpen(false);
+            onClose();
 
             editorContext?.setEditorStates((prev) => {
               return {

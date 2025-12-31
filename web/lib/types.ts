@@ -23,7 +23,7 @@ export type EditorContextType = {
   setEditorStates: Dispatch<SetStateAction<EditorStates>>;
   persistSettings: PersistentSettings | undefined;
   setPersistSettings: Dispatch<SetStateAction<PersistentSettings | undefined>>;
-  updateModalStates: (patchedState: ModalStates) => void;
+  updateModalStates: Dispatch<SetStateAction<ModalStates | undefined>>;
 };
 
 export type EditorStates = {
@@ -179,6 +179,40 @@ export type ModalStates = {
     workflow?: Workflow;
   };
   editorSettings?: {
+    isOpen?: boolean;
+  };
+  workspaceSettings?: {
+    isOpen?: boolean;
+    initialWorkspace?: WorkspaceConfig;
+    isShowUseButton?: boolean;
+  };
+  agentConfig?: {
+    isOpen?: boolean;
+  };
+  login?: {
+    isOpen?: boolean;
+  };
+  openSourceInfo?: {
+    isOpen?: boolean;
+  };
+  password?: {
+    isOpen?: boolean;
+  };
+  projectSettings?: {
+    isOpen?: boolean;
+    projectInfo?: ProjectInfo;
+  };
+  publishWorkflow?: {
+    isOpen?: boolean;
+    workflowCanvas?: HTMLElement | null;
+    localNodes?: ReactFlowNode<AppNodeData>[];
+    localEdges?: ReactFlowEdge[];
+    entryPoint?: ReactFlowNode<AppNodeData> | undefined;
+    saveAppsSnapshotStates?: () => Promise<{
+      [key: string]: any;
+    }>;
+  };
+  sharing?: {
     isOpen?: boolean;
   };
 };
@@ -513,6 +547,8 @@ export type WorkspaceConfig = {
   memoryLimit: string;
   volumeSize: string;
   createdAt?: Date;
+  isDeleted?: boolean;
+  status?: "running" | "paused";
 };
 
 export type SpecOption = {

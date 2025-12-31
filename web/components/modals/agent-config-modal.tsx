@@ -9,14 +9,14 @@ import Icon from "../misc/icon";
 import PasswordInput from "../misc/password-input";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function AgentConfigModal({
   isOpen,
-  setIsOpen,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  onClose: () => void;
 }) {
   const editorContext = useContext(EditorContext);
 
@@ -73,7 +73,7 @@ export default function AgentConfigModal({
   return (
     <ModalWrapper
       isOpen={isOpen}
-      setIsOpen={setIsOpen}
+      onClose={onClose}
       title="Agents Configuration"
       isShowGoBack={isCreatingNewAgent}
       goBackCallback={() => {

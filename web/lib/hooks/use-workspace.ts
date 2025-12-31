@@ -34,7 +34,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
   );
 
   // Check workspace status
-  const { data: isWorkspaceRunning } = useSWR<boolean>(
+  const { data: isWorkspaceHealthy } = useSWR<boolean>(
     workspace
       ? `/api/workspace/check-health?workspaceId=${workspace.id}`
       : null,
@@ -59,13 +59,29 @@ export function useWorkspace(isFetchContent: boolean = true) {
   const waitUntilRunningResolve = useRef<() => void>(null);
 
   useEffect(() => {
-    if (isWorkspaceRunning && waitUntilRunningResolve.current) {
+    if (isWorkspaceHealthy && waitUntilRunningResolve.current) {
       waitUntilRunningResolve.current();
       waitUntilRunningResolve.current = null;
     }
-  }, [isWorkspaceRunning]);
+  }, [isWorkspaceHealthy]);
 
-  const setWorkspace = (ws: WorkspaceConfig | undefined) => {
+  useEffect(() => {
+    // Update current workspace if the cloud workspaces have changed
+    if (workspace && cloudWorkspaces) {
+      const updatedWorkspace = cloudWorkspaces.find(
+        (ws) => ws.id === workspace.id,
+      );
+
+      const hasChange =
+        JSON.stringify(updatedWorkspace) !== JSON.stringify(workspace);
+
+      if (updatedWorkspace && hasChange) {
+        setGlobalWorkspace(updatedWorkspace);
+      }
+    }
+  }, [cloudWorkspaces, workspace]);
+
+  const setGlobalWorkspace = (ws: WorkspaceConfig | undefined) => {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     }
@@ -109,7 +125,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
 
     const updated = await mutateCloudWorkspaces();
     const newWorkspace = updated?.find((ws) => ws.id === id);
-    setWorkspace(newWorkspace);
+    setGlobalWorkspace(newWorkspace);
   }
 
   async function updateWorkspace(workspaceId: string, name: string) {
@@ -148,7 +164,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
 
     if (!workspaceId) {
       // Unselect workspace
-      setWorkspace(undefined);
+      setGlobalWorkspace(undefined);
       return;
     }
 
@@ -160,7 +176,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
       throw new Error("Workspace not found");
     }
 
-    setWorkspace(selectedWorkspace);
+    setGlobalWorkspace(selectedWorkspace);
   }
 
   async function deleteWorkspace(workspaceId: string) {
@@ -180,8 +196,38 @@ export function useWorkspace(isFetchContent: boolean = true) {
       throw new Error("Failed to delete workspace");
     }
 
-    setWorkspace(undefined);
+    setGlobalWorkspace(undefined);
     mutateCloudWorkspaces();
+  }
+
+  async function startWorkspace(workspaceId: string) {
+    const response = await fetchAPI(`/api/workspace/start`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ workspaceId }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to start workspace");
+    }
+
+    await mutateCloudWorkspaces();
+  }
+
+  async function stopWorkspace(workspaceId: string) {
+    const response = await fetchAPI(`/api/workspace/stop`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ workspaceId }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to stop workspace");
+    }
+
+    await mutateCloudWorkspaces();
   }
 
   async function refreshWorkspaceContent(
@@ -219,22 +265,24 @@ export function useWorkspace(isFetchContent: boolean = true) {
   }
 
   const waitUntilWorkspaceRunning = useCallback(async () => {
-    if (isWorkspaceRunning) {
+    if (isWorkspaceHealthy) {
       return;
     }
     return new Promise<void>((resolve, reject) => {
       waitUntilRunningResolve.current = resolve;
     });
-  }, [isWorkspaceRunning]);
+  }, [isWorkspaceHealthy]);
 
   return {
     workspace,
-    isWorkspaceRunning,
+    isWorkspaceHealthy,
     cloudWorkspaces,
     createWorkspace,
     updateWorkspace,
     selectWorkspace,
     deleteWorkspace,
+    startWorkspace,
+    stopWorkspace,
     refreshWorkspaceContent,
     waitUntilWorkspaceRunning,
   };

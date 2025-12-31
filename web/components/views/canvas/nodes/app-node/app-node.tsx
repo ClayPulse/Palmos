@@ -2,8 +2,7 @@ import useActionExecutor from "@/lib/hooks/use-action-executor";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppNodeData } from "@/lib/types";
 import { Node } from "@xyflow/react";
-import { memo } from "react";
-import { v4 } from "uuid";
+import { memo, useState } from "react";
 import BaseAppView from "../../../base/base-app-view";
 import CanvasNodeViewLayout from "./layout";
 
@@ -18,14 +17,23 @@ const AppNode = memo((props: any) => {
   }: AppNodeData = nodeProps.data;
   const viewId = config.viewId;
 
+  // const { 
   const { createAppTabView, deleteAppViewInCanvasView } = useTabViewManager();
   const { actions } = useActionExecutor(config.app);
 
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
   async function openViewInFullScreen() {
-    await createAppTabView({
-      ...config,
-      viewId: `${config.app}-${v4()}`,
-    });
+    // await createAppTabView({
+    //   ...config,
+    //   viewId: `${config.app}-${v4()}`,
+    // });
+
+    if (isFullscreen) {
+      setIsFullscreen(false);
+    } else {
+      setIsFullscreen(true);
+    }
   }
 
   return (

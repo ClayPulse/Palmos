@@ -13,8 +13,13 @@ import {
   ModalStates,
   PersistentSettings,
 } from "@/lib/types";
-import { merge } from "lodash";
-import React, { createContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from "react";
 
 export const EditorContext = createContext<EditorContextType | undefined>(
   undefined,
@@ -314,14 +319,18 @@ export default function EditorContextProvider({
     settings?.apiKeys,
   ]);
 
-  function updateModalStates(patchedState: ModalStates) {
-    setEditorStates((prev) => ({
-      ...prev,
+
+  const updateModalStates: Dispatch<SetStateAction<ModalStates | undefined>> = (
+    patchedState,
+  ) => {
+    setEditorStates((prevStates) => ({
+      ...prevStates,
       modalStates: {
-        ...merge({}, prev.modalStates, patchedState),
+        ...prevStates.modalStates,
+        ...patchedState,
       },
     }));
-  }
+  };
 
   return (
     <EditorContext.Provider

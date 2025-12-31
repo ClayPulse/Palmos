@@ -1,13 +1,12 @@
 import Loading from "@/components/interface/status-screens/loading";
 import Icon from "@/components/misc/icon";
-import WorkspaceSettingsModal from "@/components/modals/workspace-settings-model";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { Button } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
+import { addToast, Button } from "@heroui/react";
+import { useContext, useEffect } from "react";
 import FileSystemExplorer from "../file-system/fs-explorer";
 
 export default function WorkspaceExplorer() {
@@ -15,10 +14,7 @@ export default function WorkspaceExplorer() {
 
   const workspaceHook = useWorkspace();
   const { platformApi } = usePlatformApi();
-  const { refreshWorkspaceContent, isWorkspaceRunning } = useWorkspace();
-
-  const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
-    useState(false);
+  const { refreshWorkspaceContent, isWorkspaceHealthy } = useWorkspace();
 
   useEffect(() => {
     async function openProjectInWorkspace() {
@@ -55,15 +51,64 @@ export default function WorkspaceExplorer() {
     workspaceHook.waitUntilWorkspaceRunning,
   ]);
 
+  async function handleOpenWorkspaceSettingsModal() {
+    console.log(workspaceHook.workspace);
+
+    editorContext?.updateModalStates({
+      workspaceSettings: {
+        isOpen: true,
+        isShowUseButton: true,
+        initialWorkspace: workspaceHook.workspace,
+      },
+    });
+  }
+
   return (
     <div className="flex h-full w-full flex-col">
       {editorContext?.editorStates.project ? (
         <div className="h-full w-full">
           {getPlatform() === PlatformEnum.Electron ||
           workspaceHook.workspace ? (
-            !isWorkspaceRunning && getPlatform() !== PlatformEnum.Electron ? (
+            workspaceHook.workspace?.status === "paused" ? (
+              <div className="flex h-full flex-col items-center justify-center px-4 pb-24 gap-y-1">
+                <p className="text-center">
+                  The workspace is currently paused. Please resume the workspace
+                  to access project files.
+                </p>
+                <Button
+                  onPress={async () => {
+                    if (!workspaceHook.workspace) {
+                      addToast({
+                        title: "No workspace to start.",
+                        color: "danger",
+                      });
+                      return;
+                    }
+
+                    addToast({
+                      title: "Starting workspace...",
+                    });
+                    await workspaceHook.startWorkspace(
+                      workspaceHook.workspace.id,
+                    );
+                    addToast({
+                      title: "Workspace started.",
+                      color: "success",
+                    });
+                    await refreshWorkspaceContent();
+                  }}
+                >
+                  Start Workspace
+                </Button>
+                <Button onPress={handleOpenWorkspaceSettingsModal}>
+                  <Icon name="settings" variant="round" />
+                  <p>Workspace Settings</p>
+                </Button>
+              </div>
+            ) : !isWorkspaceHealthy &&
+              getPlatform() !== PlatformEnum.Electron ? (
               <div className="h-full w-full items-center justify-center">
-                <Loading text="Workspace is starting..."/>
+                <Loading text="Workspace is starting..." />
               </div>
             ) : (
               <FileSystemExplorer
@@ -73,23 +118,21 @@ export default function WorkspaceExplorer() {
                     isSideMenuOpen: false,
                   }));
                 }}
-                openWorkspaceSettingsModal={() => {
-                  setIsWorkspaceSettingsModalOpen(true);
-                }}
+                openWorkspaceSettingsModal={handleOpenWorkspaceSettingsModal}
               />
             )
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-y-2 px-4 pb-24">
               {!workspaceHook.workspace && (
-                <Button onPress={() => setIsWorkspaceSettingsModalOpen(true)}>
+                <Button onPress={handleOpenWorkspaceSettingsModal}>
                   <Icon name="settings" variant="round" />
                   <p>Workspace Settings</p>
                 </Button>
               )}
 
               <p className="text-center">
-                  To interact with OS features, please open in desktop client
-                  or configure a remote workspace.
+                To interact with OS features, please open in desktop client or
+                configure a remote workspace.
               </p>
             </div>
           )}
@@ -100,14 +143,6 @@ export default function WorkspaceExplorer() {
             To view project content in workspace, please select a project first.
           </p>
         </div>
-      )}
-
-      {isWorkspaceSettingsModalOpen && (
-        <WorkspaceSettingsModal
-          isOpen={isWorkspaceSettingsModalOpen}
-          setIsOpen={setIsWorkspaceSettingsModalOpen}
-          workspaceHook={workspaceHook}
-        />
       )}
     </div>
   );

@@ -66,7 +66,7 @@ export default function NavTopBar({
         onClick={onClick}
       >
         <div className="bg-success h-2 w-2 rounded-full"></div>
-        <p className="text-success text-sm">Connected to Cloud AI</p>
+        <p className="text-success text-sm whitespace-nowrap">Connected to Cloud AI</p>
       </div>
     ) : (
       <div

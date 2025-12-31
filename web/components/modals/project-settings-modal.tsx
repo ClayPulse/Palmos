@@ -4,15 +4,15 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
 import { addToast, Button, Input } from "@heroui/react";
 import { useEffect, useState } from "react";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function ProjectSettingsModal({
   isOpen,
-  setIsOpen,
+  onClose,
   projectInfo,
 }: {
   isOpen: boolean;
-  setIsOpen: (val: boolean) => void;
+  onClose: () => void;
   projectInfo?: ProjectInfo;
 }) {
   const { createProject, updateProject, deleteProject, refreshProjects } =
@@ -36,13 +36,13 @@ export default function ProjectSettingsModal({
     }
 
     await updateProject(projectInfo.name, { name: projectName });
-    setIsOpen(false);
+    onClose();
     await refreshProjects();
   }
 
   async function handleCreateProject() {
     await createProject({ name: projectName });
-    setIsOpen(false);
+    onClose();
     await refreshProjects();
   }
 
@@ -56,14 +56,14 @@ export default function ProjectSettingsModal({
     }
 
     await deleteProject(projectInfo.name);
-    setIsOpen(false);
+    onClose();
     await refreshProjects();
   }
 
   return (
     <ModalWrapper
       isOpen={isOpen}
-      setIsOpen={setIsOpen}
+      onClose={onClose}
       title="Project Settings"
     >
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">

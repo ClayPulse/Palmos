@@ -27,14 +27,14 @@ import { useContext, useEffect, useMemo, useState } from "react";
 import { v4 } from "uuid";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
-import ModalWrapper from "./modal-wrapper";
+import ModalWrapper from "./wrapper";
 
 export default function OpenInProjectModal({
   isOpen,
-  setIsOpen,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (val: boolean) => void;
+  onClose: () => void;
 }) {
   const editorContext = useContext(EditorContext);
 
@@ -44,7 +44,7 @@ export default function OpenInProjectModal({
     createWorkspace,
     selectWorkspace,
     cloudWorkspaces,
-    isWorkspaceRunning,
+    isWorkspaceHealthy,
   } = useWorkspace();
 
   const { openProject, createProject, refreshProjects } = useProjectManager();
@@ -95,12 +95,12 @@ export default function OpenInProjectModal({
     prepareWorkspace();
   }, [isProjectOpen, isUseWorkspace]);
 
-  // Wait until workspace is running
+  // Wait until workspace is healthy
   useEffect(() => {
-    if (isProjectOpen && isUseWorkspace && isWorkspaceRunning) {
+    if (isProjectOpen && isUseWorkspace && isWorkspaceHealthy) {
       setIsWorkspaceReady(true);
     }
-  }, [isWorkspaceRunning, isProjectOpen, isUseWorkspace]);
+  }, [isWorkspaceHealthy, isProjectOpen, isUseWorkspace]);
 
   // If workspace is needed and ready, open the app/workflow;
   // or if workspace is not needed, open the app/workflow directly
@@ -174,7 +174,7 @@ export default function OpenInProjectModal({
         color: "danger",
       });
     }
-    setIsOpen(false);
+    onClose();
   }
 
   async function openApp(app: ExtensionApp) {
@@ -243,7 +243,7 @@ export default function OpenInProjectModal({
   }
 
   return (
-    <ModalWrapper isOpen={isOpen} setIsOpen={setIsOpen} title="Open In Project">
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title="Open In Project">
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
         {isCreateNewProject ? (
           <div className="flex w-full flex-col items-center gap-y-1">
