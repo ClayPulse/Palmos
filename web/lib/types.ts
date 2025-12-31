@@ -513,6 +513,8 @@ export type WorkspaceConfig = {
   memoryLimit: string;
   volumeSize: string;
   createdAt?: Date;
+  isDeleted?: boolean;
+  status?: "running" | "paused";
 };
 
 export type SpecOption = {

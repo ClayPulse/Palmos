@@ -34,7 +34,7 @@ export function useWorkspace(isFetchContent: boolean = true) {
   );
 
   // Check workspace status
-  const { data: isWorkspaceRunning } = useSWR<boolean>(
+  const { data: isWorkspaceHealthy } = useSWR<boolean>(
     workspace
       ? `/api/workspace/check-health?workspaceId=${workspace.id}`
       : null,
@@ -59,11 +59,30 @@ export function useWorkspace(isFetchContent: boolean = true) {
   const waitUntilRunningResolve = useRef<() => void>(null);
 
   useEffect(() => {
-    if (isWorkspaceRunning && waitUntilRunningResolve.current) {
+    if (isWorkspaceHealthy && waitUntilRunningResolve.current) {
       waitUntilRunningResolve.current();
       waitUntilRunningResolve.current = null;
     }
-  }, [isWorkspaceRunning]);
+  }, [isWorkspaceHealthy]);
+
+  useEffect(() => {
+    // Update current workspace if the cloud workspaces have changed
+    if (workspace && cloudWorkspaces) {
+      const updatedWorkspace = cloudWorkspaces.find(
+        (ws) => ws.id === workspace.id,
+      );
+
+      const hasChange =
+        JSON.stringify(updatedWorkspace) !== JSON.stringify(workspace);
+
+      if (updatedWorkspace && hasChange) {
+        editorContext?.setEditorStates((prev) => ({
+          ...prev,
+          currentWorkspace: updatedWorkspace,
+        }));
+      }
+    }
+  }, [cloudWorkspaces, workspace]);
 
   const setWorkspace = (ws: WorkspaceConfig | undefined) => {
     if (!editorContext) {
@@ -184,6 +203,36 @@ export function useWorkspace(isFetchContent: boolean = true) {
     mutateCloudWorkspaces();
   }
 
+  async function startWorkspace(workspaceId: string) {
+    const response = await fetchAPI(`/api/workspace/start`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ workspaceId }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to start workspace");
+    }
+
+    await mutateCloudWorkspaces();
+  }
+
+  async function stopWorkspace(workspaceId: string) {
+    const response = await fetchAPI(`/api/workspace/stop`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ workspaceId }),
+    });
+    if (!response.ok) {
+      throw new Error("Failed to stop workspace");
+    }
+
+    await mutateCloudWorkspaces();
+  }
+
   async function refreshWorkspaceContent(
     ws: WorkspaceConfig | undefined = workspace,
   ) {
@@ -219,22 +268,24 @@ export function useWorkspace(isFetchContent: boolean = true) {
   }
 
   const waitUntilWorkspaceRunning = useCallback(async () => {
-    if (isWorkspaceRunning) {
+    if (isWorkspaceHealthy) {
       return;
     }
     return new Promise<void>((resolve, reject) => {
       waitUntilRunningResolve.current = resolve;
     });
-  }, [isWorkspaceRunning]);
+  }, [isWorkspaceHealthy]);
 
   return {
     workspace,
-    isWorkspaceRunning,
+    isWorkspaceHealthy,
     cloudWorkspaces,
     createWorkspace,
     updateWorkspace,
     selectWorkspace,
     deleteWorkspace,
+    startWorkspace,
+    stopWorkspace,
     refreshWorkspaceContent,
     waitUntilWorkspaceRunning,
   };

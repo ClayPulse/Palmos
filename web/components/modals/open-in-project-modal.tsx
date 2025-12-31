@@ -44,7 +44,7 @@ export default function OpenInProjectModal({
     createWorkspace,
     selectWorkspace,
     cloudWorkspaces,
-    isWorkspaceRunning,
+    isWorkspaceHealthy,
   } = useWorkspace();
 
   const { openProject, createProject, refreshProjects } = useProjectManager();
@@ -95,12 +95,12 @@ export default function OpenInProjectModal({
     prepareWorkspace();
   }, [isProjectOpen, isUseWorkspace]);
 
-  // Wait until workspace is running
+  // Wait until workspace is healthy
   useEffect(() => {
-    if (isProjectOpen && isUseWorkspace && isWorkspaceRunning) {
+    if (isProjectOpen && isUseWorkspace && isWorkspaceHealthy) {
       setIsWorkspaceReady(true);
     }
-  }, [isWorkspaceRunning, isProjectOpen, isUseWorkspace]);
+  }, [isWorkspaceHealthy, isProjectOpen, isUseWorkspace]);
 
   // If workspace is needed and ready, open the app/workflow;
   // or if workspace is not needed, open the app/workflow directly

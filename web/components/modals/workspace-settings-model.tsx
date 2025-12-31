@@ -39,10 +39,13 @@ export default function WorkspaceSettingsModal({
   const { platformApi } = usePlatformApi();
   const {
     workspace,
+    isWorkspaceHealthy,
     createWorkspace,
     updateWorkspace,
     deleteWorkspace,
     selectWorkspace,
+    startWorkspace,
+    stopWorkspace,
     cloudWorkspaces,
   } = workspaceHook;
 
@@ -165,6 +168,40 @@ export default function WorkspaceSettingsModal({
     }
   }
 
+  async function handleStopWorkspace() {
+    if (!workspace) {
+      toast.error("Workspace is not available.");
+      return;
+    }
+    addToast({
+      title: "Stopping workspace",
+      description: `Stopping workspace ${workspace.name}.`,
+    });
+    await stopWorkspace(workspace.id);
+    addToast({
+      title: "Workspace stopped",
+      description: `Workspace ${workspace.name} has been stopped successfully.`,
+      color: "success",
+    });
+  }
+
+  async function handleResumeWorkspace() {
+    if (!workspace) {
+      toast.error("Workspace is not available.");
+      return;
+    }
+    addToast({
+      title: "Starting workspace",
+      description: `Starting workspace ${workspace.name}.`,
+    });
+    await startWorkspace(workspace.id);
+    addToast({
+      title: "Workspace started",
+      description: `Workspace ${workspace.name} has been started successfully.`,
+      color: "success",
+    });
+  }
+
   return (
     <ModalWrapper
       isOpen={isOpen}
@@ -283,6 +320,16 @@ export default function WorkspaceSettingsModal({
             {workspace ? (
               <div className="flex gap-x-1">
                 <Button onPress={handleUpdateWorkspace}>Update</Button>
+
+                {isWorkspaceHealthy ? (
+                  <Button onPress={handleStopWorkspace} color="warning">
+                    Stop
+                  </Button>
+                ) : (
+                  <Button onPress={handleResumeWorkspace} color="primary">
+                    Start
+                  </Button>
+                )}
 
                 <Button color="danger" onPress={handleDeleteWorkspace}>
                   Delete

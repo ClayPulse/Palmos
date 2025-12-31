@@ -6,7 +6,7 @@ import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { Button } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import FileSystemExplorer from "../file-system/fs-explorer";
 
@@ -15,7 +15,7 @@ export default function WorkspaceExplorer() {
 
   const workspaceHook = useWorkspace();
   const { platformApi } = usePlatformApi();
-  const { refreshWorkspaceContent, isWorkspaceRunning } = useWorkspace();
+  const { refreshWorkspaceContent, isWorkspaceHealthy } = useWorkspace();
 
   const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
     useState(false);
@@ -61,9 +61,42 @@ export default function WorkspaceExplorer() {
         <div className="h-full w-full">
           {getPlatform() === PlatformEnum.Electron ||
           workspaceHook.workspace ? (
-            !isWorkspaceRunning && getPlatform() !== PlatformEnum.Electron ? (
+            workspaceHook.workspace?.status === "paused" ? (
+              <div className="flex h-full flex-col items-center justify-center px-4 pb-24">
+                <p className="text-center">
+                  The workspace is currently paused. Please resume the workspace
+                  to access project files.
+                </p>
+                <Button
+                  onPress={async () => {
+                    if (!workspaceHook.workspace) {
+                      addToast({
+                        title: "No workspace to start.",
+                        color: "danger",
+                      });
+                      return;
+                    }
+
+                    addToast({
+                      title: "Starting workspace...",
+                    });
+                    await workspaceHook.startWorkspace(
+                      workspaceHook.workspace.id,
+                    );
+                    addToast({
+                      title: "Workspace started.",
+                      color: "success",
+                    });
+                    await refreshWorkspaceContent();
+                  }}
+                >
+                  Start Workspace
+                </Button>
+              </div>
+            ) : !isWorkspaceHealthy &&
+              getPlatform() !== PlatformEnum.Electron ? (
               <div className="h-full w-full items-center justify-center">
-                <Loading text="Workspace is starting..."/>
+                <Loading text="Workspace is starting..." />
               </div>
             ) : (
               <FileSystemExplorer
@@ -88,8 +121,8 @@ export default function WorkspaceExplorer() {
               )}
 
               <p className="text-center">
-                  To interact with OS features, please open in desktop client
-                  or configure a remote workspace.
+                To interact with OS features, please open in desktop client or
+                configure a remote workspace.
               </p>
             </div>
           )}
