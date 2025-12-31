@@ -7,8 +7,7 @@ import useRecorder from "@/lib/hooks/use-recorder";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { Button, Divider, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useContext, useState } from "react";
-import AgentConfigModal from "../modals/agent-config-modal";
+import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function EditorToolbar() {
@@ -18,8 +17,6 @@ export default function EditorToolbar() {
   const { isRecording, recordVAD, stopRecording } = useRecorder();
   const { runMenuActionByName } = useMenuActions();
   const { tabItems, tabIndex } = useTabViewManager();
-
-  const [isAgentListModalOpen, setIsAgentListModalOpen] = useState(false);
 
   function setIsOpen(val: boolean) {
     if (editorContext) {
@@ -155,16 +152,14 @@ export default function EditorToolbar() {
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
                   onPress={() => {
-                    setIsAgentListModalOpen(true);
+                    editorContext.updateModalStates({
+                      agentConfig: { isOpen: true },
+                    });
                   }}
                 >
                   <Icon name="smart_toy" variant="outlined" />
                 </Button>
               </Tooltip>
-              <AgentConfigModal
-                isOpen={isAgentListModalOpen}
-                setIsOpen={setIsAgentListModalOpen}
-              />
 
               <Tooltip content={"Marketplace"}>
                 <Button

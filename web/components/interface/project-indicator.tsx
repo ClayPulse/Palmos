@@ -8,15 +8,12 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/react";
-import { Key, useContext, useState } from "react";
+import { Key, useContext } from "react";
 import Icon from "../misc/icon";
-import ProjectSettingsModal from "../modals/project-settings-modal";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function ProjectIndicator() {
   const editorContext = useContext(EditorContext);
-  const [isProjectSettingsModalOpen, setIsProjectSettingsModalOpen] =
-    useState(false);
   const { closeAllTabViews } = useTabViewManager();
 
   function closeProject() {
@@ -36,12 +33,19 @@ export default function ProjectIndicator() {
     if (key === "close") {
       closeProject();
     } else if (key === "settings") {
-      setIsProjectSettingsModalOpen(true);
+      editorContext?.updateModalStates({
+        projectSettings: {
+          isOpen: true,
+          projectInfo: editorContext?.editorStates.projectsInfo?.find(
+            (project) => project.name === editorContext?.editorStates.project,
+          ),
+        },
+      });
     }
   }
 
   return (
-    <div className="flex w-full items-center justify-center pl-8 gap-x-0.5">
+    <div className="flex w-full items-center justify-center gap-x-0.5 pl-8">
       <p className="font-semibold">{editorContext?.editorStates.project}</p>
       <Dropdown>
         <DropdownTrigger>
@@ -58,13 +62,6 @@ export default function ProjectIndicator() {
           </DropdownItem>
         </DropdownMenu>
       </Dropdown>
-      <ProjectSettingsModal
-        isOpen={isProjectSettingsModalOpen}
-        setIsOpen={setIsProjectSettingsModalOpen}
-        projectInfo={editorContext?.editorStates.projectsInfo?.find(
-          (project) => project.name === editorContext?.editorStates.project,
-        )}
-      />
     </div>
   );
 }

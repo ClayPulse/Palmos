@@ -27,12 +27,10 @@ import ModalWrapper from "./modal-wrapper";
 
 export default function WorkspaceSettingsModal({
   isOpen,
-  setIsOpen,
-  workspaceHook,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (val: boolean) => void;
-  workspaceHook: ReturnType<typeof useWorkspace>;
+  onClose: () => void;
 }) {
   const editorContext = useContext(EditorContext);
 
@@ -47,7 +45,7 @@ export default function WorkspaceSettingsModal({
     startWorkspace,
     stopWorkspace,
     cloudWorkspaces,
-  } = workspaceHook;
+  } = useWorkspace();
 
   const [workspaceName, setWorkspaceName] = useState("");
   const [storage, setStorage] = useState(5);
@@ -93,7 +91,7 @@ export default function WorkspaceSettingsModal({
       description: `Workspace ${workspaceName} has been updated successfully.`,
       color: "success",
     });
-    setIsOpen(false);
+    onClose();
   }
 
   async function handleDeleteWorkspace() {
@@ -118,7 +116,7 @@ export default function WorkspaceSettingsModal({
         color: "success",
       });
 
-      setIsOpen(false);
+      onClose();
     } catch (error: any) {
       addToast({
         title: "Error deleting workspace",
@@ -157,7 +155,7 @@ export default function WorkspaceSettingsModal({
         description: `Workspace ${workspaceName} has been created successfully.`,
         color: "success",
       });
-      setIsOpen(false);
+      onClose();
       setIsCreateNew(false);
     } catch (error: any) {
       addToast({
@@ -203,11 +201,7 @@ export default function WorkspaceSettingsModal({
   }
 
   return (
-    <ModalWrapper
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      title="Workspace Settings"
-    >
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title="Workspace Settings">
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
         <div className="flex w-full justify-center px-8">
           <Select

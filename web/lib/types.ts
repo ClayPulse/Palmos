@@ -181,6 +181,38 @@ export type ModalStates = {
   editorSettings?: {
     isOpen?: boolean;
   };
+  workspaceSettings?: {
+    isOpen?: boolean;
+  };
+  agentConfig?: {
+    isOpen?: boolean;
+  };
+  login?: {
+    isOpen?: boolean;
+  };
+  openSourceInfo?: {
+    isOpen?: boolean;
+  };
+  password?: {
+    isOpen?: boolean;
+  };
+  projectSettings?: {
+    isOpen?: boolean;
+    projectInfo?: ProjectInfo;
+  };
+  publishWorkflow?: {
+    isOpen?: boolean;
+    workflowCanvas?: HTMLElement | null;
+    localNodes?: ReactFlowNode<AppNodeData>[];
+    localEdges?: ReactFlowEdge[];
+    entryPoint?: ReactFlowNode<AppNodeData> | undefined;
+    saveAppsSnapshotStates?: () => Promise<{
+      [key: string]: any;
+    }>;
+  };
+  sharing?: {
+    isOpen?: boolean;
+  };
 };
 
 export type OpenFileDialogConfig = {

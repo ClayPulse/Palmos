@@ -12,10 +12,10 @@ import ModalWrapper from "./modal-wrapper";
 
 export default function SharingModal({
   isOpen,
-  setIsOpen,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  onClose: () => void;
 }) {
   // #region Load specified app if app query parameter is present
   const params = useSearchParams();
@@ -85,7 +85,7 @@ export default function SharingModal({
   return (
     <ModalWrapper
       isOpen={isOpen}
-      setIsOpen={setIsOpen}
+      onClose={onClose}
       title={"Share Your " + (app ? app : "Pulse Editor") + " Workspace"}
       placement={"center"}
     >

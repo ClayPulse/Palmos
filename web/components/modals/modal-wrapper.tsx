@@ -4,7 +4,7 @@ import Icon from "../misc/icon";
 export default function ModalWrapper({
   children,
   isOpen,
-  setIsOpen,
+  onClose,
   title,
   isShowGoBack,
   goBackCallback,
@@ -12,7 +12,7 @@ export default function ModalWrapper({
 }: {
   children?: React.ReactNode;
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  onClose: () => void;
   title: string;
   isShowGoBack?: boolean;
   goBackCallback?: () => void;
@@ -27,8 +27,8 @@ export default function ModalWrapper({
 }) {
   return (
     <Modal
-      backdrop="opaque"
       isOpen={isOpen}
+      backdrop="opaque"
       motionProps={{
         variants: {
           enter: {
@@ -50,7 +50,7 @@ export default function ModalWrapper({
         },
       }}
       onClose={() => {
-        setIsOpen(false);
+        onClose();
       }}
       isDismissable={false}
       placement={placement}

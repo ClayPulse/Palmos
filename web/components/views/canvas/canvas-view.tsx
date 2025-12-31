@@ -1,4 +1,3 @@
-import PublishWorkflowModal from "@/components/modals/publish-workflow-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
@@ -24,14 +23,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTheme } from "next-themes";
-import {
-  memo,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { memo, useCallback, useContext, useEffect, useRef } from "react";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
 
@@ -60,8 +52,6 @@ export default function CanvasView({
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
   const { deleteAppViewInCanvasView } = useTabViewManager();
-
-  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -176,7 +166,16 @@ export default function CanvasView({
       icon: "cloud_upload",
     },
     async () => {
-      setIsPublishModalOpen(true);
+      editorContext?.updateModalStates({
+        publishWorkflow: {
+          isOpen: true,
+          workflowCanvas: containerRef.current,
+          localNodes: localNodes,
+          localEdges: localEdges,
+          entryPoint: entryPoint,
+          saveAppsSnapshotStates: saveAppsSnapshotStates,
+        },
+      });
     },
     [isActive, tabName],
     isActive,
@@ -317,16 +316,6 @@ export default function CanvasView({
         >
           <Background id={config.viewId} variant={BackgroundVariant.Dots} />
         </ReactFlow>
-
-        <PublishWorkflowModal
-          isOpen={isPublishModalOpen}
-          setIsOpen={setIsPublishModalOpen}
-          workflowCanvas={containerRef.current}
-          localNodes={localNodes}
-          localEdges={localEdges}
-          entryPoint={entryPoint}
-          saveAppsSnapshotStates={saveAppsSnapshotStates}
-        />
       </div>
     </div>
   );

@@ -1,13 +1,12 @@
 import Loading from "@/components/interface/status-screens/loading";
 import Icon from "@/components/misc/icon";
-import WorkspaceSettingsModal from "@/components/modals/workspace-settings-model";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { addToast, Button } from "@heroui/react";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect } from "react";
 import FileSystemExplorer from "../file-system/fs-explorer";
 
 export default function WorkspaceExplorer() {
@@ -16,9 +15,6 @@ export default function WorkspaceExplorer() {
   const workspaceHook = useWorkspace();
   const { platformApi } = usePlatformApi();
   const { refreshWorkspaceContent, isWorkspaceHealthy } = useWorkspace();
-
-  const [isWorkspaceSettingsModalOpen, setIsWorkspaceSettingsModalOpen] =
-    useState(false);
 
   useEffect(() => {
     async function openProjectInWorkspace() {
@@ -107,14 +103,22 @@ export default function WorkspaceExplorer() {
                   }));
                 }}
                 openWorkspaceSettingsModal={() => {
-                  setIsWorkspaceSettingsModalOpen(true);
+                  editorContext.updateModalStates({
+                    workspaceSettings: { isOpen: true },
+                  });
                 }}
               />
             )
           ) : (
             <div className="flex h-full flex-col items-center justify-center gap-y-2 px-4 pb-24">
               {!workspaceHook.workspace && (
-                <Button onPress={() => setIsWorkspaceSettingsModalOpen(true)}>
+                <Button
+                  onPress={() =>
+                    editorContext.updateModalStates({
+                      workspaceSettings: { isOpen: true },
+                    })
+                  }
+                >
                   <Icon name="settings" variant="round" />
                   <p>Workspace Settings</p>
                 </Button>
@@ -133,14 +137,6 @@ export default function WorkspaceExplorer() {
             To view project content in workspace, please select a project first.
           </p>
         </div>
-      )}
-
-      {isWorkspaceSettingsModalOpen && (
-        <WorkspaceSettingsModal
-          isOpen={isWorkspaceSettingsModalOpen}
-          setIsOpen={setIsWorkspaceSettingsModalOpen}
-          workspaceHook={workspaceHook}
-        />
       )}
     </div>
   );

@@ -14,7 +14,6 @@ import {
 } from "react";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 import Icon from "../../misc/icon";
-import AgentConfigModal from "../../modals/agent-config-modal";
 import { EditorContext } from "../../providers/editor-context-provider";
 import AppViewLayout from "../standalone-app/layout";
 
@@ -29,7 +28,7 @@ function ConsoleNavBar({
   selectedConsoleIndex: number;
   setSelectedConsoleIndex: Dispatch<SetStateAction<number>>;
 }) {
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const editorContext = useContext(EditorContext);
 
   const [selectedConsole, setSelectedConsole] = useState<
     ExtensionApp | undefined
@@ -93,13 +92,14 @@ function ConsoleNavBar({
             variant="light"
             size="sm"
             onPress={() => {
-              setIsOpen(true);
+              editorContext?.updateModalStates({
+                agentConfig: { isOpen: true },
+              });
             }}
           >
             <Icon variant="outlined" name="add" />
           </Button>
         </Tooltip>
-        <AgentConfigModal isOpen={isOpen} setIsOpen={setIsOpen} />
       </div>
       <div className="flex grow justify-end pr-2">
         <Tooltip content="Close tab">

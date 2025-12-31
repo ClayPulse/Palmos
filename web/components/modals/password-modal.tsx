@@ -9,10 +9,10 @@ import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
 
 export default function PasswordModal({
   isOpen,
-  setIsOpen,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
+  onClose: () => void;
 }) {
   const editorContext = useContext(EditorContext);
   const [password, setPassword] = useState<string | undefined>(undefined);
@@ -20,7 +20,7 @@ export default function PasswordModal({
   return (
     <ModalWrapper
       isOpen={isOpen}
-      setIsOpen={setIsOpen}
+      onClose={onClose}
       title={
         editorContext?.persistSettings?.isPasswordSet
           ? "Enter your password"
@@ -43,7 +43,7 @@ export default function PasswordModal({
           <Button
             color="danger"
             onPress={() => {
-              setIsOpen(false);
+              onClose();
               // Reset all settings
               editorContext?.setPersistSettings(undefined);
               // Remove password from memory
@@ -68,7 +68,7 @@ export default function PasswordModal({
                 return;
               }
 
-              setIsOpen(false);
+              onClose();
               if (!editorContext?.persistSettings?.isPasswordSet) {
                 // Set password if not already set
                 const settings = editorContext?.persistSettings ?? {};

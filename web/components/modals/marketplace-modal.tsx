@@ -8,10 +8,10 @@ import ModalWrapper from "./modal-wrapper";
 
 export default function MarketplaceModal({
   isOpen,
-  setIsOpen,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
+  onClose: () => void;
 }) {
   const extensionCategories: TabItem[] = [
     {
@@ -33,22 +33,16 @@ export default function MarketplaceModal({
   );
 
   return (
-    <ModalWrapper
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      title={"Community Marketplace"}
-    >
-      <div className="h-full w-full px-2 grid grid-rows-[max-content_1fr]">
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={"Community Marketplace"}>
+      <div className="grid h-full w-full grid-rows-[max-content_1fr] px-2">
         <div className="flex justify-center">
-          {isOpen && (
-            <div>
-              <Tabs
-                tabItems={extensionCategories}
-                selectedItem={selectedCategory}
-                setSelectedItem={setSelectedCategory}
-              />
-            </div>
-          )}
+          <div>
+            <Tabs
+              tabItems={extensionCategories}
+              selectedItem={selectedCategory}
+              setSelectedItem={setSelectedCategory}
+            />
+          </div>
         </div>
 
         {selectedCategory?.name === MarketplaceCategoryEnum.Featured ? (

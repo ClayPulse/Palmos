@@ -31,10 +31,10 @@ import ModalWrapper from "./modal-wrapper";
 
 export default function OpenInProjectModal({
   isOpen,
-  setIsOpen,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (val: boolean) => void;
+  onClose: () => void;
 }) {
   const editorContext = useContext(EditorContext);
 
@@ -174,7 +174,7 @@ export default function OpenInProjectModal({
         color: "danger",
       });
     }
-    setIsOpen(false);
+    onClose();
   }
 
   async function openApp(app: ExtensionApp) {
@@ -243,7 +243,7 @@ export default function OpenInProjectModal({
   }
 
   return (
-    <ModalWrapper isOpen={isOpen} setIsOpen={setIsOpen} title="Open In Project">
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title="Open In Project">
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
         {isCreateNewProject ? (
           <div className="flex w-full flex-col items-center gap-y-1">

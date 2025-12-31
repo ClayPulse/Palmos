@@ -9,7 +9,13 @@ import MarkdownRender from "../misc/markdown-render";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./modal-wrapper";
 
-export default function AppInfoModal() {
+export default function AppInfoModal({
+  isOpen,
+  onClose,
+}: {
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const editorContext = useContext(EditorContext);
 
   const [isDeveloperSettingsOpen, setIsDeveloperSettingsOpen] = useState(false);
@@ -22,10 +28,8 @@ export default function AppInfoModal() {
 
   return (
     <ModalWrapper
-      isOpen={editorContext?.editorStates.modalStates?.appInfo?.isOpen ?? false}
-      setIsOpen={(open: boolean) => {
-        editorContext?.updateModalStates({ appInfo: { isOpen: open } });
-      }}
+      isOpen={isOpen}
+      onClose={onClose}
       title={isDeveloperSettingsOpen ? "Developer Settings" : appInfo.name}
       isShowGoBack
       goBackCallback={() => {

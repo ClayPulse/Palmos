@@ -5,8 +5,7 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
 import { Button, Spinner } from "@heroui/react";
-import { useContext, useState } from "react";
-import ProjectSettingsModal from "../../modals/project-settings-modal";
+import { useContext } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ProjectItem from "./project-item";
 
@@ -16,11 +15,6 @@ export default function ProjectExplorer() {
   const { session } = useAuth();
   const { projects, isLoading, openProject } = useProjectManager();
 
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settingsProject, setSettingsProject] = useState<
-    ProjectInfo | undefined
-  >(undefined);
-
   return (
     <div className="flex h-full w-full flex-col gap-2">
       {session ? (
@@ -29,7 +23,9 @@ export default function ProjectExplorer() {
           <Button
             className="w-full"
             onPress={() => {
-              setSettingsOpen(true);
+              editorContext?.updateModalStates({
+                projectSettings: { isOpen: true },
+              });
             }}
           >
             New Project
@@ -43,8 +39,16 @@ export default function ProjectExplorer() {
             <ProjectItem
               key={index}
               project={project}
-              setSettingsOpen={setSettingsOpen}
-              setSettingsProject={setSettingsProject}
+              setSettingsOpen={() => {
+                editorContext?.updateModalStates({
+                  projectSettings: { isOpen: true },
+                });
+              }}
+              setSettingsProject={() => {
+                editorContext?.updateModalStates({
+                  projectSettings: { projectInfo: project },
+                });
+              }}
               onOpen={(project: ProjectInfo) => {
                 openProject(project.name);
                 editorContext?.setEditorStates((prev) => ({
@@ -54,11 +58,6 @@ export default function ProjectExplorer() {
               }}
             />
           ))}
-          <ProjectSettingsModal
-            isOpen={settingsOpen}
-            setIsOpen={setSettingsOpen}
-            projectInfo={settingsProject}
-          />
         </div>
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center pb-24">

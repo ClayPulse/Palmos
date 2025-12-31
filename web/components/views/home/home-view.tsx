@@ -3,7 +3,6 @@ import { ProjectPreviewCard } from "@/components/cards/project-preview-card";
 import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
 import Icon from "@/components/misc/icon";
 import Tabs from "@/components/misc/tabs";
-import ProjectSettingsModal from "@/components/modals/project-settings-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useEditorAIAssistantHint } from "@/lib/hooks/use-editor-ai-assistant-hint";
@@ -25,8 +24,6 @@ export default function HomeView() {
   const { projects, isLoading: isLoadingProjects } = useProjectManager();
   const { session, signIn } = useAuth();
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
-
-  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const tabItems: TabItem[] = [
     {
@@ -87,16 +84,19 @@ export default function HomeView() {
                   <p className="text-xl">What is on your mind today?</p>
                   <div className="flex gap-x-1">
                     <Button
-                      size="sm"
                       color="primary"
                       onPress={() => {
-                        setSettingsOpen(true);
+                        editorContext?.updateModalStates({
+                          projectSettings: {
+                            isOpen: true,
+                            projectInfo: undefined,
+                          },
+                        });
                       }}
                     >
                       New Project
                     </Button>
                     <Button
-                      size="sm"
                       color="secondary"
                       onPress={() => {
                         editorContext?.setEditorStates((prev) => ({
@@ -146,7 +146,6 @@ export default function HomeView() {
               <p>Need help?</p>
               <div className="flex gap-x-1">
                 <Button
-                  size="sm"
                   variant="faded"
                   onPress={() => {
                     window.open(
@@ -157,7 +156,6 @@ export default function HomeView() {
                   className="border-0"
                 >
                   <div className="flex items-center gap-0.5">
-                    <p>GitHub</p>
                     <div>
                       <Icon
                         uri="/assets/github-mark"
@@ -166,10 +164,10 @@ export default function HomeView() {
                         className="p-0.5 pl-0"
                       />
                     </div>
+                    <p>GitHub</p>
                   </div>
                 </Button>
                 <Button
-                  size="sm"
                   variant="faded"
                   onPress={() => {
                     window.open("https://docs.pulse-editor.com", "_blank");
@@ -177,13 +175,32 @@ export default function HomeView() {
                   className="border-0"
                 >
                   <div className="flex items-center gap-0.5">
-                    <p>Docs</p>
                     <div>
                       <Icon name="menu_book" className="p-0.5" />
                     </div>
+                    <p>Docs</p>
                   </div>
                 </Button>
               </div>
+
+              <Button
+                onPress={() =>
+                  editorContext?.updateModalStates({
+                    openSourceInfo: {
+                      isOpen: true,
+                    },
+                  })
+                }
+                variant="faded"
+                className="border-0"
+              >
+                <div className="flex items-center gap-0.5">
+                  <div>
+                    <Icon name="code" className="p-0.5" />
+                  </div>
+                  <p>Open Source Info</p>
+                </div>
+              </Button>
             </div>
           </div>
           <div className="relative w-full overflow-x-hidden">
@@ -194,7 +211,6 @@ export default function HomeView() {
                   <Button
                     className="m-0 flex items-center gap-x-0.5 px-1 py-0"
                     variant="light"
-                    size="sm"
                     onPress={() => {
                       editorContext?.setEditorStates((prev) => ({
                         ...prev,
@@ -255,7 +271,6 @@ export default function HomeView() {
                   <Button
                     className="m-0 flex items-center gap-x-0.5 px-1 py-0"
                     variant="light"
-                    size="sm"
                     onPress={() => {
                       editorContext?.setEditorStates((prev) => ({
                         ...prev,
@@ -314,7 +329,6 @@ export default function HomeView() {
                   <Button
                     className="m-0 flex items-center gap-x-0.5 px-1 py-0"
                     variant="light"
-                    size="sm"
                     onPress={() => {
                       editorContext?.setEditorStates((prev) => ({
                         ...prev,
@@ -363,8 +377,6 @@ export default function HomeView() {
           <div className="relative"></div>
         </div>
       </div>
-
-      <ProjectSettingsModal isOpen={settingsOpen} setIsOpen={setSettingsOpen} />
     </div>
   );
 }

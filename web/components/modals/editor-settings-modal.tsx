@@ -30,25 +30,21 @@ import ModalWrapper from "./modal-wrapper";
 
 export default function EditorSettingsModal({
   isOpen,
-  setIsOpen,
+  onClose,
 }: {
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
+  onClose: () => void;
 }) {
   const editorContext = useContext(EditorContext);
 
   return (
-    <ModalWrapper
-      isOpen={isOpen}
-      setIsOpen={setIsOpen}
-      title={"Editor Settings"}
-    >
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={"Editor Settings"}>
       <div className="flex w-full flex-col gap-2">
         <GeneralSettings editorContext={editorContext} />
         <Divider />
         <AISettings editorContext={editorContext} />
         <Divider />
-        <SecuritySettings editorContext={editorContext} setIsOpen={setIsOpen} />
+        <SecuritySettings editorContext={editorContext} setIsOpen={onClose} />
         <Divider />
         <DevExtensionSettings editorContext={editorContext} />
         <Divider />
