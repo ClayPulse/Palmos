@@ -103,6 +103,12 @@ export type EditorStates = {
 
   workflowNodes: ReactFlowNode<AppNodeData>[];
   workflowEdges: ReactFlowEdge[];
+  canvasSize?: {
+    width: number;
+    height: number;
+    x: number;
+    y: number;
+  };
 
   modalStates?: ModalStates;
 };

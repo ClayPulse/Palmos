@@ -1,5 +1,6 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
+import { useCanvas } from "@/lib/hooks/use-canvas";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppNodeData, AppViewConfig, CanvasViewConfig } from "@/lib/types";
@@ -52,6 +53,7 @@ export default function CanvasView({
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
   const { deleteAppViewInCanvasView } = useTabViewManager();
+  const { getViewCenterCoordForNode } = useCanvas();
 
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -185,6 +187,33 @@ export default function CanvasView({
     id: "canvas-view-" + config.viewId,
   });
 
+  // Watch container size changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const element = containerRef.current;
+
+    const observer = new ResizeObserver((entries) => {
+      const bounds = containerRef.current?.getBoundingClientRect();
+
+      if (!bounds) return;
+
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        canvasSize: {
+          width: bounds.width,
+          height: bounds.height,
+          x: bounds.x,
+          y: bounds.y,
+        },
+      }));
+    });
+
+    observer.observe(element);
+
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(() => {
     console.log("CanvasView active droppable:", active);
   }, [active]);
@@ -195,7 +224,22 @@ export default function CanvasView({
     function promoteToWorkflowNode(newApps: AppViewConfig[]) {
       const newNodes: ReactFlowNode<AppNodeData>[] =
         newApps?.map((appConfig) => {
-          const flowCenter = getViewCenter(appConfig);
+          // const screenCenter = getScreenCenter();
+
+          // const viewCenter = screenToFlowPosition({
+          //   x:
+          //     screenCenter.x -
+          //     ((appConfig.recommendedWidth ?? 640) / 2) * viewport.zoom,
+          //   y:
+          //     screenCenter.y -
+          //     ((appConfig.recommendedHeight ?? 360) / 2) * viewport.zoom,
+          // });
+
+          const viewCenter = getViewCenterCoordForNode(
+            appConfig.recommendedWidth ?? 640,
+            appConfig.recommendedHeight ?? 360,
+            viewport.zoom,
+          );
 
           const newAppNodeData: AppNodeData = {
             config: appConfig,
@@ -210,7 +254,7 @@ export default function CanvasView({
 
           return {
             id: appConfig.viewId,
-            position: flowCenter,
+            position: viewCenter,
             data: newAppNodeData,
             type: "appNode",
             height: appConfig.recommendedHeight ?? 360,
@@ -229,26 +273,6 @@ export default function CanvasView({
             !removedNodes.find((removedNode) => removedNode.id === node.id),
         );
       });
-    }
-
-    function getViewCenter(appConfig: AppViewConfig) {
-      const containerBounds = containerRef.current?.getBoundingClientRect();
-
-      if (!containerBounds) throw new Error("Container bounds not found");
-
-      const screenCenter = {
-        x:
-          containerBounds.left +
-          containerBounds.width / 2 -
-          ((appConfig.recommendedWidth ?? 640) / 2) * viewport.zoom,
-        y:
-          containerBounds.top +
-          containerBounds.height / 2 -
-          ((appConfig.recommendedHeight ?? 360) / 2) * viewport.zoom,
-      };
-
-      const flowCenter = screenToFlowPosition(screenCenter);
-      return flowCenter;
     }
 
     if (config) {
@@ -277,7 +301,7 @@ export default function CanvasView({
     <div
       ref={setNodeRef}
       id={config.viewId}
-      className="bg-content3 text-content3-foreground h-full w-full"
+      className="bg-content3 text-content3-foreground relative h-full w-full"
       style={{
         opacity:
           isOver && active?.id.toString().startsWith("draggable-app-")

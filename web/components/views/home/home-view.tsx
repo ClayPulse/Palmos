@@ -23,7 +23,7 @@ export default function HomeView() {
   return (
     <div className="text-default-foreground h-full w-full px-2 pt-18 pb-2">
       <div className="bg-content1 h-full w-full overflow-hidden rounded-lg">
-        <div className="relative grid h-full w-full grid-rows-[max-content_max-content_max-content_max-content_1fr] gap-y-2 overflow-y-auto px-2 py-2 pt-2 pb-6 @sm:px-8 @md:px-12 @lg:px-48">
+        <div className="relative grid h-full w-full grid-rows-[max-content_max-content_max-content_max-content_1fr] gap-y-2 overflow-y-auto px-2 py-2 pt-2 pb-6 sm:px-8 lg:px-48">
           <div className="absolute -top-full flex h-full w-full translate-y-48 items-end blur-[100px]">
             <img
               src={"/assets/dashboard-dark-gradient.png"}

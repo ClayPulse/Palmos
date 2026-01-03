@@ -35,6 +35,7 @@ export default function CanvasNodeViewLayout({
   selectedAction,
   isRunning,
   isShowingWorkflowConnector,
+  isFullScreen,
   children,
 }: {
   viewId: string;
@@ -43,6 +44,7 @@ export default function CanvasNodeViewLayout({
   selectedAction: Action | undefined;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;
+  isFullScreen: boolean;
   children: React.ReactNode;
 }) {
   const editorContext = useContext(EditorContext);
@@ -74,8 +76,13 @@ export default function CanvasNodeViewLayout({
 
   return (
     <div className="relative h-full w-full">
-      {/* Control */}
-      <div className="absolute -top-1.5 z-40 flex w-full justify-center">
+      {/* Control menu */}
+      <div
+        className={clsx(
+          "absolute -top-1.5 z-40 flex w-full justify-center",
+          isFullScreen && "nodrag",
+        )}
+      >
         <div
           className="flex h-3 w-8 cursor-grab flex-col items-center justify-start pt-1 active:h-16 active:w-16 active:cursor-grabbing"
           onClick={(e) => {
@@ -83,7 +90,12 @@ export default function CanvasNodeViewLayout({
             setIsShowingMenu((prev) => !prev);
           }}
         >
-          <div className="bg-default-500 h-1 w-8 rounded-full"></div>
+          <div
+            className={clsx(
+              "bg-default-500 h-1 w-8 rounded-full",
+              isFullScreen && "nodrag",
+            )}
+          ></div>
 
           <Popover isOpen={isShowingMenu} onOpenChange={setIsShowingMenu}>
             <PopoverTrigger>
@@ -99,15 +111,17 @@ export default function CanvasNodeViewLayout({
                 setIsShowingWorkflowConnector={setIsShowingWorkflowConnector}
                 isShowingOwnedApps={isShowingOwnedApps}
                 setIsShowingOwnedApps={setIsShowingOwnedApps}
+                isFullScreen={isFullScreen}
               />
             </PopoverContent>
           </Popover>
         </div>
       </div>
 
-      {/* Input Handles */}
+      {/* Input and output handles */}
       {selectedAction && (
         <>
+          {/* Input Handles */}
           <div className="pointer-events-none absolute top-0 h-full -translate-x-[100%]">
             {isShowingWorkflowConnector && (
               <div className="pointer-events-none relative flex h-full w-full flex-col items-end justify-center gap-y-1">
@@ -164,14 +178,26 @@ export default function CanvasNodeViewLayout({
       />
 
       <div className="bg-content1 relative z-10 h-full w-full rounded-lg shadow-md">
+        {/* Borders */}
         {isRunning ? (
-          <div className="running wrapper gradient absolute top-0 left-0 z-0 h-full w-full overflow-hidden rounded-lg" />
+          <div
+            className={clsx(
+              "running wrapper gradient absolute top-0 left-0 z-0 h-full w-full overflow-hidden rounded-lg",
+              isFullScreen && "nodrag",
+            )}
+          />
         ) : (
           (node.selected || node.dragging) && (
-            <div className="selected wrapper gradient absolute top-0 left-0 z-0 h-full w-full overflow-hidden rounded-lg" />
+            <div
+              className={clsx(
+                "selected wrapper gradient absolute top-0 left-0 z-0 h-full w-full overflow-hidden rounded-lg",
+                isFullScreen && "nodrag",
+              )}
+            />
           )
         )}
 
+        {/* Children wrapper */}
         <div
           className={clsx(
             "relative z-10 h-full w-full overflow-hidden rounded-md data-[is-dragging=true]:pointer-events-none data-[is-resizing=true]:pointer-events-none",
@@ -180,11 +206,17 @@ export default function CanvasNodeViewLayout({
           data-is-dragging={node.dragging ? "true" : "false"}
           data-is-resizing={node.resizing ? "true" : "false"}
         >
-          {children}
+          <div className="relative h-full w-full">{children}</div>
+
+          <div
+            className="nodrag absolute top-0 left-0 hidden h-full w-full data-[is-visible=true]:block"
+            data-is-visible={isShowingMenu}
+          ></div>
         </div>
 
+        {/* Owned apps */}
         <div
-          className="bg-content2 text-content2-foreground mx-2 hidden flex-col gap-y-2 rounded-b-lg px-2 py-4 data-[visible=true]:flex"
+          className="bg-content2 text-content2-foreground relative mx-2 hidden flex-col gap-y-2 rounded-b-lg px-2 py-4 data-[visible=true]:flex"
           data-visible={
             Object.keys(node.data.ownedAppViews ?? {}).length > 0 &&
             isShowingWorkflowConnector &&
@@ -223,6 +255,7 @@ function CanvasNodeControl({
   setIsShowingWorkflowConnector,
   isShowingOwnedApps,
   setIsShowingOwnedApps,
+  isFullScreen,
 }: {
   actions: Action[];
   selectedAction: Action | undefined;
@@ -232,6 +265,7 @@ function CanvasNodeControl({
   setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
   isShowingOwnedApps: boolean;
   setIsShowingOwnedApps: (showing: boolean) => void;
+  isFullScreen: boolean;
 }) {
   const [actionError, setActionError] = useState<{ [key: string]: string }>({});
 
@@ -247,7 +281,11 @@ function CanvasNodeControl({
             if (action) action();
           }}
         >
-          <Icon name="fullscreen" />
+          {isFullScreen ? (
+            <Icon name="fullscreen_exit" />
+          ) : (
+            <Icon name="fullscreen" />
+          )}
         </Button>
       </Tooltip>
 
