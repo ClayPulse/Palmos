@@ -13,6 +13,7 @@ import {
   DropdownSection,
   DropdownTrigger,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
 import { useContext, useEffect } from "react";
@@ -32,6 +33,7 @@ export default function NavTopBar({
   setIsMenuOpen: (isOpen: boolean) => void;
   setIsSharingOpen: (isOpen: boolean) => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { session, signOut, subscription, usage } = useAuth();
@@ -66,7 +68,9 @@ export default function NavTopBar({
         onClick={onClick}
       >
         <div className="bg-success h-2 w-2 rounded-full"></div>
-        <p className="text-success text-sm whitespace-nowrap">Connected to Cloud AI</p>
+        <p className="text-success text-sm whitespace-nowrap">
+          {t("navigation.connectedToCloudAI")}
+        </p>
       </div>
     ) : (
       <div
@@ -74,7 +78,7 @@ export default function NavTopBar({
         onClick={onClick}
       >
         <div className="bg-warning h-2 w-2 rounded-full"></div>
-        <p className="text-warning text-sm">Offline</p>
+        <p className="text-warning text-sm">{t("navigation.offline")}</p>
       </div>
     ));
 
@@ -133,7 +137,11 @@ export default function NavTopBar({
                 setIsSharingOpen(true);
               }}
             >
-              {app ? <span>Share App</span> : <span>Share</span>}
+              {app ? (
+                <span>{t("common.shareApp")}</span>
+              ) : (
+                <span>{t("common.share")}</span>
+              )}
             </Button>
           )}
           <Button
@@ -173,7 +181,7 @@ export default function NavTopBar({
                 });
               }}
             >
-              Sign In
+              {t("common.signIn")}
             </Button>
           )}
           {session && (
@@ -194,7 +202,7 @@ export default function NavTopBar({
                   </p>
                 }
               >
-                <DropdownSection showDivider title="Subscription">
+                <DropdownSection showDivider title={t("subscription.title")}>
                   <DropdownItem
                     key={"subscription-plan"}
                     isReadOnly
@@ -202,13 +210,13 @@ export default function NavTopBar({
                   >
                     <div>
                       <p className="text-medium text-center">
-                        Subscription Plan
+                        {t("subscription.plan")}
                       </p>
                       <p className="text-center font-semibold">
                         {subscription?.name}
                       </p>
                       <p className="text-medium text-center">
-                        Credits Remaining
+                        {t("subscription.creditsRemaining")}
                       </p>
                       <p className="text-center font-semibold">
                         {usage?.remainingCredit}
@@ -220,7 +228,7 @@ export default function NavTopBar({
                   </DropdownItem>
                 </DropdownSection>
 
-                <DropdownSection title={"Account"}>
+                <DropdownSection title={t("account.title")}>
                   <DropdownItem
                     key={"manage-plan"}
                     onPress={() => {
@@ -242,7 +250,7 @@ export default function NavTopBar({
                       }
                     }}
                   >
-                    Manage Plan
+                    {t("subscription.managePlan")}
                   </DropdownItem>
                   <DropdownItem
                     key={"sign-out"}
@@ -251,7 +259,7 @@ export default function NavTopBar({
                     }}
                     className="text-danger"
                   >
-                    Sign out
+                    {t("common.signOut")}
                   </DropdownItem>
                 </DropdownSection>
               </DropdownMenu>

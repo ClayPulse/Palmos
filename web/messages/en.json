@@ -1,0 +1,37 @@
+{
+  "common": {
+    "signIn": "Sign In",
+    "signOut": "Sign out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "share": "Share",
+    "shareApp": "Share App"
+  },
+  "navigation": {
+    "connectedToCloudAI": "Connected to Cloud AI",
+    "offline": "Offline"
+  },
+  "settings": {
+    "editorSettings": "Editor Settings",
+    "generalSettings": "General Settings",
+    "aiSettings": "AI Settings",
+    "securitySettings": "Security Settings",
+    "projectHomePath": "Project Home Path"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "plan": "Subscription Plan",
+    "creditsRemaining": "Credits Remaining",
+    "managePlan": "Manage Plan"
+  },
+  "account": {
+    "title": "Account"
+  },
+  "metadata": {
+    "title": "Pulse Editor",
+    "description": "AI powered editor to boost your creativity"
+  }
+}

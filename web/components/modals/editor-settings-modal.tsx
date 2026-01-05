@@ -22,6 +22,7 @@ import {
   Switch,
   Tooltip,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -35,10 +36,11 @@ export default function EditorSettingsModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title={"Editor Settings"}>
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={t("settings.editorSettings")}>
       <div className="flex w-full flex-col gap-2">
         <GeneralSettings editorContext={editorContext} />
         <Divider />
@@ -59,6 +61,7 @@ function GeneralSettings({
 }: {
   editorContext?: EditorContextType;
 }) {
+  const t = useTranslations();
   const { selectAndSetProjectHome } = useExplorer();
   const [newEnvKey, setNewEnvKey] = useState<string>("");
   const [newEnvValue, setNewEnvValue] = useState<string>("");
@@ -67,11 +70,11 @@ function GeneralSettings({
 
   return (
     <div>
-      <p className="text-medium pb-2 font-bold">General Settings</p>
+      <p className="text-medium pb-2 font-bold">{t("settings.generalSettings")}</p>
       <div className="w-full space-y-2">
         {editorContext?.persistSettings?.projectHomePath ? (
           <Input
-            label="Project Home Path"
+            label={t("settings.projectHomePath")}
             size="md"
             isRequired
             value={editorContext?.persistSettings?.projectHomePath}

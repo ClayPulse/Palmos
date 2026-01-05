@@ -1,7 +1,11 @@
 /** @type {import('next').NextConfig} */
 // import { GenerateSW } from "workbox-webpack-plugin";
+import createNextIntlPlugin from "next-intl/plugin";
+import type { NextConfig } from "next";
 
-const nextConfig = {
+const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
+
+const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "export",
   distDir: "../build/next",
@@ -37,4 +41,4 @@ const nextConfig = {
   turbopack: {},
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
