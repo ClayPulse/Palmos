@@ -417,7 +417,10 @@ export default function useCanvasWorkflow(
   }
 
   const saveAppsSnapshotStates = useCallback(async () => {
-    const apps = localNodes.map((node) => node.data.config);
+    const apps =
+      editorContext?.editorStates.workflowNodes.map(
+        (node) => node.data.config,
+      ) ?? [];
 
     const appStates = await Promise.all(
       apps.map(async (app) => {
@@ -457,7 +460,7 @@ export default function useCanvasWorkflow(
       );
 
     return appStatesMap;
-  }, [localNodes, imcContext]);
+  }, [editorContext?.editorStates.workflowNodes, imcContext?.polyIMC]);
 
   async function restoreAppsSnapshotStates(content: WorkflowContent) {
     if (!imcContext || !imcContext.polyIMC) {
