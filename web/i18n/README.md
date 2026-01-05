@@ -9,7 +9,7 @@ This project uses [next-intl](https://next-intl-docs.vercel.app/) for internatio
   - `request.ts` - Request configuration for next-intl server
 - `/web/messages/` - Translation files
   - `en.json` - English translations (default)
-  - Add more locale files as needed (e.g., `es.json`, `fr.json`, etc.)
+  - Add more locale files as needed (e.g., `es.json` for Spanish, `fr.json` for French, etc.)
 - `/web/components/providers/i18n-provider.tsx` - Client-side i18n provider wrapper
 
 ## How to Add a New Language

@@ -3,6 +3,8 @@
 import { NextIntlClientProvider } from "next-intl";
 import { ReactNode } from "react";
 
+type Messages = Record<string, any>;
+
 export default function I18nProvider({
   children,
   locale,
@@ -10,7 +12,7 @@ export default function I18nProvider({
 }: {
   children: ReactNode;
   locale: string;
-  messages: any;
+  messages: Messages;
 }) {
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
