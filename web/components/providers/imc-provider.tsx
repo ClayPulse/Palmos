@@ -17,6 +17,7 @@ import {
 import { getVideoGenModel } from "@/lib/modalities/video-gen/get-video-gen";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { IMCContextType } from "@/lib/types";
+import { addToast } from "@heroui/react";
 import {
   Action,
   ImageModelConfig,
@@ -24,6 +25,7 @@ import {
   IMCMessageTypeEnum,
   ListPathOptions,
   LLMModelConfig,
+  NotificationTypeEnum,
   PolyIMC,
   ReceiverHandler,
   STTModelConfig,
@@ -692,6 +694,50 @@ export default function InterModuleCommunicationProvider({
             websocketUrl: wsUrl,
             projectHomePath: editorContext?.persistSettings?.projectHomePath,
           };
+        },
+      ],
+
+      [
+        IMCMessageTypeEnum.EditorShowNotification,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          // Show notification in the main app
+
+          const {
+            text,
+            type,
+          }: {
+            text: string;
+            type: NotificationTypeEnum;
+          } = message.payload;
+
+          const color:
+            | "success"
+            | "danger"
+            | "warning"
+            | "default"
+            | "foreground"
+            | "primary"
+            | "secondary"
+            | undefined =
+            type === NotificationTypeEnum.Success
+              ? "success"
+              : type === NotificationTypeEnum.Error
+                ? "danger"
+                : type === NotificationTypeEnum.Info
+                  ? "default"
+                  : type === NotificationTypeEnum.Warning
+                    ? "warning"
+                    : "default";
+
+          addToast({
+            title: "Notification from App",
+            description: text,
+            color: color,
+          });
         },
       ],
     ]);

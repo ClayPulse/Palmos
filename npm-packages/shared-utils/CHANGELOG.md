@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.69
+
+### Patch Changes
+
+- Fix notification hook
+
 ## 0.1.1-beta.68
 
 ### Patch Changes
