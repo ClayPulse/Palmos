@@ -344,59 +344,6 @@ ${Object.entries(funcs)
 		},
 	};
 
-	const previewHostConfig: WebpackConfig = {
-		mode: mode,
-		entry:
-			'./node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/index.js',
-		target: 'async-node',
-		output: {
-			publicPath: 'auto',
-			library: {type: 'commonjs-module'},
-			path: path.resolve(projectDirName, 'dist/preview/backend'),
-			filename: 'index.cjs',
-		},
-		resolve: {
-			extensions: ['.ts', '.js'],
-		},
-		module: {
-			rules: [
-				{
-					test: /\.tsx?$/,
-					use: [
-						{
-							loader: 'ts-loader',
-							options: {
-								transpileOnly: false, // Enables type-checking and .d.ts file emission
-							},
-						},
-					],
-					exclude: [/node_modules/, /dist/],
-				},
-			],
-		},
-		plugins: [
-			new NodeFederationPlugin(
-				{
-					remoteType: 'script',
-					name: 'preview_host',
-					useRuntimePlugin: true,
-					exposes: {},
-				} as any,
-				{},
-			),
-		],
-		stats: {
-			all: false,
-			errors: true,
-			warnings: true,
-			logging: 'warn',
-			colors: true,
-		},
-		infrastructureLogging: {
-			level: 'warn',
-		},
-	};
-
 	const mfClientConfig: WebpackConfig & DevServerConfig = {
 		mode: mode,
 		name: 'client',
@@ -615,7 +562,7 @@ ${Object.entries(funcs)
 	// #endregion
 
 	if (isPreview) {
-		return [previewClientConfig, previewHostConfig, mfServerConfig];
+		return [previewClientConfig, mfServerConfig];
 	} else if (buildTarget === 'server') {
 		return [mfServerConfig];
 	} else if (buildTarget === 'client') {
