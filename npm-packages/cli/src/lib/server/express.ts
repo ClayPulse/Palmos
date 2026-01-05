@@ -96,14 +96,22 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
 
 	const streamPipeline = promisify(pipeline);
 
-	// If loadAndCall returns a Response (Fetch API Response)
-	if (response.body) {
-		// Convert WHATWG stream to Node.js stream
-		const nodeStream = Readable.fromWeb(response.body);
-		// Pipe it directly to Express
-		await streamPipeline(nodeStream, res);
-	} else {
-		res.end();
+	if (response) {
+		// 1️⃣ Set status code
+		res.status(response.status);
+
+		// 2️⃣ Copy headers
+		response.headers.forEach((value: any, key: any) => {
+			res.setHeader(key, value);
+		});
+
+		// 3️⃣ Pipe body if present
+		if (response.body) {
+			const nodeStream = Readable.fromWeb(response.body);
+			await streamPipeline(nodeStream, res);
+		} else {
+			res.end();
+		}
 	}
 });
 
