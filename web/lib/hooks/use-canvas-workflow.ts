@@ -58,13 +58,12 @@ export default function useCanvasWorkflow(
     }));
   }, 200);
 
-  const debounceSaveNodesAndEdges = useDebouncedCallback(() => { 
+  const debounceSaveNodesAndEdges = useDebouncedCallback(() => {
     editorContext?.setEditorStates((prev) => ({
       ...prev,
       workflowNodes: localNodes,
       workflowEdges: localEdges,
     }));
-
   }, 500);
 
   const updateWorkflowNodeData = useCallback(
@@ -417,7 +416,7 @@ export default function useCanvasWorkflow(
     setPendingNodes([entryPoint]);
   }
 
-  async function saveAppsSnapshotStates() {
+  const saveAppsSnapshotStates = useCallback(async () => {
     const apps = localNodes.map((node) => node.data.config);
 
     const appStates = await Promise.all(
@@ -458,7 +457,7 @@ export default function useCanvasWorkflow(
       );
 
     return appStatesMap;
-  }
+  }, [localNodes, imcContext]);
 
   async function restoreAppsSnapshotStates(content: WorkflowContent) {
     if (!imcContext || !imcContext.polyIMC) {
