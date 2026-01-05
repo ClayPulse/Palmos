@@ -172,14 +172,21 @@ export default function CanvasView({
         publishWorkflow: {
           isOpen: true,
           workflowCanvas: containerRef.current,
-          localNodes: localNodes,
-          localEdges: localEdges,
+          localNodes: editorContext?.editorStates.workflowNodes,
+          localEdges: editorContext?.editorStates.workflowEdges,
           entryPoint: entryPoint,
           saveAppsSnapshotStates: saveAppsSnapshotStates,
         },
       });
     },
-    [isActive, tabName, localNodes, localEdges, entryPoint, saveAppsSnapshotStates],
+    [
+      isActive,
+      tabName,
+      editorContext?.editorStates.workflowEdges,
+      editorContext?.editorStates.workflowNodes,
+      entryPoint,
+      saveAppsSnapshotStates,
+    ],
     isActive,
   );
 
