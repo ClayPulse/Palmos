@@ -179,7 +179,7 @@ export default function CanvasView({
         },
       });
     },
-    [isActive, tabName],
+    [isActive, tabName, localNodes, localEdges, entryPoint, saveAppsSnapshotStates],
     isActive,
   );
 
