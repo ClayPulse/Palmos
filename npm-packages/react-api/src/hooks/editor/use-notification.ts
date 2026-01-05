@@ -1,7 +1,7 @@
 import {
-  NotificationTypeEnum,
   IMCMessage,
   IMCMessageTypeEnum,
+  NotificationTypeEnum,
 } from "@pulse-editor/shared-utils";
 
 import useIMC from "../imc/use-imc";
@@ -12,17 +12,16 @@ export default function useNotification() {
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
 
-  const { imc } = useIMC(receiverHandlerMap, "notification");
+  const { imc, isReady } = useIMC(receiverHandlerMap, "notification");
 
   function openNotification(text: string, type: NotificationTypeEnum) {
-    if (!imc) {
-      throw new Error("IMC is not initialized.");
+    if (isReady) {
+      imc?.sendMessage(IMCMessageTypeEnum.EditorShowNotification, {
+        text,
+        type,
+      });
     }
-    imc.sendMessage(IMCMessageTypeEnum.EditorShowNotification, {
-      text,
-      type,
-    });
   }
 
-  return { openNotification };
+  return { isReady, openNotification };
 }
