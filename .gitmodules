@@ -1,0 +1,3 @@
+[submodule "remote-workspace/src/lib/supergateway"]
+	path = remote-workspace/src/lib/supergateway
+	url = https://github.com/Shellishack/supergateway.git

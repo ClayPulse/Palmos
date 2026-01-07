@@ -11,17 +11,19 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "dotenv": "^17.2.0",
-    "express": "^5.1.0",
+    "@modelcontextprotocol/sdk": "^1.25.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
     "ignore": "^7.0.5",
-    "node-pty": "^1.1.0-beta37",
-    "ws": "^8.18.3"
+    "node-pty": "^1.1.0",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
-    "@types/express": "^5.0.3",
-    "@types/node": "^24.0.12",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.0.3",
     "@types/ws": "^8.18.1",
-    "tsx": "^4.20.3",
-    "typescript": "^5.8.3"
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }

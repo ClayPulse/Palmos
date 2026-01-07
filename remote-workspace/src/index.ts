@@ -5,6 +5,7 @@ import http from "http";
 import https from "https";
 import { getLocalNetworkIP } from "./lib/get-network";
 import { addAPIServer } from "./servers/api-server";
+import { addMCPServers } from "./servers/mcp-server";
 import { addTerminalServer } from "./servers/node-pty";
 
 dotenv.config();
@@ -42,6 +43,11 @@ async function startServers() {
   );
   console.log(
     `API server is running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/api-${workspaceId}`,
+  );
+
+  await addMCPServers(server, expressApp, serverPort);
+  console.log(
+    `MCP servers are running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/mcp-servers/`,
   );
 
   await addTerminalServer(server, "api-" + workspaceId);
