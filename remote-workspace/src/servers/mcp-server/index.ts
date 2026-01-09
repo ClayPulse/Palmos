@@ -1,18 +1,10 @@
 import express from "express";
-import http from "http";
-import https from "https";
 import { multiStdioToStatelessStreamableHttp } from "../../lib/supergateway/src/gateways/stdioToStatelessStreamableHttp";
 import { corsOrigin } from "../../lib/supergateway/src/lib/corsOrigin";
 import { getLogger } from "../../lib/supergateway/src/lib/getLogger";
 import { headers } from "../../lib/supergateway/src/lib/headers";
 
-const HOST = "0.0.0.0";
-
-export async function addMCPServers(
-  server: http.Server | https.Server,
-  expressApp: express.Express,
-  port: number,
-) {
+export async function addMCPServers(expressApp: express.Express, port: number) {
   const logger = getLogger({
     logLevel: "info",
     outputTransport: "streamableHttp",
@@ -22,11 +14,11 @@ export async function addMCPServers(
     {
       servers: [
         {
-          path: "/mcp-servers/fs",
+          path: "/:instanceId/mcp-servers/fs",
           stdioCmd: "npx -y @modelcontextprotocol/server-filesystem .",
         },
         {
-          path: "/mcp-servers/terminal",
+          path: "/:instanceId/mcp-servers/terminal",
           stdioCmd: "npx -y mcp-server-commands",
         },
       ],
@@ -50,6 +42,4 @@ export async function addMCPServers(
     },
     expressApp,
   );
-
-  server.listen(port, HOST);
 }

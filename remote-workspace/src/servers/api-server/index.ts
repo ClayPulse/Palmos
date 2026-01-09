@@ -6,18 +6,12 @@ import { handlePlatformAPIRequest } from "./platform-api/handler";
 
 dotenv.config();
 
-const HOST = "0.0.0.0";
-
 export async function addAPIServer(
-  server: http.Server | https.Server,
   expressApp: express.Express,
   instanceId: string,
-  port: number,
   frontendUrl: string,
 ) {
   await createEndpoints(expressApp, instanceId, frontendUrl);
-
-  server.listen(port, HOST);
 }
 
 async function createEndpoints(

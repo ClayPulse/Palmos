@@ -3,19 +3,10 @@ ENV NODE_VERSION=22
 
 WORKDIR /pulse-editor/server
 
-# install curl
-RUN apt update && apt install -y curl make python3 build-essential git
+# Install basic tools
+RUN apt update && apt install -y curl make python3 build-essential git zip unzip ca-certificates gnupg && rm -rf /var/lib/apt/lists/*
 
-# install node
-# Avoid interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
-
-# Install dependencies
-RUN apt-get update && apt-get install -y \
-    curl \
-    ca-certificates \
-    gnupg \
-    && rm -rf /var/lib/apt/lists/*
+# Install node
 
 # Add NodeSource repository for Node.js 22
 RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
@@ -24,14 +15,10 @@ RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
 RUN apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
-
-# set env
-ENV NVM_DIR=/root/.nvm
-
 COPY . /pulse-editor/server
 
-# Clone https://github.com/shellishack/supergateway into /pulse-editor/server/src/lib/supergateway
-RUN git clone https://github.com/shellishack/supergateway /pulse-editor/server/src/lib/supergateway
+# Clone https://github.com/shellishack/supergateway repository
+# RUN git clone https://github.com/shellishack/supergateway /pulse-editor/server/src/lib/supergateway
 
 # install pulse-cli
 RUN npm install -g @pulse-editor/cli@beta
@@ -42,15 +29,8 @@ RUN npm install
 # build project
 RUN npm run build
 
-
-# install git, zip, unzip
-RUN apt install -y git zip unzip
-
 # Generate self-signed certificate
 # RUN bash -c "./utils/generate-self-signed.sh"
-
-# set ENTRYPOINT for reloading nvm-environment
-ENTRYPOINT ["bash", "-c", "source $NVM_DIR/nvm.sh && exec \"$@\"", "--"]
 
 EXPOSE 6080 6443
 

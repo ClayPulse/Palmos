@@ -19,6 +19,8 @@ const keyPath = process.env.SSL_KEY_PATH;
 const workspaceId = process.env.WORKSPACE_ID;
 const frontendUrl = process.env.FRONTEND_URL ?? "https://web.pulse-editor.com";
 
+const HOST = "0.0.0.0";
+
 async function startServers() {
   if (!workspaceId) {
     console.error("WORKSPACE_ID is not set in environment variables.");
@@ -34,18 +36,12 @@ async function startServers() {
       ? true
       : false;
 
-  await addAPIServer(
-    server,
-    expressApp,
-    "api-" + workspaceId,
-    serverPort,
-    frontendUrl,
-  );
+  await addAPIServer(expressApp, "api-" + workspaceId, frontendUrl);
   console.log(
     `API server is running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/api-${workspaceId}`,
   );
 
-  await addMCPServers(server, expressApp, serverPort);
+  await addMCPServers(expressApp, serverPort);
   console.log(
     `MCP servers are running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/mcp-servers/`,
   );
@@ -54,6 +50,8 @@ async function startServers() {
   console.log(
     `Terminal server is running at ${isHttps ? "wss" : "ws"}://${address}:${serverPort}/api-${workspaceId}/terminal/ws`,
   );
+
+  server.listen(serverPort, HOST);
 }
 
 async function createServer() {
