@@ -1,4 +1,5 @@
 import {execa} from 'execa';
+import fs from 'fs';
 
 /**
  *	Build the cli executable and copy necessary files to dist
@@ -19,22 +20,16 @@ async function main() {
 	];
 
 	for (const filePath of filesToCopy) {
-		if (process.platform === 'win32') {
-			await execa(
-				'copy',
-				[
-					`src\\${filePath.replace(/\//g, '\\')}`,
-					`dist\\${filePath.replace(/\//g, '\\')}`,
-				],
-				{
-					shell: true,
-				},
-			);
-		} else {
-			await execa('cp', [`src/${filePath}`, `dist/${filePath}`], {
-				shell: true,
-			});
+		// Create folder if it doesn't exist
+		const pathParts = filePath.split('/');
+		pathParts.pop();
+		const folderPath = pathParts.join('/');
+
+		if (!fs.existsSync(`dist/${folderPath}`)) {
+			fs.mkdirSync(`dist/${folderPath}`, {recursive: true});
 		}
+
+		fs.copyFileSync(`src/${filePath}`, `dist/${filePath}`);
 	}
 
 	console.log('✅ Build completed successfully.');
