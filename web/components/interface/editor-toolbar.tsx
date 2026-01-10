@@ -5,7 +5,7 @@ import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { Button, Divider, Tooltip } from "@heroui/react";
+import { addToast, Button, Divider, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
@@ -146,7 +146,22 @@ export default function EditorToolbar() {
 
               <Divider className="mx-1" orientation="vertical" />
 
-              <Tooltip content={"Agent Configuration"}>
+              <Tooltip content={"Artifacts"}>
+                <Button
+                  variant="light"
+                  isIconOnly
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
+                  onPress={() => {
+                    addToast({
+                      title: "Opening Artifacts Panel (WIP)",
+                    });
+                  }}
+                >
+                  <Icon name="layers" variant="outlined" />
+                </Button>
+              </Tooltip>
+
+              <Tooltip content={"Installed Agents"}>
                 <Button
                   variant="light"
                   isIconOnly

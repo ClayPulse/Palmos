@@ -4,7 +4,8 @@ import { addToast, Button } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import { v4 } from "uuid";
-import { SideMenuTabEnum } from "../enums";
+import { PlatformEnum, SideMenuTabEnum } from "../enums";
+import { getPlatform } from "../platform-api/platform-checker";
 import {
   AppViewConfig,
   CanvasViewConfig,
@@ -360,7 +361,11 @@ export function useTabViewManager() {
         ),
       );
 
-    if (requireWorkspace && !editorContext?.editorStates.currentWorkspace) {
+    if (
+      requireWorkspace &&
+      !editorContext?.editorStates.currentWorkspace &&
+      getPlatform() !== PlatformEnum.Electron
+    ) {
       addToast({
         title: "Workspace Required",
         description: "This workflow requires a workspace to be opened.",
@@ -480,7 +485,11 @@ export function useTabViewManager() {
         )
       : false;
 
-    if (requireWorkspace && !editorContext?.editorStates.currentWorkspace) {
+    if (
+      requireWorkspace &&
+      !editorContext?.editorStates.currentWorkspace &&
+      getPlatform() !== PlatformEnum.Electron
+    ) {
       addToast({
         title: "Workspace Required",
         description: "This workflow requires a workspace to be opened.",

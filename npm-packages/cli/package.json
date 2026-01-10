@@ -1,6 +1,6 @@
 {
 	"name": "@pulse-editor/cli",
-	"version": "0.1.1-beta.21",
+	"version": "0.1.1-beta.23",
 	"license": "MIT",
 	"bin": {
 		"pulse": "dist/cli.js"
@@ -20,7 +20,7 @@
 	],
 	"dependencies": {
 		"@module-federation/enhanced": "0.21.6",
-		"@module-federation/node": "^2.7.25",
+		"@module-federation/node": "2.7.25",
 		"@module-federation/runtime": "0.21.6",
 		"@pulse-editor/shared-utils": "^0.1.1-beta.67",
 		"concurrently": "^9.2.1",
