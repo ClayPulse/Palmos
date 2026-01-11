@@ -36,14 +36,14 @@ async function startServers() {
       ? true
       : false;
 
+  await addMCPServers(expressApp, "api-"+ workspaceId, serverPort);
+  console.log(
+    `MCP servers are running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/api-${workspaceId}/mcp-servers/`,
+  );
+  
   await addAPIServer(expressApp, "api-" + workspaceId, frontendUrl);
   console.log(
     `API server is running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/api-${workspaceId}`,
-  );
-
-  await addMCPServers(expressApp, serverPort);
-  console.log(
-    `MCP servers are running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/mcp-servers/`,
   );
 
   await addTerminalServer(server, "api-" + workspaceId);

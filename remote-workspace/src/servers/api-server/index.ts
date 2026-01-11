@@ -1,7 +1,5 @@
 import dotenv from "dotenv";
 import express from "express";
-import http from "http";
-import https from "https";
 import { handlePlatformAPIRequest } from "./platform-api/handler";
 
 dotenv.config();

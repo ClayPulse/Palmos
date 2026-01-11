@@ -66,7 +66,9 @@ export default function NavTopBar({
         onClick={onClick}
       >
         <div className="bg-success h-2 w-2 rounded-full"></div>
-        <p className="text-success text-sm whitespace-nowrap">Connected to Cloud AI</p>
+        <p className="text-success text-sm whitespace-nowrap">
+          Connected to Cloud AI
+        </p>
       </div>
     ) : (
       <div
@@ -243,6 +245,22 @@ export default function NavTopBar({
                     }}
                   >
                     Manage Plan
+                  </DropdownItem>
+                  <DropdownItem
+                    key={"api-keys"}
+                    onPress={() => {
+                      const url = getAPIUrl("/home/settings/developer");
+                      if (getPlatform() === PlatformEnum.Capacitor) {
+                        Browser.open({
+                          url: url.toString(),
+                        });
+                      } else {
+                        // open in a new external browser window
+                        window.open(url.toString(), "_blank");
+                      }
+                    }}
+                  >
+                    API Keys
                   </DropdownItem>
                   <DropdownItem
                     key={"sign-out"}

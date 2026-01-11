@@ -1,24 +1,28 @@
 import express from "express";
-import { multiStdioToStatelessStreamableHttp } from "../../lib/supergateway/src/gateways/stdioToStatelessStreamableHttp";
+import { multiStdioToSse } from "../../lib/supergateway/src/gateways/stdioToSse";
 import { corsOrigin } from "../../lib/supergateway/src/lib/corsOrigin";
 import { getLogger } from "../../lib/supergateway/src/lib/getLogger";
 import { headers } from "../../lib/supergateway/src/lib/headers";
 
-export async function addMCPServers(expressApp: express.Express, port: number) {
+export async function addMCPServers(
+  expressApp: express.Express,
+  instanceId: string,
+  port: number,
+) {
   const logger = getLogger({
     logLevel: "info",
-    outputTransport: "streamableHttp",
+    outputTransport: "sse",
   });
 
-  await multiStdioToStatelessStreamableHttp(
+  await multiStdioToSse(
     {
       servers: [
         {
-          path: "/:instanceId/mcp-servers/fs",
+          path: `/${instanceId}/mcp-servers/fs`,
           stdioCmd: "npx -y @modelcontextprotocol/server-filesystem .",
         },
         {
-          path: "/:instanceId/mcp-servers/terminal",
+          path: `/${instanceId}/mcp-servers/terminal`,
           stdioCmd: "npx -y mcp-server-commands",
         },
       ],
@@ -29,16 +33,17 @@ export async function addMCPServers(expressApp: express.Express, port: number) {
       }),
       headers: headers({
         argv: {
-          header: [],
+          header: ["X-Accel-Buffering: no"],
           oauth2Bearer: undefined,
         },
         logger: logger,
       }),
-      protocolVersion: "2024-11-05",
       port: port,
       healthEndpoints: [],
       logger,
-      streamableHttpPath: "/mcp",
+      ssePath: "/sse",
+      baseUrl: "",
+      messagePath: "/message",
     },
     expressApp,
   );
