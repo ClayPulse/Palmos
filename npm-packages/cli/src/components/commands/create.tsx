@@ -70,7 +70,11 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 		if (projectName) {
 			// Check if the project already exists
 			const projectPath = path.join(process.cwd(), projectName);
-			if (fs.existsSync(projectPath)) {
+			if (
+				fs.existsSync(projectPath) &&
+				fs.lstatSync(projectPath).isDirectory() &&
+				fs.readdirSync(projectPath).length > 0
+			) {
 				setErrorMessage(
 					<Text color="redBright">
 						❌ A project with same name already exists in current path.
