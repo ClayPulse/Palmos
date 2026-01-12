@@ -1,10 +1,13 @@
 # Pulse CLI
+
 ## Install
+
 ```bash
 $ npm install --global @pulse-editor/cli
 ```
 
 ## Link local development version
+
 ```bash
 npm run link
 ```
@@ -48,6 +51,8 @@ npm run link
                       --visibility, -v [visibility]
                         The visibility of the new project. Options are private,
                         public, and unlisted.
+                      --path, -p [path]
+                        The path where to create the new project. Defaults to the name of the project in the current working directory.
 
     preview         Build the Pulse App in development mode and
                     start a preview server accessible via browser
@@ -75,6 +80,7 @@ npm run link
 ```
 
 ## Development
+
 ```
 npm run dev
 ```

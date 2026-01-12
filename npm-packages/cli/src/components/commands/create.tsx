@@ -1,5 +1,5 @@
 import {Result} from 'meow';
-import {ReactNode, useEffect, useState} from 'react';
+import {ReactNode, useEffect, useMemo, useState} from 'react';
 import {Flags} from '../../lib/cli-flags.js';
 import {Box, Text, useApp} from 'ink';
 import Spinner from 'ink-spinner';
@@ -14,6 +14,10 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 	const [framework, setFramework] = useState<string | undefined>(undefined);
 	const [projectName, setProjectName] = useState<string | undefined>(undefined);
 	const [visibility, setVisibility] = useState<string | undefined>(undefined);
+
+	const projectPath = useMemo(() => {
+		return cli.flags.path ?? projectName;
+	}, [projectName, cli]);
 
 	const [isShowFrameworkSelect, setIsShowFrameworkSelect] =
 		useState<boolean>(true);
@@ -102,6 +106,13 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 	}, [visibility, projectName]);
 
 	async function createFromTemplate(name: string, visibility: string) {
+		if (!projectPath) {
+			setErrorMessage(
+				<Text color="redBright">❌ Project path is not defined.</Text>,
+			);
+			return;
+		}
+
 		if (framework === 'react') {
 			// Clone the template repository
 			setCreateMessage(
@@ -111,12 +122,11 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				</Box>,
 			);
 			try {
-				await $`git clone --depth 1 https://github.com/ClayPulse/pulse-app-template.git ${name}`;
+				await $`git clone --depth 1 https://github.com/ClayPulse/pulse-app-template.git ${projectPath}`;
 			} catch (error) {
 				setCreateMessage(
 					<Text color="redBright">
-						❌ Failed to clone the template. Please check your internet
-						connection and try again.
+						❌ Failed to clone the template. {(error as any).message}
 					</Text>,
 				);
 				return;
@@ -131,7 +141,11 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			);
 
 			/* Setup pulse.config.ts */
-			const pulseConfigPath = path.join(process.cwd(), name, 'pulse.config.ts');
+			const pulseConfigPath = path.join(
+				process.cwd(),
+				projectPath,
+				'pulse.config.ts',
+			);
 			let pulseConfig = fs.readFileSync(pulseConfigPath, 'utf8');
 			// Modify visibility by matching the block that starts with 'visibility:',
 			// and replacing the entire line with the new visibility value.
@@ -142,7 +156,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			fs.writeFileSync(pulseConfigPath, pulseConfig);
 
 			/* Setup packages.json */
-			const packageJsonPath = path.join(process.cwd(), name, 'package.json');
+			const packageJsonPath = path.join(process.cwd(), projectPath, 'package.json');
 			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 			packageJson.name = name.replaceAll('-', '_');
 
@@ -150,19 +164,19 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
 			// Remove the .git directory
-			const gitDirPath = path.join(process.cwd(), name, '.git');
+			const gitDirPath = path.join(process.cwd(), projectPath, '.git');
 			if (fs.existsSync(gitDirPath)) {
 				fs.rmSync(gitDirPath, {recursive: true, force: true});
 			}
 
 			// Remove the .github directory
-			const githubDirPath = path.join(process.cwd(), name, '.github');
+			const githubDirPath = path.join(process.cwd(), projectPath, '.github');
 			if (fs.existsSync(githubDirPath)) {
 				fs.rmSync(githubDirPath, {recursive: true, force: true});
 			}
 
 			// Remove LICENSE file
-			const licenseFilePath = path.join(process.cwd(), name, 'LICENSE');
+			const licenseFilePath = path.join(process.cwd(), projectPath, 'LICENSE');
 			if (fs.existsSync(licenseFilePath)) {
 				fs.rmSync(licenseFilePath, {force: true});
 			}
@@ -176,7 +190,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			// Run `npm i`
 			try {
 				await execa(`npm install`, {
-					cwd: path.join(process.cwd(), name),
+					cwd: path.join(process.cwd(), projectPath),
 					shell: true,
 				});
 			} catch (error: any) {
