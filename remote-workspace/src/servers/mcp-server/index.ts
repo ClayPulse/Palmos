@@ -1,25 +1,34 @@
+import dotenv from "dotenv";
 import express from "express";
-import { multiStdioToStatelessStreamableHttp } from "../../lib/supergateway/src/gateways/stdioToStatelessStreamableHttp";
+import { multiStdioToSse } from "../../lib/supergateway/src/gateways/stdioToSse";
 import { corsOrigin } from "../../lib/supergateway/src/lib/corsOrigin";
 import { getLogger } from "../../lib/supergateway/src/lib/getLogger";
 import { headers } from "../../lib/supergateway/src/lib/headers";
 
-export async function addMCPServers(expressApp: express.Express, port: number) {
+dotenv.config();
+
+const workspacePath = process.env.WORKSPACE_PATH;
+
+export async function addMCPServers(
+  expressApp: express.Express,
+  instanceId: string,
+  port: number,
+) {
   const logger = getLogger({
     logLevel: "info",
-    outputTransport: "streamableHttp",
+    outputTransport: "sse",
   });
 
-  await multiStdioToStatelessStreamableHttp(
+  await multiStdioToSse(
     {
       servers: [
         {
-          path: "/:instanceId/mcp-servers/fs",
-          stdioCmd: "npx -y @modelcontextprotocol/server-filesystem .",
+          path: `/${instanceId}/mcp-servers/fs`,
+          stdioCmd: `${workspacePath ? `cd ${workspacePath} && ` : ""}npx -y @modelcontextprotocol/server-filesystem .`,
         },
         {
-          path: "/:instanceId/mcp-servers/terminal",
-          stdioCmd: "npx -y mcp-server-commands",
+          path: `/${instanceId}/mcp-servers/terminal`,
+          stdioCmd: `${workspacePath ? `cd ${workspacePath} && ` : ""}npx -y mcp-server-commands`,
         },
       ],
       corsOrigin: corsOrigin({
@@ -29,16 +38,17 @@ export async function addMCPServers(expressApp: express.Express, port: number) {
       }),
       headers: headers({
         argv: {
-          header: [],
+          header: ["X-Accel-Buffering: no"],
           oauth2Bearer: undefined,
         },
         logger: logger,
       }),
-      protocolVersion: "2024-11-05",
       port: port,
       healthEndpoints: [],
       logger,
-      streamableHttpPath: "/mcp",
+      ssePath: "/sse",
+      baseUrl: "",
+      messagePath: "/message",
     },
     expressApp,
   );
