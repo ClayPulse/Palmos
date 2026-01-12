@@ -1,8 +1,13 @@
+import dotenv from "dotenv";
 import express from "express";
 import { multiStdioToSse } from "../../lib/supergateway/src/gateways/stdioToSse";
 import { corsOrigin } from "../../lib/supergateway/src/lib/corsOrigin";
 import { getLogger } from "../../lib/supergateway/src/lib/getLogger";
 import { headers } from "../../lib/supergateway/src/lib/headers";
+
+dotenv.config();
+
+const workspacePath = process.env.WORKSPACE_PATH;
 
 export async function addMCPServers(
   expressApp: express.Express,
@@ -19,11 +24,11 @@ export async function addMCPServers(
       servers: [
         {
           path: `/${instanceId}/mcp-servers/fs`,
-          stdioCmd: "npx -y @modelcontextprotocol/server-filesystem .",
+          stdioCmd: `${workspacePath ? `cd ${workspacePath} && ` : ""}npx -y @modelcontextprotocol/server-filesystem .`,
         },
         {
           path: `/${instanceId}/mcp-servers/terminal`,
-          stdioCmd: "npx -y mcp-server-commands",
+          stdioCmd: `${workspacePath ? `cd ${workspacePath} && ` : ""}npx -y mcp-server-commands`,
         },
       ],
       corsOrigin: corsOrigin({
