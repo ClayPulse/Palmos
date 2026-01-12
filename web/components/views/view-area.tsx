@@ -29,10 +29,10 @@ export default function ViewArea() {
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
 
   const isInitialized = useRef(false);
+  const app = params?.get("app");
 
   useEffect(() => {
     // Standalone app mode
-    const app = params?.get("app");
     const inviteCode = params?.get("inviteCode") || undefined;
     const fileUri = params?.get("fileUri") || undefined;
 
@@ -80,7 +80,7 @@ export default function ViewArea() {
 
   return (
     <div className="h-full w-full overflow-hidden">
-      {!editorContext?.editorStates.project ? (
+      {!editorContext?.editorStates.project && app === undefined ? (
         <HomeView />
       ) : tabViews.length === 0 ? (
         <ProjectView />
