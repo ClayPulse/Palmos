@@ -84,7 +84,10 @@ export default function ExtensionPage({}) {
       console.log(`[FETCH INTERCEPTED]: ${url} → ${newUrl}`);
       console.log(`[App Info] ID: ${moduleId}, Version: ${moduleVersion}`);
 
-      const response = await originalFetch(newUrl, config);
+      const response = await originalFetch(newUrl, {
+        ...config,
+        credentials: "include",
+      });
 
       if (!response.ok) {
         console.warn(`Fetch Error (${response.status}) for ${url}`);
