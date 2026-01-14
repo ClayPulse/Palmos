@@ -13,6 +13,7 @@ import path from 'path';
 export default function Create({cli}: {cli: Result<Flags>}) {
 	const [framework, setFramework] = useState<string | undefined>(undefined);
 	const [projectName, setProjectName] = useState<string | undefined>(undefined);
+	const [displayName, setDisplayName] = useState<string | undefined>(undefined);
 	const [visibility, setVisibility] = useState<string | undefined>(undefined);
 
 	const projectPath = useMemo(() => {
@@ -22,6 +23,8 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 	const [isShowFrameworkSelect, setIsShowFrameworkSelect] =
 		useState<boolean>(true);
 	const [isShowProjectNameInput, setIsShowProjectNameInput] =
+		useState<boolean>(false);
+	const [isShowDisplayNameInput, setIsShowDisplayNameInput] =
 		useState<boolean>(false);
 	const [isShowVisibilitySelect, setIsShowVisibilitySelect] =
 		useState<boolean>(false);
@@ -90,6 +93,17 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				return;
 			}
 
+			const displayName = cli.flags.displayName;
+			if (displayName) {
+				setDisplayName(displayName);
+			} else {
+				setIsShowDisplayNameInput(true);
+			}
+		}
+	}, [projectName, cli]);
+
+	useEffect(() => {
+		if (displayName) {
 			const visibility = cli.flags.visibility;
 			if (visibility) {
 				setVisibility(visibility);
@@ -97,7 +111,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				setIsShowVisibilitySelect(true);
 			}
 		}
-	}, [projectName, cli]);
+	}, [displayName, cli]);
 
 	useEffect(() => {
 		if (visibility && projectName) {
@@ -156,9 +170,14 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			fs.writeFileSync(pulseConfigPath, pulseConfig);
 
 			/* Setup packages.json */
-			const packageJsonPath = path.join(process.cwd(), projectPath, 'package.json');
+			const packageJsonPath = path.join(
+				process.cwd(),
+				projectPath,
+				'package.json',
+			);
 			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 			packageJson.name = name.replaceAll('-', '_');
+			packageJson.displayName = displayName;
 
 			// Write the modified package.json back to the file
 			fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
@@ -223,6 +242,14 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				<ProjectNameInput
 					projectName={projectName}
 					setProjectName={setProjectName}
+				/>
+			)}
+
+			{isShowDisplayNameInput && (
+				<DisplayNameInput
+					projectName={projectName ?? ''}
+					displayName={displayName}
+					setDisplayName={setDisplayName}
 				/>
 			)}
 
@@ -301,6 +328,34 @@ function ProjectNameInput({
 				<UncontrolledTextInput
 					onSubmit={value => setTimeout(() => setProjectName(value), 0)}
 					focus={projectName === undefined}
+				/>
+			</Box>
+		</>
+	);
+}
+
+function DisplayNameInput({
+	projectName,
+	displayName,
+	setDisplayName,
+}: {
+	projectName: string;
+	displayName: string | undefined;
+	setDisplayName: (value: string) => void;
+}) {
+	return (
+		<>
+			<Box>
+				<Text>Enter your project display name: (default: {projectName})</Text>
+
+				<UncontrolledTextInput
+					onSubmit={value =>
+						setTimeout(
+							() => setDisplayName(value.length > 0 ? value : projectName),
+							0,
+						)
+					}
+					focus={displayName === undefined}
 				/>
 			</Box>
 		</>
