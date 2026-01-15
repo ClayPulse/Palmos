@@ -15,7 +15,7 @@ For you to get started quickly, we offer starter templates for the following fra
 
 ## Use Pulse Editor CLI
 
-You can use Pulse Editor CLI tool to manage developer credentials, create projects, and publish extensions, etc. Check out the [cli guide](/docs/guide/develop-extension-apps/cli).
+You can use Pulse Editor CLI tool to manage developer credentials, create projects, and publish extensions, etc. Check out the [cli guide](/guide/develop-extension-apps/cli).
 
 import DocCardList from '@theme/DocCardList';
 

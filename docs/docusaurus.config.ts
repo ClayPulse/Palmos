@@ -158,7 +158,7 @@ const config: Config = {
           items: [
             {
               label: "Guide",
-              to: "/docs/guide",
+              to: "/guide",
             },
             {
               label: "Blog",
@@ -166,7 +166,7 @@ const config: Config = {
             },
             {
               label: "API Reference",
-              to: "/docs/api-reference",
+              to: "/api-reference",
             },
           ],
         },
