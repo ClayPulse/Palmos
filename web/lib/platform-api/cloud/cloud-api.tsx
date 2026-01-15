@@ -461,7 +461,9 @@ export class CloudAPI extends AbstractPlatformAPI {
       throw new Error("Failed to fetch persistent settings");
     }
 
-    const settings: PersistentSettings = await response.json();
+    const settings: PersistentSettings = (await response.json()) ?? {
+      isUseManagedCloud: true,
+    };
 
     settings.projectHomePath = "/workspace";
 

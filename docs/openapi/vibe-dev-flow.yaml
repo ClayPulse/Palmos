@@ -1,0 +1,131 @@
+openapi: 3.1.1
+info:
+  title: Vibe Dev Flow - Generate Endpoint
+  version: 1.0.0
+  description: |
+    Vibe Dev Flow is a vibe coding app that generates new Pulse apps based on user prompts
+    in both user-friendly and programmatic ways. 
+    This document describes the Generate Endpoint API, which allows users to create new apps
+    via a POST request with a prompt and app name, and receive real-time progress updates.
+    If you are interested in using Vibe Dev Flow interactively, check out the
+    [Vibe Dev Flow App Guide](https://docs.pulse-editor.com/guides/vibe-dev-flow) in Pulse Editor client.
+
+    ## Introduction
+    Vibe Dev Flow leverages Pulse Editor's full-stack Module Federation framework to deploy both frontend 
+    and serverless backend on Pulse Editor platform. Along with Pulse Editor's remote workspace,
+    Vibe Dev Flow can spin up coding agents in a cloud VM to generate code, build, test, and deploy
+    new apps based on user prompts.
+
+    ## Authentication
+    This API requires you to provide a valid Pulse Editor API key in the Authorization header,
+    or login to Pulse Editor client and use it via the frontend UI.
+
+servers:
+  - url: https://pulse-editor.com/api/server-function/vibe_dev_flow/latest
+    description: Production
+  - url: http://localhost:6080/server-function
+    description: Local
+paths:
+  /generate-code/v2/generate:
+    post:
+      summary: Run Vibe coding flow and stream progress
+      description: >
+        Vibe coding a new Pulse app based on user prompt, then publish it 
+        to marketplace upon completion. It updates vibe coding progress while 
+        generating, and returns the final app URL and source code URL when done.
+        Accepts a JSON payload with prompt and appName. Streams progress as
+        text/event-stream (SSE).
+      operationId: generateVibeApp
+      tags:
+        - Generate Vibe App
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Pulse Editor API key
+          example: Bearer your_api_key_here
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+                - appName
+              properties:
+                prompt:
+                  type: string
+                  description: The user prompt instructing the Vibe coding agent
+                  example: "Create a todo app with auth and dark mode"
+                appName:
+                  type: string
+                  description: Friendly display name for the app
+                  example: "My Todo App"
+      responses:
+        "200":
+          description: Streaming Server-Sent Events (SSE) with progress and final result
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: 'SSE stream payload; clients should parse "data: ..." events. TODO: This will change to more structured JSON events in the future.'
+              examples:
+                progress:
+                  summary: Example SSE events
+                  value: |
+                    data: Starting workspace for app "myapp_abc123"...
+
+                    data: Waiting for MCP servers to be ready...
+
+                    data: Running Vibe coding agent with your prompt...
+
+                    data: Publishing the app to Pulse Editor...
+
+                    data: Your app has been successfully created and deployed to https://web.pulse-editor.com?app=myapp_abc123
+
+        "400":
+          description: Bad Request (missing or invalid input)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                missing_prompt:
+                  summary: Missing prompt
+                  value:
+                    error: "Bad Request: Missing prompt"
+        "401":
+          description: Unauthorized (missing authorization header)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                missing_auth:
+                  summary: Missing authorization
+                  value:
+                    error: "Unauthorized"
+        "500":
+          description: Internal Server Error (failed flow or workspace operations)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+              examples:
+                failed_flow:
+                  value:
+                    error: "Error running vibe code flow: <details>"
+components:
+  securitySchemes: {}

@@ -1,0 +1,72 @@
+---
+id: generate-vibe-app
+title: "Run Vibe coding flow and stream progress"
+description: "Vibe coding a new Pulse app based on user prompt, then publish it  to marketplace upon completion. It updates vibe coding progress while  generating, and returns the final app URL and source code URL when done. Accepts a JSON payload with prompt and appName. Streams progress as text/event-stream (SSE)."
+sidebar_label: "Run Vibe coding flow and stream progress"
+hide_title: true
+hide_table_of_contents: true
+api: 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
+sidebar_class_name: "post api-method"
+info_path: api-reference/app-server-functions/official-apps/vibe-dev-flow/vibe-dev-flow-generate-endpoint
+custom_edit_url: null
+---
+
+import MethodEndpoint from "@theme/ApiExplorer/MethodEndpoint";
+import ParamsDetails from "@theme/ParamsDetails";
+import RequestSchema from "@theme/RequestSchema";
+import StatusCodes from "@theme/StatusCodes";
+import OperationTabs from "@theme/OperationTabs";
+import TabItem from "@theme/TabItem";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Run Vibe coding flow and stream progress"}
+>
+</Heading>
+
+<MethodEndpoint
+  method={"post"}
+  path={"/generate-code/v2/generate"}
+  context={"endpoint"}
+>
+  
+</MethodEndpoint>
+
+
+
+Vibe coding a new Pulse app based on user prompt, then publish it  to marketplace upon completion. It updates vibe coding progress while  generating, and returns the final app URL and source code URL when done. Accepts a JSON payload with prompt and appName. Streams progress as text/event-stream (SSE).
+
+
+<Heading
+  id={"request"}
+  as={"h2"}
+  className={"openapi-tabs__heading"}
+  children={"Request"}
+>
+</Heading>
+
+<ParamsDetails
+  parameters={[{"name":"Authorization","in":"header","required":true,"schema":{"type":"string"},"description":"Pulse Editor API key","example":"Bearer your_api_key_here"}]}
+>
+  
+</ParamsDetails>
+
+<RequestSchema
+  title={"Body"}
+  body={{"required":true,"content":{"application/json":{"schema":{"type":"object","required":["prompt","appName"],"properties":{"prompt":{"type":"string","description":"The user prompt instructing the Vibe coding agent","example":"Create a todo app with auth and dark mode"},"appName":{"type":"string","description":"Friendly display name for the app","example":"My Todo App"}}}}}}}
+>
+  
+</RequestSchema>
+
+<StatusCodes
+  id={undefined}
+  label={undefined}
+  responses={{"200":{"description":"Streaming Server-Sent Events (SSE) with progress and final result","content":{"text/event-stream":{"schema":{"type":"string","description":"SSE stream payload; clients should parse \"data: ...\" events. TODO: This will change to more structured JSON events in the future."},"examples":{"progress":{"summary":"Example SSE events","value":"data: Starting workspace for app \"myapp_abc123\"...\n\ndata: Waiting for MCP servers to be ready...\n\ndata: Running Vibe coding agent with your prompt...\n\ndata: Publishing the app to Pulse Editor...\n\ndata: Your app has been successfully created and deployed to https://web.pulse-editor.com?app=myapp_abc123\n"}}}}},"400":{"description":"Bad Request (missing or invalid input)","content":{"application/json":{"schema":{"type":"object","properties":{"error":{"type":"string"}}},"examples":{"missing_prompt":{"summary":"Missing prompt","value":{"error":"Bad Request: Missing prompt"}}}}}},"401":{"description":"Unauthorized (missing authorization header)","content":{"application/json":{"schema":{"type":"object","properties":{"error":{"type":"string"}}},"examples":{"missing_auth":{"summary":"Missing authorization","value":{"error":"Unauthorized"}}}}}},"500":{"description":"Internal Server Error (failed flow or workspace operations)","content":{"application/json":{"schema":{"type":"object","properties":{"error":{"type":"string"}}},"examples":{"failed_flow":{"value":{"error":"Error running vibe code flow: <details>"}}}}}}}}
+>
+  
+</StatusCodes>
+
+
+      
