@@ -14,10 +14,10 @@ Pulse Editor is an all-in-one AI creative platform that allows you to create wor
 For both scenarios, you can choose to either bring your own AI model API keys from providers, or subscribe to [Pulse Editor's plans (Coming Soon)](https://pulse-editor.com/pricing) to use our managed AI services.
 
 :::info
-You can also choose not to set up AI if you do not need to use Pulse Editor Creative AI and installed extensions do not call AI models. There are still many non-AI functions from all kinds of extensions that might be helpful for your project. Jump to [next step](/docs/guide/quick-start/how-to-use-extensions) to get started using extensions right away.
+You can also choose not to set up AI if you do not need to use Pulse Editor Creative AI and installed extensions do not call AI models. There are still many non-AI functions from all kinds of extensions that might be helpful for your project. Jump to [next step](/guide/quick-start/how-to-use-extensions) to get started using extensions right away.
 :::
 
-Before proceeding, make sure you have installed Pulse Editor on your desired platform by following [installation guide](/docs/guide/installation/). You can start configuring Pulse Editor's AI settings on your device with the following options to fully unlock the power of Pulse Editor AI.
+Before proceeding, make sure you have installed Pulse Editor on your desired platform by following [installation guide](/guide/installation/). You can start configuring Pulse Editor's AI settings on your device with the following options to fully unlock the power of Pulse Editor AI.
 
 ## Bring your own AI API keys
 
