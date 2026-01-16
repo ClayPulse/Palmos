@@ -266,9 +266,9 @@ function DragPreview({ data }: { data: DragData | undefined }) {
           <img
             src={
               getRemoteClientBaseURL(
-                appData.app.remoteOrigin,
                 appData.app.config.id,
                 appData.app.config.version,
+                appData.app.remoteOrigin,
               ) +
               "/" +
               appData.app.config.thumbnail

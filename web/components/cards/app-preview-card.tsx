@@ -111,18 +111,18 @@ export default function AppPreviewCard({
       const remoteMFVersion =
         extension.mfVersion ??
         (await getRemoteMFVersion(
-          extension.remoteOrigin,
           extension.config.id,
           extension.config.version,
+          extension.remoteOrigin,
         ));
       setRemoteMFVersion(remoteMFVersion);
 
       const remoteLibVersion = (
         extension.config.libVersion === undefined
           ? await getRemoteLibVersion(
-              extension.remoteOrigin,
-              extension.config.id,
-              extension.config.version,
+            extension.config.id,
+            extension.config.version,
+            extension.remoteOrigin,
             )
           : extension.config.libVersion
       )?.replace("^", "");
@@ -373,9 +373,9 @@ export default function AppPreviewCard({
               draggable={false}
               src={
                 getRemoteClientBaseURL(
-                  extension.remoteOrigin,
                   extension.config.id,
                   extension.config.version,
+                  extension.remoteOrigin,
                 ) +
                 "/" +
                 extension.config.thumbnail
