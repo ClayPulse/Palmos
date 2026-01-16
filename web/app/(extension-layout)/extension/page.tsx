@@ -39,7 +39,7 @@ export default function ExtensionPage({}) {
     window.viewId = viewId;
 
     if (!isRegistered) {
-      mfHost.registerRemotes(getRemote(remoteOrigin, moduleId, moduleVersion));
+      mfHost.registerRemotes(getRemote(moduleId, moduleVersion, remoteOrigin));
       setIsRegistered(true);
     }
 

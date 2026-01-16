@@ -116,7 +116,7 @@ export default function RemoteModuleProvider({
 
     const remotes = extensions
       .map((ext) =>
-        getRemote(ext.remoteOrigin, ext.config.id, ext.config.version),
+        getRemote(ext.config.id, ext.config.version, ext.remoteOrigin),
       )
       .flat();
 

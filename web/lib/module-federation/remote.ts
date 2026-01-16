@@ -1,4 +1,20 @@
-export function getRemote(remoteOrigin: string, id: string, version: string) {
+export function getDefaultRemoteOrigin() {
+  if (
+    !process.env.NEXT_PUBLIC_CDN_URL ||
+    !process.env.NEXT_PUBLIC_STORAGE_CONTAINER
+  ) {
+    throw new Error(
+      "Remote origin is not specified and environment variables for CDN are not set.",
+    );
+  }
+  return `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`;
+}
+
+export function getRemote(
+  id: string,
+  version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
+) {
   return [
     {
       name: id,
@@ -14,28 +30,28 @@ export function getRemote(remoteOrigin: string, id: string, version: string) {
 }
 
 export function getRemoteClientBaseURL(
-  remoteOrigin: string,
   id: string,
   version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
 ) {
   return `${remoteOrigin}/${id}/${version}/client`;
 }
 
 export function getRemoteServerBaseURL(
-  remoteOrigin: string,
   id: string,
   version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
 ) {
   return `${remoteOrigin}/${id}/${version}/server`;
 }
 
 export async function getRemoteClientManifest(
-  remoteOrigin: string,
   id: string,
   version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
 ) {
   const mfManifest = await fetch(
-    `${getRemoteClientBaseURL(remoteOrigin, id, version)}/mf-manifest.json`,
+    `${getRemoteClientBaseURL(id, version, remoteOrigin)}/mf-manifest.json`,
   )
     .then((res) => res.json())
     .catch((err) => {
@@ -46,12 +62,12 @@ export async function getRemoteClientManifest(
 }
 
 export function getRemoteClientConfig(
-  remoteOrigin: string,
   id: string,
   version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
 ) {
   const config = fetch(
-    `${getRemoteClientBaseURL(remoteOrigin, id, version)}/pulse.config.json`,
+    `${getRemoteClientBaseURL(id, version, remoteOrigin)}/pulse.config.json`,
   )
     .then((res) => res.json())
     .catch((err) => {
@@ -59,4 +75,35 @@ export function getRemoteClientConfig(
       return null;
     });
   return config;
+}
+
+async function getRemoteServerManifest(
+  id: string,
+  version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
+) {
+  const mfManifest = await fetch(
+    `${getRemoteServerBaseURL(id, version, remoteOrigin)}/mf-manifest.json`,
+  )
+    .then((res) => res.json())
+    .catch((err) => {
+      console.warn("Failed to fetch remote manifest:", err);
+      return null;
+    });
+  return mfManifest;
+}
+
+export async function listRemoteServerFunctions(
+  id: string,
+  version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
+): Promise<string[]> {
+  const mfManifest = await getRemoteServerManifest(id, version, remoteOrigin);
+
+  console.log("Remote MF Manifest:", mfManifest);
+
+  const exposes = mfManifest?.exposes ?? [];
+  const functions = exposes.map((expose: any) => expose.name).sort();
+
+  return functions;
 }
