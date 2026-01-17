@@ -5,6 +5,7 @@ import { ExtensionAgent, ExtensionApp } from "@/lib/types";
 import { createInstance } from "@module-federation/runtime";
 import React, { ReactNode, useContext, useEffect } from "react";
 import ReactDOM from "react-dom";
+import { Workbox } from "workbox-window";
 import { EditorContext } from "./editor-context-provider";
 
 export const mfHost = createInstance({
@@ -33,7 +34,7 @@ export const mfHost = createInstance({
     "workbox-webpack-plugin": {
       shareConfig: {
         singleton: true,
-        requiredVersion: "^7.3.0",
+        requiredVersion: "^7.4.0",
       },
     },
   },
@@ -49,12 +50,13 @@ export default function RemoteModuleProvider({
   const editorContext = useContext(EditorContext);
 
   /* Add service worker to allow offline access to extensions */
-  // useEffect(() => {
-  //   if ("serviceWorker" in navigator) {
-  //     const wb = new Workbox("/service-worker.js");
-  //     wb.register();
-  //   }
-  // }, []);
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
+      console.log("Registering service worker.");
+      const wb = new Workbox("/service-worker.js");
+      wb.register();
+    }
+  }, []);
 
   useEffect(() => {
     if (!isPreventingCSS) return;

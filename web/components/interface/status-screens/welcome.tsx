@@ -67,7 +67,7 @@ export default function WelcomeScreen({
           },
         }}
       >
-        Your Next AI-OS Powered by Vibe Coded Apps
+        Your Next AI-OS Powered by Vibe Coded Apps and Workflows
       </motion.p>
 
       <div className="w-64 pt-4 pb-8 sm:w-96">
