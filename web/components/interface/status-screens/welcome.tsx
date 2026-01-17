@@ -6,7 +6,7 @@ export default function WelcomeScreen({
 }: {
   setAnimationFinished?: (mounted: boolean) => void;
 }) {
-  const animationDuration = 2.5; // Total animation duration in seconds
+  const animationDuration = 2; // Total animation duration in seconds
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -19,54 +19,60 @@ export default function WelcomeScreen({
   }, [setAnimationFinished]);
 
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center gap-4">
-      <style jsx>{`
-        @keyframes wave-shimmer {
-          0% {
-            background-position: -400% center;
-          }
-          100% {
-            background-position: 400% center;
-          }
-        }
-        .wave-text {
-          background: linear-gradient(
-            90deg,
-            #d97706 0%,
-            #f59e0b 20%,
-            #fbbf24 40%,
-            #fef3c7 50%,
-            #fbbf24 60%,
-            #f59e0b 80%,
-            #d97706 100%
-          );
-          background-size: 400% 100%;
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-          color: transparent;
-          animation: wave-shimmer 4s ease-in-out infinite;
-        }
-      `}</style>
+    <div className="flex h-screen w-full flex-col items-center justify-center gap-y-4">
       <motion.h1
-        className="wave-text text-6xl font-bold"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        className="bg-gradient-to-r from-amber-700 via-amber-500 to-amber-700 bg-[length:200%_100%] bg-clip-text text-5xl font-bold text-transparent sm:text-6xl dark:from-amber-600 dark:via-amber-300 dark:to-amber-600"
+        initial={{
+          opacity: 0,
+          y: -20,
+          backgroundPosition: "200% 50%",
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          backgroundPosition: ["200% 50%", "0% 50%"],
+        }}
+        transition={{
+          opacity: { duration: 0.8, ease: "easeOut" },
+          y: { duration: 0.8, ease: "easeOut" },
+          backgroundPosition: {
+            duration: 2,
+            repeat: Infinity,
+            ease: "linear",
+          },
+        }}
       >
         Pulse Editor
       </motion.h1>
+
       <motion.p
-        className="wave-text text-2xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+        className="bg-gradient-to-r from-neutral-700 via-neutral-500 to-neutral-700 bg-[length:200%_100%] bg-clip-text px-2 text-center text-2xl text-transparent dark:from-neutral-400 dark:via-neutral-200 dark:to-neutral-400"
+        initial={{
+          opacity: 0,
+          y: 20,
+          backgroundPosition: "200% 50%",
+        }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          backgroundPosition: ["200% 50%", "0% 50%"],
+        }}
+        transition={{
+          opacity: { duration: 0.8, delay: 0.2 },
+          y: { duration: 0.8, delay: 0.2 },
+          backgroundPosition: {
+            duration: 2.5,
+            repeat: Infinity,
+            ease: "linear",
+          },
+        }}
       >
         Your Next AI-OS Powered by Vibe Coded Apps
       </motion.p>
-      <div className="mt-8 w-64">
+
+      <div className="w-64 pt-4 pb-8 sm:w-96">
         <motion.div
-          className="h-1 bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 rounded-full"
+          className="h-1 rounded-full bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600"
           initial={{ scaleX: 0 }}
           animate={{ scaleX: 1 }}
           transition={{ duration: animationDuration, ease: "easeInOut" }}

@@ -72,6 +72,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   return (
     <>
+      <WelcomeScreen setAnimationFinished={setIsAnimationFinished} />
       {/* Welcome Screen - Always render and plays immediately */}
       {!isAnimationFinished && (
         <div className="fixed inset-0 z-50">
