@@ -15,8 +15,8 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pulse Editor",
-  description: "AI powered editor to boost your creativity",
+  title: "Pulse Editor Web",
+  description: "Web-based Vibe Coding Editor",
 };
 
 export default function RootLayout({
