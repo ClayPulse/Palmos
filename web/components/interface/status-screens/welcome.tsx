@@ -19,7 +19,7 @@ export default function WelcomeScreen({
   }, [setAnimationFinished]);
 
   return (
-    <div className="flex h-screen w-full flex-col items-center justify-center gap-y-4">
+    <div className="flex h-full w-full flex-col items-center justify-center gap-y-4">
       <motion.h1
         className="bg-gradient-to-r from-amber-700 via-amber-500 to-amber-700 bg-[length:200%_100%] bg-clip-text text-5xl font-bold text-transparent sm:text-6xl dark:from-amber-600 dark:via-amber-300 dark:to-amber-600"
         initial={{
@@ -67,10 +67,12 @@ export default function WelcomeScreen({
           },
         }}
       >
-        Your Next AI-OS Powered by Vibe Coded Apps and Workflows
+        Your Next AI-OS Powered by
+        <br />
+        Vibe Coded Apps & Workflows
       </motion.p>
 
-      <div className="w-64 pt-4 pb-8 sm:w-96">
+      <div className="w-64 pt-4 pb-8 sm:w-80">
         <motion.div
           className="h-1 rounded-full bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600"
           initial={{ scaleX: 0 }}
