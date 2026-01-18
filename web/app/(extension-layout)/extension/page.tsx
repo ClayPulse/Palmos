@@ -86,7 +86,12 @@ export default function ExtensionPage({}) {
 
       const response = await originalFetch(newUrl, {
         ...config,
-        credentials: "include",
+        // Include cookies when url starts with remoteOrigin
+        credentials: remoteOrigin.startsWith(
+          process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com",
+        )
+          ? "include"
+          : config?.credentials,
       });
 
       if (!response.ok) {

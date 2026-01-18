@@ -21,6 +21,10 @@ generateSW({
   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
   // Fallback to / for SPA routing
   navigateFallback: "/",
+  navigateFallbackDenylist: [
+    // Deny /extension from being redirected to /
+    new RegExp("^/extension"),
+  ],
   additionalManifestEntries: [
     // Fetch and cache root URL when first time online loading the app
     { url: "/", revision: null },

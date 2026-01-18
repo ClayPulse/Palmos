@@ -1,7 +1,7 @@
 ---
 id: vibe-dev-flow-generate-endpoint
 title: "Vibe Dev Flow - Generate Endpoint"
-description: "Vibe Dev Flow is a vibe coding app that generates new Pulse apps based on user prompts"
+description: "Vibe Dev Flow is a vibe coding service that generates, builds, and publishes"
 sidebar_label: Introduction
 sidebar_position: 0
 hide_title: true
@@ -29,22 +29,17 @@ import Export from "@theme/ApiExplorer/Export";
 
 
 
-Vibe Dev Flow is a vibe coding app that generates new Pulse apps based on user prompts
-in both user-friendly and programmatic ways. 
-This document describes the Generate Endpoint API, which allows users to create new apps
-via a POST request with a prompt and app name, and receive real-time progress updates.
-If you are interested in using Vibe Dev Flow interactively, check out the
-[Vibe Dev Flow App Guide](https://docs.pulse-editor.com/guides/vibe-dev-flow) in Pulse Editor client.
+Vibe Dev Flow is a vibe coding service that generates, builds, and publishes
+Pulse Apps using cloud-based coding agents with both user-friendly UI and backend API.
 
-## Introduction
-Vibe Dev Flow leverages Pulse Editor's full-stack Module Federation framework to deploy both frontend 
-and serverless backend on Pulse Editor platform. Along with Pulse Editor's remote workspace,
-Vibe Dev Flow can spin up coding agents in a cloud VM to generate code, build, test, and deploy
-new apps based on user prompts.
+This API exposes a **streaming Server-Sent Events (SSE)** endpoint that:
+- Creates a remote workspace
+- Runs AI coding agents
+- Builds and publishes a Pulse App
+- Streams structured progress updates in real time
 
-## Authentication
-This API requires you to provide a valid Pulse Editor API key in the Authorization header,
-or login to Pulse Editor client and use it via the frontend UI.
+Clients should consume the response as an SSE stream and parse each
+`data:` event as JSON.
 
 
 
