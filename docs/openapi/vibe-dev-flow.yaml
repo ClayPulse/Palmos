@@ -3,38 +3,42 @@ info:
   title: Vibe Dev Flow - Generate Endpoint
   version: 1.0.0
   description: |
-    Vibe Dev Flow is a vibe coding app that generates new Pulse apps based on user prompts
-    in both user-friendly and programmatic ways. 
-    This document describes the Generate Endpoint API, which allows users to create new apps
-    via a POST request with a prompt and app name, and receive real-time progress updates.
-    If you are interested in using Vibe Dev Flow interactively, check out the
-    [Vibe Dev Flow App Guide](https://docs.pulse-editor.com/guides/vibe-dev-flow) in Pulse Editor client.
+    Vibe Dev Flow is a vibe coding service that generates, builds, and publishes
+    Pulse Apps using cloud-based coding agents with both user-friendly UI and backend API.
 
-    ## Introduction
-    Vibe Dev Flow leverages Pulse Editor's full-stack Module Federation framework to deploy both frontend 
-    and serverless backend on Pulse Editor platform. Along with Pulse Editor's remote workspace,
-    Vibe Dev Flow can spin up coding agents in a cloud VM to generate code, build, test, and deploy
-    new apps based on user prompts.
+    This API exposes a **streaming Server-Sent Events (SSE)** endpoint that:
+    - Creates a remote workspace
+    - Runs AI coding agents
+    - Builds and publishes a Pulse App
+    - Streams structured progress updates in real time
 
-    ## Authentication
-    This API requires you to provide a valid Pulse Editor API key in the Authorization header,
-    or login to Pulse Editor client and use it via the frontend UI.
+    Clients should consume the response as an SSE stream and parse each
+    `data:` event as JSON.
 
 servers:
   - url: https://pulse-editor.com/api/server-function/vibe_dev_flow/latest
     description: Production
   - url: http://localhost:6080/server-function
-    description: Local
+    description: Local development
+
 paths:
   /generate-code/v2/generate:
     post:
-      summary: Run Vibe coding flow and stream progress
-      description: >
-        Vibe coding a new Pulse app based on user prompt, then publish it 
-        to marketplace upon completion. It updates vibe coding progress while 
-        generating, and returns the final app URL and source code URL when done.
-        Accepts a JSON payload with prompt and appName. Streams progress as
-        text/event-stream (SSE).
+      summary: Run Vibe coding flow and stream progress updates
+      description: |
+        Starts a Vibe coding flow that generates a new Pulse App based on a user prompt.
+
+        The response is a **Server-Sent Events (SSE)** stream where each event
+        contains a JSON-encoded message describing progress, tool calls, updates,
+        or final outputs.
+
+        Each SSE message is formatted as:
+        ```
+        data: <JSON>
+        ```
+
+        followed by a blank line.
+
       operationId: generateVibeApp
       tags:
         - Generate Vibe App
@@ -73,59 +77,145 @@ paths:
                 type: string
                 description: 'SSE stream payload; clients should parse "data: ..." events. TODO: This will change to more structured JSON events in the future.'
               examples:
-                progress:
-                  summary: Example SSE events
+                notification:
+                  summary: Notification message
                   value: |
-                    data: Starting workspace for app "myapp_abc123"...
-
-                    data: Waiting for MCP servers to be ready...
-
-                    data: Running Vibe coding agent with your prompt...
-
-                    data: Publishing the app to Pulse Editor...
-
-                    data: Your app has been successfully created and deployed to https://web.pulse-editor.com?app=myapp_abc123
+                    data: {"type":"creation","messageId":1,"data":{"type":"notification","title":"Starting Workspace","description":"Starting workspace for app \"my_app_x7k9q2\"..."}}
+                update:
+                  summary: Update message
+                  value: |
+                    data: {"type":"update","messageId":1,"updateType":"append","delta":{"result":"Workspace started."},"isFinal":true}
+                artifact:
+                  summary: Final artifact output
+                  value: |
+                    data: {"type":"creation","messageId":42,"data":{"type":"artifactOutput","title":"App Published","description":"App published successfully!","result":"{\"publishedAppLink\":\"https://pulse-editor.com/code?app=my_app_x7k9q2\"}"},"isFinal":true}
 
         "400":
           description: Bad Request (missing or invalid input)
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
+                $ref: "#/components/schemas/ErrorResponse"
               examples:
                 missing_prompt:
-                  summary: Missing prompt
-                  value:
-                    error: "Bad Request: Missing prompt"
+                  value: |
+                    error: Bad Request: Missing prompt
+
         "401":
-          description: Unauthorized (missing authorization header)
+          description: Unauthorized
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              examples:
-                missing_auth:
-                  summary: Missing authorization
-                  value:
-                    error: "Unauthorized"
+                $ref: "#/components/schemas/ErrorResponse"
+
         "500":
-          description: Internal Server Error (failed flow or workspace operations)
+          description: Internal Server Error
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-              examples:
-                failed_flow:
-                  value:
-                    error: "Error running vibe code flow: <details>"
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
-  securitySchemes: {}
+  schemas:
+    GenerateRequest:
+      type: object
+      required:
+        - prompt
+        - appName
+      properties:
+        prompt:
+          type: string
+          description: User instruction for the Vibe coding agent
+          example: Create a note-taking app with markdown support
+        appName:
+          type: string
+          description: Display name of the Pulse App
+          example: Markdown Notes
+        streamUpdatePolicy:
+          type: string
+          description: |
+            Controls when streaming updates are emitted.
+          enum:
+            - whenTaskItemFinished
+            - whenNewTokenAvailable
+          example: whenTaskItemFinished
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+
+    AgentTaskMessage:
+      type: object
+      required:
+        - type
+        - messageId
+        - data
+      properties:
+        type:
+          $ref: "#/components/schemas/AgentTaskMessageType"
+        messageId:
+          type: integer
+          description: Incremental task message ID
+        data:
+          $ref: "#/components/schemas/AgentTaskMessageData"
+        isFinal:
+          type: boolean
+          description: Indicates no further updates are expected for this message
+
+    AgentTaskMessageUpdate:
+      type: object
+      required:
+        - type
+        - messageId
+        - updateType
+        - delta
+      properties:
+        type:
+          $ref: "#/components/schemas/AgentTaskMessageType"
+        messageId:
+          type: integer
+        updateType:
+          type: string
+          enum: [append]
+          description: Update strategy (only `append` is supported)
+        delta:
+          $ref: "#/components/schemas/AgentTaskMessageData"
+        isFinal:
+          type: boolean
+        timeUsedSec:
+          type: string
+          description: Optional elapsed time information
+
+    AgentTaskMessageType:
+      type: string
+      enum:
+        - creation
+        - update
+
+    AgentTaskMessageDataType:
+      type: string
+      enum:
+        - notification
+        - toolCall
+        - artifactOutput
+
+    AgentTaskMessageData:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AgentTaskMessageDataType"
+        title:
+          type: string
+        description:
+          type: string
+        toolName:
+          type: string
+        parameters:
+          type: object
+          additionalProperties: true
+        error:
+          type: string
+        result:
+          type: string
