@@ -11,8 +11,20 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
+import {
+  fetchLatestApp,
+  getDefaultRemoteOrigin,
+} from "@/lib/module-federation/remote";
 import { ExtensionApp, Session, TabItem, Workflow } from "@/lib/types";
-import { Button, Divider, Listbox, ListboxItem, Skeleton } from "@heroui/react";
+import {
+  addToast,
+  Button,
+  Divider,
+  Listbox,
+  ListboxItem,
+  Skeleton,
+} from "@heroui/react";
+import { motion } from "framer-motion";
 import { useContext, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
@@ -66,13 +78,98 @@ function OverviewPanel({
 
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
+  const {} = useExtensionAppManager();
+
+  async function getVibeCodeApp() {
+    const appId = "vibe_dev_flow";
+
+    let latestVersion;
+    try {
+      latestVersion = await fetchLatestApp(appId);
+    } catch (error) {
+      console.error("Failed to fetch latest version.");
+      addToast({
+        title: "Error",
+        description: "Failed to fetch latest version of Vibe Code.",
+        color: "danger",
+      });
+      return null;
+    }
+
+    const app: ExtensionApp = {
+      config: latestVersion.appConfig!,
+      remoteOrigin: getDefaultRemoteOrigin(),
+      isEnabled: true,
+    };
+
+    return app;
+  }
+
+  async function handleOpenVibeCode() {
+    const app = await getVibeCodeApp();
+
+    if (!app) {
+      return;
+    }
+
+    editorContext?.updateModalStates({
+      openInProject: {
+        isOpen: true,
+        app: app,
+        isOpenAppInFullscreen: true,
+      },
+    });
+  }
+
   return (
-    <div className="@container relative flex h-3/4 w-full flex-col items-center justify-center shrink-0">
-      <div className="flex w-full flex-col items-center gap-y-1 rounded-lg px-1 py-2 @sm:w-fit @sm:px-8 @md:px-16">
+    <div className="@container relative flex h-3/4 w-full shrink-0 flex-col items-center justify-center">
+      <div className="flex w-full flex-col items-center gap-y-2 rounded-lg px-1 py-2 @sm:w-fit @sm:px-8 @md:px-16">
         {session && (
           <>
-            <p className="text-xl">Hello, {session?.user.name}</p>
-            <p className="text-xl">What is on your mind today?</p>
+            <p className="text-center text-2xl">Hello, {session?.user.name}</p>
+            <p className="text-center text-2xl">What is on your mind today?</p>
+
+            <Button
+              className="border-divider border bg-amber-900/80 shadow-sm transition-colors hover:bg-amber-800/80 dark:border-amber-400/40 dark:bg-amber-900/30 dark:hover:bg-amber-900/20"
+              onPress={handleOpenVibeCode}
+            >
+              <motion.div
+                className="flex items-center gap-2 rounded-full px-3 py-1"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              >
+                <motion.span
+                  className="bg-gradient-to-r from-amber-400 via-amber-100 to-amber-400 bg-[length:200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                  initial={{ backgroundPosition: "200% 50%" }}
+                  animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
+                  transition={{
+                    backgroundPosition: {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear",
+                    },
+                  }}
+                >
+                  <Icon name="bolt" />
+                </motion.span>
+                <motion.p
+                  className="bg-gradient-to-r from-amber-400 via-amber-100 to-amber-400 bg-[length:200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                  initial={{ backgroundPosition: "200% 50%" }}
+                  animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
+                  transition={{
+                    backgroundPosition: {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear",
+                    },
+                  }}
+                >
+                  Vibe Code A New App
+                </motion.p>
+              </motion.div>
+            </Button>
+
             <div className="flex gap-x-1">
               <Button
                 color="primary"
@@ -85,7 +182,10 @@ function OverviewPanel({
                   });
                 }}
               >
-                New Project
+                <div className="flex items-center gap-2">
+                  <Icon name="add" className="text-primary-foreground" />
+                  <p className="text-primary-foreground">New Project</p>
+                </div>
               </Button>
               <Button
                 color="secondary"
@@ -101,7 +201,10 @@ function OverviewPanel({
                   }));
                 }}
               >
-                Marketplace
+                <div className="flex items-center gap-2">
+                  <Icon name="store" className="text-primary-foreground" />
+                  <p className="text-primary-foreground">Marketplace</p>
+                </div>
               </Button>
             </div>
 
@@ -135,10 +238,9 @@ function OverviewPanel({
             </Button>
           </>
         )}
-        <p>Need help?</p>
+        <p className="pt-2 text-center">Learn More</p>
         <div className="flex gap-x-1">
           <Button
-            variant="faded"
             onPress={() => {
               window.open(
                 "https://github.com/claypulse/pulse-editor",
@@ -160,7 +262,6 @@ function OverviewPanel({
             </div>
           </Button>
           <Button
-            variant="faded"
             onPress={() => {
               window.open("https://docs.pulse-editor.com", "_blank");
             }}
@@ -182,7 +283,6 @@ function OverviewPanel({
               },
             })
           }
-          variant="faded"
           className="border-0"
         >
           <div className="flex items-center gap-0.5">
@@ -240,7 +340,7 @@ function MarketplaceAppsAndWorkflows() {
   }
 
   return (
-    <div className="relative w-full gap-y-1 overflow-x-hidden rounded-sm shrink-0">
+    <div className="relative w-full shrink-0 gap-y-1 overflow-x-hidden rounded-sm">
       <h2 className="pb-4 text-center text-5xl font-semibold">
         Explore Marketplace
       </h2>
@@ -376,9 +476,6 @@ function MarketplaceAppsAndWorkflows() {
   );
 }
 
-
-
-
 function MyAppsAndProjects({ session }: { session?: Session }) {
   const editorContext = useContext(EditorContext);
 
@@ -413,7 +510,7 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
   }
 
   return (
-    <div className="relative w-full overflow-x-auto shrink-0">
+    <div className="relative w-full shrink-0 overflow-x-auto">
       <h2 className="pb-4 text-center text-5xl font-semibold">
         My Apps and Projects
       </h2>
@@ -538,7 +635,7 @@ function MyResources() {
   const isListClickable = useMediaQuery({ maxWidth: 640 });
 
   return (
-    <div className="flex w-full flex-col shrink-0">
+    <div className="flex w-full shrink-0 flex-col">
       <div className="flex items-center gap-x-4 py-1">
         <h2 className="text-2xl font-semibold">Your Resources</h2>
         <Button

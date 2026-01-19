@@ -330,11 +330,7 @@ export function useExtensionAppManager(fetchCategory?: string) {
 
           const mfVersion =
             extMeta.mfVersion ??
-            (await getRemoteMFVersion(
-              extMeta.name,
-              extMeta.version,
-              origin,
-            ));
+            (await getRemoteMFVersion(extMeta.name, extMeta.version, origin));
 
           return {
             config: extMeta.appConfig!,

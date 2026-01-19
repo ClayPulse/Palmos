@@ -191,8 +191,8 @@ export default function useActionExecutor(appName?: string) {
           await createAppViewInCanvasView({
             app: ext.config.id,
             viewId,
-            recommendedHeight: ext.config.recommendedHeight,
-            recommendedWidth: ext.config.recommendedWidth,
+            initialHeight: ext.config.recommendedHeight,
+            initialWidth: ext.config.recommendedWidth,
           });
         } else {
           await createAppTabView({

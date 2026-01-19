@@ -1,3 +1,6 @@
+import { fetchAPI } from "../pulse-editor-website/backend";
+import { AppMetaData } from "../types";
+
 export function getDefaultRemoteOrigin() {
   if (
     !process.env.NEXT_PUBLIC_CDN_URL ||
@@ -8,6 +11,20 @@ export function getDefaultRemoteOrigin() {
     );
   }
   return `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`;
+}
+
+export async function fetchLatestApp(id: string) {
+  const response = await fetchAPI(
+    `/api/app/get?latest=true&name=${encodeURIComponent(id)}`,
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch latest version from registry.");
+  }
+
+  const latestVersion = (await response.json())[0] as AppMetaData;
+
+  return latestVersion;
 }
 
 export function getRemote(
@@ -61,7 +78,7 @@ export async function getRemoteClientManifest(
   return mfManifest;
 }
 
-export function getRemoteClientConfig(
+export async function getRemoteClientConfig(
   id: string,
   version: string,
   remoteOrigin: string = getDefaultRemoteOrigin(),

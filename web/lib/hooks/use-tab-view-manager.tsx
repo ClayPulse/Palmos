@@ -185,8 +185,8 @@ export function useTabViewManager() {
         viewId: `${installedApp.config.id}-${v4()}`,
         app: installedApp.config.id,
         fileUri: file.name,
-        recommendedHeight: installedApp.config.recommendedHeight,
-        recommendedWidth: installedApp.config.recommendedWidth,
+        initialHeight: installedApp.config.recommendedHeight,
+        initialWidth: installedApp.config.recommendedWidth,
       };
       const newCanvasConfig: CanvasViewConfig = {
         ...currentTab.config,

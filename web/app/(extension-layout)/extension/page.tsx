@@ -24,84 +24,90 @@ export default function ExtensionPage({}) {
   }, []);
 
   useEffect(() => {
-    if (!isMounted) return;
+    async function loadExtension() {
+      if (!isMounted) return;
 
-    if (isLoaded) return;
+      if (isLoaded) return;
 
-    if (!remoteOrigin || !moduleId || !moduleVersion || !viewId) {
-      console.error(
-        "Missing required parameters: remoteOrigin, moduleId, moduleVersion, viewId",
-      );
-      return;
-    }
-
-    // @ts-expect-error View id is assigned to window object
-    window.viewId = viewId;
-
-    if (!isRegistered) {
-      mfHost.registerRemotes(getRemote(moduleId, moduleVersion, remoteOrigin));
-      setIsRegistered(true);
-    }
-
-    // Load the remote module
-    mfHost
-      .loadRemote(`${moduleId}/main`)
-      .then((module) => {
-        console.log("Loaded remote module:", moduleId, module);
-
-        // @ts-expect-error Types are not available since @module-federation/enhanced
-        // cannot work in Nextjs App router. Hence types are not generated.
-        const { default: LoadedExtension, Config } = module;
-
-        setExt(() => LoadedExtension);
-        setIsLoaded(true);
-      })
-      .catch((error) => {
-        console.error("Error loading remote module:", error);
-      });
-
-    // Patch fetch for Pulse App backend calling
-    const originalFetch = window.fetch;
-
-    const patchedFetch = async (
-      ...args: Parameters<typeof fetch>
-    ): Promise<Response> => {
-      const [resource, config] = args;
-      const url =
-        resource instanceof Request ? resource.url : resource.toString();
-
-      // Only patch relative URLs (not absolute http/https)
-      if (/^https?:\/\//i.test(url)) {
-        return originalFetch(resource, config);
+      if (!remoteOrigin || !moduleId || !moduleVersion || !viewId) {
+        console.error(
+          "Missing required parameters: remoteOrigin, moduleId, moduleVersion, viewId",
+        );
+        return;
       }
 
-      const newUrl = remoteOrigin.startsWith(
-        process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com",
-      )
-        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
-        : remoteOrigin + url;
+      // @ts-expect-error View id is assigned to window object
+      window.viewId = viewId;
 
-      console.log(`[FETCH INTERCEPTED]: ${url} → ${newUrl}`);
-      console.log(`[App Info] ID: ${moduleId}, Version: ${moduleVersion}`);
+      if (!isRegistered) {
+        mfHost.registerRemotes(
+          getRemote(moduleId, moduleVersion, remoteOrigin),
+        );
+        setIsRegistered(true);
+      }
 
-      const response = await originalFetch(newUrl, {
-        ...config,
-        // Include cookies when url starts with remoteOrigin
-        credentials: remoteOrigin.startsWith(
+      // Load the remote module
+      mfHost
+        .loadRemote(`${moduleId}/main`)
+        .then((module) => {
+          console.log("Loaded remote module:", moduleId, module);
+
+          // @ts-expect-error Types are not available since @module-federation/enhanced
+          // cannot work in Nextjs App router. Hence types are not generated.
+          const { default: LoadedExtension, Config } = module;
+
+          setExt(() => LoadedExtension);
+          setIsLoaded(true);
+        })
+        .catch((error) => {
+          console.error("Error loading remote module:", error);
+        });
+
+      // Patch fetch for Pulse App backend calling
+      const originalFetch = window.fetch;
+
+      const patchedFetch = async (
+        ...args: Parameters<typeof fetch>
+      ): Promise<Response> => {
+        const [resource, config] = args;
+        const url =
+          resource instanceof Request ? resource.url : resource.toString();
+
+        // Only patch relative URLs (not absolute http/https)
+        if (/^https?:\/\//i.test(url)) {
+          return originalFetch(resource, config);
+        }
+
+        const newUrl = remoteOrigin.startsWith(
           process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com",
         )
-          ? "include"
-          : config?.credentials,
-      });
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
+          : remoteOrigin + url;
 
-      if (!response.ok) {
-        console.warn(`Fetch Error (${response.status}) for ${url}`);
-      }
+        console.log(`[FETCH INTERCEPTED]: ${url} → ${newUrl}`);
+        console.log(`[App Info] ID: ${moduleId}, Version: ${moduleVersion}`);
 
-      return response;
-    };
+        const response = await originalFetch(newUrl, {
+          ...config,
+          // Include cookies when url starts with remoteOrigin
+          credentials: remoteOrigin.startsWith(
+            process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com",
+          )
+            ? "include"
+            : config?.credentials,
+        });
 
-    window.fetch = patchedFetch;
+        if (!response.ok) {
+          console.warn(`Fetch Error (${response.status}) for ${url}`);
+        }
+
+        return response;
+      };
+
+      window.fetch = patchedFetch;
+    }
+
+    loadExtension();
   }, [remoteOrigin, moduleId, moduleVersion, isMounted]);
 
   if (!isMounted) {

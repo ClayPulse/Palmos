@@ -97,6 +97,9 @@ export default function AppPreviewCard({
   const [isLibCompatible, setIsLibCompatible] = useState<boolean | undefined>(
     undefined,
   );
+  const [thumbnailImage, setThumbnailImage] = useState<string | undefined>(
+    undefined,
+  );
 
   const [isHover, setIsHover] = useState(false);
 
@@ -120,9 +123,9 @@ export default function AppPreviewCard({
       const remoteLibVersion = (
         extension.config.libVersion === undefined
           ? await getRemoteLibVersion(
-            extension.config.id,
-            extension.config.version,
-            extension.remoteOrigin,
+              extension.config.id,
+              extension.config.version,
+              extension.remoteOrigin,
             )
           : extension.config.libVersion
       )?.replace("^", "");
@@ -156,6 +159,25 @@ export default function AppPreviewCard({
       : false;
     setIsOutdated(isOutdated);
     setIsEnabled(foundExt?.isEnabled ?? false);
+  }, [extension]);
+
+  // Load thumbnail image
+  useEffect(() => {
+    function loadThumbnail() {
+      if (extension.config.thumbnail) {
+        const imageUrl =
+          getRemoteClientBaseURL(
+            extension.config.id,
+            extension.config.version,
+            extension.remoteOrigin,
+          ) +
+          "/" +
+          extension.config.thumbnail;
+        setThumbnailImage(imageUrl);
+      }
+    }
+
+    loadThumbnail();
   }, [extension]);
 
   function toggleExtension() {
@@ -368,18 +390,10 @@ export default function AppPreviewCard({
               : undefined
           }
         >
-          {extension.config.thumbnail ? (
+          {thumbnailImage ? (
             <img
               draggable={false}
-              src={
-                getRemoteClientBaseURL(
-                  extension.config.id,
-                  extension.config.version,
-                  extension.remoteOrigin,
-                ) +
-                "/" +
-                extension.config.thumbnail
-              }
+              src={thumbnailImage}
               alt={extension.config.displayName}
               className="h-full w-full rounded-md object-cover"
             />
