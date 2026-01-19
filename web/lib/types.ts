@@ -282,6 +282,7 @@ export type MenuAction = {
 export type AppViewConfig = {
   viewId: string;
   app: string;
+  requiredVersion?: string;
   inviteCode?: string;
   // An app can be opened via a file.
   // e.g. a PDF viewer app can be opened with a PDF file;
