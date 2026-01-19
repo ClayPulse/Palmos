@@ -78,24 +78,30 @@ export default function ExtensionPage({}) {
           return originalFetch(resource, config);
         }
 
-        const newUrl = remoteOrigin.startsWith(
-          process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com",
-        )
-          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
-          : remoteOrigin + url;
+      const expectedCdnOrigin =
+        process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com";
+
+      let isCdnOrigin = false;
+      try {
+        const parsedRemote = new URL(remoteOrigin);
+        const parsedExpected = new URL(expectedCdnOrigin);
+        isCdnOrigin = parsedRemote.origin === parsedExpected.origin;
+      } catch {
+        isCdnOrigin = false;
+      }
+
+      const newUrl = isCdnOrigin
+        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
+        : remoteOrigin + url;
 
         console.log(`[FETCH INTERCEPTED]: ${url} → ${newUrl}`);
         console.log(`[App Info] ID: ${moduleId}, Version: ${moduleVersion}`);
 
-        const response = await originalFetch(newUrl, {
-          ...config,
-          // Include cookies when url starts with remoteOrigin
-          credentials: remoteOrigin.startsWith(
-            process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com",
-          )
-            ? "include"
-            : config?.credentials,
-        });
+      const response = await originalFetch(newUrl, {
+        ...config,
+        // Include cookies only when remoteOrigin matches the configured CDN origin
+        credentials: isCdnOrigin ? "include" : config?.credentials,
+      });
 
         if (!response.ok) {
           console.warn(`Fetch Error (${response.status}) for ${url}`);
