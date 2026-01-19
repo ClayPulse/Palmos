@@ -18,7 +18,6 @@ export default function BaseAppView({
   const imcContext = useContext(IMCContext);
 
   const {
-    installedExtensionApps,
     installExtensionApp,
     uninstallExtensionApp,
     loadAppFromCache,
@@ -34,22 +33,6 @@ export default function BaseAppView({
 
   useEffect(() => {
     async function installAndOpenApp(ext: ExtensionApp) {
-      // Update extension app if ext is newer
-      const isInstalled = installedExtensionApps.find(
-        (app) => app.config.id === ext.config.id,
-      );
-
-      const isNewerVersion = isInstalled
-        ? compare(ext.config.version, isInstalled.config.version) === 1
-        : false;
-
-      if (isInstalled && isNewerVersion) {
-        console.log(
-          `Updating extension app ${ext.config.id} to version ${ext.config.version}`,
-        );
-        await uninstallExtensionApp(ext.config.id);
-      }
-
       await installExtensionApp(
         ext.remoteOrigin,
         ext.config.id,
@@ -68,7 +51,21 @@ export default function BaseAppView({
       if (!config.app) return;
 
       const cachedExt = await loadAppFromCache(config.app);
+
       if (cachedExt) {
+        // Update extension app if ext is newer
+        const isNewerVersion =
+          config.requiredVersion && cachedExt
+            ? compare(config.requiredVersion, cachedExt.config.version) === 1
+            : false;
+
+        if (isNewerVersion) {
+          console.log(
+            `Updating extension app ${cachedExt.config.id} to version ${cachedExt.config.version}`,
+          );
+          await uninstallExtensionApp(cachedExt.config.id);
+        }
+        
         await installAndOpenApp(cachedExt);
       } else if (
         config.app?.startsWith("http://") ||

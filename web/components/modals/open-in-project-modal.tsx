@@ -184,6 +184,7 @@ export default function OpenInProjectModal({
   async function openApp(app: ExtensionApp, isFullscreen?: boolean) {
     const config: AppViewConfig = {
       app: app.config.id,
+      requiredVersion: app.config.version,
       viewId: `${app.config.id}-${v4()}`,
       initialHeight: app.config.recommendedHeight,
       initialWidth: app.config.recommendedWidth,
