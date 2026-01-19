@@ -82,10 +82,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
       {/* Main Content - Render as soon as mounted, but hidden/under welcome screen until animation finishes */}
       {mounted && (
         <div
-          className={`bg-default hidden h-full w-full flex-col overflow-hidden data-[animation-finished=true]:flex`}
+          className={`bg-default relative hidden h-full w-full overflow-hidden data-[animation-finished=true]:block`}
           data-animation-finished={isAnimationFinished}
         >
-          <div className="grid h-full w-full grid-cols-[max-content_auto] grid-rows-1">
+          <div className="relative grid h-full w-full grid-cols-[max-content_auto] grid-rows-1">
             <div className="h-full w-full overflow-y-hidden">
               {isShowNavbar && (
                 <NavSideMenu
@@ -94,7 +94,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                 />
               )}
             </div>
-            <div className="relative h-full w-full">
+            <div className="relative h-full w-full overflow-hidden">
               {isShowNavbar && (
                 <NavTopBar
                   isMenuOpen={isMenuOpen}
@@ -107,9 +107,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                 />
               )}
 
-              <div className={`flex h-full w-full overflow-hidden`}>
-                {children}
-              </div>
+              <div className={`h-full w-full overflow-hidden`}>{children}</div>
             </div>
           </div>
 

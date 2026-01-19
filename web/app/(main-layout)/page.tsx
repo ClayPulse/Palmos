@@ -12,7 +12,7 @@ export default function HomePage() {
   const editorContext = useContext(EditorContext);
 
   return (
-    <div className="relative flex h-full w-full flex-col">
+    <div className="relative h-full w-full">
       <EditorToolbar />
       <ViewArea />
       <ConsolePanelView />
