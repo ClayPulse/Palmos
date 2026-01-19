@@ -25,9 +25,7 @@ const AppNode = memo((props: any) => {
   }: AppNodeData = nodeProps.data;
   const viewId = config.viewId;
 
-  // const {
-  const { createAppTabView, deleteAppViewInCanvasView, activeTabView } =
-    useTabViewManager();
+  const { deleteAppViewInCanvasView } = useTabViewManager();
   const { actions } = useActionExecutor(config.app);
   const { updateNode, zoomTo } = useReactFlow();
   const viewport = useViewport();

@@ -5,6 +5,7 @@ import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { AppViewConfig, ExtensionApp } from "@/lib/types";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
+import { compare } from "semver";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 
 export default function BaseAppView({
@@ -17,7 +18,9 @@ export default function BaseAppView({
   const imcContext = useContext(IMCContext);
 
   const {
+    installedExtensionApps,
     installExtensionApp,
+    uninstallExtensionApp,
     loadAppFromCache,
     loadAppFromRegistry,
     loadAppFromURL,
@@ -31,6 +34,22 @@ export default function BaseAppView({
 
   useEffect(() => {
     async function installAndOpenApp(ext: ExtensionApp) {
+      // Update extension app if ext is newer
+      const isInstalled = installedExtensionApps.find(
+        (app) => app.config.id === ext.config.id,
+      );
+
+      const isNewerVersion = isInstalled
+        ? compare(ext.config.version, isInstalled.config.version) === 1
+        : false;
+
+      if (isInstalled && isNewerVersion) {
+        console.log(
+          `Updating extension app ${ext.config.id} to version ${ext.config.version}`,
+        );
+        await uninstallExtensionApp(ext.config.id);
+      }
+
       await installExtensionApp(
         ext.remoteOrigin,
         ext.config.id,
