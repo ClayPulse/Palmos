@@ -42,13 +42,15 @@ const vibeCodeHints = [
 ];
 
 export default function HomeView() {
+  const editorContext = useContext(EditorContext);
+
   const { createCanvasTabView } = useTabViewManager();
   const { session, signIn } = useAuth();
 
   return (
     <div className="text-default-foreground h-full w-full px-2 pt-18 pb-2">
       <div className="bg-content1 h-full w-full overflow-y-auto rounded-lg">
-        <div className="relative h-full w-full gap-y-2 overflow-x-hidden px-2 py-2 pt-2 pb-6 sm:px-8 lg:px-48">
+        <div className="relative h-full w-full gap-y-2 overflow-x-hidden">
           <div className="absolute -top-full flex h-full w-full translate-y-48 items-end blur-[100px]">
             <img
               src={"/assets/dashboard-dark-gradient.png"}
@@ -61,7 +63,7 @@ export default function HomeView() {
             />
           </div>
 
-          <div className="relative flex h-full w-full flex-col gap-y-2">
+          <div className="relative flex h-full w-full flex-col gap-y-2 px-2 sm:px-8 lg:px-48">
             <OverviewPanel session={session} signIn={signIn} />
 
             {/* Quick-start / featured for users to get started coding apps right away */}
@@ -73,6 +75,26 @@ export default function HomeView() {
             <Divider />
 
             <MyResources />
+
+            {/* Footer */}
+            <div
+              className="flex w-full justify-center py-4 data-[is-toolbar-open=true]:pb-16"
+              data-is-toolbar-open={
+                editorContext?.editorStates.isToolbarOpen ? "true" : "false"
+              }
+            >
+              <p className="text-default-foreground/50 text-sm">
+                Made with ❤️ by
+                <a
+                  href="https://claypulse.ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-primary ml-1 underline"
+                >
+                  ClayPulse AI
+                </a>
+              </p>
+            </div>
           </div>
         </div>
       </div>
