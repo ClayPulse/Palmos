@@ -1,6 +1,6 @@
 "use client";
 
-import { PlatformEnum, SideMenuTabEnum } from "@/lib/enums";
+import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
@@ -22,6 +22,7 @@ import {
   NumberInput,
   Select,
   SelectItem,
+  Spinner,
 } from "@heroui/react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { v4 } from "uuid";
@@ -63,6 +64,7 @@ export default function OpenInProjectModal({
   const [storage, setStorage] = useState(5);
   const [selectedSpec, setSelectedSpec] = useState<SpecOption>(specsOptions[0]);
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const isUseWorkspace = useMemo(() => {
     const { app, workflow } =
@@ -123,6 +125,7 @@ export default function OpenInProjectModal({
   }, [isWorkspaceReady, isProjectOpen, isUseWorkspace]);
 
   async function handleOpenInProject() {
+    setIsLoading(true);
     if (!selectedProject) {
       addToast({
         title: "Failed to open.",
@@ -137,14 +140,11 @@ export default function OpenInProjectModal({
   }
 
   async function handleOpenInNewProject() {
+    setIsLoading(true);
     await createProject({ name: projectName });
     await refreshProjects();
 
     openProject(projectName);
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      sideMenuTab: SideMenuTabEnum.Apps,
-    }));
     setIsProjectOpen(true);
   }
 
@@ -179,6 +179,7 @@ export default function OpenInProjectModal({
       });
     }
     onClose();
+    setIsLoading(false);
   }
 
   async function openApp(app: ExtensionApp, isFullscreen?: boolean) {
@@ -412,29 +413,46 @@ export default function OpenInProjectModal({
 
         <div className="flex gap-x-2">
           {isCreateNewProject ? (
-            <Button onPress={handleOpenInNewProject} color="primary">
+            <Button
+              onPress={handleOpenInNewProject}
+              color="primary"
+              isDisabled={isLoading}
+            >
               Create
             </Button>
           ) : (
             <Button
               onPress={handleOpenInProject}
               color="primary"
-              isDisabled={!selectedProject}
+              isDisabled={!selectedProject || isLoading}
             >
               Open
             </Button>
           )}
 
           {isCreateNewProject ? (
-            <Button onPress={() => setIsCreateNewProject(false)}>
+            <Button
+              onPress={() => setIsCreateNewProject(false)}
+              isDisabled={isLoading}
+            >
               Select Existing Project
             </Button>
           ) : (
-            <Button onPress={() => setIsCreateNewProject(true)}>
+            <Button
+              onPress={() => setIsCreateNewProject(true)}
+              isDisabled={isLoading}
+            >
               Create New Project
             </Button>
           )}
         </div>
+
+        {isLoading && (
+          <div className="flex items-center gap-x-2">
+            <Spinner />
+            <p>Getting things ready...</p>
+          </div>
+        )}
       </div>
     </ModalWrapper>
   );
