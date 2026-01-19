@@ -8,7 +8,6 @@ export function useCanvas() {
 
   /**
    * Find the position for centering an app in the current canvas view
-   * @param appConfig The app view configuration to center
    * @returns The position to center the app at
    */
   function getScreenCenter() {

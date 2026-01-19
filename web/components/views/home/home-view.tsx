@@ -11,10 +11,35 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
+import {
+  fetchLatestApp,
+  getDefaultRemoteOrigin,
+} from "@/lib/module-federation/remote";
 import { ExtensionApp, Session, TabItem, Workflow } from "@/lib/types";
-import { Button, Input, Listbox, ListboxItem, Skeleton } from "@heroui/react";
-import { useContext, useState } from "react";
+import {
+  addToast,
+  Button,
+  Divider,
+  Listbox,
+  ListboxItem,
+  Skeleton,
+} from "@heroui/react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useContext, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+
+const vibeCodeHints = [
+  "Vibe Code A New App",
+  "Vibe Code A Blog",
+  "Vibe Code A Portfolio Website",
+  "Vibe Code A To-Do List App",
+  "Vibe Code A Weather App",
+  "Vibe Code A Chat Application",
+  "Vibe Code A E-commerce Store",
+  "Vibe Code A Social Media App",
+  "Vibe Code A Fitness Tracker",
+  "Vibe Code A Recipe App",
+];
 
 export default function HomeView() {
   const { createCanvasTabView } = useTabViewManager();
@@ -22,8 +47,8 @@ export default function HomeView() {
 
   return (
     <div className="text-default-foreground h-full w-full px-2 pt-18 pb-2">
-      <div className="bg-content1 h-full w-full overflow-hidden rounded-lg">
-        <div className="relative grid h-full w-full grid-rows-[max-content_max-content_max-content_max-content_1fr] gap-y-2 overflow-y-auto px-2 py-2 pt-2 pb-6 sm:px-8 lg:px-48">
+      <div className="bg-content1 h-full w-full overflow-y-auto rounded-lg">
+        <div className="relative h-full w-full gap-y-2 overflow-x-hidden px-2 py-2 pt-2 pb-6 sm:px-8 lg:px-48">
           <div className="absolute -top-full flex h-full w-full translate-y-48 items-end blur-[100px]">
             <img
               src={"/assets/dashboard-dark-gradient.png"}
@@ -36,13 +61,19 @@ export default function HomeView() {
             />
           </div>
 
-          <OverviewPanel session={session} signIn={signIn} />
-          <RecentProjects session={session} />
-          <Resources />
+          <div className="relative flex h-full w-full flex-col gap-y-2">
+            <OverviewPanel session={session} signIn={signIn} />
 
-          <AppsAndWorkflows />
+            {/* Quick-start / featured for users to get started coding apps right away */}
+            <MarketplaceAppsAndWorkflows />
+            <Divider />
 
-          <div className="relative"></div>
+            {/* My apps and projects */}
+            <MyAppsAndProjects session={session} />
+            <Divider />
+
+            <MyResources />
+          </div>
         </div>
       </div>
     </div>
@@ -60,13 +91,122 @@ function OverviewPanel({
 
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
+  const {} = useExtensionAppManager();
+
+  async function getVibeCodeApp() {
+    const appId = "vibe_dev_flow";
+
+    let latestVersion;
+    try {
+      latestVersion = await fetchLatestApp(appId);
+    } catch (error) {
+      console.error("Failed to fetch latest version.");
+      addToast({
+        title: "Error",
+        description: "Failed to fetch latest version of Vibe Code.",
+        color: "danger",
+      });
+      return null;
+    }
+
+    const app: ExtensionApp = {
+      config: latestVersion.appConfig!,
+      remoteOrigin: getDefaultRemoteOrigin(),
+      isEnabled: true,
+    };
+
+    return app;
+  }
+
+  async function handleOpenVibeCode() {
+    const app = await getVibeCodeApp();
+
+    if (!app) {
+      return;
+    }
+
+    editorContext?.updateModalStates({
+      openInProject: {
+        isOpen: true,
+        app: app,
+        isOpenAppInFullscreen: true,
+      },
+    });
+  }
+
+  const [currentHintIndex, setCurrentHintIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentHintIndex((prev) => (prev + 1) % vibeCodeHints.length);
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
-    <div className="@container relative flex w-full flex-col items-center justify-center">
-      <div className="flex w-full flex-col items-center gap-y-1 rounded-lg px-1 py-2 @sm:w-fit @sm:px-8 @md:px-16">
-        {session ? (
+    <div className="@container relative flex h-3/4 w-full shrink-0 flex-col items-center justify-center">
+      <div className="flex w-full flex-col items-center gap-y-2 rounded-lg px-1 py-2 @sm:w-fit @sm:px-8 @md:px-16">
+        {session && (
           <>
-            <p className="text-xl">Hello, {session?.user.name}</p>
-            <p className="text-xl">What is on your mind today?</p>
+            <p className="text-center text-2xl">Hello, {session?.user.name}</p>
+            <p className="text-center text-2xl">What is on your mind today?</p>
+
+            <Button
+              className="border-divider border bg-amber-900/80 shadow-sm transition-colors hover:bg-amber-800/80 dark:border-amber-400/40 dark:bg-amber-900/30 dark:hover:bg-amber-900/20"
+              onPress={handleOpenVibeCode}
+            >
+              <motion.div
+                className="flex items-center gap-2 rounded-full px-3 py-1"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, ease: "easeOut" }}
+              >
+                <motion.span
+                  className="bg-gradient-to-r from-amber-400 via-amber-100 to-amber-400 bg-[length:200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                  initial={{ backgroundPosition: "200% 50%" }}
+                  animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
+                  transition={{
+                    backgroundPosition: {
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear",
+                    },
+                  }}
+                >
+                  <Icon name="bolt" />
+                </motion.span>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.p
+                    key={vibeCodeHints[currentHintIndex]}
+                    className="bg-gradient-to-r from-amber-400 via-amber-100 to-amber-400 bg-[length:200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                    initial={{
+                      opacity: 0,
+                      y: -20,
+                      backgroundPosition: "200% 50%",
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      backgroundPosition: ["200% 50%", "0% 50%"],
+                    }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{
+                      duration: 0.6,
+                      ease: "easeOut",
+                      backgroundPosition: {
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                      },
+                    }}
+                  >
+                    {vibeCodeHints[currentHintIndex]}
+                  </motion.p>
+                </AnimatePresence>
+              </motion.div>
+            </Button>
+
             <div className="flex gap-x-1">
               <Button
                 color="primary"
@@ -79,7 +219,10 @@ function OverviewPanel({
                   });
                 }}
               >
-                New Project
+                <div className="flex items-center gap-2">
+                  <Icon name="add" className="text-primary-foreground" />
+                  <p className="text-primary-foreground">New Project</p>
+                </div>
               </Button>
               <Button
                 color="secondary"
@@ -95,11 +238,15 @@ function OverviewPanel({
                   }));
                 }}
               >
-                Marketplace
+                <div className="flex items-center gap-2">
+                  <Icon name="store" className="text-primary-foreground" />
+                  <p className="text-primary-foreground">Marketplace</p>
+                </div>
               </Button>
             </div>
 
-            <Input
+            {/* TODO: Add back in the future when AI chat simplifies */}
+            {/* <Input
               className="w-full @sm:w-100"
               onFocus={() => {
                 // Open command viewer
@@ -115,9 +262,11 @@ function OverviewPanel({
                   <Icon name="auto_awesome" />
                 </div>
               }
-            />
+            /> */}
           </>
-        ) : (
+        )}
+
+        {!session && (
           <>
             <p className="text-xl font-semibold">Welcome to Pulse Editor</p>
             <p className="text-xl">Sign in to access your projects</p>
@@ -126,11 +275,9 @@ function OverviewPanel({
             </Button>
           </>
         )}
-
-        <p>Need help?</p>
+        <p className="pt-2 text-center">Learn More</p>
         <div className="flex gap-x-1">
           <Button
-            variant="faded"
             onPress={() => {
               window.open(
                 "https://github.com/claypulse/pulse-editor",
@@ -152,7 +299,6 @@ function OverviewPanel({
             </div>
           </Button>
           <Button
-            variant="faded"
             onPress={() => {
               window.open("https://docs.pulse-editor.com", "_blank");
             }}
@@ -166,7 +312,6 @@ function OverviewPanel({
             </div>
           </Button>
         </div>
-
         <Button
           onPress={() =>
             editorContext?.updateModalStates({
@@ -175,7 +320,6 @@ function OverviewPanel({
               },
             })
           }
-          variant="faded"
           className="border-0"
         >
           <div className="flex items-center gap-0.5">
@@ -190,14 +334,345 @@ function OverviewPanel({
   );
 }
 
-function Resources() {
+function MarketplaceAppsAndWorkflows() {
+  const editorContext = useContext(EditorContext);
+
+  const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
+    useExtensionAppManager("All");
+  const { workflows, isLoading: isLoadingWorkflow } = useWorkflowManager("All");
+
+  const tabItems: TabItem[] = [
+    {
+      name: "Workflows",
+      description: "Community workflows",
+      icon: "hub",
+    },
+    {
+      name: "Apps",
+      description: "Community apps",
+      icon: "apps",
+    },
+  ];
+
+  const [selectedTab, setSelectedTab] = useState<"Apps" | "Workflows">(
+    "Workflows",
+  );
+
+  async function openAppInProject(ext: ExtensionApp) {
+    editorContext?.updateModalStates({
+      openInProject: {
+        isOpen: true,
+        app: ext,
+      },
+    });
+  }
+
+  async function openWorkflowInProject(workflow: Workflow) {
+    editorContext?.updateModalStates({
+      openInProject: {
+        isOpen: true,
+        workflow: workflow,
+      },
+    });
+  }
+
+  return (
+    <div className="relative w-full shrink-0 gap-y-1 overflow-x-hidden rounded-sm">
+      <h2 className="pb-4 text-center text-5xl font-semibold">
+        Explore Marketplace
+      </h2>
+
+      <div className="flex w-full justify-center">
+        <div className="bg-content3/75 rounded-2xl">
+          <Tabs
+            tabItems={tabItems}
+            selectedItem={tabItems.find((tab) => tab.name === selectedTab)}
+            setSelectedItem={(item) => {
+              setSelectedTab(item?.name as "Apps" | "Workflows");
+            }}
+          />
+        </div>
+      </div>
+
+      {selectedTab === "Apps" ? (
+        <>
+          <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
+            <h2 className="text-2xl font-semibold">Latest Apps</h2>
+            <Button
+              className="m-0 flex items-center gap-x-0.5 px-1 py-0"
+              variant="light"
+              onPress={() => {
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  modalStates: {
+                    ...prev.modalStates,
+                    marketplace: {
+                      isOpen: true,
+                    },
+                  },
+                }));
+              }}
+            >
+              <p className="text-sm whitespace-nowrap">View All</p>
+              <div>
+                <Icon name="arrow_outward" />
+              </div>
+            </Button>
+          </div>
+          <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
+            {isLoadingMarketplaceExtensions && (
+              <>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+              </>
+            )}
+
+            {marketplaceExtensions?.length === 0 &&
+              !isLoadingMarketplaceExtensions && (
+                <p className="text-medium w-full py-4 text-center font-medium">
+                  No apps found in marketplace.
+                </p>
+              )}
+
+            {marketplaceExtensions?.map((app, index) => (
+              <div key={index} className="h-full max-w-80 min-w-40 shrink-0">
+                <AppPreviewCard
+                  extension={app}
+                  isShowCompatibleChip={false}
+                  isShowInstalledChip={false}
+                  isShowUninstallButton={false}
+                  isShowUseButton
+                  isShowContextMenu={false}
+                  isShowInstallationButtons={false}
+                  onPress={openAppInProject}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
+            <h2 className="text-2xl font-semibold whitespace-nowrap">
+              Explore Workflows
+            </h2>
+            <Button
+              className="m-0 flex items-center gap-x-0.5 px-1 py-0"
+              variant="light"
+              onPress={() => {
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  modalStates: {
+                    ...prev.modalStates,
+                    marketplace: {
+                      isOpen: true,
+                    },
+                  },
+                }));
+              }}
+            >
+              <p className="text-sm whitespace-nowrap">View All</p>
+              <div>
+                <Icon name="arrow_outward" />
+              </div>
+            </Button>
+          </div>
+          <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
+            {isLoadingWorkflow && (
+              <>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+              </>
+            )}
+
+            {workflows?.length === 0 && !isLoadingWorkflow && (
+              <p className="text-medium w-full py-4 text-center font-medium">
+                No workflows found in marketplace.
+              </p>
+            )}
+            {workflows?.map((wf, index) => (
+              <div key={index} className="h-full max-w-80 min-w-40 shrink-0">
+                <WorkflowPreviewCard
+                  workflow={wf}
+                  onPress={openWorkflowInProject}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+function MyAppsAndProjects({ session }: { session?: Session }) {
+  const editorContext = useContext(EditorContext);
+
+  const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
+    useExtensionAppManager("Published by Me");
+  const { projects, isLoading: isLoadingProjects } = useProjectManager();
+
+  const tabItems: TabItem[] = [
+    {
+      name: "My Apps",
+      description: "Apps published by me",
+      icon: "apps",
+    },
+    {
+      name: "My Projects",
+      description: "Projects created by me",
+      icon: "folder",
+    },
+  ];
+
+  const [selectedTab, setSelectedTab] = useState<"My Apps" | "My Projects">(
+    "My Apps",
+  );
+
+  async function openAppInProject(ext: ExtensionApp) {
+    editorContext?.updateModalStates({
+      openInProject: {
+        isOpen: true,
+        app: ext,
+      },
+    });
+  }
+
+  return (
+    <div className="relative w-full shrink-0 overflow-x-auto">
+      <h2 className="pb-4 text-center text-5xl font-semibold">
+        My Apps and Projects
+      </h2>
+      <div className="flex w-full justify-center">
+        <div className="bg-content3/75 rounded-2xl">
+          <Tabs
+            tabItems={tabItems}
+            selectedItem={tabItems.find((tab) => tab.name === selectedTab)}
+            setSelectedItem={(item) => {
+              setSelectedTab(item?.name as "My Apps" | "My Projects");
+            }}
+          />
+        </div>
+      </div>
+
+      {selectedTab === "My Apps" ? (
+        <>
+          <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
+            <h2 className="text-2xl font-semibold">My Apps</h2>
+            <Button
+              className="m-0 flex items-center gap-x-0.5 px-1 py-0"
+              variant="light"
+              onPress={() => {
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  modalStates: {
+                    ...prev.modalStates,
+                    marketplace: {
+                      isOpen: true,
+                    },
+                  },
+                }));
+              }}
+            >
+              <p className="text-sm whitespace-nowrap">View All</p>
+              <div>
+                <Icon name="arrow_outward" />
+              </div>
+            </Button>
+          </div>
+          <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
+            {isLoadingMarketplaceExtensions && (
+              <>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+              </>
+            )}
+
+            {marketplaceExtensions?.map((app, index) => (
+              <div key={index} className="h-full max-w-80 min-w-40 shrink-0">
+                <AppPreviewCard
+                  extension={app}
+                  isShowCompatibleChip={false}
+                  isShowInstalledChip={false}
+                  isShowUninstallButton={false}
+                  isShowUseButton
+                  isShowContextMenu={false}
+                  isShowInstallationButtons={false}
+                  onPress={openAppInProject}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        session && (
+          <>
+            <div className="flex items-center gap-x-4 py-1">
+              <h2 className="text-2xl font-semibold">My Apps and Projects</h2>
+              <Button
+                className="m-0 flex items-center gap-x-0.5 px-1 py-0"
+                variant="light"
+                onPress={() => {
+                  editorContext?.setEditorStates((prev) => ({
+                    ...prev,
+                    isSideMenuOpen: true,
+                  }));
+                }}
+              >
+                <p className="text-sm whitespace-nowrap">View All</p>
+                <div>
+                  <Icon name="arrow_outward" />
+                </div>
+              </Button>
+            </div>
+            <div className="flex h-60 items-start gap-x-2 overflow-x-auto overflow-y-hidden">
+              {isLoadingProjects && !projects && (
+                <>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                </>
+              )}
+
+              {projects?.map((project, index) => (
+                <div key={index} className="h-full min-w-40 shrink-0">
+                  <ProjectPreviewCard
+                    project={project}
+                    workspaceConfig={undefined}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )
+      )}
+    </div>
+  );
+}
+
+function MyResources() {
   const editorContext = useContext(EditorContext);
 
   const { cloudWorkspaces } = useWorkspace();
   const isListClickable = useMediaQuery({ maxWidth: 640 });
 
   return (
-    <div className="flex w-full flex-col">
+    <div className="flex w-full shrink-0 flex-col">
       <div className="flex items-center gap-x-4 py-1">
         <h2 className="text-2xl font-semibold">Your Resources</h2>
         <Button
@@ -272,223 +747,6 @@ function Resources() {
           </ListboxItem>
         )) ?? []}
       </Listbox>
-    </div>
-  );
-}
-
-function RecentProjects({ session }: { session?: Session }) {
-  const editorContext = useContext(EditorContext);
-
-  const { projects, isLoading: isLoadingProjects } = useProjectManager();
-
-  return (
-    <div className="relative w-full overflow-x-hidden">
-      {session && (
-        <>
-          <div className="flex items-center gap-x-4 py-1">
-            <h2 className="text-2xl font-semibold">Recent Projects</h2>
-            <Button
-              className="m-0 flex items-center gap-x-0.5 px-1 py-0"
-              variant="light"
-              onPress={() => {
-                editorContext?.setEditorStates((prev) => ({
-                  ...prev,
-                  isSideMenuOpen: true,
-                }));
-              }}
-            >
-              <p className="text-sm whitespace-nowrap">View All</p>
-              <div>
-                <Icon name="arrow_outward" />
-              </div>
-            </Button>
-          </div>
-          <div className="flex h-60 items-start gap-x-2 overflow-x-auto overflow-y-hidden">
-            {isLoadingProjects && !projects && (
-              <>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-              </>
-            )}
-
-            {projects?.map((project, index) => (
-              <div key={index} className="h-full min-w-40 shrink-0">
-                <ProjectPreviewCard
-                  project={project}
-                  workspaceConfig={undefined}
-                />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
-
-function AppsAndWorkflows() {
-  const editorContext = useContext(EditorContext);
-
-  const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
-    useExtensionAppManager("All");
-  const { workflows, isLoading: isLoadingWorkflow } = useWorkflowManager("All");
-
-  const tabItems: TabItem[] = [
-    {
-      name: "Workflows",
-      description: "Community workflows",
-      icon: "hub",
-    },
-    {
-      name: "Apps",
-      description: "Community apps",
-      icon: "apps",
-    },
-  ];
-
-  const [selectedTab, setSelectedTab] = useState<"Apps" | "Workflows">(
-    "Workflows",
-  );
-
-  async function openAppInProject(ext: ExtensionApp) {
-    editorContext?.updateModalStates({
-      openInProject: {
-        isOpen: true,
-        app: ext,
-      },
-    });
-  }
-
-  async function openWorkflowInProject(workflow: Workflow) {
-    editorContext?.updateModalStates({
-      openInProject: {
-        isOpen: true,
-        workflow: workflow,
-      },
-    });
-  }
-
-  return (
-    <div className="relative w-full gap-y-1 overflow-x-hidden rounded-sm">
-      <div className="flex w-full justify-center">
-        <div className="bg-content3/75 rounded-2xl">
-          <Tabs
-            tabItems={tabItems}
-            selectedItem={tabItems.find((tab) => tab.name === selectedTab)}
-            setSelectedItem={(item) => {
-              setSelectedTab(item?.name as "Apps" | "Workflows");
-            }}
-          />
-        </div>
-      </div>
-
-      {selectedTab === "Apps" ? (
-        <>
-          <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
-            <h2 className="text-2xl font-semibold">Latest Apps</h2>
-            <Button
-              className="m-0 flex items-center gap-x-0.5 px-1 py-0"
-              variant="light"
-              onPress={() => {
-                editorContext?.setEditorStates((prev) => ({
-                  ...prev,
-                  modalStates: {
-                    ...prev.modalStates,
-                    marketplace: {
-                      isOpen: true,
-                    },
-                  },
-                }));
-              }}
-            >
-              <p className="text-sm whitespace-nowrap">View All</p>
-              <div>
-                <Icon name="arrow_outward" />
-              </div>
-            </Button>
-          </div>
-          <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
-            {isLoadingMarketplaceExtensions && (
-              <>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-              </>
-            )}
-
-            {marketplaceExtensions?.map((app, index) => (
-              <div key={index} className="h-full max-w-80 min-w-40 shrink-0">
-                <AppPreviewCard
-                  extension={app}
-                  isShowCompatibleChip={false}
-                  isShowInstalledChip={false}
-                  isShowUninstallButton={false}
-                  isShowUseButton
-                  isShowContextMenu={false}
-                  isShowInstallationButtons={false}
-                  onPress={openAppInProject}
-                />
-              </div>
-            ))}
-          </div>
-        </>
-      ) : (
-        <>
-          <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
-            <h2 className="text-2xl font-semibold whitespace-nowrap">
-              Explore Workflows
-            </h2>
-            <Button
-              className="m-0 flex items-center gap-x-0.5 px-1 py-0"
-              variant="light"
-              onPress={() => {
-                editorContext?.setEditorStates((prev) => ({
-                  ...prev,
-                  modalStates: {
-                    ...prev.modalStates,
-                    marketplace: {
-                      isOpen: true,
-                    },
-                  },
-                }));
-              }}
-            >
-              <p className="text-sm whitespace-nowrap">View All</p>
-              <div>
-                <Icon name="arrow_outward" />
-              </div>
-            </Button>
-          </div>
-          <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
-            {isLoadingWorkflow && (
-              <>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-                <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
-              </>
-            )}
-
-            {workflows?.map((wf, index) => (
-              <div key={index} className="h-full max-w-80 min-w-40 shrink-0">
-                <WorkflowPreviewCard
-                  workflow={wf}
-                  onPress={openWorkflowInProject}
-                />
-              </div>
-            ))}
-          </div>
-        </>
-      )}
     </div>
   );
 }

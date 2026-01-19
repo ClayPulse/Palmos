@@ -89,8 +89,8 @@ export default function DndProvider({
             const config: AppViewConfig = {
               app: app.config.id,
               viewId: `${app.config.id}-${v4()}`,
-              recommendedHeight: app.config.recommendedHeight,
-              recommendedWidth: app.config.recommendedWidth,
+              initialHeight: app.config.recommendedHeight,
+              initialWidth: app.config.recommendedWidth,
             };
             await createAppViewInCanvasView(config);
           } catch (error) {
@@ -107,8 +107,8 @@ export default function DndProvider({
             const config: AppViewConfig = {
               app: app.config.id,
               viewId: `${app.config.id}-${v4()}`,
-              recommendedHeight: app.config.recommendedHeight,
-              recommendedWidth: app.config.recommendedWidth,
+              initialHeight: app.config.recommendedHeight,
+              initialWidth: app.config.recommendedWidth,
             };
 
             const { viewId, node, paramName, updateNodeData } = over.data
@@ -257,22 +257,39 @@ function DraggableOverlay({ data }: { data: DragData | undefined }) {
 }
 
 function DragPreview({ data }: { data: DragData | undefined }) {
+  const [thumbnailImage, setThumbnailImage] = useState<string | undefined>(
+    undefined,
+  );
+
+  // Load thumbnail image
+  useEffect(() => {
+    function loadThumbnail(extension: ExtensionApp) {
+      if (extension.config.thumbnail) {
+        const imageUrl =
+          getRemoteClientBaseURL(
+            extension.config.id,
+            extension.config.version,
+            extension.remoteOrigin,
+          ) +
+          "/" +
+          extension.config.thumbnail;
+        setThumbnailImage(imageUrl);
+      }
+    }
+
+    if (data?.type === "app") {
+      loadThumbnail((data.data as AppDragData).app);
+    }
+  }, [data]);
+
   if (data?.type === "app") {
     const appData = data.data as AppDragData;
 
     return (
       <div className="bg-content3 h-36 w-48 overflow-hidden rounded-xl">
-        {appData.app.config.thumbnail && (
+        {thumbnailImage && (
           <img
-            src={
-              getRemoteClientBaseURL(
-                appData.app.config.id,
-                appData.app.config.version,
-                appData.app.remoteOrigin,
-              ) +
-              "/" +
-              appData.app.config.thumbnail
-            }
+            src={thumbnailImage}
             alt={appData.app.config.thumbnail}
             className="h-full w-full object-cover"
           />

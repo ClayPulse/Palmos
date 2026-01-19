@@ -108,7 +108,10 @@ export default function OpenInProjectModal({
     async function openWhenReady() {
       if (isProjectOpen) {
         if ((isUseWorkspace && isWorkspaceReady) || !isUseWorkspace) {
-          await openAppOrWorkflow();
+          await openAppOrWorkflow(
+            editorContext?.editorStates.modalStates?.openInProject
+              ?.isOpenAppInFullscreen,
+          );
           // Reset states
           setIsProjectOpen(false);
           setIsWorkspaceReady(false);
@@ -145,10 +148,11 @@ export default function OpenInProjectModal({
     setIsProjectOpen(true);
   }
 
-  async function openAppOrWorkflow() {
+  async function openAppOrWorkflow(isAppFullscreen?: boolean) {
     if (editorContext?.editorStates.modalStates?.openInProject?.app) {
       await openApp(
         editorContext?.editorStates.modalStates?.openInProject?.app,
+        isAppFullscreen,
       );
 
       addToast({
@@ -177,12 +181,13 @@ export default function OpenInProjectModal({
     onClose();
   }
 
-  async function openApp(app: ExtensionApp) {
+  async function openApp(app: ExtensionApp, isFullscreen?: boolean) {
     const config: AppViewConfig = {
       app: app.config.id,
       viewId: `${app.config.id}-${v4()}`,
-      recommendedHeight: app.config.recommendedHeight,
-      recommendedWidth: app.config.recommendedWidth,
+      initialHeight: app.config.recommendedHeight,
+      initialWidth: app.config.recommendedWidth,
+      initialIsFullscreen: isFullscreen,
     };
     await createAppViewInCanvasView(config);
   }

@@ -87,8 +87,8 @@ function DraggableAppPreviewCard({ ext }: { ext: ExtensionApp }) {
           const config: AppViewConfig = {
             app: ext.config.id,
             viewId: `${ext.config.id}-${v4()}`,
-            recommendedHeight: ext.config.recommendedHeight,
-            recommendedWidth: ext.config.recommendedWidth,
+            initialHeight: ext.config.recommendedHeight,
+            initialWidth: ext.config.recommendedWidth,
           };
           await createAppViewInCanvasView(config);
         }}
