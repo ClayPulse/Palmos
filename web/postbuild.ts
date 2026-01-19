@@ -9,7 +9,6 @@ const buildDir = path.resolve("../build/next");
 generateSW({
   swDest: `${buildDir}/service-worker.js`,
   globDirectory: buildDir,
-
   globPatterns: [
     // Do not include HTML files here,
     // as deployed app routing won't use .html path.
@@ -27,7 +26,16 @@ generateSW({
   ],
   additionalManifestEntries: [
     // Fetch and cache root URL when first time online loading the app
-    { url: "/", revision: null },
+    { url: "/", revision: String(Date.now()) },
+  ],
+  runtimeCaching: [
+    {
+      urlPattern: ({ request }) => request.mode === "navigate",
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "pages",
+      },
+    },
   ],
 })
   .then(({ count, size }) => {
