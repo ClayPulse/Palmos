@@ -550,6 +550,7 @@ export function useTabViewManager() {
       };
     });
 
+    /* Wait until /components/views/canvas/canvas-view.tsx initializes app node where app is installed and created.  */
     await imcContext?.resolveWhenViewInitialized(appConfig.viewId);
 
     if (!isLandscape) {
