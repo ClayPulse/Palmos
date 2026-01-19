@@ -24,9 +24,22 @@ import {
   ListboxItem,
   Skeleton,
 } from "@heroui/react";
-import { motion } from "framer-motion";
-import { useContext, useState } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { useContext, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+
+const vibeCodeHints = [
+  "Vibe Code A New App",
+  "Vibe Code A Blog",
+  "Vibe Code A Portfolio Website",
+  "Vibe Code A To-Do List App",
+  "Vibe Code A Weather App",
+  "Vibe Code A Chat Application",
+  "Vibe Code A E-commerce Store",
+  "Vibe Code A Social Media App",
+  "Vibe Code A Fitness Tracker",
+  "Vibe Code A Recipe App",
+];
 
 export default function HomeView() {
   const { createCanvasTabView } = useTabViewManager();
@@ -121,6 +134,16 @@ function OverviewPanel({
     });
   }
 
+  const [currentHintIndex, setCurrentHintIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentHintIndex((prev) => (prev + 1) % vibeCodeHints.length);
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <div className="@container relative flex h-3/4 w-full shrink-0 flex-col items-center justify-center">
       <div className="flex w-full flex-col items-center gap-y-2 rounded-lg px-1 py-2 @sm:w-fit @sm:px-8 @md:px-16">
@@ -153,20 +176,34 @@ function OverviewPanel({
                 >
                   <Icon name="bolt" />
                 </motion.span>
-                <motion.p
-                  className="bg-gradient-to-r from-amber-400 via-amber-100 to-amber-400 bg-[length:200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-                  initial={{ backgroundPosition: "200% 50%" }}
-                  animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-                  transition={{
-                    backgroundPosition: {
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear",
-                    },
-                  }}
-                >
-                  Vibe Code A New App
-                </motion.p>
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.p
+                    key={vibeCodeHints[currentHintIndex]}
+                    className="bg-gradient-to-r from-amber-400 via-amber-100 to-amber-400 bg-[length:200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                    initial={{
+                      opacity: 0,
+                      y: -20,
+                      backgroundPosition: "200% 50%",
+                    }}
+                    animate={{
+                      opacity: 1,
+                      y: 0,
+                      backgroundPosition: ["200% 50%", "0% 50%"],
+                    }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{
+                      duration: 0.6,
+                      ease: "easeOut",
+                      backgroundPosition: {
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                      },
+                    }}
+                  >
+                    {vibeCodeHints[currentHintIndex]}
+                  </motion.p>
+                </AnimatePresence>
               </motion.div>
             </Button>
 
