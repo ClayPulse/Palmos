@@ -12,7 +12,7 @@ import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { ExtensionApp, Session, TabItem, Workflow } from "@/lib/types";
-import { Button, Input, Listbox, ListboxItem, Skeleton } from "@heroui/react";
+import { Button, Divider, Listbox, ListboxItem, Skeleton } from "@heroui/react";
 import { useContext, useState } from "react";
 import { useMediaQuery } from "react-responsive";
 
@@ -23,7 +23,7 @@ export default function HomeView() {
   return (
     <div className="text-default-foreground h-full w-full px-2 pt-18 pb-2">
       <div className="bg-content1 h-full w-full overflow-hidden rounded-lg">
-        <div className="relative grid h-full w-full grid-rows-[max-content_max-content_max-content_max-content_1fr] gap-y-2 overflow-y-auto px-2 py-2 pt-2 pb-6 sm:px-8 lg:px-48">
+        <div className="relative grid h-full w-full grid-rows-[max-content_max-content_1fr] gap-y-2 overflow-y-auto px-2 py-2 pt-2 pb-6 sm:px-8 lg:px-48">
           <div className="absolute -top-full flex h-full w-full translate-y-48 items-end blur-[100px]">
             <img
               src={"/assets/dashboard-dark-gradient.png"}
@@ -36,11 +36,19 @@ export default function HomeView() {
             />
           </div>
 
-          <OverviewPanel session={session} signIn={signIn} />
-          <RecentProjects session={session} />
-          <Resources />
+          <div className="flex h-full w-full flex-col gap-y-2 overflow-x-hidden">
+            <OverviewPanel session={session} signIn={signIn} />
 
-          <AppsAndWorkflows />
+            {/* Quick-start / featured for users to get started coding apps right away */}
+            <AppsAndWorkflows />
+            <Divider />
+
+            {/* My apps and projects */}
+            <MyAppsAndProjects session={session} />
+            <Divider />
+
+            <MyResources />
+          </div>
 
           <div className="relative"></div>
         </div>
@@ -63,7 +71,7 @@ function OverviewPanel({
   return (
     <div className="@container relative flex w-full flex-col items-center justify-center">
       <div className="flex w-full flex-col items-center gap-y-1 rounded-lg px-1 py-2 @sm:w-fit @sm:px-8 @md:px-16">
-        {session ? (
+        {session && (
           <>
             <p className="text-xl">Hello, {session?.user.name}</p>
             <p className="text-xl">What is on your mind today?</p>
@@ -99,7 +107,8 @@ function OverviewPanel({
               </Button>
             </div>
 
-            <Input
+            {/* TODO: Add back in the future when AI chat simplifies */}
+            {/* <Input
               className="w-full @sm:w-100"
               onFocus={() => {
                 // Open command viewer
@@ -115,9 +124,11 @@ function OverviewPanel({
                   <Icon name="auto_awesome" />
                 </div>
               }
-            />
+            /> */}
           </>
-        ) : (
+        )}
+
+        {!session && (
           <>
             <p className="text-xl font-semibold">Welcome to Pulse Editor</p>
             <p className="text-xl">Sign in to access your projects</p>
@@ -126,7 +137,6 @@ function OverviewPanel({
             </Button>
           </>
         )}
-
         <p>Need help?</p>
         <div className="flex gap-x-1">
           <Button
@@ -166,7 +176,6 @@ function OverviewPanel({
             </div>
           </Button>
         </div>
-
         <Button
           onPress={() =>
             editorContext?.updateModalStates({
@@ -190,7 +199,7 @@ function OverviewPanel({
   );
 }
 
-function Resources() {
+function MyResources() {
   const editorContext = useContext(EditorContext);
 
   const { cloudWorkspaces } = useWorkspace();
@@ -276,24 +285,72 @@ function Resources() {
   );
 }
 
-function RecentProjects({ session }: { session?: Session }) {
+function MyAppsAndProjects({ session }: { session?: Session }) {
   const editorContext = useContext(EditorContext);
 
+  const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
+    useExtensionAppManager("Published by Me");
   const { projects, isLoading: isLoadingProjects } = useProjectManager();
+
+  const tabItems: TabItem[] = [
+    {
+      name: "My Apps",
+      description: "Apps published by me",
+      icon: "apps",
+    },
+    {
+      name: "My Projects",
+      description: "Projects created by me",
+      icon: "folder",
+    },
+  ];
+
+  const [selectedTab, setSelectedTab] = useState<"My Apps" | "My Projects">(
+    "My Projects",
+  );
+
+  async function openAppInProject(ext: ExtensionApp) {
+    editorContext?.updateModalStates({
+      openInProject: {
+        isOpen: true,
+        app: ext,
+      },
+    });
+  }
 
   return (
     <div className="relative w-full overflow-x-hidden">
-      {session && (
+      <h2 className="pb-4 text-center text-5xl font-semibold">
+        My Apps and Projects
+      </h2>
+      <div className="flex w-full justify-center">
+        <div className="bg-content3/75 rounded-2xl">
+          <Tabs
+            tabItems={tabItems}
+            selectedItem={tabItems.find((tab) => tab.name === selectedTab)}
+            setSelectedItem={(item) => {
+              setSelectedTab(item?.name as "My Apps" | "My Projects");
+            }}
+          />
+        </div>
+      </div>
+
+      {selectedTab === "My Apps" ? (
         <>
-          <div className="flex items-center gap-x-4 py-1">
-            <h2 className="text-2xl font-semibold">Recent Projects</h2>
+          <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
+            <h2 className="text-2xl font-semibold">My Apps</h2>
             <Button
               className="m-0 flex items-center gap-x-0.5 px-1 py-0"
               variant="light"
               onPress={() => {
                 editorContext?.setEditorStates((prev) => ({
                   ...prev,
-                  isSideMenuOpen: true,
+                  modalStates: {
+                    ...prev.modalStates,
+                    marketplace: {
+                      isOpen: true,
+                    },
+                  },
                 }));
               }}
             >
@@ -303,8 +360,8 @@ function RecentProjects({ session }: { session?: Session }) {
               </div>
             </Button>
           </div>
-          <div className="flex h-60 items-start gap-x-2 overflow-x-auto overflow-y-hidden">
-            {isLoadingProjects && !projects && (
+          <div className="flex items-start gap-x-2 overflow-x-auto overflow-y-hidden">
+            {isLoadingMarketplaceExtensions && (
               <>
                 <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
                 <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
@@ -315,16 +372,66 @@ function RecentProjects({ session }: { session?: Session }) {
               </>
             )}
 
-            {projects?.map((project, index) => (
-              <div key={index} className="h-full min-w-40 shrink-0">
-                <ProjectPreviewCard
-                  project={project}
-                  workspaceConfig={undefined}
+            {marketplaceExtensions?.map((app, index) => (
+              <div key={index} className="h-full max-w-80 min-w-40 shrink-0">
+                <AppPreviewCard
+                  extension={app}
+                  isShowCompatibleChip={false}
+                  isShowInstalledChip={false}
+                  isShowUninstallButton={false}
+                  isShowUseButton
+                  isShowContextMenu={false}
+                  isShowInstallationButtons={false}
+                  onPress={openAppInProject}
                 />
               </div>
             ))}
           </div>
         </>
+      ) : (
+        session && (
+          <>
+            <div className="flex items-center gap-x-4 py-1">
+              <h2 className="text-2xl font-semibold">My Apps and Projects</h2>
+              <Button
+                className="m-0 flex items-center gap-x-0.5 px-1 py-0"
+                variant="light"
+                onPress={() => {
+                  editorContext?.setEditorStates((prev) => ({
+                    ...prev,
+                    isSideMenuOpen: true,
+                  }));
+                }}
+              >
+                <p className="text-sm whitespace-nowrap">View All</p>
+                <div>
+                  <Icon name="arrow_outward" />
+                </div>
+              </Button>
+            </div>
+            <div className="flex h-60 items-start gap-x-2 overflow-x-auto overflow-y-hidden">
+              {isLoadingProjects && !projects && (
+                <>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                  <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
+                </>
+              )}
+
+              {projects?.map((project, index) => (
+                <div key={index} className="h-full min-w-40 shrink-0">
+                  <ProjectPreviewCard
+                    project={project}
+                    workspaceConfig={undefined}
+                  />
+                </div>
+              ))}
+            </div>
+          </>
+        )
       )}
     </div>
   );
@@ -374,6 +481,10 @@ function AppsAndWorkflows() {
 
   return (
     <div className="relative w-full gap-y-1 overflow-x-hidden rounded-sm">
+      <h2 className="pb-4 text-center text-5xl font-semibold">
+        Explore Marketplace
+      </h2>
+
       <div className="flex w-full justify-center">
         <div className="bg-content3/75 rounded-2xl">
           <Tabs
@@ -422,6 +533,13 @@ function AppsAndWorkflows() {
                 <Skeleton className="h-60 w-60 shrink-0 rounded-xl"></Skeleton>
               </>
             )}
+
+            {marketplaceExtensions?.length === 0 &&
+              !isLoadingMarketplaceExtensions && (
+                <p className="text-medium w-full py-4 text-center font-medium">
+                  No apps found in marketplace.
+                </p>
+              )}
 
             {marketplaceExtensions?.map((app, index) => (
               <div key={index} className="h-full max-w-80 min-w-40 shrink-0">
@@ -478,6 +596,11 @@ function AppsAndWorkflows() {
               </>
             )}
 
+            {workflows?.length === 0 && !isLoadingWorkflow && (
+              <p className="text-medium w-full py-4 text-center font-medium">
+                No workflows found in marketplace.
+              </p>
+            )}
             {workflows?.map((wf, index) => (
               <div key={index} className="h-full max-w-80 min-w-40 shrink-0">
                 <WorkflowPreviewCard
