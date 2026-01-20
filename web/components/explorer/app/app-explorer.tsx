@@ -2,6 +2,7 @@ import AppPreviewCard from "@/components/cards/app-preview-card";
 import { DraggableItem } from "@/components/misc/draggable-item";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { isMobile } from "@/lib/platform-api/platform-checker";
 import {
   AppDragData,
   AppViewConfig,
@@ -44,6 +45,8 @@ export default function AppExplorer() {
 }
 
 function DraggableAppPreviewCard({ ext }: { ext: ExtensionApp }) {
+  const editorContext = useContext(EditorContext);
+
   const { createAppViewInCanvasView } = useTabViewManager();
   const { setNodeRef, listeners, isDragging } = useDraggable({
     id: `draggable-app-${ext.config.id}`,
@@ -84,6 +87,13 @@ function DraggableAppPreviewCard({ ext }: { ext: ExtensionApp }) {
         isShowContextMenu={false}
         isDisableButtonPress={!isDragFinished}
         onPress={async (ext) => {
+          if (isMobile()) {
+            // On mobile, close the explorer after opening the app.
+            editorContext?.setEditorStates((prev) => ({
+              ...prev,
+              isSideMenuOpen: false,
+            }));
+          }
           const config: AppViewConfig = {
             app: ext.config.id,
             viewId: createAppViewId(ext.config.id),

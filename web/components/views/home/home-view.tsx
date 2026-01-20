@@ -78,7 +78,7 @@ export default function HomeView() {
 
             {/* Footer */}
             <div
-              className="flex w-full justify-center py-4 data-[is-toolbar-open=true]:pb-16"
+              className="flex w-full justify-center pt-4 data-[is-toolbar-open=true]:pb-[max(60px,env(safe-area-inset-bottom)+60px)] pb-[max(16px,env(safe-area-inset-bottom)+12px)] "
               data-is-toolbar-open={
                 editorContext?.editorStates.isToolbarOpen ? "true" : "false"
               }
