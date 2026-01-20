@@ -3,9 +3,9 @@ import Icon from "@/components/misc/icon";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
 import { Workflow } from "@/lib/types";
+import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Select, SelectItem } from "@heroui/react";
 import { useEffect, useState } from "react";
-import { v4 } from "uuid";
 import Loading from "../../interface/status-screens/loading";
 
 export default function WorkflowGallery() {
@@ -32,7 +32,7 @@ export default function WorkflowGallery() {
   async function openWorkflow(workflow: Workflow) {
     await createCanvasTabView(
       {
-        viewId: `canvas-${v4()}`,
+        viewId: createCanvasViewId(),
         appConfigs: workflow.content.nodes.map((node) => node.data.config),
         initialWorkflowContent: workflow.content,
       },

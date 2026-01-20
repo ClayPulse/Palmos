@@ -13,6 +13,8 @@ import useSTT from "./hooks/ai-modality/use-stt";
 import useTTS from "./hooks/ai-modality/use-tts";
 import useVideoGen from "./hooks/ai-modality/use-video-gen";
 import useEditorEnv from "./hooks/editor/use-editor-env";
+import useOpenApp from "./hooks/editor/use-open-app";
+import useOpenLink from "./hooks/editor/use-open-link";
 import useOwnedAppView from "./hooks/editor/use-owned-app-view";
 import useSnapshotState from "./hooks/editor/use-snapshot-state";
 import useFileSystem from "./hooks/workspace/use-file-system";
@@ -35,6 +37,8 @@ export {
   useLoading,
   useNotification,
   useOCR,
+  useOpenApp,
+  useOpenLink,
   useOwnedAppView,
   useReceiveFile,
   useRegisterAction,

@@ -1,8 +1,8 @@
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { useEffect, useState } from "react";
-import { v4 } from "uuid";
 import NavMenuDropdown from "../nav-menu-dropdown";
 
 export default function FileMenuDropDown() {
@@ -20,7 +20,7 @@ export default function FileMenuDropDown() {
     },
     async () => {
       // Trigger new Workflow creation logic
-      await createCanvasTabView({ viewId: "canvas-" + v4() });
+      await createCanvasTabView({ viewId: createCanvasViewId() });
     },
     [],
   );

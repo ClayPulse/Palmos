@@ -8,10 +8,10 @@ import {
   DragData,
   ExtensionApp,
 } from "@/lib/types";
+import { createAppViewId } from "@/lib/views/view-helpers";
 import { useDraggable } from "@dnd-kit/core";
 import { Button } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
-import { v4 } from "uuid";
 
 export default function AppExplorer() {
   const editorContext = useContext(EditorContext);
@@ -86,7 +86,7 @@ function DraggableAppPreviewCard({ ext }: { ext: ExtensionApp }) {
         onPress={async (ext) => {
           const config: AppViewConfig = {
             app: ext.config.id,
-            viewId: `${ext.config.id}-${v4()}`,
+            viewId: createAppViewId(ext.config.id),
             initialHeight: ext.config.recommendedHeight,
             initialWidth: ext.config.recommendedWidth,
           };

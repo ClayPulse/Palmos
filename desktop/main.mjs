@@ -459,6 +459,10 @@ app.whenReady().then(() => {
   ipcMain.handle("login", handleLogin);
   ipcMain.handle("logout", handleLogout);
 
+  ipcMain.handle("open-in-new-tab", async (event, url) => {
+    await shell.openExternal(url);
+  });
+
   createMainWindow();
 });
 

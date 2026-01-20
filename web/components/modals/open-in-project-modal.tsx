@@ -13,6 +13,7 @@ import {
   SpecOption,
   Workflow,
 } from "@/lib/types";
+import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
 import { getUnitFromUnitString, specsOptions } from "@/lib/workspace/specs";
 import {
   addToast,
@@ -25,7 +26,6 @@ import {
   Spinner,
 } from "@heroui/react";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { v4 } from "uuid";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
@@ -186,7 +186,7 @@ export default function OpenInProjectModal({
     const config: AppViewConfig = {
       app: app.config.id,
       requiredVersion: app.config.version,
-      viewId: `${app.config.id}-${v4()}`,
+      viewId: createAppViewId(app.config.id),
       initialHeight: app.config.recommendedHeight,
       initialWidth: app.config.recommendedWidth,
       initialIsFullscreen: isFullscreen,
@@ -197,7 +197,7 @@ export default function OpenInProjectModal({
   async function openWorkflow(workflow: Workflow) {
     await createCanvasTabView(
       {
-        viewId: `canvas-${v4()}`,
+        viewId: createCanvasViewId(),
         appConfigs: workflow.content.nodes.map((node) => node.data.config),
         initialWorkflowContent: workflow.content,
       },
