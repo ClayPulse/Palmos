@@ -430,72 +430,74 @@ function DeveloperSettings({
       <h3 className="text-danger-500 text-center text-lg font-semibold">
         Danger Zone
       </h3>
-      {isShowConfirmUnpublish ? (
-        <>
-          <p className="text-danger-500 text-center font-semibold">
-            Are you sure you want to unpublish this app? This action cannot be
-            undone.
-          </p>
-          <div className="flex gap-x-1">
-            <Button
-              variant="light"
-              className="w-full"
-              onPress={() => setIsShowConfirmUnpublish(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              color="danger"
-              className="w-full"
-              onPress={async () => {
-                addToast({
-                  title: "Deleting App",
-                  description: `Deleting app ${appInfo.name}.`,
-                });
-                const response = await fetchAPI("/api/app/delete", {
-                  method: "DELETE",
-                  body: JSON.stringify({
-                    name: appInfo.id,
-                  }),
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                });
-                if (!response.ok) {
+      <div>
+        {isShowConfirmUnpublish ? (
+          <>
+            <p className="text-danger-500 text-center font-semibold">
+              Are you sure you want to unpublish this app? This action cannot be
+              undone.
+            </p>
+            <div className="flex gap-x-1">
+              <Button
+                variant="light"
+                className="w-full"
+                onPress={() => setIsShowConfirmUnpublish(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                color="danger"
+                className="w-full"
+                onPress={async () => {
                   addToast({
-                    title: "Error",
-                    description: `Failed to unpublish app ${appInfo.name}.`,
-                    color: "danger",
+                    title: "Deleting App",
+                    description: `Deleting app ${appInfo.name}.`,
                   });
-                  return;
-                }
+                  const response = await fetchAPI("/api/app/delete", {
+                    method: "DELETE",
+                    body: JSON.stringify({
+                      name: appInfo.id,
+                    }),
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                  });
+                  if (!response.ok) {
+                    addToast({
+                      title: "Error",
+                      description: `Failed to unpublish app ${appInfo.name}.`,
+                      color: "danger",
+                    });
+                    return;
+                  }
 
-                addToast({
-                  title: "App Unpublished",
-                  description: `App ${appInfo.name} unpublished successfully.`,
-                  color: "success",
-                });
-                setIsShowConfirmUnpublish(false);
-                editorContext?.updateModalStates({
-                  appInfo: { isOpen: false },
-                });
-              }}
-            >
-              Confirm Unpublish
-            </Button>
-          </div>
-        </>
-      ) : (
-        <Button
-          color="danger"
-          className="w-full"
-          onPress={async () => {
-            setIsShowConfirmUnpublish(true);
-          }}
-        >
-          Unpublish
-        </Button>
-      )}
+                  addToast({
+                    title: "App Unpublished",
+                    description: `App ${appInfo.name} unpublished successfully.`,
+                    color: "success",
+                  });
+                  setIsShowConfirmUnpublish(false);
+                  editorContext?.updateModalStates({
+                    appInfo: { isOpen: false },
+                  });
+                }}
+              >
+                Confirm Unpublish
+              </Button>
+            </div>
+          </>
+        ) : (
+          <Button
+            color="danger"
+            className="w-full"
+            onPress={async () => {
+              setIsShowConfirmUnpublish(true);
+            }}
+          >
+            Unpublish
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
@@ -567,9 +569,13 @@ function EndpointCost({
           placeholder="Credits Cost per Call"
           value={costString}
           onValueChange={setCostString}
-          endContent={<div>
-            <span className="text-default-foreground/60 whitespace-nowrap">credits per call</span>
-          </div>}
+          endContent={
+            <div>
+              <span className="text-default-foreground/60 whitespace-nowrap">
+                credits per call
+              </span>
+            </div>
+          }
         />
         <Button
           isIconOnly
