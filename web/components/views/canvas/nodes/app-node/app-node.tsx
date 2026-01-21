@@ -22,12 +22,13 @@ const AppNode = memo((props: any) => {
     selectedAction,
     isRunning,
     isShowingWorkflowConnector,
+    isFullscreen,
   }: AppNodeData = nodeProps.data;
   const viewId = config.viewId;
 
   const { deleteAppViewInCanvasView } = useTabViewManager();
   const { actions } = useActionExecutor(config.app);
-  const { updateNode, zoomTo } = useReactFlow();
+  const { updateNode, zoomTo, updateNodeData } = useReactFlow();
   const viewport = useViewport();
   const node = useInternalNode(viewId);
   const { getViewCenterCoordForNode } = useCanvas();
@@ -40,10 +41,11 @@ const AppNode = memo((props: any) => {
   const [previousShapeAndLocation, setPreviousShapeAndLocation] =
     useState<NodeShapeAndLocation | null>(null);
 
-  const [isFullscreen, setIsFullscreen] = useState(
-    nodeProps.data.config.initialIsFullscreen ?? false,
-  );
+  async function setIsFullscreen(value: boolean) {
+    await updateNodeData(viewId, { isFullscreen: value });
+  }
 
+  // In fullscreen mode, adjust the node size and position when the canvas size changes
   useEffect(() => {
     if (isFullscreen) {
       zoomToFitNodeFullscreen();
@@ -63,6 +65,45 @@ const AppNode = memo((props: any) => {
     }
   }, [isFullscreen, previousShapeAndLocation]);
 
+  // Toggle fullscreen mode
+  useEffect(() => {
+    async function toggleFullscreenEffect() {
+      if (!node) return;
+
+      if (!isFullscreen) {
+        if (previousShapeAndLocation) {
+          await zoomTo(previousShapeAndLocation.zoom);
+          await updateNode(viewId, {
+            width: previousShapeAndLocation.width,
+            height: previousShapeAndLocation.height,
+            position:
+              previousShapeAndLocation.x && previousShapeAndLocation.y
+                ? {
+                    x: previousShapeAndLocation.x,
+                    y: previousShapeAndLocation.y,
+                  }
+                : node.position,
+            zIndex: previousShapeAndLocation.zIndex,
+          });
+          setPreviousShapeAndLocation(null);
+        }
+      } else {
+        setPreviousShapeAndLocation({
+          width: node.width as number,
+          height: node.height as number,
+          zoom: viewport.zoom,
+          x: node.position.x,
+          y: node.position.y,
+          zIndex: node.zIndex,
+        });
+        await zoomToFitNodeFullscreen();
+      }
+    }
+
+    toggleFullscreenEffect();
+  }, [isFullscreen]);
+
+  // Fit node to current canvas size in fullscreen mode
   async function zoomToFitNodeFullscreen() {
     const padding = 4;
     const width =
@@ -86,39 +127,40 @@ const AppNode = memo((props: any) => {
 
   async function toggleFullScreen() {
     if (!node) return;
+    setIsFullscreen(!isFullscreen);
 
-    if (isFullscreen) {
-      if (previousShapeAndLocation) {
-        await zoomTo(previousShapeAndLocation.zoom);
-        await updateNode(viewId, {
-          width: previousShapeAndLocation.width,
-          height: previousShapeAndLocation.height,
-          position:
-            previousShapeAndLocation.x && previousShapeAndLocation.y
-              ? {
-                  x: previousShapeAndLocation.x,
-                  y: previousShapeAndLocation.y,
-                }
-              : node.position,
-          zIndex: previousShapeAndLocation.zIndex,
-        });
-        setPreviousShapeAndLocation(null);
-      }
+    // if (isFullscreen) {
+    //   if (previousShapeAndLocation) {
+    //     await zoomTo(previousShapeAndLocation.zoom);
+    //     await updateNode(viewId, {
+    //       width: previousShapeAndLocation.width,
+    //       height: previousShapeAndLocation.height,
+    //       position:
+    //         previousShapeAndLocation.x && previousShapeAndLocation.y
+    //           ? {
+    //               x: previousShapeAndLocation.x,
+    //               y: previousShapeAndLocation.y,
+    //             }
+    //           : node.position,
+    //       zIndex: previousShapeAndLocation.zIndex,
+    //     });
+    //     setPreviousShapeAndLocation(null);
+    //   }
 
-      setIsFullscreen(false);
-    } else {
-      setPreviousShapeAndLocation({
-        width: node.width as number,
-        height: node.height as number,
-        zoom: viewport.zoom,
-        x: node.position.x,
-        y: node.position.y,
-        zIndex: node.zIndex,
-      });
+    //   setIsFullscreen(false);
+    // } else {
+    //   setPreviousShapeAndLocation({
+    //     width: node.width as number,
+    //     height: node.height as number,
+    //     zoom: viewport.zoom,
+    //     x: node.position.x,
+    //     y: node.position.y,
+    //     zIndex: node.zIndex,
+    //   });
 
-      await zoomToFitNodeFullscreen();
-      setIsFullscreen(true);
-    }
+    //   await zoomToFitNodeFullscreen();
+    //   setIsFullscreen(true);
+    // }
   }
 
   return (

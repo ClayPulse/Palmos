@@ -101,8 +101,15 @@ export type EditorStates = {
     audioBuffer?: ArrayBuffer;
   };
 
+  // Read-only
   workflowNodes: ReactFlowNode<AppNodeData>[];
+  // Read-only
   workflowEdges: ReactFlowEdge[];
+  // Update workflow callbacks
+  updateWorkflowNodeData?: (
+    nodeViewId: string,
+    data: Partial<AppNodeData>,
+  ) => void;
   canvasSize?: {
     width: number;
     height: number;
@@ -424,6 +431,7 @@ export type AppNodeData = {
   selectedAction: Action | undefined;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;
+  isFullscreen: boolean;
   ownedAppViews: {
     [key: string]: ViewModel;
   };

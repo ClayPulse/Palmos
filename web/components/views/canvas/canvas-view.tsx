@@ -246,6 +246,7 @@ export default function CanvasView({
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
             ownedAppViews: {}, // Initially no owned apps
+            isFullscreen: appConfig.initialIsFullscreen ?? false,
           };
 
           return {
