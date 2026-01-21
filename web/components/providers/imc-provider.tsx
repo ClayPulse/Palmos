@@ -790,7 +790,12 @@ export default function InterModuleCommunicationProvider({
             location: "canvas";
           } = message.payload;
 
+          const senderViewId = message.from;
+
           if (location === "canvas") {
+            editorContext?.editorStates.updateWorkflowNodeData?.(senderViewId, {
+              isFullscreen: false,
+            });
             await createAppViewInCanvasView({
               app: appId,
               requiredVersion: version,

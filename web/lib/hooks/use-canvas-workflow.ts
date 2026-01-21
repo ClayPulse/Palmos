@@ -158,6 +158,14 @@ export default function useCanvasWorkflow(
     restore();
   }, [initialWorkflowContent, imcContext, isRestored]);
 
+  // Update callback
+  useEffect(() => {
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      updateWorkflowNodeData: updateWorkflowNodeData,
+    }));
+  }, [updateWorkflowNodeData]);
+
   async function startWorkflow() {
     // DAG traversal using Kahn's algorithm (topological sort)
     function getExecutionSequence(entryPoint: ReactFlowNode<AppNodeData>) {
