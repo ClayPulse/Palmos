@@ -106,6 +106,14 @@ const config: Config = {
   themes: ["docusaurus-theme-openapi-docs"],
 
   themeConfig: {
+    metadata: [
+      {
+        name: "keywords",
+        content:
+          "Pulse Editor, AI, Vibe Coding, Documentation, API Reference",
+      },
+    ],
+
     // Replace with your project's social card
     image: "img/pulse-editor-social-card.png",
     navbar: {
