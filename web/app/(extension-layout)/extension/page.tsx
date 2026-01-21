@@ -63,7 +63,9 @@ export default function ExtensionPage({}) {
           console.error("Error loading remote module:", error);
         });
 
-      // Patch fetch for Pulse App backend calling
+      // -------------------
+      // Patch fetch for API calls
+      // -------------------
       const originalFetch = window.fetch;
 
       const patchedFetch = async (
@@ -78,30 +80,30 @@ export default function ExtensionPage({}) {
           return originalFetch(resource, config);
         }
 
-      const expectedCdnOrigin =
-        process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com";
+        const expectedCdnOrigin =
+          process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com";
 
-      let isCdnOrigin = false;
-      try {
-        const parsedRemote = new URL(remoteOrigin);
-        const parsedExpected = new URL(expectedCdnOrigin);
-        isCdnOrigin = parsedRemote.origin === parsedExpected.origin;
-      } catch {
-        isCdnOrigin = false;
-      }
+        let isCdnOrigin = false;
+        try {
+          const parsedRemote = new URL(remoteOrigin);
+          const parsedExpected = new URL(expectedCdnOrigin);
+          isCdnOrigin = parsedRemote.origin === parsedExpected.origin;
+        } catch {
+          isCdnOrigin = false;
+        }
 
-      const newUrl = isCdnOrigin
-        ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
-        : remoteOrigin + url;
+        const newUrl = isCdnOrigin
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
+          : remoteOrigin + url;
 
         console.log(`[FETCH INTERCEPTED]: ${url} → ${newUrl}`);
         console.log(`[App Info] ID: ${moduleId}, Version: ${moduleVersion}`);
 
-      const response = await originalFetch(newUrl, {
-        ...config,
-        // Include cookies only when remoteOrigin matches the configured CDN origin
-        credentials: isCdnOrigin ? "include" : config?.credentials,
-      });
+        const response = await originalFetch(newUrl, {
+          ...config,
+          // Include cookies only when remoteOrigin matches the configured CDN origin
+          credentials: isCdnOrigin ? "include" : config?.credentials,
+        });
 
         if (!response.ok) {
           console.warn(`Fetch Error (${response.status}) for ${url}`);
@@ -111,6 +113,60 @@ export default function ExtensionPage({}) {
       };
 
       window.fetch = patchedFetch;
+
+      // -------------------
+      // Patch DOM resources to CDN
+      // -------------------
+      const cdnBase =
+        process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com";
+      const storageContainer = process.env.NEXT_PUBLIC_STORAGE_CONTAINER;
+
+      const patchResources = () => {
+        document
+          .querySelectorAll<HTMLElement>("[src^='/'], [href^='/']")
+          .forEach((el) => {
+            // Skip if already patched
+            if (el.dataset.cdnPatched) return;
+
+            if (
+              el.tagName === "IMG" ||
+              el.tagName === "VIDEO" ||
+              el.tagName === "AUDIO"
+            ) {
+              const src = el.getAttribute("src");
+              if (src && src.startsWith("/")) {
+                el.setAttribute(
+                  "src",
+                  `${cdnBase}/${storageContainer}/${moduleId}/${moduleVersion}/client${src}`,
+                );
+                el.dataset.cdnPatched = "true";
+                console.log(
+                  `[RESOURCE PATCHED]: ${src} → ${el.getAttribute("src")}`,
+                );
+              }
+            } else if (el.tagName === "LINK" || el.tagName === "SCRIPT") {
+              const attr = el.tagName === "LINK" ? "href" : "src";
+              const val = el.getAttribute(attr);
+              if (val && val.startsWith("/")) {
+                el.setAttribute(attr, `${cdnBase}${val}`);
+                el.dataset.cdnPatched = "true";
+                console.log(
+                  `[RESOURCE PATCHED]: ${val} → ${el.getAttribute(attr)}`,
+                );
+              }
+            }
+          });
+      };
+
+      // Patch immediately
+      patchResources();
+
+      // Observe for dynamically added elements
+      const observer = new MutationObserver(patchResources);
+      observer.observe(document.body, { childList: true, subtree: true });
+
+      // Clean up observer on unmount
+      return () => observer.disconnect();
     }
 
     loadExtension();

@@ -172,6 +172,38 @@ ${Object.entries(funcs)
 			console.log('Continuing...');
 		}
 
+		// Generate tsconfig for server functions
+		function generateTempTsConfig() {
+			const tempTsConfigPath = path.join(
+				process.cwd(),
+				'node_modules/.pulse/tsconfig.server.json',
+			);
+
+			const tsConfig = {
+				compilerOptions: {
+					target: 'ES2020',
+					module: 'esnext',
+					moduleResolution: 'bundler',
+					strict: true,
+					declaration: true,
+					outDir: path.join(process.cwd(), 'dist'),
+				},
+				include: [
+					path.join(process.cwd(), 'src/server-function/**/*'),
+					path.join(process.cwd(), 'pulse.config.ts'),
+					path.join(process.cwd(), 'global.d.ts'),
+				],
+				exclude: [
+					path.join(process.cwd(), 'node_modules'),
+					path.join(process.cwd(), 'dist'),
+				],
+			};
+
+			fs.writeFileSync(tempTsConfigPath, JSON.stringify(tsConfig, null, 2));
+		}
+
+		generateTempTsConfig();
+
 		// Run a new webpack compilation to pick up new server functions
 		const options = {
 			...compiler.options,
@@ -543,7 +575,12 @@ ${Object.entries(funcs)
 			rules: [
 				{
 					test: /\.tsx?$/,
-					use: 'ts-loader',
+					use: {
+						loader: 'ts-loader',
+						options: {
+							configFile: 'node_modules/.pulse/tsconfig.server.json',
+						},
+					},
 					exclude: [/node_modules/, /dist/],
 				},
 			],
