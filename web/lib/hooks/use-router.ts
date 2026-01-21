@@ -14,5 +14,9 @@ export default function useRouter() {
     window.location.reload();
   }
 
-  return { replace, refresh };
+  function openInNewTab(url: string) {
+    window.open(url, "_blank");
+  }
+
+  return { replace, refresh, openInNewTab };
 }

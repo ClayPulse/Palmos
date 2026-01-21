@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.70
+
+### Patch Changes
+
+- Add open app and link apis
+
 ## 0.1.1-beta.69
 
 ### Patch Changes

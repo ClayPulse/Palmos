@@ -2,9 +2,9 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useEditorAIAssistantHint } from "@/lib/hooks/use-editor-ai-assistant-hint";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Input } from "@heroui/react";
 import { useCallback, useContext } from "react";
-import { v4 } from "uuid";
 
 export default function ProjectView() {
   const editorContext = useContext(EditorContext);
@@ -14,7 +14,7 @@ export default function ProjectView() {
 
   const createNewCanvas = useCallback(async () => {
     await createCanvasTabView({
-      viewId: "canvas-" + v4(),
+      viewId: createCanvasViewId(),
     });
   }, []);
 

@@ -46,6 +46,10 @@ export enum IMCMessageTypeEnum {
   EditorAppUseOwnedApp = "editor-app-use-owned-app",
   // App requests workspace info
   EditorAppRequestWorkspace = "editor-app-request-workspace",
+  // Let editor to handle link opening on different platforms/devices
+  EditorOpenLink = "editor-open-link",
+  // Open app in editor
+  EditorOpenApp = "editor-open-app",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)

@@ -160,7 +160,7 @@ export default function ConsolePanelView() {
   //     setConsoles(foundConsoles);
   //     setViewModels(
   //       foundConsoles.map((ext) => ({
-  //         viewId: `${ext.config.id}-${v4()}`,
+  //         viewId: createAppViewId(ext.config.id),
   //         isFocused: false,
   //         appConfig: ext.config,
   //       })),

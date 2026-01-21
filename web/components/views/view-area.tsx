@@ -1,9 +1,9 @@
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
+import { createAppViewId } from "@/lib/views/view-helpers";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useSearchParams } from "next/navigation";
 import { lazy, Suspense, useContext, useEffect, useRef, useState } from "react";
-import { v4 } from "uuid";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
 import HomeView from "./home/home-view";
@@ -58,7 +58,7 @@ export default function ViewArea() {
 
         if (existingAppIndex === -1) {
           // Create new tab if not already exists
-          const viewId = `${app}-${v4()}`;
+          const viewId = createAppViewId(app);
           await createAppTabView({
             viewId,
             app,

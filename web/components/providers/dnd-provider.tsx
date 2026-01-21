@@ -32,6 +32,7 @@ import { DraggableItem } from "../misc/draggable-item";
 import Icon from "../misc/icon";
 import { EditorContext } from "./editor-context-provider";
 import { IMCContext } from "./imc-provider";
+import { createAppViewId } from "@/lib/views/view-helpers";
 
 export default function DndProvider({
   children,
@@ -88,7 +89,7 @@ export default function DndProvider({
             const app: ExtensionApp = appData.app;
             const config: AppViewConfig = {
               app: app.config.id,
-              viewId: `${app.config.id}-${v4()}`,
+              viewId: createAppViewId(app.config.id),
               initialHeight: app.config.recommendedHeight,
               initialWidth: app.config.recommendedWidth,
             };
@@ -106,7 +107,7 @@ export default function DndProvider({
             const app: ExtensionApp = appData.app;
             const config: AppViewConfig = {
               app: app.config.id,
-              viewId: `${app.config.id}-${v4()}`,
+              viewId: createAppViewId(app.config.id),
               initialHeight: app.config.recommendedHeight,
               initialWidth: app.config.recommendedWidth,
             };

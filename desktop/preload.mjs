@@ -12,7 +12,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
 
   createProject: (uri) => ipcRenderer.invoke("create-project", uri),
   deleteProject: (uri) => ipcRenderer.invoke("delete-project", uri),
-  updateProject: (uri, updatedInfo) => ipcRenderer.invoke("update-project", uri, updatedInfo),
+  updateProject: (uri, updatedInfo) =>
+    ipcRenderer.invoke("update-project", uri, updatedInfo),
 
   createFolder: (uri) => ipcRenderer.invoke("create-folder", uri),
   createFile: (uri) => ipcRenderer.invoke("create-file", uri),
@@ -27,7 +28,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   copyFiles: (from, to) => ipcRenderer.invoke("copy-files", from, to),
 
   getPersistentSettings: () => ipcRenderer.invoke("get-persistent-settings"),
-  setPersistentSettings: (settings) => ipcRenderer.invoke("set-persistent-settings", settings),
+  setPersistentSettings: (settings) =>
+    ipcRenderer.invoke("set-persistent-settings", settings),
 
   getInstallationPath: () => ipcRenderer.invoke("get-installation-path"),
 
@@ -39,4 +41,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   login: () => ipcRenderer.invoke("login"),
   logout: () => ipcRenderer.invoke("logout"),
   // #endregion
+
+  // Open external link
+  openInNewTab: (url) => ipcRenderer.invoke("open-in-new-tab", url),
 });

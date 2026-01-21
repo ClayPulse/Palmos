@@ -2,9 +2,9 @@ import BaseAppView from "@/components/views/base/base-app-view";
 import useActionExecutor from "@/lib/hooks/use-action-executor";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppNodeData } from "@/lib/types";
+import { createAppViewId } from "@/lib/views/view-helpers";
 import { Node } from "@xyflow/react";
 import { memo } from "react";
-import { v4 } from "uuid";
 import CanvasNodeViewLayout from "../app-node/layout";
 
 /* Runs backend part of pulse app. */
@@ -20,7 +20,7 @@ const BackendNode = memo((props: any) => {
   async function openViewInFullScreen() {
     await createAppTabView({
       ...config,
-      viewId: `${config.app}-${v4()}`,
+      viewId: createAppViewId(config.app),
     });
   }
 
