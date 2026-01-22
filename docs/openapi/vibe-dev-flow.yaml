@@ -68,6 +68,15 @@ paths:
                   type: string
                   description: Friendly display name for the app
                   example: "My Todo App"
+                  optional: false
+                appId:
+                  type: string
+                  description: Optional unique identifier of an existing app to update. If not provided, a new app will be created.
+                  example: "my_app_x7k9q2"
+                version:
+                  type: string
+                  description: Optional version identifier of an existing app that the next vibe coding generation/query should be based on. If not provided, defaults to latest version.
+                  example: "0.0.1"
       responses:
         "200":
           description: Streaming Server-Sent Events (SSE) with progress and final result
@@ -88,7 +97,7 @@ paths:
                 artifact:
                   summary: Final artifact output
                   value: |
-                    data: {"type":"creation","messageId":42,"data":{"type":"artifactOutput","title":"App Published","description":"App published successfully!","result":"{\"publishedAppLink\":\"https://pulse-editor.com/code?app=my_app_x7k9q2\"}"},"isFinal":true}
+                    data: {"type":"creation","messageId":42,"data":{"type":"artifactOutput","title":"App Published","description":"App published successfully!","result":"{\"publishedAppLink\":\"https://pulse-editor.com/code?app=my_app_x7k9q2\"}"\"sourceCodeArchiveLink\":\"https://pulse-editor.com/code?app=daily_wallpaper_3_ni63if\",\"appId\":\"daily_wallpaper_3_ni63if\",\"version\":\"0.0.2\"}"},"isFinal":true}
 
         "400":
           description: Bad Request (missing or invalid input)
