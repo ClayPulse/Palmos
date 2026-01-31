@@ -12,6 +12,7 @@ import OpenSourceInfoModal from "../modals/open-source-info-modal";
 import PasswordModal from "../modals/password-modal";
 import ProjectSettingsModal from "../modals/project-settings-modal";
 import PublishWorkflowModal from "../modals/publish-workflow-modal";
+import QuickVibeCodeSetupModal from "../modals/quick-vibe-code-setup-modal";
 import SharingModal from "../modals/sharing-modal";
 import WorkspaceSettingsModal from "../modals/workspace-settings-model";
 import { EditorContext } from "./editor-context-provider";
@@ -73,6 +74,20 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
           onClose={() =>
             editorContext?.updateModalStates({
               openInProject: { isOpen: false },
+            })
+          }
+        />
+      )}
+
+      {useDelayedUnmount(
+        modalStates?.quickVibeCodeSetup?.isOpen ?? false,
+        delaySeconds,
+      ) && (
+        <QuickVibeCodeSetupModal
+          isOpen={modalStates?.quickVibeCodeSetup?.isOpen ?? false}
+          onClose={() =>
+            editorContext?.updateModalStates({
+              quickVibeCodeSetup: { isOpen: false },
             })
           }
         />

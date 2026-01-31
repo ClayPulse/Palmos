@@ -229,6 +229,10 @@ export type ModalStates = {
   sharing?: {
     isOpen?: boolean;
   };
+  quickVibeCodeSetup?: {
+    isOpen?: boolean;
+    app?: ExtensionApp;
+  };
 };
 
 export type OpenFileDialogConfig = {

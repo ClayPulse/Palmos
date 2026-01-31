@@ -111,7 +111,11 @@ export default function NavTopBar({
         </div>
         <div className="col-start-2 flex flex-col items-center justify-center">
           {editorContext?.editorStates.project &&
-            !editorContext.editorStates.isSideMenuOpen && <ProjectIndicator />}
+            !editorContext.editorStates.isSideMenuOpen && (
+              <div className="hidden sm:block">
+                <ProjectIndicator />
+              </div>
+            )}
           <VoiceIndicator />
         </div>
         <div className="col-start-3 flex justify-end gap-x-1">
