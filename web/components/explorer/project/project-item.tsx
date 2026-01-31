@@ -1,6 +1,7 @@
 import { ContextMenuState, ProjectInfo } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useContext, useState } from "react";
+import { useTranslations } from "next-intl";
 import ContextMenu from "../../interface/context-menu";
 import { EditorContext } from "../../providers/editor-context-provider";
 
@@ -11,6 +12,7 @@ export default function ProjectItem({
   project: ProjectInfo;
   onOpen?: (project: ProjectInfo) => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
@@ -63,7 +65,7 @@ export default function ProjectItem({
       >
         <div className="flex w-full flex-col items-start justify-center">
           <p>{projectName}</p>
-          <p className="text-xs">{"Created: " + projectCtime}</p>
+          <p className="text-xs">{t("projectItem.created") + projectCtime}</p>
         </div>
       </Button>
       <ContextMenu state={contextMenuState} setState={setContextMenuState}>
@@ -78,13 +80,13 @@ export default function ProjectItem({
               setContextMenuState({ x: 0, y: 0, isOpen: false });
             }}
           >
-            <p className="w-full text-start">Project Settings</p>
+            <p className="w-full text-start">{t("projectItem.projectSettings")}</p>
           </Button>
           <Button
             className="text-medium h-12 sm:h-8 sm:text-sm"
             variant="light"
           >
-            <p className="w-full text-start">Select Multiple</p>
+            <p className="w-full text-start">{t("projectItem.selectMultiple")}</p>
           </Button>
         </div>
       </ContextMenu>

@@ -13,8 +13,10 @@ import { createAppViewId } from "@/lib/views/view-helpers";
 import { useDraggable } from "@dnd-kit/core";
 import { Button } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 
 export default function AppExplorer() {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const extensions = editorContext?.persistSettings?.extensions ?? [];
@@ -25,7 +27,7 @@ export default function AppExplorer() {
 
   return (
     <div className="grid h-full grid-rows-[max-content_auto_max-content] gap-y-2">
-      <p className="text-center">Tap or drag an extension to open it.</p>
+      <p className="text-center">{t("appExplorer.dragTip")}</p>
 
       <div className="grid h-fit max-h-full w-full grid-cols-2 gap-2 overflow-x-hidden overflow-y-auto px-4">
         {previews}
@@ -37,7 +39,7 @@ export default function AppExplorer() {
             editorContext?.updateModalStates({ marketplace: { isOpen: true } });
           }}
         >
-          Explorer Community Workflows/Apps
+          {t("appExplorer.exploreWorkflowsApps")}
         </Button>
       </div>
     </div>

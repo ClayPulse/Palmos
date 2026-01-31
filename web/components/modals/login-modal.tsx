@@ -3,6 +3,7 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { Button, Divider, Input } from "@heroui/react";
 import { useContext, useState } from "react";
 import toast from "react-hot-toast";
+import { useTranslations } from 'next-intl';
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
@@ -15,6 +16,7 @@ export default function LoginModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [workspaceAddress, setWorkspaceAddress] = useState<string | undefined>(
@@ -31,21 +33,21 @@ export default function LoginModal({
         }));
         onClose();
       }}
-      title={"Access Pulse Editor Workspace"}
+      title={t('loginModal.title')}
       placement={"center"}
     >
       <div className="flex w-full flex-col gap-2">
-        <p>Access Pulse Editor Cloud Workspace</p>
+        <p>{t('loginModal.title')}</p>
         <Button color="primary" onPress={() => signIn()}>
-          Login
+          {t('loginModal.login')}
         </Button>
 
         <Divider />
-        <p>Connect to Self-hosted Remote Workspace</p>
+        <p>{t('loginModal.connectToRemote')}</p>
 
         <Input
-          label="Remote Workspace Address"
-          placeholder="e.g. http://localhost:3000"
+          label={t('loginModal.remoteUrl')}
+          placeholder={t('loginModal.remoteUrlPlaceholder')}
           value={workspaceAddress}
           onChange={(e) => setWorkspaceAddress((prev) => e.target.value)}
         />
@@ -68,7 +70,7 @@ export default function LoginModal({
             }
           }}
         >
-          Connect
+          {t('loginModal.connect')}
         </Button>
 
         <Button
@@ -76,7 +78,7 @@ export default function LoginModal({
             const platform = getPlatform();
             if (platform === "web") {
               toast.error(
-                "Local workspace is not available in browser. Please use the desktop/mobile client, or connect to a remote instance.",
+                t('loginModal.localWorkspaceNotAvailable'),
               );
             }
 
@@ -92,8 +94,8 @@ export default function LoginModal({
         >
           {getPlatform() === PlatformEnum.Web ||
           getPlatform() === PlatformEnum.WebMobile
-            ? "Continue as Guest"
-            : "Continue Offline"}
+            ? t('loginModal.continueAsGuest')
+            : t('loginModal.continueOffline')}
         </Button>
       </div>
     </ModalWrapper>

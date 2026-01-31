@@ -6,10 +6,12 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
 import { Button, Spinner } from "@heroui/react";
 import { useContext } from "react";
+import { useTranslations } from "next-intl";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ProjectItem from "./project-item";
 
 export default function ProjectExplorer() {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { session } = useAuth();
@@ -19,7 +21,7 @@ export default function ProjectExplorer() {
     <div className="flex h-full w-full flex-col gap-2">
       {session ? (
         <div>
-          <p className="text-center text-lg font-medium">Manage Projects</p>
+          <p className="text-center text-lg font-medium">{t("projectExplorer.title")}</p>
           <Button
             className="w-full"
             onPress={() => {
@@ -28,7 +30,7 @@ export default function ProjectExplorer() {
               });
             }}
           >
-            New Project
+            {t("projectExplorer.newProject.button")}
           </Button>
           {isLoading && (projects ?? []).length === 0 && (
             <div className="flex justify-center">
@@ -52,9 +54,7 @@ export default function ProjectExplorer() {
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center pb-24">
           <p className="text-center text-lg font-medium">
-            Sign in to view your projects,
-            <br />
-            or open a local project with desktop client.
+            {t("projectExplorer.signInMessage")}
           </p>
         </div>
       )}

@@ -22,6 +22,7 @@ import {
   Switch,
   Tooltip,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -35,10 +36,11 @@ export default function EditorSettingsModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title={"Editor Settings"}>
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={t("settings.editorSettings")}>
       <div className="flex w-full flex-col gap-2">
         <GeneralSettings editorContext={editorContext} />
         <Divider />
@@ -59,6 +61,7 @@ function GeneralSettings({
 }: {
   editorContext?: EditorContextType;
 }) {
+  const t = useTranslations();
   const { selectAndSetProjectHome } = useExplorer();
   const [newEnvKey, setNewEnvKey] = useState<string>("");
   const [newEnvValue, setNewEnvValue] = useState<string>("");
@@ -67,11 +70,11 @@ function GeneralSettings({
 
   return (
     <div>
-      <p className="text-medium pb-2 font-bold">General Settings</p>
+      <p className="text-medium pb-2 font-bold">{t("settings.generalSettings")}</p>
       <div className="w-full space-y-2">
         {editorContext?.persistSettings?.projectHomePath ? (
           <Input
-            label="Project Home Path"
+            label={t("settings.projectHomePath")}
             size="md"
             isRequired
             value={editorContext?.persistSettings?.projectHomePath}
@@ -99,7 +102,7 @@ function GeneralSettings({
         ) : (
           <div className="space-y-1">
             <p className="text-content4-foreground text-sm">
-              All your projects will be saved in this folder.
+              {t("settings.projectHomeDescription")}
             </p>
             <Button
               className="w-full"
@@ -107,18 +110,17 @@ function GeneralSettings({
                 selectAndSetProjectHome();
               }}
             >
-              Select Project Home Path
+              {t("settings.selectProjectHomePath")}
             </Button>
           </div>
         )}
 
         {/* Environment Variables */}
         <p className="text-content4-foreground text-sm">
-          Environment Variables (frontend):
+          {t("settings.environmentVariables")}
         </p>
         <p className="text-warning text-sm">
-          To set backend environment variables, please set it in extension app's
-          settings.
+          {t("settings.backendEnvVariablesWarning")}
         </p>
         {Object.entries(editorContext?.persistSettings?.envs ?? {}).length >
           0 && (
@@ -154,13 +156,13 @@ function GeneralSettings({
 
         <div className="flex items-center gap-x-1">
           <Input
-            label="Add New Variable"
+            label={t("settings.addNewVariable")}
             size="sm"
             value={newEnvKey}
             onValueChange={setNewEnvKey}
           />
           <Input
-            label="Value"
+            label={t("settings.value")}
             size="sm"
             value={newEnvValue}
             onValueChange={setNewEnvValue}
@@ -171,8 +173,8 @@ function GeneralSettings({
             onPress={() => {
               if (newEnvKey.trim() === "") {
                 addToast({
-                  title: "Error",
-                  description: "Environment variable key cannot be empty.",
+                  title: t("appInfoModal.error"),
+                  description: t("appInfoModal.envKeyEmpty"),
                   color: "danger",
                 });
                 return;
@@ -198,7 +200,7 @@ function GeneralSettings({
               router.refresh();
             }}
           >
-            Restart to Apply
+            {t("settings.restartToApply")}
           </Button>
         </div>
       </div>
@@ -208,11 +210,12 @@ function GeneralSettings({
 
 function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
   const { subscription, usage } = useAuth();
+  const t = useTranslations();
 
   return (
     <>
       <div>
-        <p className="text-medium pb-2 font-bold">AI Settings</p>
+        <p className="text-medium pb-2 font-bold">{t("settings.aiSettings")}</p>
         <Switch
           isSelected={editorContext?.persistSettings?.isUseManagedCloud ?? true}
           onChange={(e) => {
@@ -225,7 +228,7 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             });
           }}
         >
-          Use Managed AI Endpoints
+          {t("settings.useManagedAIEndpoints")}
         </Switch>
         <Alert
           color={
@@ -235,21 +238,21 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
           }
         >
           {(editorContext?.persistSettings?.isUseManagedCloud ?? true)
-            ? "Unlock the full power of Pulse Editor instantly with managed cloud you get lightning-fast AI assistance, cross-platform syncing, creative tools. So you always stay in flow."
-            : "Bring Your Own API Keys lets you connect directly to AI providers. More setup required, but you stay in full control."}
+            ? t("settings.managedCloudDescription")
+            : t("settings.byoAPIKeysDescription")}
         </Alert>
       </div>
 
       {(editorContext?.persistSettings?.isUseManagedCloud ?? true) ? (
         <div className="flex flex-col items-center">
           <p className="text-medium pb-2 font-bold">
-            Your Plan: {subscription?.name}
+            {t("settings.yourPlan", { plan: subscription?.name ?? "" })}
           </p>
-          <Button color="primary">Upgrade/Manage Plan</Button>
+          <Button color="primary">{t("settings.upgradeManagePlan")}</Button>
           <p className="text-medium pb-2 font-bold">
-            Credits: {usage?.remainingCredit}
+            {t("settings.credits", { credits: usage?.remainingCredit ?? 0 })}
           </p>
-          <Button color="primary">Top Up Credits</Button>
+          <Button color="primary">{t("settings.topUpCredits")}</Button>
         </div>
       ) : (
         <div>
@@ -259,8 +262,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               items={Object.keys(sttProviderOptions).map((key) => ({
                 provider: key,
               }))}
-              label="Provider"
-              placeholder="Select a provider"
+              label={t("settings.provider")}
+              placeholder={t("settings.selectProvider")}
               onChange={(e) => {
                 editorContext?.setPersistSettings((prev) => {
                   return {
@@ -290,8 +293,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                   editorContext?.persistSettings?.sttProvider ?? ""
                 ]?.models.map((model) => ({ model: model.name })) ?? []
               }
-              label="Model"
-              placeholder="Select a model"
+              label={t("settings.model")}
+              placeholder={t("settings.selectModel")}
               isRequired
               selectedKeys={
                 editorContext?.persistSettings?.sttModel
@@ -316,19 +319,18 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             <Tooltip
               content={
                 <p>
-                  Please disable password to edit API Key. <br />
-                  You can enable password again after editing API keys.
+                  {t("settings.passwordToEditApiKey")}
                 </p>
               }
               isDisabled={!editorContext?.persistSettings?.isUsePassword}
             >
               <Input
-                label="API Key"
+                label={t("settings.apiKey")}
                 size="md"
                 isRequired
                 value={
                   editorContext?.persistSettings?.isPasswordSet
-                    ? "API key is encrypted"
+                    ? t("settings.apiKeyEncrypted")
                     : (getAPIKey(
                         editorContext,
                         editorContext?.persistSettings?.sttProvider,
@@ -354,8 +356,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                 items={Object.keys(llmProviderOptions).map((key) => ({
                   provider: key,
                 }))}
-                label="Provider"
-                placeholder="Select a provider"
+                label={t("settings.provider")}
+                placeholder={t("settings.selectProvider")}
                 onChange={(e) => {
                   editorContext?.setPersistSettings((prev) => {
                     return {
@@ -385,8 +387,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                     editorContext?.persistSettings?.llmProvider ?? ""
                   ]?.models.map((model) => ({ model: model.name })) ?? []
                 }
-                label="Model"
-                placeholder="Select a model"
+                label={t("settings.model")}
+                placeholder={t("settings.selectModel")}
                 isRequired
                 onChange={(e) => {
                   editorContext?.setPersistSettings((prev) => {
@@ -411,19 +413,18 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               <Tooltip
                 content={
                   <p>
-                    Please disable password to edit API Key. <br />
-                    You can enable password again after editing API keys.
+                    {t("settings.passwordToEditApiKey")}
                   </p>
                 }
                 isDisabled={!editorContext?.persistSettings?.isUsePassword}
               >
                 <Input
-                  label="API Key"
+                  label={t("settings.apiKey")}
                   size="md"
                   isRequired
                   value={
                     editorContext?.persistSettings?.isPasswordSet
-                      ? "API key is encrypted"
+                      ? t("settings.apiKeyEncrypted")
                       : (getAPIKey(
                           editorContext,
                           editorContext?.persistSettings?.llmProvider,
@@ -450,8 +451,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                 items={Object.keys(ttsProviderOptions).map((key) => ({
                   provider: key,
                 }))}
-                label="Provider"
-                placeholder="Select a provider"
+                label={t("settings.provider")}
+                placeholder={t("settings.selectProvider")}
                 onChange={(e) => {
                   editorContext?.setPersistSettings((prev) => {
                     return {
@@ -481,8 +482,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                     editorContext?.persistSettings?.ttsProvider ?? ""
                   ]?.models.map((model) => ({ model: model.name })) ?? []
                 }
-                label="Model"
-                placeholder="Select a model"
+                label={t("settings.model")}
+                placeholder={t("settings.selectModel")}
                 isRequired
                 onChange={(e) => {
                   editorContext?.setPersistSettings((prev) => {
@@ -505,7 +506,7 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                 )}
               </Select>
               <Input
-                label="Voice Name"
+                label={t("settings.voiceName")}
                 size="md"
                 isRequired
                 value={editorContext?.persistSettings?.ttsVoice ?? ""}
@@ -522,19 +523,18 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               <Tooltip
                 content={
                   <p>
-                    Please disable password to edit API Key. <br />
-                    You can enable password again after editing API keys.
+                    {t("settings.passwordToEditApiKey")}
                   </p>
                 }
                 isDisabled={!editorContext?.persistSettings?.isUsePassword}
               >
                 <Input
-                  label="API Key"
+                  label={t("settings.apiKey")}
                   size="md"
                   isRequired
                   value={
                     editorContext?.persistSettings?.isPasswordSet
-                      ? "API key is encrypted"
+                      ? t("settings.apiKeyEncrypted")
                       : (getAPIKey(
                           editorContext,
                           editorContext?.persistSettings?.ttsProvider,
@@ -560,8 +560,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               items={Object.keys(imageGenProviderOptions).map((key) => ({
                 provider: key,
               }))}
-              label="Provider"
-              placeholder="Select a provider"
+              label={t("settings.provider")}
+              placeholder={t("settings.selectProvider")}
               onChange={(e) => {
                 editorContext?.setPersistSettings((prev) => {
                   return {
@@ -591,8 +591,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                   editorContext?.persistSettings?.imageGenProvider ?? ""
                 ]?.models.map((model) => ({ model: model.name })) ?? []
               }
-              label="Model"
-              placeholder="Select a model"
+              label={t("settings.model")}
+              placeholder={t("settings.selectModel")}
               isRequired
               onChange={(e) => {
                 editorContext?.setPersistSettings((prev) => {
@@ -617,19 +617,18 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             <Tooltip
               content={
                 <p>
-                  Please disable password to edit API Key. <br />
-                  You can enable password again after editing API keys.
+                  {t("settings.passwordToEditApiKey")}
                 </p>
               }
               isDisabled={!editorContext?.persistSettings?.isUsePassword}
             >
               <Input
-                label="API Key"
+                label={t("settings.apiKey")}
                 size="md"
                 isRequired
                 value={
                   editorContext?.persistSettings?.isPasswordSet
-                    ? "API key is encrypted"
+                    ? t("settings.apiKeyEncrypted")
                     : (getAPIKey(
                         editorContext,
                         editorContext?.persistSettings?.imageGenProvider,
@@ -654,8 +653,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
               items={Object.keys(videoGenProviderOptions).map((key) => ({
                 provider: key,
               }))}
-              label="Provider"
-              placeholder="Select a provider"
+              label={t("settings.provider")}
+              placeholder={t("settings.selectProvider")}
               onChange={(e) => {
                 editorContext?.setPersistSettings((prev) => {
                   return {
@@ -685,8 +684,8 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
                   editorContext?.persistSettings?.videoGenProvider ?? ""
                 ]?.models.map((model) => ({ model: model.name })) ?? []
               }
-              label="Model"
-              placeholder="Select a model"
+              label={t("settings.model")}
+              placeholder={t("settings.selectModel")}
               isRequired
               onChange={(e) => {
                 editorContext?.setPersistSettings((prev) => {
@@ -711,19 +710,18 @@ function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
             <Tooltip
               content={
                 <p>
-                  Please disable password to edit API Key. <br />
-                  You can enable password again after editing API keys.
+                  {t("settings.passwordToEditApiKey")}
                 </p>
               }
               isDisabled={!editorContext?.persistSettings?.isUsePassword}
             >
               <Input
-                label="API Key"
+                label={t("settings.apiKey")}
                 size="md"
                 isRequired
                 value={
                   editorContext?.persistSettings?.isPasswordSet
-                    ? "API key is encrypted"
+                    ? t("settings.apiKeyEncrypted")
                     : (getAPIKey(
                         editorContext,
                         editorContext?.persistSettings?.videoGenProvider,
@@ -755,13 +753,13 @@ function SecuritySettings({
   setIsOpen: (open: boolean) => void;
 }) {
   const [ttl, setTTL] = useState<string>("14");
+  const t = useTranslations();
 
   return (
     <div>
-      <p className="text-medium pb-2 font-bold">Security</p>
+      <p className="text-medium pb-2 font-bold">{t("settings.security")}</p>
       <p className="text-small">
-        Use a password to encrypt the API tokens. You will need to re-enter all
-        API tokens if you forget the password.
+        {t("settings.passwordDescription")}
       </p>
       <Switch
         isSelected={editorContext?.persistSettings?.isUsePassword ?? false}
@@ -788,15 +786,13 @@ function SecuritySettings({
           }
         }}
       >
-        Encrypt API tokens with password
+        {t("settings.encryptApiTokens")}
       </Switch>
       <p className="text-small">
-        The API tokens are saved for the duration of the TTL (Time To Live)
-        days. After the TTL, the API tokens will be deleted when the app opens
-        next time. Set -1 to keep the tokens indefinitely.
+        {t("settings.ttlDescription")}
       </p>
       <Input
-        label="TTL (in days)"
+        label={t("settings.ttlLabel")}
         size="md"
         isRequired
         defaultValue="14"
@@ -814,8 +810,8 @@ function SecuritySettings({
           } else if (Number.isNaN(days)) {
             days = 14;
             addToast({
-              title: "Error",
-              description: "Invalid input. Using default 14 days.",
+              title: t("appInfoModal.error"),
+              description: t("settings.ttlError"),
               color: "danger",
             });
           }
@@ -838,6 +834,7 @@ function DevExtensionSettings({
   editorContext?: EditorContextType;
 }) {
   const router = useRouter();
+  const t = useTranslations();
 
   const [fileTypeExtensionMap, setFileTypeExtensionMap] = useState<
     Map<string, ExtensionApp[]>
@@ -948,9 +945,9 @@ function DevExtensionSettings({
         </div>
       </div>
 
-      <p className="text-small font-bold">Extension Dev Mode</p>
+      <p className="text-small font-bold">{t("settings.extensionDevMode")}</p>
       <p className="text-small">
-        Load extension from local extension dev server at http://localhost:3030.
+        {t("settings.extensionDevModeDescription")}
       </p>
       <Switch
         isSelected={editorContext?.persistSettings?.isExtensionDevMode ?? false}
@@ -961,33 +958,32 @@ function DevExtensionSettings({
           }));
           if (e.target.checked) {
             addToast({
-              title: "Extension dev mode enabled",
-              description:
-                "You can now load extensions from your local dev server.",
+              title: t("editorSettingsModal.devExtension.toast.devModeEnabled.title"),
+              description: t("editorSettingsModal.devExtension.toast.devModeEnabled.description"),
               color: "success",
             });
           } else {
             addToast({
-              title: "Extension dev mode disabled",
-              description: "You have disabled extension dev mode.",
+              title: t("editorSettingsModal.devExtension.toast.devModeDisabled.title"),
+              description: t("editorSettingsModal.devExtension.toast.devModeDisabled.description"),
               color: "success",
             });
           }
         }}
       >
-        Enable extension dev mode
+        {t("editorSettingsModal.devExtension.toast.enableDevMode")}
       </Switch>
       {editorContext?.persistSettings?.isExtensionDevMode && (
         <div className="space-y-2">
           <Input
-            label="Extension Dev Server URL"
+            label={t("editorSettingsModal.devExtension.toast.extensionDevServerURL")}
             size="md"
             isRequired
             value={devExtensionRemoteOrigin}
             onValueChange={setDevExtensionRemoteOrigin}
           />
           <Input
-            label="Extension ID"
+            label={t("editorSettingsModal.devExtension.toast.extensionID")}
             size="md"
             isRequired
             placeholder={"(extension_id)"}
@@ -995,7 +991,7 @@ function DevExtensionSettings({
             onValueChange={setDevExtensionId}
           />
           <Input
-            label="Extension Version"
+            label={t("editorSettingsModal.devExtension.toast.extensionVersion")}
             size="md"
             isRequired
             placeholder={"(version)"}
@@ -1017,8 +1013,8 @@ function DevExtensionSettings({
                       devExtensionVersion,
                     );
                     addToast({
-                      title: "Extension installed",
-                      description: `Extension ${devExtensionId} installed successfully.`,
+                      title: t("editorSettingsModal.devExtension.toast.extensionInstalled.title"),
+                      description: t("editorSettingsModal.devExtension.toast.extensionInstalled.description", { id: devExtensionId }),
                       color: "success",
                     });
                   } catch (e) {
@@ -1027,7 +1023,7 @@ function DevExtensionSettings({
                 }
               }}
             >
-              Add Dev Extension
+              {t("editorSettingsModal.devExtension.toast.addDevExtension")}
             </Button>
             <Button
               onPress={() => {
@@ -1044,7 +1040,7 @@ function DevExtensionSettings({
                 }
               }}
             >
-              Open as App
+              {t("editorSettingsModal.devExtension.toast.openAsApp")}
             </Button>
           </div>
         </div>
@@ -1058,13 +1054,15 @@ function ExtensionDefinedSettings({
 }: {
   editorContext: EditorContextType | undefined;
 }) {
+  const t = useTranslations();
+  
   return (
     <div>
-      <p className="text-medium pb-2 font-bold">Extension Defined Settings</p>
-      <p className="text-small font-bold">Pulse Editor Terminal</p>
+      <p className="text-medium pb-2 font-bold">{t("settings.extensionDefinedSettings")}</p>
+      <p className="text-small font-bold">{t("settings.pulseEditorTerminal")}</p>
       <div className="w-full space-y-2">
         <Input
-          label="Device Host Address"
+          label={t("editorSettingsModal.devExtension.toast.deviceHostAddress")}
           size="md"
           isRequired
           value={editorContext?.persistSettings?.mobileHost ?? ""}

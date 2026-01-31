@@ -6,11 +6,13 @@ import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { addToast, Button, Divider, Tooltip } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function EditorToolbar() {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant } = useEditorAIAssistant();
@@ -76,7 +78,7 @@ export default function EditorToolbar() {
                 </Button>
               </Tooltip> */}
 
-              <Tooltip content={"Run Workflow"}>
+              <Tooltip content={t("editorToolbar.runWorkflow.tooltip")}>
                 <Button
                   variant="light"
                   isIconOnly
@@ -93,7 +95,7 @@ export default function EditorToolbar() {
               </Tooltip>
 
               <Divider className="mx-1" orientation="vertical" />
-              <Tooltip content={"Open Agentic Console"}>
+              <Tooltip content={t("editorToolbar.openConsole.tooltip")}>
                 <Button
                   variant={
                     editorContext?.editorStates?.isConsolePanelOpen
@@ -116,7 +118,7 @@ export default function EditorToolbar() {
                 </Button>
               </Tooltip>
 
-              <Tooltip content={"Voice Chat With Agent"}>
+              <Tooltip content={t("editorToolbar.voiceChat.tooltip")}>
                 <Button
                   isIconOnly
                   className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
@@ -146,7 +148,7 @@ export default function EditorToolbar() {
 
               <Divider className="mx-1" orientation="vertical" />
 
-              <Tooltip content={"Artifacts"}>
+              <Tooltip content={t("editorToolbar.artifacts.tooltip")}>
                 <Button
                   variant="light"
                   isIconOnly

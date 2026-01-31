@@ -1,0 +1,1072 @@
+{
+	"common": {
+		"signIn": "登录",
+		"signOut": "退出登录",
+		"save": "保存",
+		"cancel": "取消",
+		"close": "关闭",
+		"delete": "删除",
+		"edit": "编辑",
+		"share": "分享",
+		"shareApp": "分享应用",
+		"create": "新建",
+		"open": "打开",
+		"confirm": "确认",
+		"update": "更新",
+		"publish": "发布",
+		"add": "添加",
+		"enter": "输入"
+	},
+	"navigation": {
+		"connectedToCloudAI": "已连接到云端 AI",
+		"offline": "离线",
+		"language": {
+			"title": "语言"
+		}
+	},
+	"settings": {
+		"editorSettings": "编辑器设置",
+		"generalSettings": "常规设置",
+		"aiSettings": "AI 设置",
+		"securitySettings": "安全设置",
+		"projectHomePath": "项目主目录",
+		"projectHomeDescription": "所有项目都会保存在此文件夹中。",
+		"selectProjectHomePath": "选择项目主目录",
+		"environmentVariables": "环境变量（前端）：",
+		"backendEnvVariablesWarning": "要设置后端环境变量，请在扩展应用的设置中进行配置。",
+		"addNewVariable": "添加新变量",
+		"value": "值",
+		"restartToApply": "重启以生效",
+		"useManagedAIEndpoints": "使用托管 AI 端点",
+		"managedCloudDescription": "通过托管云端立即解锁 Pulse Editor 的全部能力：闪电般快速的 AI 助手、跨平台同步以及创意工具，让你始终保持创作流。",
+		"byoAPIKeysDescription": "使用自带 API Key 可直接连接到 AI 提供商。需要更多配置，但你可以完全掌控。",
+		"yourPlan": "当前套餐：{plan}",
+		"upgradeManagePlan": "升级 / 管理套餐",
+		"credits": "积分：{credits}",
+		"topUpCredits": "充值积分",
+		"provider": "提供商",
+		"selectProvider": "选择提供商",
+		"model": "模型",
+		"selectModel": "选择模型",
+		"apiKey": "API 密钥",
+		"apiKeyEncrypted": "API 密钥已加密",
+		"passwordToEditApiKey": "请先关闭密码保护以编辑 API 密钥。编辑完成后可以重新启用密码。",
+		"voiceName": "语音名称",
+		"security": "安全",
+		"passwordDescription": "使用密码加密 API Token。如果忘记密码，你需要重新输入所有 API Token。",
+		"encryptApiTokens": "使用密码加密 API Token",
+		"ttlDescription": "API Token 会按照 TTL（生存时间，天）保存。TTL 到期后，下次打开应用时 Token 会被删除。设置为 -1 表示永久保留。",
+		"ttlLabel": "TTL（天）",
+		"ttlError": "输入无效，已使用默认 14 天。",
+		"devExtensionSettings": "扩展开发设置",
+		"fileTypeMapping": "文件类型默认扩展映射",
+		"noFileTypes": "未找到任何文件类型。请安装支持文件类型的扩展。",
+		"selectDefaultExtension": "选择默认扩展",
+		"extensionDevMode": "扩展开发模式",
+		"extensionDevModeDescription": "从本地扩展开发服务器 http://localhost:3030 加载扩展。",
+		"enableExtensionDevMode": "启用扩展开发模式",
+		"extensionDevServerURL": "扩展开发服务器 URL",
+		"extensionID": "扩展 ID",
+		"extensionVersion": "扩展版本",
+		"addDevExtension": "添加开发扩展",
+		"openAsApp": "作为应用打开",
+		"extensionDevModeEnabled": "已启用扩展开发模式",
+		"extensionDevModeEnabledDescription": "你现在可以从本地开发服务器加载扩展。",
+		"extensionDevModeDisabled": "已禁用扩展开发模式",
+		"extensionDevModeDisabledDescription": "你已关闭扩展开发模式。",
+		"extensionInstalled": "扩展已安装",
+		"extensionInstalledDescription": "扩展 {id} 安装成功。",
+		"extensionDefinedSettings": "扩展定义的设置",
+		"pulseEditorTerminal": "Pulse Editor 终端",
+		"deviceHostAddress": "设备主机地址"
+	},
+	"subscription": {
+		"title": "订阅",
+		"plan": "订阅计划",
+		"creditsRemaining": "剩余积分",
+		"managePlan": "管理订阅"
+	},
+	"planPicker": {
+		"freeDescription": "免费：使用免费套餐并享受基础功能。可访问自托管工作区并使用自带 API Key。此选项将永久可用，我们承诺保持其免费且开源。",
+		"readMoreOpenSource": "了解更多我们的开源承诺"
+	},
+	"account": {
+		"title": "账户"
+	},
+	"metadata": {
+		"title": "Pulse Editor",
+		"description": "AI 驱动的编辑器，助你激发创造力"
+	},
+	"cloudApi": {
+		"directorySelection": {
+			"notSupported": "当前平台不支持选择文件夹"
+		},
+		"fileSelection": {
+			"notSupported": "当前平台不支持选择文件"
+		},
+		"fetchProjects": {
+			"failed": "获取项目列表失败"
+		},
+		"listProjects": {
+			"notSignedIn": "无法列出项目。请确认你已登录？"
+		},
+		"listPath": {
+			"failed": "列出路径失败",
+			"noWorkspace": "无法列出路径，尚未选择工作区"
+		},
+		"createFolder": {
+			"failed": "创建文件夹失败",
+			"noWorkspace": "无法创建文件夹，尚未选择工作区"
+		},
+		"createFile": {
+			"failed": "创建文件失败",
+			"noWorkspace": "无法创建文件，尚未选择工作区"
+		},
+		"renameFile": {
+			"failed": "重命名文件失败",
+			"noWorkspace": "无法重命名文件，尚未选择工作区"
+		},
+		"deleteFile": {
+			"failed": "删除文件失败",
+			"noWorkspace": "无法删除文件，尚未选择工作区"
+		},
+		"checkPath": {
+			"failed": "检查路径失败",
+			"noWorkspace": "无法检查路径，尚未选择工作区"
+		},
+		"readFile": {
+			"failed": "读取文件失败",
+			"noWorkspace": "无法读取文件，尚未选择工作区"
+		},
+		"writeFile": {
+			"failed": "写入文件失败",
+			"noWorkspace": "无法写入文件，尚未选择工作区"
+		},
+		"copyFiles": {
+			"failed": "复制文件失败",
+			"noWorkspace": "无法复制文件，尚未选择工作区"
+		},
+		"installationPath": {
+			"failed": "获取安装路径失败",
+			"noWorkspace": "无法获取安装路径，尚未选择工作区"
+		},
+		"createTerminal": {
+			"failed": "创建终端失败",
+			"noWorkspace": "无法创建终端，尚未选择工作区"
+		}
+	},
+	"homeView": {
+		"title": "首页",
+		"vibeCode": {
+			"title": "你想创建什么？",
+			"newApp": "Vibe Code 一个应用",
+			"blog": "Vibe Code 一个博客",
+			"portfolio": "Vibe Code 一个作品集网站",
+			"weatherApp": "Vibe Code 一个天气应用",
+			"chatApp": "Vibe Code 一个聊天应用",
+			"socialMediaApp": "Vibe Code 一个社交媒体应用",
+			"fitnessTracker": "Vibe Code 一个健身追踪应用",
+			"recipeApp": "Vibe Code 一个菜谱应用"
+		},
+		"createWorkflow": {
+			"button": "创建工作流"
+		},
+		"exploreMarketplace": {
+			"button": "浏览市场"
+		},
+		"signIn": {
+			"message": "登录以解锁更多功能",
+			"button": "登录"
+		},
+		"myProjects": {
+			"tab": "我的项目",
+			"title": "我的项目"
+		},
+		"myApps": {
+			"tab": "我的应用",
+			"title": "我的应用"
+		},
+		"featuredWorkflows": {
+			"tab": "精选工作流",
+			"title": "精选工作流"
+		},
+		"featuredApps": {
+			"tab": "精选应用",
+			"title": "精选应用"
+		},
+		"learnMore": "了解更多",
+		"myAppsAndProjects": "我的应用和项目",
+		"yourResources": "你的资源",
+		"cloudWorkspaces": "云工作区"
+	},
+	"common": {
+		"signIn": "登录",
+		"signOut": "退出登录",
+		"save": "保存",
+		"cancel": "取消",
+		"close": "关闭",
+		"delete": "删除",
+		"edit": "编辑",
+		"share": "分享",
+		"shareApp": "分享应用",
+		"create": "新建",
+		"open": "打开",
+		"confirm": "确认",
+		"update": "更新",
+		"publish": "发布",
+		"add": "添加",
+		"enter": "输入",
+		"viewAll": "查看全部"
+	},
+	"openInProjectModal": {
+		"title": "在项目中打开",
+		"openExisting": "打开现有项目",
+		"newProject": "新建项目",
+		"projectName": "项目名称",
+		"projectNamePlaceholder": "输入项目名称",
+		"projectLocation": "项目位置",
+		"projectLocationPlaceholder": "选择项目位置",
+		"selectLocation": "选择位置",
+		"createInside": "创建到此目录内",
+		"moreOptionsComingSoon": "更多选项即将推出...",
+		"create": "创建",
+		"open": "打开",
+		"selectProjectFolder": "选择项目文件夹",
+		"selectProjectFile": "选择项目文件",
+		"workspaceRequired": "此应用 / 工作流需要打开一个工作区才能正常运行。",
+		"selectWorkspace": "选择工作区",
+		"localComputer": "本地计算机",
+		"workspaceName": "工作区名称",
+		"workspaceSpecs": "工作区规格",
+		"storageGB": "存储（GB）",
+		"moreToCome": "更多功能即将到来",
+		"gettingReady": "正在为你准备环境...",
+		"toast": {
+			"preparingWorkspace": {
+				"title": "正在准备工作区",
+				"description": "等待工作区准备就绪..."
+			},
+			"failedToOpen": {
+				"title": "打开失败",
+				"description": "未选择任何项目。"
+			},
+			"appOpened": {
+				"title": "应用已打开",
+				"description": "应用已成功打开。"
+			},
+			"workflowOpened": {
+				"title": "工作流已打开",
+				"description": "工作流已成功打开。"
+			},
+			"noAppOrWorkflow": "没有可打开的应用或工作流。",
+			"unableToCreate": {
+				"title": "无法创建工作区。",
+				"unknownPlatform": "未知平台。",
+				"nameRequired": "工作区名称为必填项。"
+			},
+			"creatingWorkspace": {
+				"title": "正在创建工作区",
+				"description": "正在创建工作区 {name}。规格：{cpu} vCPU，{ram} 内存，{storage} 存储。"
+			},
+			"workspaceCreated": {
+				"title": "工作区已创建",
+				"description": "工作区 {name} 已成功创建。"
+			},
+			"errorCreating": {
+				"title": "创建工作区时出错"
+			}
+		},
+		"errors": {
+			"noName": "请输入项目名称",
+			"noLocation": "请选择项目位置"
+		}
+	},
+	"quickVibeCodeSetupModal": {
+		"title": "快速 Vibe Code 设置",
+		"vibeCodeProject": "Vibe Code 项目",
+		"projectName": "项目名称",
+		"gettingReady": "正在为你准备一切...",
+		"appOpened": {
+			"title": "应用已打开",
+			"description": "应用已成功打开。"
+		},
+		"noAppToOpen": "没有可打开的应用。"
+	},
+	"passwordModal": {
+		"title": "输入密码",
+		"subtitle": "此操作需要身份验证",
+		"password": "密码",
+		"passwordPlaceholder": "请输入密码",
+		"resetConfig": {
+			"button": "重置配置",
+			"title": "重置配置",
+			"message": "确定要重置所有配置吗？此操作无法撤销。"
+		},
+		"validation": {
+			"required": "密码为必填项"
+		},
+		"confirm": {
+			"button": "确认"
+		}
+	},
+	"openSourceInfoModal": {
+		"title": "开源",
+		"description": "我们相信开源软件，因为透明度有助于建立信任、促进创新和协作。我们的使命是为全球开发者提供免费的工具，让他们能够无障碍地构建、创造与创新。",
+		"pulseEditorCore": "Pulse Editor 核心",
+		"officialApps": "官方应用",
+		"opensource": "开源",
+		"cloudServices": "同时，我们也提供云托管服务与应用市场，让你无需操心基础设施和后端，就能轻松管理项目并与社区分享你的作品。",
+		"loveWhatWeDo": "喜欢我们正在做的事吗？欢迎在 GitHub 上为我们加星，或在 Google Play 下载我们的移动应用！",
+		"giveUsAStar": "给我们加星",
+		"googlePlay": "Google Play"
+	},
+	"commandViewer": {
+		"chatInput": {
+			"placeholder": "输入命令或提出问题",
+			"emptyDescription": "你可以输入“add”、“remove”、“edit”等来执行操作，也可以直接提问",
+			"emptyDescriptionWithCommand": "你可以输入带有“@”的命令来运行，或直接提问",
+			"pressEnter": "按 Enter 发送",
+			"pressEnterToExecute": "按 Enter 执行"
+		},
+		"send": "发送",
+		"you": "你："
+	},
+	"projectIndicator": {
+		"closeProject": {
+			"menuItem": "关闭项目"
+		},
+		"projectSettings": {
+			"menuItem": "项目设置"
+		}
+	},
+	"editorToolbar": {
+		"runWorkflow": {
+			"tooltip": "运行工作流"
+		},
+		"openConsole": {
+			"tooltip": "打开 Agentic 控制台"
+		},
+		"voiceChat": {
+			"tooltip": "与智能体语音对话"
+		},
+		"artifacts": {
+			"tooltip": "制品",
+			"wip": "制品（开发中）"
+		},
+		"installedAgents": {
+			"tooltip": "已安装智能体"
+		},
+		"marketplace": {
+			"tooltip": "市场"
+		},
+		"settings": {
+			"tooltip": "设置"
+		}
+	},
+	"publishWorkflowModal": {
+		"title": "发布工作流",
+		"description": "发布你的工作流，与他人分享",
+		"workflowName": "工作流名称",
+		"workflowNamePlaceholder": "输入工作流名称",
+		"workflowDescription": "描述",
+		"workflowDescriptionPlaceholder": "输入工作流描述",
+		"workflowVersion": "工作流版本",
+		"workflowVersionPlaceholder": "输入工作流版本",
+		"publish": "发布",
+		"publishing": "正在发布工作流",
+		"publishingDescription": "你的工作流正在发布中...",
+		"toast": {
+			"published": {
+				"title": "工作流已发布",
+				"description": "你的工作流已成功发布。"
+			},
+			"failed": {
+				"title": "发布工作流失败"
+			}
+		}
+	},
+	"projectSettingsModal": {
+		"title": "项目设置",
+		"projectName": "项目名称",
+		"projectPath": "项目路径",
+		"update": "更新",
+		"create": "创建",
+		"delete": "删除",
+		"toast": {
+			"noProjectSelected": "未选择任何项目。"
+		}
+	},
+	"editorSettingsModal": {
+		"title": "编辑器设置",
+		"projectsFolder": {
+			"description": "所有项目都会保存在此文件夹中。",
+			"selectFolder": "选择文件夹",
+			"selectProjectHomePath": "选择项目主目录"
+		},
+		"environmentVariables": {
+			"frontend": "环境变量（前端）：",
+			"instructions": "KEY=VALUE，每行一个",
+			"backendWarning": "要设置后端环境变量，请在扩展应用的设置中进行配置。",
+			"addNewVariable": "添加新变量",
+			"value": "值",
+			"errorEmptyKey": {
+				"title": "错误",
+				"description": "环境变量键不能为空。"
+			}
+		},
+		"customOnnxWasmCdnUrl": {
+			"label": "自定义 onnx-wasm CDN URL",
+			"placeholder": "输入自定义 onnx-wasm CDN 地址"
+		},
+		"restartToApply": "重启以生效",
+		"aiSettings": {
+			"title": "AI 设置",
+			"useManagedEndpoints": "使用托管 AI 端点",
+			"managedMessage": "通过托管云端立即解锁 Pulse Editor 的全部能力：闪电般快速的 AI 助手、跨平台同步以及创意工具，让你始终保持创作流。",
+			"byokMessage": "使用自带 API Key 可直接连接到 AI 提供商。需要更多配置，但你可以完全掌控。",
+			"yourPlan": "当前套餐：",
+			"upgradeManagePlan": "升级 / 管理套餐",
+			"credits": "积分：",
+			"topUpCredits": "充值积分",
+			"stt": "语音转文本",
+			"llm": "大语言模型",
+			"tts": "文本转语音",
+			"imageGen": "图像生成",
+			"videoGen": "视频生成",
+			"provider": "提供商",
+			"providerPlaceholder": "选择提供商",
+			"model": "模型",
+			"modelPlaceholder": "选择模型",
+			"voiceName": "语音名称",
+			"apiKey": "API 密钥",
+			"apiKeyEncrypted": "API 密钥已加密",
+			"apiKeyTooltip": "请先关闭密码保护以编辑 API 密钥。编辑完成后可以重新启用密码。"
+		},
+		"security": {
+			"title": "安全",
+			"encryptApiTokens": "使用密码加密 API Token",
+			"encryptDescription": "使用密码加密 API Token。如果忘记密码，你需要重新输入所有 Token。",
+			"ttlLabel": "TTL（天）",
+			"ttlDescription": "API Token 会按照 TTL（生存时间，天）保存。TTL 到期后，下次打开应用时 Token 会被删除。设置为 -1 表示永久保留。",
+			"ttlError": {
+				"title": "错误",
+				"description": "输入无效，已使用默认 14 天。"
+			}
+		},
+		"devExtension": {
+			"title": "扩展开发设置",
+			"fileTypeMapping": "文件类型默认扩展映射",
+			"noFileTypes": "未找到任何文件类型。请安装支持文件类型的扩展。",
+			"selectDefaultExtension": "选择默认扩展",
+			"extensionDevMode": "扩展开发模式",
+			"extensionDevModeDescription": "从本地扩展开发服务器 http://localhost:3030 加载扩展。",
+			"enableExtensionDevMode": "启用扩展开发模式",
+			"extensionDevServerUrl": "扩展开发服务器 URL",
+			"extensionId": "扩展 ID",
+			"extensionIdPlaceholder": "(extension_id)",
+			"extensionVersion": "扩展版本",
+			"extensionVersionPlaceholder": "(version)",
+			"addDevExtension": "添加开发扩展",
+			"openAsApp": "作为应用打开",
+			"toast": {
+				"devModeEnabled": {
+					"title": "已启用扩展开发模式",
+					"description": "你现在可以从本地开发服务器加载扩展。"
+				},
+				"devModeDisabled": {
+					"title": "已禁用扩展开发模式",
+					"description": "你已关闭扩展开发模式。"
+				},
+				"extensionInstalled": {
+					"title": "扩展已安装",
+					"description": "扩展 {id} 安装成功。"
+				},
+				"enableDevMode": "启用扩展开发模式",
+				"addDevExtension": "添加开发扩展",
+				"openAsApp": "作为应用打开",
+				"extensionDevServerURL": "扩展开发服务器 URL",
+				"extensionID": "扩展 ID",
+				"extensionVersion": "扩展版本",
+				"selectDefaultExtension": "选择默认扩展",
+				"noFileTypes": "未找到任何文件类型。请安装支持文件类型的扩展。",
+				"fileTypeMapping": "文件类型默认扩展映射",
+				"deviceHostAddress": "设备主机地址"
+			}
+		},
+		"extensionDefined": {
+			"title": "扩展定义的设置",
+			"pulseEditorTerminal": "Pulse Editor 终端",
+			"deviceHostAddress": "设备主机地址"
+		}
+	},
+	"marketplaceModal": {
+		"title": "社区市场",
+		"tabs": {
+			"featured": "精选",
+			"featuredDescription": "社区精选的应用和工作流",
+			"workflows": "工作流",
+			"workflowsDescription": "浏览社区分享的工作流",
+			"apps": "应用",
+			"appsDescription": "浏览社区开发的联邦 Pulse 应用",
+			"installed": "已安装",
+			"installedApps": "已安装应用",
+			"installedAgents": "已安装智能体",
+			"discover": "发现",
+			"discoverApps": "发现应用",
+			"discoverAgents": "发现智能体"
+		}
+	},
+	"loginModal": {
+		"title": "登录",
+		"connectToRemote": "连接到远程实例",
+		"login": "登录",
+		"remoteUrl": "远程 URL",
+		"remoteUrlPlaceholder": "输入远程 URL",
+		"remotePassword": "密码",
+		"remotePasswordPlaceholder": "输入密码",
+		"connect": "连接",
+		"localWorkspaceNotAvailable": "浏览器中不可使用本地工作区。请使用桌面 / 移动客户端，或连接到远程实例。",
+		"continueAsGuest": "以游客身份继续",
+		"continueOffline": "离线继续"
+	},
+	"agentConfigModal": {
+		"title": "已安装智能体",
+		"tabs": {
+			"agents": "智能体",
+			"agentsDescription": "管理已安装的智能体",
+			"providers": "提供商",
+			"providersDescription": "管理 AI 提供商"
+		},
+		"installedAgents": "已安装智能体",
+		"availableAgents": "可用智能体",
+		"noAgentsInstalled": "尚未安装任何智能体",
+		"noAgentsAvailable": "暂无可用智能体",
+		"edit": "编辑",
+		"delete": "删除",
+		"createNewAgent": {
+			"title": "创建新智能体",
+			"description": "向编辑器中添加一个基础聊天智能体。",
+			"button": "创建新智能体"
+		},
+		"form": {
+			"name": "名称",
+			"namePlaceholder": "输入智能体名称",
+			"version": "版本",
+			"versionPlaceholder": "输入智能体版本",
+			"description": "描述",
+			"descriptionPlaceholder": "输入智能体描述",
+			"systemPrompt": "系统提示词",
+			"systemPromptPlaceholder": "输入智能体提示词",
+			"provider": "提供商",
+			"providerPlaceholder": "输入提供商",
+			"modelName": "模型名称",
+			"modelNamePlaceholder": "输入模型名称",
+			"model": "模型",
+			"modelPlaceholder": "选择模型",
+			"temperature": "温度",
+			"contextLength": "上下文长度",
+			"contextLengthPlaceholder": "输入上下文长度"
+		},
+		"addAgent": "添加智能体",
+		"installedBy": "由扩展 {extension}（{publisher}）安装",
+		"llmConfig": "LLM 配置：",
+		"toast": {
+			"agentDeleted": "已删除智能体",
+			"agentAdded": "已添加新智能体"
+		},
+		"llmUsage": {
+			"title": "智能体的 LLM 使用情况",
+			"provider": "提供商：",
+			"usedModels": "使用的模型：",
+			"usedByAgents": "被以下智能体使用：",
+			"totalUsageByAgents": "智能体总数：",
+			"agent": "智能体",
+			"totalCost": "总成本",
+			"noData": "暂无使用数据",
+			"apiKey": "API 密钥",
+			"apiKeyNotVisible": "API 密钥在输入后不可见。"
+		}
+	},
+	"appInfoModal": {
+		"title": "应用信息",
+		"developerSettings": "开发者设置",
+		"loading": "加载中...",
+		"metadata": {
+			"id": "ID",
+			"version": "版本",
+			"author": "作者",
+			"license": "许可证",
+			"website": "网站",
+			"readme": "README"
+		},
+		"apiPricing": {
+			"title": "API 计价",
+			"description": "以下为此应用的 API 计费设置。",
+			"endpoint": "端点：",
+			"cost": "费用：",
+			"creditsPerCall": "每次调用消耗积分",
+			"perCall": "每次调用",
+			"noApiPricing": "此应用尚未设置 API 计价。",
+			"noServerFunctions": "未找到此应用的服务器函数。",
+			"costPlaceholder": "每次调用消耗的积分"
+		},
+		"developerMode": {
+			"title": "开发者设置",
+			"appInfo": "应用信息",
+			"appId": "应用 ID",
+			"environmentVariables": "环境变量",
+			"addNewVariable": "添加新变量",
+			"value": "值",
+			"localServer": "本地服务器",
+			"localServerPlaceholder": "输入本地服务器地址（例如：http://localhost:3000）",
+			"envInstructions": "KEY=VALUE，每行一个",
+			"testMode": "测试模式",
+			"testModeDescription": "启用测试模式以使用本地服务器和环境变量",
+			"toast": {
+				"addingVariable": {
+					"title": "正在添加变量",
+					"description": "正在添加环境变量 {key}。"
+				},
+				"variableAdded": {
+					"title": "变量已添加",
+					"description": "环境变量 {key} 添加成功。"
+				},
+				"errorEmptyKey": {
+					"title": "错误",
+					"description": "环境变量键不能为空。"
+				},
+				"settingCost": {
+					"title": "正在设置端点费用",
+					"description": "正在为端点 {endpoint} 设置费用：{cost}。"
+				},
+				"costSet": {
+					"title": "费用已设置",
+					"description": "端点 {endpoint} 的费用已成功设置为 {cost}。"
+				},
+				"costSetError": {
+					"title": "错误",
+					"description": "无法为端点 {endpoint} 设置费用。{error}。"
+				},
+				"deletingApp": {
+					"title": "正在删除应用",
+					"description": "正在删除应用 {name}。"
+				},
+				"appUnpublished": {
+					"title": "应用已取消发布",
+					"description": "应用 {name} 已成功取消发布。"
+				},
+				"unpublishError": {
+					"title": "错误",
+					"description": "无法取消发布应用 {name}。"
+				}
+			}
+		},
+		"dangerZone": {
+			"title": "危险区域",
+			"unpublish": "取消发布",
+			"unpublishConfirm": "确定要取消发布此应用吗？此操作无法撤销。",
+			"confirmUnpublish": "确认取消发布",
+			"cancel": "取消",
+			"deleteApp": "删除应用",
+			"deleteAppDescription": "从你的账号中永久删除此应用",
+			"uninstallApp": "卸载应用",
+			"uninstallAppDescription": "从已安装应用中移除此应用"
+		}
+	},
+	"navSideMenu": {
+		"home": {
+			"label": "首页",
+			"icon": "home"
+		},
+		"projectHome": {
+			"label": "项目主目录",
+			"icon": "folder",
+			"notSet": "你尚未设置项目主目录。请前往设置中进行配置。",
+			"select": {
+				"button": "选择项目主目录"
+			}
+		}
+	},
+	"fileMenu": {
+		"title": "文件",
+		"newProject": "新建项目",
+		"openProject": "打开项目"
+	},
+	"viewMenu": {
+		"title": "视图",
+		"commandViewer": "命令视图",
+		"console": "控制台",
+		"importWorkflow": {
+			"title": "导入工作流",
+			"invalidFile": "无效的工作流文件",
+			"readError": "读取工作流文件时出错"
+		}
+	},
+	"fsExplorer": {
+		"newFolder": "新建文件夹",
+		"folderName": "文件夹名称",
+		"newFile": "新建文件",
+		"fileName": "文件名称",
+		"selectOneFolder": "请仅选择一个文件夹，以在其内部创建新文件夹。",
+		"selectOneFolderForFile": "请仅选择一个文件夹，以在其内部创建新文件。",
+		"emptyContent": "内容为空。新建一个文件以开始。"
+	},
+	"projectExplorer": {
+		"title": "项目",
+		"newProject": {
+			"button": "新建项目"
+		},
+		"signInMessage": "登录以查看你的项目，或使用桌面客户端打开本地项目。"
+	},
+	"viewArea": {
+		"unknownViewType": "未知视图类型",
+		"noViewSelected": "尚未选择视图"
+	},
+	"projectView": {
+		"title": "项目",
+		"createWorkflow": {
+			"button": "创建工作流"
+		},
+		"exploreMarketplace": {
+			"button": "浏览市场"
+		}
+	},
+	"dnd": {
+		"openApp": {
+			"failed": "打开应用失败",
+			"invalidData": "无效的应用数据"
+		},
+		"linkApp": {
+			"failed": "关联应用失败",
+			"invalidData": "无效的应用数据"
+		},
+		"openFile": {
+			"failed": "打开文件失败",
+			"invalidData": "无效的文件数据"
+		},
+		"invalidTarget": {
+			"cannotDropFile": "此位置无法接收文件",
+			"somethingWrong": "出现了一些问题，请重试。",
+			"cannotDrop": "无法在此处放置"
+		}
+	},
+	"workspaceSettingsModal": {
+		"title": "工作区设置",
+		"selectWorkspace": "选择工作区",
+		"localComputer": "本地计算机",
+		"createNew": "新建",
+		"workspaceName": "工作区名称",
+		"workspaceSpecs": "工作区规格",
+		"storageGB": "存储（GB）",
+		"moreToCome": "更多功能即将到来",
+		"useWorkspace": "使用工作区",
+		"exitWorkspace": "退出工作区",
+		"start": "启动",
+		"stop": "停止",
+		"update": "更新",
+		"delete": "删除",
+		"create": "创建",
+		"unpublishWorkspace": "取消发布工作区",
+		"toast": {
+			"unknownPlatform": "未知平台。",
+			"workspaceNotAvailable": "工作区不可用。",
+			"workspaceNameRequired": "工作区名称为必填项。",
+			"workspaceExists": "工作区已存在，请改为更新。",
+			"updatingWorkspace": {
+				"title": "正在更新工作区",
+				"description": "正在更新工作区 {name}。"
+			},
+			"workspaceUpdated": {
+				"title": "工作区已更新",
+				"description": "工作区 {name} 已成功更新。"
+			},
+			"deletingWorkspace": {
+				"title": "正在删除工作区",
+				"description": "正在删除工作区 {name}。"
+			},
+			"workspaceDeleted": {
+				"title": "工作区已删除",
+				"description": "工作区 {name} 已成功删除。"
+			},
+			"errorDeleting": {
+				"title": "删除工作区时出错"
+			},
+			"creatingWorkspace": {
+				"title": "正在创建工作区",
+				"description": "正在创建工作区 {name}。规格：{cpu} vCPU，{ram} 内存，{storage} 存储。"
+			},
+			"workspaceCreated": {
+				"title": "工作区已创建",
+				"description": "工作区 {name} 已成功创建。"
+			},
+			"errorCreating": {
+				"title": "创建工作区时出错"
+			},
+			"stoppingWorkspace": {
+				"title": "正在停止工作区",
+				"description": "正在停止工作区 {name}。"
+			},
+			"workspaceStopped": {
+				"title": "工作区已停止",
+				"description": "工作区 {name} 已成功停止。"
+			},
+			"startingWorkspace": {
+				"title": "正在启动工作区",
+				"description": "正在启动工作区 {name}。"
+			},
+			"workspaceStarted": {
+				"title": "工作区已启动",
+				"description": "工作区 {name} 已成功启动。"
+			}
+		}
+	},
+	"qrDisplay": {
+		"title": "扫描二维码",
+		"download": "下载",
+		"loadingError": "二维码仍在生成中，请稍候。"
+	},
+	"sharingModal": {
+		"title": "分享你的 {name} 工作区",
+		"visibility": "可见性",
+		"visibilityPlaceholder": "选择可见性",
+		"inviteCode": "邀请码",
+		"selectVisibility": "请选择一个可见性选项以查看分享方式。",
+		"workspacePrivate": "你的工作区为私有。",
+		"tabs": {
+			"qrCode": "二维码",
+			"qrCodeDescription": "通过二维码分享工作区",
+			"url": "URL",
+			"urlDescription": "通过链接分享工作区"
+		},
+		"qrCode": {
+			"description": "使用此二维码分享你的工作区"
+		},
+		"url": {
+			"description": "使用此链接分享你的工作区",
+			"copy": "复制"
+		},
+		"toast": {
+			"fetchError": "获取扩展分享信息失败",
+			"urlCopied": "链接已复制到剪贴板"
+		}
+	},
+	"workflowPreviewCard": {
+		"open": "打开",
+		"clone": "克隆"
+	},
+	"appGallery": {
+		"title": "应用",
+		"noApps": "未找到应用"
+	},
+	"workflowGallery": {
+		"title": "工作流",
+		"noWorkflows": "未找到工作流"
+	},
+	"featuredGallery": {
+		"title": "精选"
+	},
+	"statusScreens": {
+		"welcome": {
+			"title": "欢迎使用 Pulse Editor",
+			"subtitle": "从创建新项目或打开现有项目开始",
+			"taglineLine1": "你的下一代 AI 操作系统，由",
+			"taglineLine2": "Vibe Coded 应用和工作流驱动"
+		},
+		"wip": {
+			"title": "开发中",
+			"subtitle": "此功能即将推出"
+		},
+		"loading": {
+			"title": "加载中...",
+			"subtitle": "请稍候"
+		},
+		"notAuthorized": {
+			"title": "无访问权限",
+			"subtitle": "你没有访问此资源的权限"
+		},
+		"error": {
+			"title": "错误",
+			"subtitle": "发生了某些错误"
+		}
+	},
+	"appLoader": {
+		"loading": "正在加载应用...",
+		"failed": "加载应用失败"
+	},
+	"consolePanelView": {
+		"title": "控制台",
+		"clear": "清空",
+		"noOutput": "暂无输出"
+	},
+	"tabViewManager": {
+		"openProject": "打开项目",
+		"untitled": "未命名",
+		"newTab": "新建标签页"
+	},
+	"voiceRecorder": {
+		"listening": "正在聆听",
+		"thinking": "正在思考",
+		"speaking": "正在讲话",
+		"loadingMic": "正在加载麦克风",
+		"waiting": "等待中"
+	},
+	"commandExecutor": {
+		"commandExecuted": "命令已执行",
+		"commandExecutionFailed": "命令执行失败"
+	},
+	"planPicker": {
+		"freeDescription": "免费：使用功能受限的免费套餐。你也可以自托管服务器以获得无限制的 AI 功能访问。",
+		"readMoreOpenSource": "了解更多我们的开源承诺"
+	},
+	"projectItem": {
+		"projectSettings": "项目设置",
+		"selectMultiple": "多选",
+		"created": "创建时间："
+	},
+	"fsExplorer": {
+		"newFolder": "新建文件夹",
+		"folderName": "文件夹名称",
+		"newFile": "新建文件",
+		"fileName": "文件名称",
+		"selectOneFolder": "请仅选择一个文件夹，以在其内部创建新文件夹。",
+		"selectOneFolderForFile": "请仅选择一个文件夹，以在其内部创建新文件。",
+		"emptyContent": "内容为空。新建一个文件以开始。",
+		"noAppSelected": "没有可处理此文件的应用。",
+		"selectNodeInCanvas": "请在画布中选择一个节点以查看文件",
+		"noWorkspaceSelected": "尚未选择工作区"
+	},
+	"treeView": {
+		"contextMenu": {
+			"openInCanvas": "在画布中打开",
+			"openInApp": "在应用中打开",
+			"rename": "重命名",
+			"delete": "删除",
+			"loading": "加载中..."
+		},
+		"toast": {
+			"newFolderCreated": "已创建新文件夹",
+			"failedToCreateFolder": "创建文件夹失败",
+			"newFileCreated": "已创建新文件",
+			"failedToCreateFile": "创建文件失败",
+			"fileRenamed": "文件已重命名",
+			"failedToRename": "重命名文件失败",
+			"fileDeleted": "文件已删除",
+			"failedToDelete": "删除文件失败"
+		}
+	},
+	"workspaceExplorer": {
+		"workspacePaused": "工作区当前已暂停。请重新启动工作区以访问项目文件。",
+		"startWorkspace": "启动工作区",
+		"workspaceSettings": "工作区设置",
+		"osFeatures": "如需与操作系统功能交互，请在桌面客户端中打开，或配置远程工作区。",
+		"workspaceStarting": "工作区正在启动...",
+		"viewProjectContent": "要在工作区中查看项目内容，请先选择一个项目。",
+		"toast": {
+			"noWorkspace": "没有可启动的工作区。",
+			"startingWorkspace": "正在启动工作区...",
+			"workspaceStarted": "工作区已启动。"
+		}
+	},
+	"appExplorer": {
+		"dragTip": "点击或拖拽扩展以打开。",
+		"exploreWorkflowsApps": "浏览社区工作流 / 应用"
+	},
+	"appInfoModalExtra": {
+		"developerSettings": "开发者设置",
+		"id": "ID",
+		"version": "版本",
+		"author": "作者",
+		"license": "许可证",
+		"website": "网站",
+		"readme": "README",
+		"noReadme": "暂无 README",
+		"apiPricing": "API 计价",
+		"apiPricingDescription": "以下为此应用的 API 计费设置。",
+		"endpoint": "端点：",
+		"cost": "费用：",
+		"credits": "积分",
+		"perCall": "每次调用",
+		"noApiPricing": "此应用尚未设置 API 计价。",
+		"appInfo": "应用信息",
+		"appID": "应用 ID",
+		"environmentVariables": "环境变量",
+		"addNewVariable": "添加新变量",
+		"value": "值",
+		"error": "错误",
+		"envKeyEmpty": "环境变量键不能为空。",
+		"addingVariable": "正在添加变量",
+		"addingVariableDescription": "正在添加环境变量 {key}。",
+		"variableAdded": "变量已添加",
+		"variableAddedDescription": "环境变量 {key} 添加成功。",
+		"apiPricingSetup": "你可以在此为应用 API 调用设置积分消耗。一旦设置，将无法再次更改。",
+		"noServerFunctions": "未找到此应用的服务器函数。",
+		"dangerZone": "危险区域",
+		"confirmUnpublish": "确定要取消发布此应用吗？此操作无法撤销。",
+		"unpublish": "取消发布",
+		"deletingApp": "正在删除应用",
+		"deletingAppDescription": "正在删除应用 {name}。",
+		"failedToUnpublish": "无法取消发布应用 {name}。",
+		"appUnpublished": "应用已取消发布",
+		"appUnpublishedDescription": "应用 {name} 已成功取消发布。",
+		"confirmUnpublishButton": "确认取消发布",
+		"settingEndpointCost": "正在设置端点费用",
+		"settingEndpointCostDescription": "正在为端点 {endpoint} 设置费用：{cost}。",
+		"failedToSetCost": "无法为端点 {endpoint} 设置费用。{error}。",
+		"costSet": "费用已设置",
+		"costSetDescription": "端点 {endpoint} 的费用已成功设置为 {cost}。",
+		"creditsPerCall": "每次调用消耗积分",
+		"creditsCostPerCall": "每次调用的积分消耗"
+	},
+	"projectPreviewCard": {
+		"workspace": "工作区：",
+		"undefined": "未定义"
+	},
+	"appPreviewCard": {
+		"requiresWorkspace": "此应用需要在打开工作区的情况下才能正常运行。",
+		"requiresWorkspaceLabel": "需要工作区",
+		"use": "使用",
+		"details": "详情",
+		"install": "安装",
+		"upgrade": "升级",
+		"uninstall": "卸载",
+		"open": "打开",
+		"installed": "已安装",
+		"outdated": "已过期",
+		"compatible": "兼容",
+		"extensionInstalled": "扩展已安装",
+		"extensionInstalledDescription": "扩展 {id} 安装成功。",
+		"extensionUpgraded": "扩展已升级",
+		"extensionUpgradedDescription": "扩展 {id} 升级成功。",
+		"extensionUninstalled": "扩展已卸载",
+		"extensionUninstalledDescription": "扩展 {id} 卸载成功。",
+		"mfIncompatible": "此应用已过期，不再是有效的模块联邦应用。请更新到最新版本。",
+		"hostMFVersion": "宿主 MF 版本：",
+		"appMFVersion": "应用 MF 版本：",
+		"libIncompatible": "此应用依赖的库版本已过期，可能无法正常工作。请更新到最新版本。",
+		"hostLibVersion": "宿主库版本：",
+		"appLibVersion": "应用库版本：",
+		"compatibleTooltip": "此应用的模块联邦版本（{mfVersion}）和库版本（{libVersion}）与宿主版本一致，应该可以正常工作。",
+		"enabled": "已启用",
+		"disabled": "已禁用"
+	},
+	"extensionCard": {
+		"extensionUninstalled": "扩展已卸载",
+		"uninstall": "卸载",
+		"install": "安装",
+		"update": "更新",
+		"enable": "启用",
+		"disable": "禁用",
+		"details": "详情",
+		"unavailable": "不可用",
+		"mfVersion": "MF 版本",
+		"libVersion": "库版本",
+		"updatesAvailable": "有可用更新"
+	},
+	"nodeHandle": {
+		"ariaLabel": "点击节点句柄以打开节点菜单",
+		"required": "*必填"
+	},
+	"draggableItem": {
+		"ariaLabel": "拖拽以移动"
+	}
+}

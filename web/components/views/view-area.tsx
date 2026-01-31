@@ -1,3 +1,5 @@
+'use client'
+
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
 import { createAppViewId } from "@/lib/views/view-helpers";

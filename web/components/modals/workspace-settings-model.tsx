@@ -19,6 +19,7 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useContext, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -36,6 +37,7 @@ export default function WorkspaceSettingsModal({
   initialWorkspace?: WorkspaceConfig;
   isShowUseButton?: boolean;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { platformApi } = usePlatformApi();
@@ -100,27 +102,27 @@ export default function WorkspaceSettingsModal({
 
   async function handleUpdateWorkspace() {
     if (!platformApi) {
-      toast.error("Unknown platform.");
+      toast.error(t("workspaceSettingsModal.toast.unknownPlatform"));
       return;
     } else if (!selectedWorkspace) {
-      toast.error("Workspace is not available.");
+      toast.error(t("workspaceSettingsModal.toast.workspaceNotAvailable"));
       return;
     } else if (workspaceName === "") {
-      toast.error("Workspace Name is required.");
+      toast.error(t("workspaceSettingsModal.toast.workspaceNameRequired"));
       return;
     }
 
     // Update workspace
     addToast({
-      title: "Updating workspace",
-      description: `Updating workspace ${workspaceName}.`,
+      title: t("workspaceSettingsModal.toast.updatingWorkspace.title"),
+      description: t("workspaceSettingsModal.toast.updatingWorkspace.description", { name: workspaceName }),
     });
 
     await updateWorkspace(selectedWorkspace.id, workspaceName);
 
     addToast({
-      title: "Workspace updated",
-      description: `Workspace ${workspaceName} has been updated successfully.`,
+      title: t("workspaceSettingsModal.toast.workspaceUpdated.title"),
+      description: t("workspaceSettingsModal.toast.workspaceUpdated.description", { name: workspaceName }),
       color: "success",
     });
     onClose();
@@ -128,30 +130,30 @@ export default function WorkspaceSettingsModal({
 
   async function handleDeleteWorkspace() {
     if (!platformApi) {
-      toast.error("Unknown platform.");
+      toast.error(t("workspaceSettingsModal.toast.unknownPlatform"));
       return;
     } else if (!selectedWorkspace) {
-      toast.error("Workspace is not available.");
+      toast.error(t("workspaceSettingsModal.toast.workspaceNotAvailable"));
       return;
     }
     try {
       // Delete workspace
       addToast({
-        title: "Deleting workspace",
-        description: `Deleting workspace ${workspaceName}`,
+        title: t("workspaceSettingsModal.toast.deletingWorkspace.title"),
+        description: t("workspaceSettingsModal.toast.deletingWorkspace.description", { name: workspaceName }),
       });
 
       await deleteWorkspace(selectedWorkspace.id);
       addToast({
-        title: "Workspace deleted",
-        description: `Workspace ${selectedWorkspace.name} has been deleted successfully.`,
+        title: t("workspaceSettingsModal.toast.workspaceDeleted.title"),
+        description: t("workspaceSettingsModal.toast.workspaceDeleted.description", { name: selectedWorkspace.name }),
         color: "success",
       });
 
       onClose();
     } catch (error: any) {
       addToast({
-        title: "Error deleting workspace",
+        title: t("workspaceSettingsModal.toast.errorDeleting.title"),
         description: error.message,
         color: "danger",
       });
@@ -160,13 +162,13 @@ export default function WorkspaceSettingsModal({
 
   async function handleCreateWorkspace() {
     if (!platformApi) {
-      toast.error("Unknown platform.");
+      toast.error(t("workspaceSettingsModal.toast.unknownPlatform"));
       return;
     } else if (selectedWorkspace) {
-      toast.error("Workspace already exists. Please update it instead.");
+      toast.error(t("workspaceSettingsModal.toast.workspaceExists"));
       return;
     } else if (workspaceName === "") {
-      toast.error("Workspace Name is required.");
+      toast.error(t("workspaceSettingsModal.toast.workspaceNameRequired"));
       return;
     }
 
@@ -176,22 +178,25 @@ export default function WorkspaceSettingsModal({
       const volumeSize = getUnitFromUnitString(storage.toString(), "Gi");
 
       addToast({
-        title: "Creating workspace",
-        description: `Creating workspace ${workspaceName}. Specifications: ${
-          selectedSpec.vCPU
-        } vCPU, ${selectedSpec.ram} RAM, ${volumeSize} storage.`,
+        title: t("workspaceSettingsModal.toast.creatingWorkspace.title"),
+        description: t("workspaceSettingsModal.toast.creatingWorkspace.description", {
+          name: workspaceName,
+          cpu: selectedSpec.vCPU,
+          ram: selectedSpec.ram,
+          storage: volumeSize
+        }),
       });
       await createWorkspace(workspaceName, specs, volumeSize);
       addToast({
-        title: "Workspace created",
-        description: `Workspace ${workspaceName} has been created successfully.`,
+        title: t("workspaceSettingsModal.toast.workspaceCreated.title"),
+        description: t("workspaceSettingsModal.toast.workspaceCreated.description", { name: workspaceName }),
         color: "success",
       });
       onClose();
       setIsCreateNew(false);
     } catch (error: any) {
       addToast({
-        title: "Error creating workspace",
+        title: t("workspaceSettingsModal.toast.errorCreating.title"),
         description: error.message,
         color: "danger",
       });
@@ -200,34 +205,34 @@ export default function WorkspaceSettingsModal({
 
   async function handleStopWorkspace() {
     if (!selectedWorkspace) {
-      toast.error("Workspace is not available.");
+      toast.error(t("workspaceSettingsModal.toast.workspaceNotAvailable"));
       return;
     }
     addToast({
-      title: "Stopping workspace",
-      description: `Stopping workspace ${selectedWorkspace.name}.`,
+      title: t("workspaceSettingsModal.toast.stoppingWorkspace.title"),
+      description: t("workspaceSettingsModal.toast.stoppingWorkspace.description", { name: selectedWorkspace.name }),
     });
     await stopWorkspace(selectedWorkspace.id);
     addToast({
-      title: "Workspace stopped",
-      description: `Workspace ${selectedWorkspace.name} has been stopped successfully.`,
+      title: t("workspaceSettingsModal.toast.workspaceStopped.title"),
+      description: t("workspaceSettingsModal.toast.workspaceStopped.description", { name: selectedWorkspace.name }),
       color: "success",
     });
   }
 
   async function handleResumeWorkspace() {
     if (!selectedWorkspace) {
-      toast.error("Workspace is not available.");
+      toast.error(t("workspaceSettingsModal.toast.workspaceNotAvailable"));
       return;
     }
     addToast({
-      title: "Starting workspace",
-      description: `Starting workspace ${selectedWorkspace.name}.`,
+      title: t("workspaceSettingsModal.toast.startingWorkspace.title"),
+      description: t("workspaceSettingsModal.toast.startingWorkspace.description", { name: selectedWorkspace.name }),
     });
     await startWorkspace(selectedWorkspace.id);
     addToast({
-      title: "Workspace started",
-      description: `Workspace ${selectedWorkspace.name} has been started successfully.`,
+      title: t("workspaceSettingsModal.toast.workspaceStarted.title"),
+      description: t("workspaceSettingsModal.toast.workspaceStarted.description", { name: selectedWorkspace.name }),
       color: "success",
     });
   }
@@ -248,7 +253,7 @@ export default function WorkspaceSettingsModal({
   }
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title="Workspace Settings">
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={t("workspaceSettingsModal.title")}>
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
         <div className="flex w-full justify-center px-8">
           <Select
@@ -258,8 +263,8 @@ export default function WorkspaceSettingsModal({
               mainWrapper: "h-10",
               trigger: "py-0.5 min-h-10",
             }}
-            label="Select Workspace"
-            placeholder="Select Workspace"
+            label={t("workspaceSettingsModal.selectWorkspace")}
+            placeholder={t("workspaceSettingsModal.selectWorkspace")}
             isLoading={
               !editorContext?.editorStates?.isSigningIn && !cloudWorkspaces
             }
@@ -292,7 +297,7 @@ export default function WorkspaceSettingsModal({
           >
             <>
               {getPlatform() === PlatformEnum.Electron && (
-                <SelectItem key={"__internal-local"}>Local Computer</SelectItem>
+                <SelectItem key={"__internal-local"}>{t("workspaceSettingsModal.localComputer")}</SelectItem>
               )}
               {cloudWorkspaces?.map((ws) => (
                 <SelectItem key={ws.id}>{ws.name}</SelectItem>
@@ -307,7 +312,7 @@ export default function WorkspaceSettingsModal({
                   </div>
                 }
               >
-                Create New
+                {t("workspaceSettingsModal.createNew")}
               </SelectItem>
             </>
           </Select>
@@ -317,13 +322,13 @@ export default function WorkspaceSettingsModal({
           <>
             <Divider />
             <Input
-              label="Workspace Name"
+              label={t("workspaceSettingsModal.workspaceName")}
               isRequired
               value={workspaceName}
               onValueChange={setWorkspaceName}
             />
             <Select
-              label="Workspace Specs"
+              label={t("workspaceSettingsModal.workspaceSpecs")}
               selectedKeys={[selectedSpec.key]}
               onSelectionChange={(key) => {
                 const spec = specsOptions.find(
@@ -343,12 +348,12 @@ export default function WorkspaceSettingsModal({
                   >{`${option.vCPU} vCPU, ${option.ram} GB RAM`}</SelectItem>
                 ))}
                 <SelectItem isReadOnly key={"more to come"}>
-                  <p className="pl-5 text-center">More to come</p>
+                  <p className="pl-5 text-center">{t("workspaceSettingsModal.moreToCome")}</p>
                 </SelectItem>
               </>
             </Select>
             <NumberInput
-              label="Storage (GB)"
+              label={t("workspaceSettingsModal.storageGB")}
               value={storage}
               onValueChange={setStorage}
               minValue={2}
@@ -360,32 +365,32 @@ export default function WorkspaceSettingsModal({
                 {isShowUseButton &&
                   (isWorkspaceCurrentlyOpen ? (
                     <Button onPress={handleExitWorkspace}>
-                      Exit Workspace
+                      {t("workspaceSettingsModal.exitWorkspace")}
                     </Button>
                   ) : (
-                    <Button onPress={handleUseWorkspace}>Use Workspace</Button>
+                    <Button onPress={handleUseWorkspace}>{t("workspaceSettingsModal.useWorkspace")}</Button>
                   ))}
 
                 {isEdited && (
-                  <Button onPress={handleUpdateWorkspace}>Update</Button>
+                  <Button onPress={handleUpdateWorkspace}>{t("common.update")}</Button>
                 )}
 
                 {isWorkspaceRunning ? (
                   <Button onPress={handleStopWorkspace} color="warning">
-                    Stop
+                    {t("workspaceSettingsModal.stop")}
                   </Button>
                 ) : (
                   <Button onPress={handleResumeWorkspace} color="primary">
-                    Start
+                    {t("workspaceSettingsModal.start")}
                   </Button>
                 )}
 
                 <Button color="danger" onPress={handleDeleteWorkspace}>
-                  Delete
+                  {t("common.delete")}
                 </Button>
               </div>
             ) : (
-              <Button onPress={handleCreateWorkspace}>Create</Button>
+              <Button onPress={handleCreateWorkspace}>{t("common.create")}</Button>
             )}
           </>
         )}

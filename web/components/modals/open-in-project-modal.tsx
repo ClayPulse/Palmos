@@ -6,6 +6,7 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { useTranslations } from 'next-intl';
 import {
   AppViewConfig,
   ExtensionApp,
@@ -37,6 +38,7 @@ export default function OpenInProjectModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { platformApi } = usePlatformApi();
@@ -88,8 +90,8 @@ export default function OpenInProjectModal({
         }
 
         addToast({
-          title: "Preparing workspace",
-          description: "Waiting for workspace to be ready...",
+          title: t('openInProjectModal.toast.preparingWorkspace.title'),
+          description: t('openInProjectModal.toast.preparingWorkspace.description'),
         });
       }
     }
@@ -128,8 +130,8 @@ export default function OpenInProjectModal({
     setIsLoading(true);
     if (!selectedProject) {
       addToast({
-        title: "Failed to open.",
-        description: "No project selected.",
+        title: t('openInProjectModal.toast.failedToOpen.title'),
+        description: t('openInProjectModal.toast.failedToOpen.description'),
         color: "danger",
       });
       return;
@@ -156,8 +158,8 @@ export default function OpenInProjectModal({
       );
 
       addToast({
-        title: "App opened",
-        description: "App has been opened successfully.",
+        title: t('openInProjectModal.toast.appOpened.title'),
+        description: t('openInProjectModal.toast.appOpened.description'),
         color: "success",
       });
     } else if (
@@ -168,13 +170,13 @@ export default function OpenInProjectModal({
       );
 
       addToast({
-        title: "Workflow opened",
-        description: "Workflow has been opened successfully.",
+        title: t('openInProjectModal.toast.workflowOpened.title'),
+        description: t('openInProjectModal.toast.workflowOpened.description'),
         color: "success",
       });
     } else {
       addToast({
-        title: "No app or workflow to open.",
+        title: t('openInProjectModal.toast.noAppOrWorkflow'),
         color: "danger",
       });
     }
@@ -208,15 +210,15 @@ export default function OpenInProjectModal({
   async function createNewWorkspace() {
     if (!platformApi) {
       addToast({
-        title: "Unable to create workspace.",
-        description: "Unknown platform.",
+        title: t('openInProjectModal.toast.unableToCreate.title'),
+        description: t('openInProjectModal.toast.unableToCreate.unknownPlatform'),
         color: "danger",
       });
       return;
     } else if (workspaceName === "") {
       addToast({
-        title: "Unable to create workspace.",
-        description: "Workspace Name is required.",
+        title: t('openInProjectModal.toast.unableToCreate.title'),
+        description: t('openInProjectModal.toast.unableToCreate.nameRequired'),
         color: "danger",
       });
       return;
@@ -228,21 +230,24 @@ export default function OpenInProjectModal({
       const volumeSize = getUnitFromUnitString(storage.toString(), "Gi");
 
       addToast({
-        title: "Creating workspace",
-        description: `Creating workspace ${workspaceName}. Specifications: ${
-          selectedSpec.vCPU
-        } vCPU, ${selectedSpec.ram} RAM, ${volumeSize} storage.`,
+        title: t('openInProjectModal.toast.creatingWorkspace.title'),
+        description: t('openInProjectModal.toast.creatingWorkspace.description', {
+          name: workspaceName,
+          cpu: selectedSpec.vCPU,
+          ram: selectedSpec.ram,
+          storage: volumeSize
+        }),
       });
       await createWorkspace(workspaceName, specs, volumeSize);
       addToast({
-        title: "Workspace created",
-        description: `Workspace ${workspaceName} has been created successfully.`,
+        title: t('openInProjectModal.toast.workspaceCreated.title'),
+        description: t('openInProjectModal.toast.workspaceCreated.description', { name: workspaceName }),
         color: "success",
       });
       setIsCreateNewWorkspace(false);
     } catch (error: any) {
       addToast({
-        title: "Error creating workspace",
+        title: t('openInProjectModal.toast.errorCreating.title'),
         description: error.message,
         color: "danger",
       });
@@ -250,13 +255,13 @@ export default function OpenInProjectModal({
   }
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title="Open In Project">
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={t('openInProjectModal.title')}>
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
         {isCreateNewProject ? (
           <div className="flex w-full flex-col items-center gap-y-1">
-            <p>Open in new project</p>
+            <p>{t('openInProjectModal.newProject')}</p>
             <Input
-              label="Project Name"
+              label={t('openInProjectModal.projectName')}
               isRequired
               value={projectName}
               onValueChange={setProjectName}
@@ -264,9 +269,9 @@ export default function OpenInProjectModal({
           </div>
         ) : (
           <div className="flex w-full flex-col items-center gap-y-1">
-            <p>Open in existing project</p>
+            <p>{t('openInProjectModal.openExisting')}</p>
             <Select
-              label="Select Project"
+              label={t('openInProjectModal.selectProjectFolder')}
               isRequired
               value={selectedProject?.name ?? undefined}
               onSelectionChange={(value) => {
@@ -292,8 +297,7 @@ export default function OpenInProjectModal({
         {isUseWorkspace && (
           <div className="flex flex-col items-center gap-y-1">
             <p>
-              This app/workflow requires a workspace to be opened in order to
-              function properly.
+              {t('openInProjectModal.workspaceRequired')}
             </p>
 
             <div className="flex w-full justify-center px-8">
@@ -304,8 +308,8 @@ export default function OpenInProjectModal({
                   mainWrapper: "h-10",
                   trigger: "py-0.5 min-h-10",
                 }}
-                label="Select Workspace"
-                placeholder="Select Workspace"
+                label={t('openInProjectModal.selectWorkspace')}
+                placeholder={t('openInProjectModal.selectWorkspace')}
                 isLoading={
                   !editorContext?.editorStates?.isSigningIn && !cloudWorkspaces
                 }
@@ -342,7 +346,7 @@ export default function OpenInProjectModal({
                 <>
                   {getPlatform() === PlatformEnum.Electron && (
                     <SelectItem key={"__internal-local"}>
-                      Local Computer
+                      {t('openInProjectModal.localComputer')}
                     </SelectItem>
                   )}
                   {cloudWorkspaces?.map((workspace) => (
@@ -358,7 +362,7 @@ export default function OpenInProjectModal({
                       </div>
                     }
                   >
-                    Create New
+                    {t('common.create')}
                   </SelectItem>
                 </>
               </Select>
@@ -368,13 +372,13 @@ export default function OpenInProjectModal({
               <>
                 <Divider />
                 <Input
-                  label="Workspace Name"
+                  label={t('openInProjectModal.workspaceName')}
                   isRequired
                   value={workspaceName}
                   onValueChange={setWorkspaceName}
                 />
                 <Select
-                  label="Workspace Specs"
+                  label={t('openInProjectModal.workspaceSpecs')}
                   selectedKeys={[selectedSpec.key]}
                   onSelectionChange={(key) => {
                     const spec = specsOptions.find(
@@ -394,12 +398,12 @@ export default function OpenInProjectModal({
                       >{`${option.vCPU} vCPU, ${option.ram} GB RAM`}</SelectItem>
                     ))}
                     <SelectItem isReadOnly key={"more to come"}>
-                      <p className="pl-5 text-center">More to come</p>
+                      <p className="pl-5 text-center">{t('openInProjectModal.moreToCome')}</p>
                     </SelectItem>
                   </>
                 </Select>
                 <NumberInput
-                  label="Storage (GB)"
+                  label={t('openInProjectModal.storageGB')}
                   value={storage}
                   onValueChange={setStorage}
                   minValue={2}
@@ -418,7 +422,7 @@ export default function OpenInProjectModal({
               color="primary"
               isDisabled={isLoading}
             >
-              Create
+              {t('openInProjectModal.create')}
             </Button>
           ) : (
             <Button
@@ -426,7 +430,7 @@ export default function OpenInProjectModal({
               color="primary"
               isDisabled={!selectedProject || isLoading}
             >
-              Open
+              {t('openInProjectModal.open')}
             </Button>
           )}
 
@@ -435,14 +439,14 @@ export default function OpenInProjectModal({
               onPress={() => setIsCreateNewProject(false)}
               isDisabled={isLoading}
             >
-              Select Existing Project
+              {t('openInProjectModal.selectProjectFolder')}
             </Button>
           ) : (
             <Button
               onPress={() => setIsCreateNewProject(true)}
               isDisabled={isLoading}
             >
-              Create New Project
+              {t('openInProjectModal.newProject')}
             </Button>
           )}
         </div>
@@ -450,7 +454,7 @@ export default function OpenInProjectModal({
         {isLoading && (
           <div className="flex items-center gap-x-2">
             <Spinner />
-            <p>Getting things ready...</p>
+            <p>{t('openInProjectModal.gettingReady')}</p>
           </div>
         )}
       </div>

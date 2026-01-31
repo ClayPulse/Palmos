@@ -7,9 +7,11 @@ import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { addToast, Button } from "@heroui/react";
 import { useContext, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import FileSystemExplorer from "../file-system/fs-explorer";
 
 export default function WorkspaceExplorer() {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const workspaceHook = useWorkspace();
@@ -72,43 +74,42 @@ export default function WorkspaceExplorer() {
             workspaceHook.workspace?.status === "paused" ? (
               <div className="flex h-full flex-col items-center justify-center px-4 pb-24 gap-y-1">
                 <p className="text-center">
-                  The workspace is currently paused. Please resume the workspace
-                  to access project files.
+                  {t("workspaceExplorer.workspacePaused")}
                 </p>
                 <Button
                   onPress={async () => {
                     if (!workspaceHook.workspace) {
                       addToast({
-                        title: "No workspace to start.",
+                        title: t("workspaceExplorer.toast.noWorkspace"),
                         color: "danger",
                       });
                       return;
                     }
 
                     addToast({
-                      title: "Starting workspace...",
+                      title: t("workspaceExplorer.toast.startingWorkspace"),
                     });
                     await workspaceHook.startWorkspace(
                       workspaceHook.workspace.id,
                     );
                     addToast({
-                      title: "Workspace started.",
+                      title: t("workspaceExplorer.toast.workspaceStarted"),
                       color: "success",
                     });
                     await refreshWorkspaceContent();
                   }}
                 >
-                  Start Workspace
+                  {t("workspaceExplorer.startWorkspace")}
                 </Button>
                 <Button onPress={handleOpenWorkspaceSettingsModal}>
                   <Icon name="settings" variant="round" />
-                  <p>Workspace Settings</p>
+                  <p>{t("workspaceExplorer.workspaceSettings")}</p>
                 </Button>
               </div>
             ) : !isWorkspaceHealthy &&
               getPlatform() !== PlatformEnum.Electron ? (
               <div className="h-full w-full items-center justify-center">
-                <Loading text="Workspace is starting..." />
+                <Loading text={t("workspaceExplorer.workspaceStarting")} />
               </div>
             ) : (
               <FileSystemExplorer
@@ -126,13 +127,12 @@ export default function WorkspaceExplorer() {
               {!workspaceHook.workspace && (
                 <Button onPress={handleOpenWorkspaceSettingsModal}>
                   <Icon name="settings" variant="round" />
-                  <p>Workspace Settings</p>
+                  <p>{t("workspaceExplorer.workspaceSettings")}</p>
                 </Button>
               )}
 
               <p className="text-center">
-                To interact with OS features, please open in desktop client or
-                configure a remote workspace.
+                {t("workspaceExplorer.osFeatures")}
               </p>
             </div>
           )}
@@ -140,7 +140,7 @@ export default function WorkspaceExplorer() {
       ) : (
         <div className="flex h-full flex-col items-center justify-center px-4 pb-24">
           <p>
-            To view project content in workspace, please select a project first.
+            {t("workspaceExplorer.viewProjectContent")}
           </p>
         </div>
       )}

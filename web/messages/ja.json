@@ -1,0 +1,1072 @@
+{
+	"common": {
+		"signIn": "サインイン",
+		"signOut": "サインアウト",
+		"save": "保存",
+		"cancel": "キャンセル",
+		"close": "閉じる",
+		"delete": "削除",
+		"edit": "編集",
+		"share": "共有",
+		"shareApp": "アプリを共有",
+		"create": "作成",
+		"open": "開く",
+		"confirm": "確認",
+		"update": "更新",
+		"publish": "公開",
+		"add": "追加",
+		"enter": "入力"
+	},
+	"navigation": {
+		"connectedToCloudAI": "Cloud AI に接続済み",
+		"offline": "オフライン",
+		"language": {
+			"title": "言語"
+		}
+	},
+	"settings": {
+		"editorSettings": "エディター設定",
+		"generalSettings": "一般設定",
+		"aiSettings": "AI 設定",
+		"securitySettings": "セキュリティ設定",
+		"projectHomePath": "プロジェクトホームパス",
+		"projectHomeDescription": "すべてのプロジェクトはこのフォルダーに保存されます。",
+		"selectProjectHomePath": "プロジェクトホームパスを選択",
+		"environmentVariables": "環境変数（フロントエンド）：",
+		"backendEnvVariablesWarning": "バックエンドの環境変数を設定するには、拡張アプリの設定から行ってください。",
+		"addNewVariable": "新しい変数を追加",
+		"value": "値",
+		"restartToApply": "再起動して反映",
+		"useManagedAIEndpoints": "マネージド AI エンドポイントを使用",
+		"managedCloudDescription": "マネージドクラウドで Pulse Editor のフルパワーを即座に解放しましょう。超高速な AI アシスト、クロスプラットフォーム同期、クリエイティブツールにより、常にフロー状態を維持できます。",
+		"byoAPIKeysDescription": "自分の API キーを持ち込むことで、AI プロバイダーに直接接続できます。セットアップは増えますが、完全なコントロールを維持できます。",
+		"yourPlan": "ご利用プラン：{plan}",
+		"upgradeManagePlan": "プランのアップグレード / 管理",
+		"credits": "クレジット：{credits}",
+		"topUpCredits": "クレジットをチャージ",
+		"provider": "プロバイダー",
+		"selectProvider": "プロバイダーを選択",
+		"model": "モデル",
+		"selectModel": "モデルを選択",
+		"apiKey": "API キー",
+		"apiKeyEncrypted": "API キーは暗号化されています",
+		"passwordToEditApiKey": "API キーを編集するにはパスワード保護を一時的に無効にしてください。編集後に再度有効化できます。",
+		"voiceName": "ボイス名",
+		"security": "セキュリティ",
+		"passwordDescription": "API トークンを暗号化するためのパスワードを設定します。パスワードを忘れた場合は、すべてのトークンを再入力する必要があります。",
+		"encryptApiTokens": "API トークンをパスワードで暗号化",
+		"ttlDescription": "API トークンは TTL（日数）で指定された期間保存されます。TTL を過ぎると、次回アプリ起動時にトークンは削除されます。無期限に保持するには -1 を設定してください。",
+		"ttlLabel": "TTL（日数）",
+		"ttlError": "無効な入力です。デフォルトの 14 日を使用します。",
+		"devExtensionSettings": "開発用拡張機能の設定",
+		"fileTypeMapping": "ファイルタイプごとのデフォルト拡張子マッピング",
+		"noFileTypes": "ファイルタイプが見つかりません。ファイルタイプをサポートする拡張機能をインストールしてください。",
+		"selectDefaultExtension": "デフォルト拡張子を選択",
+		"extensionDevMode": "拡張機能開発モード",
+		"extensionDevModeDescription": "http://localhost:3030 上のローカル拡張開発サーバーから拡張機能を読み込みます。",
+		"enableExtensionDevMode": "拡張機能開発モードを有効化",
+		"extensionDevServerURL": "拡張開発サーバー URL",
+		"extensionID": "拡張機能 ID",
+		"extensionVersion": "拡張機能バージョン",
+		"addDevExtension": "開発用拡張を追加",
+		"openAsApp": "アプリとして開く",
+		"extensionDevModeEnabled": "拡張機能開発モードが有効になりました",
+		"extensionDevModeEnabledDescription": "ローカル開発サーバーから拡張機能を読み込めるようになりました。",
+		"extensionDevModeDisabled": "拡張機能開発モードが無効になりました",
+		"extensionDevModeDisabledDescription": "拡張機能開発モードを無効にしました。",
+		"extensionInstalled": "拡張機能をインストールしました",
+		"extensionInstalledDescription": "拡張機能 {id} を正常にインストールしました。",
+		"extensionDefinedSettings": "拡張機能定義の設定",
+		"pulseEditorTerminal": "Pulse Editor ターミナル",
+		"deviceHostAddress": "デバイスホストアドレス"
+	},
+	"subscription": {
+		"title": "サブスクリプション",
+		"plan": "サブスクリプションプラン",
+		"creditsRemaining": "残りクレジット",
+		"managePlan": "プランを管理"
+	},
+	"planPicker": {
+		"freeDescription": "無料：無料プランで基本機能を利用できます。セルフホストのワークスペースと、お持ちの API キーの利用が可能です。このオプションは今後も無料かつオープンソースとして提供し続けます。",
+		"readMoreOpenSource": "当社のオープンソースへの取り組みについて詳しく見る"
+	},
+	"account": {
+		"title": "アカウント"
+	},
+	"metadata": {
+		"title": "Pulse Editor",
+		"description": "創造性を高める AI 搭載エディター"
+	},
+	"cloudApi": {
+		"directorySelection": {
+			"notSupported": "このプラットフォームではディレクトリ選択はサポートされていません"
+		},
+		"fileSelection": {
+			"notSupported": "このプラットフォームではファイル選択はサポートされていません"
+		},
+		"fetchProjects": {
+			"failed": "プロジェクト一覧の取得に失敗しました"
+		},
+		"listProjects": {
+			"notSignedIn": "プロジェクトを一覧表示できません。サインインしていますか？"
+		},
+		"listPath": {
+			"failed": "パスの一覧取得に失敗しました",
+			"noWorkspace": "パスを一覧表示できません。ワークスペースが選択されていません"
+		},
+		"createFolder": {
+			"failed": "フォルダーの作成に失敗しました",
+			"noWorkspace": "フォルダーを作成できません。ワークスペースが選択されていません"
+		},
+		"createFile": {
+			"failed": "ファイルの作成に失敗しました",
+			"noWorkspace": "ファイルを作成できません。ワークスペースが選択されていません"
+		},
+		"renameFile": {
+			"failed": "ファイル名の変更に失敗しました",
+			"noWorkspace": "ファイル名を変更できません。ワークスペースが選択されていません"
+		},
+		"deleteFile": {
+			"failed": "ファイルの削除に失敗しました",
+			"noWorkspace": "ファイルを削除できません。ワークスペースが選択されていません"
+		},
+		"checkPath": {
+			"failed": "パスの確認に失敗しました",
+			"noWorkspace": "パスを確認できません。ワークスペースが選択されていません"
+		},
+		"readFile": {
+			"failed": "ファイルの読み込みに失敗しました",
+			"noWorkspace": "ファイルを読み込めません。ワークスペースが選択されていません"
+		},
+		"writeFile": {
+			"failed": "ファイルの書き込みに失敗しました",
+			"noWorkspace": "ファイルを書き込めません。ワークスペースが選択されていません"
+		},
+		"copyFiles": {
+			"failed": "ファイルのコピーに失敗しました",
+			"noWorkspace": "ファイルをコピーできません。ワークスペースが選択されていません"
+		},
+		"installationPath": {
+			"failed": "インストールパスの取得に失敗しました",
+			"noWorkspace": "インストールパスを取得できません。ワークスペースが選択されていません"
+		},
+		"createTerminal": {
+			"failed": "ターミナルの作成に失敗しました",
+			"noWorkspace": "ターミナルを作成できません。ワークスペースが選択されていません"
+		}
+	},
+	"homeView": {
+		"title": "ホーム",
+		"vibeCode": {
+			"title": "何を作りたいですか？",
+			"newApp": "Vibe Code でアプリを作成",
+			"blog": "Vibe Code でブログを作成",
+			"portfolio": "Vibe Code でポートフォリオサイトを作成",
+			"weatherApp": "Vibe Code で天気アプリを作成",
+			"chatApp": "Vibe Code でチャットアプリを作成",
+			"socialMediaApp": "Vibe Code で SNS アプリを作成",
+			"fitnessTracker": "Vibe Code でフィットネストラッカーを作成",
+			"recipeApp": "Vibe Code でレシピアプリを作成"
+		},
+		"createWorkflow": {
+			"button": "ワークフローを作成"
+		},
+		"exploreMarketplace": {
+			"button": "マーケットプレイスを探索"
+		},
+		"signIn": {
+			"message": "サインインしてさらに多くの機能を利用しましょう",
+			"button": "サインイン"
+		},
+		"myProjects": {
+			"tab": "自分のプロジェクト",
+			"title": "自分のプロジェクト"
+		},
+		"myApps": {
+			"tab": "自分のアプリ",
+			"title": "自分のアプリ"
+		},
+		"featuredWorkflows": {
+			"tab": "注目のワークフロー",
+			"title": "注目のワークフロー"
+		},
+		"featuredApps": {
+			"tab": "注目のアプリ",
+			"title": "注目のアプリ"
+		},
+		"learnMore": "詳細を見る",
+		"myAppsAndProjects": "自分のアプリとプロジェクト",
+		"yourResources": "あなたのリソース",
+		"cloudWorkspaces": "クラウドワークスペース"
+	},
+	"common": {
+		"signIn": "サインイン",
+		"signOut": "サインアウト",
+		"save": "保存",
+		"cancel": "キャンセル",
+		"close": "閉じる",
+		"delete": "削除",
+		"edit": "編集",
+		"share": "共有",
+		"shareApp": "アプリを共有",
+		"create": "作成",
+		"open": "開く",
+		"confirm": "確認",
+		"update": "更新",
+		"publish": "公開",
+		"add": "追加",
+		"enter": "入力",
+		"viewAll": "すべて表示"
+	},
+	"openInProjectModal": {
+		"title": "プロジェクトで開く",
+		"openExisting": "既存を開く",
+		"newProject": "新規プロジェクト",
+		"projectName": "プロジェクト名",
+		"projectNamePlaceholder": "プロジェクト名を入力",
+		"projectLocation": "プロジェクトの場所",
+		"projectLocationPlaceholder": "プロジェクトの場所を選択",
+		"selectLocation": "場所を選択",
+		"createInside": "この中に作成",
+		"moreOptionsComingSoon": "その他のオプションは近日追加予定...",
+		"create": "作成",
+		"open": "開く",
+		"selectProjectFolder": "プロジェクトフォルダーを選択",
+		"selectProjectFile": "プロジェクトファイルを選択",
+		"workspaceRequired": "このアプリ / ワークフローを正しく動作させるには、ワークスペースを開いておく必要があります。",
+		"selectWorkspace": "ワークスペースを選択",
+		"localComputer": "ローカルコンピューター",
+		"workspaceName": "ワークスペース名",
+		"workspaceSpecs": "ワークスペース仕様",
+		"storageGB": "ストレージ (GB)",
+		"moreToCome": "今後さらに追加予定",
+		"gettingReady": "準備中です...",
+		"toast": {
+			"preparingWorkspace": {
+				"title": "ワークスペースを準備中",
+				"description": "ワークスペースの準備が整うまでお待ちください..."
+			},
+			"failedToOpen": {
+				"title": "開くことに失敗しました。",
+				"description": "プロジェクトが選択されていません。"
+			},
+			"appOpened": {
+				"title": "アプリを開きました",
+				"description": "アプリは正常に開かれました。"
+			},
+			"workflowOpened": {
+				"title": "ワークフローを開きました",
+				"description": "ワークフローは正常に開かれました。"
+			},
+			"noAppOrWorkflow": "開くアプリまたはワークフローがありません。",
+			"unableToCreate": {
+				"title": "ワークスペースを作成できません。",
+				"unknownPlatform": "不明なプラットフォームです。",
+				"nameRequired": "ワークスペース名は必須です。"
+			},
+			"creatingWorkspace": {
+				"title": "ワークスペースを作成中",
+				"description": "ワークスペース {name} を作成しています。仕様：{cpu} vCPU、{ram} RAM、{storage} ストレージ。"
+			},
+			"workspaceCreated": {
+				"title": "ワークスペースを作成しました",
+				"description": "ワークスペース {name} は正常に作成されました。"
+			},
+			"errorCreating": {
+				"title": "ワークスペース作成中にエラーが発生しました"
+			}
+		},
+		"errors": {
+			"noName": "プロジェクト名を入力してください",
+			"noLocation": "プロジェクトの場所を選択してください"
+		}
+	},
+	"quickVibeCodeSetupModal": {
+		"title": "クイック Vibe Code セットアップ",
+		"vibeCodeProject": "Vibe Code プロジェクト",
+		"projectName": "プロジェクト名",
+		"gettingReady": "セットアップを準備しています...",
+		"appOpened": {
+			"title": "アプリを開きました",
+			"description": "アプリは正常に開かれました。"
+		},
+		"noAppToOpen": "開くアプリがありません。"
+	},
+	"passwordModal": {
+		"title": "パスワードを入力",
+		"subtitle": "この操作には認証が必要です",
+		"password": "パスワード",
+		"passwordPlaceholder": "パスワードを入力",
+		"resetConfig": {
+			"button": "設定をリセット",
+			"title": "設定のリセット",
+			"message": "本当にすべての設定をリセットしますか？この操作は元に戻せません。"
+		},
+		"validation": {
+			"required": "パスワードは必須です"
+		},
+		"confirm": {
+			"button": "確認"
+		}
+	},
+	"openSourceInfoModal": {
+		"title": "オープンソース",
+		"description": "私たちは、透明性が信頼・イノベーション・コラボレーションを生むと信じて、オープンソフトウェアを支持しています。世界中の開発者が、制限なく構築・創造・革新できるよう、必要なツールへの無料アクセスを提供することが私たちの使命です。",
+		"pulseEditorCore": "Pulse Editor コア",
+		"officialApps": "公式アプリ",
+		"opensource": "オープンソース",
+		"cloudServices": "同時に、クラウドホスティングされたサービスやマーケットプレイスも提供しており、インフラやバックエンドを気にすることなく、プロジェクトを簡単に管理し、コミュニティと共有することができます。",
+		"loveWhatWeDo": "私たちの取り組みが気に入ったら、GitHub でスターを付けるか、Google Play からモバイルアプリをダウンロードして応援してください！",
+		"giveUsAStar": "スターを付ける",
+		"googlePlay": "Google Play"
+	},
+	"commandViewer": {
+		"chatInput": {
+			"placeholder": "コマンドを入力するか質問してください",
+			"emptyDescription": "'add'、'remove'、'edit' などを入力してアクションを実行したり、質問することができます",
+			"emptyDescriptionWithCommand": "'@' 付きでコマンドを入力して実行したり、質問することができます",
+			"pressEnter": "Enter キーで送信",
+			"pressEnterToExecute": "Enter キーで実行"
+		},
+		"send": "送信",
+		"you": "あなた："
+	},
+	"projectIndicator": {
+		"closeProject": {
+			"menuItem": "プロジェクトを閉じる"
+		},
+		"projectSettings": {
+			"menuItem": "プロジェクト設定"
+		}
+	},
+	"editorToolbar": {
+		"runWorkflow": {
+			"tooltip": "ワークフローを実行"
+		},
+		"openConsole": {
+			"tooltip": "エージェントコンソールを開く"
+		},
+		"voiceChat": {
+			"tooltip": "エージェントと音声チャット"
+		},
+		"artifacts": {
+			"tooltip": "アーティファクト",
+			"wip": "アーティファクト（開発中）"
+		},
+		"installedAgents": {
+			"tooltip": "インストール済みエージェント"
+		},
+		"marketplace": {
+			"tooltip": "マーケットプレイス"
+		},
+		"settings": {
+			"tooltip": "設定"
+		}
+	},
+	"publishWorkflowModal": {
+		"title": "ワークフローを公開",
+		"description": "ワークフローを公開して他の人と共有しましょう",
+		"workflowName": "ワークフロー名",
+		"workflowNamePlaceholder": "ワークフロー名を入力",
+		"workflowDescription": "説明",
+		"workflowDescriptionPlaceholder": "ワークフローの説明を入力",
+		"workflowVersion": "ワークフローバージョン",
+		"workflowVersionPlaceholder": "ワークフローバージョンを入力",
+		"publish": "公開",
+		"publishing": "ワークフローを公開中",
+		"publishingDescription": "ワークフローを公開しています...",
+		"toast": {
+			"published": {
+				"title": "ワークフローを公開しました",
+				"description": "ワークフローは正常に公開されました。"
+			},
+			"failed": {
+				"title": "ワークフローの公開に失敗しました"
+			}
+		}
+	},
+	"projectSettingsModal": {
+		"title": "プロジェクト設定",
+		"projectName": "プロジェクト名",
+		"projectPath": "プロジェクトパス",
+		"update": "更新",
+		"create": "作成",
+		"delete": "削除",
+		"toast": {
+			"noProjectSelected": "プロジェクトが選択されていません。"
+		}
+	},
+	"editorSettingsModal": {
+		"title": "エディター設定",
+		"projectsFolder": {
+			"description": "すべてのプロジェクトはこのフォルダーに保存されます。",
+			"selectFolder": "フォルダーを選択",
+			"selectProjectHomePath": "プロジェクトホームパスを選択"
+		},
+		"environmentVariables": {
+			"frontend": "環境変数（フロントエンド）：",
+			"instructions": "KEY=VALUE を 1 行ずつ指定",
+			"backendWarning": "バックエンドの環境変数を設定するには、拡張アプリの設定から行ってください。",
+			"addNewVariable": "新しい変数を追加",
+			"value": "値",
+			"errorEmptyKey": {
+				"title": "エラー",
+				"description": "環境変数のキーは空にできません。"
+			}
+		},
+		"customOnnxWasmCdnUrl": {
+			"label": "カスタム onnx-wasm CDN URL",
+			"placeholder": "onnx-wasm 用のカスタム CDN URL を入力"
+		},
+		"restartToApply": "再起動して反映",
+		"aiSettings": {
+			"title": "AI 設定",
+			"useManagedEndpoints": "マネージド AI エンドポイントを使用",
+			"managedMessage": "マネージドクラウドで Pulse Editor のフルパワーを即座に解放しましょう。超高速な AI アシスト、クロスプラットフォーム同期、クリエイティブツールにより、常にフロー状態を維持できます。",
+			"byokMessage": "自分の API キーを持ち込むことで、AI プロバイダーに直接接続できます。セットアップは増えますが、完全なコントロールを維持できます。",
+			"yourPlan": "ご利用プラン：",
+			"upgradeManagePlan": "プランのアップグレード / 管理",
+			"credits": "クレジット：",
+			"topUpCredits": "クレジットをチャージ",
+			"stt": "STT",
+			"llm": "LLM",
+			"tts": "TTS",
+			"imageGen": "画像生成",
+			"videoGen": "動画生成",
+			"provider": "プロバイダー",
+			"providerPlaceholder": "プロバイダーを選択",
+			"model": "モデル",
+			"modelPlaceholder": "モデルを選択",
+			"voiceName": "ボイス名",
+			"apiKey": "API キー",
+			"apiKeyEncrypted": "API キーは暗号化されています",
+			"apiKeyTooltip": "API キーを編集するにはパスワード保護を一時的に無効にしてください。編集後に再度有効化できます。"
+		},
+		"security": {
+			"title": "セキュリティ",
+			"encryptApiTokens": "API トークンをパスワードで暗号化",
+			"encryptDescription": "API トークンを暗号化するためのパスワードを設定します。パスワードを忘れた場合は、すべてのトークンを再入力する必要があります。",
+			"ttlLabel": "TTL（日数）",
+			"ttlDescription": "API トークンは TTL（日数）で指定された期間保存されます。TTL を過ぎると、次回アプリ起動時にトークンは削除されます。無期限に保持するには -1 を設定してください。",
+			"ttlError": {
+				"title": "エラー",
+				"description": "無効な入力です。デフォルトの 14 日を使用します。"
+			}
+		},
+		"devExtension": {
+			"title": "開発用拡張機能の設定",
+			"fileTypeMapping": "ファイルタイプごとのデフォルト拡張子マッピング",
+			"noFileTypes": "ファイルタイプが見つかりません。ファイルタイプをサポートする拡張機能をインストールしてください。",
+			"selectDefaultExtension": "デフォルト拡張子を選択",
+			"extensionDevMode": "拡張機能開発モード",
+			"extensionDevModeDescription": "http://localhost:3030 上のローカル拡張開発サーバーから拡張機能を読み込みます。",
+			"enableExtensionDevMode": "拡張機能開発モードを有効化",
+			"extensionDevServerUrl": "拡張開発サーバー URL",
+			"extensionId": "拡張機能 ID",
+			"extensionIdPlaceholder": "(extension_id)",
+			"extensionVersion": "拡張機能バージョン",
+			"extensionVersionPlaceholder": "(version)",
+			"addDevExtension": "開発用拡張を追加",
+			"openAsApp": "アプリとして開く",
+			"toast": {
+				"devModeEnabled": {
+					"title": "拡張機能開発モードが有効になりました",
+					"description": "ローカル開発サーバーから拡張機能を読み込めるようになりました。"
+				},
+				"devModeDisabled": {
+					"title": "拡張機能開発モードが無効になりました",
+					"description": "拡張機能開発モードを無効にしました。"
+				},
+				"extensionInstalled": {
+					"title": "拡張機能をインストールしました",
+					"description": "拡張機能 {id} を正常にインストールしました。"
+				},
+				"enableDevMode": "拡張機能開発モードを有効化",
+				"addDevExtension": "開発用拡張を追加",
+				"openAsApp": "アプリとして開く",
+				"extensionDevServerURL": "拡張開発サーバー URL",
+				"extensionID": "拡張機能 ID",
+				"extensionVersion": "拡張機能バージョン",
+				"selectDefaultExtension": "デフォルト拡張子を選択",
+				"noFileTypes": "ファイルタイプが見つかりません。ファイルタイプをサポートする拡張機能をインストールしてください。",
+				"fileTypeMapping": "ファイルタイプごとのデフォルト拡張子マッピング",
+				"deviceHostAddress": "デバイスホストアドレス"
+			}
+		},
+		"extensionDefined": {
+			"title": "拡張機能定義の設定",
+			"pulseEditorTerminal": "Pulse Editor ターミナル",
+			"deviceHostAddress": "デバイスホストアドレス"
+		}
+	},
+	"marketplaceModal": {
+		"title": "コミュニティマーケットプレイス",
+		"tabs": {
+			"featured": "おすすめ",
+			"featuredDescription": "コミュニティによるおすすめのアプリとワークフロー",
+			"workflows": "ワークフロー",
+			"workflowsDescription": "コミュニティで共有されているワークフローを閲覧",
+			"apps": "アプリ",
+			"appsDescription": "コミュニティが開発したフェデレーテッド Pulse アプリを閲覧",
+			"installed": "インストール済み",
+			"installedApps": "インストール済みアプリ",
+			"installedAgents": "インストール済みエージェント",
+			"discover": "発見",
+			"discoverApps": "アプリを探す",
+			"discoverAgents": "エージェントを探す"
+		}
+	},
+	"loginModal": {
+		"title": "サインイン",
+		"connectToRemote": "リモートインスタンスに接続",
+		"login": "ログイン",
+		"remoteUrl": "リモート URL",
+		"remoteUrlPlaceholder": "リモート URL を入力",
+		"remotePassword": "パスワード",
+		"remotePasswordPlaceholder": "パスワードを入力",
+		"connect": "接続",
+		"localWorkspaceNotAvailable": "ブラウザではローカルワークスペースは利用できません。デスクトップ / モバイルクライアントを使用するか、リモートインスタンスに接続してください。",
+		"continueAsGuest": "ゲストとして続行",
+		"continueOffline": "オフラインで続行"
+	},
+	"agentConfigModal": {
+		"title": "インストール済みエージェント",
+		"tabs": {
+			"agents": "エージェント",
+			"agentsDescription": "インストール済みエージェントを管理",
+			"providers": "プロバイダー",
+			"providersDescription": "AI プロバイダーを管理"
+		},
+		"installedAgents": "インストール済みエージェント",
+		"availableAgents": "利用可能なエージェント",
+		"noAgentsInstalled": "インストールされているエージェントはありません",
+		"noAgentsAvailable": "利用可能なエージェントはありません",
+		"edit": "編集",
+		"delete": "削除",
+		"createNewAgent": {
+			"title": "新しいエージェントを作成",
+			"description": "エディターに基本的なチャットエージェントを追加します。",
+			"button": "新しいエージェントを作成"
+		},
+		"form": {
+			"name": "名前",
+			"namePlaceholder": "エージェント名を入力",
+			"version": "バージョン",
+			"versionPlaceholder": "エージェントのバージョンを入力",
+			"description": "説明",
+			"descriptionPlaceholder": "エージェントの説明を入力",
+			"systemPrompt": "システムプロンプト",
+			"systemPromptPlaceholder": "エージェントプロンプトを入力",
+			"provider": "プロバイダー",
+			"providerPlaceholder": "プロバイダーを入力",
+			"modelName": "モデル名",
+			"modelNamePlaceholder": "モデル名を入力",
+			"model": "モデル",
+			"modelPlaceholder": "モデルを選択",
+			"temperature": "温度",
+			"contextLength": "コンテキスト長",
+			"contextLengthPlaceholder": "コンテキスト長を入力"
+		},
+		"addAgent": "エージェントを追加",
+		"installedBy": "拡張機能 {extension}（{publisher} 提供）によってインストール",
+		"llmConfig": "LLM 設定：",
+		"toast": {
+			"agentDeleted": "エージェントを削除しました",
+			"agentAdded": "新しいエージェントを追加しました"
+		},
+		"llmUsage": {
+			"title": "エージェントによる LLM 利用状況",
+			"provider": "プロバイダー：",
+			"usedModels": "使用モデル：",
+			"usedByAgents": "使用しているエージェント：",
+			"totalUsageByAgents": "エージェント総数：",
+			"agent": "エージェント",
+			"totalCost": "合計コスト",
+			"noData": "利用データはありません",
+			"apiKey": "API キー",
+			"apiKeyNotVisible": "入力後は API キーは表示されません。"
+		}
+	},
+	"appInfoModal": {
+		"title": "アプリ情報",
+		"developerSettings": "開発者設定",
+		"loading": "読み込み中...",
+		"metadata": {
+			"id": "ID",
+			"version": "バージョン",
+			"author": "作者",
+			"license": "ライセンス",
+			"website": "Web サイト",
+			"readme": "README"
+		},
+		"apiPricing": {
+			"title": "API 料金",
+			"description": "このアプリの API 料金設定は次のとおりです。",
+			"endpoint": "エンドポイント：",
+			"cost": "コスト：",
+			"creditsPerCall": "1 コールあたりのクレジット",
+			"perCall": "/ コール",
+			"noApiPricing": "このアプリには API 料金が設定されていません。",
+			"noServerFunctions": "このアプリにサーバー関数は見つかりませんでした。",
+			"costPlaceholder": "1 コールあたりのクレジットコスト"
+		},
+		"developerMode": {
+			"title": "開発者設定",
+			"appInfo": "アプリ情報",
+			"appId": "アプリ ID",
+			"environmentVariables": "環境変数",
+			"addNewVariable": "新しい変数を追加",
+			"value": "値",
+			"localServer": "ローカルサーバー",
+			"localServerPlaceholder": "ローカルサーバー URL を入力（例：http://localhost:3000）",
+			"envInstructions": "KEY=VALUE を 1 行ずつ指定",
+			"testMode": "テストモード",
+			"testModeDescription": "ローカルサーバーと環境変数を使用するにはテストモードを有効にします",
+			"toast": {
+				"addingVariable": {
+					"title": "変数を追加中",
+					"description": "環境変数 {key} を追加しています。"
+				},
+				"variableAdded": {
+					"title": "変数を追加しました",
+					"description": "環境変数 {key} を正常に追加しました。"
+				},
+				"errorEmptyKey": {
+					"title": "エラー",
+					"description": "環境変数のキーは空にできません。"
+				},
+				"settingCost": {
+					"title": "エンドポイントコストを設定中",
+					"description": "エンドポイント {endpoint} のコスト {cost} を設定しています。"
+				},
+				"costSet": {
+					"title": "コストを設定しました",
+					"description": "エンドポイント {endpoint} のコストを {cost} に設定しました。"
+				},
+				"costSetError": {
+					"title": "エラー",
+					"description": "エンドポイント {endpoint} のコスト設定に失敗しました。{error}."
+				},
+				"deletingApp": {
+					"title": "アプリを削除中",
+					"description": "アプリ {name} を削除しています。"
+				},
+				"appUnpublished": {
+					"title": "アプリを非公開にしました",
+					"description": "アプリ {name} は正常に非公開になりました。"
+				},
+				"unpublishError": {
+					"title": "エラー",
+					"description": "アプリ {name} の非公開に失敗しました。"
+				}
+			}
+		},
+		"dangerZone": {
+			"title": "危険ゾーン",
+			"unpublish": "非公開にする",
+			"unpublishConfirm": "本当にこのアプリを非公開にしますか？この操作は元に戻せません。",
+			"confirmUnpublish": "非公開を確認",
+			"cancel": "キャンセル",
+			"deleteApp": "アプリを削除",
+			"deleteAppDescription": "このアプリをアカウントから完全に削除します",
+			"uninstallApp": "アプリをアンインストール",
+			"uninstallAppDescription": "インストール済みアプリからこのアプリを削除します"
+		}
+	},
+	"navSideMenu": {
+		"home": {
+			"label": "ホーム",
+			"icon": "home"
+		},
+		"projectHome": {
+			"label": "プロジェクトホーム",
+			"icon": "folder",
+			"notSet": "まだプロジェクトホームパスが設定されていません。設定画面から指定してください。",
+			"select": {
+				"button": "プロジェクトホームを選択"
+			}
+		}
+	},
+	"fileMenu": {
+		"title": "ファイル",
+		"newProject": "新規プロジェクト",
+		"openProject": "プロジェクトを開く"
+	},
+	"viewMenu": {
+		"title": "表示",
+		"commandViewer": "コマンドビューアー",
+		"console": "コンソール",
+		"importWorkflow": {
+			"title": "ワークフローをインポート",
+			"invalidFile": "無効なワークフローファイルです",
+			"readError": "ワークフローファイルの読み込み中にエラーが発生しました"
+		}
+	},
+	"fsExplorer": {
+		"newFolder": "新規フォルダー",
+		"folderName": "フォルダー名",
+		"newFile": "新規ファイル",
+		"fileName": "ファイル名",
+		"selectOneFolder": "新しいフォルダーを作成するには、1 つのフォルダーのみを選択してください。",
+		"selectOneFolderForFile": "新しいファイルを作成するには、1 つのフォルダーのみを選択してください。",
+		"emptyContent": "内容が空です。新しいファイルを作成して開始してください。"
+	},
+	"projectExplorer": {
+		"title": "プロジェクト",
+		"newProject": {
+			"button": "新規プロジェクト"
+		},
+		"signInMessage": "プロジェクトを表示するにはサインインするか、デスクトップクライアントでローカルプロジェクトを開いてください。"
+	},
+	"viewArea": {
+		"unknownViewType": "不明なビュータイプです",
+		"noViewSelected": "ビューが選択されていません"
+	},
+	"projectView": {
+		"title": "プロジェクト",
+		"createWorkflow": {
+			"button": "ワークフローを作成"
+		},
+		"exploreMarketplace": {
+			"button": "マーケットプレイスを探索"
+		}
+	},
+	"dnd": {
+		"openApp": {
+			"failed": "アプリのオープンに失敗しました",
+			"invalidData": "無効なアプリデータです"
+		},
+		"linkApp": {
+			"failed": "アプリのリンクに失敗しました",
+			"invalidData": "無効なアプリデータです"
+		},
+		"openFile": {
+			"failed": "ファイルのオープンに失敗しました",
+			"invalidData": "無効なファイルデータです"
+		},
+		"invalidTarget": {
+			"cannotDropFile": "ここにはファイルをドロップできません",
+			"somethingWrong": "問題が発生しました。もう一度お試しください。",
+			"cannotDrop": "ここにはドロップできません"
+		}
+	},
+	"workspaceSettingsModal": {
+		"title": "ワークスペース設定",
+		"selectWorkspace": "ワークスペースを選択",
+		"localComputer": "ローカルコンピューター",
+		"createNew": "新規作成",
+		"workspaceName": "ワークスペース名",
+		"workspaceSpecs": "ワークスペース仕様",
+		"storageGB": "ストレージ (GB)",
+		"moreToCome": "今後さらに追加予定",
+		"useWorkspace": "ワークスペースを使用",
+		"exitWorkspace": "ワークスペースを終了",
+		"start": "開始",
+		"stop": "停止",
+		"update": "更新",
+		"delete": "削除",
+		"create": "作成",
+		"unpublishWorkspace": "ワークスペースを非公開にする",
+		"toast": {
+			"unknownPlatform": "不明なプラットフォームです。",
+			"workspaceNotAvailable": "ワークスペースは利用できません。",
+			"workspaceNameRequired": "ワークスペース名は必須です。",
+			"workspaceExists": "ワークスペースは既に存在します。代わりに更新してください。",
+			"updatingWorkspace": {
+				"title": "ワークスペースを更新中",
+				"description": "ワークスペース {name} を更新しています。"
+			},
+			"workspaceUpdated": {
+				"title": "ワークスペースを更新しました",
+				"description": "ワークスペース {name} は正常に更新されました。"
+			},
+			"deletingWorkspace": {
+				"title": "ワークスペースを削除中",
+				"description": "ワークスペース {name} を削除しています"
+			},
+			"workspaceDeleted": {
+				"title": "ワークスペースを削除しました",
+				"description": "ワークスペース {name} は正常に削除されました。"
+			},
+			"errorDeleting": {
+				"title": "ワークスペース削除中にエラーが発生しました"
+			},
+			"creatingWorkspace": {
+				"title": "ワークスペースを作成中",
+				"description": "ワークスペース {name} を作成しています。仕様：{cpu} vCPU、{ram} RAM、{storage} ストレージ。"
+			},
+			"workspaceCreated": {
+				"title": "ワークスペースを作成しました",
+				"description": "ワークスペース {name} は正常に作成されました。"
+			},
+			"errorCreating": {
+				"title": "ワークスペース作成中にエラーが発生しました"
+			},
+			"stoppingWorkspace": {
+				"title": "ワークスペースを停止中",
+				"description": "ワークスペース {name} を停止しています。"
+			},
+			"workspaceStopped": {
+				"title": "ワークスペースを停止しました",
+				"description": "ワークスペース {name} は正常に停止しました。"
+			},
+			"startingWorkspace": {
+				"title": "ワークスペースを起動中",
+				"description": "ワークスペース {name} を起動しています。"
+			},
+			"workspaceStarted": {
+				"title": "ワークスペースを起動しました",
+				"description": "ワークスペース {name} は正常に起動しました。"
+			}
+		}
+	},
+	"qrDisplay": {
+		"title": "QR コードをスキャン",
+		"download": "ダウンロード",
+		"loadingError": "QR コードを読み込み中です。しばらくお待ちください。"
+	},
+	"sharingModal": {
+		"title": "{name} ワークスペースを共有",
+		"visibility": "公開範囲",
+		"visibilityPlaceholder": "公開範囲を選択",
+		"inviteCode": "招待コード",
+		"selectVisibility": "共有オプションを表示するには公開範囲を選択してください。",
+		"workspacePrivate": "このワークスペースは非公開です。",
+		"tabs": {
+			"qrCode": "QR コード",
+			"qrCodeDescription": "QR コードでワークスペースを共有",
+			"url": "URL",
+			"urlDescription": "URL でワークスペースを共有"
+		},
+		"qrCode": {
+			"description": "この QR コードを使ってワークスペースを共有できます"
+		},
+		"url": {
+			"description": "この URL を使ってワークスペースを共有できます",
+			"copy": "コピー"
+		},
+		"toast": {
+			"fetchError": "拡張機能の共有情報の取得に失敗しました",
+			"urlCopied": "URL をクリップボードにコピーしました"
+		}
+	},
+	"workflowPreviewCard": {
+		"open": "開く",
+		"clone": "クローン"
+	},
+	"appGallery": {
+		"title": "アプリ",
+		"noApps": "アプリが見つかりません"
+	},
+	"workflowGallery": {
+		"title": "ワークフロー",
+		"noWorkflows": "ワークフローが見つかりません"
+	},
+	"featuredGallery": {
+		"title": "おすすめ"
+	},
+	"statusScreens": {
+		"welcome": {
+			"title": "Pulse Editor へようこそ",
+			"subtitle": "新しいプロジェクトを作成するか、既存のプロジェクトを開いて開始しましょう",
+			"taglineLine1": "次世代の AI OS、駆動源は",
+			"taglineLine2": "Vibe Coded アプリとワークフロー"
+		},
+		"wip": {
+			"title": "開発中",
+			"subtitle": "この機能は近日公開予定です"
+		},
+		"loading": {
+			"title": "読み込み中...",
+			"subtitle": "しばらくお待ちください"
+		},
+		"notAuthorized": {
+			"title": "権限がありません",
+			"subtitle": "このリソースにアクセスする権限がありません"
+		},
+		"error": {
+			"title": "エラー",
+			"subtitle": "問題が発生しました"
+		}
+	},
+	"appLoader": {
+		"loading": "アプリを読み込み中...",
+		"failed": "アプリの読み込みに失敗しました"
+	},
+	"consolePanelView": {
+		"title": "コンソール",
+		"clear": "クリア",
+		"noOutput": "まだ出力はありません"
+	},
+	"tabViewManager": {
+		"openProject": "プロジェクトを開く",
+		"untitled": "無題",
+		"newTab": "新しいタブ"
+	},
+	"voiceRecorder": {
+		"listening": "聞き取り中",
+		"thinking": "思考中",
+		"speaking": "応答中",
+		"loadingMic": "マイクを読み込み中",
+		"waiting": "待機中"
+	},
+	"commandExecutor": {
+		"commandExecuted": "コマンドを実行しました",
+		"commandExecutionFailed": "コマンドの実行に失敗しました"
+	},
+	"planPicker": {
+		"freeDescription": "無料：機能が限定された無料プランを利用できます。サーバーを自前でホストすることで、AI 機能に無制限にアクセスすることも可能です。",
+		"readMoreOpenSource": "オープンソースへの取り組みについて詳しく見る"
+	},
+	"projectItem": {
+		"projectSettings": "プロジェクト設定",
+		"selectMultiple": "複数選択",
+		"created": "作成日："
+	},
+	"fsExplorer": {
+		"newFolder": "新規フォルダー",
+		"folderName": "フォルダー名",
+		"newFile": "新規ファイル",
+		"fileName": "ファイル名",
+		"selectOneFolder": "新しいフォルダーを作成するには、1 つのフォルダーのみを選択してください。",
+		"selectOneFolderForFile": "新しいファイルを作成するには、1 つのフォルダーのみを選択してください。",
+		"emptyContent": "内容が空です。新しいファイルを作成して開始してください。",
+		"noAppSelected": "このファイルを扱うアプリが選択されていません。",
+		"selectNodeInCanvas": "ファイルを表示するにはキャンバス上のノードを選択してください",
+		"noWorkspaceSelected": "ワークスペースが選択されていません"
+	},
+	"treeView": {
+		"contextMenu": {
+			"openInCanvas": "キャンバスで開く",
+			"openInApp": "アプリで開く",
+			"rename": "名前を変更",
+			"delete": "削除",
+			"loading": "読み込み中..."
+		},
+		"toast": {
+			"newFolderCreated": "新しいフォルダーを作成しました",
+			"failedToCreateFolder": "フォルダーの作成に失敗しました",
+			"newFileCreated": "新しいファイルを作成しました",
+			"failedToCreateFile": "ファイルの作成に失敗しました",
+			"fileRenamed": "ファイル名を変更しました",
+			"failedToRename": "ファイル名の変更に失敗しました",
+			"fileDeleted": "ファイルを削除しました",
+			"failedToDelete": "ファイルの削除に失敗しました"
+		}
+	},
+	"workspaceExplorer": {
+		"workspacePaused": "ワークスペースは現在一時停止中です。プロジェクトファイルにアクセスするにはワークスペースを再開してください。",
+		"startWorkspace": "ワークスペースを開始",
+		"workspaceSettings": "ワークスペース設定",
+		"osFeatures": "OS 機能と連携するには、デスクトップクライアントで開くか、リモートワークスペースを設定してください。",
+		"workspaceStarting": "ワークスペースを起動しています...",
+		"viewProjectContent": "ワークスペースでプロジェクト内容を表示するには、まずプロジェクトを選択してください。",
+		"toast": {
+			"noWorkspace": "開始できるワークスペースがありません。",
+			"startingWorkspace": "ワークスペースを起動しています...",
+			"workspaceStarted": "ワークスペースが起動しました。"
+		}
+	},
+	"appExplorer": {
+		"dragTip": "タップまたはドラッグして拡張機能を開きます。",
+		"exploreWorkflowsApps": "コミュニティのワークフロー / アプリを探索"
+	},
+	"appInfoModalExtra": {
+		"developerSettings": "開発者設定",
+		"id": "ID",
+		"version": "バージョン",
+		"author": "作者",
+		"license": "ライセンス",
+		"website": "Web サイト",
+		"readme": "README",
+		"noReadme": "README はありません",
+		"apiPricing": "API 料金",
+		"apiPricingDescription": "このアプリの API 料金設定は次のとおりです。",
+		"endpoint": "エンドポイント：",
+		"cost": "コスト：",
+		"credits": "クレジット",
+		"perCall": "/ コール",
+		"noApiPricing": "このアプリには API 料金が設定されていません。",
+		"appInfo": "アプリ情報",
+		"appID": "アプリ ID",
+		"environmentVariables": "環境変数",
+		"addNewVariable": "新しい変数を追加",
+		"value": "値",
+		"error": "エラー",
+		"envKeyEmpty": "環境変数のキーは空にできません。",
+		"addingVariable": "変数を追加中",
+		"addingVariableDescription": "環境変数 {key} を追加しています。",
+		"variableAdded": "変数を追加しました",
+		"variableAddedDescription": "環境変数 {key} を正常に追加しました。",
+		"apiPricingSetup": "ここでアプリの API 呼び出しに対するクレジットコストを設定できます。一度設定すると変更はできません。",
+		"noServerFunctions": "このアプリにサーバー関数は見つかりませんでした。",
+		"dangerZone": "危険ゾーン",
+		"confirmUnpublish": "本当にこのアプリを非公開にしますか？この操作は元に戻せません。",
+		"unpublish": "非公開にする",
+		"deletingApp": "アプリを削除中",
+		"deletingAppDescription": "アプリ {name} を削除しています。",
+		"failedToUnpublish": "アプリ {name} の非公開に失敗しました。",
+		"appUnpublished": "アプリを非公開にしました",
+		"appUnpublishedDescription": "アプリ {name} は正常に非公開になりました。",
+		"confirmUnpublishButton": "非公開を確認",
+		"settingEndpointCost": "エンドポイントコストを設定中",
+		"settingEndpointCostDescription": "エンドポイント {endpoint} のコスト {cost} を設定しています。",
+		"failedToSetCost": "エンドポイント {endpoint} のコスト設定に失敗しました。{error}.",
+		"costSet": "コストを設定しました",
+		"costSetDescription": "エンドポイント {endpoint} のコストを {cost} に設定しました。",
+		"creditsPerCall": "1 コールあたりのクレジット",
+		"creditsCostPerCall": "1 コールあたりのクレジットコスト"
+	},
+	"projectPreviewCard": {
+		"workspace": "ワークスペース：",
+		"undefined": "未定義"
+	},
+	"appPreviewCard": {
+		"requiresWorkspace": "このアプリを正しく動作させるには、ワークスペースを開いておく必要があります。",
+		"requiresWorkspaceLabel": "ワークスペースが必要",
+		"use": "使用",
+		"details": "詳細",
+		"install": "インストール",
+		"upgrade": "アップグレード",
+		"uninstall": "アンインストール",
+		"open": "開く",
+		"installed": "インストール済み",
+		"outdated": "古いバージョン",
+		"compatible": "互換あり",
+		"extensionInstalled": "拡張機能をインストールしました",
+		"extensionInstalledDescription": "拡張機能 {id} を正常にインストールしました。",
+		"extensionUpgraded": "拡張機能をアップグレードしました",
+		"extensionUpgradedDescription": "拡張機能 {id} を正常にアップグレードしました。",
+		"extensionUninstalled": "拡張機能をアンインストールしました",
+		"extensionUninstalledDescription": "拡張機能 {id} を正常にアンインストールしました。",
+		"mfIncompatible": "このアプリは古く、有効な Module Federation アプリではありません。最新バージョンにアップデートしてください。",
+		"hostMFVersion": "ホスト MF バージョン：",
+		"appMFVersion": "アプリ MF バージョン：",
+		"libIncompatible": "このアプリのライブラリバージョンは古く、正しく動作しない可能性があります。最新バージョンにアップデートしてください。",
+		"hostLibVersion": "ホストライブラリバージョン：",
+		"appLibVersion": "アプリライブラリバージョン：",
+		"compatibleTooltip": "このアプリの Module Federation バージョン ({mfVersion}) とライブラリバージョン ({libVersion}) はホストと一致しています。アプリは正しく動作するはずです。",
+		"enabled": "有効",
+		"disabled": "無効"
+	},
+	"extensionCard": {
+		"extensionUninstalled": "拡張機能をアンインストールしました",
+		"uninstall": "アンインストール",
+		"install": "インストール",
+		"update": "更新",
+		"enable": "有効化",
+		"disable": "無効化",
+		"details": "詳細",
+		"unavailable": "利用できません",
+		"mfVersion": "MF バージョン",
+		"libVersion": "ライブラリバージョン",
+		"updatesAvailable": "アップデートあり"
+	},
+	"nodeHandle": {
+		"ariaLabel": "ノードハンドルをクリックしてノードメニューを開きます",
+		"required": "*必須"
+	},
+	"draggableItem": {
+		"ariaLabel": "ドラッグして移動"
+	}
+}

@@ -2,6 +2,7 @@
 
 import { colors } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useContext } from "react";
 import {
@@ -13,6 +14,7 @@ import {
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function VoiceIndicator() {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { resolvedTheme } = useTheme();
@@ -56,14 +58,14 @@ export default function VoiceIndicator() {
             </div>
             <p className="text-content2-foreground w-full text-center text-xl">
               {editorContext?.editorStates?.isListening
-                ? "Listening"
+                ? t("voiceRecorder.listening")
                 : editorContext?.editorStates?.isThinking
-                  ? (editorContext.editorStates.thinkingText ?? "Thinking")
+                  ? (editorContext.editorStates.thinkingText ?? t("voiceRecorder.thinking"))
                   : editorContext?.editorStates.isSpeaking
-                    ? "Speaking"
+                    ? t("voiceRecorder.speaking")
                     : editorContext.editorStates.isLoadingRecorder
-                      ? "Loading Mic"
-                      : "Waiting"}
+                      ? t("voiceRecorder.loadingMic")
+                      : t("voiceRecorder.waiting")}
             </p>
           </div>
         </motion.div>

@@ -1,0 +1,1072 @@
+{
+	"common": {
+		"signIn": "Entrar",
+		"signOut": "Sair",
+		"save": "Salvar",
+		"cancel": "Cancelar",
+		"close": "Fechar",
+		"delete": "Excluir",
+		"edit": "Editar",
+		"share": "Compartilhar",
+		"shareApp": "Compartilhar aplicativo",
+		"create": "Criar",
+		"open": "Abrir",
+		"confirm": "Confirmar",
+		"update": "Atualizar",
+		"publish": "Publicar",
+		"add": "Adicionar",
+		"enter": "Inserir"
+	},
+	"navigation": {
+		"connectedToCloudAI": "Conectado à Cloud AI",
+		"offline": "Offline",
+		"language": {
+			"title": "Idioma"
+		}
+	},
+	"settings": {
+		"editorSettings": "Configurações do editor",
+		"generalSettings": "Configurações gerais",
+		"aiSettings": "Configurações de IA",
+		"securitySettings": "Configurações de segurança",
+		"projectHomePath": "Pasta padrão de projetos",
+		"projectHomeDescription": "Todos os seus projetos serão salvos nesta pasta.",
+		"selectProjectHomePath": "Selecionar pasta padrão de projetos",
+		"environmentVariables": "Variáveis de ambiente (frontend):",
+		"backendEnvVariablesWarning": "Para definir variáveis de ambiente de backend, use as configurações do aplicativo de extensão.",
+		"addNewVariable": "Adicionar nova variável",
+		"value": "Valor",
+		"restartToApply": "Reinicie para aplicar",
+		"useManagedAIEndpoints": "Usar endpoints de IA gerenciados",
+		"managedCloudDescription": "Desbloqueie instantaneamente todo o poder do Pulse Editor com a nuvem gerenciada: você obtém assistência de IA ultrarrápida, sincronização entre plataformas e ferramentas criativas para se manter sempre no fluxo.",
+		"byoAPIKeysDescription": "Trazer suas próprias chaves de API permite conectar-se diretamente aos provedores de IA. Requer mais configuração, mas você mantém controle total.",
+		"yourPlan": "Seu plano: {plan}",
+		"upgradeManagePlan": "Atualizar/gerenciar plano",
+		"credits": "Créditos: {credits}",
+		"topUpCredits": "Adicionar créditos",
+		"provider": "Provedor",
+		"selectProvider": "Selecione um provedor",
+		"model": "Modelo",
+		"selectModel": "Selecione um modelo",
+		"apiKey": "Chave de API",
+		"apiKeyEncrypted": "A chave de API está criptografada",
+		"passwordToEditApiKey": "Desative a senha para editar a chave de API. Você pode reativar a senha após editar as chaves.",
+		"voiceName": "Nome da voz",
+		"security": "Segurança",
+		"passwordDescription": "Use uma senha para criptografar os tokens de API. Se você esquecer a senha, precisará inserir novamente todos os tokens.",
+		"encryptApiTokens": "Criptografar tokens de API com senha",
+		"ttlDescription": "Os tokens de API são salvos pelo período definido em TTL (Tempo de Vida) em dias. Após o TTL, os tokens serão excluídos na próxima vez que o aplicativo for aberto. Defina -1 para mantê-los indefinidamente.",
+		"ttlLabel": "TTL (em dias)",
+		"ttlError": "Entrada inválida. Usando o padrão de 14 dias.",
+		"devExtensionSettings": "Configurações de extensão de desenvolvimento",
+		"fileTypeMapping": "Mapeamento padrão de extensões por tipo de arquivo",
+		"noFileTypes": "Nenhum tipo de arquivo encontrado. Instale extensões que ofereçam suporte a tipos de arquivo.",
+		"selectDefaultExtension": "Selecionar extensão padrão",
+		"extensionDevMode": "Modo de desenvolvimento de extensão",
+		"extensionDevModeDescription": "Carregar extensão do servidor local de desenvolvimento em http://localhost:3030.",
+		"enableExtensionDevMode": "Ativar modo de desenvolvimento de extensão",
+		"extensionDevServerURL": "URL do servidor de desenvolvimento de extensão",
+		"extensionID": "ID da extensão",
+		"extensionVersion": "Versão da extensão",
+		"addDevExtension": "Adicionar extensão de desenvolvimento",
+		"openAsApp": "Abrir como aplicativo",
+		"extensionDevModeEnabled": "Modo de desenvolvimento de extensão ativado",
+		"extensionDevModeEnabledDescription": "Agora você pode carregar extensões do seu servidor local de desenvolvimento.",
+		"extensionDevModeDisabled": "Modo de desenvolvimento de extensão desativado",
+		"extensionDevModeDisabledDescription": "Você desativou o modo de desenvolvimento de extensão.",
+		"extensionInstalled": "Extensão instalada",
+		"extensionInstalledDescription": "Extensão {id} instalada com sucesso.",
+		"extensionDefinedSettings": "Configurações definidas pela extensão",
+		"pulseEditorTerminal": "Terminal do Pulse Editor",
+		"deviceHostAddress": "Endereço do dispositivo host"
+	},
+	"subscription": {
+		"title": "Assinatura",
+		"plan": "Plano de assinatura",
+		"creditsRemaining": "Créditos restantes",
+		"managePlan": "Gerenciar plano"
+	},
+	"planPicker": {
+		"freeDescription": "Gratuito: Use o plano gratuito e aproveite os recursos básicos. Acesse workspaces auto-hospedados e traga suas próprias chaves de API. Esta opção continuará disponível para sempre e estamos comprometidos em mantê-la gratuita e de código aberto.",
+		"readMoreOpenSource": "Leia mais sobre nosso compromisso com o open source"
+	},
+	"account": {
+		"title": "Conta"
+	},
+	"metadata": {
+		"title": "Pulse Editor",
+		"description": "Editor com IA para potencializar sua criatividade"
+	},
+	"cloudApi": {
+		"directorySelection": {
+			"notSupported": "Seleção de diretório não suportada nesta plataforma"
+		},
+		"fileSelection": {
+			"notSupported": "Seleção de arquivo não suportada nesta plataforma"
+		},
+		"fetchProjects": {
+			"failed": "Falha ao listar projetos"
+		},
+		"listProjects": {
+			"notSignedIn": "Não é possível listar projetos. Você está autenticado?"
+		},
+		"listPath": {
+			"failed": "Falha ao listar caminho",
+			"noWorkspace": "Não é possível listar caminho. Nenhum workspace selecionado"
+		},
+		"createFolder": {
+			"failed": "Falha ao criar pasta",
+			"noWorkspace": "Não é possível criar pasta. Nenhum workspace selecionado"
+		},
+		"createFile": {
+			"failed": "Falha ao criar arquivo",
+			"noWorkspace": "Não é possível criar arquivo. Nenhum workspace selecionado"
+		},
+		"renameFile": {
+			"failed": "Falha ao renomear arquivo",
+			"noWorkspace": "Não é possível renomear arquivo. Nenhum workspace selecionado"
+		},
+		"deleteFile": {
+			"failed": "Falha ao excluir arquivo",
+			"noWorkspace": "Não é possível excluir arquivo. Nenhum workspace selecionado"
+		},
+		"checkPath": {
+			"failed": "Falha ao verificar caminho",
+			"noWorkspace": "Não é possível verificar caminho. Nenhum workspace selecionado"
+		},
+		"readFile": {
+			"failed": "Falha ao ler arquivo",
+			"noWorkspace": "Não é possível ler arquivo. Nenhum workspace selecionado"
+		},
+		"writeFile": {
+			"failed": "Falha ao gravar arquivo",
+			"noWorkspace": "Não é possível gravar arquivo. Nenhum workspace selecionado"
+		},
+		"copyFiles": {
+			"failed": "Falha ao copiar arquivos",
+			"noWorkspace": "Não é possível copiar arquivos. Nenhum workspace selecionado"
+		},
+		"installationPath": {
+			"failed": "Falha ao obter caminho de instalação",
+			"noWorkspace": "Não é possível obter caminho de instalação. Nenhum workspace selecionado"
+		},
+		"createTerminal": {
+			"failed": "Falha ao criar terminal",
+			"noWorkspace": "Não é possível criar terminal. Nenhum workspace selecionado"
+		}
+	},
+	"homeView": {
+		"title": "Início",
+		"vibeCode": {
+			"title": "O que você gostaria de criar?",
+			"newApp": "Vibe Code um aplicativo",
+			"blog": "Vibe Code um blog",
+			"portfolio": "Vibe Code um site de portfólio",
+			"weatherApp": "Vibe Code um aplicativo de clima",
+			"chatApp": "Vibe Code um aplicativo de chat",
+			"socialMediaApp": "Vibe Code um app de rede social",
+			"fitnessTracker": "Vibe Code um app de fitness",
+			"recipeApp": "Vibe Code um app de receitas"
+		},
+		"createWorkflow": {
+			"button": "Criar workflow"
+		},
+		"exploreMarketplace": {
+			"button": "Explorar marketplace"
+		},
+		"signIn": {
+			"message": "Entre para desbloquear mais recursos",
+			"button": "Entrar"
+		},
+		"myProjects": {
+			"tab": "Meus projetos",
+			"title": "Meus projetos"
+		},
+		"myApps": {
+			"tab": "Meus apps",
+			"title": "Meus apps"
+		},
+		"featuredWorkflows": {
+			"tab": "Workflows em destaque",
+			"title": "Workflows em destaque"
+		},
+		"featuredApps": {
+			"tab": "Apps em destaque",
+			"title": "Apps em destaque"
+		},
+		"learnMore": "Saiba mais",
+		"myAppsAndProjects": "Meus apps e projetos",
+		"yourResources": "Seus recursos",
+		"cloudWorkspaces": "Workspaces na nuvem"
+	},
+	"common": {
+		"signIn": "Entrar",
+		"signOut": "Sair",
+		"save": "Salvar",
+		"cancel": "Cancelar",
+		"close": "Fechar",
+		"delete": "Excluir",
+		"edit": "Editar",
+		"share": "Compartilhar",
+		"shareApp": "Compartilhar aplicativo",
+		"create": "Criar",
+		"open": "Abrir",
+		"confirm": "Confirmar",
+		"update": "Atualizar",
+		"publish": "Publicar",
+		"add": "Adicionar",
+		"enter": "Inserir",
+		"viewAll": "Ver tudo"
+	},
+	"openInProjectModal": {
+		"title": "Abrir em projeto",
+		"openExisting": "Abrir existente",
+		"newProject": "Novo projeto",
+		"projectName": "Nome do projeto",
+		"projectNamePlaceholder": "Insira o nome do projeto",
+		"projectLocation": "Local do projeto",
+		"projectLocationPlaceholder": "Selecione o local do projeto",
+		"selectLocation": "Selecionar local",
+		"createInside": "Criar dentro de",
+		"moreOptionsComingSoon": "Mais opções em breve...",
+		"create": "Criar",
+		"open": "Abrir",
+		"selectProjectFolder": "Selecionar pasta do projeto",
+		"selectProjectFile": "Selecionar arquivo de projeto",
+		"workspaceRequired": "Este app/workflow requer um workspace aberto para funcionar corretamente.",
+		"selectWorkspace": "Selecionar workspace",
+		"localComputer": "Computador local",
+		"workspaceName": "Nome do workspace",
+		"workspaceSpecs": "Especificações do workspace",
+		"storageGB": "Armazenamento (GB)",
+		"moreToCome": "Mais por vir",
+		"gettingReady": "Preparando tudo...",
+		"toast": {
+			"preparingWorkspace": {
+				"title": "Preparando workspace",
+				"description": "Aguardando o workspace ficar pronto..."
+			},
+			"failedToOpen": {
+				"title": "Falha ao abrir.",
+				"description": "Nenhum projeto selecionado."
+			},
+			"appOpened": {
+				"title": "App aberto",
+				"description": "O app foi aberto com sucesso."
+			},
+			"workflowOpened": {
+				"title": "Workflow aberto",
+				"description": "O workflow foi aberto com sucesso."
+			},
+			"noAppOrWorkflow": "Nenhum app ou workflow para abrir.",
+			"unableToCreate": {
+				"title": "Não foi possível criar workspace.",
+				"unknownPlatform": "Plataforma desconhecida.",
+				"nameRequired": "Nome do workspace é obrigatório."
+			},
+			"creatingWorkspace": {
+				"title": "Criando workspace",
+				"description": "Criando workspace {name}. Especificações: {cpu} vCPU, {ram} RAM, {storage} de armazenamento."
+			},
+			"workspaceCreated": {
+				"title": "Workspace criado",
+				"description": "Workspace {name} foi criado com sucesso."
+			},
+			"errorCreating": {
+				"title": "Erro ao criar workspace"
+			}
+		},
+		"errors": {
+			"noName": "Insira um nome de projeto",
+			"noLocation": "Selecione um local de projeto"
+		}
+	},
+	"quickVibeCodeSetupModal": {
+		"title": "Configuração rápida do Vibe Code",
+		"vibeCodeProject": "Projeto Vibe Code",
+		"projectName": "Nome do projeto",
+		"gettingReady": "Preparando tudo para você...",
+		"appOpened": {
+			"title": "App aberto",
+			"description": "O app foi aberto com sucesso."
+		},
+		"noAppToOpen": "Nenhum app para abrir."
+	},
+	"passwordModal": {
+		"title": "Inserir senha",
+		"subtitle": "Esta ação requer autenticação",
+		"password": "Senha",
+		"passwordPlaceholder": "Insira sua senha",
+		"resetConfig": {
+			"button": "Redefinir configuração",
+			"title": "Redefinir configurações",
+			"message": "Tem certeza de que deseja redefinir todas as configurações? Esta ação não pode ser desfeita."
+		},
+		"validation": {
+			"required": "Senha é obrigatória"
+		},
+		"confirm": {
+			"button": "Confirmar"
+		}
+	},
+	"openSourceInfoModal": {
+		"title": "Código aberto",
+		"description": "Acreditamos em software aberto porque a transparência promove confiança, inovação e colaboração. Nossa missão é capacitar desenvolvedores no mundo todo, fornecendo acesso gratuito às ferramentas de que precisam para construir, criar e inovar sem barreiras.",
+		"pulseEditorCore": "Núcleo do Pulse Editor",
+		"officialApps": "Apps oficiais",
+		"opensource": "Open source",
+		"cloudServices": "Ao mesmo tempo, oferecemos serviços em nuvem e um marketplace para que você gerencie seus projetos e compartilhe seu trabalho com a comunidade sem se preocupar com infraestrutura e backend.",
+		"loveWhatWeDo": "Gosta do que estamos fazendo? Apoie-nos dando uma estrela no GitHub ou baixando nosso app móvel na Google Play!",
+		"giveUsAStar": "Dê-nos uma estrela",
+		"googlePlay": "Google Play"
+	},
+	"commandViewer": {
+		"chatInput": {
+			"placeholder": "Digite um comando ou faça uma pergunta",
+			"emptyDescription": "Você pode digitar 'add', 'remove', 'edit', etc. para executar ações ou fazer perguntas",
+			"emptyDescriptionWithCommand": "Você pode digitar um comando com '@' para executá-lo ou fazer perguntas",
+			"pressEnter": "Pressione Enter para enviar",
+			"pressEnterToExecute": "Pressione Enter para executar"
+		},
+		"send": "Enviar",
+		"you": "Você: "
+	},
+	"projectIndicator": {
+		"closeProject": {
+			"menuItem": "Fechar projeto"
+		},
+		"projectSettings": {
+			"menuItem": "Configurações do projeto"
+		}
+	},
+	"editorToolbar": {
+		"runWorkflow": {
+			"tooltip": "Executar workflow"
+		},
+		"openConsole": {
+			"tooltip": "Abrir console agentic"
+		},
+		"voiceChat": {
+			"tooltip": "Chat por voz com agente"
+		},
+		"artifacts": {
+			"tooltip": "Artefatos",
+			"wip": "Artefatos (em desenvolvimento)"
+		},
+		"installedAgents": {
+			"tooltip": "Agentes instalados"
+		},
+		"marketplace": {
+			"tooltip": "Marketplace"
+		},
+		"settings": {
+			"tooltip": "Configurações"
+		}
+	},
+	"publishWorkflowModal": {
+		"title": "Publicar workflow",
+		"description": "Publique seu workflow para compartilhá-lo com outras pessoas",
+		"workflowName": "Nome do workflow",
+		"workflowNamePlaceholder": "Insira o nome do workflow",
+		"workflowDescription": "Descrição",
+		"workflowDescriptionPlaceholder": "Insira a descrição do workflow",
+		"workflowVersion": "Versão do workflow",
+		"workflowVersionPlaceholder": "Insira a versão do workflow",
+		"publish": "Publicar",
+		"publishing": "Publicando workflow",
+		"publishingDescription": "Seu workflow está sendo publicado...",
+		"toast": {
+			"published": {
+				"title": "Workflow publicado",
+				"description": "Seu workflow foi publicado com sucesso."
+			},
+			"failed": {
+				"title": "Falha ao publicar workflow"
+			}
+		}
+	},
+	"projectSettingsModal": {
+		"title": "Configurações do projeto",
+		"projectName": "Nome do projeto",
+		"projectPath": "Caminho do projeto",
+		"update": "Atualizar",
+		"create": "Criar",
+		"delete": "Excluir",
+		"toast": {
+			"noProjectSelected": "Nenhum projeto selecionado."
+		}
+	},
+	"editorSettingsModal": {
+		"title": "Configurações do editor",
+		"projectsFolder": {
+			"description": "Todos os seus projetos serão salvos nesta pasta.",
+			"selectFolder": "Selecionar pasta",
+			"selectProjectHomePath": "Selecionar pasta padrão de projetos"
+		},
+		"environmentVariables": {
+			"frontend": "Variáveis de ambiente (frontend):",
+			"instructions": "KEY=VALUE separadas por quebras de linha",
+			"backendWarning": "Para definir variáveis de ambiente de backend, use as configurações do aplicativo de extensão.",
+			"addNewVariable": "Adicionar nova variável",
+			"value": "Valor",
+			"errorEmptyKey": {
+				"title": "Erro",
+				"description": "A chave da variável de ambiente não pode ser vazia."
+			}
+		},
+		"customOnnxWasmCdnUrl": {
+			"label": "URL CDN personalizada para onnx-wasm",
+			"placeholder": "Insira a URL CDN personalizada para onnx-wasm"
+		},
+		"restartToApply": "Reinicie para aplicar",
+		"aiSettings": {
+			"title": "Configurações de IA",
+			"useManagedEndpoints": "Usar endpoints de IA gerenciados",
+			"managedMessage": "Desbloqueie instantaneamente todo o poder do Pulse Editor com a nuvem gerenciada: você obtém assistência de IA ultrarrápida, sincronização entre plataformas e ferramentas criativas para se manter sempre no fluxo.",
+			"byokMessage": "Trazer suas próprias chaves de API permite conectar-se diretamente aos provedores de IA. Requer mais configuração, mas você mantém controle total.",
+			"yourPlan": "Seu plano:",
+			"upgradeManagePlan": "Atualizar/gerenciar plano",
+			"credits": "Créditos:",
+			"topUpCredits": "Adicionar créditos",
+			"stt": "STT",
+			"llm": "LLM",
+			"tts": "TTS",
+			"imageGen": "Geração de imagem",
+			"videoGen": "Geração de vídeo",
+			"provider": "Provedor",
+			"providerPlaceholder": "Selecione um provedor",
+			"model": "Modelo",
+			"modelPlaceholder": "Selecione um modelo",
+			"voiceName": "Nome da voz",
+			"apiKey": "Chave de API",
+			"apiKeyEncrypted": "A chave de API está criptografada",
+			"apiKeyTooltip": "Desative a senha para editar a chave de API. Você pode reativar a senha após editar as chaves."
+		},
+		"security": {
+			"title": "Segurança",
+			"encryptApiTokens": "Criptografar tokens de API com senha",
+			"encryptDescription": "Use uma senha para criptografar os tokens de API. Se você esquecer a senha, precisará inserir novamente todos os tokens.",
+			"ttlLabel": "TTL (em dias)",
+			"ttlDescription": "Os tokens de API são salvos pelo período definido em TTL (Tempo de Vida) em dias. Após o TTL, os tokens serão excluídos na próxima vez que o aplicativo for aberto. Defina -1 para mantê-los indefinidamente.",
+			"ttlError": {
+				"title": "Erro",
+				"description": "Entrada inválida. Usando o padrão de 14 dias."
+			}
+		},
+		"devExtension": {
+			"title": "Configurações de extensão de desenvolvimento",
+			"fileTypeMapping": "Mapeamento padrão de extensões por tipo de arquivo",
+			"noFileTypes": "Nenhum tipo de arquivo encontrado. Instale extensões que ofereçam suporte a tipos de arquivo.",
+			"selectDefaultExtension": "Selecionar extensão padrão",
+			"extensionDevMode": "Modo de desenvolvimento de extensão",
+			"extensionDevModeDescription": "Carregar extensão do servidor local de desenvolvimento em http://localhost:3030.",
+			"enableExtensionDevMode": "Ativar modo de desenvolvimento de extensão",
+			"extensionDevServerUrl": "URL do servidor de desenvolvimento de extensão",
+			"extensionId": "ID da extensão",
+			"extensionIdPlaceholder": "(extension_id)",
+			"extensionVersion": "Versão da extensão",
+			"extensionVersionPlaceholder": "(versão)",
+			"addDevExtension": "Adicionar extensão de desenvolvimento",
+			"openAsApp": "Abrir como aplicativo",
+			"toast": {
+				"devModeEnabled": {
+					"title": "Modo de desenvolvimento de extensão ativado",
+					"description": "Agora você pode carregar extensões do seu servidor local de desenvolvimento."
+				},
+				"devModeDisabled": {
+					"title": "Modo de desenvolvimento de extensão desativado",
+					"description": "Você desativou o modo de desenvolvimento de extensão."
+				},
+				"extensionInstalled": {
+					"title": "Extensão instalada",
+					"description": "Extensão {id} instalada com sucesso."
+				},
+				"enableDevMode": "Ativar modo de desenvolvimento de extensão",
+				"addDevExtension": "Adicionar extensão de desenvolvimento",
+				"openAsApp": "Abrir como aplicativo",
+				"extensionDevServerURL": "URL do servidor de desenvolvimento de extensão",
+				"extensionID": "ID da extensão",
+				"extensionVersion": "Versão da extensão",
+				"selectDefaultExtension": "Selecionar extensão padrão",
+				"noFileTypes": "Nenhum tipo de arquivo encontrado. Instale extensões que ofereçam suporte a tipos de arquivo.",
+				"fileTypeMapping": "Mapeamento padrão de extensões por tipo de arquivo",
+				"deviceHostAddress": "Endereço do dispositivo host"
+			}
+		},
+		"extensionDefined": {
+			"title": "Configurações definidas pela extensão",
+			"pulseEditorTerminal": "Terminal do Pulse Editor",
+			"deviceHostAddress": "Endereço do dispositivo host"
+		}
+	},
+	"marketplaceModal": {
+		"title": "Marketplace da comunidade",
+		"tabs": {
+			"featured": "Em destaque",
+			"featuredDescription": "Apps e workflows em destaque da comunidade",
+			"workflows": "Workflows",
+			"workflowsDescription": "Navegue por workflows compartilhados pela comunidade",
+			"apps": "Apps",
+			"appsDescription": "Navegue por Pulse Apps federados desenvolvidos pela comunidade",
+			"installed": "Instalados",
+			"installedApps": "Apps instalados",
+			"installedAgents": "Agentes instalados",
+			"discover": "Descobrir",
+			"discoverApps": "Descobrir apps",
+			"discoverAgents": "Descobrir agentes"
+		}
+	},
+	"loginModal": {
+		"title": "Entrar",
+		"connectToRemote": "Conectar a uma instância remota",
+		"login": "Login",
+		"remoteUrl": "URL remota",
+		"remoteUrlPlaceholder": "Insira a URL remota",
+		"remotePassword": "Senha",
+		"remotePasswordPlaceholder": "Insira a senha",
+		"connect": "Conectar",
+		"localWorkspaceNotAvailable": "O workspace local não está disponível no navegador. Use o cliente desktop/mobile ou conecte-se a uma instância remota.",
+		"continueAsGuest": "Continuar como convidado",
+		"continueOffline": "Continuar offline"
+	},
+	"agentConfigModal": {
+		"title": "Agentes instalados",
+		"tabs": {
+			"agents": "Agentes",
+			"agentsDescription": "Gerencie agentes instalados",
+			"providers": "Provedores",
+			"providersDescription": "Gerencie provedores de IA"
+		},
+		"installedAgents": "Agentes instalados",
+		"availableAgents": "Agentes disponíveis",
+		"noAgentsInstalled": "Nenhum agente instalado",
+		"noAgentsAvailable": "Nenhum agente disponível",
+		"edit": "Editar",
+		"delete": "Excluir",
+		"createNewAgent": {
+			"title": "Criar novo agente",
+			"description": "Adicione um agente de chat básico ao editor.",
+			"button": "Criar novo agente"
+		},
+		"form": {
+			"name": "Nome",
+			"namePlaceholder": "Insira o nome do agente",
+			"version": "Versão",
+			"versionPlaceholder": "Insira a versão do agente",
+			"description": "Descrição",
+			"descriptionPlaceholder": "Insira a descrição do agente",
+			"systemPrompt": "Prompt do sistema",
+			"systemPromptPlaceholder": "Insira o prompt do agente",
+			"provider": "Provedor",
+			"providerPlaceholder": "Insira o provedor",
+			"modelName": "Nome do modelo",
+			"modelNamePlaceholder": "Insira o nome do modelo",
+			"model": "Modelo",
+			"modelPlaceholder": "Selecione um modelo",
+			"temperature": "Temperatura",
+			"contextLength": "Comprimento do contexto",
+			"contextLengthPlaceholder": "Insira o comprimento do contexto"
+		},
+		"addAgent": "Adicionar agente",
+		"installedBy": "Instalado pela extensão {extension} de {publisher}",
+		"llmConfig": "Configuração de LLM:",
+		"toast": {
+			"agentDeleted": "Agente excluído",
+			"agentAdded": "Novo agente adicionado"
+		},
+		"llmUsage": {
+			"title": "Uso de LLM por agentes",
+			"provider": "Provedor:",
+			"usedModels": "Modelos usados:",
+			"usedByAgents": "Usado pelos agentes:",
+			"totalUsageByAgents": "Número total de agentes:",
+			"agent": "Agente",
+			"totalCost": "Custo total",
+			"noData": "Nenhum dado de uso disponível",
+			"apiKey": "Chave de API",
+			"apiKeyNotVisible": "A chave de API não é visível após ser inserida."
+		}
+	},
+	"appInfoModal": {
+		"title": "Informações do app",
+		"developerSettings": "Configurações de desenvolvedor",
+		"loading": "Carregando...",
+		"metadata": {
+			"id": "ID",
+			"version": "Versão",
+			"author": "Autor",
+			"license": "Licença",
+			"website": "Site",
+			"readme": "README"
+		},
+		"apiPricing": {
+			"title": "Preços da API",
+			"description": "As seguintes são as configurações de preço de API para este app.",
+			"endpoint": "Endpoint:",
+			"cost": "Custo:",
+			"creditsPerCall": "créditos por chamada",
+			"perCall": "por chamada",
+			"noApiPricing": "Nenhum preço de API definido para este app.",
+			"noServerFunctions": "Nenhuma função de servidor encontrada para este app.",
+			"costPlaceholder": "Custo em créditos por chamada"
+		},
+		"developerMode": {
+			"title": "Configurações de desenvolvedor",
+			"appInfo": "Informações do app",
+			"appId": "ID do app",
+			"environmentVariables": "Variáveis de ambiente",
+			"addNewVariable": "Adicionar nova variável",
+			"value": "Valor",
+			"localServer": "Servidor local",
+			"localServerPlaceholder": "Insira a URL do servidor local (ex.: http://localhost:3000)",
+			"envInstructions": "KEY=VALUE separadas por quebras de linha",
+			"testMode": "Modo de teste",
+			"testModeDescription": "Ative o modo de teste para usar servidor local e variáveis de ambiente",
+			"toast": {
+				"addingVariable": {
+					"title": "Adicionando variável",
+					"description": "Adicionando variável de ambiente {key}."
+				},
+				"variableAdded": {
+					"title": "Variável adicionada",
+					"description": "Variável de ambiente {key} adicionada com sucesso."
+				},
+				"errorEmptyKey": {
+					"title": "Erro",
+					"description": "A chave da variável de ambiente não pode ser vazia."
+				},
+				"settingCost": {
+					"title": "Definindo custo do endpoint",
+					"description": "Definindo custo para o endpoint {endpoint}: {cost}."
+				},
+				"costSet": {
+					"title": "Custo definido",
+					"description": "Custo para o endpoint {endpoint} definido como {cost} com sucesso."
+				},
+				"costSetError": {
+					"title": "Erro",
+					"description": "Falha ao definir custo para o endpoint {endpoint}. {error}."
+				},
+				"deletingApp": {
+					"title": "Excluindo app",
+					"description": "Excluindo app {name}."
+				},
+				"appUnpublished": {
+					"title": "App despublicado",
+					"description": "App {name} despublicado com sucesso."
+				},
+				"unpublishError": {
+					"title": "Erro",
+					"description": "Falha ao despublicar app {name}."
+				}
+			}
+		},
+		"dangerZone": {
+			"title": "Zona de perigo",
+			"unpublish": "Despublicar",
+			"unpublishConfirm": "Tem certeza de que deseja despublicar este app? Esta ação não pode ser desfeita.",
+			"confirmUnpublish": "Confirmar despublicação",
+			"cancel": "Cancelar",
+			"deleteApp": "Excluir app",
+			"deleteAppDescription": "Excluir este app permanentemente da sua conta",
+			"uninstallApp": "Desinstalar app",
+			"uninstallAppDescription": "Remover este app dos seus apps instalados"
+		}
+	},
+	"navSideMenu": {
+		"home": {
+			"label": "Início",
+			"icon": "home"
+		},
+		"projectHome": {
+			"label": "Pasta de projetos",
+			"icon": "folder",
+			"notSet": "Você ainda não definiu a pasta padrão de projetos. Defina-a nas configurações.",
+			"select": {
+				"button": "Selecionar pasta de projetos"
+			}
+		}
+	},
+	"fileMenu": {
+		"title": "Arquivo",
+		"newProject": "Novo projeto",
+		"openProject": "Abrir projeto"
+	},
+	"viewMenu": {
+		"title": "Visualizar",
+		"commandViewer": "Visualizador de comandos",
+		"console": "Console",
+		"importWorkflow": {
+			"title": "Importar workflow",
+			"invalidFile": "Arquivo de workflow inválido",
+			"readError": "Erro ao ler arquivo de workflow"
+		}
+	},
+	"fsExplorer": {
+		"newFolder": "Nova pasta",
+		"folderName": "Nome da pasta",
+		"newFile": "Novo arquivo",
+		"fileName": "Nome do arquivo",
+		"selectOneFolder": "Selecione apenas uma pasta para criar uma nova pasta dentro dela.",
+		"selectOneFolderForFile": "Selecione apenas uma pasta para criar um novo arquivo dentro dela.",
+		"emptyContent": "Conteúdo vazio. Crie um novo arquivo para começar."
+	},
+	"projectExplorer": {
+		"title": "Projetos",
+		"newProject": {
+			"button": "Novo projeto"
+		},
+		"signInMessage": "Entre para ver seus projetos ou abra um projeto local com o cliente desktop."
+	},
+	"viewArea": {
+		"unknownViewType": "Tipo de visualização desconhecido",
+		"noViewSelected": "Nenhuma visualização selecionada"
+	},
+	"projectView": {
+		"title": "Projeto",
+		"createWorkflow": {
+			"button": "Criar workflow"
+		},
+		"exploreMarketplace": {
+			"button": "Explorar marketplace"
+		}
+	},
+	"dnd": {
+		"openApp": {
+			"failed": "Falha ao abrir app",
+			"invalidData": "Dados de app inválidos"
+		},
+		"linkApp": {
+			"failed": "Falha ao vincular app",
+			"invalidData": "Dados de app inválidos"
+		},
+		"openFile": {
+			"failed": "Falha ao abrir arquivo",
+			"invalidData": "Dados de arquivo inválidos"
+		},
+		"invalidTarget": {
+			"cannotDropFile": "Não é possível soltar arquivo aqui",
+			"somethingWrong": "Algo deu errado. Tente novamente.",
+			"cannotDrop": "Não é possível soltar aqui"
+		}
+	},
+	"workspaceSettingsModal": {
+		"title": "Configurações do workspace",
+		"selectWorkspace": "Selecionar workspace",
+		"localComputer": "Computador local",
+		"createNew": "Criar novo",
+		"workspaceName": "Nome do workspace",
+		"workspaceSpecs": "Especificações do workspace",
+		"storageGB": "Armazenamento (GB)",
+		"moreToCome": "Mais por vir",
+		"useWorkspace": "Usar workspace",
+		"exitWorkspace": "Sair do workspace",
+		"start": "Iniciar",
+		"stop": "Parar",
+		"update": "Atualizar",
+		"delete": "Excluir",
+		"create": "Criar",
+		"unpublishWorkspace": "Despublicar workspace",
+		"toast": {
+			"unknownPlatform": "Plataforma desconhecida.",
+			"workspaceNotAvailable": "Workspace não está disponível.",
+			"workspaceNameRequired": "Nome do workspace é obrigatório.",
+			"workspaceExists": "Workspace já existe. Atualize-o em vez disso.",
+			"updatingWorkspace": {
+				"title": "Atualizando workspace",
+				"description": "Atualizando workspace {name}."
+			},
+			"workspaceUpdated": {
+				"title": "Workspace atualizado",
+				"description": "Workspace {name} foi atualizado com sucesso."
+			},
+			"deletingWorkspace": {
+				"title": "Excluindo workspace",
+				"description": "Excluindo workspace {name}"
+			},
+			"workspaceDeleted": {
+				"title": "Workspace excluído",
+				"description": "Workspace {name} foi excluído com sucesso."
+			},
+			"errorDeleting": {
+				"title": "Erro ao excluir workspace"
+			},
+			"creatingWorkspace": {
+				"title": "Criando workspace",
+				"description": "Criando workspace {name}. Especificações: {cpu} vCPU, {ram} RAM, {storage} de armazenamento."
+			},
+			"workspaceCreated": {
+				"title": "Workspace criado",
+				"description": "Workspace {name} foi criado com sucesso."
+			},
+			"errorCreating": {
+				"title": "Erro ao criar workspace"
+			},
+			"stoppingWorkspace": {
+				"title": "Parando workspace",
+				"description": "Parando workspace {name}."
+			},
+			"workspaceStopped": {
+				"title": "Workspace parado",
+				"description": "Workspace {name} foi parado com sucesso."
+			},
+			"startingWorkspace": {
+				"title": "Iniciando workspace",
+				"description": "Iniciando workspace {name}."
+			},
+			"workspaceStarted": {
+				"title": "Workspace iniciado",
+				"description": "Workspace {name} foi iniciado com sucesso."
+			}
+		}
+	},
+	"qrDisplay": {
+		"title": "Escanear código QR",
+		"download": "Baixar",
+		"loadingError": "O código QR ainda está carregando, aguarde."
+	},
+	"sharingModal": {
+		"title": "Compartilhar seu workspace {name}",
+		"visibility": "Visibilidade",
+		"visibilityPlaceholder": "Selecionar visibilidade",
+		"inviteCode": "Código de convite",
+		"selectVisibility": "Selecione uma opção de visibilidade para ver as opções de compartilhamento.",
+		"workspacePrivate": "Seu workspace é privado.",
+		"tabs": {
+			"qrCode": "Código QR",
+			"qrCodeDescription": "Compartilhe seu workspace via código QR",
+			"url": "URL",
+			"urlDescription": "Compartilhe seu workspace via URL"
+		},
+		"qrCode": {
+			"description": "Compartilhe seu workspace usando este código QR"
+		},
+		"url": {
+			"description": "Compartilhe seu workspace usando esta URL",
+			"copy": "Copiar"
+		},
+		"toast": {
+			"fetchError": "Falha ao obter informações de compartilhamento da extensão",
+			"urlCopied": "URL copiada para a área de transferência"
+		}
+	},
+	"workflowPreviewCard": {
+		"open": "Abrir",
+		"clone": "Clonar"
+	},
+	"appGallery": {
+		"title": "Apps",
+		"noApps": "Nenhum app encontrado"
+	},
+	"workflowGallery": {
+		"title": "Workflows",
+		"noWorkflows": "Nenhum workflow encontrado"
+	},
+	"featuredGallery": {
+		"title": "Em destaque"
+	},
+	"statusScreens": {
+		"welcome": {
+			"title": "Bem-vindo ao Pulse Editor",
+			"subtitle": "Comece criando um novo projeto ou abrindo um existente",
+			"taglineLine1": "Seu próximo sistema operacional de IA, impulsionado por",
+			"taglineLine2": "Apps e fluxos de trabalho Vibe Coded"
+		},
+		"wip": {
+			"title": "Em desenvolvimento",
+			"subtitle": "Este recurso estará disponível em breve"
+		},
+		"loading": {
+			"title": "Carregando...",
+			"subtitle": "Aguarde"
+		},
+		"notAuthorized": {
+			"title": "Não autorizado",
+			"subtitle": "Você não tem permissão para acessar este recurso"
+		},
+		"error": {
+			"title": "Erro",
+			"subtitle": "Algo deu errado"
+		}
+	},
+	"appLoader": {
+		"loading": "Carregando app...",
+		"failed": "Falha ao carregar app"
+	},
+	"consolePanelView": {
+		"title": "Console",
+		"clear": "Limpar",
+		"noOutput": "Nenhuma saída ainda"
+	},
+	"tabViewManager": {
+		"openProject": "Abrir projeto",
+		"untitled": "Sem título",
+		"newTab": "Nova aba"
+	},
+	"voiceRecorder": {
+		"listening": "Ouvindo",
+		"thinking": "Pensando",
+		"speaking": "Falando",
+		"loadingMic": "Carregando microfone",
+		"waiting": "Aguardando"
+	},
+	"commandExecutor": {
+		"commandExecuted": "Comando executado",
+		"commandExecutionFailed": "Falha na execução do comando"
+	},
+	"planPicker": {
+		"freeDescription": "Gratuito: use o plano gratuito com recursos limitados. Você também pode auto-hospedar o servidor para acesso ilimitado aos recursos de IA.",
+		"readMoreOpenSource": "Leia mais sobre nosso compromisso com o open source"
+	},
+	"projectItem": {
+		"projectSettings": "Configurações do projeto",
+		"selectMultiple": "Selecionar múltiplos",
+		"created": "Criado: "
+	},
+	"fsExplorer": {
+		"newFolder": "Nova pasta",
+		"folderName": "Nome da pasta",
+		"newFile": "Novo arquivo",
+		"fileName": "Nome do arquivo",
+		"selectOneFolder": "Selecione apenas uma pasta para criar uma nova pasta dentro dela.",
+		"selectOneFolderForFile": "Selecione apenas uma pasta para criar um novo arquivo dentro dela.",
+		"emptyContent": "Conteúdo vazio. Crie um novo arquivo para começar.",
+		"noAppSelected": "Nenhum app selecionado para lidar com este arquivo.",
+		"selectNodeInCanvas": "Selecione um nó no canvas para ver o arquivo",
+		"noWorkspaceSelected": "Nenhum workspace selecionado"
+	},
+	"treeView": {
+		"contextMenu": {
+			"openInCanvas": "Abrir no canvas",
+			"openInApp": "Abrir no app",
+			"rename": "Renomear",
+			"delete": "Excluir",
+			"loading": "Carregando..."
+		},
+		"toast": {
+			"newFolderCreated": "Nova pasta criada",
+			"failedToCreateFolder": "Falha ao criar pasta",
+			"newFileCreated": "Novo arquivo criado",
+			"failedToCreateFile": "Falha ao criar arquivo",
+			"fileRenamed": "Arquivo renomeado",
+			"failedToRename": "Falha ao renomear arquivo",
+			"fileDeleted": "Arquivo excluído",
+			"failedToDelete": "Falha ao excluir arquivo"
+		}
+	},
+	"workspaceExplorer": {
+		"workspacePaused": "O workspace está atualmente em pausa. Retome o workspace para acessar os arquivos do projeto.",
+		"startWorkspace": "Iniciar workspace",
+		"workspaceSettings": "Configurações do workspace",
+		"osFeatures": "Para interagir com recursos do sistema operacional, abra no cliente desktop ou configure um workspace remoto.",
+		"workspaceStarting": "O workspace está iniciando...",
+		"viewProjectContent": "Para ver o conteúdo do projeto no workspace, selecione primeiro um projeto.",
+		"toast": {
+			"noWorkspace": "Nenhum workspace para iniciar.",
+			"startingWorkspace": "Iniciando workspace...",
+			"workspaceStarted": "Workspace iniciado."
+		}
+	},
+	"appExplorer": {
+		"dragTip": "Toque ou arraste uma extensão para abri-la.",
+		"exploreWorkflowsApps": "Explorar workflows/apps da comunidade"
+	},
+	"appInfoModal": {
+		"developerSettings": "Configurações de desenvolvedor",
+		"id": "ID",
+		"version": "Versão",
+		"author": "Autor",
+		"license": "Licença",
+		"website": "Site",
+		"readme": "README",
+		"noReadme": "Nenhum README disponível",
+		"apiPricing": "Preços da API",
+		"apiPricingDescription": "As seguintes são as configurações de preço de API para este app.",
+		"endpoint": "Endpoint: ",
+		"cost": "Custo: ",
+		"credits": "créditos",
+		"perCall": "por chamada",
+		"noApiPricing": "Nenhum preço de API definido para este app.",
+		"appInfo": "Informações do app",
+		"appID": "ID do app",
+		"environmentVariables": "Variáveis de ambiente",
+		"addNewVariable": "Adicionar nova variável",
+		"value": "Valor",
+		"error": "Erro",
+		"envKeyEmpty": "A chave da variável de ambiente não pode ser vazia.",
+		"addingVariable": "Adicionando variável",
+		"addingVariableDescription": "Adicionando variável de ambiente {key}.",
+		"variableAdded": "Variável adicionada",
+		"variableAddedDescription": "Variável de ambiente {key} adicionada com sucesso.",
+		"apiPricingSetup": "Você pode definir aqui o custo em créditos para chamadas às APIs do seu app. Depois de definido, não será possível alterá-lo novamente.",
+		"noServerFunctions": "Nenhuma função de servidor encontrada para este app.",
+		"dangerZone": "Zona de perigo",
+		"confirmUnpublish": "Tem certeza de que deseja despublicar este app? Esta ação não pode ser desfeita.",
+		"unpublish": "Despublicar",
+		"deletingApp": "Excluindo app",
+		"deletingAppDescription": "Excluindo app {name}.",
+		"failedToUnpublish": "Falha ao despublicar app {name}.",
+		"appUnpublished": "App despublicado",
+		"appUnpublishedDescription": "App {name} despublicado com sucesso.",
+		"confirmUnpublishButton": "Confirmar despublicação",
+		"settingEndpointCost": "Definindo custo do endpoint",
+		"settingEndpointCostDescription": "Definindo custo para o endpoint {endpoint}: {cost}.",
+		"failedToSetCost": "Falha ao definir custo para o endpoint {endpoint}. {error}.",
+		"costSet": "Custo definido",
+		"costSetDescription": "Custo para o endpoint {endpoint} definido como {cost} com sucesso.",
+		"creditsPerCall": "créditos por chamada",
+		"creditsCostPerCall": "Custo em créditos por chamada"
+	},
+	"projectPreviewCard": {
+		"workspace": "Workspace:",
+		"undefined": "Indefinido"
+	},
+	"appPreviewCard": {
+		"requiresWorkspace": "Este app requer um workspace aberto para funcionar corretamente.",
+		"requiresWorkspaceLabel": "Requer workspace",
+		"use": "Usar",
+		"details": "Detalhes",
+		"install": "Instalar",
+		"upgrade": "Atualizar",
+		"uninstall": "Desinstalar",
+		"open": "Abrir",
+		"installed": "Instalado",
+		"outdated": "Desatualizado",
+		"compatible": "Compatível",
+		"extensionInstalled": "Extensão instalada",
+		"extensionInstalledDescription": "Extensão {id} instalada com sucesso.",
+		"extensionUpgraded": "Extensão atualizada",
+		"extensionUpgradedDescription": "Extensão {id} atualizada com sucesso.",
+		"extensionUninstalled": "Extensão desinstalada",
+		"extensionUninstalledDescription": "Extensão {id} desinstalada com sucesso.",
+		"mfIncompatible": "Este app está desatualizado e não é mais um app de module federation válido. Atualize o app para a versão mais recente.",
+		"hostMFVersion": "Versão MF do host:",
+		"appMFVersion": "Versão MF do app:",
+		"libIncompatible": "A versão da biblioteca deste app está desatualizada e pode não funcionar corretamente. Atualize o app para a versão mais recente.",
+		"hostLibVersion": "Versão da lib do host:",
+		"appLibVersion": "Versão da lib do app:",
+		"compatibleTooltip": "A versão de module federation ({mfVersion}) e a versão da biblioteca ({libVersion}) deste app correspondem às do host. O app deve funcionar corretamente.",
+		"enabled": "Ativado",
+		"disabled": "Desativado"
+	},
+	"extensionCard": {
+		"extensionUninstalled": "Extensão desinstalada",
+		"uninstall": "Desinstalar",
+		"install": "Instalar",
+		"update": "Atualizar",
+		"enable": "Ativar",
+		"disable": "Desativar",
+		"details": "Detalhes",
+		"unavailable": "Indisponível",
+		"mfVersion": "Versão MF",
+		"libVersion": "Versão da lib",
+		"updatesAvailable": "Atualizações disponíveis"
+	},
+	"nodeHandle": {
+		"ariaLabel": "Clique no manipulador do nó para abrir o menu do nó",
+		"required": "*obrigatório"
+	},
+	"draggableItem": {
+		"ariaLabel": "Arraste para mover"
+	}
+}

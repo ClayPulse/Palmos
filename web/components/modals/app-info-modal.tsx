@@ -2,6 +2,7 @@ import { listRemoteServerFunctions } from "@/lib/module-federation/remote";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppInfoModalContent } from "@/lib/types";
 import { addToast, Button, Chip, Divider, Input, Spinner } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useContext, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import EnvInput from "../misc/env-input";
@@ -162,6 +163,7 @@ function AppInfo({
   funcNamesWithCosts: EndPointInfo[];
   isLoadingEndpoints: boolean;
 }) {
+  const t = useTranslations();
   const [isAuthor, setIsAuthor] = useState(false);
 
   const filteredFuncNamesWithCosts = useMemo(() => {
@@ -219,13 +221,21 @@ function AppInfo({
             </a>
           </p>
         )}
-        {appInfo?.readme && (
+        {appInfo?.readme ? (
           <div>
             <Divider />
             <p>
               <span className="font-semibold">README</span>:
             </p>
             <MarkdownRender content={appInfo.readme} />
+          </div>
+        ) : (
+          <div>
+            <Divider />
+            <p>
+              <span className="font-semibold">README</span>:
+            </p>
+            <p className="text-default-foreground/60">{t("appInfoModal.noReadme")}</p>
           </div>
         )}
       </div>

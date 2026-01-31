@@ -2,6 +2,8 @@ import { Button } from "@heroui/react";
 import Link from "next/link";
 import Icon from "../misc/icon";
 import ModalWrapper from "./wrapper";
+import { useTranslations } from 'next-intl';
+
 export default function OpenSourceInfoModal({
   isOpen,
   onClose,
@@ -9,16 +11,16 @@ export default function OpenSourceInfoModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
+  
   return (
     <ModalWrapper
       isOpen={isOpen}
       onClose={onClose}
-      title={"Open Source Information"}
+      title={t('openSourceInfoModal.title')}
     >
       <div className="flex w-full flex-col items-center gap-y-1">
-        We believe in open software. Pulse Editor's core client and many of its
-        official apps and workflows are fully open source, built to empower
-        developers everywhere.
+        {t('openSourceInfoModal.description')}
         <div className="flex gap-x-1">
           <Link href="https://github.com/claypulse/pulse-editor">
             <Button>
@@ -31,7 +33,7 @@ export default function OpenSourceInfoModal({
                     className="p-0.5 pl-0"
                   />
                 </div>
-                <p>Pulse Editor Core</p>
+                <p>{t('openSourceInfoModal.pulseEditorCore')}</p>
               </div>
             </Button>
           </Link>
@@ -46,18 +48,15 @@ export default function OpenSourceInfoModal({
                     className="p-0.5 pl-0"
                   />
                 </div>
-                <p>Official Apps</p>
+                <p>{t('openSourceInfoModal.officialApps')}</p>
               </div>
             </Button>
           </Link>
         </div>
-        Meanwhile, we offer cloud hosted services like remote workspaces and AI
-        inference to make Pulse Editor easier to use at scale. Some of these
-        services are closed source and require a subscription to access.
+        {t('openSourceInfoModal.cloudServices')}
         <br />
         <br />
-        Love what we are doing? Please consider ⭐ starring us on GitHub,
-        downloading and giving feedback on Google Play.
+        {t('openSourceInfoModal.loveWhatWeDo')}
         <div className="flex gap-x-1">
           <Link href="https://github.com/claypulse/pulse-editor">
             <Button>
@@ -69,7 +68,7 @@ export default function OpenSourceInfoModal({
                   className="p-0.5 pl-0"
                 />
               </div>
-              <p> Give us a star</p>
+              <p>{t('openSourceInfoModal.giveUsAStar')}</p>
             </Button>
           </Link>
           <Link href="https://play.google.com/store/apps/details?id=com.pulse_editor.app">
@@ -77,7 +76,7 @@ export default function OpenSourceInfoModal({
               <div>
                 <Icon name="phone_android" />
               </div>
-              <p>Google Play</p>
+              <p>{t('openSourceInfoModal.googlePlay')}</p>
             </Button>
           </Link>
         </div>

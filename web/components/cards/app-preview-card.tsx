@@ -1,6 +1,7 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
+import { useTranslations } from "next-intl";
 import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
 import {
   checkCompatibility,
@@ -55,6 +56,7 @@ export default function AppPreviewCard({
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
 }) {
+  const t = useTranslations();
   const {
     disableExtensionApp,
     enableExtensionApp,
@@ -235,8 +237,7 @@ export default function AppPreviewCard({
                   content={
                     <div className="max-w-xs">
                       <p>
-                        This app requires a workspace to be opened in order to
-                        function properly.
+                        {t("appPreviewCard.requiresWorkspace")}
                       </p>
                     </div>
                   }
@@ -248,7 +249,7 @@ export default function AppPreviewCard({
                     color="secondary"
                     size="sm"
                   >
-                    Requires Workspace
+                    {t("appPreviewCard.requiresWorkspaceLabel")}
                   </Chip>
                 </Tooltip>
               </div>
@@ -261,7 +262,7 @@ export default function AppPreviewCard({
                   variant="faded"
                   size="sm"
                 >
-                  Installed
+                  {t("appPreviewCard.installed")}
                 </Chip>
               </div>
             )}
@@ -283,23 +284,19 @@ export default function AppPreviewCard({
                       <div className="max-w-xs">
                         {!isMFCompatible && (
                           <p>
-                            This app is outdated and no longer a valid module
-                            federation app. Please update the app to the latest
-                            version. <br />
-                            Host MF version: {hostMFVersion}
+                            {t("appPreviewCard.mfIncompatible")} <br />
+                            {t("appPreviewCard.hostMFVersion")} {hostMFVersion}
                             <br />
-                            App MF version: {remoteMFVersion}
+                            {t("appPreviewCard.appMFVersion")} {remoteMFVersion}
                           </p>
                         )}
                         {!isLibCompatible && (
                           <p>
-                            This app's library version is outdated and may not
-                            work correctly. Please update the app to the latest
-                            version.
+                            {t("appPreviewCard.libIncompatible")}
                             <br />
-                            Host lib version: {hostLibVersion}
+                            {t("appPreviewCard.hostLibVersion")} {hostLibVersion}
                             <br />
-                            App lib version: {remoteLibVersion}
+                            {t("appPreviewCard.appLibVersion")} {remoteLibVersion}
                           </p>
                         )}
                       </div>
@@ -321,10 +318,10 @@ export default function AppPreviewCard({
                       content={
                         <div className="max-w-xs">
                           <p>
-                            This app's module federation version (
-                            {hostMFVersion}) and library version (
-                            {hostLibVersion}) match the host version. The app
-                            should work correctly.
+                            {t("appPreviewCard.compatibleTooltip", {
+                              mfVersion: hostMFVersion ?? "unknown",
+                              libVersion: hostLibVersion ?? "unknown",
+                            })}
                           </p>
                         </div>
                       }
@@ -337,7 +334,7 @@ export default function AppPreviewCard({
                           radius="full"
                           className="h-7"
                         >
-                          Outdated
+                          {t("appPreviewCard.outdated")}
                         </Button>
                       ) : (
                         <Button
@@ -347,7 +344,7 @@ export default function AppPreviewCard({
                           radius="full"
                           className="h-7"
                         >
-                          Compatible
+                          {t("appPreviewCard.compatible")}
                         </Button>
                       )}
                     </Tooltip>
@@ -411,7 +408,7 @@ export default function AppPreviewCard({
                   onPress?.(extension);
                 }}
               >
-                Use
+                {t("appPreviewCard.use")}
               </Button>
             )}
             <Button
@@ -421,7 +418,7 @@ export default function AppPreviewCard({
                 showDetails();
               }}
             >
-              Details
+              {t("appPreviewCard.details")}
             </Button>
             {isShowInstallationButtons &&
               (!isInstalled ? (
@@ -436,8 +433,8 @@ export default function AppPreviewCard({
                     )
                       .then(() => {
                         addToast({
-                          title: "Extension installed",
-                          description: `Extension ${extension.config.id} installed successfully.`,
+                          title: t("appPreviewCard.extensionInstalled"),
+                          description: t("appPreviewCard.extensionInstalledDescription", { id: extension.config.id }),
                           color: "success",
                         });
                         setIsInstalled(true);
@@ -448,7 +445,7 @@ export default function AppPreviewCard({
                       });
                   }}
                 >
-                  Install
+                  {t("appPreviewCard.install")}
                 </Button>
               ) : isOutdated ? (
                 <Button
@@ -465,8 +462,8 @@ export default function AppPreviewCard({
                       );
 
                       addToast({
-                        title: "Extension upgraded",
-                        description: `Extension ${extension.config.id} upgraded successfully.`,
+                        title: t("appPreviewCard.extensionUpgraded"),
+                        description: t("appPreviewCard.extensionUpgradedDescription", { id: extension.config.id }),
                         color: "success",
                       });
                       setIsOutdated(false);
@@ -476,7 +473,7 @@ export default function AppPreviewCard({
                     }
                   }}
                 >
-                  Upgrade
+                  {t("appPreviewCard.upgrade")}
                 </Button>
               ) : (
                 isShowUninstallButton && (
@@ -486,15 +483,15 @@ export default function AppPreviewCard({
                     onPress={(e) => {
                       uninstallExtensionApp(extension.config.id).then(() => {
                         addToast({
-                          title: "Extension uninstalled",
-                          description: `Extension ${extension.config.id} uninstalled successfully.`,
+                          title: t("appPreviewCard.extensionUninstalled"),
+                          description: t("appPreviewCard.extensionUninstalledDescription", { id: extension.config.id }),
                           color: "success",
                         });
                         setIsInstalled(false);
                       });
                     }}
                   >
-                    Uninstall
+                    {t("appPreviewCard.uninstall")}
                   </Button>
                 )
               ))}
@@ -510,15 +507,15 @@ export default function AppPreviewCard({
                   onPress={(e) => {
                     uninstallExtensionApp(extension.config.id).then(() => {
                       addToast({
-                        title: "Extension uninstalled",
-                        description: `Extension ${extension.config.id} uninstalled successfully.`,
+                        title: t("appPreviewCard.extensionUninstalled"),
+                        description: t("appPreviewCard.extensionUninstalledDescription", { id: extension.config.id }),
                         color: "success",
                       });
                     });
                     setContextMenuState({ x: 0, y: 0, isOpen: false });
                   }}
                 >
-                  <p className="w-full text-start">Uninstall</p>
+                  <p className="w-full text-start">{t("appPreviewCard.uninstall")}</p>
                 </Button>
               ) : (
                 <Button
@@ -532,8 +529,8 @@ export default function AppPreviewCard({
                     )
                       .then(() => {
                         addToast({
-                          title: "Extension installed",
-                          description: `Extension ${extension.config.id} installed successfully.`,
+                          title: t("appPreviewCard.extensionInstalled"),
+                          description: t("appPreviewCard.extensionInstalledDescription", { id: extension.config.id }),
                           color: "success",
                         });
                         setIsInstalled(true);
@@ -545,7 +542,7 @@ export default function AppPreviewCard({
                     setContextMenuState({ x: 0, y: 0, isOpen: false });
                   }}
                 >
-                  <p className="w-full text-start">Install</p>
+                  <p className="w-full text-start">{t("appPreviewCard.install")}</p>
                 </Button>
               )}
             </div>
@@ -611,6 +608,7 @@ function EnableCheckBox({
   activeText?: string;
   inactiveText?: string;
 }) {
+  const t = useTranslations();
   const { children, isSelected, getBaseProps, getLabelProps, getInputProps } =
     useCheckbox({
       onValueChange: onPress,
@@ -672,7 +670,7 @@ function EnableCheckBox({
         }}
         size="sm"
       >
-        {children ? children : isSelected ? "Enabled" : "Disabled"}
+        {children ? children : isSelected ? t("appPreviewCard.enabled") : t("appPreviewCard.disabled")}
       </Chip>
     </label>
   );

@@ -1,0 +1,1072 @@
+{
+  "common": {
+    "signIn": "Sign In",
+    "signOut": "Sign out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "share": "Share",
+    "shareApp": "Share App",
+    "create": "Create",
+    "open": "Open",
+    "confirm": "Confirm",
+    "update": "Update",
+    "publish": "Publish",
+    "add": "Add",
+    "enter": "Enter"
+  },
+  "navigation": {
+    "connectedToCloudAI": "Connected to Cloud AI",
+    "offline": "Offline",
+    "language": {
+      "title": "Language"
+    }
+  },
+  "settings": {
+    "editorSettings": "Editor Settings",
+    "generalSettings": "General Settings",
+    "aiSettings": "AI Settings",
+    "securitySettings": "Security Settings",
+    "projectHomePath": "Project Home Path",
+    "projectHomeDescription": "All your projects will be saved in this folder.",
+    "selectProjectHomePath": "Select Project Home Path",
+    "environmentVariables": "Environment Variables (frontend):",
+    "backendEnvVariablesWarning": "To set backend environment variables, please set it in extension app's settings.",
+    "addNewVariable": "Add New Variable",
+    "value": "Value",
+    "restartToApply": "Restart to Apply",
+    "useManagedAIEndpoints": "Use Managed AI Endpoints",
+    "managedCloudDescription": "Unlock the full power of Pulse Editor instantly with managed cloud you get lightning-fast AI assistance, cross-platform syncing, creative tools. So you always stay in flow.",
+    "byoAPIKeysDescription": "Bring Your Own API Keys lets you connect directly to AI providers. More setup required, but you stay in full control.",
+    "yourPlan": "Your Plan: {plan}",
+    "upgradeManagePlan": "Upgrade/Manage Plan",
+    "credits": "Credits: {credits}",
+    "topUpCredits": "Top Up Credits",
+    "provider": "Provider",
+    "selectProvider": "Select a provider",
+    "model": "Model",
+    "selectModel": "Select a model",
+    "apiKey": "API Key",
+    "apiKeyEncrypted": "API key is encrypted",
+    "passwordToEditApiKey": "Please disable password to edit API Key. You can enable password again after editing API keys.",
+    "voiceName": "Voice Name",
+    "security": "Security",
+    "passwordDescription": "Use a password to encrypt the API tokens. You will need to re-enter all API tokens if you forget the password.",
+    "encryptApiTokens": "Encrypt API tokens with password",
+    "ttlDescription": "The API tokens are saved for the duration of the TTL (Time To Live) days. After the TTL, the API tokens will be deleted when the app opens next time. Set -1 to keep the tokens indefinitely.",
+    "ttlLabel": "TTL (in days)",
+    "ttlError": "Invalid input. Using default 14 days.",
+    "devExtensionSettings": "Dev Extension Settings",
+    "fileTypeMapping": "File Type Default Extension Mapping",
+    "noFileTypes": "No file types found. Please install extensions that support file types.",
+    "selectDefaultExtension": "Select default extension",
+    "extensionDevMode": "Extension Dev Mode",
+    "extensionDevModeDescription": "Load extension from local extension dev server at http://localhost:3030.",
+    "enableExtensionDevMode": "Enable extension dev mode",
+    "extensionDevServerURL": "Extension Dev Server URL",
+    "extensionID": "Extension ID",
+    "extensionVersion": "Extension Version",
+    "addDevExtension": "Add Dev Extension",
+    "openAsApp": "Open as App",
+    "extensionDevModeEnabled": "Extension dev mode enabled",
+    "extensionDevModeEnabledDescription": "You can now load extensions from your local dev server.",
+    "extensionDevModeDisabled": "Extension dev mode disabled",
+    "extensionDevModeDisabledDescription": "You have disabled extension dev mode.",
+    "extensionInstalled": "Extension installed",
+    "extensionInstalledDescription": "Extension {id} installed successfully.",
+    "extensionDefinedSettings": "Extension Defined Settings",
+    "pulseEditorTerminal": "Pulse Editor Terminal",
+    "deviceHostAddress": "Device Host Address"
+  },
+  "subscription": {
+    "title": "Subscription",
+    "plan": "Subscription Plan",
+    "creditsRemaining": "Credits Remaining",
+    "managePlan": "Manage Plan"
+  },
+  "planPicker": {
+    "freeDescription": "Free: Use free plan and enjoy basic features. Access to self-hosted workspaces and bring your own API keys. This option will remain available forever and we are committed to keeping it free and open source.",
+    "readMoreOpenSource": "Read more about our open source commitment"
+  },
+  "account": {
+    "title": "Account"
+  },
+  "metadata": {
+    "title": "Pulse Editor",
+    "description": "AI powered editor to boost your creativity"
+  },
+  "cloudApi": {
+    "directorySelection": {
+      "notSupported": "Directory selection not supported on this platform"
+    },
+    "fileSelection": {
+      "notSupported": "File selection not supported on this platform"
+    },
+    "fetchProjects": {
+      "failed": "Failed to list projects"
+    },
+    "listProjects": {
+      "notSignedIn": "Cannot list projects. Are you signed in?"
+    },
+    "listPath": {
+      "failed": "Failed to list path",
+      "noWorkspace": "Cannot list path. No workspace selected"
+    },
+    "createFolder": {
+      "failed": "Failed to create folder",
+      "noWorkspace": "Cannot create folder. No workspace selected"
+    },
+    "createFile": {
+      "failed": "Failed to create file",
+      "noWorkspace": "Cannot create file. No workspace selected"
+    },
+    "renameFile": {
+      "failed": "Failed to rename file",
+      "noWorkspace": "Cannot rename file. No workspace selected"
+    },
+    "deleteFile": {
+      "failed": "Failed to delete file",
+      "noWorkspace": "Cannot delete file. No workspace selected"
+    },
+    "checkPath": {
+      "failed": "Failed to check path",
+      "noWorkspace": "Cannot check path. No workspace selected"
+    },
+    "readFile": {
+      "failed": "Failed to read file",
+      "noWorkspace": "Cannot read file. No workspace selected"
+    },
+    "writeFile": {
+      "failed": "Failed to write file",
+      "noWorkspace": "Cannot write file. No workspace selected"
+    },
+    "copyFiles": {
+      "failed": "Failed to copy files",
+      "noWorkspace": "Cannot copy files. No workspace selected"
+    },
+    "installationPath": {
+      "failed": "Failed to get installation path",
+      "noWorkspace": "Cannot get installation path. No workspace selected"
+    },
+    "createTerminal": {
+      "failed": "Failed to create terminal",
+      "noWorkspace": "Cannot create terminal. No workspace selected"
+    }
+  },
+  "homeView": {
+    "title": "Home",
+    "vibeCode": {
+      "title": "What would you like to create?",
+      "newApp": "Vibe Code An App",
+      "blog": "Vibe Code A Blog",
+      "portfolio": "Vibe Code A Portfolio Website",
+      "weatherApp": "Vibe Code A Weather App",
+      "chatApp": "Vibe Code A Chat Application",
+      "socialMediaApp": "Vibe Code A Social Media App",
+      "fitnessTracker": "Vibe Code A Fitness Tracker",
+      "recipeApp": "Vibe Code A Recipe App"
+    },
+    "createWorkflow": {
+      "button": "Create Workflow"
+    },
+    "exploreMarketplace": {
+      "button": "Explore Marketplace"
+    },
+    "signIn": {
+      "message": "Sign in to unlock more features",
+      "button": "Sign In"
+    },
+    "myProjects": {
+      "tab": "My Projects",
+      "title": "My Projects"
+    },
+    "myApps": {
+      "tab": "My Apps",
+      "title": "My Apps"
+    },
+    "featuredWorkflows": {
+      "tab": "Featured Workflows",
+      "title": "Featured Workflows"
+    },
+    "featuredApps": {
+      "tab": "Featured Apps",
+      "title": "Featured Apps"
+    },
+    "learnMore": "Learn More",
+    "myAppsAndProjects": "My Apps and Projects",
+    "yourResources": "Your Resources",
+    "cloudWorkspaces": "Cloud Workspaces"
+  },
+  "common": {
+    "signIn": "Sign In",
+    "signOut": "Sign out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "share": "Share",
+    "shareApp": "Share App",
+    "create": "Create",
+    "open": "Open",
+    "confirm": "Confirm",
+    "update": "Update",
+    "publish": "Publish",
+    "add": "Add",
+    "enter": "Enter",
+    "viewAll": "View All"
+  },
+  "openInProjectModal": {
+    "title": "Open In Project",
+    "openExisting": "Open Existing",
+    "newProject": "New Project",
+    "projectName": "Project Name",
+    "projectNamePlaceholder": "Enter project name",
+    "projectLocation": "Project Location",
+    "projectLocationPlaceholder": "Select project location",
+    "selectLocation": "Select Location",
+    "createInside": "Create inside",
+    "moreOptionsComingSoon": "More options coming soon...",
+    "create": "Create",
+    "open": "Open",
+    "selectProjectFolder": "Select Project Folder",
+    "selectProjectFile": "Select Project File",
+    "workspaceRequired": "This app/workflow requires a workspace to be opened in order to function properly.",
+    "selectWorkspace": "Select Workspace",
+    "localComputer": "Local Computer",
+    "workspaceName": "Workspace Name",
+    "workspaceSpecs": "Workspace Specs",
+    "storageGB": "Storage (GB)",
+    "moreToCome": "More to come",
+    "gettingReady": "Getting things ready...",
+    "toast": {
+      "preparingWorkspace": {
+        "title": "Preparing workspace",
+        "description": "Waiting for workspace to be ready..."
+      },
+      "failedToOpen": {
+        "title": "Failed to open.",
+        "description": "No project selected."
+      },
+      "appOpened": {
+        "title": "App opened",
+        "description": "App has been opened successfully."
+      },
+      "workflowOpened": {
+        "title": "Workflow opened",
+        "description": "Workflow has been opened successfully."
+      },
+      "noAppOrWorkflow": "No app or workflow to open.",
+      "unableToCreate": {
+        "title": "Unable to create workspace.",
+        "unknownPlatform": "Unknown platform.",
+        "nameRequired": "Workspace Name is required."
+      },
+      "creatingWorkspace": {
+        "title": "Creating workspace",
+        "description": "Creating workspace {name}. Specifications: {cpu} vCPU, {ram} RAM, {storage} storage."
+      },
+      "workspaceCreated": {
+        "title": "Workspace created",
+        "description": "Workspace {name} has been created successfully."
+      },
+      "errorCreating": {
+        "title": "Error creating workspace"
+      }
+    },
+    "errors": {
+      "noName": "Please enter a project name",
+      "noLocation": "Please select a project location"
+    }
+  },
+  "quickVibeCodeSetupModal": {
+    "title": "Quick Vibe Code Setup",
+    "vibeCodeProject": "Vibe Code Project",
+    "projectName": "Project Name",
+    "gettingReady": "Getting things ready for you...",
+    "appOpened": {
+      "title": "App opened",
+      "description": "App has been opened successfully."
+    },
+    "noAppToOpen": "No app to open."
+  },
+  "passwordModal": {
+    "title": "Enter Password",
+    "subtitle": "This action requires authentication",
+    "password": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "resetConfig": {
+      "button": "Reset Config",
+      "title": "Reset Configuration",
+      "message": "Are you sure you want to reset all configurations? This action cannot be undone."
+    },
+    "validation": {
+      "required": "Password is required"
+    },
+    "confirm": {
+      "button": "Confirm"
+    }
+  },
+  "openSourceInfoModal": {
+    "title": "Open Source",
+    "description": "We believe in open software because transparency fosters trust, innovation, and collaboration. Our mission is to empower developers worldwide by providing free access to the tools they need to build, create, and innovate without barriers.",
+    "pulseEditorCore": "Pulse Editor Core",
+    "officialApps": "Official Apps",
+    "opensource": "Opensource",
+    "cloudServices": "Meanwhile, we offer cloud hosted services and marketplace so you can easily manage your projects and share your work with the community without worrying about the infrastructure and backend.",
+    "loveWhatWeDo": "Love what we are doing? Support us by giving a star on GitHub or downloading our mobile app on Google Play!",
+    "giveUsAStar": "Give us a star",
+    "googlePlay": "Google Play"
+  },
+  "commandViewer": {
+    "chatInput": {
+      "placeholder": "Type a command or ask a question",
+      "emptyDescription": "You can type 'add', 'remove', 'edit', etc. to perform actions, or ask questions",
+      "emptyDescriptionWithCommand": "You can type a command with '@' to run it, or ask questions",
+      "pressEnter": "Press enter to send",
+      "pressEnterToExecute": "Press enter to execute"
+    },
+    "send": "Send",
+    "you": "You: "
+  },
+  "projectIndicator": {
+    "closeProject": {
+      "menuItem": "Close Project"
+    },
+    "projectSettings": {
+      "menuItem": "Project Settings"
+    }
+  },
+  "editorToolbar": {
+    "runWorkflow": {
+      "tooltip": "Run Workflow"
+    },
+    "openConsole": {
+      "tooltip": "Open Agentic Console"
+    },
+    "voiceChat": {
+      "tooltip": "Voice Chat With Agent"
+    },
+    "artifacts": {
+      "tooltip": "Artifacts",
+      "wip": "Artifacts (WIP)"
+    },
+    "installedAgents": {
+      "tooltip": "Installed Agents"
+    },
+    "marketplace": {
+      "tooltip": "Marketplace"
+    },
+    "settings": {
+      "tooltip": "Settings"
+    }
+  },
+  "publishWorkflowModal": {
+    "title": "Publish Workflow",
+    "description": "Publish your workflow to share it with others",
+    "workflowName": "Workflow Name",
+    "workflowNamePlaceholder": "Enter workflow name",
+    "workflowDescription": "Description",
+    "workflowDescriptionPlaceholder": "Enter workflow description",
+    "workflowVersion": "Workflow Version",
+    "workflowVersionPlaceholder": "Enter workflow version",
+    "publish": "Publish",
+    "publishing": "Publishing Workflow",
+    "publishingDescription": "Your workflow is being published...",
+    "toast": {
+      "published": {
+        "title": "Workflow Published",
+        "description": "Your workflow has been published successfully."
+      },
+      "failed": {
+        "title": "Failed to Publish Workflow"
+      }
+    }
+  },
+  "projectSettingsModal": {
+    "title": "Project Settings",
+    "projectName": "Project Name",
+    "projectPath": "Project Path",
+    "update": "Update",
+    "create": "Create",
+    "delete": "Delete",
+    "toast": {
+      "noProjectSelected": "No project selected."
+    }
+  },
+  "editorSettingsModal": {
+    "title": "Editor Settings",
+    "projectsFolder": {
+      "description": "All your projects will be saved in this folder.",
+      "selectFolder": "Select Folder",
+      "selectProjectHomePath": "Select Project Home Path"
+    },
+    "environmentVariables": {
+      "frontend": "Environment Variables (frontend):",
+      "instructions": "KEY=VALUE separated by newline",
+      "backendWarning": "To set backend environment variables, please set it in extension app's settings.",
+      "addNewVariable": "Add New Variable",
+      "value": "Value",
+      "errorEmptyKey": {
+        "title": "Error",
+        "description": "Environment variable key cannot be empty."
+      }
+    },
+    "customOnnxWasmCdnUrl": {
+      "label": "Custom onnx-wasm CDN URL",
+      "placeholder": "Enter custom CDN URL for onnx-wasm"
+    },
+    "restartToApply": "Restart to Apply",
+    "aiSettings": {
+      "title": "AI Settings",
+      "useManagedEndpoints": "Use Managed AI Endpoints",
+      "managedMessage": "Unlock the full power of Pulse Editor instantly with managed cloud you get lightning-fast AI assistance, cross-platform syncing, creative tools. So you always stay in flow.",
+      "byokMessage": "Bring Your Own API Keys lets you connect directly to AI providers. More setup required, but you stay in full control.",
+      "yourPlan": "Your Plan:",
+      "upgradeManagePlan": "Upgrade/Manage Plan",
+      "credits": "Credits:",
+      "topUpCredits": "Top Up Credits",
+      "stt": "STT",
+      "llm": "LLM",
+      "tts": "TTS",
+      "imageGen": "Image Gen",
+      "videoGen": "Video Gen",
+      "provider": "Provider",
+      "providerPlaceholder": "Select a provider",
+      "model": "Model",
+      "modelPlaceholder": "Select a model",
+      "voiceName": "Voice Name",
+      "apiKey": "API Key",
+      "apiKeyEncrypted": "API key is encrypted",
+      "apiKeyTooltip": "Please disable password to edit API Key. You can enable password again after editing API keys."
+    },
+    "security": {
+      "title": "Security",
+      "encryptApiTokens": "Encrypt API tokens with password",
+      "encryptDescription": "Use a password to encrypt the API tokens. You will need to re-enter all API tokens if you forget the password.",
+      "ttlLabel": "TTL (in days)",
+      "ttlDescription": "The API tokens are saved for the duration of the TTL (Time To Live) days. After the TTL, the API tokens will be deleted when the app opens next time. Set -1 to keep the tokens indefinitely.",
+      "ttlError": {
+        "title": "Error",
+        "description": "Invalid input. Using default 14 days."
+      }
+    },
+    "devExtension": {
+      "title": "Dev Extension Settings",
+      "fileTypeMapping": "File Type Default Extension Mapping",
+      "noFileTypes": "No file types found. Please install extensions that support file types.",
+      "selectDefaultExtension": "Select default extension",
+      "extensionDevMode": "Extension Dev Mode",
+      "extensionDevModeDescription": "Load extension from local extension dev server at http://localhost:3030.",
+      "enableExtensionDevMode": "Enable extension dev mode",
+      "extensionDevServerUrl": "Extension Dev Server URL",
+      "extensionId": "Extension ID",
+      "extensionIdPlaceholder": "(extension_id)",
+      "extensionVersion": "Extension Version",
+      "extensionVersionPlaceholder": "(version)",
+      "addDevExtension": "Add Dev Extension",
+      "openAsApp": "Open as App",
+      "toast": {
+        "devModeEnabled": {
+          "title": "Extension dev mode enabled",
+          "description": "You can now load extensions from your local dev server."
+        },
+        "devModeDisabled": {
+          "title": "Extension dev mode disabled",
+          "description": "You have disabled extension dev mode."
+        },
+        "extensionInstalled": {
+          "title": "Extension installed",
+          "description": "Extension {id} installed successfully."
+        },
+        "enableDevMode": "Enable extension dev mode",
+        "addDevExtension": "Add Dev Extension",
+        "openAsApp": "Open as App",
+        "extensionDevServerURL": "Extension Dev Server URL",
+        "extensionID": "Extension ID",
+        "extensionVersion": "Extension Version",
+        "selectDefaultExtension": "Select default extension",
+        "noFileTypes": "No file types found. Please install extensions that support file types.",
+        "fileTypeMapping": "File Type Default Extension Mapping",
+        "deviceHostAddress": "Device Host Address"
+      }
+    },
+    "extensionDefined": {
+      "title": "Extension Defined Settings",
+      "pulseEditorTerminal": "Pulse Editor Terminal",
+      "deviceHostAddress": "Device Host Address"
+    }
+  },
+  "marketplaceModal": {
+    "title": "Community Marketplace",
+    "tabs": {
+      "featured": "Featured",
+      "featuredDescription": "Featured apps and workflows from the community",
+      "workflows": "Workflows",
+      "workflowsDescription": "Browse workflows shared by the community",
+      "apps": "Apps",
+      "appsDescription": "Browse federated Pulse Apps developed by the community",
+      "installed": "Installed",
+      "installedApps": "Installed Apps",
+      "installedAgents": "Installed Agents",
+      "discover": "Discover",
+      "discoverApps": "Discover Apps",
+      "discoverAgents": "Discover Agents"
+    }
+  },
+  "loginModal": {
+    "title": "Sign In",
+    "connectToRemote": "Connect to a remote instance",
+    "login": "Login",
+    "remoteUrl": "Remote URL",
+    "remoteUrlPlaceholder": "Enter remote URL",
+    "remotePassword": "Password",
+    "remotePasswordPlaceholder": "Enter password",
+    "connect": "Connect",
+    "localWorkspaceNotAvailable": "Local workspace is not available in browser. Please use the desktop/mobile client, or connect to a remote instance.",
+    "continueAsGuest": "Continue as Guest",
+    "continueOffline": "Continue Offline"
+  },
+  "agentConfigModal": {
+    "title": "Installed Agents",
+    "tabs": {
+      "agents": "Agents",
+      "agentsDescription": "Manage installed agents",
+      "providers": "Providers",
+      "providersDescription": "Manage AI providers"
+    },
+    "installedAgents": "Installed Agents",
+    "availableAgents": "Available Agents",
+    "noAgentsInstalled": "No agents installed",
+    "noAgentsAvailable": "No agents available",
+    "edit": "Edit",
+    "delete": "Delete",
+    "createNewAgent": {
+      "title": "Create New Agent",
+      "description": "Add a basic chat agent to the editor.",
+      "button": "Create New Agent"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "Enter agent name",
+      "version": "Version",
+      "versionPlaceholder": "Enter agent version",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter agent description",
+      "systemPrompt": "System Prompt",
+      "systemPromptPlaceholder": "Enter agent prompt",
+      "provider": "Provider",
+      "providerPlaceholder": "Enter provider",
+      "modelName": "Model Name",
+      "modelNamePlaceholder": "Enter model name",
+      "model": "Model",
+      "modelPlaceholder": "Select model",
+      "temperature": "Temperature",
+      "contextLength": "Context Length",
+      "contextLengthPlaceholder": "Enter context length"
+    },
+    "addAgent": "Add Agent",
+    "installedBy": "Installed by extension {extension} from {publisher}",
+    "llmConfig": "LLM config:",
+    "toast": {
+      "agentDeleted": "Deleted agent",
+      "agentAdded": "Added new agent"
+    },
+    "llmUsage": {
+      "title": "LLM Usage by Agents",
+      "provider": "Provider:",
+      "usedModels": "Used Models:",
+      "usedByAgents": "Used by agents:",
+      "totalUsageByAgents": "Total number of agents:",
+      "agent": "Agent",
+      "totalCost": "Total Cost",
+      "noData": "No usage data available",
+      "apiKey": "API Key",
+      "apiKeyNotVisible": "API Key is not visible after entered."
+    }
+  },
+  "appInfoModal": {
+    "title": "App Info",
+    "developerSettings": "Developer Settings",
+    "loading": "Loading...",
+    "metadata": {
+      "id": "ID",
+      "version": "Version",
+      "author": "Author",
+      "license": "License",
+      "website": "Website",
+      "readme": "README"
+    },
+    "apiPricing": {
+      "title": "API Pricing",
+      "description": "The following are the API pricing settings for this app.",
+      "endpoint": "Endpoint:",
+      "cost": "Cost:",
+      "creditsPerCall": "credits per call",
+      "perCall": "per call",
+      "noApiPricing": "No API pricing set for this app.",
+      "noServerFunctions": "No server functions found for this app.",
+      "costPlaceholder": "Credits Cost per Call"
+    },
+    "developerMode": {
+      "title": "Developer Settings",
+      "appInfo": "App Info",
+      "appId": "App ID",
+      "environmentVariables": "Environment Variables",
+      "addNewVariable": "Add New Variable",
+      "value": "Value",
+      "localServer": "Local Server",
+      "localServerPlaceholder": "Enter local server URL (e.g., http://localhost:3000)",
+      "envInstructions": "KEY=VALUE separated by newline",
+      "testMode": "Test Mode",
+      "testModeDescription": "Enable test mode to use local server and environment variables",
+      "toast": {
+        "addingVariable": {
+          "title": "Adding Variable",
+          "description": "Adding environment variable {key}."
+        },
+        "variableAdded": {
+          "title": "Variable Added",
+          "description": "Environment variable {key} added successfully."
+        },
+        "errorEmptyKey": {
+          "title": "Error",
+          "description": "Environment variable key cannot be empty."
+        },
+        "settingCost": {
+          "title": "Setting Endpoint Cost",
+          "description": "Setting cost for endpoint {endpoint}: {cost}."
+        },
+        "costSet": {
+          "title": "Cost Set",
+          "description": "Cost for endpoint {endpoint} set to {cost} successfully."
+        },
+        "costSetError": {
+          "title": "Error",
+          "description": "Failed to set cost for endpoint {endpoint}. {error}."
+        },
+        "deletingApp": {
+          "title": "Deleting App",
+          "description": "Deleting app {name}."
+        },
+        "appUnpublished": {
+          "title": "App Unpublished",
+          "description": "App {name} unpublished successfully."
+        },
+        "unpublishError": {
+          "title": "Error",
+          "description": "Failed to unpublish app {name}."
+        }
+      }
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "unpublish": "Unpublish",
+      "unpublishConfirm": "Are you sure you want to unpublish this app? This action cannot be undone.",
+      "confirmUnpublish": "Confirm Unpublish",
+      "cancel": "Cancel",
+      "deleteApp": "Delete App",
+      "deleteAppDescription": "Permanently delete this app from your account",
+      "uninstallApp": "Uninstall App",
+      "uninstallAppDescription": "Remove this app from your installed apps"
+    }
+  },
+  "navSideMenu": {
+    "home": {
+      "label": "Home",
+      "icon": "home"
+    },
+    "projectHome": {
+      "label": "Project Home",
+      "icon": "folder",
+      "notSet": "You have not set a project home path yet. Please set it in the settings.",
+      "select": {
+        "button": "Select Project Home"
+      }
+    }
+  },
+  "fileMenu": {
+    "title": "File",
+    "newProject": "New Project",
+    "openProject": "Open Project"
+  },
+  "viewMenu": {
+    "title": "View",
+    "commandViewer": "Command Viewer",
+    "console": "Console",
+    "importWorkflow": {
+      "title": "Import Workflow",
+      "invalidFile": "Invalid workflow file",
+      "readError": "Error reading workflow file"
+    }
+  },
+  "fsExplorer": {
+    "newFolder": "New Folder",
+    "folderName": "Folder Name",
+    "newFile": "New File",
+    "fileName": "File Name",
+    "selectOneFolder": "Please select only one folder to create a new folder inside.",
+    "selectOneFolderForFile": "Please select only one folder to create a new file inside.",
+    "emptyContent": "Empty content. Create a new file to get started."
+  },
+  "projectExplorer": {
+    "title": "Projects",
+    "newProject": {
+      "button": "New Project"
+    },
+    "signInMessage": "Sign in to view your projects, or open a local project with desktop client."
+  },
+  "viewArea": {
+    "unknownViewType": "Unknown view type",
+    "noViewSelected": "No view selected"
+  },
+  "projectView": {
+    "title": "Project",
+    "createWorkflow": {
+      "button": "Create Workflow"
+    },
+    "exploreMarketplace": {
+      "button": "Explore Marketplace"
+    }
+  },
+  "dnd": {
+    "openApp": {
+      "failed": "Failed to open app",
+      "invalidData": "Invalid app data"
+    },
+    "linkApp": {
+      "failed": "Failed to link app",
+      "invalidData": "Invalid app data"
+    },
+    "openFile": {
+      "failed": "Failed to open file",
+      "invalidData": "Invalid file data"
+    },
+    "invalidTarget": {
+      "cannotDropFile": "Cannot drop file here",
+      "somethingWrong": "Something went wrong. Please try again.",
+      "cannotDrop": "Cannot drop here"
+    }
+  },
+  "workspaceSettingsModal": {
+    "title": "Workspace Settings",
+    "selectWorkspace": "Select Workspace",
+    "localComputer": "Local Computer",
+    "createNew": "Create New",
+    "workspaceName": "Workspace Name",
+    "workspaceSpecs": "Workspace Specs",
+    "storageGB": "Storage (GB)",
+    "moreToCome": "More to come",
+    "useWorkspace": "Use Workspace",
+    "exitWorkspace": "Exit Workspace",
+    "start": "Start",
+    "stop": "Stop",
+    "update": "Update",
+    "delete": "Delete",
+    "create": "Create",
+    "unpublishWorkspace": "Unpublish Workspace",
+    "toast": {
+      "unknownPlatform": "Unknown platform.",
+      "workspaceNotAvailable": "Workspace is not available.",
+      "workspaceNameRequired": "Workspace Name is required.",
+      "workspaceExists": "Workspace already exists. Please update it instead.",
+      "updatingWorkspace": {
+        "title": "Updating workspace",
+        "description": "Updating workspace {name}."
+      },
+      "workspaceUpdated": {
+        "title": "Workspace updated",
+        "description": "Workspace {name} has been updated successfully."
+      },
+      "deletingWorkspace": {
+        "title": "Deleting workspace",
+        "description": "Deleting workspace {name}"
+      },
+      "workspaceDeleted": {
+        "title": "Workspace deleted",
+        "description": "Workspace {name} has been deleted successfully."
+      },
+      "errorDeleting": {
+        "title": "Error deleting workspace"
+      },
+      "creatingWorkspace": {
+        "title": "Creating workspace",
+        "description": "Creating workspace {name}. Specifications: {cpu} vCPU, {ram} RAM, {storage} storage."
+      },
+      "workspaceCreated": {
+        "title": "Workspace created",
+        "description": "Workspace {name} has been created successfully."
+      },
+      "errorCreating": {
+        "title": "Error creating workspace"
+      },
+      "stoppingWorkspace": {
+        "title": "Stopping workspace",
+        "description": "Stopping workspace {name}."
+      },
+      "workspaceStopped": {
+        "title": "Workspace stopped",
+        "description": "Workspace {name} has been stopped successfully."
+      },
+      "startingWorkspace": {
+        "title": "Starting workspace",
+        "description": "Starting workspace {name}."
+      },
+      "workspaceStarted": {
+        "title": "Workspace started",
+        "description": "Workspace {name} has been started successfully."
+      }
+    }
+  },
+  "qrDisplay": {
+    "title": "Scan QR Code",
+    "download": "Download",
+    "loadingError": "QR code is still loading, please wait."
+  },
+  "sharingModal": {
+    "title": "Share Your {name} Workspace",
+    "visibility": "Visibility",
+    "visibilityPlaceholder": "Select visibility",
+    "inviteCode": "Invite Code",
+    "selectVisibility": "Select a visibility option to see sharing options.",
+    "workspacePrivate": "Your workspace is private.",
+    "tabs": {
+      "qrCode": "QR Code",
+      "qrCodeDescription": "Share your workspace via QR code",
+      "url": "URL",
+      "urlDescription": "Share your workspace via URL"
+    },
+    "qrCode": {
+      "description": "Share your workspace via this QR Code"
+    },
+    "url": {
+      "description": "Share your workspace via this URL",
+      "copy": "Copy"
+    },
+    "toast": {
+      "fetchError": "Failed to fetch extension share info",
+      "urlCopied": "URL copied to clipboard"
+    }
+  },
+  "workflowPreviewCard": {
+    "open": "Open",
+    "clone": "Clone"
+  },
+  "appGallery": {
+    "title": "Apps",
+    "noApps": "No apps found"
+  },
+  "workflowGallery": {
+    "title": "Workflows",
+    "noWorkflows": "No workflows found"
+  },
+  "featuredGallery": {
+    "title": "Featured"
+  },
+  "statusScreens": {
+    "welcome": {
+      "title": "Welcome to Pulse Editor",
+      "subtitle": "Start by creating a new project or opening an existing one",
+      "taglineLine1": "Your Next AI-OS Powered by",
+      "taglineLine2": "Vibe Coded Apps & Workflows"
+    },
+    "wip": {
+      "title": "Work In Progress",
+      "subtitle": "This feature is coming soon"
+    },
+    "loading": {
+      "title": "Loading...",
+      "subtitle": "Please wait"
+    },
+    "notAuthorized": {
+      "title": "Not Authorized",
+      "subtitle": "You don't have permission to access this resource"
+    },
+    "error": {
+      "title": "Error",
+      "subtitle": "Something went wrong"
+    }
+  },
+  "appLoader": {
+    "loading": "Loading app...",
+    "failed": "Failed to load app"
+  },
+  "consolePanelView": {
+    "title": "Console",
+    "clear": "Clear",
+    "noOutput": "No output yet"
+  },
+  "tabViewManager": {
+    "openProject": "Open Project",
+    "untitled": "Untitled",
+    "newTab": "New Tab"
+  },
+  "voiceRecorder": {
+    "listening": "Listening",
+    "thinking": "Thinking",
+    "speaking": "Speaking",
+    "loadingMic": "Loading Mic",
+    "waiting": "Waiting"
+  },
+  "commandExecutor": {
+    "commandExecuted": "Command Executed",
+    "commandExecutionFailed": "Command Execution Failed"
+  },
+  "planPicker": {
+    "freeDescription": "Free: Use free plan with limited features. You can also self-host the server for unlimited access to AI features.",
+    "readMoreOpenSource": "Read more about our open source commitment"
+  },
+  "projectItem": {
+    "projectSettings": "Project Settings",
+    "selectMultiple": "Select Multiple",
+    "created": "Created: "
+  },
+  "fsExplorer": {
+    "newFolder": "New Folder",
+    "folderName": "Folder Name",
+    "newFile": "New File",
+    "fileName": "File Name",
+    "selectOneFolder": "Please select only one folder to create a new folder inside.",
+    "selectOneFolderForFile": "Please select only one folder to create a new file inside.",
+    "emptyContent": "Empty content. Create a new file to get started.",
+    "noAppSelected": "No app selected to handle this file.",
+    "selectNodeInCanvas": "Please select a node in canvas to view the file",
+    "noWorkspaceSelected": "No workspace selected"
+  },
+  "treeView": {
+    "contextMenu": {
+      "openInCanvas": "Open In Canvas",
+      "openInApp": "Open In App",
+      "rename": "Rename",
+      "delete": "Delete",
+      "loading": "Loading..."
+    },
+    "toast": {
+      "newFolderCreated": "New folder created",
+      "failedToCreateFolder": "Failed to create folder",
+      "newFileCreated": "New file created",
+      "failedToCreateFile": "Failed to create file",
+      "fileRenamed": "File renamed",
+      "failedToRename": "Failed to rename file",
+      "fileDeleted": "File deleted",
+      "failedToDelete": "Failed to delete file"
+    }
+  },
+  "workspaceExplorer": {
+    "workspacePaused": "The workspace is currently paused. Please resume the workspace to access project files.",
+    "startWorkspace": "Start Workspace",
+    "workspaceSettings": "Workspace Settings",
+    "osFeatures": "To interact with OS features, please open in desktop client or configure a remote workspace.",
+    "workspaceStarting": "Workspace is starting...",
+    "viewProjectContent": "To view project content in workspace, please select a project first.",
+    "toast": {
+      "noWorkspace": "No workspace to start.",
+      "startingWorkspace": "Starting workspace...",
+      "workspaceStarted": "Workspace started."
+    }
+  },
+  "appExplorer": {
+    "dragTip": "Tap or drag an extension to open it.",
+    "exploreWorkflowsApps": "Explorer Community Workflows/Apps"
+  },
+  "appInfoModal": {
+    "developerSettings": "Developer Settings",
+    "id": "ID",
+    "version": "Version",
+    "author": "Author",
+    "license": "License",
+    "website": "Website",
+    "readme": "README",
+    "noReadme": "No README available",
+    "apiPricing": "API Pricing",
+    "apiPricingDescription": "The following are the API pricing settings for this app.",
+    "endpoint": "Endpoint: ",
+    "cost": "Cost: ",
+    "credits": "credits",
+    "perCall": "per call",
+    "noApiPricing": "No API pricing set for this app.",
+    "appInfo": "App Info",
+    "appID": "App ID",
+    "environmentVariables": "Environment Variables",
+    "addNewVariable": "Add New Variable",
+    "value": "Value",
+    "error": "Error",
+    "envKeyEmpty": "Environment variable key cannot be empty.",
+    "addingVariable": "Adding Variable",
+    "addingVariableDescription": "Adding environment variable {key}.",
+    "variableAdded": "Variable Added",
+    "variableAddedDescription": "Environment variable {key} added successfully.",
+    "apiPricingSetup": "You can set up credits cost for calls made to your app's APIs here. Once set, you cannot change it again.",
+    "noServerFunctions": "No server functions found for this app.",
+    "dangerZone": "Danger Zone",
+    "confirmUnpublish": "Are you sure you want to unpublish this app? This action cannot be undone.",
+    "unpublish": "Unpublish",
+    "deletingApp": "Deleting App",
+    "deletingAppDescription": "Deleting app {name}.",
+    "failedToUnpublish": "Failed to unpublish app {name}.",
+    "appUnpublished": "App Unpublished",
+    "appUnpublishedDescription": "App {name} unpublished successfully.",
+    "confirmUnpublishButton": "Confirm Unpublish",
+    "settingEndpointCost": "Setting Endpoint Cost",
+    "settingEndpointCostDescription": "Setting cost for endpoint {endpoint}: {cost}.",
+    "failedToSetCost": "Failed to set cost for endpoint {endpoint}. {error}.",
+    "costSet": "Cost Set",
+    "costSetDescription": "Cost for endpoint {endpoint} set to {cost} successfully.",
+    "creditsPerCall": "credits per call",
+    "creditsCostPerCall": "Credits Cost per Call"
+  },
+  "projectPreviewCard": {
+    "workspace": "Workspace:",
+    "undefined": "Undefined"
+  },
+  "appPreviewCard": {
+    "requiresWorkspace": "This app requires a workspace to be opened in order to function properly.",
+    "requiresWorkspaceLabel": "Requires Workspace",
+    "use": "Use",
+    "details": "Details",
+    "install": "Install",
+    "upgrade": "Upgrade",
+    "uninstall": "Uninstall",
+    "open": "Open",
+    "installed": "Installed",
+    "outdated": "Outdated",
+    "compatible": "Compatible",
+    "extensionInstalled": "Extension installed",
+    "extensionInstalledDescription": "Extension {id} installed successfully.",
+    "extensionUpgraded": "Extension upgraded",
+    "extensionUpgradedDescription": "Extension {id} upgraded successfully.",
+    "extensionUninstalled": "Extension uninstalled",
+    "extensionUninstalledDescription": "Extension {id} uninstalled successfully.",
+    "mfIncompatible": "This app is outdated and no longer a valid module federation app. Please update the app to the latest version.",
+    "hostMFVersion": "Host MF version:",
+    "appMFVersion": "App MF version:",
+    "libIncompatible": "This app's library version is outdated and may not work correctly. Please update the app to the latest version.",
+    "hostLibVersion": "Host lib version:",
+    "appLibVersion": "App lib version:",
+    "compatibleTooltip": "This app's module federation version ({mfVersion}) and library version ({libVersion}) match the host version. The app should work correctly.",
+    "enabled": "Enabled",
+    "disabled": "Disabled"
+  },
+  "extensionCard": {
+    "extensionUninstalled": "Extension uninstalled",
+    "uninstall": "Uninstall",
+    "install": "Install",
+    "update": "Update",
+    "enable": "Enable",
+    "disable": "Disable",
+    "details": "Details",
+    "unavailable": "Unavailable",
+    "mfVersion": "MF Version",
+    "libVersion": "Lib Version",
+    "updatesAvailable": "Updates available"
+  },
+  "nodeHandle": {
+    "ariaLabel": "Click on node handle to open node menu",
+    "required": "*required"
+  },
+  "draggableItem": {
+    "ariaLabel": "Drag to move"
+  }
+}

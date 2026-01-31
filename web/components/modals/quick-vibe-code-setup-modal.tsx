@@ -8,10 +8,9 @@ import { AppViewConfig, ExtensionApp, Workflow } from "@/lib/types";
 import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
 import { addToast, Spinner } from "@heroui/react";
 import { useContext, useEffect, useMemo, useState } from "react";
+import { useTranslations } from 'next-intl';
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
-
-const vibeCodeProject = "Vibe Code Project";
 
 export default function QuickVibeCodeSetupModal({
   isOpen,
@@ -20,7 +19,9 @@ export default function QuickVibeCodeSetupModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
+  const vibeCodeProject = t('quickVibeCodeSetupModal.vibeCodeProject');
 
   const { platformApi } = usePlatformApi();
   const { workspace, createWorkspace, selectWorkspace, isWorkspaceHealthy } =
@@ -91,13 +92,13 @@ export default function QuickVibeCodeSetupModal({
       );
 
       addToast({
-        title: "App opened",
-        description: "App has been opened successfully.",
+        title: t('quickVibeCodeSetupModal.appOpened.title'),
+        description: t('quickVibeCodeSetupModal.appOpened.description'),
         color: "success",
       });
     } else {
       addToast({
-        title: "No app to open.",
+        title: t('quickVibeCodeSetupModal.noAppToOpen'),
         color: "danger",
       });
     }
@@ -129,11 +130,11 @@ export default function QuickVibeCodeSetupModal({
   }
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title="Vibe Code Setup">
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={t('quickVibeCodeSetupModal.title')}>
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
         <div className="flex items-center gap-x-2">
           <Spinner />
-          <p>Getting things ready for you...</p>
+          <p>{t('quickVibeCodeSetupModal.gettingReady')}</p>
         </div>
       </div>
     </ModalWrapper>

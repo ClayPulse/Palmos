@@ -3,6 +3,7 @@ import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppNodeData, Workflow } from "@/lib/types";
 import { addToast, Button, closeToast, Input } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
+import { useTranslations } from "next-intl";
 import { useContext, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
@@ -26,6 +27,7 @@ export default function PublishWorkflowModal({
     [key: string]: any;
   }>;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [name, setName] = useState("");
@@ -82,14 +84,14 @@ export default function PublishWorkflowModal({
       }
 
       addToast({
-        title: "Workflow Published",
-        description: "Your workflow has been published successfully.",
+        title: t("publishWorkflowModal.toast.published.title"),
+        description: t("publishWorkflowModal.toast.published.description"),
         color: "success",
       });
     } catch (error: any) {
       console.error("Error publishing workflow:", error);
       addToast({
-        title: "Failed to Publish Workflow",
+        title: t("publishWorkflowModal.toast.failed.title"),
         description: error.message,
         color: "danger",
       });
@@ -98,8 +100,8 @@ export default function PublishWorkflowModal({
 
   async function handlePress() {
     const key = addToast({
-      title: "Publishing Workflow",
-      description: "Your workflow is being published...",
+      title: t("publishWorkflowModal.publishing"),
+      description: t("publishWorkflowModal.publishingDescription"),
       promise: new Promise<void>(async (resolve) => {
         await publishWorkflow();
         if (key) closeToast(key);
@@ -112,26 +114,26 @@ export default function PublishWorkflowModal({
     <ModalWrapper
       isOpen={isOpen}
       onClose={onClose}
-      title={"Publish Workflow"}
+      title={t("publishWorkflowModal.title")}
       placement={"center"}
     >
       <div className="flex w-full flex-col items-center gap-2">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          label="Workflow Name"
-          placeholder="Enter workflow name"
+          label={t("publishWorkflowModal.workflowName")}
+          placeholder={t("publishWorkflowModal.workflowNamePlaceholder")}
         />
 
         <Input
           value={version}
           onChange={(e) => setVersion(e.target.value)}
-          label="Workflow Version"
-          placeholder="Enter workflow version"
+          label={t("publishWorkflowModal.workflowVersion")}
+          placeholder={t("publishWorkflowModal.workflowVersionPlaceholder")}
         />
 
         <Button color="primary" onPress={handlePress}>
-          Publish
+          {t("common.publish")}
         </Button>
       </div>
     </ModalWrapper>

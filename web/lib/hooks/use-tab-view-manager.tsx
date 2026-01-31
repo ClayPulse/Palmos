@@ -3,6 +3,7 @@ import { IMCContext } from "@/components/providers/imc-provider";
 import { addToast, Button } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
+import { useTranslations } from 'next-intl';
 import { PlatformEnum, SideMenuTabEnum } from "../enums";
 import { getPlatform } from "../platform-api/platform-checker";
 import {
@@ -16,6 +17,7 @@ import useRouter from "./use-router";
 import { useScreenSize } from "./use-screen-size";
 
 export function useTabViewManager() {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
@@ -451,7 +453,7 @@ export function useTabViewManager() {
       throw new Error("Editor context is not available");
     } else if (!editorContext.editorStates.project) {
       addToast({
-        title: "Project Not Opened",
+        title: t('tabViewManager.openProject'),
         description: `No project is opened.`,
         color: "danger",
         endContent: (
@@ -471,7 +473,7 @@ export function useTabViewManager() {
               }));
             }}
           >
-            Open Project
+            {t('tabViewManager.openProject')}
           </Button>
         ),
       });
