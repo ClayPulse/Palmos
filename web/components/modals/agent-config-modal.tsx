@@ -136,7 +136,10 @@ function AgentConfigs({
             </div>
             {
               <p className="text-small text-foreground-600 leading-4">
-                {t("agentConfigModal.installedBy", { extension: agent.author.extension, publisher: agent.author.publisher })}
+                {t("agentConfigModal.installedBy", {
+                  extension: agent.author.extension ?? "unknown",
+                  publisher: agent.author.publisher,
+                })}
               </p>
             }
             <p className="pt-2 leading-4">{agent.description}</p>
