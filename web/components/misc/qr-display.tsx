@@ -1,6 +1,7 @@
 import { generateQR } from "@/lib/share/qr-gen";
 import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";
+import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Loading from "../interface/status-screens/loading";
@@ -8,6 +9,7 @@ import Icon from "./icon";
 
 export default function QRDisplay({ url }: { url: string }) {
   const { resolvedTheme } = useTheme();
+  const t = useTranslations();
 
   const [image, setImage] = useState<string | undefined>(undefined);
 
@@ -25,13 +27,13 @@ export default function QRDisplay({ url }: { url: string }) {
 
   return (
     <>
-      {image ? <img src={image} alt="QR Code" /> : <Loading />}
+      {image ? <img src={image} alt={t("qrDisplay.title")} /> : <Loading />}
 
       <Button
         color="primary"
         onPress={() => {
           if (!image) {
-            toast.error("QR code is still loading, please wait.");
+            toast.error(t("qrDisplay.loadingError"));
             return;
           }
           // Logic to download the QR code
@@ -44,7 +46,7 @@ export default function QRDisplay({ url }: { url: string }) {
         }}
       >
         <Icon name="download" className="text-primary-foreground!" />
-        Download
+        {t("qrDisplay.download")}
       </Button>
     </>
   );

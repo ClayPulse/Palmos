@@ -3,6 +3,7 @@
 import { LLMUsage, TabItem, UserAgent } from "@/lib/types";
 import { Button, Divider, Input, Textarea } from "@heroui/react";
 import { AgentMethod } from "@pulse-editor/shared-utils";
+import { useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -18,16 +19,17 @@ export default function AgentConfigModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const tabItems: TabItem[] = [
     {
-      name: "Agents",
-      description: "Manage installed agents",
+      name: t("agentConfigModal.tabs.agents"),
+      description: t("agentConfigModal.tabs.agentsDescription"),
     },
     {
-      name: "Providers",
-      description: "Manage AI providers",
+      name: t("agentConfigModal.tabs.providers"),
+      description: t("agentConfigModal.tabs.providersDescription"),
     },
   ];
   const [selectedTab, setSelectedTab] = useState<TabItem | undefined>(
@@ -74,7 +76,7 @@ export default function AgentConfigModal({
     <ModalWrapper
       isOpen={isOpen}
       onClose={onClose}
-      title="Installed Agents"
+      title={t("agentConfigModal.title")}
       isShowGoBack={isCreatingNewAgent}
       goBackCallback={() => {
         setIsCreatingNewAgent(false);
@@ -108,6 +110,7 @@ function AgentConfigs({
 }: {
   setIsCreatingNewAgent: (isCreatingNewAgent: boolean) => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
   return (
     <div className="flex flex-col space-y-2">
@@ -133,17 +136,16 @@ function AgentConfigs({
             </div>
             {
               <p className="text-small text-foreground-600 leading-4">
-                Installed by extension {agent.author.extension} from{" "}
-                {agent.author.publisher}
+                {t("agentConfigModal.installedBy", { extension: agent.author.extension, publisher: agent.author.publisher })}
               </p>
             }
             <p className="pt-2 leading-4">{agent.description}</p>
             <div className="flex gap-x-1 pt-2">
-              <p>LLM config:</p>
+              <p>{t("agentConfigModal.llmConfig")}</p>
               <p>{agent.LLMConfig?.modelId ?? "default/default"}</p>
             </div>
             <div className="flex w-full justify-end gap-1">
-              <Button size="sm">Edit</Button>
+              <Button size="sm">{t("common.edit")}</Button>
               <Button
                 size="sm"
                 color="danger"
@@ -160,10 +162,10 @@ function AgentConfigs({
                       extensionAgents: updatedAgents,
                     };
                   });
-                  toast.success("Deleted agent");
+                  toast.success(t("agentConfigModal.toast.agentDeleted"));
                 }}
               >
-                Delete
+                {t("common.delete")}
               </Button>
             </div>
           </div>
@@ -174,7 +176,7 @@ function AgentConfigs({
           setIsCreatingNewAgent(true);
         }}
       >
-        Create New Agent
+        {t("agentConfigModal.createNewAgent.button")}
       </Button>
     </div>
   );
@@ -185,6 +187,7 @@ function AgentCreation({
 }: {
   setIsCreatingNewAgent: (isCreatingNewAgent: boolean) => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [name, setName] = useState<string>("");
@@ -198,30 +201,30 @@ function AgentCreation({
 
   return (
     <div className="flex flex-col space-y-2">
-      <p>Add a basic chat agent to the editor.</p>
+      <p>{t("agentConfigModal.createNewAgent.description")}</p>
 
       <Input
-        label="Name"
-        placeholder="Enter agent name"
+        label={t("agentConfigModal.form.name")}
+        placeholder={t("agentConfigModal.form.namePlaceholder")}
         value={name}
         onChange={(e) => setName(e.target.value)}
       />
       <Input
-        label="Version"
-        placeholder="Enter agent version"
+        label={t("agentConfigModal.form.version")}
+        placeholder={t("agentConfigModal.form.versionPlaceholder")}
         value={version}
         onChange={(e) => setVersion(e.target.value)}
       />
       <Textarea
-        label="Description"
-        placeholder="Enter agent description"
+        label={t("agentConfigModal.form.description")}
+        placeholder={t("agentConfigModal.form.descriptionPlaceholder")}
         isMultiline
         value={description}
         onChange={(e) => setDescription(e.target.value)}
       />
       <Textarea
-        label="System Prompt"
-        placeholder="Enter agent prompt"
+        label={t("agentConfigModal.form.systemPrompt")}
+        placeholder={t("agentConfigModal.form.systemPromptPlaceholder")}
         isMultiline
         value={systemPrompt}
         onChange={(e) => setSystemPrompt(e.target.value)}
@@ -229,20 +232,20 @@ function AgentCreation({
 
       <div className="grid grid-cols-2 gap-2">
         <Input
-          label="Provider"
-          placeholder="Enter provider"
+          label={t("agentConfigModal.form.provider")}
+          placeholder={t("agentConfigModal.form.providerPlaceholder")}
           value={provider}
           onChange={(e) => setProvider(e.target.value)}
         />
         <Input
-          label="Model Name"
-          placeholder="Enter model name"
+          label={t("agentConfigModal.form.modelName")}
+          placeholder={t("agentConfigModal.form.modelNamePlaceholder")}
           value={modelName}
           onChange={(e) => setModelName(e.target.value)}
         />
         <Input
-          label="Temperature"
-          placeholder="Enter temperature"
+          label={t("agentConfigModal.form.temperature")}
+          placeholder={t("agentConfigModal.form.temperature")}
           type="number"
           value={temperature.toString()}
           onChange={(e) => setTemperature(parseFloat(e.target.value))}
@@ -279,17 +282,18 @@ function AgentCreation({
             };
           });
 
-          toast.success("Added new agent");
+          toast.success(t("agentConfigModal.toast.agentAdded"));
           setIsCreatingNewAgent(false);
         }}
       >
-        Add Agent
+        {t("agentConfigModal.addAgent")}
       </Button>
     </div>
   );
 }
 
 function ProviderConfig({ usage }: { usage: LLMUsage }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
   const [apiKey, setApiKey] = useState("");
   const [isRevealable, setIsRevealable] = useState(true);
@@ -300,7 +304,7 @@ function ProviderConfig({ usage }: { usage: LLMUsage }) {
       : undefined;
 
     if (key) {
-      setApiKey("API Key is not visible after entered.");
+      setApiKey(t("agentConfigModal.llmUsage.apiKeyNotVisible"));
       setIsRevealable(false);
     }
   }, []);
@@ -308,21 +312,21 @@ function ProviderConfig({ usage }: { usage: LLMUsage }) {
   return (
     <div>
       <div className="grid grid-cols-2">
-        <p>Provider:</p>
+        <p>{t("agentConfigModal.llmUsage.provider")}</p>
         <p>{usage.provider}</p>
 
-        <p>Used Models:</p>
+        <p>{t("agentConfigModal.llmUsage.usedModels")}</p>
         <p>{usage.usedModals.join(", ")}</p>
 
-        <p>Used by agents:</p>
+        <p>{t("agentConfigModal.llmUsage.usedByAgents")}</p>
         <p>{usage.usedByAgents.join(", ")}</p>
 
-        <p>Total number of agents:</p>
+        <p>{t("agentConfigModal.llmUsage.totalUsageByAgents")}</p>
         <p>{usage.totalUsageByAgents}</p>
       </div>
       <PasswordInput
         className="w-full"
-        label="API Key"
+        label={t("agentConfigModal.llmUsage.apiKey")}
         size="sm"
         isRevealable={isRevealable}
         isReadOnly={!isRevealable}
@@ -359,9 +363,10 @@ function ProviderConfig({ usage }: { usage: LLMUsage }) {
 }
 
 function ProviderConfigs({ llmUsageList }: { llmUsageList: LLMUsage[] }) {
+  const t = useTranslations();
   return (
     <div>
-      <p className="font-semibold">LLM Usage by Agents</p>
+      <p className="font-semibold">{t("agentConfigModal.llmUsage.title")}</p>
       <div className="w-full space-y-1">
         {llmUsageList.map((usage, index) => (
           <div key={usage.provider} className="w-full space-y-1">

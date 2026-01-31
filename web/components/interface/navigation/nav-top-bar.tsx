@@ -1,8 +1,7 @@
-import { languageNames, LocaleType } from "@/i18n/config";
+import { languageNames } from "@/i18n/config";
 import { PlatformEnum } from "@/lib/enums";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { useLocale } from "@/lib/hooks/use-locale";
 import useRouter from "@/lib/hooks/use-router";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIUrl } from "@/lib/pulse-editor-website/backend";
@@ -15,10 +14,10 @@ import {
   DropdownSection,
   DropdownTrigger,
 } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useTransition } from "react";
 import Icon from "../../misc/icon";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ProjectIndicator from "../project-indicator";
@@ -40,8 +39,9 @@ export default function NavTopBar({
 
   const { session, signOut, subscription, usage } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
-  const { locale, setLocale } = useLocale();
+  const locale = useLocale();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   // #region Load specified app if app query parameter is present
   const params = useSearchParams();
@@ -205,14 +205,15 @@ export default function NavTopBar({
               </Button>
             </DropdownTrigger>
             <DropdownMenu>
-              <DropdownSection title={t("language.title")}>
+              <DropdownSection title={t("navigation.language.title")}>
                 {Object.entries(languageNames).map(([langCode, langName]) => (
                   <DropdownItem
                     key={langCode}
+                    data-is-selected={langCode === locale}
                     onPress={() => {
-                      setLocale(langCode as LocaleType);
+                      window.location.href = `/${langCode}${window.location.pathname.substring(3)}`;
                     }}
-                    className={langCode === locale ? "font-semibold" : ""}
+                    className="data-[is-selected=true]:bg-primary/20 data-[is-selected=true]:font-bold"
                   >
                     {langName}
                   </DropdownItem>

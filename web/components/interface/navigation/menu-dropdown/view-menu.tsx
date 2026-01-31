@@ -4,10 +4,12 @@ import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-men
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { CanvasViewConfig, WorkflowContent } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
+import { useTranslations } from "next-intl";
 import { useContext, useEffect, useState } from "react";
 import NavMenuDropdown from "../nav-menu-dropdown";
 
 export default function ViewMenuDropDown() {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
   const { menuActions } = useMenuActions("view");
 
@@ -92,10 +94,10 @@ export default function ViewMenuDropDown() {
                 initialWorkflowContent: workflowContent,
               } as CanvasViewConfig);
             } else {
-              alert("Invalid workflow file");
+              alert(t("viewMenu.importWorkflow.invalidFile"));
             }
           } catch (err) {
-            alert("Error reading workflow file");
+            alert(t("viewMenu.importWorkflow.readError"));
           }
         };
         reader.readAsText(file);

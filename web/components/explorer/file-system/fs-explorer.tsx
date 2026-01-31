@@ -9,6 +9,7 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { TreeViewGroupRef } from "@/lib/types";
 import { addToast, Button, Spinner } from "@heroui/react";
 import { IMCMessageTypeEnum, ViewModeEnum } from "@pulse-editor/shared-utils";
+import { useTranslations } from "next-intl";
 import { useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../../misc/icon";
@@ -22,6 +23,7 @@ export default function FileSystemExplorer({
   setIsMenuOpen: (isOpen: boolean) => void;
   openWorkspaceSettingsModal: () => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
@@ -80,8 +82,8 @@ export default function FileSystemExplorer({
 
       if (selectedViewIds.length === 0) {
         addToast({
-          title: "No app selected to handle this file.",
-          description: "Please select a node in canvas to view the file",
+          title: t("fsExplorer.noAppSelected"),
+          description: t("fsExplorer.selectNodeInCanvas"),
           color: "danger",
         });
         return;
@@ -103,9 +105,8 @@ export default function FileSystemExplorer({
       }
     } else {
       addToast({
-        title: "No app selected or opened to handle this file.",
-        description:
-          "Please open an app or select a node in canvas to view the file",
+        title: t("fsExplorer.noAppSelected"),
+        description: t("fsExplorer.selectNodeInCanvas"),
         color: "danger",
       });
     }
@@ -134,7 +135,7 @@ export default function FileSystemExplorer({
       return;
     }
 
-    toast.error("Please select only one folder to create a new folder inside.");
+    toast.error(t("fsExplorer.selectOneFolder"));
     return;
   }
 
@@ -161,7 +162,7 @@ export default function FileSystemExplorer({
       return;
     }
 
-    toast.error("Please select only one folder to create a new file inside.");
+    toast.error(t("fsExplorer.selectOneFolderForFile"));
     return;
   }
 
@@ -244,7 +245,7 @@ export default function FileSystemExplorer({
 
         {content.length === 0 && !isLoading && (
           <p className="text-center">
-            Empty content. Create a new file to get started.
+            {t("fsExplorer.emptyContent")}
           </p>
         )}
       </div>

@@ -1,21 +1,15 @@
-"use client";
-
 import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
 import { ReactNode } from "react";
 
-type Messages = Record<string, any>;
-
-export default function I18nProvider({
+export default async function I18nProvider({
   children,
-  locale,
-  messages,
 }: {
   children: ReactNode;
-  locale: string;
-  messages: Messages;
 }) {
+  const messages = await getMessages();
   return (
-    <NextIntlClientProvider locale={locale} messages={messages}>
+    <NextIntlClientProvider messages={messages} timeZone="UTC">
       {children}
     </NextIntlClientProvider>
   );

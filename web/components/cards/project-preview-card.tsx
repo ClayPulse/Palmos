@@ -1,6 +1,7 @@
 import { ContextMenuState, ProjectInfo, WorkspaceConfig } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useContext, useState } from "react";
+import { useTranslations } from "next-intl";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 import { SideMenuTabEnum } from "@/lib/enums";
@@ -12,6 +13,7 @@ export function ProjectPreviewCard({
   project: ProjectInfo;
   workspaceConfig?: WorkspaceConfig;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
@@ -57,8 +59,8 @@ export function ProjectPreviewCard({
         <h1 className="text-center text-lg font-semibold">{project.name}</h1>
 
         <div className="grid w-full grid-cols-[auto_max-content]">
-          <p className="text-start font-semibold">Workspace:</p>
-          <p>{workspaceConfig?.name ?? "Undefined"}</p>
+          <p className="text-start font-semibold">{t("projectPreviewCard.workspace")}</p>
+          <p>{workspaceConfig?.name ?? t("projectPreviewCard.undefined")}</p>
         </div>
 
         <div className="grid w-full grid-cols-[auto_max-content]">

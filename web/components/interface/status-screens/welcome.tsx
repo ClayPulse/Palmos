@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 
 export default function WelcomeScreen({
@@ -7,6 +8,7 @@ export default function WelcomeScreen({
   setAnimationFinished?: (mounted: boolean) => void;
 }) {
   const animationDuration = 2; // Total animation duration in seconds
+  const t = useTranslations("statusScreens.welcome");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -67,9 +69,9 @@ export default function WelcomeScreen({
           },
         }}
       >
-        Your Next AI-OS Powered by
+        {t("taglineLine1")}
         <br />
-        Vibe Coded Apps & Workflows
+        {t("taglineLine2")}
       </motion.p>
 
       <div className="w-64 pt-4 pb-8 sm:w-80">

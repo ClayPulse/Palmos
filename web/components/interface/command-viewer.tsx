@@ -1,3 +1,5 @@
+"use client";
+
 import useActionExecutor from "@/lib/hooks/use-action-executor";
 import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import { useEditorAIAssistantHint } from "@/lib/hooks/use-editor-ai-assistant-hint";
@@ -12,6 +14,7 @@ import {
   ListboxItem,
   Spinner,
 } from "@heroui/react";
+import { useTranslations } from "next-intl";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -19,6 +22,7 @@ import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function CommandViewer() {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant, history } = useEditorAIAssistant();
@@ -45,13 +49,13 @@ export default function CommandViewer() {
         console.log("Command result:", result);
         addToast({
           color: "success",
-          title: "Command Executed",
+          title: t("commandExecutor.commandExecuted"),
           description: `Executed command: ${action.action.name}`,
         });
       } catch (error: any) {
         addToast({
           color: "danger",
-          title: "Command Execution Failed",
+          title: t("commandExecutor.commandExecutionFailed"),
           description: `Failed to execute command: ${action.action.name}. Error: ${error.message}`,
         });
         console.error("Failed to run action:", error);
@@ -290,6 +294,8 @@ ${JSON.stringify(jsonValue, null, 2)}
 
     return parsedContent;
   }
+
+  if (!editorContext?.editorStates.isCommandViewerOpen) return null;
 
   return (
     <div className="absolute top-20 left-1/2 z-50 -translate-x-1/2">

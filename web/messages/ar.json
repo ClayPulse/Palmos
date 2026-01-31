@@ -1,0 +1,1045 @@
+{
+	"common": {
+		"signIn": "تسجيل الدخول",
+		"signOut": "تسجيل الخروج",
+		"save": "حفظ",
+		"cancel": "إلغاء",
+		"close": "إغلاق",
+		"delete": "حذف",
+		"edit": "تعديل",
+		"share": "مشاركة",
+		"shareApp": "مشاركة التطبيق",
+		"create": "إنشاء",
+		"open": "فتح",
+		"confirm": "تأكيد",
+		"update": "تحديث",
+		"publish": "نشر",
+		"add": "إضافة",
+		"enter": "إدخال",
+		"viewAll": "عرض الكل"
+	},
+	"navigation": {
+		"connectedToCloudAI": "متصل بـ Cloud AI",
+		"offline": "غير متصل",
+		"language": {
+			"title": "اللغة"
+		}
+	},
+	"settings": {
+		"editorSettings": "إعدادات المحرر",
+		"generalSettings": "الإعدادات العامة",
+		"aiSettings": "إعدادات الذكاء الاصطناعي",
+		"securitySettings": "إعدادات الأمان",
+		"projectHomePath": "مسار مجلد المشاريع الرئيسي",
+		"projectHomeDescription": "سيتم حفظ جميع مشاريعك في هذا المجلد.",
+		"selectProjectHomePath": "اختيار مسار مجلد المشاريع الرئيسي",
+		"environmentVariables": "متغيرات البيئة (الواجهة الأمامية):",
+		"backendEnvVariablesWarning": "لإعداد متغيرات بيئة الخلفية، قم بضبطها في إعدادات تطبيق الامتداد.",
+		"addNewVariable": "إضافة متغير جديد",
+		"value": "القيمة",
+		"restartToApply": "أعد التشغيل للتطبيق",
+		"useManagedAIEndpoints": "استخدام نقاط نهاية ذكاء اصطناعي مُدارة",
+		"managedCloudDescription": "قم بإطلاق القوة الكاملة لـ Pulse Editor فورًا مع السحابة المُدارة، لتحصل على مساعدة ذكاء اصطناعي سريعة جدًا، ومزامنة عبر الأنظمة الأساسية، وأدوات إبداعية، حتى تبقى في حالة تدفق مستمرة.",
+		"byoAPIKeysDescription": "باستخدام مفاتيح واجهات برمجة التطبيقات الخاصة بك، يمكنك الاتصال مباشرة بمزوّدي الذكاء الاصطناعي. يتطلب ذلك إعدادًا أكثر، لكن يبقى لديك التحكم الكامل.",
+		"yourPlan": "خطتك: {plan}",
+		"upgradeManagePlan": "ترقية/إدارة الخطة",
+		"credits": "الأرصدة: {credits}",
+		"topUpCredits": "إعادة شحن الأرصدة",
+		"provider": "المزوّد",
+		"selectProvider": "اختر مزوّدًا",
+		"model": "النموذج",
+		"selectModel": "اختر نموذجًا",
+		"apiKey": "مفتاح API",
+		"apiKeyEncrypted": "مفتاح API مشفّر",
+		"passwordToEditApiKey": "يرجى تعطيل كلمة المرور لتحرير مفتاح API. يمكنك إعادة تفعيل كلمة المرور بعد تعديل المفاتيح.",
+		"voiceName": "اسم الصوت",
+		"security": "الأمان",
+		"passwordDescription": "استخدم كلمة مرور لتشفير رموز API. ستحتاج إلى إدخال جميع رموز API مرة أخرى إذا نسيت كلمة المرور.",
+		"encryptApiTokens": "تشفير رموز API بكلمة مرور",
+		"ttlDescription": "يتم حفظ رموز API لمدة عدد أيام TTL (زمن البقاء). بعد انتهاء TTL، سيتم حذف الرموز في المرة التالية التي يتم فيها فتح التطبيق. اضبط القيمة على -1 للاحتفاظ بالرموز إلى أجل غير مسمى.",
+		"ttlLabel": "زمن البقاء (بالأيام)",
+		"ttlError": "إدخال غير صالح. سيتم استخدام القيمة الافتراضية 14 يومًا.",
+		"devExtensionSettings": "إعدادات امتداد التطوير",
+		"fileTypeMapping": "تعيين الامتداد الافتراضي حسب نوع الملف",
+		"noFileTypes": "لم يتم العثور على أنواع ملفات. يرجى تثبيت امتدادات تدعم أنواع الملفات.",
+		"selectDefaultExtension": "اختر الامتداد الافتراضي",
+		"extensionDevMode": "وضع تطوير الامتداد",
+		"extensionDevModeDescription": "تحميل الامتداد من خادم تطوير محلي على http://localhost:3030.",
+		"enableExtensionDevMode": "تفعيل وضع تطوير الامتداد",
+		"extensionDevServerURL": "عنوان خادم تطوير الامتداد",
+		"extensionID": "معرّف الامتداد",
+		"extensionVersion": "إصدار الامتداد",
+		"addDevExtension": "إضافة امتداد تطوير",
+		"openAsApp": "فتح كتطبيق",
+		"extensionDevModeEnabled": "تم تفعيل وضع تطوير الامتداد",
+		"extensionDevModeEnabledDescription": "يمكنك الآن تحميل الامتدادات من خادم التطوير المحلي الخاص بك.",
+		"extensionDevModeDisabled": "تم تعطيل وضع تطوير الامتداد",
+		"extensionDevModeDisabledDescription": "لقد قمت بتعطيل وضع تطوير الامتداد.",
+		"extensionInstalled": "تم تثبيت الامتداد",
+		"extensionInstalledDescription": "تم تثبيت الامتداد {id} بنجاح.",
+		"extensionDefinedSettings": "إعدادات محددة من الامتداد",
+		"pulseEditorTerminal": "طرفية Pulse Editor",
+		"deviceHostAddress": "عنوان مضيف الجهاز"
+	},
+	"subscription": {
+		"title": "الاشتراك",
+		"plan": "خطة الاشتراك",
+		"creditsRemaining": "الأرصدة المتبقية",
+		"managePlan": "إدارة الخطة"
+	},
+	"planPicker": {
+		"freeDescription": "مجاني: استخدم الخطة المجانية واستمتع بالميزات الأساسية. يمكنك الوصول إلى مساحات عمل ذاتية الاستضافة وإحضار مفاتيح API الخاصة بك. ستظل هذه الخيارات متاحة دائمًا، ونحن ملتزمون بالحفاظ عليها مفتوحة المصدر ومجانية.",
+		"readMoreOpenSource": "قراءة المزيد عن التزامنا بالمصدر المفتوح"
+	},
+	"account": {
+		"title": "الحساب"
+	},
+	"metadata": {
+		"title": "Pulse Editor",
+		"description": "محرر مدعوم بالذكاء الاصطناعي لزيادة إبداعك"
+	},
+	"cloudApi": {
+		"directorySelection": {
+			"notSupported": "اختيار المجلدات غير مدعوم على هذا النظام"
+		},
+		"fileSelection": {
+			"notSupported": "اختيار الملفات غير مدعوم على هذا النظام"
+		},
+		"fetchProjects": {
+			"failed": "فشل في عرض قائمة المشاريع"
+		},
+		"listProjects": {
+			"notSignedIn": "لا يمكن عرض قائمة المشاريع. هل قمت بتسجيل الدخول؟"
+		},
+		"listPath": {
+			"failed": "فشل في عرض مسار الملفات",
+			"noWorkspace": "لا يمكن عرض المسار. لم يتم اختيار مساحة عمل"
+		},
+		"createFolder": {
+			"failed": "فشل في إنشاء المجلد",
+			"noWorkspace": "لا يمكن إنشاء مجلد. لم يتم اختيار مساحة عمل"
+		},
+		"createFile": {
+			"failed": "فشل في إنشاء الملف",
+			"noWorkspace": "لا يمكن إنشاء ملف. لم يتم اختيار مساحة عمل"
+		},
+		"renameFile": {
+			"failed": "فشل في إعادة تسمية الملف",
+			"noWorkspace": "لا يمكن إعادة تسمية الملف. لم يتم اختيار مساحة عمل"
+		},
+		"deleteFile": {
+			"failed": "فشل في حذف الملف",
+			"noWorkspace": "لا يمكن حذف الملف. لم يتم اختيار مساحة عمل"
+		},
+		"checkPath": {
+			"failed": "فشل في التحقق من المسار",
+			"noWorkspace": "لا يمكن التحقق من المسار. لم يتم اختيار مساحة عمل"
+		},
+		"readFile": {
+			"failed": "فشل في قراءة الملف",
+			"noWorkspace": "لا يمكن قراءة الملف. لم يتم اختيار مساحة عمل"
+		},
+		"writeFile": {
+			"failed": "فشل في كتابة الملف",
+			"noWorkspace": "لا يمكن كتابة الملف. لم يتم اختيار مساحة عمل"
+		},
+		"copyFiles": {
+			"failed": "فشل في نسخ الملفات",
+			"noWorkspace": "لا يمكن نسخ الملفات. لم يتم اختيار مساحة عمل"
+		},
+		"installationPath": {
+			"failed": "فشل في الحصول على مسار التثبيت",
+			"noWorkspace": "لا يمكن الحصول على مسار التثبيت. لم يتم اختيار مساحة عمل"
+		},
+		"createTerminal": {
+			"failed": "فشل في إنشاء الطرفية",
+			"noWorkspace": "لا يمكن إنشاء الطرفية. لم يتم اختيار مساحة عمل"
+		}
+	},
+	"homeView": {
+		"title": "الصفحة الرئيسية",
+		"vibeCode": {
+			"title": "ماذا تريد أن تنشئ؟",
+			"newApp": "Vibe Code تطبيق",
+			"blog": "Vibe Code مدونة",
+			"portfolio": "Vibe Code موقع أعمال",
+			"weatherApp": "Vibe Code تطبيق طقس",
+			"chatApp": "Vibe Code تطبيق محادثة",
+			"socialMediaApp": "Vibe Code تطبيق تواصل اجتماعي",
+			"fitnessTracker": "Vibe Code تطبيق متابعة لياقة",
+			"recipeApp": "Vibe Code تطبيق وصفات"
+		},
+		"createWorkflow": {
+			"button": "إنشاء سير عمل"
+		},
+		"exploreMarketplace": {
+			"button": "استكشاف المتجر"
+		},
+		"signIn": {
+			"message": "سجّل الدخول لفتح مزيد من الميزات",
+			"button": "تسجيل الدخول"
+		},
+		"myProjects": {
+			"tab": "مشاريعي",
+			"title": "مشاريعي"
+		},
+		"myApps": {
+			"tab": "تطبيقاتي",
+			"title": "تطبيقاتي"
+		},
+		"featuredWorkflows": {
+			"tab": "سير عمل مميز",
+			"title": "سير عمل مميز"
+		},
+		"featuredApps": {
+			"tab": "تطبيقات مميزة",
+			"title": "تطبيقات مميزة"
+		},
+		"learnMore": "معرفة المزيد",
+		"myAppsAndProjects": "تطبيقاتي ومشاريعي",
+		"yourResources": "مواردك",
+		"cloudWorkspaces": "مساحات عمل سحابية"
+	},
+	"openInProjectModal": {
+		"title": "فتح في مشروع",
+		"openExisting": "فتح مشروع موجود",
+		"newProject": "مشروع جديد",
+		"projectName": "اسم المشروع",
+		"projectNamePlaceholder": "أدخل اسم المشروع",
+		"projectLocation": "موقع المشروع",
+		"projectLocationPlaceholder": "اختر موقع المشروع",
+		"selectLocation": "اختيار الموقع",
+		"createInside": "إنشاء داخل",
+		"moreOptionsComingSoon": "المزيد من الخيارات قريبًا...",
+		"create": "إنشاء",
+		"open": "فتح",
+		"selectProjectFolder": "اختيار مجلد المشروع",
+		"selectProjectFile": "اختيار ملف المشروع",
+		"workspaceRequired": "يتطلب هذا التطبيق/سير العمل فتح مساحة عمل ليعمل بشكل صحيح.",
+		"selectWorkspace": "اختيار مساحة عمل",
+		"localComputer": "الكمبيوتر المحلي",
+		"workspaceName": "اسم مساحة العمل",
+		"workspaceSpecs": "مواصفات مساحة العمل",
+		"storageGB": "سعة التخزين (غيغابايت)",
+		"moreToCome": "المزيد قادم",
+		"gettingReady": "جارٍ التحضير...",
+		"toast": {
+			"preparingWorkspace": {
+				"title": "جارٍ تحضير مساحة العمل",
+				"description": "جارٍ انتظار مساحة العمل حتى تصبح جاهزة..."
+			},
+			"failedToOpen": {
+				"title": "فشل في الفتح",
+				"description": "لم يتم اختيار أي مشروع."
+			},
+			"appOpened": {
+				"title": "تم فتح التطبيق",
+				"description": "تم فتح التطبيق بنجاح."
+			},
+			"workflowOpened": {
+				"title": "تم فتح سير العمل",
+				"description": "تم فتح سير العمل بنجاح."
+			},
+			"noAppOrWorkflow": "لا يوجد تطبيق أو سير عمل للفتح.",
+			"unableToCreate": {
+				"title": "تعذّر إنشاء مساحة العمل.",
+				"unknownPlatform": "منصة غير معروفة.",
+				"nameRequired": "اسم مساحة العمل مطلوب."
+			},
+			"creatingWorkspace": {
+				"title": "جارٍ إنشاء مساحة العمل",
+				"description": "جارٍ إنشاء مساحة العمل {name}. المواصفات: {cpu} معالج، {ram} ذاكرة، {storage} تخزين."
+			},
+			"workspaceCreated": {
+				"title": "تم إنشاء مساحة العمل",
+				"description": "تم إنشاء مساحة العمل {name} بنجاح."
+			},
+			"errorCreating": {
+				"title": "خطأ في إنشاء مساحة العمل"
+			}
+		},
+		"errors": {
+			"noName": "يرجى إدخال اسم المشروع",
+			"noLocation": "يرجى اختيار موقع المشروع"
+		}
+	},
+	"quickVibeCodeSetupModal": {
+		"title": "إعداد سريع لـ Vibe Code",
+		"vibeCodeProject": "مشروع Vibe Code",
+		"projectName": "اسم المشروع",
+		"gettingReady": "جارٍ التحضير لك...",
+		"appOpened": {
+			"title": "تم فتح التطبيق",
+			"description": "تم فتح التطبيق بنجاح."
+		},
+		"noAppToOpen": "لا يوجد تطبيق لفتحه."
+	},
+	"passwordModal": {
+		"title": "إدخال كلمة المرور",
+		"subtitle": "تتطلب هذه العملية مصادقة",
+		"password": "كلمة المرور",
+		"passwordPlaceholder": "أدخل كلمة المرور",
+		"resetConfig": {
+			"button": "إعادة ضبط الإعدادات",
+			"title": "إعادة ضبط الإعدادات",
+			"message": "هل أنت متأكد أنك تريد إعادة ضبط جميع الإعدادات؟ لا يمكن التراجع عن هذه العملية."
+		},
+		"validation": {
+			"required": "كلمة المرور مطلوبة"
+		},
+		"confirm": {
+			"button": "تأكيد"
+		}
+	},
+	"openSourceInfoModal": {
+		"title": "البرمجيات مفتوحة المصدر",
+		"description": "نحن نؤمن بالبرمجيات المفتوحة لأن الشفافية تعزز الثقة والابتكار والتعاون. مهمتنا هي تمكين المطورين حول العالم من خلال توفير وصول مجاني إلى الأدوات التي يحتاجونها للبناء والابتكار بدون عوائق.",
+		"pulseEditorCore": "نواة Pulse Editor",
+		"officialApps": "تطبيقات رسمية",
+		"opensource": "مفتوح المصدر",
+		"cloudServices": "في الوقت نفسه، نقدم خدمات سحابية ومتجرًا يمكنك من خلاله إدارة مشاريعك بسهولة ومشاركة عملك مع المجتمع بدون القلق بشأن البنية التحتية أو الخلفية.",
+		"loveWhatWeDo": "هل تحب ما نقوم به؟ ادعمنا بإعطائنا نجمة على GitHub أو بتنزيل تطبيقنا على Google Play!",
+		"giveUsAStar": "أعطنا نجمة",
+		"googlePlay": "Google Play"
+	},
+	"commandViewer": {
+		"chatInput": {
+			"placeholder": "اكتب أمرًا أو اطرح سؤالًا",
+			"emptyDescription": "يمكنك كتابة 'add' أو 'remove' أو 'edit' وغير ذلك لتنفيذ إجراءات، أو طرح الأسئلة",
+			"emptyDescriptionWithCommand": "يمكنك كتابة أمر مع '@' لتنفيذه، أو طرح الأسئلة",
+			"pressEnter": "اضغط Enter للإرسال",
+			"pressEnterToExecute": "اضغط Enter للتنفيذ"
+		},
+		"send": "إرسال",
+		"you": "أنت: "
+	},
+	"projectIndicator": {
+		"closeProject": {
+			"menuItem": "إغلاق المشروع"
+		},
+		"projectSettings": {
+			"menuItem": "إعدادات المشروع"
+		}
+	},
+	"editorToolbar": {
+		"runWorkflow": {
+			"tooltip": "تشغيل سير العمل"
+		},
+		"openConsole": {
+			"tooltip": "فتح وحدة تحكم الوكيل"
+		},
+		"voiceChat": {
+			"tooltip": "محادثة صوتية مع الوكيل"
+		},
+		"artifacts": {
+			"tooltip": "النتائج",
+			"wip": "النتائج (قيد العمل)"
+		},
+		"installedAgents": {
+			"tooltip": "الوكلاء المثبّتون"
+		},
+		"marketplace": {
+			"tooltip": "المتجر"
+		},
+		"settings": {
+			"tooltip": "الإعدادات"
+		}
+	},
+	"publishWorkflowModal": {
+		"title": "نشر سير العمل",
+		"description": "انشر سير العمل الخاص بك لمشاركته مع الآخرين",
+		"workflowName": "اسم سير العمل",
+		"workflowNamePlaceholder": "أدخل اسم سير العمل",
+		"workflowDescription": "الوصف",
+		"workflowDescriptionPlaceholder": "أدخل وصف سير العمل",
+		"workflowVersion": "إصدار سير العمل",
+		"workflowVersionPlaceholder": "أدخل إصدار سير العمل",
+		"publish": "نشر",
+		"publishing": "جارٍ نشر سير العمل",
+		"publishingDescription": "جارٍ نشر سير العمل الخاص بك...",
+		"toast": {
+			"published": {
+				"title": "تم نشر سير العمل",
+				"description": "تم نشر سير العمل بنجاح."
+			},
+			"failed": {
+				"title": "فشل في نشر سير العمل"
+			}
+		}
+	},
+	"projectSettingsModal": {
+		"title": "إعدادات المشروع",
+		"projectName": "اسم المشروع",
+		"projectPath": "مسار المشروع",
+		"update": "تحديث",
+		"create": "إنشاء",
+		"delete": "حذف",
+		"toast": {
+			"noProjectSelected": "لم يتم اختيار أي مشروع."
+		}
+	},
+	"editorSettingsModal": {
+		"title": "إعدادات المحرر",
+		"projectsFolder": {
+			"description": "سيتم حفظ جميع مشاريعك في هذا المجلد.",
+			"selectFolder": "اختيار مجلد",
+			"selectProjectHomePath": "اختيار مسار مجلد المشاريع الرئيسي"
+		},
+		"environmentVariables": {
+			"frontend": "متغيرات البيئة (الواجهة الأمامية):",
+			"instructions": "KEY=VALUE مفصولة بسطر جديد",
+			"backendWarning": "لإعداد متغيرات بيئة الخلفية، قم بضبطها في إعدادات تطبيق الامتداد.",
+			"addNewVariable": "إضافة متغير جديد",
+			"value": "القيمة",
+			"errorEmptyKey": {
+				"title": "خطأ",
+				"description": "لا يمكن أن يكون مفتاح متغير البيئة فارغًا."
+			}
+		},
+		"customOnnxWasmCdnUrl": {
+			"label": "عنوان CDN مخصص لـ onnx-wasm",
+			"placeholder": "أدخل عنوان CDN مخصصًا لـ onnx-wasm"
+		},
+		"restartToApply": "أعد التشغيل للتطبيق",
+		"aiSettings": {
+			"title": "إعدادات الذكاء الاصطناعي",
+			"useManagedEndpoints": "استخدام نقاط نهاية ذكاء اصطناعي مُدارة",
+			"managedMessage": "قم بإطلاق القوة الكاملة لـ Pulse Editor فورًا مع السحابة المُدارة، لتحصل على مساعدة ذكاء اصطناعي سريعة جدًا، ومزامنة عبر الأنظمة الأساسية، وأدوات إبداعية، حتى تبقى في حالة تدفق مستمرة.",
+			"byokMessage": "باستخدام مفاتيح واجهات برمجة التطبيقات الخاصة بك، يمكنك الاتصال مباشرة بمزوّدي الذكاء الاصطناعي. يتطلب ذلك إعدادًا أكثر، لكن يبقى لديك التحكم الكامل.",
+			"yourPlan": "خطتك:",
+			"upgradeManagePlan": "ترقية/إدارة الخطة",
+			"credits": "الأرصدة:",
+			"topUpCredits": "إعادة شحن الأرصدة",
+			"stt": "STT",
+			"llm": "LLM",
+			"tts": "TTS",
+			"imageGen": "توليد الصور",
+			"videoGen": "توليد الفيديو",
+			"provider": "المزوّد",
+			"providerPlaceholder": "اختر مزوّدًا",
+			"model": "النموذج",
+			"modelPlaceholder": "اختر نموذجًا",
+			"voiceName": "اسم الصوت",
+			"apiKey": "مفتاح API",
+			"apiKeyEncrypted": "مفتاح API مشفّر",
+			"apiKeyTooltip": "يرجى تعطيل كلمة المرور لتحرير مفتاح API. يمكنك إعادة تفعيل كلمة المرور بعد تعديل المفاتيح."
+		},
+		"security": {
+			"title": "الأمان",
+			"encryptApiTokens": "تشفير رموز API بكلمة مرور",
+			"encryptDescription": "استخدم كلمة مرور لتشفير رموز API. ستحتاج إلى إدخال جميع الرموز مرة أخرى إذا نسيت كلمة المرور.",
+			"ttlLabel": "زمن البقاء (بالأيام)",
+			"ttlDescription": "يتم حفظ رموز API لمدة عدد أيام TTL (زمن البقاء). بعد انتهاء TTL، سيتم حذف الرموز في المرة التالية التي يتم فيها فتح التطبيق. اضبط القيمة على -1 للاحتفاظ بالرموز إلى أجل غير مسمى.",
+			"ttlError": {
+				"title": "خطأ",
+				"description": "إدخال غير صالح. سيتم استخدام القيمة الافتراضية 14 يومًا."
+			}
+		},
+		"devExtension": {
+			"title": "إعدادات امتداد التطوير",
+			"fileTypeMapping": "تعيين الامتداد الافتراضي حسب نوع الملف",
+			"noFileTypes": "لم يتم العثور على أنواع ملفات. يرجى تثبيت امتدادات تدعم أنواع الملفات.",
+			"selectDefaultExtension": "اختر الامتداد الافتراضي",
+			"extensionDevMode": "وضع تطوير الامتداد",
+			"extensionDevModeDescription": "تحميل الامتداد من خادم تطوير محلي على http://localhost:3030.",
+			"enableExtensionDevMode": "تفعيل وضع تطوير الامتداد",
+			"extensionDevServerUrl": "عنوان خادم تطوير الامتداد",
+			"extensionId": "معرّف الامتداد",
+			"extensionIdPlaceholder": "(extension_id)",
+			"extensionVersion": "إصدار الامتداد",
+			"extensionVersionPlaceholder": "(الإصدار)",
+			"addDevExtension": "إضافة امتداد تطوير",
+			"openAsApp": "فتح كتطبيق",
+			"toast": {
+				"devModeEnabled": {
+					"title": "تم تفعيل وضع تطوير الامتداد",
+					"description": "يمكنك الآن تحميل الامتدادات من خادم التطوير المحلي الخاص بك."
+				},
+				"devModeDisabled": {
+					"title": "تم تعطيل وضع تطوير الامتداد",
+					"description": "لقد قمت بتعطيل وضع تطوير الامتداد."
+				},
+				"extensionInstalled": {
+					"title": "تم تثبيت الامتداد",
+					"description": "تم تثبيت الامتداد {id} بنجاح."
+				},
+				"enableDevMode": "تفعيل وضع تطوير الامتداد",
+				"addDevExtension": "إضافة امتداد تطوير",
+				"openAsApp": "فتح كتطبيق",
+				"extensionDevServerURL": "عنوان خادم تطوير الامتداد",
+				"extensionID": "معرّف الامتداد",
+				"extensionVersion": "إصدار الامتداد",
+				"selectDefaultExtension": "اختر الامتداد الافتراضي",
+				"noFileTypes": "لم يتم العثور على أنواع ملفات. يرجى تثبيت امتدادات تدعم أنواع الملفات.",
+				"fileTypeMapping": "تعيين الامتداد الافتراضي حسب نوع الملف",
+				"deviceHostAddress": "عنوان مضيف الجهاز"
+			}
+		},
+		"extensionDefined": {
+			"title": "إعدادات محددة من الامتداد",
+			"pulseEditorTerminal": "طرفية Pulse Editor",
+			"deviceHostAddress": "عنوان مضيف الجهاز"
+		}
+	},
+	"marketplaceModal": {
+		"title": "متجر المجتمع",
+		"tabs": {
+			"featured": "مميز",
+			"featuredDescription": "تطبيقات وسير عمل مميزة من المجتمع",
+			"workflows": "سير العمل",
+			"workflowsDescription": "استعرض سير العمل التي شاركها المجتمع",
+			"apps": "التطبيقات",
+			"appsDescription": "استعرض تطبيقات Pulse الموحّدة التي طورها المجتمع",
+			"installed": "مثبّتة",
+			"installedApps": "التطبيقات المثبّتة",
+			"installedAgents": "الوكلاء المثبّتون",
+			"discover": "اكتشاف",
+			"discoverApps": "اكتشاف التطبيقات",
+			"discoverAgents": "اكتشاف الوكلاء"
+		}
+	},
+	"loginModal": {
+		"title": "تسجيل الدخول",
+		"connectToRemote": "الاتصال بمثيل بعيد",
+		"login": "تسجيل الدخول",
+		"remoteUrl": "عنوان URL البعيد",
+		"remoteUrlPlaceholder": "أدخل عنوان URL البعيد",
+		"remotePassword": "كلمة المرور",
+		"remotePasswordPlaceholder": "أدخل كلمة المرور",
+		"connect": "اتصال",
+		"localWorkspaceNotAvailable": "مساحة العمل المحلية غير متاحة في المتصفح. يرجى استخدام عميل سطح المكتب/الهاتف المحمول أو الاتصال بمثيل بعيد.",
+		"continueAsGuest": "المتابعة كضيف",
+		"continueOffline": "المتابعة دون اتصال"
+	},
+	"agentConfigModal": {
+		"title": "الوكلاء المثبّتون",
+		"tabs": {
+			"agents": "الوكلاء",
+			"agentsDescription": "إدارة الوكلاء المثبّتين",
+			"providers": "المزوّدون",
+			"providersDescription": "إدارة مزوّدي الذكاء الاصطناعي"
+		},
+		"installedAgents": "الوكلاء المثبّتون",
+		"availableAgents": "الوكلاء المتاحون",
+		"noAgentsInstalled": "لا توجد وكلاء مثبّتون",
+		"noAgentsAvailable": "لا يوجد وكلاء متاحون",
+		"edit": "تعديل",
+		"delete": "حذف",
+		"createNewAgent": {
+			"title": "إنشاء وكيل جديد",
+			"description": "إضافة وكيل محادثة أساسي إلى المحرر.",
+			"button": "إنشاء وكيل جديد"
+		},
+		"form": {
+			"name": "الاسم",
+			"namePlaceholder": "أدخل اسم الوكيل",
+			"version": "الإصدار",
+			"versionPlaceholder": "أدخل إصدار الوكيل",
+			"description": "الوصف",
+			"descriptionPlaceholder": "أدخل وصف الوكيل",
+			"systemPrompt": "موجه النظام",
+			"systemPromptPlaceholder": "أدخل موجه الوكيل",
+			"provider": "المزوّد",
+			"providerPlaceholder": "أدخل المزوّد",
+			"modelName": "اسم النموذج",
+			"modelNamePlaceholder": "أدخل اسم النموذج",
+			"model": "النموذج",
+			"modelPlaceholder": "اختر نموذجًا",
+			"temperature": "درجة الحرارة",
+			"contextLength": "طول السياق",
+			"contextLengthPlaceholder": "أدخل طول السياق"
+		},
+		"addAgent": "إضافة وكيل",
+		"installedBy": "مثبّت بواسطة الامتداد {extension} من {publisher}",
+		"llmConfig": "إعدادات نموذج اللغة:",
+		"toast": {
+			"agentDeleted": "تم حذف الوكيل",
+			"agentAdded": "تم إضافة وكيل جديد"
+		},
+		"llmUsage": {
+			"title": "استخدام نموذج اللغة من قبل الوكلاء",
+			"provider": "المزوّد:",
+			"usedModels": "النماذج المستخدمة:",
+			"usedByAgents": "مستخدمة من قبل الوكلاء:",
+			"totalUsageByAgents": "إجمالي عدد الوكلاء:",
+			"agent": "الوكيل",
+			"totalCost": "إجمالي التكلفة",
+			"noData": "لا توجد بيانات استخدام متاحة",
+			"apiKey": "مفتاح API",
+			"apiKeyNotVisible": "لا يمكن رؤية مفتاح API بعد إدخاله."
+		}
+	},
+	"appInfoModal": {
+		"title": "معلومات التطبيق",
+		"developerSettings": "إعدادات المطوّر",
+		"loading": "جارٍ التحميل...",
+		"metadata": {
+			"id": "المعرّف",
+			"version": "الإصدار",
+			"author": "المؤلف",
+			"license": "الترخيص",
+			"website": "الموقع الإلكتروني",
+			"readme": "README"
+		},
+		"apiPricing": {
+			"title": "أسعار واجهات برمجة التطبيقات",
+			"description": "الإعدادات التالية هي أسعار واجهات برمجة التطبيقات لهذا التطبيق.",
+			"endpoint": "نقطة النهاية:",
+			"cost": "التكلفة:",
+			"creditsPerCall": "أرصدة لكل استدعاء",
+			"perCall": "لكل استدعاء",
+			"noApiPricing": "لم يتم تعيين أسعار لواجهات برمجة التطبيقات لهذا التطبيق.",
+			"noServerFunctions": "لم يتم العثور على وظائف خادم لهذا التطبيق.",
+			"costPlaceholder": "تكلفة الأرصدة لكل استدعاء"
+		},
+		"developerMode": {
+			"title": "إعدادات المطوّر",
+			"appInfo": "معلومات التطبيق",
+			"appId": "معرّف التطبيق",
+			"environmentVariables": "متغيرات البيئة",
+			"addNewVariable": "إضافة متغير جديد",
+			"value": "القيمة",
+			"localServer": "خادم محلي",
+			"localServerPlaceholder": "أدخل عنوان الخادم المحلي (مثلاً http://localhost:3000)",
+			"envInstructions": "KEY=VALUE مفصولة بسطر جديد",
+			"testMode": "وضع الاختبار",
+			"testModeDescription": "فعّل وضع الاختبار لاستخدام الخادم المحلي ومتغيرات البيئة",
+			"toast": {
+				"addingVariable": {
+					"title": "جارٍ إضافة متغير",
+					"description": "جارٍ إضافة متغير البيئة {key}."
+				},
+				"variableAdded": {
+					"title": "تمت إضافة المتغير",
+					"description": "تمت إضافة متغير البيئة {key} بنجاح."
+				},
+				"errorEmptyKey": {
+					"title": "خطأ",
+					"description": "لا يمكن أن يكون مفتاح متغير البيئة فارغًا."
+				},
+				"settingCost": {
+					"title": "جارٍ تعيين تكلفة نقطة النهاية",
+					"description": "جارٍ تعيين تكلفة نقطة النهاية {endpoint}: {cost}."
+				},
+				"costSet": {
+					"title": "تم تعيين التكلفة",
+					"description": "تم تعيين تكلفة نقطة النهاية {endpoint} إلى {cost} بنجاح."
+				},
+				"costSetError": {
+					"title": "خطأ",
+					"description": "فشل في تعيين تكلفة نقطة النهاية {endpoint}. {error}."
+				},
+				"deletingApp": {
+					"title": "جارٍ حذف التطبيق",
+					"description": "جارٍ حذف التطبيق {name}."
+				},
+				"appUnpublished": {
+					"title": "تم إلغاء نشر التطبيق",
+					"description": "تم إلغاء نشر التطبيق {name} بنجاح."
+				},
+				"unpublishError": {
+					"title": "خطأ",
+					"description": "فشل في إلغاء نشر التطبيق {name}."
+				}
+			}
+		},
+		"dangerZone": {
+			"title": "منطقة الخطر",
+			"unpublish": "إلغاء النشر",
+			"unpublishConfirm": "هل أنت متأكد أنك تريد إلغاء نشر هذا التطبيق؟ لا يمكن التراجع عن هذه العملية.",
+			"confirmUnpublish": "تأكيد إلغاء النشر",
+			"cancel": "إلغاء",
+			"deleteApp": "حذف التطبيق",
+			"deleteAppDescription": "حذف هذا التطبيق نهائيًا من حسابك",
+			"uninstallApp": "إلغاء تثبيت التطبيق",
+			"uninstallAppDescription": "إزالة هذا التطبيق من التطبيقات المثبّتة لديك"
+		}
+	},
+	"navSideMenu": {
+		"home": {
+			"label": "الرئيسية",
+			"icon": "home"
+		},
+		"projectHome": {
+			"label": "مجلد المشاريع الرئيسي",
+			"icon": "folder",
+			"notSet": "لم تقم بعد بتعيين مسار مجلد المشاريع الرئيسي. يرجى تعيينه من الإعدادات.",
+			"select": {
+				"button": "اختيار مجلد المشاريع الرئيسي"
+			}
+		}
+	},
+	"fileMenu": {
+		"title": "ملف",
+		"newProject": "مشروع جديد",
+		"openProject": "فتح مشروع"
+	},
+	"viewMenu": {
+		"title": "عرض",
+		"commandViewer": "عارض الأوامر",
+		"console": "وحدة التحكم",
+		"importWorkflow": {
+			"title": "استيراد سير عمل",
+			"invalidFile": "ملف سير عمل غير صالح",
+			"readError": "خطأ في قراءة ملف سير العمل"
+		}
+	},
+	"fsExplorer": {
+		"newFolder": "مجلد جديد",
+		"folderName": "اسم المجلد",
+		"newFile": "ملف جديد",
+		"fileName": "اسم الملف",
+		"selectOneFolder": "يرجى اختيار مجلد واحد فقط لإنشاء مجلد جديد بداخله.",
+		"selectOneFolderForFile": "يرجى اختيار مجلد واحد فقط لإنشاء ملف جديد بداخله.",
+		"emptyContent": "لا يوجد محتوى. أنشئ ملفًا جديدًا للبدء.",
+		"noAppSelected": "لم يتم اختيار تطبيق للتعامل مع هذا الملف.",
+		"selectNodeInCanvas": "يرجى اختيار عقدة في مساحة العمل لعرض الملف",
+		"noWorkspaceSelected": "لم يتم اختيار مساحة عمل"
+	},
+	"projectExplorer": {
+		"title": "المشاريع",
+		"newProject": {
+			"button": "مشروع جديد"
+		},
+		"signInMessage": "سجّل الدخول لعرض مشاريعك، أو افتح مشروعًا محليًا باستخدام عميل سطح المكتب."
+	},
+	"viewArea": {
+		"unknownViewType": "نوع عرض غير معروف",
+		"noViewSelected": "لم يتم اختيار أي عرض"
+	},
+	"projectView": {
+		"title": "المشروع",
+		"createWorkflow": {
+			"button": "إنشاء سير عمل"
+		},
+		"exploreMarketplace": {
+			"button": "استكشاف المتجر"
+		}
+	},
+	"dnd": {
+		"openApp": {
+			"failed": "فشل في فتح التطبيق",
+			"invalidData": "بيانات تطبيق غير صالحة"
+		},
+		"linkApp": {
+			"failed": "فشل في ربط التطبيق",
+			"invalidData": "بيانات تطبيق غير صالحة"
+		},
+		"openFile": {
+			"failed": "فشل في فتح الملف",
+			"invalidData": "بيانات ملف غير صالحة"
+		},
+		"invalidTarget": {
+			"cannotDropFile": "لا يمكن إفلات الملف هنا",
+			"somethingWrong": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+			"cannotDrop": "لا يمكن الإفلات هنا"
+		}
+	},
+	"workspaceSettingsModal": {
+		"title": "إعدادات مساحة العمل",
+		"selectWorkspace": "اختيار مساحة عمل",
+		"localComputer": "الكمبيوتر المحلي",
+		"createNew": "إنشاء جديد",
+		"workspaceName": "اسم مساحة العمل",
+		"workspaceSpecs": "مواصفات مساحة العمل",
+		"storageGB": "سعة التخزين (غيغابايت)",
+		"moreToCome": "المزيد قادم",
+		"useWorkspace": "استخدام مساحة العمل",
+		"exitWorkspace": "الخروج من مساحة العمل",
+		"start": "بدء",
+		"stop": "إيقاف",
+		"update": "تحديث",
+		"delete": "حذف",
+		"create": "إنشاء",
+		"unpublishWorkspace": "إلغاء نشر مساحة العمل",
+		"toast": {
+			"unknownPlatform": "منصة غير معروفة.",
+			"workspaceNotAvailable": "مساحة العمل غير متاحة.",
+			"workspaceNameRequired": "اسم مساحة العمل مطلوب.",
+			"workspaceExists": "مساحة العمل موجودة بالفعل. يرجى تحديثها بدلًا من ذلك.",
+			"updatingWorkspace": {
+				"title": "جارٍ تحديث مساحة العمل",
+				"description": "جارٍ تحديث مساحة العمل {name}."
+			},
+			"workspaceUpdated": {
+				"title": "تم تحديث مساحة العمل",
+				"description": "تم تحديث مساحة العمل {name} بنجاح."
+			},
+			"deletingWorkspace": {
+				"title": "جارٍ حذف مساحة العمل",
+				"description": "جارٍ حذف مساحة العمل {name}"
+			},
+			"workspaceDeleted": {
+				"title": "تم حذف مساحة العمل",
+				"description": "تم حذف مساحة العمل {name} بنجاح."
+			},
+			"errorDeleting": {
+				"title": "خطأ في حذف مساحة العمل"
+			},
+			"creatingWorkspace": {
+				"title": "جارٍ إنشاء مساحة العمل",
+				"description": "جارٍ إنشاء مساحة العمل {name}. المواصفات: {cpu} معالج، {ram} ذاكرة، {storage} تخزين."
+			},
+			"workspaceCreated": {
+				"title": "تم إنشاء مساحة العمل",
+				"description": "تم إنشاء مساحة العمل {name} بنجاح."
+			},
+			"errorCreating": {
+				"title": "خطأ في إنشاء مساحة العمل"
+			},
+			"stoppingWorkspace": {
+				"title": "جارٍ إيقاف مساحة العمل",
+				"description": "جارٍ إيقاف مساحة العمل {name}."
+			},
+			"workspaceStopped": {
+				"title": "تم إيقاف مساحة العمل",
+				"description": "تم إيقاف مساحة العمل {name} بنجاح."
+			},
+			"startingWorkspace": {
+				"title": "جارٍ بدء مساحة العمل",
+				"description": "جارٍ بدء مساحة العمل {name}."
+			},
+			"workspaceStarted": {
+				"title": "تم بدء مساحة العمل",
+				"description": "تم بدء مساحة العمل {name} بنجاح."
+			}
+		}
+	},
+	"qrDisplay": {
+		"title": "مسح رمز QR",
+		"download": "تنزيل",
+		"loadingError": "لا يزال رمز QR قيد التحميل، يرجى الانتظار."
+	},
+	"sharingModal": {
+		"title": "مشاركة مساحة العمل {name}",
+		"visibility": "إمكانية الرؤية",
+		"visibilityPlaceholder": "اختر مستوى الرؤية",
+		"inviteCode": "رمز الدعوة",
+		"selectVisibility": "اختر خيار الرؤية لعرض خيارات المشاركة.",
+		"workspacePrivate": "مساحة العمل الخاصة بك خاصة.",
+		"tabs": {
+			"qrCode": "رمز QR",
+			"qrCodeDescription": "شارك مساحة العمل الخاصة بك عبر رمز QR",
+			"url": "رابط URL",
+			"urlDescription": "شارك مساحة العمل الخاصة بك عبر رابط URL"
+		},
+		"qrCode": {
+			"description": "شارك مساحة العمل الخاصة بك بواسطة هذا الرمز QR"
+		},
+		"url": {
+			"description": "شارك مساحة العمل الخاصة بك بواسطة هذا الرابط",
+			"copy": "نسخ"
+		},
+		"toast": {
+			"fetchError": "فشل في جلب معلومات المشاركة من الامتداد",
+			"urlCopied": "تم نسخ الرابط إلى الحافظة"
+		}
+	},
+	"workflowPreviewCard": {
+		"open": "فتح",
+		"clone": "استنساخ"
+	},
+	"appGallery": {
+		"title": "التطبيقات",
+		"noApps": "لم يتم العثور على تطبيقات"
+	},
+	"workflowGallery": {
+		"title": "سير العمل",
+		"noWorkflows": "لم يتم العثور على سير عمل"
+	},
+	"featuredGallery": {
+		"title": "مميز"
+	},
+	"statusScreens": {
+		"welcome": {
+			"title": "مرحبًا بك في Pulse Editor",
+			"subtitle": "ابدأ بإنشاء مشروع جديد أو فتح مشروع موجود",
+			"taglineLine1": "نظام التشغيل التالي بالذكاء الاصطناعي، مدعوم بـ",
+			"taglineLine2": "تطبيقات وتدفقات عمل Vibe Coded"
+		},
+		"wip": {
+			"title": "العمل قيد التقدم",
+			"subtitle": "هذه الميزة قادمة قريبًا"
+		},
+		"loading": {
+			"title": "جارٍ التحميل...",
+			"subtitle": "يرجى الانتظار"
+		},
+		"notAuthorized": {
+			"title": "غير مصرح",
+			"subtitle": "ليس لديك صلاحية للوصول إلى هذا المورد"
+		},
+		"error": {
+			"title": "خطأ",
+			"subtitle": "حدث خطأ ما"
+		}
+	},
+	"appLoader": {
+		"loading": "جارٍ تحميل التطبيق...",
+		"failed": "فشل في تحميل التطبيق"
+	},
+	"consolePanelView": {
+		"title": "وحدة التحكم",
+		"clear": "مسح",
+		"noOutput": "لا توجد مخرجات بعد"
+	},
+	"tabViewManager": {
+		"openProject": "فتح مشروع",
+		"untitled": "بدون عنوان",
+		"newTab": "لسان جديد"
+	},
+	"voiceRecorder": {
+		"listening": "جارٍ الاستماع",
+		"thinking": "جارٍ التفكير",
+		"speaking": "جارٍ التحدّث",
+		"loadingMic": "جارٍ تحميل الميكروفون",
+		"waiting": "بانتظار"
+	},
+	"commandExecutor": {
+		"commandExecuted": "تم تنفيذ الأمر",
+		"commandExecutionFailed": "فشل في تنفيذ الأمر"
+	},
+	"planPicker": {
+		"freeDescription": "مجاني: استخدم الخطة المجانية مع ميزات محدودة. يمكنك أيضًا استضافة الخادم ذاتيًا للوصول غير المحدود إلى ميزات الذكاء الاصطناعي.",
+		"readMoreOpenSource": "قراءة المزيد عن التزامنا بالمصدر المفتوح"
+	},
+	"projectItem": {
+		"projectSettings": "إعدادات المشروع",
+		"selectMultiple": "تحديد متعدّد",
+		"created": "تم الإنشاء: "
+	},
+	"treeView": {
+		"contextMenu": {
+			"openInCanvas": "فتح في مساحة العمل",
+			"openInApp": "فتح في التطبيق",
+			"rename": "إعادة تسمية",
+			"delete": "حذف",
+			"loading": "جارٍ التحميل..."
+		},
+		"toast": {
+			"newFolderCreated": "تم إنشاء مجلد جديد",
+			"failedToCreateFolder": "فشل في إنشاء المجلد",
+			"newFileCreated": "تم إنشاء ملف جديد",
+			"failedToCreateFile": "فشل في إنشاء الملف",
+			"fileRenamed": "تمت إعادة تسمية الملف",
+			"failedToRename": "فشل في إعادة تسمية الملف",
+			"fileDeleted": "تم حذف الملف",
+			"failedToDelete": "فشل في حذف الملف"
+		}
+	},
+	"workspaceExplorer": {
+		"workspacePaused": "مساحة العمل متوقفة حاليًا. يرجى استئنافها للوصول إلى ملفات المشروع.",
+		"startWorkspace": "بدء مساحة العمل",
+		"workspaceSettings": "إعدادات مساحة العمل",
+		"osFeatures": "للتفاعل مع ميزات نظام التشغيل، افتح في عميل سطح المكتب أو قم بإعداد مساحة عمل بعيدة.",
+		"workspaceStarting": "جارٍ بدء مساحة العمل...",
+		"viewProjectContent": "لعرض محتوى المشروع في مساحة العمل، يرجى اختيار مشروع أولاً.",
+		"toast": {
+			"noWorkspace": "لا توجد مساحة عمل لبدء تشغيلها.",
+			"startingWorkspace": "جارٍ بدء مساحة العمل...",
+			"workspaceStarted": "تم بدء مساحة العمل."
+		}
+	},
+	"appExplorer": {
+		"dragTip": "اضغط أو اسحب امتدادًا لفتحه.",
+		"exploreWorkflowsApps": "استكشاف سير العمل/التطبيقات من المجتمع"
+	},
+	"appInfoModalExtra": {
+		"developerSettings": "إعدادات المطوّر",
+		"id": "المعرّف",
+		"version": "الإصدار",
+		"author": "المؤلف",
+		"license": "الترخيص",
+		"website": "الموقع الإلكتروني",
+		"readme": "README",
+		"noReadme": "لا يوجد ملف README متاح",
+		"apiPricing": "أسعار واجهات برمجة التطبيقات",
+		"apiPricingDescription": "يمكنك هنا تعيين تكلفة الأرصدة للاستدعاءات التي تتم إلى واجهات برمجة التطبيقات لتطبيقك. بعد التعيين لا يمكنك تغييرها مرة أخرى.",
+		"endpoint": "نقطة النهاية: ",
+		"cost": "التكلفة: ",
+		"credits": "أرصدة",
+		"perCall": "لكل استدعاء",
+		"noApiPricing": "لم يتم تعيين أسعار لواجهات برمجة التطبيقات لهذا التطبيق.",
+		"appInfo": "معلومات التطبيق",
+		"appID": "معرّف التطبيق",
+		"environmentVariables": "متغيرات البيئة",
+		"addNewVariable": "إضافة متغير جديد",
+		"value": "القيمة",
+		"error": "خطأ",
+		"envKeyEmpty": "لا يمكن أن يكون مفتاح متغير البيئة فارغًا.",
+		"addingVariable": "جارٍ إضافة متغير",
+		"addingVariableDescription": "جارٍ إضافة متغير البيئة {key}.",
+		"variableAdded": "تمت إضافة المتغير",
+		"variableAddedDescription": "تمت إضافة متغير البيئة {key} بنجاح.",
+		"apiPricingSetup": "يمكنك هنا إعداد تكلفة الأرصدة للاستدعاءات التي تتم إلى واجهات برمجة التطبيقات لتطبيقك. بعد التعيين لا يمكنك تغييرها.",
+		"noServerFunctions": "لم يتم العثور على وظائف خادم لهذا التطبيق.",
+		"dangerZone": "منطقة الخطر",
+		"confirmUnpublish": "هل أنت متأكد أنك تريد إلغاء نشر هذا التطبيق؟ لا يمكن التراجع عن هذه العملية.",
+		"unpublish": "إلغاء النشر",
+		"deletingApp": "جارٍ حذف التطبيق",
+		"deletingAppDescription": "جارٍ حذف التطبيق {name}.",
+		"failedToUnpublish": "فشل في إلغاء نشر التطبيق {name}.",
+		"appUnpublished": "تم إلغاء نشر التطبيق",
+		"appUnpublishedDescription": "تم إلغاء نشر التطبيق {name} بنجاح.",
+		"confirmUnpublishButton": "تأكيد إلغاء النشر",
+		"settingEndpointCost": "جارٍ تعيين تكلفة نقطة النهاية",
+		"settingEndpointCostDescription": "جارٍ تعيين تكلفة نقطة النهاية {endpoint}: {cost}.",
+		"failedToSetCost": "فشل في تعيين تكلفة نقطة النهاية {endpoint}. {error}.",
+		"costSet": "تم تعيين التكلفة",
+		"costSetDescription": "تم تعيين تكلفة نقطة النهاية {endpoint} إلى {cost} بنجاح.",
+		"creditsPerCall": "أرصدة لكل استدعاء",
+		"creditsCostPerCall": "تكلفة الأرصدة لكل استدعاء"
+	},
+	"projectPreviewCard": {
+		"workspace": "مساحة العمل:",
+		"undefined": "غير معرّف"
+	},
+	"appPreviewCard": {
+		"requiresWorkspace": "يتطلب هذا التطبيق فتح مساحة عمل ليعمل بشكل صحيح.",
+		"requiresWorkspaceLabel": "يتطلب مساحة عمل",
+		"use": "استخدام",
+		"details": "التفاصيل",
+		"install": "تثبيت",
+		"upgrade": "ترقية",
+		"uninstall": "إلغاء التثبيت",
+		"open": "فتح",
+		"installed": "مثبّت",
+		"outdated": "قديم",
+		"compatible": "متوافق",
+		"extensionInstalled": "تم تثبيت الامتداد",
+		"extensionInstalledDescription": "تم تثبيت الامتداد {id} بنجاح.",
+		"extensionUpgraded": "تم ترقية الامتداد",
+		"extensionUpgradedDescription": "تم ترقية الامتداد {id} بنجاح.",
+		"extensionUninstalled": "تم إلغاء تثبيت الامتداد",
+		"extensionUninstalledDescription": "تم إلغاء تثبيت الامتداد {id} بنجاح.",
+		"mfIncompatible": "هذا التطبيق قديم ولم يعد تطبيق اتحاد وحدات صالحًا. يرجى تحديث التطبيق إلى أحدث إصدار.",
+		"hostMFVersion": "إصدار MF للمضيف:",
+		"appMFVersion": "إصدار MF للتطبيق:",
+		"libIncompatible": "إصدار مكتبة هذا التطبيق قديم وقد لا يعمل بشكل صحيح. يرجى تحديث التطبيق إلى أحدث إصدار.",
+		"hostLibVersion": "إصدار مكتبة المضيف:",
+		"appLibVersion": "إصدار مكتبة التطبيق:",
+		"compatibleTooltip": "إصدار اتحاد الوحدات ({mfVersion}) وإصدار المكتبة ({libVersion}) لهذا التطبيق يطابقان إصدار المضيف. من المفترض أن يعمل التطبيق بشكل صحيح.",
+		"enabled": "مفعّل",
+		"disabled": "معطّل"
+	},
+	"extensionCard": {
+		"extensionUninstalled": "تم إلغاء تثبيت الامتداد",
+		"uninstall": "إلغاء التثبيت",
+		"install": "تثبيت",
+		"update": "تحديث",
+		"enable": "تفعيل",
+		"disable": "تعطيل",
+		"details": "التفاصيل",
+		"unavailable": "غير متاح",
+		"mfVersion": "إصدار MF",
+		"libVersion": "إصدار المكتبة",
+		"updatesAvailable": "تحديثات متاحة"
+	},
+	"nodeHandle": {
+		"ariaLabel": "اضغط على مقبض العقدة لفتح قائمة العقدة",
+		"required": "*مطلوب"
+	},
+	"draggableItem": {
+		"ariaLabel": "اسحب للتحريك"
+	}
+}

@@ -1,0 +1,1037 @@
+{
+	"common": {
+		"signIn": "Войти",
+		"signOut": "Выйти",
+		"save": "Сохранить",
+		"cancel": "Отмена",
+		"close": "Закрыть",
+		"delete": "Удалить",
+		"edit": "Редактировать",
+		"share": "Поделиться",
+		"shareApp": "Поделиться приложением",
+		"create": "Создать",
+		"open": "Открыть",
+		"confirm": "Подтвердить",
+		"update": "Обновить",
+		"publish": "Опубликовать",
+		"add": "Добавить",
+		"enter": "Ввести"
+	},
+	"navigation": {
+		"connectedToCloudAI": "Подключено к Cloud AI",
+		"offline": "Офлайн",
+		"language": {
+			"title": "Язык"
+		}
+	},
+	"settings": {
+		"editorSettings": "Настройки редактора",
+		"generalSettings": "Общие настройки",
+		"aiSettings": "Настройки ИИ",
+		"securitySettings": "Настройки безопасности",
+		"projectHomePath": "Домашний путь проектов",
+		"projectHomeDescription": "Все ваши проекты будут сохранены в этой папке.",
+		"selectProjectHomePath": "Выбрать домашний путь проектов",
+		"environmentVariables": "Переменные окружения (frontend):",
+		"backendEnvVariablesWarning": "Чтобы настроить переменные окружения для backend, используйте настройки приложения расширения.",
+		"addNewVariable": "Добавить новую переменную",
+		"value": "Значение",
+		"restartToApply": "Перезапустите, чтобы применить",
+		"useManagedAIEndpoints": "Использовать управляемые AI‑эндпоинты",
+		"managedCloudDescription": "Мгновенно раскройте всю мощь Pulse Editor в управляемом облаке. Сверхбыстрая помощь ИИ, кроссплатформенная синхронизация и креативные инструменты помогут вам оставаться в состоянии потока.",
+		"byoAPIKeysDescription": "Подключайтесь напрямую к провайдерам ИИ с помощью собственных API‑ключей. Потребуется чуть больше настройки, но вы сохраните полный контроль.",
+		"yourPlan": "Ваш тариф: {plan}",
+		"upgradeManagePlan": "Обновить / управлять тарифом",
+		"credits": "Кредиты: {credits}",
+		"topUpCredits": "Пополнить кредиты",
+		"provider": "Провайдер",
+		"selectProvider": "Выберите провайдера",
+		"model": "Модель",
+		"selectModel": "Выберите модель",
+		"apiKey": "API‑ключ",
+		"apiKeyEncrypted": "API‑ключ зашифрован",
+		"passwordToEditApiKey": "Чтобы отредактировать API‑ключ, временно отключите защиту паролем. После изменений вы сможете включить её снова.",
+		"voiceName": "Имя голоса",
+		"security": "Безопасность",
+		"passwordDescription": "Создайте пароль для шифрования ваших API‑токенов. Если вы его забудете, вам придётся ввести все токены заново.",
+		"encryptApiTokens": "Шифровать API‑токены паролем",
+		"ttlDescription": "API‑токены хранятся в течение указанного времени (в днях). После истечения срока они будут удалены при следующем запуске приложения. Установите -1, чтобы хранить их бессрочно.",
+		"ttlLabel": "TTL (дни)",
+		"ttlError": "Неверный ввод. Используется значение по умолчанию: 14 дней.",
+		"devExtensionSettings": "Настройки расширения для разработки",
+		"fileTypeMapping": "Типы файлов и сопоставление расширений по умолчанию",
+		"noFileTypes": "Типы файлов не найдены. Установите расширения, поддерживающие типы файлов.",
+		"selectDefaultExtension": "Выберите расширение по умолчанию",
+		"extensionDevMode": "Режим разработки расширений",
+		"extensionDevModeDescription": "Загружайте расширения с локального сервера разработки по адресу http://localhost:3030.",
+		"enableExtensionDevMode": "Включить режим разработки расширений",
+		"extensionDevServerURL": "URL сервера разработки расширений",
+		"extensionID": "ID расширения",
+		"extensionVersion": "Версия расширения",
+		"addDevExtension": "Добавить расширение для разработки",
+		"openAsApp": "Открыть как приложение",
+		"extensionDevModeEnabled": "Режим разработки расширений включён",
+		"extensionDevModeEnabledDescription": "Теперь вы можете загружать расширения с локального сервера разработки.",
+		"extensionDevModeDisabled": "Режим разработки расширений выключен",
+		"extensionDevModeDisabledDescription": "Режим разработки расширений был отключён.",
+		"extensionInstalled": "Расширение установлено",
+		"extensionInstalledDescription": "Расширение {id} успешно установлено.",
+		"extensionDefinedSettings": "Настройки, определённые расширением",
+		"pulseEditorTerminal": "Терминал Pulse Editor",
+		"deviceHostAddress": "Адрес хоста устройства"
+	},
+	"subscription": {
+		"title": "Подписка",
+		"plan": "Тарифный план",
+		"creditsRemaining": "Оставшиеся кредиты",
+		"managePlan": "Управлять тарифом"
+	},
+	"planPicker": {
+		"freeDescription": "Бесплатно: используйте бесплатный тариф с основными возможностями. Самостоятельно размещайте рабочие пространства и используйте собственные API‑ключи. Этот вариант навсегда останется бесплатным и с открытым исходным кодом.",
+		"readMoreOpenSource": "Узнать больше о нашем подходе к open‑source"
+	},
+	"account": {
+		"title": "Аккаунт"
+	},
+	"metadata": {
+		"title": "Pulse Editor",
+		"description": "Редактор на базе ИИ для усиления креативности"
+	},
+	"cloudApi": {
+		"directorySelection": {
+			"notSupported": "Выбор директорий не поддерживается на этой платформе"
+		},
+		"fileSelection": {
+			"notSupported": "Выбор файлов не поддерживается на этой платформе"
+		},
+		"fetchProjects": {
+			"failed": "Не удалось получить список проектов"
+		},
+		"listProjects": {
+			"notSignedIn": "Невозможно отобразить проекты. Вы вошли в систему?"
+		},
+		"listPath": {
+			"failed": "Не удалось получить список по пути",
+			"noWorkspace": "Невозможно отобразить путь: рабочее пространство не выбрано"
+		},
+		"createFolder": {
+			"failed": "Не удалось создать папку",
+			"noWorkspace": "Невозможно создать папку: рабочее пространство не выбрано"
+		},
+		"createFile": {
+			"failed": "Не удалось создать файл",
+			"noWorkspace": "Невозможно создать файл: рабочее пространство не выбрано"
+		},
+		"renameFile": {
+			"failed": "Не удалось переименовать файл",
+			"noWorkspace": "Невозможно переименовать файл: рабочее пространство не выбрано"
+		},
+		"deleteFile": {
+			"failed": "Не удалось удалить файл",
+			"noWorkspace": "Невозможно удалить файл: рабочее пространство не выбрано"
+		},
+		"checkPath": {
+			"failed": "Не удалось проверить путь",
+			"noWorkspace": "Невозможно проверить путь: рабочее пространство не выбрано"
+		},
+		"readFile": {
+			"failed": "Не удалось прочитать файл",
+			"noWorkspace": "Невозможно прочитать файл: рабочее пространство не выбрано"
+		},
+		"writeFile": {
+			"failed": "Не удалось записать файл",
+			"noWorkspace": "Невозможно записать файл: рабочее пространство не выбрано"
+		},
+		"copyFiles": {
+			"failed": "Не удалось скопировать файлы",
+			"noWorkspace": "Невозможно скопировать файлы: рабочее пространство не выбрано"
+		},
+		"installationPath": {
+			"failed": "Не удалось получить путь установки",
+			"noWorkspace": "Невозможно получить путь установки: рабочее пространство не выбрано"
+		},
+		"createTerminal": {
+			"failed": "Не удалось создать терминал",
+			"noWorkspace": "Невозможно создать терминал: рабочее пространство не выбрано"
+		}
+	},
+	"homeView": {
+		"title": "Главная",
+		"vibeCode": {
+			"title": "Что вы хотите создать?",
+			"newApp": "Создать приложение с помощью Vibe Code",
+			"blog": "Создать блог с помощью Vibe Code",
+			"portfolio": "Создать портфолио‑сайт с помощью Vibe Code",
+			"weatherApp": "Создать погодное приложение с помощью Vibe Code",
+			"chatApp": "Создать приложение‑чат с помощью Vibe Code",
+			"socialMediaApp": "Создать приложение соцсети с помощью Vibe Code",
+			"fitnessTracker": "Создать фитнес‑трекер с помощью Vibe Code",
+			"recipeApp": "Создать приложение рецептов с помощью Vibe Code"
+		},
+		"createWorkflow": {
+			"button": "Создать рабочий процесс"
+		},
+		"exploreMarketplace": {
+			"button": "Исследовать маркетплейс"
+		},
+		"signIn": {
+			"message": "Войдите, чтобы получить больше возможностей",
+			"button": "Войти"
+		},
+		"myProjects": {
+			"tab": "Мои проекты",
+			"title": "Мои проекты"
+		},
+		"myApps": {
+			"tab": "Мои приложения",
+			"title": "Мои приложения"
+		},
+		"featuredWorkflows": {
+			"tab": "Рекомендуемые рабочие процессы",
+			"title": "Рекомендуемые рабочие процессы"
+		},
+		"featuredApps": {
+			"tab": "Рекомендуемые приложения",
+			"title": "Рекомендуемые приложения"
+		},
+		"learnMore": "Подробнее",
+		"myAppsAndProjects": "Мои приложения и проекты",
+		"yourResources": "Ваши ресурсы",
+		"cloudWorkspaces": "Облачные рабочие пространства"
+	},
+	"openInProjectModal": {
+		"title": "Открыть в проекте",
+		"openExisting": "Открыть существующий",
+		"newProject": "Новый проект",
+		"projectName": "Название проекта",
+		"projectNamePlaceholder": "Введите название проекта",
+		"projectLocation": "Расположение проекта",
+		"projectLocationPlaceholder": "Выберите расположение проекта",
+		"selectLocation": "Выбрать расположение",
+		"createInside": "Создать внутри",
+		"moreOptionsComingSoon": "Скоро появятся дополнительные параметры...",
+		"create": "Создать",
+		"open": "Открыть",
+		"selectProjectFolder": "Выберите папку проекта",
+		"selectProjectFile": "Выберите файл проекта",
+		"workspaceRequired": "Чтобы это приложение / рабочий процесс работали корректно, необходимо открыть рабочее пространство.",
+		"selectWorkspace": "Выбрать рабочее пространство",
+		"localComputer": "Локальный компьютер",
+		"workspaceName": "Название рабочего пространства",
+		"workspaceSpecs": "Характеристики рабочего пространства",
+		"storageGB": "Хранилище (ГБ)",
+		"moreToCome": "Скоро будет больше",
+		"gettingReady": "Подготовка...",
+		"toast": {
+			"preparingWorkspace": {
+				"title": "Подготовка рабочего пространства",
+				"description": "Подождите, пока рабочее пространство будет готово..."
+			},
+			"failedToOpen": {
+				"title": "Не удалось открыть",
+				"description": "Проект не выбран."
+			},
+			"appOpened": {
+				"title": "Приложение открыто",
+				"description": "Приложение успешно открыто."
+			},
+			"workflowOpened": {
+				"title": "Рабочий процесс открыт",
+				"description": "Рабочий процесс успешно открыт."
+			},
+			"noAppOrWorkflow": "Нет приложения или рабочего процесса для открытия.",
+			"unableToCreate": {
+				"title": "Невозможно создать рабочее пространство",
+				"unknownPlatform": "Неизвестная платформа.",
+				"nameRequired": "Требуется имя рабочего пространства."
+			},
+			"creatingWorkspace": {
+				"title": "Создание рабочего пространства",
+				"description": "Создаём рабочее пространство {name} со следующими параметрами: {cpu} vCPU, {ram} RAM, {storage} хранилища."
+			},
+			"workspaceCreated": {
+				"title": "Рабочее пространство создано",
+				"description": "Рабочее пространство {name} успешно создано."
+			},
+			"errorCreating": {
+				"title": "Ошибка при создании рабочего пространства"
+			}
+		},
+		"errors": {
+			"noName": "Введите название проекта",
+			"noLocation": "Выберите расположение проекта"
+		}
+	},
+	"quickVibeCodeSetupModal": {
+		"title": "Быстрая настройка Vibe Code",
+		"vibeCodeProject": "Проект Vibe Code",
+		"projectName": "Название проекта",
+		"gettingReady": "Готовим настройку...",
+		"appOpened": {
+			"title": "Приложение открыто",
+			"description": "Приложение успешно открыто."
+		},
+		"noAppToOpen": "Нет приложения для открытия."
+	},
+	"passwordModal": {
+		"title": "Введите пароль",
+		"subtitle": "Для этого действия требуется аутентификация",
+		"password": "Пароль",
+		"passwordPlaceholder": "Введите пароль",
+		"resetConfig": {
+			"button": "Сбросить настройки",
+			"title": "Сброс настроек",
+			"message": "Вы уверены, что хотите сбросить все настройки? Это действие нельзя отменить."
+		},
+		"validation": {
+			"required": "Пароль обязателен для заполнения"
+		},
+		"confirm": {
+			"button": "Подтвердить"
+		}
+	},
+	"openSourceInfoModal": {
+		"title": "Open Source",
+		"description": "Мы поддерживаем открытое программное обеспечение, потому что верим, что прозрачность рождает доверие, инновации и сотрудничество. Наша миссия — предоставить разработчикам по всему миру бесплатный доступ к инструментам, которые позволяют создавать и экспериментировать без ограничений.",
+		"pulseEditorCore": "Ядро Pulse Editor",
+		"officialApps": "Официальные приложения",
+		"opensource": "Открытый исходный код",
+		"cloudServices": "Одновременно мы предоставляем облачные сервисы и маркетплейс, чтобы вы могли легко управлять проектами и делиться ими с сообществом, не думая об инфраструктуре и backend.",
+		"loveWhatWeDo": "Если вам нравится наша работа, поставьте звёздочку на GitHub или скачайте мобильное приложение в Google Play, чтобы поддержать нас!",
+		"giveUsAStar": "Поставить звёздочку",
+		"googlePlay": "Google Play"
+	},
+	"commandViewer": {
+		"chatInput": {
+			"placeholder": "Введите команду или задайте вопрос",
+			"emptyDescription": "Введите такие команды, как 'add', 'remove', 'edit', чтобы выполнять действия, или задайте вопрос",
+			"emptyDescriptionWithCommand": "Введите команду с '@', чтобы выполнить действие, или задайте вопрос",
+			"pressEnter": "Нажмите Enter для отправки",
+			"pressEnterToExecute": "Нажмите Enter для выполнения"
+		},
+		"send": "Отправить",
+		"you": "Вы:"
+	},
+	"projectIndicator": {
+		"closeProject": {
+			"menuItem": "Закрыть проект"
+		},
+		"projectSettings": {
+			"menuItem": "Настройки проекта"
+		}
+	},
+	"editorToolbar": {
+		"runWorkflow": {
+			"tooltip": "Запустить рабочий процесс"
+		},
+		"openConsole": {
+			"tooltip": "Открыть консоль агента"
+		},
+		"voiceChat": {
+			"tooltip": "Голосовой чат с агентом"
+		},
+		"artifacts": {
+			"tooltip": "Артефакты",
+			"wip": "Артефакты (в разработке)"
+		},
+		"installedAgents": {
+			"tooltip": "Установленные агенты"
+		},
+		"marketplace": {
+			"tooltip": "Маркетплейс"
+		},
+		"settings": {
+			"tooltip": "Настройки"
+		}
+	},
+	"publishWorkflowModal": {
+		"title": "Публикация рабочего процесса",
+		"description": "Опубликуйте рабочий процесс, чтобы поделиться им с другими",
+		"workflowName": "Название рабочего процесса",
+		"workflowNamePlaceholder": "Введите название рабочего процесса",
+		"workflowDescription": "Описание",
+		"workflowDescriptionPlaceholder": "Введите описание рабочего процесса",
+		"workflowVersion": "Версия рабочего процесса",
+		"workflowVersionPlaceholder": "Введите версию рабочего процесса",
+		"publish": "Опубликовать",
+		"publishing": "Публикация рабочего процесса",
+		"publishingDescription": "Публикация рабочего процесса...",
+		"toast": {
+			"published": {
+				"title": "Рабочий процесс опубликован",
+				"description": "Рабочий процесс успешно опубликован."
+			},
+			"failed": {
+				"title": "Не удалось опубликовать рабочий процесс"
+			}
+		}
+	},
+	"projectSettingsModal": {
+		"title": "Настройки проекта",
+		"projectName": "Название проекта",
+		"projectPath": "Путь к проекту",
+		"update": "Обновить",
+		"create": "Создать",
+		"delete": "Удалить",
+		"toast": {
+			"noProjectSelected": "Проект не выбран."
+		}
+	},
+	"editorSettingsModal": {
+		"title": "Настройки редактора",
+		"projectsFolder": {
+			"description": "Все ваши проекты будут сохранены в этой папке.",
+			"selectFolder": "Выбрать папку",
+			"selectProjectHomePath": "Выбрать домашний путь проектов"
+		},
+		"environmentVariables": {
+			"frontend": "Переменные окружения (frontend):",
+			"instructions": "Указывайте KEY=VALUE по одной паре в строке",
+			"backendWarning": "Чтобы настроить переменные окружения для backend, используйте настройки приложения расширения.",
+			"addNewVariable": "Добавить новую переменную",
+			"value": "Значение",
+			"errorEmptyKey": {
+				"title": "Ошибка",
+				"description": "Ключ переменной окружения не может быть пустым."
+			}
+		},
+		"customOnnxWasmCdnUrl": {
+			"label": "Пользовательский URL CDN для onnx-wasm",
+			"placeholder": "Введите пользовательский URL CDN для onnx-wasm"
+		},
+		"restartToApply": "Перезапустите, чтобы применить",
+		"aiSettings": {
+			"title": "Настройки ИИ",
+			"useManagedEndpoints": "Использовать управляемые AI‑эндпоинты",
+			"managedMessage": "Мгновенно раскройте всю мощь Pulse Editor в управляемом облаке. Сверхбыстрая помощь ИИ, кроссплатформенная синхронизация и креативные инструменты помогут вам оставаться в состоянии потока.",
+			"byokMessage": "Подключайтесь напрямую к провайдерам ИИ с помощью собственных API‑ключей. Потребуется чуть больше настройки, но вы сохраните полный контроль.",
+			"yourPlan": "Ваш тариф:",
+			"upgradeManagePlan": "Обновить / управлять тарифом",
+			"credits": "Кредиты:",
+			"topUpCredits": "Пополнить кредиты",
+			"stt": "STT",
+			"llm": "LLM",
+			"tts": "TTS",
+			"imageGen": "Генерация изображений",
+			"videoGen": "Генерация видео",
+			"provider": "Провайдер",
+			"providerPlaceholder": "Выберите провайдера",
+			"model": "Модель",
+			"modelPlaceholder": "Выберите модель",
+			"voiceName": "Имя голоса",
+			"apiKey": "API‑ключ",
+			"apiKeyEncrypted": "API‑ключ зашифрован",
+			"apiKeyTooltip": "Чтобы отредактировать API‑ключ, временно отключите защиту паролем. После изменений вы сможете включить её снова."
+		},
+		"security": {
+			"title": "Безопасность",
+			"encryptApiTokens": "Шифровать API‑токены паролем",
+			"encryptDescription": "Создайте пароль для шифрования ваших API‑токенов. Если вы его забудете, вам придётся ввести все токены заново.",
+			"ttlLabel": "TTL (дни)",
+			"ttlDescription": "API‑токены хранятся в течение указанного времени (в днях). После истечения срока они будут удалены при следующем запуске приложения. Установите -1, чтобы хранить их бессрочно.",
+			"ttlError": {
+				"title": "Ошибка",
+				"description": "Неверный ввод. Используется значение по умолчанию: 14 дней."
+			}
+		},
+		"devExtension": {
+			"title": "Настройки расширения для разработки",
+			"fileTypeMapping": "Типы файлов и сопоставление расширений по умолчанию",
+			"noFileTypes": "Типы файлов не найдены. Установите расширения, поддерживающие типы файлов.",
+			"selectDefaultExtension": "Выберите расширение по умолчанию",
+			"extensionDevMode": "Режим разработки расширений",
+			"extensionDevModeDescription": "Загружайте расширения с локального сервера разработки по адресу http://localhost:3030.",
+			"enableExtensionDevMode": "Включить режим разработки расширений",
+			"extensionDevServerUrl": "URL сервера разработки расширений",
+			"extensionId": "ID расширения",
+			"extensionIdPlaceholder": "(extension_id)",
+			"extensionVersion": "Версия расширения",
+			"extensionVersionPlaceholder": "(version)",
+			"addDevExtension": "Добавить расширение для разработки",
+			"openAsApp": "Открыть как приложение",
+			"toast": {
+				"devModeEnabled": {
+					"title": "Режим разработки расширений включён",
+					"description": "Теперь вы можете загружать расширения с локального сервера разработки."
+				},
+				"devModeDisabled": {
+					"title": "Режим разработки расширений выключен",
+					"description": "Режим разработки расширений был отключён."
+				},
+				"extensionInstalled": {
+					"title": "Расширение установлено",
+					"description": "Расширение {id} успешно установлено."
+				},
+				"enableDevMode": "Включить режим разработки расширений",
+				"addDevExtension": "Добавить расширение для разработки",
+				"openAsApp": "Открыть как приложение",
+				"extensionDevServerURL": "URL сервера разработки расширений",
+				"extensionID": "ID расширения",
+				"extensionVersion": "Версия расширения",
+				"selectDefaultExtension": "Выберите расширение по умолчанию",
+				"noFileTypes": "Типы файлов не найдены. Установите расширения, поддерживающие типы файлов.",
+				"fileTypeMapping": "Типы файлов и сопоставление расширений по умолчанию",
+				"deviceHostAddress": "Адрес хоста устройства"
+			}
+		},
+		"extensionDefined": {
+			"title": "Настройки, определённые расширением",
+			"pulseEditorTerminal": "Терминал Pulse Editor",
+			"deviceHostAddress": "Адрес хоста устройства"
+		}
+	},
+	"marketplaceModal": {
+		"title": "Маркетплейс сообщества",
+		"tabs": {
+			"featured": "Рекомендуемые",
+			"featuredDescription": "Рекомендуемые приложения и рабочие процессы от сообщества",
+			"workflows": "Рабочие процессы",
+			"workflowsDescription": "Просматривайте рабочие процессы, которыми делится сообщество",
+			"apps": "Приложения",
+			"appsDescription": "Обзор федеративных приложений Pulse, созданных сообществом",
+			"installed": "Установленные",
+			"installedApps": "Установленные приложения",
+			"installedAgents": "Установленные агенты",
+			"discover": "Открыть",
+			"discoverApps": "Найти приложения",
+			"discoverAgents": "Найти агентов"
+		}
+	},
+	"loginModal": {
+		"title": "Вход",
+		"connectToRemote": "Подключиться к удалённому экземпляру",
+		"login": "Войти",
+		"remoteUrl": "Удалённый URL",
+		"remoteUrlPlaceholder": "Введите удалённый URL",
+		"remotePassword": "Пароль",
+		"remotePasswordPlaceholder": "Введите пароль",
+		"connect": "Подключиться",
+		"localWorkspaceNotAvailable": "Локальное рабочее пространство недоступно в браузере. Используйте десктопный / мобильный клиент или подключитесь к удалённому экземпляру.",
+		"continueAsGuest": "Продолжить как гость",
+		"continueOffline": "Продолжить офлайн"
+	},
+	"agentConfigModal": {
+		"title": "Установленные агенты",
+		"tabs": {
+			"agents": "Агенты",
+			"agentsDescription": "Управление установленными агентами",
+			"providers": "Провайдеры",
+			"providersDescription": "Управление провайдерами ИИ"
+		},
+		"installedAgents": "Установленные агенты",
+		"availableAgents": "Доступные агенты",
+		"noAgentsInstalled": "Агенты не установлены",
+		"noAgentsAvailable": "Нет доступных агентов",
+		"edit": "Редактировать",
+		"delete": "Удалить",
+		"createNewAgent": {
+			"title": "Создать нового агента",
+			"description": "Добавьте базового чат‑агента в редактор.",
+			"button": "Создать нового агента"
+		},
+		"form": {
+			"name": "Имя",
+			"namePlaceholder": "Введите имя агента",
+			"version": "Версия",
+			"versionPlaceholder": "Введите версию агента",
+			"description": "Описание",
+			"descriptionPlaceholder": "Введите описание агента",
+			"systemPrompt": "Системный промпт",
+			"systemPromptPlaceholder": "Введите промпт агента",
+			"provider": "Провайдер",
+			"providerPlaceholder": "Введите провайдера",
+			"modelName": "Имя модели",
+			"modelNamePlaceholder": "Введите имя модели",
+			"model": "Модель",
+			"modelPlaceholder": "Выберите модель",
+			"temperature": "Температура",
+			"contextLength": "Длина контекста",
+			"contextLengthPlaceholder": "Введите длину контекста"
+		},
+		"addAgent": "Добавить агента",
+		"installedBy": "Установлено расширением {extension} (издатель {publisher})",
+		"llmConfig": "Настройки LLM:",
+		"toast": {
+			"agentDeleted": "Агент удалён",
+			"agentAdded": "Добавлен новый агент"
+		},
+		"llmUsage": {
+			"title": "Использование LLM агентами",
+			"provider": "Провайдер:",
+			"usedModels": "Используемые модели:",
+			"usedByAgents": "Использующие агенты:",
+			"totalUsageByAgents": "Всего агентов:",
+			"agent": "Агент",
+			"totalCost": "Общая стоимость",
+			"noData": "Нет данных об использовании",
+			"apiKey": "API‑ключ",
+			"apiKeyNotVisible": "После ввода API‑ключ не будет отображаться."
+		}
+	},
+	"appInfoModal": {
+		"title": "Информация о приложении",
+		"developerSettings": "Настройки разработчика",
+		"loading": "Загрузка...",
+		"metadata": {
+			"id": "ID",
+			"version": "Версия",
+			"author": "Автор",
+			"license": "Лицензия",
+			"website": "Веб‑сайт",
+			"readme": "README"
+		},
+		"apiPricing": {
+			"title": "Цены API",
+			"description": "Структура ценообразования API этого приложения:",
+			"endpoint": "Эндпоинт:",
+			"cost": "Стоимость:",
+			"creditsPerCall": "кредитов за вызов",
+			"perCall": "/ вызов",
+			"noApiPricing": "Для этого приложения не настроены цены API.",
+			"noServerFunctions": "В этом приложении не найдено серверных функций.",
+			"costPlaceholder": "Стоимость в кредитах за один вызов"
+		},
+		"developerMode": {
+			"title": "Настройки разработчика",
+			"appInfo": "Информация о приложении",
+			"appId": "ID приложения",
+			"environmentVariables": "Переменные окружения",
+			"addNewVariable": "Добавить новую переменную",
+			"value": "Значение",
+			"localServer": "Локальный сервер",
+			"localServerPlaceholder": "Введите URL локального сервера (например, http://localhost:3000)",
+			"envInstructions": "Указывайте KEY=VALUE по одной паре в строке",
+			"testMode": "Тестовый режим",
+			"testModeDescription": "Включите тестовый режим, чтобы использовать локальный сервер и переменные окружения",
+			"toast": {
+				"addingVariable": {
+					"title": "Добавление переменной",
+					"description": "Добавляем переменную окружения {key}."
+				},
+				"variableAdded": {
+					"title": "Переменная добавлена",
+					"description": "Переменная окружения {key} успешно добавлена."
+				},
+				"errorEmptyKey": {
+					"title": "Ошибка",
+					"description": "Ключ переменной окружения не может быть пустым."
+				},
+				"settingCost": {
+					"title": "Настройка стоимости эндпоинта",
+					"description": "Устанавливаем стоимость {cost} для эндпоинта {endpoint}."
+				},
+				"costSet": {
+					"title": "Стоимость установлена",
+					"description": "Стоимость эндпоинта {endpoint} установлена на {cost}."
+				},
+				"costSetError": {
+					"title": "Ошибка",
+					"description": "Не удалось установить стоимость для эндпоинта {endpoint}. {error}."
+				},
+				"deletingApp": {
+					"title": "Удаление приложения",
+					"description": "Удаляем приложение {name}."
+				},
+				"appUnpublished": {
+					"title": "Приложение снято с публикации",
+					"description": "Приложение {name} успешно снято с публикации."
+				},
+				"unpublishError": {
+					"title": "Ошибка",
+					"description": "Не удалось снять с публикации приложение {name}."
+				}
+			}
+		},
+		"dangerZone": {
+			"title": "Опасная зона",
+			"unpublish": "Снять с публикаци",
+			"unpublishConfirm": "Вы уверены, что хотите снять это приложение с публикации? Это действие нельзя отменить.",
+			"confirmUnpublish": "Подтвердить снятие с публикации",
+			"cancel": "Отмена",
+			"deleteApp": "Удалить приложение",
+			"deleteAppDescription": "Полностью удалить это приложение из вашего аккаунта",
+			"uninstallApp": "Удалить установку приложения",
+			"uninstallAppDescription": "Удалить это приложение из списка установленных"
+		}
+	},
+	"navSideMenu": {
+		"home": {
+			"label": "Главная",
+			"icon": "home"
+		},
+		"projectHome": {
+			"label": "Домашняя папка проектов",
+			"icon": "folder",
+			"notSet": "Домашний путь проектов ещё не настроен. Укажите его в настройках.",
+			"select": {
+				"button": "Выбрать домашний путь проектов"
+			}
+		}
+	},
+	"fileMenu": {
+		"title": "Файл",
+		"newProject": "Новый проект",
+		"openProject": "Открыть проект"
+	},
+	"viewMenu": {
+		"title": "Вид",
+		"commandViewer": "Просмотр команд",
+		"console": "Консоль",
+		"importWorkflow": {
+			"title": "Импортировать рабочий процесс",
+			"invalidFile": "Неверный файл рабочего процесса",
+			"readError": "Ошибка чтения файла рабочего процесса"
+		}
+	},
+	"fsExplorer": {
+		"newFolder": "Новая папка",
+		"folderName": "Имя папки",
+		"newFile": "Новый файл",
+		"fileName": "Имя файла",
+		"selectOneFolder": "Выберите только одну папку, чтобы создать новую папку внутри неё.",
+		"selectOneFolderForFile": "Выберите только одну папку, чтобы создать в ней новый файл.",
+		"emptyContent": "Нет содержимого. Создайте новый файл, чтобы начать."
+	},
+	"projectExplorer": {
+		"title": "Проекты",
+		"newProject": {
+			"button": "Новый проект"
+		},
+		"signInMessage": "Чтобы увидеть проекты, войдите в систему или откройте локальные проекты в десктопном клиенте."
+	},
+	"viewArea": {
+		"unknownViewType": "Неизвестный тип представления",
+		"noViewSelected": "Представление не выбрано"
+	},
+	"projectView": {
+		"title": "Проект",
+		"createWorkflow": {
+			"button": "Создать рабочий процесс"
+		},
+		"exploreMarketplace": {
+			"button": "Исследовать маркетплейс"
+		}
+	},
+	"dnd": {
+		"openApp": {
+			"failed": "Не удалось открыть приложение",
+			"invalidData": "Недопустимые данные приложения"
+		},
+		"linkApp": {
+			"failed": "Не удалось привязать приложение",
+			"invalidData": "Недопустимые данные приложения"
+		},
+		"openFile": {
+			"failed": "Не удалось открыть файл",
+			"invalidData": "Недопустимые данные файла"
+		},
+		"invalidTarget": {
+			"cannotDropFile": "Нельзя перетащить файл сюда",
+			"somethingWrong": "Что‑то пошло не так. Попробуйте ещё раз.",
+			"cannotDrop": "Невозможно опустить сюда"
+		}
+	},
+	"workspaceSettingsModal": {
+		"title": "Настройки рабочего пространства",
+		"selectWorkspace": "Выбрать рабочее пространство",
+		"localComputer": "Локальный компьютер",
+		"createNew": "Создать новое",
+		"workspaceName": "Название рабочего пространства",
+		"workspaceSpecs": "Характеристики рабочего пространства",
+		"storageGB": "Хранилище (ГБ)",
+		"moreToCome": "Скоро будет больше",
+		"useWorkspace": "Использовать рабочее пространство",
+		"exitWorkspace": "Выйти из рабочего пространства",
+		"start": "Запустить",
+		"stop": "Остановить",
+		"update": "Обновить",
+		"delete": "Удалить",
+		"create": "Создать",
+		"unpublishWorkspace": "Снять рабочее пространство с публикации",
+		"toast": {
+			"unknownPlatform": "Неизвестная платформа.",
+			"workspaceNotAvailable": "Рабочее пространство недоступно.",
+			"workspaceNameRequired": "Требуется имя рабочего пространства.",
+			"workspaceExists": "Рабочее пространство уже существует. Вместо этого обновите его.",
+			"updatingWorkspace": {
+				"title": "Обновление рабочего пространства",
+				"description": "Обновляем рабочее пространство {name}."
+			},
+			"workspaceUpdated": {
+				"title": "Рабочее пространство обновлено",
+				"description": "Рабочее пространство {name} успешно обновлено."
+			},
+			"deletingWorkspace": {
+				"title": "Удаление рабочего пространства",
+				"description": "Удаляем рабочее пространство {name}."
+			},
+			"workspaceDeleted": {
+				"title": "Рабочее пространство удалено",
+				"description": "Рабочее пространство {name} успешно удалено."
+			},
+			"errorDeleting": {
+				"title": "Ошибка при удалении рабочего пространства"
+			},
+			"creatingWorkspace": {
+				"title": "Создание рабочего пространства",
+				"description": "Создаём рабочее пространство {name} со следующими параметрами: {cpu} vCPU, {ram} RAM, {storage} хранилища."
+			},
+			"workspaceCreated": {
+				"title": "Рабочее пространство создано",
+				"description": "Рабочее пространство {name} успешно создано."
+			},
+			"errorCreating": {
+				"title": "Ошибка при создании рабочего пространства"
+			},
+			"stoppingWorkspace": {
+				"title": "Остановка рабочего пространства",
+				"description": "Останавливаем рабочее пространство {name}."
+			},
+			"workspaceStopped": {
+				"title": "Рабочее пространство остановлено",
+				"description": "Рабочее пространство {name} успешно остановлено."
+			},
+			"startingWorkspace": {
+				"title": "Запуск рабочего пространства",
+				"description": "Запускаем рабочее пространство {name}."
+			},
+			"workspaceStarted": {
+				"title": "Рабочее пространство запущено",
+				"description": "Рабочее пространство {name} успешно запущено."
+			}
+		}
+	},
+	"qrDisplay": {
+		"title": "Сканируйте QR‑код",
+		"download": "Скачать",
+		"loadingError": "Загружаем QR‑код. Пожалуйста, подождите."
+	},
+	"sharingModal": {
+		"title": "Общий доступ к рабочему пространству {name}",
+		"visibility": "Видимость",
+		"visibilityPlaceholder": "Выберите видимость",
+		"inviteCode": "Код приглашения",
+		"selectVisibility": "Выберите видимость, чтобы увидеть параметры общего доступа.",
+		"workspacePrivate": "Это рабочее пространство приватно.",
+		"tabs": {
+			"qrCode": "QR‑код",
+			"qrCodeDescription": "Делитесь рабочим пространством с помощью QR‑кода",
+			"url": "URL",
+			"urlDescription": "Делитесь рабочим пространством по URL"
+		},
+		"qrCode": {
+			"description": "Используйте этот QR‑код, чтобы поделиться рабочим пространством"
+		},
+		"url": {
+			"description": "Используйте этот URL, чтобы поделиться рабочим пространством",
+			"copy": "Копировать"
+		},
+		"toast": {
+			"fetchError": "Не удалось получить информацию об общем доступе к расширению",
+			"urlCopied": "URL скопирован в буфер обмена"
+		}
+	},
+	"workflowPreviewCard": {
+		"open": "Открыть",
+		"clone": "Клонировать"
+	},
+	"appGallery": {
+		"title": "Приложения",
+		"noApps": "Приложения не найдены"
+	},
+	"workflowGallery": {
+		"title": "Рабочие процессы",
+		"noWorkflows": "Рабочие процессы не найдены"
+	},
+	"featuredGallery": {
+		"title": "Рекомендуемые"
+	},
+	"statusScreens": {
+		"welcome": {
+			"title": "Добро пожаловать в Pulse Editor",
+			"subtitle": "Создайте новый проект или откройте существующий, чтобы начать",
+			"taglineLine1": "Ваша следующая операционная система на базе ИИ, созданная на основе",
+			"taglineLine2": "Приложений и рабочих процессов Vibe Coded"
+		},
+		"wip": {
+			"title": "В разработке",
+			"subtitle": "Эта функция появится в ближайшее время"
+		},
+		"loading": {
+			"title": "Загрузка...",
+			"subtitle": "Пожалуйста, подождите"
+		},
+		"notAuthorized": {
+			"title": "Нет доступа",
+			"subtitle": "У вас нет прав для доступа к этому ресурсу"
+		},
+		"error": {
+			"title": "Ошибка",
+			"subtitle": "Произошла ошибка"
+		}
+	},
+	"appLoader": {
+		"loading": "Загрузка приложения...",
+		"failed": "Не удалось загрузить приложение"
+	},
+	"consolePanelView": {
+		"title": "Консоль",
+		"clear": "Очистить",
+		"noOutput": "Вывод пока отсутствует"
+	},
+	"tabViewManager": {
+		"openProject": "Открыть проект",
+		"untitled": "Безымянный",
+		"newTab": "Новая вкладка"
+	},
+	"voiceRecorder": {
+		"listening": "Прослушивание",
+		"thinking": "Обработка",
+		"speaking": "Ответ",
+		"loadingMic": "Загрузка микрофона",
+		"waiting": "Ожидание"
+	},
+	"commandExecutor": {
+		"commandExecuted": "Команда выполнена",
+		"commandExecutionFailed": "Не удалось выполнить команду"
+	},
+	"projectItem": {
+		"projectSettings": "Настройки проекта",
+		"selectMultiple": "Множественный выбор",
+		"created": "Создан: "
+	},
+	"treeView": {
+		"contextMenu": {
+			"openInCanvas": "Открыть на холсте",
+			"openInApp": "Открыть в приложении",
+			"rename": "Переименовать",
+			"delete": "Удалить",
+			"loading": "Загрузка..."
+		},
+		"toast": {
+			"newFolderCreated": "Создана новая папка",
+			"failedToCreateFolder": "Не удалось создать папку",
+			"newFileCreated": "Создан новый файл",
+			"failedToCreateFile": "Не удалось создать файл",
+			"fileRenamed": "Файл переименован",
+			"failedToRename": "Не удалось переименовать файл",
+			"fileDeleted": "Файл удалён",
+			"failedToDelete": "Не удалось удалить файл"
+		}
+	},
+	"workspaceExplorer": {
+		"workspacePaused": "Рабочее пространство сейчас приостановлено. Чтобы получить доступ к файлам проекта, возобновите работу пространства.",
+		"startWorkspace": "Запустить рабочее пространство",
+		"workspaceSettings": "Настройки рабочего пространства",
+		"osFeatures": "Чтобы использовать функции ОС, откройте редактор в десктопном клиенте или настройте удалённое рабочее пространство.",
+		"workspaceStarting": "Запускаем рабочее пространство...",
+		"viewProjectContent": "Чтобы увидеть содержимое проекта в рабочем пространстве, сначала выберите проект.",
+		"toast": {
+			"noWorkspace": "Нет рабочего пространства, которое можно запустить.",
+			"startingWorkspace": "Запускаем рабочее пространство...",
+			"workspaceStarted": "Рабочее пространство запущено."
+		}
+	},
+	"appExplorer": {
+		"dragTip": "Нажмите или перетащите, чтобы открыть расширение.",
+		"exploreWorkflowsApps": "Исследовать рабочие процессы и приложения сообщества"
+	},
+	"appInfoModalExtra": {
+		"developerSettings": "Настройки разработчика",
+		"id": "ID",
+		"version": "Версия",
+		"author": "Автор",
+		"license": "Лицензия",
+		"website": "Веб‑сайт",
+		"readme": "README",
+		"noReadme": "README отсутствует",
+		"apiPricing": "Цены API",
+		"apiPricingDescription": "Структура ценообразования API этого приложения:",
+		"endpoint": "Эндпоинт:",
+		"cost": "Стоимость:",
+		"credits": "Кредиты",
+		"perCall": "/ вызов",
+		"noApiPricing": "Для этого приложения не настроены цены API.",
+		"appInfo": "Информация о приложении",
+		"appID": "ID приложения",
+		"environmentVariables": "Переменные окружения",
+		"addNewVariable": "Добавить новую переменную",
+		"value": "Значение",
+		"error": "Ошибка",
+		"envKeyEmpty": "Ключ переменной окружения не может быть пустым.",
+		"addingVariable": "Добавление переменной",
+		"addingVariableDescription": "Добавляем переменную окружения {key}.",
+		"variableAdded": "Переменная добавлена",
+		"variableAddedDescription": "Переменная окружения {key} успешно добавлена.",
+		"apiPricingSetup": "Здесь вы можете задать стоимость в кредитах за вызовы API вашего приложения. После установки изменить стоимость будет невозможно.",
+		"noServerFunctions": "В этом приложении не найдено серверных функций.",
+		"dangerZone": "Опасная зона",
+		"confirmUnpublish": "Вы уверены, что хотите снять это приложение с публикации? Это действие нельзя отменить.",
+		"unpublish": "Снять с публикаци",
+		"deletingApp": "Удаление приложения",
+		"deletingAppDescription": "Удаляем приложение {name}.",
+		"failedToUnpublish": "Не удалось снять с публикации приложение {name}.",
+		"appUnpublished": "Приложение снято с публикации",
+		"appUnpublishedDescription": "Приложение {name} успешно снято с публикации.",
+		"confirmUnpublishButton": "Подтвердить снятие с публикации",
+		"settingEndpointCost": "Настройка стоимости эндпоинта",
+		"settingEndpointCostDescription": "Устанавливаем стоимость {cost} для эндпоинта {endpoint}.",
+		"failedToSetCost": "Не удалось установить стоимость для эндпоинта {endpoint}. {error}.",
+		"costSet": "Стоимость установлена",
+		"costSetDescription": "Стоимость эндпоинта {endpoint} установлена на {cost}.",
+		"creditsPerCall": "Кредитов за один вызов",
+		"creditsCostPerCall": "Стоимость в кредитах за один вызов"
+	},
+	"projectPreviewCard": {
+		"workspace": "Рабочее пространство:",
+		"undefined": "Не определено"
+	},
+	"appPreviewCard": {
+		"requiresWorkspace": "Для корректной работы этого приложения необходимо открыть рабочее пространство.",
+		"requiresWorkspaceLabel": "Требуется рабочее пространство",
+		"use": "Использовать",
+		"details": "Подробнее",
+		"install": "Установить",
+		"upgrade": "Обновить",
+		"uninstall": "Удалить установку",
+		"open": "Открыть",
+		"installed": "Установлено",
+		"outdated": "Устарело",
+		"compatible": "Совместимо",
+		"extensionInstalled": "Расширение установлено",
+		"extensionInstalledDescription": "Расширение {id} успешно установлено.",
+		"extensionUpgraded": "Расширение обновлено",
+		"extensionUpgradedDescription": "Расширение {id} успешно обновлено.",
+		"extensionUninstalled": "Расширение удалено",
+		"extensionUninstalledDescription": "Расширение {id} успешно удалено.",
+		"mfIncompatible": "Это приложение устарело и не является корректным Module Federation‑приложением. Пожалуйста, обновите его до последней версии.",
+		"hostMFVersion": "Версия MF хоста:",
+		"appMFVersion": "Версия MF приложения:",
+		"libIncompatible": "Версия библиотек этого приложения устарела и может работать некорректно. Обновите приложение до последней версии.",
+		"hostLibVersion": "Версия библиотек хоста:",
+		"appLibVersion": "Версия библиотек приложения:",
+		"compatibleTooltip": "Версия Module Federation ({mfVersion}) и версия библиотек ({libVersion}) этого приложения совпадают с хостом. Приложение должно работать корректно.",
+		"enabled": "Включено",
+		"disabled": "Выключено"
+	},
+	"extensionCard": {
+		"extensionUninstalled": "Расширение удалено",
+		"uninstall": "Удалить установку",
+		"install": "Установить",
+		"update": "Обновить",
+		"enable": "Включить",
+		"disable": "Выключить",
+		"details": "Подробнее",
+		"unavailable": "Недоступно",
+		"mfVersion": "Версия MF",
+		"libVersion": "Версия библиотек",
+		"updatesAvailable": "Доступны обновления"
+	},
+	"nodeHandle": {
+		"ariaLabel": "Нажмите на узел, чтобы открыть меню узла",
+		"required": "*обязательно"
+	},
+	"draggableItem": {
+		"ariaLabel": "Перетащите, чтобы переместить"
+	}
+}

@@ -6,6 +6,7 @@ import Icon from "../misc/icon";
 import ModalWrapper from "./wrapper";
 import { EditorContext } from "../providers/editor-context-provider";
 import { getAPIKey, setAPIKey } from "@/lib/settings/api-manager-utils";
+import { useTranslations } from 'next-intl';
 
 export default function PasswordModal({
   isOpen,
@@ -14,6 +15,7 @@ export default function PasswordModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
   const editorContext = useContext(EditorContext);
   const [password, setPassword] = useState<string | undefined>(undefined);
 
@@ -23,16 +25,16 @@ export default function PasswordModal({
       onClose={onClose}
       title={
         editorContext?.persistSettings?.isPasswordSet
-          ? "Enter your password"
-          : "Set a password"
+          ? t('passwordModal.title')
+          : t('passwordModal.title')
       }
     >
       <>
         <ModalBody>
           <Input
             endContent={<Icon name="lock" />}
-            label="Password"
-            placeholder="Enter your password"
+            label={t('passwordModal.password')}
+            placeholder={t('passwordModal.passwordPlaceholder')}
             type="password"
             variant="bordered"
             value={password ?? ""}
@@ -58,13 +60,13 @@ export default function PasswordModal({
             disableRipple
             disableAnimation
           >
-            Reset Config
+            {t('passwordModal.resetConfig.button')}
           </Button>
           <Button
             color="primary"
             onPress={() => {
               if (!password) {
-                toast.error("Please enter password");
+                toast.error(t('passwordModal.validation.required'));
                 return;
               }
 
@@ -131,7 +133,7 @@ export default function PasswordModal({
               }
             }}
           >
-            Confirm
+            {t('passwordModal.confirm.button')}
           </Button>
         </ModalFooter>
       </>

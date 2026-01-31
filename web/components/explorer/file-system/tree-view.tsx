@@ -16,6 +16,7 @@ import {
 import { useDraggable } from "@dnd-kit/core";
 import { Button, Input } from "@heroui/react";
 import { FileSystemObject } from "@pulse-editor/shared-utils";
+import { useTranslations } from "next-intl";
 import {
   forwardRef,
   Ref,
@@ -45,6 +46,8 @@ const TreeViewNode = forwardRef(function TreeViewNode(
   },
   ref: Ref<TreeViewNodeRef | null>,
 ) {
+  const t = useTranslations();
+  
   useImperativeHandle(ref, () => ({
     getParentGroupRef() {
       return parentGroupRef.current;
@@ -179,7 +182,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
       setHasLoadedSubDir(true);
     } catch (error) {
       console.error("Failed to load subdirectory contents:", error);
-      toast.error("Failed to load folder contents");
+      toast.error(t("treeView.toast.failedToCreateFolder"));
     } finally {
       setIsLoadingSubDir(false);
     }
@@ -217,6 +220,9 @@ const TreeViewNode = forwardRef(function TreeViewNode(
 
               platformApi?.rename(object.uri, newUri).then(() => {
                 refreshWorkspaceContent();
+                toast.success(t("treeView.toast.fileRenamed"));
+              }).catch(() => {
+                toast.error(t("treeView.toast.failedToRename"));
               });
 
               setIsRenaming(false);
@@ -229,6 +235,9 @@ const TreeViewNode = forwardRef(function TreeViewNode(
 
               platformApi?.rename(object.uri, newUri).then(() => {
                 refreshWorkspaceContent();
+                toast.success(t("treeView.toast.fileRenamed"));
+              }).catch(() => {
+                toast.error(t("treeView.toast.failedToRename"));
               });
 
               setIsRenaming(false);
@@ -327,7 +336,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                     viewFile(object.uri);
                   }}
                 >
-                  <p className="w-full text-start">Open In Canvas</p>
+                  <p className="w-full text-start">{t("treeView.contextMenu.openInCanvas")}</p>
                 </Button>
               )}
               {!object.isFolder && (
@@ -340,7 +349,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                     viewFile(object.uri);
                   }}
                 >
-                  <p className="w-full text-start">Open In App</p>
+                  <p className="w-full text-start">{t("treeView.contextMenu.openInApp")}</p>
                 </Button>
               )}
               <Button
@@ -351,7 +360,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                   setContextMenuState({ x: 0, y: 0, isOpen: false });
                 }}
               >
-                <p className="w-full text-start">Rename</p>
+                <p className="w-full text-start">{t("treeView.contextMenu.rename")}</p>
               </Button>
               <Button
                 className="text-medium h-12 sm:h-8 sm:text-sm"
@@ -360,12 +369,15 @@ const TreeViewNode = forwardRef(function TreeViewNode(
                 onPress={(e) => {
                   platformApi?.delete(object.uri).then(() => {
                     refreshWorkspaceContent();
+                    toast.success(t("treeView.toast.fileDeleted"));
+                  }).catch(() => {
+                    toast.error(t("treeView.toast.failedToDelete"));
                   });
                   setContextMenuState({ x: 0, y: 0, isOpen: false });
                 }}
               >
                 <p className="text-danger-foreground w-full text-start">
-                  Delete
+                  {t("treeView.contextMenu.delete")}
                 </p>
               </Button>
             </div>
@@ -377,7 +389,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
         <div className="ml-4">
           {isLoadingSubDir ? (
             <div className="flex justify-center py-2">
-              <div className="text-sm">Loading...</div>
+              <div className="text-sm">{t("treeView.contextMenu.loading")}</div>
             </div>
           ) : (
             <TreeViewGroup
@@ -438,6 +450,8 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
   },
   ref: Ref<TreeViewGroupRef>,
 ) {
+  const t = useTranslations();
+  
   useImperativeHandle(ref, () => ({
     startCreatingNewFolder() {
       setFolderNameInputValue("");
@@ -472,12 +486,15 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     console.log("Creating new folder with uri:", uri);
 
     if (!platformApi) {
-      toast.error("Platform API is not available.");
+      toast.error(t("treeView.toast.failedToCreateFolder"));
       return;
     }
 
     platformApi.createFolder(uri).then(() => {
       refreshWorkspaceContent();
+      toast.success(t("treeView.toast.newFolderCreated"));
+    }).catch(() => {
+      toast.error(t("treeView.toast.failedToCreateFolder"));
     });
 
     setFolderNameInputValue("");
@@ -488,12 +505,15 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
     console.log("Creating new file with uri:", uri);
 
     if (!platformApi) {
-      toast.error("Platform API is not available.");
+      toast.error(t("treeView.toast.failedToCreateFile"));
       return;
     }
 
     platformApi.createFile(uri).then(() => {
       refreshWorkspaceContent();
+      toast.success(t("treeView.toast.newFileCreated"));
+    }).catch(() => {
+      toast.error(t("treeView.toast.failedToCreateFile"));
     });
 
     setFileNameInputValue("");
@@ -517,7 +537,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
 
       {isCreatingNewFolder && (
         <Input
-          placeholder="folder name"
+          placeholder={t("fsExplorer.folderName")}
           autoFocus
           variant="bordered"
           size="sm"
@@ -539,7 +559,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
       )}
       {isCreatingNewFile && (
         <Input
-          placeholder="file name"
+          placeholder={t("fsExplorer.fileName")}
           autoFocus
           variant="bordered"
           size="sm"

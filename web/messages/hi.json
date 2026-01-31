@@ -1,0 +1,1072 @@
+{
+	"common": {
+		"signIn": "साइन इन",
+		"signOut": "साइन आउट",
+		"save": "सहेजें",
+		"cancel": "रद्द करें",
+		"close": "बंद करें",
+		"delete": "हटाएँ",
+		"edit": "संपादित करें",
+		"share": "साझा करें",
+		"shareApp": "ऐप साझा करें",
+		"create": "बनाएँ",
+		"open": "खोलें",
+		"confirm": "पुष्टि करें",
+		"update": "अपडेट करें",
+		"publish": "प्रकाशित करें",
+		"add": "जोड़ें",
+		"enter": "दर्ज करें"
+	},
+	"navigation": {
+		"connectedToCloudAI": "क्लाउड AI से कनेक्टेड",
+		"offline": "ऑफ़लाइन",
+		"language": {
+			"title": "भाषा"
+		}
+	},
+	"settings": {
+		"editorSettings": "एडिटर सेटिंग्स",
+		"generalSettings": "जनरल सेटिंग्स",
+		"aiSettings": "AI सेटिंग्स",
+		"securitySettings": "सुरक्षा सेटिंग्स",
+		"projectHomePath": "प्रोजेक्ट होम पाथ",
+		"projectHomeDescription": "आपके सभी प्रोजेक्ट इस फ़ोल्डर में सहेजे जाएँगे।",
+		"selectProjectHomePath": "प्रोजेक्ट होम पाथ चुनें",
+		"environmentVariables": "एनवायरनमेंट वेरिएबल (फ्रंटएंड):",
+		"backendEnvVariablesWarning": "बैकएंड एनवायरनमेंट वेरिएबल सेट करने के लिए कृपया एक्सटेंशन ऐप की सेटिंग्स इस्तेमाल करें।",
+		"addNewVariable": "नया वेरिएबल जोड़ें",
+		"value": "मान",
+		"restartToApply": "लागू करने के लिए रीस्टार्ट करें",
+		"useManagedAIEndpoints": "मैनेज्ड AI एंडपॉइंट्स का उपयोग करें",
+		"managedCloudDescription": "मैनेज्ड क्लाउड के साथ तुरंत Pulse Editor की पूरी शक्ति अनलॉक करें: बेहद तेज़ AI सहायता, क्रॉस-प्लेटफ़ॉर्म सिंक और क्रिएटिव टूल्स, ताकि आप हमेशा फ़्लो में रहें।",
+		"byoAPIKeysDescription": "अपने API कीज़ लाकर आप सीधे AI प्रदाताओं से कनेक्ट हो सकते हैं। इसके लिए अधिक सेटअप चाहिए, लेकिन पूरा नियंत्रण आपके पास रहता है।",
+		"yourPlan": "आपकी योजना: {plan}",
+		"upgradeManagePlan": "प्लान अपग्रेड/मैनेज करें",
+		"credits": "क्रेडिट: {credits}",
+		"topUpCredits": "क्रेडिट रिचार्ज करें",
+		"provider": "प्रोवाइडर",
+		"selectProvider": "कोई प्रोवाइडर चुनें",
+		"model": "मॉडल",
+		"selectModel": "कोई मॉडल चुनें",
+		"apiKey": "API की",
+		"apiKeyEncrypted": "API की एन्क्रिप्ट की गई है",
+		"passwordToEditApiKey": "API की एडिट करने के लिए कृपया पासवर्ड सुरक्षा अस्थायी रूप से बंद करें। एडिट के बाद आप इसे फिर से सक्षम कर सकते हैं।",
+		"voiceName": "आवाज़ का नाम",
+		"security": "सुरक्षा",
+		"passwordDescription": "API टोकन्स को एन्क्रिप्ट करने के लिए पासवर्ड का उपयोग करें। अगर आप पासवर्ड भूल जाते हैं, तो आपको सभी API टोकन्स दोबारा दर्ज करने होंगे।",
+		"encryptApiTokens": "API टोकन्स को पासवर्ड से एन्क्रिप्ट करें",
+		"ttlDescription": "API टोकन्स TTL (टाइम टू लाइव, दिन) की अवधि तक सहेजे जाएँगे। TTL के बाद, अगली बार ऐप खुलने पर टोकन्स हटा दिए जाएँगे। टोकन्स को हमेशा के लिए रखने के लिए -1 सेट करें।",
+		"ttlLabel": "TTL (दिनों में)",
+		"ttlError": "अमान्य इनपुट। डिफ़ॉल्ट 14 दिन का उपयोग किया जा रहा है।",
+		"devExtensionSettings": "डेव एक्सटेंशन सेटिंग्स",
+		"fileTypeMapping": "फाइल टाइप डिफ़ॉल्ट एक्सटेंशन मैपिंग",
+		"noFileTypes": "कोई फाइल टाइप नहीं मिला। कृपया फाइल टाइप सपोर्ट करने वाले एक्सटेंशन इंस्टॉल करें।",
+		"selectDefaultExtension": "डिफ़ॉल्ट एक्सटेंशन चुनें",
+		"extensionDevMode": "एक्सटेंशन डेवलपमेंट मोड",
+		"extensionDevModeDescription": "लोकल एक्सटेंशन डेवलपमेंट सर्वर http://localhost:3030 से एक्सटेंशन लोड करें।",
+		"enableExtensionDevMode": "एक्सटेंशन डेवलपमेंट मोड सक्षम करें",
+		"extensionDevServerURL": "एक्सटेंशन डेवलपमेंट सर्वर URL",
+		"extensionID": "एक्सटेंशन ID",
+		"extensionVersion": "एक्सटेंशन वर्ज़न",
+		"addDevExtension": "डेव एक्सटेंशन जोड़ें",
+		"openAsApp": "ऐप के रूप में खोलें",
+		"extensionDevModeEnabled": "एक्सटेंशन डेवलपमेंट मोड सक्षम है",
+		"extensionDevModeEnabledDescription": "अब आप अपने लोकल डेवलपमेंट सर्वर से एक्सटेंशन लोड कर सकते हैं।",
+		"extensionDevModeDisabled": "एक्सटेंशन डेवलपमेंट मोड अक्षम है",
+		"extensionDevModeDisabledDescription": "आपने एक्सटेंशन डेवलपमेंट मोड बंद कर दिया है।",
+		"extensionInstalled": "एक्सटेंशन इंस्टॉल हो गया",
+		"extensionInstalledDescription": "एक्सटेंशन {id} सफलतापूर्वक इंस्टॉल हो गया है।",
+		"extensionDefinedSettings": "एक्सटेंशन द्वारा परिभाषित सेटिंग्स",
+		"pulseEditorTerminal": "Pulse Editor टर्मिनल",
+		"deviceHostAddress": "डिवाइस होस्ट पता"
+	},
+	"subscription": {
+		"title": "सब्सक्रिप्शन",
+		"plan": "सब्सक्रिप्शन प्लान",
+		"creditsRemaining": "शेष क्रेडिट",
+		"managePlan": "प्लान मैनेज करें"
+	},
+	"planPicker": {
+		"freeDescription": "फ्री: फ्री प्लान का उपयोग करें और बेसिक फीचर्स का आनंद लें। सेल्फ-होस्टेड वर्कस्पेस और अपने API कीज़ का उपयोग करें। यह विकल्प हमेशा के लिए उपलब्ध रहेगा और हम इसे फ्री और ओपन सोर्स रखने के लिए प्रतिबद्ध हैं।",
+		"readMoreOpenSource": "हमारी ओपन सोर्स प्रतिबद्धता के बारे में और पढ़ें"
+	},
+	"account": {
+		"title": "अकाउंट"
+	},
+	"metadata": {
+		"title": "Pulse Editor",
+		"description": "AI संचालित एडिटर जो आपकी क्रिएटिविटी बढ़ाता है"
+	},
+	"cloudApi": {
+		"directorySelection": {
+			"notSupported": "इस प्लेटफ़ॉर्म पर डायरेक्टरी चयन समर्थित नहीं है"
+		},
+		"fileSelection": {
+			"notSupported": "इस प्लेटफ़ॉर्म पर फाइल चयन समर्थित नहीं है"
+		},
+		"fetchProjects": {
+			"failed": "प्रोजेक्ट्स की सूची प्राप्त करने में विफल"
+		},
+		"listProjects": {
+			"notSignedIn": "प्रोजेक्ट्स की सूची नहीं दिखा सकते। क्या आप साइन इन हैं?"
+		},
+		"listPath": {
+			"failed": "पाथ की सूची बनाने में विफल",
+			"noWorkspace": "पाथ की सूची नहीं बना सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"createFolder": {
+			"failed": "फ़ोल्डर बनाने में विफल",
+			"noWorkspace": "फ़ोल्डर नहीं बना सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"createFile": {
+			"failed": "फाइल बनाने में विफल",
+			"noWorkspace": "फाइल नहीं बना सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"renameFile": {
+			"failed": "फाइल का नाम बदलने में विफल",
+			"noWorkspace": "फाइल का नाम नहीं बदल सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"deleteFile": {
+			"failed": "फाइल हटाने में विफल",
+			"noWorkspace": "फाइल नहीं हटा सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"checkPath": {
+			"failed": "पाथ जाँचने में विफल",
+			"noWorkspace": "पाथ नहीं जाँच सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"readFile": {
+			"failed": "फाइल पढ़ने में विफल",
+			"noWorkspace": "फाइल नहीं पढ़ सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"writeFile": {
+			"failed": "फाइल लिखने में विफल",
+			"noWorkspace": "फाइल नहीं लिख सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"copyFiles": {
+			"failed": "फाइलों की कॉपी करने में विफल",
+			"noWorkspace": "फाइलों की कॉपी नहीं कर सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"installationPath": {
+			"failed": "इंस्टॉलेशन पाथ प्राप्त करने में विफल",
+			"noWorkspace": "इंस्टॉलेशन पाथ नहीं प्राप्त कर सकते। कोई वर्कस्पेस चयनित नहीं है"
+		},
+		"createTerminal": {
+			"failed": "टर्मिनल बनाने में विफल",
+			"noWorkspace": "टर्मिनल नहीं बना सकते। कोई वर्कस्पेस चयनित नहीं है"
+		}
+	},
+	"homeView": {
+		"title": "होम",
+		"vibeCode": {
+			"title": "आप क्या बनाना चाहते हैं?",
+			"newApp": "Vibe Code एक ऐप",
+			"blog": "Vibe Code एक ब्लॉग",
+			"portfolio": "Vibe Code एक पोर्टफोलियो वेबसाइट",
+			"weatherApp": "Vibe Code एक वेदर ऐप",
+			"chatApp": "Vibe Code एक चैट एप्लिकेशन",
+			"socialMediaApp": "Vibe Code एक सोशल मीडिया ऐप",
+			"fitnessTracker": "Vibe Code एक फ़िटनेस ट्रैकर",
+			"recipeApp": "Vibe Code एक रेसिपी ऐप"
+		},
+		"createWorkflow": {
+			"button": "वर्कफ़्लो बनाएँ"
+		},
+		"exploreMarketplace": {
+			"button": "मार्केटप्लेस देखें"
+		},
+		"signIn": {
+			"message": "और फीचर्स अनलॉक करने के लिए साइन इन करें",
+			"button": "साइन इन"
+		},
+		"myProjects": {
+			"tab": "मेरे प्रोजेक्ट",
+			"title": "मेरे प्रोजेक्ट"
+		},
+		"myApps": {
+			"tab": "मेरे ऐप्स",
+			"title": "मेरे ऐप्स"
+		},
+		"featuredWorkflows": {
+			"tab": "फ़ीचर्ड वर्कफ़्लो",
+			"title": "फ़ीचर्ड वर्कफ़्लो"
+		},
+		"featuredApps": {
+			"tab": "फ़ीचर्ड ऐप्स",
+			"title": "फ़ीचर्ड ऐप्स"
+		},
+		"learnMore": "और जानें",
+		"myAppsAndProjects": "मेरे ऐप्स और प्रोजेक्ट",
+		"yourResources": "आपके संसाधन",
+		"cloudWorkspaces": "क्लाउड वर्कस्पेस"
+	},
+	"common": {
+		"signIn": "साइन इन",
+		"signOut": "साइन आउट",
+		"save": "सहेजें",
+		"cancel": "रद्द करें",
+		"close": "बंद करें",
+		"delete": "हटाएँ",
+		"edit": "संपादित करें",
+		"share": "साझा करें",
+		"shareApp": "ऐप साझा करें",
+		"create": "बनाएँ",
+		"open": "खोलें",
+		"confirm": "पुष्टि करें",
+		"update": "अपडेट करें",
+		"publish": "प्रकाशित करें",
+		"add": "जोड़ें",
+		"enter": "दर्ज करें",
+		"viewAll": "सभी देखें"
+	},
+	"openInProjectModal": {
+		"title": "प्रोजेक्ट में खोलें",
+		"openExisting": "मौजूदा प्रोजेक्ट खोलें",
+		"newProject": "नया प्रोजेक्ट",
+		"projectName": "प्रोजेक्ट का नाम",
+		"projectNamePlaceholder": "प्रोजेक्ट का नाम दर्ज करें",
+		"projectLocation": "प्रोजेक्ट स्थान",
+		"projectLocationPlaceholder": "प्रोजेक्ट स्थान चुनें",
+		"selectLocation": "स्थान चुनें",
+		"createInside": "इसके अंदर बनाएँ",
+		"moreOptionsComingSoon": "जल्द ही और विकल्प आ रहे हैं...",
+		"create": "बनाएँ",
+		"open": "खोलें",
+		"selectProjectFolder": "प्रोजेक्ट फ़ोल्डर चुनें",
+		"selectProjectFile": "प्रोजेक्ट फाइल चुनें",
+		"workspaceRequired": "इस ऐप/वर्कफ़्लो को सही तरह से काम करने के लिए वर्कस्पेस की आवश्यकता होती है।",
+		"selectWorkspace": "वर्कस्पेस चुनें",
+		"localComputer": "लोकल कंप्यूटर",
+		"workspaceName": "वर्कस्पेस नाम",
+		"workspaceSpecs": "वर्कस्पेस स्पेसिफिकेशन",
+		"storageGB": "स्टोरेज (GB)",
+		"moreToCome": "और भी आ रहा है",
+		"gettingReady": "आपके लिए चीज़ें तैयार की जा रही हैं...",
+		"toast": {
+			"preparingWorkspace": {
+				"title": "वर्कस्पेस तैयार हो रहा है",
+				"description": "वर्कस्पेस के तैयार होने का इंतज़ार कर रहे हैं..."
+			},
+			"failedToOpen": {
+				"title": "खोलने में विफल",
+				"description": "कोई प्रोजेक्ट चयनित नहीं है।"
+			},
+			"appOpened": {
+				"title": "ऐप खुल गया",
+				"description": "ऐप सफलतापूर्वक खुल गया है।"
+			},
+			"workflowOpened": {
+				"title": "वर्कफ़्लो खुल गया",
+				"description": "वर्कफ़्लो सफलतापूर्वक खुल गया है।"
+			},
+			"noAppOrWorkflow": "खोलने के लिए कोई ऐप या वर्कफ़्लो नहीं।",
+			"unableToCreate": {
+				"title": "वर्कस्पेस नहीं बना सके।",
+				"unknownPlatform": "अज्ञात प्लेटफ़ॉर्म।",
+				"nameRequired": "वर्कस्पेस नाम आवश्यक है।"
+			},
+			"creatingWorkspace": {
+				"title": "वर्कस्पेस बनाया जा रहा है",
+				"description": "वर्कस्पेस {name} बनाया जा रहा है। स्पेसिफिकेशन: {cpu} vCPU, {ram} RAM, {storage} स्टोरेज।"
+			},
+			"workspaceCreated": {
+				"title": "वर्कस्पेस बन गया",
+				"description": "वर्कस्पेस {name} सफलतापूर्वक बन गया है।"
+			},
+			"errorCreating": {
+				"title": "वर्कस्पेस बनाते समय त्रुटि"
+			}
+		},
+		"errors": {
+			"noName": "कृपया प्रोजेक्ट का नाम दर्ज करें",
+			"noLocation": "कृपया प्रोजेक्ट स्थान चुनें"
+		}
+	},
+	"quickVibeCodeSetupModal": {
+		"title": "क्विक Vibe Code सेटअप",
+		"vibeCodeProject": "Vibe Code प्रोजेक्ट",
+		"projectName": "प्रोजेक्ट का नाम",
+		"gettingReady": "हम आपके लिए सब कुछ तैयार कर रहे हैं...",
+		"appOpened": {
+			"title": "ऐप खुल गया",
+			"description": "ऐप सफलतापूर्वक खुल गया है।"
+		},
+		"noAppToOpen": "खोलने के लिए कोई ऐप नहीं।"
+	},
+	"passwordModal": {
+		"title": "पासवर्ड दर्ज करें",
+		"subtitle": "इस क्रिया के लिए प्रमाणीकरण आवश्यक है",
+		"password": "पासवर्ड",
+		"passwordPlaceholder": "अपना पासवर्ड दर्ज करें",
+		"resetConfig": {
+			"button": "कन्फ़िग रीसेट करें",
+			"title": "कन्फ़िगरेशन रीसेट करें",
+			"message": "क्या आप वाकई सभी कन्फ़िगरेशन रीसेट करना चाहते हैं? यह क्रिया वापस नहीं ली जा सकती।"
+		},
+		"validation": {
+			"required": "पासवर्ड आवश्यक है"
+		},
+		"confirm": {
+			"button": "पुष्टि करें"
+		}
+	},
+	"openSourceInfoModal": {
+		"title": "ओपन सोर्स",
+		"description": "हम ओपन सॉफ्टवेयर में विश्वास करते हैं क्योंकि पारदर्शिता भरोसा, नवाचार और सहयोग को बढ़ावा देती है। हमारा मिशन दुनिया भर के डेवलपर्स को वह टूल्स मुफ्त में उपलब्ध कराना है जिनकी उन्हें बिना बाधा के बनाने, क्रिएट करने और इनोवेट करने के लिए ज़रूरत है।",
+		"pulseEditorCore": "Pulse Editor कोर",
+		"officialApps": "आधिकारिक ऐप्स",
+		"opensource": "ओपन सोर्स",
+		"cloudServices": "साथ ही, हम क्लाउड-होस्टेड सेवाएँ और मार्केटप्लेस भी प्रदान करते हैं ताकि आप इन्फ्रास्ट्रक्चर या बैकएंड की चिंता किए बिना आसानी से अपने प्रोजेक्ट मैनेज कर सकें और अपना काम कम्युनिटी के साथ साझा कर सकें।",
+		"loveWhatWeDo": "जो हम कर रहे हैं वह पसंद है? हमें GitHub पर स्टार दें या हमारी मोबाइल ऐप Google Play से डाउनलोड करें!",
+		"giveUsAStar": "हमें स्टार दें",
+		"googlePlay": "Google Play"
+	},
+	"commandViewer": {
+		"chatInput": {
+			"placeholder": "कोई कमांड टाइप करें या सवाल पूछें",
+			"emptyDescription": "आप 'add', 'remove', 'edit' आदि टाइप करके एक्शन चला सकते हैं, या सवाल पूछ सकते हैं",
+			"emptyDescriptionWithCommand": "आप '@' के साथ कमांड टाइप करके चला सकते हैं, या सवाल पूछ सकते हैं",
+			"pressEnter": "भेजने के लिए Enter दबाएँ",
+			"pressEnterToExecute": "चलाने के लिए Enter दबाएँ"
+		},
+		"send": "भेजें",
+		"you": "आप: "
+	},
+	"projectIndicator": {
+		"closeProject": {
+			"menuItem": "प्रोजेक्ट बंद करें"
+		},
+		"projectSettings": {
+			"menuItem": "प्रोजेक्ट सेटिंग्स"
+		}
+	},
+	"editorToolbar": {
+		"runWorkflow": {
+			"tooltip": "वर्कफ़्लो चलाएँ"
+		},
+		"openConsole": {
+			"tooltip": "एजेंटिक कंसोल खोलें"
+		},
+		"voiceChat": {
+			"tooltip": "एजेंट के साथ वॉइस चैट"
+		},
+		"artifacts": {
+			"tooltip": "आर्टिफैक्ट्स",
+			"wip": "आर्टिफैक्ट्स (विकासाधीन)"
+		},
+		"installedAgents": {
+			"tooltip": "इंस्टॉल्ड एजेंट्स"
+		},
+		"marketplace": {
+			"tooltip": "मार्केटप्लेस"
+		},
+		"settings": {
+			"tooltip": "सेटिंग्स"
+		}
+	},
+	"publishWorkflowModal": {
+		"title": "वर्कफ़्लो प्रकाशित करें",
+		"description": "अपना वर्कफ़्लो प्रकाशित करें और दूसरों के साथ साझा करें",
+		"workflowName": "वर्कफ़्लो का नाम",
+		"workflowNamePlaceholder": "वर्कफ़्लो का नाम दर्ज करें",
+		"workflowDescription": "विवरण",
+		"workflowDescriptionPlaceholder": "वर्कफ़्लो का विवरण दर्ज کریں",
+		"workflowVersion": "वर्कफ़्लो वर्ज़न",
+		"workflowVersionPlaceholder": "वर्कफ़्लो वर्ज़न दर्ज करें",
+		"publish": "प्रकाशित करें",
+		"publishing": "वर्कफ़्लो प्रकाशित किया जा रहा है",
+		"publishingDescription": "आपका वर्कफ़्लो प्रकाशित किया जा रहा है...",
+		"toast": {
+			"published": {
+				"title": "वर्कफ़्लो प्रकाशित हो गया",
+				"description": "आपका वर्कफ़्लो सफलतापूर्वक प्रकाशित हो गया है।"
+			},
+			"failed": {
+				"title": "वर्कफ़्लो प्रकाशित करने में विफल"
+			}
+		}
+	},
+	"projectSettingsModal": {
+		"title": "प्रोजेक्ट सेटिंग्स",
+		"projectName": "प्रोजेक्ट का नाम",
+		"projectPath": "प्रोजेक्ट पाथ",
+		"update": "अपडेट करें",
+		"create": "बनाएँ",
+		"delete": "हटाएँ",
+		"toast": {
+			"noProjectSelected": "कोई प्रोजेक्ट चयनित नहीं है।"
+		}
+	},
+	"editorSettingsModal": {
+		"title": "एडिटर सेटिंग्स",
+		"projectsFolder": {
+			"description": "आपके सभी प्रोजेक्ट इस फ़ोल्डर में सहेजे जाएँगे।",
+			"selectFolder": "फ़ोल्डर चुनें",
+			"selectProjectHomePath": "प्रोजेक्ट होम पाथ चुनें"
+		},
+		"environmentVariables": {
+			"frontend": "एनवायरनमेंट वेरिएबल (फ्रंटएंड):",
+			"instructions": "KEY=VALUE, हर पंक्ति में एक",
+			"backendWarning": "बैकएंड एनवायरनमेंट वेरिएबल सेट करने के लिए कृपया एक्सटेंशन ऐप की सेटिंग्स इस्तेमाल करें।",
+			"addNewVariable": "नया वेरिएबल जोड़ें",
+			"value": "मान",
+			"errorEmptyKey": {
+				"title": "त्रुटि",
+				"description": "एनवायरनमेंट वेरिएबल की- खाली नहीं हो सकती।"
+			}
+		},
+		"customOnnxWasmCdnUrl": {
+			"label": "कस्टम onnx-wasm CDN URL",
+			"placeholder": "कस्टम onnx-wasm CDN URL दर्ज करें"
+		},
+		"restartToApply": "लागू करने के लिए रीस्टार्ट करें",
+		"aiSettings": {
+			"title": "AI सेटिंग्स",
+			"useManagedEndpoints": "मैनेज्ड AI एंडपॉइंट्स का उपयोग करें",
+			"managedMessage": "मैनेज्ड क्लाउड के साथ तुरंत Pulse Editor की पूरी शक्ति अनलॉक करें: बेहद तेज़ AI सहायता, क्रॉस-प्लेटफ़ॉर्म सिंक और क्रिएटिव टूल्स, ताकि आप हमेशा फ़्लो में रहें।",
+			"byokMessage": "अपने API कीज़ लाकर आप सीधे AI प्रदाताओं से कनेक्ट हो सकते हैं। इसके लिए अधिक सेटअप चाहिए, लेकिन पूरा नियंत्रण आपके पास रहता है।",
+			"yourPlan": "आपकी योजना:",
+			"upgradeManagePlan": "प्लान अपग्रेड/मैनेज करें",
+			"credits": "क्रेडिट:",
+			"topUpCredits": "क्रेडिट रिचार्ज करें",
+			"stt": "STT",
+			"llm": "LLM",
+			"tts": "TTS",
+			"imageGen": "इमेज जेनरेशन",
+			"videoGen": "वीडियो जेनरेशन",
+			"provider": "प्रोवाइडर",
+			"providerPlaceholder": "कोई प्रोवाइडर चुनें",
+			"model": "मॉडल",
+			"modelPlaceholder": "कोई मॉडल चुनें",
+			"voiceName": "आवाज़ का नाम",
+			"apiKey": "API की",
+			"apiKeyEncrypted": "API की एन्क्रिप्ट की गई है",
+			"apiKeyTooltip": "API की एडिट करने के लिए कृपया पासवर्ड सुरक्षा अस्थायी रूप से बंद करें। एडिट के बाद आप इसे फिर से सक्षम कर सकते हैं।"
+		},
+		"security": {
+			"title": "सुरक्षा",
+			"encryptApiTokens": "API टोकन्स को पासवर्ड से एन्क्रिप्ट करें",
+			"encryptDescription": "API टोकन्स को एन्क्रिप्ट करने के लिए पासवर्ड का उपयोग करें। अगर आप पासवर्ड भूल जाते हैं, तो आपको सभी टोकन्स दोबारा दर्ज करने होंगे।",
+			"ttlLabel": "TTL (दिनों में)",
+			"ttlDescription": "API टोकन्स TTL (टाइम टू लाइव, दिन) की अवधि तक सहेजे जाएँगे। TTL के बाद, अगली बार ऐप खुलने पर टोकन्स हटा दिए जाएँगे। टोकन्स को हमेशा के लिए रखने के लिए -1 सेट करें।",
+			"ttlError": {
+				"title": "त्रुटि",
+				"description": "अमान्य इनपुट। डिफ़ॉल्ट 14 दिन का उपयोग किया जा रहा है।"
+			}
+		},
+		"devExtension": {
+			"title": "डेव एक्सटेंशन सेटिंग्स",
+			"fileTypeMapping": "फाइल टाइप डिफ़ॉल्ट एक्सटेंशन मैपिंग",
+			"noFileTypes": "कोई फाइल टाइप नहीं मिला। कृपया फाइल टाइप सपोर्ट करने वाले एक्सटेंशन इंस्टॉल करें।",
+			"selectDefaultExtension": "डिफ़ॉल्ट एक्सटेंशन चुनें",
+			"extensionDevMode": "एक्सटेंशन डेवलपमेंट मोड",
+			"extensionDevModeDescription": "लोकल एक्सटेंशन डेवलपमेंट सर्वर http://localhost:3030 से एक्सटेंशन लोड करें।",
+			"enableExtensionDevMode": "एक्सटेंशन डेवलपमेंट मोड सक्षम करें",
+			"extensionDevServerUrl": "एक्सटेंशन डेवलपमेंट सर्वर URL",
+			"extensionId": "एक्सटेंशन ID",
+			"extensionIdPlaceholder": "(extension_id)",
+			"extensionVersion": "एक्सटेंशन वर्ज़न",
+			"extensionVersionPlaceholder": "(version)",
+			"addDevExtension": "डेव एक्सटेंशन जोड़ें",
+			"openAsApp": "ऐप के रूप में खोलें",
+			"toast": {
+				"devModeEnabled": {
+					"title": "एक्सटेंशन डेवलपमेंट मोड सक्षम है",
+					"description": "अब आप अपने लोकल डेवलपमेंट सर्वर से एक्सटेंशन लोड कर सकते हैं।"
+				},
+				"devModeDisabled": {
+					"title": "एक्सटेंशन डेवलपमेंट मोड अक्षम है",
+					"description": "आपने एक्सटेंशन डेवलपमेंट मोड बंद कर दिया है।"
+				},
+				"extensionInstalled": {
+					"title": "एक्सटेंशन इंस्टॉल हो गया",
+					"description": "एक्सटेंशन {id} सफलतापूर्वक इंस्टॉल हो गया है।"
+				},
+				"enableDevMode": "एक्सटेंशन डेवलपमेंट मोड सक्षम करें",
+				"addDevExtension": "डेव एक्सटेंशन जोड़ें",
+				"openAsApp": "ऐप के रूप में खोलें",
+				"extensionDevServerURL": "एक्सटेंशन डेवलपमेंट सर्वर URL",
+				"extensionID": "एक्सटेंशन ID",
+				"extensionVersion": "एक्सटेंशन वर्ज़न",
+				"selectDefaultExtension": "डिफ़ॉल्ट एक्सटेंशन चुनें",
+				"noFileTypes": "कोई फाइल टाइप नहीं मिला। कृपया फाइल टाइप सपोर्ट करने वाले एक्सटेंशन इंस्टॉल करें।",
+				"fileTypeMapping": "फाइल टाइप डिफ़ॉल्ट एक्सटेंशन मैपिंग",
+				"deviceHostAddress": "डिवाइस होस्ट पता"
+			}
+		},
+		"extensionDefined": {
+			"title": "एक्सटेंशन द्वारा परिभाषित सेटिंग्स",
+			"pulseEditorTerminal": "Pulse Editor टर्मिनल",
+			"deviceHostAddress": "डिवाइस होस्ट पता"
+		}
+	},
+	"marketplaceModal": {
+		"title": "कम्युनिटी मार्केटप्लेस",
+		"tabs": {
+			"featured": "फ़ीचर्ड",
+			"featuredDescription": "कम्युनिटी के फ़ीचर्ड ऐप्स और वर्कफ़्लो",
+			"workflows": "वर्कफ़्लो",
+			"workflowsDescription": "कम्युनिटी द्वारा साझा किए गए वर्कफ़्लो ब्राउज़ करें",
+			"apps": "ऐप्स",
+			"appsDescription": "कम्युनिटी द्वारा विकसित फेडरेटेड Pulse ऐप्स ब्राउज़ करें",
+			"installed": "इंस्टॉल्ड",
+			"installedApps": "इंस्टॉल्ड ऐप्स",
+			"installedAgents": "इंस्टॉल्ड एजेंट्स",
+			"discover": "डिस्कवर करें",
+			"discoverApps": "ऐप्स खोजें",
+			"discoverAgents": "एजेंट्स खोजें"
+		}
+	},
+	"loginModal": {
+		"title": "साइन इन",
+		"connectToRemote": "रिमोट इंस्टेंस से कनेक्ट करें",
+		"login": "लॉगिन",
+		"remoteUrl": "रिमोट URL",
+		"remoteUrlPlaceholder": "रिमोट URL दर्ज करें",
+		"remotePassword": "पासवर्ड",
+		"remotePasswordPlaceholder": "पासवर्ड दर्ज करें",
+		"connect": "कनेक्ट करें",
+		"localWorkspaceNotAvailable": "ब्राउज़र में लोकल वर्कस्पेस उपलब्ध नहीं है। कृपया डेस्कटॉप/मोबाइल क्लाइंट का उपयोग करें, या रिमोट इंस्टेंस से कनेक्ट हों।",
+		"continueAsGuest": "गेस्ट के रूप में जारी रखें",
+		"continueOffline": "ऑफ़लाइन जारी रखें"
+	},
+	"agentConfigModal": {
+		"title": "इंस्टॉल्ड एजेंट्स",
+		"tabs": {
+			"agents": "एजेंट्स",
+			"agentsDescription": "इंस्टॉल्ड एजेंट्स प्रबंधित करें",
+			"providers": "प्रोवाइडर्स",
+			"providersDescription": "AI प्रोवाइडर्स प्रबंधित करें"
+		},
+		"installedAgents": "इंस्टॉल्ड एजेंट्स",
+		"availableAgents": "उपलब्ध एजेंट्स",
+		"noAgentsInstalled": "कोई एजेंट इंस्टॉल नहीं है",
+		"noAgentsAvailable": "कोई उपलब्ध एजेंट नहीं है",
+		"edit": "संपादित करें",
+		"delete": "हटाएँ",
+		"createNewAgent": {
+			"title": "नया एजेंट बनाएँ",
+			"description": "एडिटर में एक बेसिक चैट एजेंट जोड़ें।",
+			"button": "नया एजेंट बनाएँ"
+		},
+		"form": {
+			"name": "नाम",
+			"namePlaceholder": "एजेंट का नाम दर्ज करें",
+			"version": "वर्ज़न",
+			"versionPlaceholder": "एजेंट का वर्ज़न दर्ज करें",
+			"description": "विवरण",
+			"descriptionPlaceholder": "एजेंट का विवरण दर्ज करें",
+			"systemPrompt": "सिस्टम प्रॉम्प्ट",
+			"systemPromptPlaceholder": "एजेंट प्रॉम्प्ट दर्ज करें",
+			"provider": "प्रोवाइडर",
+			"providerPlaceholder": "प्रोवाइडर दर्ज करें",
+			"modelName": "मॉडल नाम",
+			"modelNamePlaceholder": "मॉडल नाम दर्ज करें",
+			"model": "मॉडल",
+			"modelPlaceholder": "मॉडल चुनें",
+			"temperature": "टेम्परेचर",
+			"contextLength": "कॉन्टेक्स्ट लंबाई",
+			"contextLengthPlaceholder": "कॉन्टेक्स्ट लंबाई दर्ज करें"
+		},
+		"addAgent": "एजेंट जोड़ें",
+		"installedBy": "एक्सटेंशन {extension} द्वारा {publisher} से इंस्टॉल किया गया",
+		"llmConfig": "LLM कॉन्फ़िग:",
+		"toast": {
+			"agentDeleted": "एजेंट हटाया गया",
+			"agentAdded": "नया एजेंट जोड़ा गया"
+		},
+		"llmUsage": {
+			"title": "एजेंट्स द्वारा LLM उपयोग",
+			"provider": "प्रोवाइडर:",
+			"usedModels": "उपयोग किए गए मॉडल:",
+			"usedByAgents": "इन एजेंट्स द्वारा उपयोग:",
+			"totalUsageByAgents": "कुल एजेंट्स की संख्या:",
+			"agent": "एजेंट",
+			"totalCost": "कुल लागत",
+			"noData": "कोई उपयोग डेटा उपलब्ध नहीं",
+			"apiKey": "API की",
+			"apiKeyNotVisible": "दर्ज करने के बाद API की दिखाई नहीं देती।"
+		}
+	},
+	"appInfoModal": {
+		"title": "ऐप जानकारी",
+		"developerSettings": "डेवलपर सेटिंग्स",
+		"loading": "लोड हो रहा है...",
+		"metadata": {
+			"id": "ID",
+			"version": "वर्ज़न",
+			"author": "लेखक",
+			"license": "लाइसेंस",
+			"website": "वेबसाइट",
+			"readme": "README"
+		},
+		"apiPricing": {
+			"title": "API प्राइसिंग",
+			"description": "इस ऐप के लिए API प्राइसिंग सेटिंग्स नीचे दी गई हैं।",
+			"endpoint": "एंडपॉइंट:",
+			"cost": "क़ीमत:",
+			"creditsPerCall": "प्रति कॉल क्रेडिट",
+			"perCall": "प्रति कॉल",
+			"noApiPricing": "इस ऐप के लिए कोई API प्राइसिंग सेट नहीं की गई है।",
+			"noServerFunctions": "इस ऐप के लिए कोई सर्वर फ़ंक्शन नहीं मिला।",
+			"costPlaceholder": "प्रति कॉल क्रेडिट क़ीमत"
+		},
+		"developerMode": {
+			"title": "डेवलपर सेटिंग्स",
+			"appInfo": "ऐप जानकारी",
+			"appId": "ऐप ID",
+			"environmentVariables": "एनवायरनमेंट वेरिएबल",
+			"addNewVariable": "नया वेरिएबल जोड़ें",
+			"value": "मान",
+			"localServer": "लोकल सर्वर",
+			"localServerPlaceholder": "लोकल सर्वर URL दर्ज करें (जैसे http://localhost:3000)",
+			"envInstructions": "KEY=VALUE, हर पंक्ति में एक",
+			"testMode": "टेस्ट मोड",
+			"testModeDescription": "लोकल सर्वर और एनवायरनमेंट वेरिएबल का उपयोग करने के लिए टेस्ट मोड सक्षम करें",
+			"toast": {
+				"addingVariable": {
+					"title": "वेरिएबल जोड़ा जा रहा है",
+					"description": "एनवायरनमेंट वेरिएबल {key} जोड़ा जा रहा है।"
+				},
+				"variableAdded": {
+					"title": "वेरिएबल जोड़ा गया",
+					"description": "एनवायरनमेंट वेरिएबल {key} सफलतापूर्वक जोड़ा गया।"
+				},
+				"errorEmptyKey": {
+					"title": "त्रुटि",
+					"description": "एनवायरनमेंट वेरिएबल की- खाली नहीं हो सकती।"
+				},
+				"settingCost": {
+					"title": "एंडपॉइंट क़ीमत सेट की जा रही है",
+					"description": "एंडपॉइंट {endpoint} के लिए क़ीमत {cost} सेट की जा रही है।"
+				},
+				"costSet": {
+					"title": "क़ीमत सेट हो गई",
+					"description": "एंडपॉइंट {endpoint} की क़ीमत सफलतापूर्वक {cost} सेट हो गई है।"
+				},
+				"costSetError": {
+					"title": "त्रुटि",
+					"description": "एंडपॉइंट {endpoint} की क़ीमत सेट करने में विफल। {error}."
+				},
+				"deletingApp": {
+					"title": "ऐप हटाया जा रहा है",
+					"description": "ऐप {name} हटाया जा रहा है।"
+				},
+				"appUnpublished": {
+					"title": "ऐप अनपब्लिश हो गया",
+					"description": "ऐप {name} सफलतापूर्वक अनपब्लिश हो गया है।"
+				},
+				"unpublishError": {
+					"title": "त्रुटि",
+					"description": "ऐप {name} को अनपब्लिश करने में विफल।"
+				}
+			}
+		},
+		"dangerZone": {
+			"title": "डेंजर ज़ोन",
+			"unpublish": "अनपब्लिश करें",
+			"unpublishConfirm": "क्या आप वाकई इस ऐप को अनपब्लिश करना चाहते हैं? यह क्रिया वापस नहीं ली जा सकती।",
+			"confirmUnpublish": "अनपब्लिश की पुष्टि करें",
+			"cancel": "रद्द करें",
+			"deleteApp": "ऐप हटाएँ",
+			"deleteAppDescription": "इस ऐप को आपके अकाउंट से स्थायी रूप से हटाएँ",
+			"uninstallApp": "ऐप अनइंस्टॉल करें",
+			"uninstallAppDescription": "इस ऐप को आपके इंस्टॉल्ड ऐप्स से हटाएँ"
+		}
+	},
+	"navSideMenu": {
+		"home": {
+			"label": "होम",
+			"icon": "home"
+		},
+		"projectHome": {
+			"label": "प्रोजेक्ट होम",
+			"icon": "folder",
+			"notSet": "आपने अभी तक प्रोजेक्ट होम पाथ सेट नहीं किया है। कृपया सेटिंग्स में इसे सेट करें।",
+			"select": {
+				"button": "प्रोजेक्ट होम चुनें"
+			}
+		}
+	},
+	"fileMenu": {
+		"title": "फ़ाइल",
+		"newProject": "नया प्रोजेक्ट",
+		"openProject": "प्रोजेक्ट खोलें"
+	},
+	"viewMenu": {
+		"title": "व्यू",
+		"commandViewer": "कमांड व्यूअर",
+		"console": "कंसोल",
+		"importWorkflow": {
+			"title": "वर्कफ़्लो इम्पोर्ट करें",
+			"invalidFile": "अमान्य वर्कफ़्लो फाइल",
+			"readError": "वर्कफ़्लो फाइल पढ़ने में त्रुटि"
+		}
+	},
+	"fsExplorer": {
+		"newFolder": "नया फ़ोल्डर",
+		"folderName": "फ़ोल्डर नाम",
+		"newFile": "नई फाइल",
+		"fileName": "फाइल नाम",
+		"selectOneFolder": "कृपया केवल एक फ़ोल्डर चुनें ताकि उसके अंदर नया फ़ोल्डर बनाया जा सके।",
+		"selectOneFolderForFile": "कृपया केवल एक फ़ोल्डर चुनें ताकि उसके अंदर नई फाइल बनाई जा सके।",
+		"emptyContent": "कोई सामग्री नहीं। शुरू करने के लिए नई फाइल बनाएँ।"
+	},
+	"projectExplorer": {
+		"title": "प्रोजेक्ट्स",
+		"newProject": {
+			"button": "नया प्रोजेक्ट"
+		},
+		"signInMessage": "अपने प्रोजेक्ट देखने के लिए साइन इन करें, या डेस्कटॉप क्लाइंट से लोकल प्रोजेक्ट खोलें।"
+	},
+	"viewArea": {
+		"unknownViewType": "अज्ञात व्यू प्रकार",
+		"noViewSelected": "कोई व्यू चयनित नहीं है"
+	},
+	"projectView": {
+		"title": "प्रोजेक्ट",
+		"createWorkflow": {
+			"button": "वर्कफ़्लो बनाएँ"
+		},
+		"exploreMarketplace": {
+			"button": "मार्केटप्लेस देखें"
+		}
+	},
+	"dnd": {
+		"openApp": {
+			"failed": "ऐप खोलने में विफल",
+			"invalidData": "अमान्य ऐप डेटा"
+		},
+		"linkApp": {
+			"failed": "ऐप लिंक करने में विफल",
+			"invalidData": "अमान्य ऐप डेटा"
+		},
+		"openFile": {
+			"failed": "फाइल खोलने में विफल",
+			"invalidData": "अमान्य फाइल डेटा"
+		},
+		"invalidTarget": {
+			"cannotDropFile": "इस जगह फाइल ड्रॉप नहीं कर सकते",
+			"somethingWrong": "कुछ गलत हो गया। कृपया दोबारा प्रयास करें।",
+			"cannotDrop": "यहाँ ड्रॉप नहीं कर सकते"
+		}
+	},
+	"workspaceSettingsModal": {
+		"title": "वर्कस्पेस सेटिंग्स",
+		"selectWorkspace": "वर्कस्पेस चुनें",
+		"localComputer": "लोकल कंप्यूटर",
+		"createNew": "नया बनाएँ",
+		"workspaceName": "वर्कस्पेस नाम",
+		"workspaceSpecs": "वर्कस्पेस स्पेसिफिकेशन",
+		"storageGB": "स्टोरेज (GB)",
+		"moreToCome": "और भी आ रहा है",
+		"useWorkspace": "वर्कस्पेस का उपयोग करें",
+		"exitWorkspace": "वर्कस्पेस से बाहर निकलें",
+		"start": "स्टार्ट",
+		"stop": "स्टॉप",
+		"update": "अपडेट करें",
+		"delete": "हटाएँ",
+		"create": "बनाएँ",
+		"unpublishWorkspace": "वर्कस्पेस अनपब्लिश करें",
+		"toast": {
+			"unknownPlatform": "अज्ञात प्लेटफ़ॉर्म।",
+			"workspaceNotAvailable": "वर्कस्पेस उपलब्ध नहीं है।",
+			"workspaceNameRequired": "वर्कस्पेस नाम आवश्यक है।",
+			"workspaceExists": "वर्कस्पेस पहले से मौजूद है। कृपया उसकी बजाय अपडेट करें।",
+			"updatingWorkspace": {
+				"title": "वर्कस्पेस अपडेट किया जा रहा है",
+				"description": "वर्कस्पेस {name} अपडेट किया जा रहा है।"
+			},
+			"workspaceUpdated": {
+				"title": "वर्कस्पेस अपडेट हो गया",
+				"description": "वर्कस्पेस {name} सफलतापूर्वक अपडेट हो गया है।"
+			},
+			"deletingWorkspace": {
+				"title": "वर्कस्पेस हटाया जा रहा है",
+				"description": "वर्कस्पेस {name} हटाया जा रहा है।"
+			},
+			"workspaceDeleted": {
+				"title": "वर्कस्पेस हटाया गया",
+				"description": "वर्कस्पेस {name} सफलतापूर्वक हटाया गया है।"
+			},
+			"errorDeleting": {
+				"title": "वर्कस्पेस हटाने में त्रुटि"
+			},
+			"creatingWorkspace": {
+				"title": "वर्कस्पेस बनाया जा रहा है",
+				"description": "वर्कस्पेस {name} बनाया जा रहा है। स्पेसिफिकेशन: {cpu} vCPU, {ram} RAM, {storage} स्टोरेज।"
+			},
+			"workspaceCreated": {
+				"title": "वर्कस्पेस बन गया",
+				"description": "वर्कस्पेस {name} सफलतापूर्वक बन गया है।"
+			},
+			"errorCreating": {
+				"title": "वर्कस्पेस बनाते समय त्रुटि"
+			},
+			"stoppingWorkspace": {
+				"title": "वर्कस्पेस रोका जा रहा है",
+				"description": "वर्कस्पेस {name} रोका जा रहा है।"
+			},
+			"workspaceStopped": {
+				"title": "वर्कस्पेस रुक गया",
+				"description": "वर्कस्पेस {name} सफलतापूर्वक रुक गया है।"
+			},
+			"startingWorkspace": {
+				"title": "वर्कस्पेस शुरू किया जा रहा है",
+				"description": "वर्कस्पेस {name} शुरू किया जा रहा है।"
+			},
+			"workspaceStarted": {
+				"title": "वर्कस्पेस शुरू हो गया",
+				"description": "वर्कस्पेस {name} सफलतापूर्वक शुरू हो गया है।"
+			}
+		}
+	},
+	"qrDisplay": {
+		"title": "QR कोड स्कैन करें",
+		"download": "डाउनलोड करें",
+		"loadingError": "QR कोड अभी लोड हो रहा है, कृपया प्रतीक्षा करें।"
+	},
+	"sharingModal": {
+		"title": "अपना {name} वर्कस्पेस साझा करें",
+		"visibility": "विज़िबिलिटी",
+		"visibilityPlaceholder": "विज़िबिलिटी चुनें",
+		"inviteCode": "इन्वाइट कोड",
+		"selectVisibility": "शेयरिंग विकल्प देखने के लिए कोई विज़िबिलिटी विकल्प चुनें।",
+		"workspacePrivate": "आपका वर्कस्पेस प्राइवेट है।",
+		"tabs": {
+			"qrCode": "QR कोड",
+			"qrCodeDescription": "QR कोड के माध्यम से वर्कस्पेस साझा करें",
+			"url": "URL",
+			"urlDescription": "URL के माध्यम से वर्कस्पेस साझा करें"
+		},
+		"qrCode": {
+			"description": "इस QR कोड के माध्यम से अपना वर्कस्पेस साझा करें"
+		},
+		"url": {
+			"description": "इस URL के माध्यम से अपना वर्कस्पेस साझा करें",
+			"copy": "कॉपी करें"
+		},
+		"toast": {
+			"fetchError": "एक्सटेंशन शेयर जानकारी प्राप्त करने में विफल",
+			"urlCopied": "URL क्लिपबोर्ड पर कॉपी हो गया"
+		}
+	},
+	"workflowPreviewCard": {
+		"open": "खोलें",
+		"clone": "क्लोन करें"
+	},
+	"appGallery": {
+		"title": "ऐप्स",
+		"noApps": "कोई ऐप नहीं मिला"
+	},
+	"workflowGallery": {
+		"title": "वर्कफ़्लो",
+		"noWorkflows": "कोई वर्कफ़्लो नहीं मिला"
+	},
+	"featuredGallery": {
+		"title": "फ़ीचर्ड"
+	},
+	"statusScreens": {
+		"welcome": {
+			"title": "Pulse Editor में आपका स्वागत है",
+			"subtitle": "नया प्रोजेक्ट बनाकर या मौजूदा खोलकर शुरू करें",
+			"taglineLine1": "आपका अगला AI-OS, संचालित द्वारा",
+			"taglineLine2": "Vibe Coded ऐप्स और वर्कफ़्लोज़"
+		},
+		"wip": {
+			"title": "वर्क इन प्रोग्रेस",
+			"subtitle": "यह फ़ीचर जल्द आ रहा है"
+		},
+		"loading": {
+			"title": "लोड हो रहा है...",
+			"subtitle": "कृपया प्रतीक्षा करें"
+		},
+		"notAuthorized": {
+			"title": "अनधिकृत",
+			"subtitle": "आपको इस संसाधन तक पहुँचने की अनुमति नहीं है"
+		},
+		"error": {
+			"title": "त्रुटि",
+			"subtitle": "कुछ गलत हो गया"
+		}
+	},
+	"appLoader": {
+		"loading": "ऐप लोड हो रहा है...",
+		"failed": "ऐप लोड करने में विफल"
+	},
+	"consolePanelView": {
+		"title": "कंसोल",
+		"clear": "क्लियर करें",
+		"noOutput": "अभी तक कोई आउटपुट नहीं"
+	},
+	"tabViewManager": {
+		"openProject": "प्रोजेक्ट खोलें",
+		"untitled": "अनटाइटल्ड",
+		"newTab": "नया टैब"
+	},
+	"voiceRecorder": {
+		"listening": "सुन रहे हैं",
+		"thinking": "सोच रहे हैं",
+		"speaking": "बोल रहे हैं",
+		"loadingMic": "माइक लोड हो रहा है",
+		"waiting": "प्रतीक्षा कर रहा है"
+	},
+	"commandExecutor": {
+		"commandExecuted": "कमांड निष्पादित हुआ",
+		"commandExecutionFailed": "कमांड निष्पादन विफल"
+	},
+	"planPicker": {
+		"freeDescription": "फ्री: सीमित फीचर्स के साथ फ्री प्लान का उपयोग करें। आप सर्वर को स्वयं होस्ट करके AI फीचर्स तक असीमित पहुँच भी प्राप्त कर सकते हैं।",
+		"readMoreOpenSource": "हमारी ओपन सोर्स प्रतिबद्धता के बारे में और पढ़ें"
+	},
+	"projectItem": {
+		"projectSettings": "प्रोजेक्ट सेटिंग्स",
+		"selectMultiple": "मल्टीपल चुनें",
+		"created": "बनाया गया: "
+	},
+	"fsExplorer": {
+		"newFolder": "नया फ़ोल्डर",
+		"folderName": "फ़ोल्डर नाम",
+		"newFile": "नई फाइल",
+		"fileName": "फाइल नाम",
+		"selectOneFolder": "कृपया केवल एक फ़ोल्डर चुनें ताकि उसके अंदर नया फ़ोल्डर बनाया जा सके।",
+		"selectOneFolderForFile": "कृपया केवल एक फ़ोल्डर चुनें ताकि उसके अंदर नई फाइल बनाई जा सके।",
+		"emptyContent": "कोई सामग्री नहीं। शुरू करने के लिए नई फाइल बनाएँ।",
+		"noAppSelected": "इस फाइल को हैंडल करने के लिए कोई ऐप चयनित नहीं है।",
+		"selectNodeInCanvas": "फाइल देखने के लिए कृपया कैनवास में कोई नोड चुनें",
+		"noWorkspaceSelected": "कोई वर्कस्पेस चयनित नहीं है"
+	},
+	"treeView": {
+		"contextMenu": {
+			"openInCanvas": "कैनवास में खोलें",
+			"openInApp": "ऐप में खोलें",
+			"rename": "नाम बदलें",
+			"delete": "हटाएँ",
+			"loading": "लोड हो रहा है..."
+		},
+		"toast": {
+			"newFolderCreated": "नया फ़ोल्डर बनाया गया",
+			"failedToCreateFolder": "फ़ोल्डर बनाने में विफल",
+			"newFileCreated": "नई फाइल बनाई गई",
+			"failedToCreateFile": "फाइल बनाने में विफल",
+			"fileRenamed": "फाइल का नाम बदला गया",
+			"failedToRename": "फाइल का नाम बदलने में विफल",
+			"fileDeleted": "फाइल हटाई गई",
+			"failedToDelete": "फाइल हटाने में विफल"
+		}
+	},
+	"workspaceExplorer": {
+		"workspacePaused": "वर्कस्पेस फिलहाल पॉज़्ड है। प्रोजेक्ट फाइल्स तक पहुँचने के लिए कृपया वर्कस्पेस फिर से शुरू करें।",
+		"startWorkspace": "वर्कस्पेस शुरू करें",
+		"workspaceSettings": "वर्कस्पेस सेटिंग्स",
+		"osFeatures": "OS फीचर्स के साथ इंटरेक्ट करने के लिए कृपया डेस्कटॉप क्लाइंट में खोलें या रिमोट वर्कस्पेस कॉन्फ़िगर करें।",
+		"workspaceStarting": "वर्कस्पेस शुरू हो रहा है...",
+		"viewProjectContent": "वर्कस्पेस में प्रोजेक्ट कंटेंट देखने के लिए पहले कोई प्रोजेक्ट चुनें।",
+		"toast": {
+			"noWorkspace": "शुरू करने के लिए कोई वर्कस्पेस नहीं है।",
+			"startingWorkspace": "वर्कस्पेस शुरू किया जा रहा है...",
+			"workspaceStarted": "वर्कस्पेस शुरू हो गया है।"
+		}
+	},
+	"appExplorer": {
+		"dragTip": "एक्सटेंशन खोलने के लिए टैप या ड्रैग करें।",
+		"exploreWorkflowsApps": "कम्युनिटी वर्कफ़्लो/ऐप्स एक्सप्लोर करें"
+	},
+	"appInfoModalExtra": {
+		"developerSettings": "डेवलपर सेटिंग्स",
+		"id": "ID",
+		"version": "वर्ज़न",
+		"author": "लेखक",
+		"license": "लाइसेंस",
+		"website": "वेबसाइट",
+		"readme": "README",
+		"noReadme": "कोई README उपलब्ध नहीं",
+		"apiPricing": "API प्राइसिंग",
+		"apiPricingDescription": "इस ऐप के लिए API प्राइसिंग सेटिंग्स नीचे दी गई हैं।",
+		"endpoint": "एंडपॉइंट: ",
+		"cost": "क़ीमत: ",
+		"credits": "क्रेडिट",
+		"perCall": "प्रति कॉल",
+		"noApiPricing": "इस ऐप के लिए कोई API प्राइसिंग सेट नहीं की गई है।",
+		"appInfo": "ऐप जानकारी",
+		"appID": "ऐप ID",
+		"environmentVariables": "एनवायरनमेंट वेरिएबल",
+		"addNewVariable": "नया वेरिएबल जोड़ें",
+		"value": "मान",
+		"error": "त्रुटि",
+		"envKeyEmpty": "एनवायरनमेंट वेरिएबल की- खाली नहीं हो सकती।",
+		"addingVariable": "वेरिएबल जोड़ा जा रहा है",
+		"addingVariableDescription": "एनवायरनमेंट वेरिएबल {key} जोड़ा जा रहा है।",
+		"variableAdded": "वेरिएबल जोड़ा गया",
+		"variableAddedDescription": "एनवायरनमेंट वेरिएबल {key} सफलतापूर्वक जोड़ा गया।",
+		"apiPricingSetup": "आप यहाँ ऐप की APIs पर किए गए कॉल के लिए क्रेडिट क़ीमत सेट कर सकते हैं। एक बार सेट करने के बाद आप इसे फिर से बदल नहीं सकते।",
+		"noServerFunctions": "इस ऐप के लिए कोई सर्वर फ़ंक्शन नहीं मिला।",
+		"dangerZone": "डेंजर ज़ोन",
+		"confirmUnpublish": "क्या आप वाकई इस ऐप को अनपब्लिश करना चाहते हैं? यह क्रिया वापस नहीं ली जा सकती।",
+		"unpublish": "अनपब्लिश करें",
+		"deletingApp": "ऐप हटाया जा रहा है",
+		"deletingAppDescription": "ऐप {name} हटाया जा रहा है।",
+		"failedToUnpublish": "ऐप {name} को अनपब्लिश करने में विफल।",
+		"appUnpublished": "ऐप अनपब्लिश हो गया",
+		"appUnpublishedDescription": "ऐप {name} सफलतापूर्वक अनपब्लिश हो गया है।",
+		"confirmUnpublishButton": "अनपब्लिश की पुष्टि करें",
+		"settingEndpointCost": "एंडपॉइंट क़ीमत सेट की जा रही है",
+		"settingEndpointCostDescription": "एंडपॉइंट {endpoint} के लिए क़ीमत {cost} सेट की जा रही है।",
+		"failedToSetCost": "एंडपॉइंट {endpoint} की क़ीमत सेट करने में विफल। {error}.",
+		"costSet": "क़ीमत सेट हो गई",
+		"costSetDescription": "एंडपॉइंट {endpoint} की क़ीमत सफलतापूर्वक {cost} सेट हो गई है।",
+		"creditsPerCall": "प्रति कॉल क्रेडिट",
+		"creditsCostPerCall": "प्रति कॉल क्रेडिट क़ीमत"
+	},
+	"projectPreviewCard": {
+		"workspace": "वर्कस्पेस:",
+		"undefined": "अनिर्धारित"
+	},
+	"appPreviewCard": {
+		"requiresWorkspace": "इस ऐप के सही तरह से काम करने के लिए वर्कस्पेस का खुला होना आवश्यक है।",
+		"requiresWorkspaceLabel": "वर्कस्पेस आवश्यक",
+		"use": "उपयोग करें",
+		"details": "विवरण",
+		"install": "इंस्टॉल करें",
+		"upgrade": "अपग्रेड करें",
+		"uninstall": "अनइंस्टॉल करें",
+		"open": "खोलें",
+		"installed": "इंस्टॉल्ड",
+		"outdated": "आउटडेटेड",
+		"compatible": "कम्पैटिबल",
+		"extensionInstalled": "एक्सटेंशन इंस्टॉल हो गया",
+		"extensionInstalledDescription": "एक्सटेंशन {id} सफलतापूर्वक इंस्टॉल हो गया है।",
+		"extensionUpgraded": "एक्सटेंशन अपग्रेड हो गया",
+		"extensionUpgradedDescription": "एक्सटेंशन {id} सफलतापूर्वक अपग्रेड हो गया है।",
+		"extensionUninstalled": "एक्सटेंशन अनइंस्टॉल हो गया",
+		"extensionUninstalledDescription": "एक्सटेंशन {id} सफलतापूर्वक अनइंस्टॉल हो गया है।",
+		"mfIncompatible": "यह ऐप आउटडेटेड है और अब एक वैध मॉड्यूल फेडरेशन ऐप नहीं है। कृपया ऐप को नवीनतम संस्करण में अपडेट करें।",
+		"hostMFVersion": "होस्ट MF वर्ज़न:",
+		"appMFVersion": "ऐप MF वर्ज़न:",
+		"libIncompatible": "इस ऐप की लाइब्रेरी वर्ज़न आउटडेटेड है और संभव है कि यह सही तरह से काम न करे। कृपया ऐप को नवीनतम संस्करण में अपडेट करें।",
+		"hostLibVersion": "होस्ट लाइब्रेरी वर्ज़न:",
+		"appLibVersion": "ऐप लाइब्रेरी वर्ज़न:",
+		"compatibleTooltip": "इस ऐप का मॉड्यूल फेडरेशन वर्ज़न ({mfVersion}) और लाइब्रेरी वर्ज़न ({libVersion}) होस्ट वर्ज़न से मेल खाता है। ऐप को सही तरह से काम करना चाहिए।",
+		"enabled": "सक्रिय",
+		"disabled": "निष्क्रिय"
+	},
+	"extensionCard": {
+		"extensionUninstalled": "एक्सटेंशन अनइंस्टॉल हो गया",
+		"uninstall": "अनइंस्टॉल करें",
+		"install": "इंस्टॉल करें",
+		"update": "अपडेट करें",
+		"enable": "सक्रिय करें",
+		"disable": "निष्क्रिय करें",
+		"details": "विवरण",
+		"unavailable": "उपलब्ध नहीं",
+		"mfVersion": "MF वर्ज़न",
+		"libVersion": "लाइब्रेरी वर्ज़न",
+		"updatesAvailable": "अपडेट उपलब्ध हैं"
+	},
+	"nodeHandle": {
+		"ariaLabel": "नोड मेनू खोलने के लिए नोड हैंडल पर क्लिक करें",
+		"required": "*आवश्यक"
+	},
+	"draggableItem": {
+		"ariaLabel": "खिसकाने के लिए ड्रैग करें"
+	}
+}

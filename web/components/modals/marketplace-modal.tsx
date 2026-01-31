@@ -1,5 +1,6 @@
 import { MarketplaceCategoryEnum } from "@/lib/enums";
 import { TabItem } from "@/lib/types";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import AppGallery from "../marketplace/app/app-gallery";
 import WorkflowGallery from "../marketplace/workflow/workflow-gallery";
@@ -13,18 +14,20 @@ export default function MarketplaceModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const t = useTranslations();
+  
   const extensionCategories: TabItem[] = [
     {
       name: MarketplaceCategoryEnum.Featured,
-      description: "Featured apps and workflows from the community",
+      description: t("marketplaceModal.tabs.featuredDescription"),
     },
     {
       name: MarketplaceCategoryEnum.Workflows,
-      description: "Browse workflows shared by the community",
+      description: t("marketplaceModal.tabs.workflowsDescription"),
     },
     {
       name: MarketplaceCategoryEnum.Apps,
-      description: "Browse federated Pulse Apps developed by the community",
+      description: t("marketplaceModal.tabs.appsDescription"),
     },
   ];
 
@@ -33,7 +36,7 @@ export default function MarketplaceModal({
   );
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title={"Community Marketplace"}>
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={t("marketplaceModal.title")}>
       <div className="grid h-full w-full grid-rows-[max-content_1fr] px-2">
         <div className="flex justify-center">
           <div>
