@@ -174,6 +174,8 @@ export type PersistentSettings = {
     tts?: TTSModelConfig;
     sts?: TTSModelConfig;
   };
+
+  locale?: string;
 };
 // #endregion
 

@@ -1,6 +1,8 @@
+import { languageNames, LocaleType } from "@/i18n/config";
 import { PlatformEnum } from "@/lib/enums";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { useLocale } from "@/lib/hooks/use-locale";
 import useRouter from "@/lib/hooks/use-router";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIUrl } from "@/lib/pulse-editor-website/backend";
@@ -38,6 +40,7 @@ export default function NavTopBar({
 
   const { session, signOut, subscription, usage } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
+  const { locale, setLocale } = useLocale();
   const router = useRouter();
 
   // #region Load specified app if app query parameter is present
@@ -188,6 +191,36 @@ export default function NavTopBar({
               {t("common.signIn")}
             </Button>
           )}
+
+          <Dropdown>
+            <DropdownTrigger>
+              <Button
+                // Disable on hover background
+                className="data-[hover=true]:bg-transparent"
+                isIconOnly
+                variant="light"
+                onPress={() => {}}
+              >
+                <Icon name="language" variant="round" />
+              </Button>
+            </DropdownTrigger>
+            <DropdownMenu>
+              <DropdownSection title={t("language.title")}>
+                {Object.entries(languageNames).map(([langCode, langName]) => (
+                  <DropdownItem
+                    key={langCode}
+                    onPress={() => {
+                      setLocale(langCode as LocaleType);
+                    }}
+                    className={langCode === locale ? "font-semibold" : ""}
+                  >
+                    {langName}
+                  </DropdownItem>
+                ))}
+              </DropdownSection>
+            </DropdownMenu>
+          </Dropdown>
+
           {session && (
             <Dropdown>
               <DropdownTrigger>
@@ -232,7 +265,7 @@ export default function NavTopBar({
                   </DropdownItem>
                 </DropdownSection>
 
-                <DropdownSection title={t("account.title")}>
+                <DropdownSection title={t("account.title")} showDivider>
                   <DropdownItem
                     key={"manage-plan"}
                     onPress={() => {
@@ -255,22 +288,6 @@ export default function NavTopBar({
                     }}
                   >
                     {t("subscription.managePlan")}
-                  </DropdownItem>
-                  <DropdownItem
-                    key={"api-keys"}
-                    onPress={() => {
-                      const url = getAPIUrl("/home/settings/developer");
-                      if (getPlatform() === PlatformEnum.Capacitor) {
-                        Browser.open({
-                          url: url.toString(),
-                        });
-                      } else {
-                        // open in a new external browser window
-                        window.open(url.toString(), "_blank");
-                      }
-                    }}
-                  >
-                    API Keys
                   </DropdownItem>
                   <DropdownItem
                     key={"api-keys"}
