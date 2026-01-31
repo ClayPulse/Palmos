@@ -3,8 +3,8 @@ import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { CanvasViewConfig, WorkflowContent } from "@/lib/types";
+import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { useContext, useEffect, useState } from "react";
-import { v4 } from "uuid";
 import NavMenuDropdown from "../nav-menu-dropdown";
 
 export default function ViewMenuDropDown() {
@@ -83,7 +83,7 @@ export default function ViewMenuDropDown() {
             ) as WorkflowContent;
             if (workflowContent) {
               // Create a new tab view with the imported workflow
-              const viewId = "canvas-" + v4();
+              const viewId = createCanvasViewId();
               await createCanvasTabView({
                 viewId,
                 appConfigs: workflowContent.nodes.map(

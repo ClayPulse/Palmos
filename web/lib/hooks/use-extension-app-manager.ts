@@ -4,7 +4,10 @@ import { useCallback, useContext } from "react";
 import toast from "react-hot-toast";
 import { compare } from "semver";
 import useSWR from "swr";
-import { getRemoteClientBaseURL } from "../module-federation/remote";
+import {
+  getDefaultRemoteOrigin,
+  getRemoteClientBaseURL,
+} from "../module-federation/remote";
 import {
   getHostMFVersion,
   getRemoteLibVersion,
@@ -42,18 +45,20 @@ export function useExtensionAppManager(fetchCategory?: string) {
                 );
               }
 
+              const origin = getDefaultRemoteOrigin();
+
               const mfVersion =
                 extMeta.mfVersion ??
                 (await getRemoteMFVersion(
-                  `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
                   extMeta.name,
                   extMeta.version,
+                  origin,
                 ));
 
               return {
                 config: extMeta.appConfig!,
                 isEnabled: true,
-                remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+                remoteOrigin: origin,
                 mfVersion: mfVersion,
               };
             }),
@@ -216,12 +221,12 @@ export function useExtensionAppManager(fetchCategory?: string) {
   ) {
     // Fetch the remote to get config
     const configUrl =
-      getRemoteClientBaseURL(remoteOrigin, id, version) + "/pulse.config.json";
+      getRemoteClientBaseURL(id, version, remoteOrigin) + "/pulse.config.json";
 
     const config = await fetch(configUrl).then((res) => res.json());
 
     // Fetch the manifest to get mfVersion
-    const remoteMFVersion = await getRemoteMFVersion(remoteOrigin, id, version);
+    const remoteMFVersion = await getRemoteMFVersion(id, version, remoteOrigin);
 
     console.log("Fetched remote config", config);
 
@@ -255,17 +260,17 @@ export function useExtensionAppManager(fetchCategory?: string) {
     const remoteOrigin = url.origin + parts.slice(0, -2).join("/");
 
     const remoteMFVersion = await getRemoteMFVersion(
-      remoteOrigin,
       extensionId,
       version,
+      remoteOrigin,
     );
 
     const hostMFVersion = await getHostMFVersion();
 
     const libVersion = await getRemoteLibVersion(
-      remoteOrigin,
       extensionId,
       version,
+      remoteOrigin,
     );
 
     if (remoteMFVersion !== hostMFVersion) {
@@ -321,18 +326,16 @@ export function useExtensionAppManager(fetchCategory?: string) {
             );
           }
 
+          const origin = getDefaultRemoteOrigin();
+
           const mfVersion =
             extMeta.mfVersion ??
-            (await getRemoteMFVersion(
-              `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
-              extMeta.name,
-              extMeta.version,
-            ));
+            (await getRemoteMFVersion(extMeta.name, extMeta.version, origin));
 
           return {
             config: extMeta.appConfig!,
             isEnabled: true,
-            remoteOrigin: `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}`,
+            remoteOrigin: origin,
             mfVersion: mfVersion,
           };
         }),

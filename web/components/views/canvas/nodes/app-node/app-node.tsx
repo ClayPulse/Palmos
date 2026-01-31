@@ -2,7 +2,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import useActionExecutor from "@/lib/hooks/use-action-executor";
 import { useCanvas } from "@/lib/hooks/use-canvas";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { AppNodeData } from "@/lib/types";
+import { AppNodeData, NodeShape, NodeShapeAndLocation } from "@/lib/types";
 import {
   Node as ReactFlowNode,
   useInternalNode,
@@ -22,41 +22,95 @@ const AppNode = memo((props: any) => {
     selectedAction,
     isRunning,
     isShowingWorkflowConnector,
+    isFullscreen,
   }: AppNodeData = nodeProps.data;
   const viewId = config.viewId;
 
-  // const {
-  const { createAppTabView, deleteAppViewInCanvasView, activeTabView } =
-    useTabViewManager();
+  const { deleteAppViewInCanvasView } = useTabViewManager();
   const { actions } = useActionExecutor(config.app);
-  const { updateNode, zoomTo } = useReactFlow();
+  const { updateNode, zoomTo, updateNodeData } = useReactFlow();
   const viewport = useViewport();
   const node = useInternalNode(viewId);
   const { getViewCenterCoordForNode } = useCanvas();
 
-  const [previousPosition, setPreviousPosition] = useState<{
-    width: number;
-    height: number;
-    zoom: number;
-    x: number;
-    y: number;
-    zIndex?: number;
-  } | null>(null);
+  const initialShapeAndLocation: NodeShape = {
+    width: nodeProps.data.config.initialWidth ?? 800,
+    height: nodeProps.data.config.initialHeight ?? 600,
+  };
 
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [previousShapeAndLocation, setPreviousShapeAndLocation] =
+    useState<NodeShapeAndLocation | null>(null);
 
+  async function setIsFullscreen(value: boolean) {
+    await updateNodeData(viewId, { isFullscreen: value });
+  }
+
+  // In fullscreen mode, adjust the node size and position when the canvas size changes
   useEffect(() => {
     if (isFullscreen) {
       zoomToFitNodeFullscreen();
     }
   }, [isFullscreen, editorContext?.editorStates.canvasSize]);
 
+  // If the node is fullscreen and previousShapeAndLocation is null, set it to
+  // the initial shape and location
+  useEffect(() => {
+    if (isFullscreen && !previousShapeAndLocation) {
+      setPreviousShapeAndLocation({
+        width: initialShapeAndLocation.width,
+        height: initialShapeAndLocation.height,
+        zoom: 1,
+        zIndex: 1,
+      });
+    }
+  }, [isFullscreen, previousShapeAndLocation]);
+
+  // Toggle fullscreen mode
+  useEffect(() => {
+    async function toggleFullscreenEffect() {
+      if (!node) return;
+
+      if (!isFullscreen) {
+        if (previousShapeAndLocation) {
+          await zoomTo(previousShapeAndLocation.zoom);
+          await updateNode(viewId, {
+            width: previousShapeAndLocation.width,
+            height: previousShapeAndLocation.height,
+            position:
+              previousShapeAndLocation.x && previousShapeAndLocation.y
+                ? {
+                    x: previousShapeAndLocation.x,
+                    y: previousShapeAndLocation.y,
+                  }
+                : node.position,
+            zIndex: previousShapeAndLocation.zIndex,
+          });
+          setPreviousShapeAndLocation(null);
+        }
+      } else {
+        setPreviousShapeAndLocation({
+          width: node.width as number,
+          height: node.height as number,
+          zoom: viewport.zoom,
+          x: node.position.x,
+          y: node.position.y,
+          zIndex: node.zIndex,
+        });
+        await zoomToFitNodeFullscreen();
+      }
+    }
+
+    toggleFullscreenEffect();
+  }, [isFullscreen]);
+
+  // Fit node to current canvas size in fullscreen mode
   async function zoomToFitNodeFullscreen() {
     const padding = 4;
+    const topMargin = 64;
     const width =
       (editorContext?.editorStates.canvasSize?.width ?? 0) - padding * 2;
     const height =
-      (editorContext?.editorStates.canvasSize?.height ?? 0) - 72 - padding * 2;
+      (editorContext?.editorStates.canvasSize?.height ?? 0) - topMargin - padding * 2;
 
     const viewCenter = getViewCenterCoordForNode(width, height, viewport.zoom);
 
@@ -65,45 +119,49 @@ const AppNode = memo((props: any) => {
       height: height,
       position: {
         x: 0 + viewCenter.x,
-        y: 72 / 2 + viewCenter.y,
+        y: topMargin / 2 + viewCenter.y,
       },
       zIndex: 1000,
     });
     await zoomTo(1);
   }
 
-  async function openViewInFullScreen() {
+  async function toggleFullScreen() {
     if (!node) return;
+    setIsFullscreen(!isFullscreen);
 
-    if (isFullscreen) {
-      if (previousPosition) {
-        await zoomTo(previousPosition.zoom);
-        await updateNode(viewId, {
-          width: previousPosition.width,
-          height: previousPosition.height,
-          position: {
-            x: previousPosition.x,
-            y: previousPosition.y,
-          },
-          zIndex: previousPosition.zIndex,
-        });
-        setPreviousPosition(null);
-      }
+    // if (isFullscreen) {
+    //   if (previousShapeAndLocation) {
+    //     await zoomTo(previousShapeAndLocation.zoom);
+    //     await updateNode(viewId, {
+    //       width: previousShapeAndLocation.width,
+    //       height: previousShapeAndLocation.height,
+    //       position:
+    //         previousShapeAndLocation.x && previousShapeAndLocation.y
+    //           ? {
+    //               x: previousShapeAndLocation.x,
+    //               y: previousShapeAndLocation.y,
+    //             }
+    //           : node.position,
+    //       zIndex: previousShapeAndLocation.zIndex,
+    //     });
+    //     setPreviousShapeAndLocation(null);
+    //   }
 
-      setIsFullscreen(false);
-    } else {
-      setPreviousPosition({
-        width: node.width as number,
-        height: node.height as number,
-        zoom: viewport.zoom,
-        x: node.position.x,
-        y: node.position.y,
-        zIndex: node.zIndex,
-      });
+    //   setIsFullscreen(false);
+    // } else {
+    //   setPreviousShapeAndLocation({
+    //     width: node.width as number,
+    //     height: node.height as number,
+    //     zoom: viewport.zoom,
+    //     x: node.position.x,
+    //     y: node.position.y,
+    //     zIndex: node.zIndex,
+    //   });
 
-      await zoomToFitNodeFullscreen();
-      setIsFullscreen(true);
-    }
+    //   await zoomToFitNodeFullscreen();
+    //   setIsFullscreen(true);
+    // }
   }
 
   return (
@@ -113,7 +171,7 @@ const AppNode = memo((props: any) => {
       selectedAction={selectedAction}
       controlActions={{
         fullscreen: () => {
-          openViewInFullScreen();
+          toggleFullScreen();
         },
         delete: () => {
           deleteAppViewInCanvasView(viewId);

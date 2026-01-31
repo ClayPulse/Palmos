@@ -101,8 +101,15 @@ export type EditorStates = {
     audioBuffer?: ArrayBuffer;
   };
 
+  // Read-only
   workflowNodes: ReactFlowNode<AppNodeData>[];
+  // Read-only
   workflowEdges: ReactFlowEdge[];
+  // Update workflow callbacks
+  updateWorkflowNodeData?: (
+    nodeViewId: string,
+    data: Partial<AppNodeData>,
+  ) => void;
   canvasSize?: {
     width: number;
     height: number;
@@ -182,6 +189,7 @@ export type ModalStates = {
   openInProject?: {
     isOpen?: boolean;
     app?: ExtensionApp;
+    isOpenAppInFullscreen?: boolean;
     workflow?: Workflow;
   };
   editorSettings?: {
@@ -220,6 +228,10 @@ export type ModalStates = {
   };
   sharing?: {
     isOpen?: boolean;
+  };
+  quickVibeCodeSetup?: {
+    isOpen?: boolean;
+    app?: ExtensionApp;
   };
 };
 
@@ -281,13 +293,15 @@ export type MenuAction = {
 export type AppViewConfig = {
   viewId: string;
   app: string;
+  requiredVersion?: string;
   inviteCode?: string;
   // An app can be opened via a file.
   // e.g. a PDF viewer app can be opened with a PDF file;
   //      a game engine app can be opened with a game project file.
   fileUri?: string;
-  recommendedHeight?: number;
-  recommendedWidth?: number;
+  initialHeight?: number;
+  initialWidth?: number;
+  initialIsFullscreen?: boolean;
 };
 
 export type CanvasViewConfig = {
@@ -421,6 +435,7 @@ export type AppNodeData = {
   selectedAction: Action | undefined;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;
+  isFullscreen: boolean;
   ownedAppViews: {
     [key: string]: ViewModel;
   };
@@ -438,6 +453,20 @@ export type DragData = {
   type: "file" | "app";
   data: FileDragData | AppDragData;
 };
+
+export type NodeShape = {
+  width?: number;
+  height?: number;
+};
+
+export type NodeLocation = {
+  x?: number;
+  y?: number;
+  zoom: number;
+  zIndex?: number;
+};
+
+export type NodeShapeAndLocation = NodeShape & NodeLocation;
 // #endregion
 
 // #region Action

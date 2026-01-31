@@ -21,7 +21,7 @@ Click <Icon name="dashboard_customize"/> icon in the toolbar at bottom of screen
 ## Create a new source file
 
 :::info
-Make sure you have opened a project. To open a project, you can click <Icon name="menu"/> in top navigation bar to open project explorer. Then click on the project that you want to open, or create a new project. See [Manage Projects](http://localhost:3000/docs/guide/quick-start/manage-projects) for more details.
+Make sure you have opened a project. To open a project, you can click <Icon name="menu"/> in top navigation bar to open project explorer. Then click on the project that you want to open, or create a new project. See [Manage Projects](/guide/quick-start/manage-projects) for more details.
 :::
 
 Open the project explorer by clicking <Icon name="menu"/> in top navigation. Now click the <Icon name="note_add" variant="outlined"/> icon to create a new file, then enter file name to create the file.

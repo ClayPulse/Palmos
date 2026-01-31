@@ -1,0 +1,230 @@
+openapi: 3.1.1
+info:
+  title: Vibe Dev Flow - Generate Endpoint
+  version: 1.0.0
+  description: |
+    Vibe Dev Flow is a vibe coding service that generates, builds, and publishes
+    Pulse Apps using cloud-based coding agents with both user-friendly UI and backend API.
+
+    This API exposes a **streaming Server-Sent Events (SSE)** endpoint that:
+    - Creates a remote workspace
+    - Runs AI coding agents
+    - Builds and publishes a Pulse App
+    - Streams structured progress updates in real time
+
+    Clients should consume the response as an SSE stream and parse each
+    `data:` event as JSON.
+
+servers:
+  - url: https://pulse-editor.com/api/server-function/vibe_dev_flow/latest
+    description: Production
+  - url: http://localhost:6080/server-function
+    description: Local development
+
+paths:
+  /generate-code/v2/generate:
+    post:
+      summary: Run Vibe coding flow and stream progress updates
+      description: |
+        Starts a Vibe coding flow that generates a new Pulse App based on a user prompt.
+
+        The response is a **Server-Sent Events (SSE)** stream where each event
+        contains a JSON-encoded message describing progress, tool calls, updates,
+        or final outputs.
+
+        Each SSE message is formatted as:
+        ```
+        data: <JSON>
+        ```
+
+        followed by a blank line.
+
+      operationId: generateVibeApp
+      tags:
+        - Generate Vibe App
+      parameters:
+        - name: Authorization
+          in: header
+          required: true
+          schema:
+            type: string
+          description: Pulse Editor API key
+          example: Bearer your_api_key_here
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - prompt
+                - appName
+              properties:
+                prompt:
+                  type: string
+                  description: The user prompt instructing the Vibe coding agent
+                  example: "Create a todo app with auth and dark mode"
+                appName:
+                  type: string
+                  description: Friendly display name for the app
+                  example: "My Todo App"
+                  optional: false
+                appId:
+                  type: string
+                  description: Optional unique identifier of an existing app to update. If not provided, a new app will be created.
+                  example: "my_app_x7k9q2"
+                version:
+                  type: string
+                  description: Optional version identifier of an existing app that the next vibe coding generation/query should be based on. If not provided, defaults to latest version.
+                  example: "0.0.1"
+      responses:
+        "200":
+          description: Streaming Server-Sent Events (SSE) with progress and final result
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: 'SSE stream payload; clients should parse "data: ..." events. TODO: This will change to more structured JSON events in the future.'
+              examples:
+                notification:
+                  summary: Notification message
+                  value: |
+                    data: {"type":"creation","messageId":1,"data":{"type":"notification","title":"Starting Workspace","description":"Starting workspace for app \"my_app_x7k9q2\"..."}}
+                update:
+                  summary: Update message
+                  value: |
+                    data: {"type":"update","messageId":1,"updateType":"append","delta":{"result":"Workspace started."},"isFinal":true}
+                artifact:
+                  summary: Final artifact output
+                  value: |
+                    data: {"type":"creation","messageId":42,"data":{"type":"artifactOutput","title":"App Published","description":"App published successfully!","result":"{\"publishedAppLink\":\"https://pulse-editor.com/code?app=my_app_x7k9q2\"}"\"sourceCodeArchiveLink\":\"https://pulse-editor.com/code?app=daily_wallpaper_3_ni63if\",\"appId\":\"daily_wallpaper_3_ni63if\",\"version\":\"0.0.2\"}"},"isFinal":true}
+
+        "400":
+          description: Bad Request (missing or invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                missing_prompt:
+                  value: |
+                    error: Bad Request: Missing prompt
+
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+components:
+  schemas:
+    GenerateRequest:
+      type: object
+      required:
+        - prompt
+        - appName
+      properties:
+        prompt:
+          type: string
+          description: User instruction for the Vibe coding agent
+          example: Create a note-taking app with markdown support
+        appName:
+          type: string
+          description: Display name of the Pulse App
+          example: Markdown Notes
+        streamUpdatePolicy:
+          type: string
+          description: |
+            Controls when streaming updates are emitted.
+          enum:
+            - whenTaskItemFinished
+            - whenNewTokenAvailable
+          example: whenTaskItemFinished
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+
+    AgentTaskMessage:
+      type: object
+      required:
+        - type
+        - messageId
+        - data
+      properties:
+        type:
+          $ref: "#/components/schemas/AgentTaskMessageType"
+        messageId:
+          type: integer
+          description: Incremental task message ID
+        data:
+          $ref: "#/components/schemas/AgentTaskMessageData"
+        isFinal:
+          type: boolean
+          description: Indicates no further updates are expected for this message
+
+    AgentTaskMessageUpdate:
+      type: object
+      required:
+        - type
+        - messageId
+        - updateType
+        - delta
+      properties:
+        type:
+          $ref: "#/components/schemas/AgentTaskMessageType"
+        messageId:
+          type: integer
+        updateType:
+          type: string
+          enum: [append]
+          description: Update strategy (only `append` is supported)
+        delta:
+          $ref: "#/components/schemas/AgentTaskMessageData"
+        isFinal:
+          type: boolean
+        timeUsedSec:
+          type: string
+          description: Optional elapsed time information
+
+    AgentTaskMessageType:
+      type: string
+      enum:
+        - creation
+        - update
+
+    AgentTaskMessageDataType:
+      type: string
+      enum:
+        - notification
+        - toolCall
+        - artifactOutput
+
+    AgentTaskMessageData:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/AgentTaskMessageDataType"
+        title:
+          type: string
+        description:
+          type: string
+        toolName:
+          type: string
+        parameters:
+          type: object
+          additionalProperties: true
+        error:
+          type: string
+        result:
+          type: string

@@ -172,6 +172,38 @@ ${Object.entries(funcs)
 			console.log('Continuing...');
 		}
 
+		// Generate tsconfig for server functions
+		function generateTempTsConfig() {
+			const tempTsConfigPath = path.join(
+				process.cwd(),
+				'node_modules/.pulse/tsconfig.server.json',
+			);
+
+			const tsConfig = {
+				compilerOptions: {
+					target: 'ES2020',
+					module: 'esnext',
+					moduleResolution: 'bundler',
+					strict: true,
+					declaration: true,
+					outDir: path.join(process.cwd(), 'dist'),
+				},
+				include: [
+					path.join(process.cwd(), 'src/server-function/**/*'),
+					path.join(process.cwd(), 'pulse.config.ts'),
+					path.join(process.cwd(), 'global.d.ts'),
+				],
+				exclude: [
+					path.join(process.cwd(), 'node_modules'),
+					path.join(process.cwd(), 'dist'),
+				],
+			};
+
+			fs.writeFileSync(tempTsConfigPath, JSON.stringify(tsConfig, null, 2));
+		}
+
+		generateTempTsConfig();
+
 		// Run a new webpack compilation to pick up new server functions
 		const options = {
 			...compiler.options,
@@ -332,59 +364,6 @@ ${Object.entries(funcs)
 				},
 			],
 		},
-		stats: {
-			all: false,
-			errors: true,
-			warnings: true,
-			logging: 'warn',
-			colors: true,
-		},
-		infrastructureLogging: {
-			level: 'warn',
-		},
-	};
-
-	const previewHostConfig: WebpackConfig = {
-		mode: mode,
-		entry:
-			'./node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/index.js',
-		target: 'async-node',
-		output: {
-			publicPath: 'auto',
-			library: {type: 'commonjs-module'},
-			path: path.resolve(projectDirName, 'dist/preview/backend'),
-			filename: 'index.cjs',
-		},
-		resolve: {
-			extensions: ['.ts', '.js'],
-		},
-		module: {
-			rules: [
-				{
-					test: /\.tsx?$/,
-					use: [
-						{
-							loader: 'ts-loader',
-							options: {
-								transpileOnly: false, // Enables type-checking and .d.ts file emission
-							},
-						},
-					],
-					exclude: [/node_modules/, /dist/],
-				},
-			],
-		},
-		plugins: [
-			new NodeFederationPlugin(
-				{
-					remoteType: 'script',
-					name: 'preview_host',
-					useRuntimePlugin: true,
-					exposes: {},
-				} as any,
-				{},
-			),
-		],
 		stats: {
 			all: false,
 			errors: true,
@@ -596,7 +575,12 @@ ${Object.entries(funcs)
 			rules: [
 				{
 					test: /\.tsx?$/,
-					use: 'ts-loader',
+					use: {
+						loader: 'ts-loader',
+						options: {
+							configFile: 'node_modules/.pulse/tsconfig.server.json',
+						},
+					},
 					exclude: [/node_modules/, /dist/],
 				},
 			],
@@ -615,7 +599,7 @@ ${Object.entries(funcs)
 	// #endregion
 
 	if (isPreview) {
-		return [previewClientConfig, previewHostConfig, mfServerConfig];
+		return [previewClientConfig, mfServerConfig];
 	} else if (buildTarget === 'server') {
 		return [mfServerConfig];
 	} else if (buildTarget === 'client') {

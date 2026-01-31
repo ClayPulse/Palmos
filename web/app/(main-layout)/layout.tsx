@@ -17,8 +17,8 @@ import messages from "../../messages/en.json";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pulse Editor",
-  description: "AI powered editor to boost your creativity",
+  title: "Pulse Editor Web",
+  description: "Web-based Vibe Coding Editor",
 };
 
 const locale = "en";
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`bg-default h-[100dvh] w-[100dvw] pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] antialiased`}
+        className={`bg-default h-[100dvh] w-[100dvw] pt-[env(safe-area-inset-top)] antialiased`}
       >
         <Analytics />
         <Suspense>

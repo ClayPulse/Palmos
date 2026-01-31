@@ -5,6 +5,7 @@ import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { AppViewConfig, ExtensionApp } from "@/lib/types";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
+import { compare } from "semver";
 import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 
 export default function BaseAppView({
@@ -18,6 +19,7 @@ export default function BaseAppView({
 
   const {
     installExtensionApp,
+    uninstallExtensionApp,
     loadAppFromCache,
     loadAppFromRegistry,
     loadAppFromURL,
@@ -49,7 +51,21 @@ export default function BaseAppView({
       if (!config.app) return;
 
       const cachedExt = await loadAppFromCache(config.app);
+
       if (cachedExt) {
+        // Update extension app if ext is newer
+        const isNewerVersion =
+          config.requiredVersion && cachedExt
+            ? compare(config.requiredVersion, cachedExt.config.version) === 1
+            : false;
+
+        if (isNewerVersion) {
+          console.log(
+            `Updating extension app ${cachedExt.config.id} to version ${cachedExt.config.version}`,
+          );
+          await uninstallExtensionApp(cachedExt.config.id);
+        }
+        
         await installAndOpenApp(cachedExt);
       } else if (
         config.app?.startsWith("http://") ||

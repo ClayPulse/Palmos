@@ -1,15 +1,26 @@
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
+import { createAppViewId } from "@/lib/views/view-helpers";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useSearchParams } from "next/navigation";
-import { useContext, useEffect, useRef, useState } from "react";
-import { v4 } from "uuid";
+import { lazy, Suspense, useContext, useEffect, useRef, useState } from "react";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
-import { MemoizedCanvasView } from "./canvas/canvas-view";
 import HomeView from "./home/home-view";
 import ProjectView from "./project/project-view";
-import { MemoizedStandaloneAppView } from "./standalone-app/standalone-app-view";
+// import { MemoizedCanvasView } from "./canvas/canvas-view";
+// import { MemoizedStandaloneAppView } from "./standalone-app/standalone-app-view";
+
+const LazyCanvasView = lazy(() =>
+  import("./canvas/canvas-view").then((mod) => ({
+    default: mod.MemoizedCanvasView,
+  })),
+);
+const LazyStandaloneAppView = lazy(() =>
+  import("./standalone-app/standalone-app-view").then((mod) => ({
+    default: mod.MemoizedStandaloneAppView,
+  })),
+);
 
 export default function ViewArea() {
   const editorContext = useContext(EditorContext);
@@ -29,10 +40,10 @@ export default function ViewArea() {
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
 
   const isInitialized = useRef(false);
+  const app = params?.get("app");
 
   useEffect(() => {
     // Standalone app mode
-    const app = params?.get("app");
     const inviteCode = params?.get("inviteCode") || undefined;
     const fileUri = params?.get("fileUri") || undefined;
 
@@ -47,7 +58,7 @@ export default function ViewArea() {
 
         if (existingAppIndex === -1) {
           // Create new tab if not already exists
-          const viewId = `${app}-${v4()}`;
+          const viewId = createAppViewId(app);
           await createAppTabView({
             viewId,
             app,
@@ -80,13 +91,11 @@ export default function ViewArea() {
 
   return (
     <div className="h-full w-full overflow-hidden">
-      {!editorContext?.editorStates.project ? (
+      {!editorContext?.editorStates.project && app === null ? (
         <HomeView />
       ) : tabViews.length === 0 ? (
         <ProjectView />
-      ) : tabIndex < 0 || tabIndex >= tabViews.length ? (
-        <div>No view selected</div>
-      ) : (
+      ) : tabIndex >= 0 && tabIndex < tabViews.length ? (
         <div
           className="relative grid h-full w-full grid-rows-1 gap-y-0.5 data-[is-show-tabs=false]:data-[type=app]:pt-17 data-[is-show-tabs=true]:data-[type=app]:grid-rows-[max-content_auto]"
           data-is-show-tabs={isShowTabs}
@@ -130,19 +139,23 @@ export default function ViewArea() {
                 data-type={tabView.type}
                 className="hidden h-full w-full data-[is-active=true]:block data-[type=app]:px-2"
               >
-                {tabView.type === ViewModeEnum.App ? (
-                  <MemoizedStandaloneAppView
-                    config={tabView.config as AppViewConfig}
-                  />
-                ) : tabView.type === ViewModeEnum.Canvas ? (
-                  <MemoizedCanvasView
-                    config={tabView.config as CanvasViewConfig}
-                    isActive={idx === tabIndex}
-                    tabName={tabItems[idx]?.name}
-                  />
-                ) : (
-                  <div>Unknown view type</div>
-                )}
+                <Suspense
+                  fallback={<div className="bg-default h-full w-full" />}
+                >
+                  {tabView.type === ViewModeEnum.App ? (
+                    <LazyStandaloneAppView
+                      config={tabView.config as AppViewConfig}
+                    />
+                  ) : tabView.type === ViewModeEnum.Canvas ? (
+                    <LazyCanvasView
+                      config={tabView.config as CanvasViewConfig}
+                      isActive={idx === tabIndex}
+                      tabName={tabItems[idx]?.name}
+                    />
+                  ) : (
+                    <div>Unknown view type</div>
+                  )}
+                </Suspense>
               </div>
             ))}
           </div>
@@ -153,6 +166,8 @@ export default function ViewArea() {
             </div>
           )}
         </div>
+      ) : (
+        <div>No view selected</div>
       )}
     </div>
   );

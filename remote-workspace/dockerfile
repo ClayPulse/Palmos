@@ -1,33 +1,36 @@
 FROM ubuntu:latest
-ENV NODE_VERSION=20
+ENV NODE_VERSION=22
 
 WORKDIR /pulse-editor/server
 
-# install curl
-RUN apt update && apt install -y curl make python3 build-essential
+# Install basic tools
+RUN apt update && apt install -y curl make python3 build-essential git zip unzip ca-certificates gnupg && rm -rf /var/lib/apt/lists/*
 
-# install nvm
-RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+# Install node
 
-# set env
-ENV NVM_DIR=/root/.nvm
+# Add NodeSource repository for Node.js 22
+RUN curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x | bash -
+
+# Install Node.js
+RUN apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . /pulse-editor/server
 
-# install node
-RUN bash -c "source $NVM_DIR/nvm.sh && nvm install $NODE_VERSION && npm install && npm run build"
+# Clone https://github.com/shellishack/supergateway repository
+# RUN git clone https://github.com/shellishack/supergateway /pulse-editor/server/src/lib/supergateway
 
-# install pulse cli
-RUN bash -c "source $NVM_DIR/nvm.sh && npm install -g @pulse-editor/cli@beta"
+# install pulse-cli
+RUN npm install -g @pulse-editor/cli@beta
 
-# install git, zip, unzip
-RUN apt install -y git zip unzip
+# install dependencies
+RUN npm install
+
+# build project
+RUN npm run build
 
 # Generate self-signed certificate
 # RUN bash -c "./utils/generate-self-signed.sh"
-
-# set ENTRYPOINT for reloading nvm-environment
-ENTRYPOINT ["bash", "-c", "source $NVM_DIR/nvm.sh && exec \"$@\"", "--"]
 
 EXPOSE 6080 6443
 

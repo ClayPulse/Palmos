@@ -1,0 +1,46 @@
+---
+id: vibe-dev-flow-generate-endpoint
+title: "Vibe Dev Flow - Generate Endpoint"
+description: "Vibe Dev Flow is a vibe coding service that generates, builds, and publishes"
+sidebar_label: Introduction
+sidebar_position: 0
+hide_title: true
+custom_edit_url: null
+---
+
+import ApiLogo from "@theme/ApiLogo";
+import Heading from "@theme/Heading";
+import SchemaTabs from "@theme/SchemaTabs";
+import TabItem from "@theme/TabItem";
+import Export from "@theme/ApiExplorer/Export";
+
+<span
+  className={"theme-doc-version-badge badge badge--secondary"}
+  children={"Version: 1.0.0"}
+>
+</span>
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"Vibe Dev Flow - Generate Endpoint"}
+>
+</Heading>
+
+
+
+Vibe Dev Flow is a vibe coding service that generates, builds, and publishes
+Pulse Apps using cloud-based coding agents with both user-friendly UI and backend API.
+
+This API exposes a **streaming Server-Sent Events (SSE)** endpoint that:
+- Creates a remote workspace
+- Runs AI coding agents
+- Builds and publishes a Pulse App
+- Streams structured progress updates in real time
+
+Clients should consume the response as an SSE stream and parse each
+`data:` event as JSON.
+
+
+
+      

@@ -231,20 +231,9 @@ export default function CanvasView({
     function promoteToWorkflowNode(newApps: AppViewConfig[]) {
       const newNodes: ReactFlowNode<AppNodeData>[] =
         newApps?.map((appConfig) => {
-          // const screenCenter = getScreenCenter();
-
-          // const viewCenter = screenToFlowPosition({
-          //   x:
-          //     screenCenter.x -
-          //     ((appConfig.recommendedWidth ?? 640) / 2) * viewport.zoom,
-          //   y:
-          //     screenCenter.y -
-          //     ((appConfig.recommendedHeight ?? 360) / 2) * viewport.zoom,
-          // });
-
           const viewCenter = getViewCenterCoordForNode(
-            appConfig.recommendedWidth ?? 640,
-            appConfig.recommendedHeight ?? 360,
+            appConfig.initialWidth ?? 640,
+            appConfig.initialHeight ?? 360,
             viewport.zoom,
           );
 
@@ -257,6 +246,7 @@ export default function CanvasView({
                 (n) => n.id === appConfig.viewId,
               )?.data.isShowingWorkflowConnector ?? false,
             ownedAppViews: {}, // Initially no owned apps
+            isFullscreen: appConfig.initialIsFullscreen ?? false,
           };
 
           return {
@@ -264,8 +254,8 @@ export default function CanvasView({
             position: viewCenter,
             data: newAppNodeData,
             type: "appNode",
-            height: appConfig.recommendedHeight ?? 360,
-            width: appConfig.recommendedWidth ?? 640,
+            height: appConfig.initialHeight ?? 360,
+            width: appConfig.initialWidth ?? 640,
           };
         }) ?? [];
 

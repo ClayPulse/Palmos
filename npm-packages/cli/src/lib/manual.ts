@@ -49,6 +49,9 @@ const create = `\
                     --visibility, -v [visibility]
                       The visibility of the new project. Options are private,
                       public, and unlisted.
+                    --path, -p [path]
+                      The path where to create the new project. Defaults to
+                      the name of the project in the current working directory.
 
 `;
 

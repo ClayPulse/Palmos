@@ -12,6 +12,7 @@ import { v4 } from "uuid";
 import { ExtensionApp, ScopedAction } from "../types";
 import { useMenuActions } from "./menu-actions/use-menu-actions";
 import { useTabViewManager } from "./use-tab-view-manager";
+import { createAppViewId } from "../views/view-helpers";
 
 /**
  *  Use actions in active tab.
@@ -186,13 +187,13 @@ export default function useActionExecutor(appName?: string) {
       } else {
         // Create an instance of the app that provides the static Action,
         // then execute Action in the app's context.
-        const viewId = `${ext.config.id}-${v4()}`;
+        const viewId = createAppViewId(ext.config.id);
         if (activeTabView?.type === ViewModeEnum.Canvas) {
           await createAppViewInCanvasView({
             app: ext.config.id,
             viewId,
-            recommendedHeight: ext.config.recommendedHeight,
-            recommendedWidth: ext.config.recommendedWidth,
+            initialHeight: ext.config.recommendedHeight,
+            initialWidth: ext.config.recommendedWidth,
           });
         } else {
           await createAppTabView({

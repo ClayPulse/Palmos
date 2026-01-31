@@ -84,15 +84,31 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
 
 	const fileUrl = pathToFileURL(dir).href;
 
-	const {loadAndCall} = await import(fileUrl);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const response = await loadAndCall(
+	const {loadFunc, loadPrice} = await import(fileUrl);
+
+	const price = await loadPrice(
 		func,
-		request,
 		pulseConfig.id,
 		'http://localhost:3030',
 		pulseConfig.version,
 	);
+
+	if (price) {
+		// Make func name and price bold in console
+		console.log(`🏃 Running function \x1b[1m${func}\x1b[0m, credits consumed: \x1b[1m${price}\x1b[0m`);
+	} else {
+		console.log(`🏃 Running function \x1b[1m${func}\x1b[0m.`);
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const loadedFunc = await loadFunc(
+		func,
+		pulseConfig.id,
+		'http://localhost:3030',
+		pulseConfig.version,
+	);
+
+	const response = await loadedFunc(request);
 
 	const streamPipeline = promisify(pipeline);
 

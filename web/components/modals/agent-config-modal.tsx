@@ -74,7 +74,7 @@ export default function AgentConfigModal({
     <ModalWrapper
       isOpen={isOpen}
       onClose={onClose}
-      title="Agents Configuration"
+      title="Installed Agents"
       isShowGoBack={isCreatingNewAgent}
       goBackCallback={() => {
         setIsCreatingNewAgent(false);

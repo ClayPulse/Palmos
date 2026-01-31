@@ -3,17 +3,21 @@ import https from "https";
 import { IPty, spawn } from "node-pty";
 import os from "os";
 import { WebSocket, WebSocketServer } from "ws";
+import fs from "fs";
 
 let sharedPtyProcess: IPty | null = null;
 let sharedTerminalMode = false;
 
 const shell = os.platform() === "win32" ? "pwsh.exe" : "bash";
 
+const hasWorkspaceDir = fs.existsSync("/workspace");
+const cwd = hasWorkspaceDir ? "/workspace" : process.cwd();
+
 const spawnShell = () => {
   return spawn(shell, [], {
     name: "xterm-color",
     env: process.env,
-    cwd: "/workspace"
+    cwd: cwd,
   });
 };
 

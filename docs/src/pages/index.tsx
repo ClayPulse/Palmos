@@ -28,7 +28,7 @@ function HomepageHeader() {
           <div className={styles.buttons}>
             <Link
               className="button button--secondary button--lg"
-              to="/docs/guide"
+              to="/guide"
             >
               Pulse Editor Guide
             </Link>
@@ -36,7 +36,7 @@ function HomepageHeader() {
           <div className={styles.buttons}>
             <Link
               className="button button--secondary button--lg"
-              to="/docs/api-reference"
+              to="/api-reference"
             >
               API Reference
             </Link>

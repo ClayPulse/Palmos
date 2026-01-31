@@ -1,5 +1,5 @@
 import {Result} from 'meow';
-import {ReactNode, useEffect, useState} from 'react';
+import {ReactNode, useEffect, useMemo, useState} from 'react';
 import {Flags} from '../../lib/cli-flags.js';
 import {Box, Text, useApp} from 'ink';
 import Spinner from 'ink-spinner';
@@ -13,11 +13,18 @@ import path from 'path';
 export default function Create({cli}: {cli: Result<Flags>}) {
 	const [framework, setFramework] = useState<string | undefined>(undefined);
 	const [projectName, setProjectName] = useState<string | undefined>(undefined);
+	const [displayName, setDisplayName] = useState<string | undefined>(undefined);
 	const [visibility, setVisibility] = useState<string | undefined>(undefined);
+
+	const projectPath = useMemo(() => {
+		return cli.flags.path ?? projectName;
+	}, [projectName, cli]);
 
 	const [isShowFrameworkSelect, setIsShowFrameworkSelect] =
 		useState<boolean>(true);
 	const [isShowProjectNameInput, setIsShowProjectNameInput] =
+		useState<boolean>(false);
+	const [isShowDisplayNameInput, setIsShowDisplayNameInput] =
 		useState<boolean>(false);
 	const [isShowVisibilitySelect, setIsShowVisibilitySelect] =
 		useState<boolean>(false);
@@ -70,7 +77,11 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 		if (projectName) {
 			// Check if the project already exists
 			const projectPath = path.join(process.cwd(), projectName);
-			if (fs.existsSync(projectPath)) {
+			if (
+				fs.existsSync(projectPath) &&
+				fs.lstatSync(projectPath).isDirectory() &&
+				fs.readdirSync(projectPath).length > 0
+			) {
 				setErrorMessage(
 					<Text color="redBright">
 						❌ A project with same name already exists in current path.
@@ -82,6 +93,17 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				return;
 			}
 
+			const displayName = cli.flags.displayName;
+			if (displayName) {
+				setDisplayName(displayName);
+			} else {
+				setIsShowDisplayNameInput(true);
+			}
+		}
+	}, [projectName, cli]);
+
+	useEffect(() => {
+		if (displayName) {
 			const visibility = cli.flags.visibility;
 			if (visibility) {
 				setVisibility(visibility);
@@ -89,7 +111,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				setIsShowVisibilitySelect(true);
 			}
 		}
-	}, [projectName, cli]);
+	}, [displayName, cli]);
 
 	useEffect(() => {
 		if (visibility && projectName) {
@@ -98,6 +120,13 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 	}, [visibility, projectName]);
 
 	async function createFromTemplate(name: string, visibility: string) {
+		if (!projectPath) {
+			setErrorMessage(
+				<Text color="redBright">❌ Project path is not defined.</Text>,
+			);
+			return;
+		}
+
 		if (framework === 'react') {
 			// Clone the template repository
 			setCreateMessage(
@@ -107,12 +136,11 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				</Box>,
 			);
 			try {
-				await $`git clone --depth 1 https://github.com/ClayPulse/pulse-app-template.git ${name}`;
+				await $`git clone --depth 1 https://github.com/ClayPulse/pulse-app-template.git ${projectPath}`;
 			} catch (error) {
 				setCreateMessage(
 					<Text color="redBright">
-						❌ Failed to clone the template. Please check your internet
-						connection and try again.
+						❌ Failed to clone the template. {(error as any).message}
 					</Text>,
 				);
 				return;
@@ -127,7 +155,11 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			);
 
 			/* Setup pulse.config.ts */
-			const pulseConfigPath = path.join(process.cwd(), name, 'pulse.config.ts');
+			const pulseConfigPath = path.join(
+				process.cwd(),
+				projectPath,
+				'pulse.config.ts',
+			);
 			let pulseConfig = fs.readFileSync(pulseConfigPath, 'utf8');
 			// Modify visibility by matching the block that starts with 'visibility:',
 			// and replacing the entire line with the new visibility value.
@@ -138,27 +170,32 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			fs.writeFileSync(pulseConfigPath, pulseConfig);
 
 			/* Setup packages.json */
-			const packageJsonPath = path.join(process.cwd(), name, 'package.json');
+			const packageJsonPath = path.join(
+				process.cwd(),
+				projectPath,
+				'package.json',
+			);
 			const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 			packageJson.name = name.replaceAll('-', '_');
+			packageJson.displayName = displayName;
 
 			// Write the modified package.json back to the file
 			fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2));
 
 			// Remove the .git directory
-			const gitDirPath = path.join(process.cwd(), name, '.git');
+			const gitDirPath = path.join(process.cwd(), projectPath, '.git');
 			if (fs.existsSync(gitDirPath)) {
 				fs.rmSync(gitDirPath, {recursive: true, force: true});
 			}
 
 			// Remove the .github directory
-			const githubDirPath = path.join(process.cwd(), name, '.github');
+			const githubDirPath = path.join(process.cwd(), projectPath, '.github');
 			if (fs.existsSync(githubDirPath)) {
 				fs.rmSync(githubDirPath, {recursive: true, force: true});
 			}
 
 			// Remove LICENSE file
-			const licenseFilePath = path.join(process.cwd(), name, 'LICENSE');
+			const licenseFilePath = path.join(process.cwd(), projectPath, 'LICENSE');
 			if (fs.existsSync(licenseFilePath)) {
 				fs.rmSync(licenseFilePath, {force: true});
 			}
@@ -172,7 +209,7 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 			// Run `npm i`
 			try {
 				await execa(`npm install`, {
-					cwd: path.join(process.cwd(), name),
+					cwd: path.join(process.cwd(), projectPath),
 					shell: true,
 				});
 			} catch (error: any) {
@@ -205,6 +242,14 @@ export default function Create({cli}: {cli: Result<Flags>}) {
 				<ProjectNameInput
 					projectName={projectName}
 					setProjectName={setProjectName}
+				/>
+			)}
+
+			{isShowDisplayNameInput && (
+				<DisplayNameInput
+					projectName={projectName ?? ''}
+					displayName={displayName}
+					setDisplayName={setDisplayName}
 				/>
 			)}
 
@@ -283,6 +328,34 @@ function ProjectNameInput({
 				<UncontrolledTextInput
 					onSubmit={value => setTimeout(() => setProjectName(value), 0)}
 					focus={projectName === undefined}
+				/>
+			</Box>
+		</>
+	);
+}
+
+function DisplayNameInput({
+	projectName,
+	displayName,
+	setDisplayName,
+}: {
+	projectName: string;
+	displayName: string | undefined;
+	setDisplayName: (value: string) => void;
+}) {
+	return (
+		<>
+			<Box>
+				<Text>Enter your project display name: (default: {projectName})</Text>
+
+				<UncontrolledTextInput
+					onSubmit={value =>
+						setTimeout(
+							() => setDisplayName(value.length > 0 ? value : projectName),
+							0,
+						)
+					}
+					focus={displayName === undefined}
 				/>
 			</Box>
 		</>

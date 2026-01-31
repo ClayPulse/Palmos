@@ -3,14 +3,15 @@ import { IMCContext } from "@/components/providers/imc-provider";
 import { addToast, Button } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
-import { v4 } from "uuid";
-import { SideMenuTabEnum } from "../enums";
+import { PlatformEnum, SideMenuTabEnum } from "../enums";
+import { getPlatform } from "../platform-api/platform-checker";
 import {
   AppViewConfig,
   CanvasViewConfig,
   ExtensionApp,
   TabView,
 } from "../types";
+import { createAppViewId, createCanvasViewId } from "../views/view-helpers";
 import useRouter from "./use-router";
 import { useScreenSize } from "./use-screen-size";
 
@@ -150,7 +151,7 @@ export function useTabViewManager() {
 
       // Create a new tab for the app with the file
       await createAppTabView({
-        viewId: `${installedApp.config.id}-${v4()}`,
+        viewId: createAppViewId(installedApp.config.id),
         app: installedApp.config.id,
         fileUri: file.name,
       } as AppViewConfig);
@@ -181,11 +182,11 @@ export function useTabViewManager() {
 
       // Add the app with the file to the current canvas
       const newAppConfig: AppViewConfig = {
-        viewId: `${installedApp.config.id}-${v4()}`,
+        viewId: createAppViewId(installedApp.config.id),
         app: installedApp.config.id,
         fileUri: file.name,
-        recommendedHeight: installedApp.config.recommendedHeight,
-        recommendedWidth: installedApp.config.recommendedWidth,
+        initialHeight: installedApp.config.recommendedHeight,
+        initialWidth: installedApp.config.recommendedWidth,
       };
       const newCanvasConfig: CanvasViewConfig = {
         ...currentTab.config,
@@ -360,7 +361,11 @@ export function useTabViewManager() {
         ),
       );
 
-    if (requireWorkspace && !editorContext?.editorStates.currentWorkspace) {
+    if (
+      requireWorkspace &&
+      !editorContext?.editorStates.currentWorkspace &&
+      getPlatform() !== PlatformEnum.Electron
+    ) {
       addToast({
         title: "Workspace Required",
         description: "This workflow requires a workspace to be opened.",
@@ -480,7 +485,11 @@ export function useTabViewManager() {
         )
       : false;
 
-    if (requireWorkspace && !editorContext?.editorStates.currentWorkspace) {
+    if (
+      requireWorkspace &&
+      !editorContext?.editorStates.currentWorkspace &&
+      getPlatform() !== PlatformEnum.Electron
+    ) {
       addToast({
         title: "Workspace Required",
         description: "This workflow requires a workspace to be opened.",
@@ -514,7 +523,7 @@ export function useTabViewManager() {
 
     if (!currentTab || currentTab?.type !== ViewModeEnum.Canvas) {
       currentTab = await createCanvasTabView({
-        viewId: `canvas-${v4()}`,
+        viewId: createCanvasViewId(),
       } as CanvasViewConfig);
       if (!currentTab) {
         console.error("Failed to create a new canvas tab");
@@ -541,6 +550,7 @@ export function useTabViewManager() {
       };
     });
 
+    /* Wait until /components/views/canvas/canvas-view.tsx initializes app node where app is installed and created.  */
     await imcContext?.resolveWhenViewInitialized(appConfig.viewId);
 
     if (!isLandscape) {

@@ -75,10 +75,10 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 			setIsZipping(true);
 			// Zip the dist folder
 			try {
-				await $({cwd: 'dist'})`zip -r ../node_modules/@pulse-editor/dist.zip *`;
-			} catch (error) {
+				await $({cwd: 'dist'})`zip -r ../node_modules/@pulse-editor/dist.zip .`;
+			} catch (error: any) {
 				setIsZippingError(true);
-				setFailureMessage('Failed to zip the build output.');
+				setFailureMessage('Failed to zip the build output. ' + error.message);
 				return;
 			} finally {
 				setIsZipping(false);
@@ -157,7 +157,9 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 						</Box>
 					)}
 					{isZippingError && (
-						<Text color={'redBright'}>❌ Error zipping the build output.</Text>
+						<Text color={'redBright'}>
+							❌ Error zipping the build output. {failureMessage}
+						</Text>
 					)}
 					{isPublishing && (
 						<Box>

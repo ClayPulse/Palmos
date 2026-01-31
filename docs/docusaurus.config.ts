@@ -1,6 +1,7 @@
-import { themes as prismThemes } from "prism-react-renderer";
-import type { Config } from "@docusaurus/types";
 import type * as Preset from "@docusaurus/preset-classic";
+import type { Config } from "@docusaurus/types";
+import type * as OpenApiPlugin from "docusaurus-plugin-openapi-docs";
+import { themes as prismThemes } from "prism-react-renderer";
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
@@ -23,7 +24,11 @@ const config: Config = {
   trailingSlash: false,
 
   onBrokenLinks: "throw",
-  onBrokenMarkdownLinks: "warn",
+  markdown: {
+    hooks: {
+      onBrokenMarkdownLinks: "warn",
+    },
+  },
 
   // Even if you don't use internationalization, you can use this field to set
   // useful metadata like html lang. For example, if your site is Chinese, you
@@ -42,6 +47,9 @@ const config: Config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl: "https://github.com/ClayPulse/pulse-editor/tree/main/docs/",
+          docItemComponent: "@theme/ApiItem", // Derived from docusaurus-theme-openapi
+          routeBasePath: "/",
+          breadcrumbs: true,
         },
         blog: {
           showReadingTime: true,
@@ -64,37 +72,74 @@ const config: Config = {
     ],
   ],
 
+  plugins: [
+    [
+      "docusaurus-plugin-openapi-docs",
+      {
+        id: "api", // plugin id
+        docsPluginId: "classic", // configured for preset-classic
+        config: {
+          // petstore: {
+          //   specPath: "openapi/petstore.yaml",
+          //   outputDir: "docs/api-reference/app-server-functions/official-apps/petstore",
+          //   sidebarOptions: {
+          //     groupPathsBy: "tag",
+          //     categoryLinkSource: "tag",
+          //   },
+          //   showSchemas: true,
+          // } satisfies OpenApiPlugin.Options,
+          vibeDevFlow: {
+            specPath: "openapi/vibe-dev-flow.yaml",
+            outputDir:
+              "docs/api-reference/app-server-functions/official-apps/vibe-dev-flow",
+            sidebarOptions: {
+              groupPathsBy: "tag",
+              categoryLinkSource: "tag",
+            },
+            showSchemas: true,
+          } satisfies OpenApiPlugin.Options,
+        },
+      },
+    ],
+  ],
+
+  themes: ["docusaurus-theme-openapi-docs"],
+
   themeConfig: {
+    metadata: [
+      {
+        name: "keywords",
+        content:
+          "Pulse Editor, AI, Vibe Coding, Documentation, API Reference",
+      },
+    ],
+
     // Replace with your project's social card
     image: "img/pulse-editor-social-card.png",
     navbar: {
-      title: "Pulse Editor",
+      title: "Pulse Editor Docs",
       logo: {
         alt: "Pulse Editor Logo",
         src: "img/logo.svg",
       },
       items: [
         {
-          to: "/docs/guide",
+          to: "/guide",
           sidebarId: "guideSidebar",
           position: "left",
           label: "Guide",
         },
-        { to: "/blog", label: "Blog", position: "left" },
         {
-          to: "/docs/api-reference",
+          to: "/api-reference",
           sidebarId: "apiRefSidebar",
           label: "API Reference",
           position: "left",
         },
+        { to: "/blog", label: "Blog", position: "left" },
         {
-          type: "docsVersionDropdown",
+          href: "https://web.pulse-editor.com",
+          label: "Try App",
           position: "right",
-          versions: {
-            current: {
-              label: "Latest",
-            },
-          },
         },
         {
           href: "https://pulse-editor.com",
@@ -121,7 +166,7 @@ const config: Config = {
           items: [
             {
               label: "Guide",
-              to: "/docs/guide",
+              to: "/guide",
             },
             {
               label: "Blog",
@@ -129,7 +174,7 @@ const config: Config = {
             },
             {
               label: "API Reference",
-              to: "/docs/api-reference",
+              to: "/api-reference",
             },
           ],
         },
@@ -166,6 +211,101 @@ const config: Config = {
       theme: prismThemes.github,
       darkTheme: prismThemes.dracula,
     },
+
+    languageTabs: [
+      {
+        highlight: "bash",
+        language: "curl",
+        logoClass: "curl",
+      },
+      {
+        highlight: "javascript",
+        language: "javascript",
+        logoClass: "javascript",
+      },
+      {
+        highlight: "python",
+        language: "python",
+        logoClass: "python",
+      },
+      {
+        highlight: "javascript",
+        language: "nodejs",
+        logoClass: "nodejs",
+      },
+      {
+        highlight: "csharp",
+        language: "csharp",
+        logoClass: "csharp",
+      },
+      {
+        highlight: "go",
+        language: "go",
+        logoClass: "go",
+      },
+
+      {
+        highlight: "ruby",
+        language: "ruby",
+        logoClass: "ruby",
+      },
+      {
+        highlight: "php",
+        language: "php",
+        logoClass: "php",
+      },
+      {
+        highlight: "java",
+        language: "java",
+        logoClass: "java",
+        variant: "unirest",
+      },
+      {
+        highlight: "powershell",
+        language: "powershell",
+        logoClass: "powershell",
+      },
+      {
+        highlight: "dart",
+        language: "dart",
+        logoClass: "dart",
+      },
+      {
+        highlight: "c",
+        language: "c",
+        logoClass: "c",
+      },
+      {
+        highlight: "objective-c",
+        language: "objective-c",
+        logoClass: "objective-c",
+      },
+      {
+        highlight: "ocaml",
+        language: "ocaml",
+        logoClass: "ocaml",
+      },
+      {
+        highlight: "r",
+        language: "r",
+        logoClass: "r",
+      },
+      {
+        highlight: "swift",
+        language: "swift",
+        logoClass: "swift",
+      },
+      {
+        highlight: "kotlin",
+        language: "kotlin",
+        logoClass: "kotlin",
+      },
+      {
+        highlight: "rust",
+        language: "rust",
+        logoClass: "rust",
+      },
+    ],
   } satisfies Preset.ThemeConfig,
 };
 

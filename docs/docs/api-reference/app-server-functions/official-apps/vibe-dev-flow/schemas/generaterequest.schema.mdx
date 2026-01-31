@@ -1,0 +1,33 @@
+---
+id: generaterequest
+title: "GenerateRequest"
+description: ""
+sidebar_label: "GenerateRequest"
+hide_title: true
+hide_table_of_contents: true
+schema: true
+sample: {"prompt":"Create a note-taking app with markdown support","appName":"Markdown Notes","streamUpdatePolicy":"whenTaskItemFinished"}
+custom_edit_url: null
+---
+
+import Schema from "@theme/Schema";
+import Heading from "@theme/Heading";
+
+<Heading
+  as={"h1"}
+  className={"openapi__heading"}
+  children={"GenerateRequest"}
+>
+</Heading>
+
+
+
+
+
+<Schema
+  schema={{"type":"object","required":["prompt","appName"],"properties":{"prompt":{"type":"string","description":"User instruction for the Vibe coding agent","example":"Create a note-taking app with markdown support"},"appName":{"type":"string","description":"Display name of the Pulse App","example":"Markdown Notes"},"streamUpdatePolicy":{"type":"string","description":"Controls when streaming updates are emitted.\n","enum":["whenTaskItemFinished","whenNewTokenAvailable"],"example":"whenTaskItemFinished"}},"title":"GenerateRequest"}}
+  schemaType={"response"}
+>
+  
+</Schema>
+            

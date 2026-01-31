@@ -45,6 +45,13 @@ export const flags = defineFlags({
 		type: 'boolean',
 		default: true,
 	},
+	path: {
+		type: 'string',
+		shortFlag: 'p',
+	},
+	displayName: {
+		type: 'string',
+	},
 });
 
 export type Flags = typeof flags;

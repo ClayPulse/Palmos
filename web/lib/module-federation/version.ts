@@ -2,18 +2,22 @@ import { AppConfig } from "@pulse-editor/shared-utils";
 import { satisfies } from "semver";
 import mfRuntime from "../../../node_modules/@module-federation/runtime/package.json";
 import packageJson from "../../package.json";
-import { getRemoteClientConfig, getRemoteClientManifest } from "./remote";
+import {
+  getDefaultRemoteOrigin,
+  getRemoteClientConfig,
+  getRemoteClientManifest,
+} from "./remote";
 
 export async function getHostMFVersion(): Promise<string> {
   return mfRuntime.version;
 }
 
 export async function getRemoteMFVersion(
-  remoteOrigin: string,
   id: string,
   version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
 ): Promise<string | undefined> {
-  const mfManifest = await getRemoteClientManifest(remoteOrigin, id, version);
+  const mfManifest = await getRemoteClientManifest(id, version, remoteOrigin);
   if (!mfManifest || !mfManifest.metaData) {
     return undefined;
   }
@@ -26,14 +30,14 @@ export async function getHostLibVersion(): Promise<string> {
 }
 
 export async function getRemoteLibVersion(
-  remoteOrigin: string,
   id: string,
   version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
 ): Promise<string | undefined> {
   const pulseConfig: AppConfig = await getRemoteClientConfig(
-    remoteOrigin,
     id,
     version,
+    remoteOrigin,
   );
   if (!pulseConfig || !pulseConfig.libVersion) {
     return undefined;

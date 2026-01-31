@@ -47,8 +47,13 @@ openssl req -new -key localhost-key.pem -out localhost.csr -config localhost.cnf
 openssl x509 -req -in localhost.csr -CA devCA.crt -CAkey devCA.key -CAcreateserial -out localhost.pem -days 365 -sha256 -extensions req_ext -extfile localhost.cnf
 ```
 
-5. Install `devCA.crt` on Android.
-   First, copy `devCA.crt` from PC to you android device. On Android, go to "settings -> security and privacy -> more security settings -> install from device storage -> CA certificate", then locate `devCA.crt` and install.
+5. Install `devCA.crt` on
+- **Windows**
+  
+  Double click the `devCA.crt`, then click "Install Certificate", choose "Local Machine", then "Place all certificates in the following store", then select "Trusted Root Certification Authorities", then finish.
+- **Android**
+  
+  First, copy `devCA.crt` from PC to you android device. On Android, go to "settings -> security and privacy -> more security settings -> install from device storage -> CA certificate", then locate `devCA.crt` and install.
 
 # Web Client User Guide
 

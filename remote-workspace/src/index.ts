@@ -5,6 +5,7 @@ import http from "http";
 import https from "https";
 import { getLocalNetworkIP } from "./lib/get-network";
 import { addAPIServer } from "./servers/api-server";
+import { addMCPServers } from "./servers/mcp-server";
 import { addTerminalServer } from "./servers/node-pty";
 
 dotenv.config();
@@ -17,6 +18,8 @@ const certPath = process.env.SSL_CERT_PATH;
 const keyPath = process.env.SSL_KEY_PATH;
 const workspaceId = process.env.WORKSPACE_ID;
 const frontendUrl = process.env.FRONTEND_URL ?? "https://web.pulse-editor.com";
+
+const HOST = "0.0.0.0";
 
 async function startServers() {
   if (!workspaceId) {
@@ -33,13 +36,12 @@ async function startServers() {
       ? true
       : false;
 
-  await addAPIServer(
-    server,
-    expressApp,
-    "api-" + workspaceId,
-    serverPort,
-    frontendUrl,
+  await addMCPServers(expressApp, "api-"+ workspaceId, serverPort);
+  console.log(
+    `MCP servers are running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/api-${workspaceId}/mcp-servers/`,
   );
+  
+  await addAPIServer(expressApp, "api-" + workspaceId, frontendUrl);
   console.log(
     `API server is running at ${isHttps ? "https" : "http"}://${address}:${serverPort}/api-${workspaceId}`,
   );
@@ -48,6 +50,8 @@ async function startServers() {
   console.log(
     `Terminal server is running at ${isHttps ? "wss" : "ws"}://${address}:${serverPort}/api-${workspaceId}/terminal/ws`,
   );
+
+  server.listen(serverPort, HOST);
 }
 
 async function createServer() {

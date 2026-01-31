@@ -1,7 +1,10 @@
 "use client";
 
 import { LLMAgentRunner } from "@/lib/agent/runners/llm-agent-runner";
+import { PlatformEnum } from "@/lib/enums";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
+import useRouter from "@/lib/hooks/use-router";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { getImageGenModel } from "@/lib/modalities/image-gen/get-image-gen";
 import { getLLMModel } from "@/lib/modalities/llm/get-llm";
 import { recognizeText } from "@/lib/modalities/ocr/ocr";
@@ -15,8 +18,11 @@ import {
   getDefaultVideoModelConfig,
 } from "@/lib/modalities/utils";
 import { getVideoGenModel } from "@/lib/modalities/video-gen/get-video-gen";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { IMCContextType } from "@/lib/types";
+import { createAppViewId } from "@/lib/views/view-helpers";
+import { Browser } from "@capacitor/browser";
 import { addToast } from "@heroui/react";
 import {
   Action,
@@ -45,6 +51,8 @@ export default function InterModuleCommunicationProvider({
   const { platformApi } = usePlatformApi();
   const editorContext = useContext(EditorContext);
   const { resolvedTheme } = useTheme();
+  const router = useRouter();
+  const { createAppViewInCanvasView } = useTabViewManager();
 
   const polyIMCRef = useRef<PolyIMC | undefined>(undefined);
   const imcInitializedMapRef = useRef<Map<string, boolean>>(new Map());
@@ -738,6 +746,62 @@ export default function InterModuleCommunicationProvider({
             description: text,
             color: color,
           });
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorOpenLink,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const {
+            url,
+          }: {
+            url: URL;
+          } = message.payload;
+
+          const platform = getPlatform();
+
+          if (platform === PlatformEnum.Capacitor) {
+            Browser.open({ url: url.toString() });
+          } else if (platform === PlatformEnum.Electron) {
+            // @ts-expect-error window.electronAPI is exposed by the Electron main process
+            window.electronAPI.openExternalLink(url.toString());
+          } else {
+            router.openInNewTab(url.toString());
+          }
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorOpenApp,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const {
+            appId,
+            version,
+            location,
+          }: {
+            appId: string;
+            version?: string;
+            location: "canvas";
+          } = message.payload;
+
+          const senderViewId = message.from;
+
+          if (location === "canvas") {
+            editorContext?.editorStates.updateWorkflowNodeData?.(senderViewId, {
+              isFullscreen: false,
+            });
+            await createAppViewInCanvasView({
+              app: appId,
+              requiredVersion: version,
+              viewId: createAppViewId(appId),
+            });
+          }
         },
       ],
     ]);

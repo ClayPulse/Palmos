@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 // import { GenerateSW } from "workbox-webpack-plugin";
-import createNextIntlPlugin from "next-intl/plugin";
 import type { NextConfig } from "next";
+import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 
@@ -23,15 +23,6 @@ const nextConfig: NextConfig = {
       },
     ];
 
-    config.plugins.push();
-    // new GenerateSW({
-    //   // Configurations specific to your Module Federation setup
-    //   // these options encourage the ServiceWorkers to get in there fast
-    //   // and not allow any straggling "old" SWs to hang around
-    //   clientsClaim: true,
-    //   skipWaiting: true,
-    // }),
-
     config.module.rules.push({
       test: /\.md$/,
       use: "raw-loader",
@@ -41,4 +32,6 @@ const nextConfig: NextConfig = {
   turbopack: {},
 };
 
-export default withNextIntl(nextConfig);
+const config = withNextIntl(nextConfig);
+
+export default config;
