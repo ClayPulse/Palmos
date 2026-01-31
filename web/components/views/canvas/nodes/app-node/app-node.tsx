@@ -106,10 +106,11 @@ const AppNode = memo((props: any) => {
   // Fit node to current canvas size in fullscreen mode
   async function zoomToFitNodeFullscreen() {
     const padding = 4;
+    const topMargin = 64;
     const width =
       (editorContext?.editorStates.canvasSize?.width ?? 0) - padding * 2;
     const height =
-      (editorContext?.editorStates.canvasSize?.height ?? 0) - 72 - padding * 2;
+      (editorContext?.editorStates.canvasSize?.height ?? 0) - topMargin - padding * 2;
 
     const viewCenter = getViewCenterCoordForNode(width, height, viewport.zoom);
 
@@ -118,7 +119,7 @@ const AppNode = memo((props: any) => {
       height: height,
       position: {
         x: 0 + viewCenter.x,
-        y: 72 / 2 + viewCenter.y,
+        y: topMargin / 2 + viewCenter.y,
       },
       zIndex: 1000,
     });

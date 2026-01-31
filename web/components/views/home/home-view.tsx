@@ -78,7 +78,7 @@ export default function HomeView() {
 
             {/* Footer */}
             <div
-              className="flex w-full justify-center pt-4 data-[is-toolbar-open=true]:pb-[max(60px,env(safe-area-inset-bottom)+60px)] pb-[max(16px,env(safe-area-inset-bottom)+12px)] "
+              className="flex w-full justify-center pt-4 pb-[max(16px,env(safe-area-inset-bottom)+12px)] data-[is-toolbar-open=true]:pb-[max(60px,env(safe-area-inset-bottom)+60px)]"
               data-is-toolbar-open={
                 editorContext?.editorStates.isToolbarOpen ? "true" : "false"
               }
@@ -148,10 +148,9 @@ function OverviewPanel({
     }
 
     editorContext?.updateModalStates({
-      openInProject: {
+      quickVibeCodeSetup: {
         isOpen: true,
         app: app,
-        isOpenAppInFullscreen: true,
       },
     });
   }
