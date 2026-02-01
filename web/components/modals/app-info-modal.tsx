@@ -2,7 +2,7 @@ import { listRemoteServerFunctions } from "@/lib/module-federation/remote";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppInfoModalContent } from "@/lib/types";
 import { addToast, Button, Chip, Divider, Input, Spinner } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import EnvInput from "../misc/env-input";
@@ -163,7 +163,7 @@ function AppInfo({
   funcNamesWithCosts: EndPointInfo[];
   isLoadingEndpoints: boolean;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const [isAuthor, setIsAuthor] = useState(false);
 
   const filteredFuncNamesWithCosts = useMemo(() => {

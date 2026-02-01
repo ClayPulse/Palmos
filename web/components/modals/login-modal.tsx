@@ -3,7 +3,7 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { Button, Divider, Input } from "@heroui/react";
 import { useContext, useState } from "react";
 import toast from "react-hot-toast";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/hooks/use-translations';
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
@@ -16,7 +16,7 @@ export default function LoginModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [workspaceAddress, setWorkspaceAddress] = useState<string | undefined>(

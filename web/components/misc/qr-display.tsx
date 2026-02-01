@@ -1,7 +1,7 @@
 import { generateQR } from "@/lib/share/qr-gen";
 import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Loading from "../interface/status-screens/loading";
@@ -9,7 +9,7 @@ import Icon from "./icon";
 
 export default function QRDisplay({ url }: { url: string }) {
   const { resolvedTheme } = useTheme();
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
 
   const [image, setImage] = useState<string | undefined>(undefined);
 

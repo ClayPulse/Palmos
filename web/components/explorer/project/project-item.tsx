@@ -1,7 +1,7 @@
 import { ContextMenuState, ProjectInfo } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useContext, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import ContextMenu from "../../interface/context-menu";
 import { EditorContext } from "../../providers/editor-context-provider";
 
@@ -12,7 +12,7 @@ export default function ProjectItem({
   project: ProjectInfo;
   onOpen?: (project: ProjectInfo) => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({

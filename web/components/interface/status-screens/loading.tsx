@@ -1,8 +1,8 @@
 import { Progress } from "@heroui/react";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/hooks/use-translations';
 
 export default function Loading({ text }: { text?: string }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   return (
     <div className="flex h-full w-full flex-col items-center justify-center">

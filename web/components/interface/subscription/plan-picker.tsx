@@ -1,8 +1,8 @@
 import { Button } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 
 export default function PlanPicker() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
 
   return (
     <div className="flex">

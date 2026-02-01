@@ -19,7 +19,7 @@ import {
   Select,
   SelectItem,
 } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -37,7 +37,7 @@ export default function WorkspaceSettingsModal({
   initialWorkspace?: WorkspaceConfig;
   isShowUseButton?: boolean;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { platformApi } = usePlatformApi();

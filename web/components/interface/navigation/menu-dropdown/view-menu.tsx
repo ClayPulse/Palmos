@@ -4,12 +4,12 @@ import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-men
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { CanvasViewConfig, WorkflowContent } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useState } from "react";
 import NavMenuDropdown from "../nav-menu-dropdown";
 
 export default function ViewMenuDropDown() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
   const { menuActions } = useMenuActions("view");
 

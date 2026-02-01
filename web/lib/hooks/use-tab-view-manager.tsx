@@ -3,7 +3,7 @@ import { IMCContext } from "@/components/providers/imc-provider";
 import { addToast, Button } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/hooks/use-translations';
 import { PlatformEnum, SideMenuTabEnum } from "../enums";
 import { getPlatform } from "../platform-api/platform-checker";
 import {
@@ -17,7 +17,7 @@ import useRouter from "./use-router";
 import { useScreenSize } from "./use-screen-size";
 
 export function useTabViewManager() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 

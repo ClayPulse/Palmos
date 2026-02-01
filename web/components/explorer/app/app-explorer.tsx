@@ -13,10 +13,10 @@ import { createAppViewId } from "@/lib/views/view-helpers";
 import { useDraggable } from "@dnd-kit/core";
 import { Button } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 
 export default function AppExplorer() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const extensions = editorContext?.persistSettings?.extensions ?? [];

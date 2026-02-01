@@ -8,13 +8,13 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { Key, useContext } from "react";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function ProjectIndicator() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
   const { closeAllTabViews } = useTabViewManager();
 

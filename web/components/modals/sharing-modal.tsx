@@ -1,7 +1,7 @@
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { TabItem } from "@/lib/types";
 import { Button, Input, Select, SelectItem } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -18,7 +18,7 @@ export default function SharingModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   // #region Load specified app if app query parameter is present
   const params = useSearchParams();
   // Use the 'app' query parameter to load specific extension app upon loading page

@@ -2,7 +2,7 @@ import { Button } from "@heroui/react";
 import Link from "next/link";
 import Icon from "../misc/icon";
 import ModalWrapper from "./wrapper";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/hooks/use-translations';
 
 export default function OpenSourceInfoModal({
   isOpen,
@@ -11,7 +11,7 @@ export default function OpenSourceInfoModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   return (
     <ModalWrapper

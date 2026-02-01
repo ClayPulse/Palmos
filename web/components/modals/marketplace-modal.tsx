@@ -1,6 +1,6 @@
 import { MarketplaceCategoryEnum } from "@/lib/enums";
 import { TabItem } from "@/lib/types";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useState } from "react";
 import AppGallery from "../marketplace/app/app-gallery";
 import WorkflowGallery from "../marketplace/workflow/workflow-gallery";
@@ -14,7 +14,7 @@ export default function MarketplaceModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   const extensionCategories: TabItem[] = [
     {

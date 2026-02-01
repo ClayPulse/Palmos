@@ -6,13 +6,13 @@ import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { addToast, Button, Divider, Tooltip } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function EditorToolbar() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant } = useEditorAIAssistant();

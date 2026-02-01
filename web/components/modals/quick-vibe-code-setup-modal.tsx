@@ -8,7 +8,7 @@ import { AppViewConfig, ExtensionApp, Workflow } from "@/lib/types";
 import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
 import { addToast, Spinner } from "@heroui/react";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/hooks/use-translations';
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
@@ -19,7 +19,7 @@ export default function QuickVibeCodeSetupModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
   const vibeCodeProject = t('quickVibeCodeSetupModal.vibeCodeProject');
 

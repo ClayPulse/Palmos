@@ -9,7 +9,7 @@ import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { TreeViewGroupRef } from "@/lib/types";
 import { addToast, Button, Spinner } from "@heroui/react";
 import { IMCMessageTypeEnum, ViewModeEnum } from "@pulse-editor/shared-utils";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../../misc/icon";
@@ -23,7 +23,7 @@ export default function FileSystemExplorer({
   setIsMenuOpen: (isOpen: boolean) => void;
   openWorkspaceSettingsModal: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 

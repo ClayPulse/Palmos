@@ -3,7 +3,7 @@
 import { LLMUsage, TabItem, UserAgent } from "@/lib/types";
 import { Button, Divider, Input, Textarea } from "@heroui/react";
 import { AgentMethod } from "@pulse-editor/shared-utils";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -19,7 +19,7 @@ export default function AgentConfigModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const tabItems: TabItem[] = [
@@ -110,7 +110,7 @@ function AgentConfigs({
 }: {
   setIsCreatingNewAgent: (isCreatingNewAgent: boolean) => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
   return (
     <div className="flex flex-col space-y-2">
@@ -190,7 +190,7 @@ function AgentCreation({
 }: {
   setIsCreatingNewAgent: (isCreatingNewAgent: boolean) => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [name, setName] = useState<string>("");
@@ -296,7 +296,7 @@ function AgentCreation({
 }
 
 function ProviderConfig({ usage }: { usage: LLMUsage }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
   const [apiKey, setApiKey] = useState("");
   const [isRevealable, setIsRevealable] = useState(true);
@@ -366,7 +366,7 @@ function ProviderConfig({ usage }: { usage: LLMUsage }) {
 }
 
 function ProviderConfigs({ llmUsageList }: { llmUsageList: LLMUsage[] }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   return (
     <div>
       <p className="font-semibold">{t("agentConfigModal.llmUsage.title")}</p>
