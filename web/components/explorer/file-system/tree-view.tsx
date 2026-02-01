@@ -16,7 +16,7 @@ import {
 import { useDraggable } from "@dnd-kit/core";
 import { Button, Input } from "@heroui/react";
 import { FileSystemObject } from "@pulse-editor/shared-utils";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import {
   forwardRef,
   Ref,
@@ -46,7 +46,7 @@ const TreeViewNode = forwardRef(function TreeViewNode(
   },
   ref: Ref<TreeViewNodeRef | null>,
 ) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   useImperativeHandle(ref, () => ({
     getParentGroupRef() {
@@ -450,7 +450,7 @@ const TreeViewGroup = forwardRef(function TreeViewGroup(
   },
   ref: Ref<TreeViewGroupRef>,
 ) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   useImperativeHandle(ref, () => ({
     startCreatingNewFolder() {

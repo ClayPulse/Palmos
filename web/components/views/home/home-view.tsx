@@ -11,7 +11,7 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/hooks/use-translations';
 import {
   fetchLatestApp,
   getDefaultRemoteOrigin,
@@ -41,7 +41,7 @@ const getVibeCodeHints = (t: (key: string) => string) => [
 ];
 
 export default function HomeView() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { createCanvasTabView } = useTabViewManager();
@@ -109,7 +109,7 @@ function OverviewPanel({
   session?: Session;
   signIn: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
@@ -358,7 +358,7 @@ function OverviewPanel({
 }
 
 function MarketplaceAppsAndWorkflows() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
@@ -538,7 +538,7 @@ function MarketplaceAppsAndWorkflows() {
 }
 
 function MyAppsAndProjects({ session }: { session?: Session }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
@@ -691,7 +691,7 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
 }
 
 function MyResources() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { cloudWorkspaces } = useWorkspace();

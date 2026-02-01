@@ -3,7 +3,7 @@ import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppNodeData, Workflow } from "@/lib/types";
 import { addToast, Button, closeToast, Input } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
@@ -27,7 +27,7 @@ export default function PublishWorkflowModal({
     [key: string]: any;
   }>;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [name, setName] = useState("");

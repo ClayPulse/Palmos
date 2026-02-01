@@ -6,12 +6,12 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
 import { Button, Spinner } from "@heroui/react";
 import { useContext } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ProjectItem from "./project-item";
 
 export default function ProjectExplorer() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { session } = useAuth();

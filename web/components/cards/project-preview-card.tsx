@@ -1,7 +1,7 @@
 import { ContextMenuState, ProjectInfo, WorkspaceConfig } from "@/lib/types";
 import { Button } from "@heroui/react";
 import { useContext, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 import { SideMenuTabEnum } from "@/lib/enums";
@@ -13,7 +13,7 @@ export function ProjectPreviewCard({
   project: ProjectInfo;
   workspaceConfig?: WorkspaceConfig;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useEffect } from "react";
 
 export default function WelcomeScreen({
@@ -8,7 +8,7 @@ export default function WelcomeScreen({
   setAnimationFinished?: (mounted: boolean) => void;
 }) {
   const animationDuration = 2; // Total animation duration in seconds
-  const t = useTranslations("statusScreens.welcome");
+  const {getTranslations: t} = useTranslations();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -69,9 +69,9 @@ export default function WelcomeScreen({
           },
         }}
       >
-        {t("taglineLine1")}
+        {t("statusScreens.welcome.taglineLine1")}
         <br />
-        {t("taglineLine2")}
+        {t("statusScreens.welcome.taglineLine2")}
       </motion.p>
 
       <div className="w-64 pt-4 pb-8 sm:w-80">

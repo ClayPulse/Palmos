@@ -1,6 +1,6 @@
 import { TypedVariable } from "@pulse-editor/shared-utils";
 import { Handle, HandleType, Position } from "@xyflow/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 
 export default function NodeHandle({
   id,
@@ -15,7 +15,7 @@ export default function NodeHandle({
   type: HandleType;
   isOptional?: boolean;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   return (
     <div

@@ -2,7 +2,7 @@
 
 import type { DraggableSyntheticListeners } from "@dnd-kit/core";
 import type { Transform } from "@dnd-kit/utilities";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import React, { forwardRef } from "react";
 
 interface DraggableProps {
@@ -14,7 +14,7 @@ interface DraggableProps {
 
 export const DraggableItem = forwardRef<HTMLDivElement, DraggableProps>(
   function Draggable({ listeners, transform, className, children }, ref) {
-    const t = useTranslations();
+    const {getTranslations: t} = useTranslations();
     
     return (
       <div

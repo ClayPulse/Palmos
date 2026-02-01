@@ -1,7 +1,7 @@
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/hooks/use-translations';
 
 export default function WIP() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   return (
     <div className="w-full h-full flex flex-col items-center justify-center gap-y-6">

@@ -1,8 +1,8 @@
 import { ReactNode } from "react";
-import { useTranslations } from 'next-intl';
+import { useTranslations } from '@/lib/hooks/use-translations';
 
 export default function NotAuthorized({ children }: { children?: ReactNode }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-y-4">

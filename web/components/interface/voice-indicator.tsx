@@ -2,7 +2,7 @@
 
 import { colors } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useTheme } from "next-themes";
 import { useContext } from "react";
 import {
@@ -14,7 +14,7 @@ import {
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function VoiceIndicator() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { resolvedTheme } = useTheme();

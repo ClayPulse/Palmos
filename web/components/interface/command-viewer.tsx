@@ -14,7 +14,7 @@ import {
   ListboxItem,
   Spinner,
 } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -22,7 +22,7 @@ import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function CommandViewer() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant, history } = useEditorAIAssistant();

@@ -22,7 +22,7 @@ import {
   Switch,
   Tooltip,
 } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Icon from "../misc/icon";
@@ -36,7 +36,7 @@ export default function EditorSettingsModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   return (
@@ -61,7 +61,7 @@ function GeneralSettings({
 }: {
   editorContext?: EditorContextType;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const { selectAndSetProjectHome } = useExplorer();
   const [newEnvKey, setNewEnvKey] = useState<string>("");
   const [newEnvValue, setNewEnvValue] = useState<string>("");
@@ -210,7 +210,7 @@ function GeneralSettings({
 
 function AISettings({ editorContext }: { editorContext?: EditorContextType }) {
   const { subscription, usage } = useAuth();
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
 
   return (
     <>
@@ -753,7 +753,7 @@ function SecuritySettings({
   setIsOpen: (open: boolean) => void;
 }) {
   const [ttl, setTTL] = useState<string>("14");
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
 
   return (
     <div>
@@ -834,7 +834,7 @@ function DevExtensionSettings({
   editorContext?: EditorContextType;
 }) {
   const router = useRouter();
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
 
   const [fileTypeExtensionMap, setFileTypeExtensionMap] = useState<
     Map<string, ExtensionApp[]>
@@ -1054,7 +1054,7 @@ function ExtensionDefinedSettings({
 }: {
   editorContext: EditorContextType | undefined;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   
   return (
     <div>

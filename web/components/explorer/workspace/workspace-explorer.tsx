@@ -7,11 +7,11 @@ import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { addToast, Button } from "@heroui/react";
 import { useContext, useEffect } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import FileSystemExplorer from "../file-system/fs-explorer";
 
 export default function WorkspaceExplorer() {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const workspaceHook = useWorkspace();

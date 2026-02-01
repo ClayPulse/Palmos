@@ -3,7 +3,7 @@
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
 import { addToast, Button, Input } from "@heroui/react";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useEffect, useState } from "react";
 import ModalWrapper from "./wrapper";
 
@@ -16,7 +16,7 @@ export default function ProjectSettingsModal({
   onClose: () => void;
   projectInfo?: ProjectInfo;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const { createProject, updateProject, deleteProject, refreshProjects } =
     useProjectManager();
 

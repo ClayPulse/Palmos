@@ -1,7 +1,7 @@
 import { PlatformEnum } from "@/lib/enums";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
-import { useTranslations } from "next-intl";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
 import {
   checkCompatibility,
@@ -56,7 +56,7 @@ export default function AppPreviewCard({
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const {
     disableExtensionApp,
     enableExtensionApp,
@@ -608,7 +608,7 @@ function EnableCheckBox({
   activeText?: string;
   inactiveText?: string;
 }) {
-  const t = useTranslations();
+  const {getTranslations: t} = useTranslations();
   const { children, isSelected, getBaseProps, getLabelProps, getInputProps } =
     useCheckbox({
       onValueChange: onPress,
