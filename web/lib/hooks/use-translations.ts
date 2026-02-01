@@ -74,7 +74,7 @@ export function useTranslations() {
     setLocaleState(finalLocale);
   }, [editorContext?.persistSettings?.locale, isLoaded]);
 
-  function getTranslations(key: string, variables?: { [key: string]: string }) {
+  function getTranslations(key: string, variables?: { [key: string]: any }) {
     const localeMessages = messages[locale] ?? messages["en"];
 
     // Localize nested keys using dot notation
