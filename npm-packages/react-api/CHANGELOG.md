@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.71
+
+### Patch Changes
+
+- Add locale hook
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.71
+
 ## 0.1.1-beta.70
 
 ### Patch Changes
