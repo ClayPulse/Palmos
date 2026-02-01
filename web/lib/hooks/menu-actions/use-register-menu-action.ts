@@ -5,6 +5,7 @@ import { MenuAction } from "../../types";
 export function useRegisterMenuAction(
   actionInfo: {
     name: string;
+    displayName?: string;
     menuCategory: string;
     shortcut?: string;
     description?: string;
@@ -29,6 +30,7 @@ export function useRegisterMenuAction(
     if (isEnabled) {
       registerMenuAction({
         name: actionInfo.name,
+        displayName: actionInfo.displayName,
         menuCategory: actionInfo.menuCategory as "file" | "edit" | "view",
         shortcut: actionInfo.shortcut,
         description: actionInfo.description,

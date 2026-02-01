@@ -1,8 +1,9 @@
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { listRemoteServerFunctions } from "@/lib/module-federation/remote";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { isAppAuthor } from "@/lib/pulse-editor-website/helpers";
 import { AppInfoModalContent } from "@/lib/types";
 import { addToast, Button, Chip, Divider, Input, Spinner } from "@heroui/react";
-import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useMemo, useState } from "react";
 import useSWR from "swr";
 import EnvInput from "../misc/env-input";
@@ -163,7 +164,7 @@ function AppInfo({
   funcNamesWithCosts: EndPointInfo[];
   isLoadingEndpoints: boolean;
 }) {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const [isAuthor, setIsAuthor] = useState(false);
 
   const filteredFuncNamesWithCosts = useMemo(() => {
@@ -173,17 +174,7 @@ function AppInfo({
   // Check if the current user is the author of the app
   useEffect(() => {
     async function getAuthorStatus() {
-      const response = await fetchAPI("/api/app/is-author", {
-        method: "POST",
-        body: JSON.stringify({
-          id: appInfo?.id,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const { isAuthor } = await response.json();
+      const isAuthor = await isAppAuthor(appInfo.id);
 
       setIsAuthor(isAuthor);
     }
@@ -235,7 +226,9 @@ function AppInfo({
             <p>
               <span className="font-semibold">README</span>:
             </p>
-            <p className="text-default-foreground/60">{t("appInfoModal.noReadme")}</p>
+            <p className="text-default-foreground/60">
+              {t("appInfoModal.noReadme")}
+            </p>
           </div>
         )}
       </div>

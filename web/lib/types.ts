@@ -235,6 +235,7 @@ export type ModalStates = {
   quickVibeCodeSetup?: {
     isOpen?: boolean;
     app?: ExtensionApp;
+    baseApp?: { appId: string; version: string };
   };
   artifact?: {
     isOpen?: boolean;
@@ -291,6 +292,7 @@ export type AppInfoModalContent = {
 export type MenuAction = {
   id?: string;
   name: string;
+  displayName?: string;
   menuCategory: "file" | "edit" | "view";
   description?: string;
   shortcut?: string;

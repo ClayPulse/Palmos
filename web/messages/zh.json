@@ -25,6 +25,11 @@
 		"editCode": "编辑代码（即将推出）",
 		"noData": "没有可用的工件数据。"
 	},
+	"vibeCode": {
+		"verifyingAuthor": "正在验证应用作者...",
+		"notAuthor": "无效操作。您不是此应用的作者。",
+		"fetchFailed": "无法获取Vibe Code的最新版本。"
+	},
 	"navigation": {
 		"connectedToCloudAI": "已连接到云端 AI",
 		"offline": "离线",
@@ -165,6 +170,10 @@
 	},
 	"homeView": {
 		"title": "首页",
+		"greeting": {
+			"hello": "你好，{name}",
+			"question": "今天想做什么？"
+		},
 		"vibeCode": {
 			"title": "你想创建什么？",
 			"newApp": "Vibe Code 一个应用",
@@ -698,14 +707,44 @@
 	"fileMenu": {
 		"title": "文件",
 		"newProject": "新建项目",
-		"openProject": "打开项目"
+		"openProject": "打开项目",
+		"newWorkflow": {
+			"name": "新建工作流",
+			"description": "创建一个新的工作流"
+		},
+		"closeWorkflow": {
+			"name": "关闭工作流",
+			"description": "关闭当前工作流"
+		},
+		"exportWorkflow": {
+			"name": "导出工作流",
+			"description": "将当前工作流导出为 JSON 文件"
+		},
+		"publishWorkflow": {
+			"name": "发布工作流",
+			"description": "将当前工作流发布到 Pulse Marketplace"
+		}
 	},
 	"viewMenu": {
 		"title": "视图",
 		"commandViewer": "命令视图",
 		"console": "控制台",
+		"viewCommandViewer": {
+			"name": "查看命令查看器",
+			"description": "查看所有命令和快捷键"
+		},
+		"closeCommandViewer": {
+			"name": "关闭命令查看器",
+			"description": "关闭命令查看器"
+		},
+		"runWorkflow": {
+			"name": "运行工作流",
+			"description": "从选定或默认的入口点运行当前工作流"
+		},
 		"importWorkflow": {
+			"name": "导入工作流",
 			"title": "导入工作流",
+			"description": "从 JSON 文件导入工作流",
 			"invalidFile": "无效的工作流文件",
 			"readError": "读取工作流文件时出错"
 		}
@@ -1076,5 +1115,15 @@
 	},
 	"draggableItem": {
 		"ariaLabel": "拖拽以移动"
+	},
+	"canvasNode": {
+		"tooltips": {
+			"fullscreen": "在全屏标签页中打开节点。",
+			"vibeCode": "打开 Vibe Code",
+			"ownedApps": "切换拥有的应用",
+			"workflowConnectors": "切换工作流连接器",
+			"resize": "调整节点大小",
+			"delete": "删除节点"
+		}
 	}
 }

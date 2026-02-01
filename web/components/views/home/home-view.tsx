@@ -28,6 +28,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
+import { useVibeCode } from "@/lib/hooks/use-vibe-code";
 
 const getVibeCodeHints = (t: (key: string) => string) => [
   t('homeView.vibeCode.newApp'),
@@ -41,10 +42,8 @@ const getVibeCodeHints = (t: (key: string) => string) => [
 ];
 
 export default function HomeView() {
-  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const { createCanvasTabView } = useTabViewManager();
   const { session, signIn } = useAuth();
 
   return (
@@ -114,46 +113,10 @@ function OverviewPanel({
 
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
-  const {} = useExtensionAppManager();
-
-  async function getVibeCodeApp() {
-    const appId = "vibe_dev_flow";
-
-    let latestVersion;
-    try {
-      latestVersion = await fetchLatestApp(appId);
-    } catch (error) {
-      console.error("Failed to fetch latest version.");
-      addToast({
-        title: t('statusScreens.error.title'),
-        description: "Failed to fetch latest version of Vibe Code.",
-        color: "danger",
-      });
-      return null;
-    }
-
-    const app: ExtensionApp = {
-      config: latestVersion.appConfig!,
-      remoteOrigin: getDefaultRemoteOrigin(),
-      isEnabled: true,
-    };
-
-    return app;
-  }
+  const { openVibeCode} = useVibeCode();
 
   async function handleOpenVibeCode() {
-    const app = await getVibeCodeApp();
-
-    if (!app) {
-      return;
-    }
-
-    editorContext?.updateModalStates({
-      quickVibeCodeSetup: {
-        isOpen: true,
-        app: app,
-      },
-    });
+    await openVibeCode();
   }
 
   const vibeCodeHints = getVibeCodeHints(t);
@@ -172,8 +135,8 @@ function OverviewPanel({
       <div className="flex w-full flex-col items-center gap-y-2 rounded-lg px-1 py-2 @sm:w-fit @sm:px-8 @md:px-16">
         {session && (
           <>
-            <p className="text-center text-2xl">Hello, {session?.user.name}</p>
-            <p className="text-center text-2xl">What is on your mind today?</p>
+            <p className="text-center text-2xl">{t('homeView.greeting.hello', {name: session?.user.name})}</p>
+            <p className="text-center text-2xl">{t('homeView.greeting.question')}</p>
 
             <Button
               className="border-divider border bg-amber-900/80 shadow-sm transition-colors hover:bg-amber-800/80 dark:border-amber-400/40 dark:bg-amber-900/30 dark:hover:bg-amber-900/20"

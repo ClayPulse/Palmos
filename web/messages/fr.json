@@ -25,6 +25,11 @@
 		"editCode": "Modifier le code (prochainement)",
 		"noData": "Aucune donnée d'artefact disponible."
 	},
+	"vibeCode": {
+		"verifyingAuthor": "Vérification de l'auteur de l'application...",
+		"notAuthor": "Action invalide. Vous n'êtes pas l'auteur de cette application.",
+		"fetchFailed": "Échec de la récupération de la dernière version de Vibe Code."
+	},
 	"navigation": {
 		"connectedToCloudAI": "Connecté à Cloud AI",
 		"offline": "Hors ligne",
@@ -165,6 +170,10 @@
 	},
 	"homeView": {
 		"title": "Accueil",
+		"greeting": {
+			"hello": "Bonjour, {name}",
+			"question": "À quoi pensez-vous aujourd'hui ?"
+		},
 		"vibeCode": {
 			"title": "Que souhaitez-vous créer ?",
 			"newApp": "Vibe Code une application",
@@ -698,14 +707,44 @@
 	"fileMenu": {
 		"title": "Fichier",
 		"newProject": "Nouveau projet",
-		"openProject": "Ouvrir un projet"
+		"openProject": "Ouvrir un projet",
+		"newWorkflow": {
+			"name": "Nouveau workflow",
+			"description": "Créer un nouveau workflow"
+		},
+		"closeWorkflow": {
+			"name": "Fermer le workflow",
+			"description": "Fermer le workflow actuel"
+		},
+		"exportWorkflow": {
+			"name": "Exporter le workflow",
+			"description": "Exporter le workflow actuel en fichier JSON"
+		},
+		"publishWorkflow": {
+			"name": "Publier le workflow",
+			"description": "Publier le workflow actuel sur Pulse Marketplace"
+		}
 	},
 	"viewMenu": {
 		"title": "Affichage",
 		"commandViewer": "Visionneuse de commandes",
 		"console": "Console",
+		"viewCommandViewer": {
+			"name": "Voir la visionneuse de commandes",
+			"description": "Voir toutes les commandes et raccourcis"
+		},
+		"closeCommandViewer": {
+			"name": "Fermer la visionneuse de commandes",
+			"description": "Fermer la visionneuse de commandes"
+		},
+		"runWorkflow": {
+			"name": "Exécuter le workflow",
+			"description": "Exécuter le workflow actuel à partir du point d'entrée sélectionné ou par défaut"
+		},
 		"importWorkflow": {
+			"name": "Importer un workflow",
 			"title": "Importer un workflow",
+			"description": "Importer un workflow depuis un fichier JSON",
 			"invalidFile": "Fichier de workflow invalide",
 			"readError": "Erreur lors de la lecture du fichier de workflow"
 		}
@@ -1076,5 +1115,15 @@
 	},
 	"draggableItem": {
 		"ariaLabel": "Faire glisser pour déplacer"
+	},
+	"canvasNode": {
+		"tooltips": {
+			"fullscreen": "Ouvrir le nœud dans un onglet plein écran.",
+			"vibeCode": "Ouvrir Vibe Code",
+			"ownedApps": "Basculer les applications possédées",
+			"workflowConnectors": "Basculer les connecteurs de flux de travail",
+			"resize": "Redimensionner le nœud",
+			"delete": "Supprimer le nœud"
+		}
 	}
 }

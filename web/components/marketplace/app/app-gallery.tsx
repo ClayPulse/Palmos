@@ -1,5 +1,6 @@
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useAuth } from "@/lib/hooks/use-auth";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { ExtensionApp } from "@/lib/types";
 import { Select, SelectItem } from "@heroui/react";

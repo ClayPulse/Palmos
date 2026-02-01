@@ -25,6 +25,11 @@
 		"editCode": "कोड संपादित करें (जल्द आ रहा है)",
 		"noData": "कोई आर्टिफैक्ट डेटा उपलब्ध नहीं है।"
 	},
+	"vibeCode": {
+		"verifyingAuthor": "ऐप लेखक की पुष्टि की जा रही है...",
+		"notAuthor": "अमान्य क्रिया। आप इस ऐप के लेखक नहीं हैं।",
+		"fetchFailed": "Vibe Code का नवीनतम संस्करण प्राप्त करने में विफल।"
+	},
 	"navigation": {
 		"connectedToCloudAI": "क्लाउड AI से कनेक्टेड",
 		"offline": "ऑफ़लाइन",
@@ -165,6 +170,10 @@
 	},
 	"homeView": {
 		"title": "होम",
+		"greeting": {
+			"hello": "नमस्ते, {name}",
+			"question": "आज आपके मन में क्या है?"
+		},
 		"vibeCode": {
 			"title": "आप क्या बनाना चाहते हैं?",
 			"newApp": "Vibe Code एक ऐप",
@@ -698,14 +707,44 @@
 	"fileMenu": {
 		"title": "फ़ाइल",
 		"newProject": "नया प्रोजेक्ट",
-		"openProject": "प्रोजेक्ट खोलें"
+		"openProject": "प्रोजेक्ट खोलें",
+		"newWorkflow": {
+			"name": "नया वर्कफ़्लो",
+			"description": "एक नया वर्कफ़्लो बनाएं"
+		},
+		"closeWorkflow": {
+			"name": "वर्कफ़्लो बंद करें",
+			"description": "वर्तमान वर्कफ़्लो बंद करें"
+		},
+		"exportWorkflow": {
+			"name": "वर्कफ़्लो निर्यात करें",
+			"description": "वर्तमान वर्कफ़्लो को JSON फ़ाइल के रूप में निर्यात करें"
+		},
+		"publishWorkflow": {
+			"name": "वर्कफ़्लो प्रकाशित करें",
+			"description": "वर्तमान वर्कफ़्लो को Pulse Marketplace पर प्रकाशित करें"
+		}
 	},
 	"viewMenu": {
 		"title": "व्यू",
 		"commandViewer": "कमांड व्यूअर",
 		"console": "कंसोल",
+		"viewCommandViewer": {
+			"name": "कमांड व्यूअर देखें",
+			"description": "सभी कमांड और शॉर्टकट देखें"
+		},
+		"closeCommandViewer": {
+			"name": "कमांड व्यूअर बंद करें",
+			"description": "कमांड व्यूअर बंद करें"
+		},
+		"runWorkflow": {
+			"name": "वर्कफ़्लो चलाएं",
+			"description": "चयनित या डिफ़ॉल्ट प्रवेश बिंदु से वर्तमान वर्कफ़्लो चलाएं"
+		},
 		"importWorkflow": {
+			"name": "वर्कफ़्लो इम्पोर्ट करें",
 			"title": "वर्कफ़्लो इम्पोर्ट करें",
+			"description": "JSON फ़ाइल से वर्कफ़्लो इम्पोर्ट करें",
 			"invalidFile": "अमान्य वर्कफ़्लो फाइल",
 			"readError": "वर्कफ़्लो फाइल पढ़ने में त्रुटि"
 		}
@@ -1076,5 +1115,15 @@
 	},
 	"draggableItem": {
 		"ariaLabel": "खिसकाने के लिए ड्रैग करें"
+	},
+	"canvasNode": {
+		"tooltips": {
+			"fullscreen": "नोड को पूर्ण स्क्रीन टैब में खोलें।",
+			"vibeCode": "Vibe Code खोलें",
+			"ownedApps": "स्वामित्व वाले ऐप्स टॉगल करें",
+			"workflowConnectors": "वर्कफ़्लो कनेक्टर टॉगल करें",
+			"resize": "नोड का आकार बदलें",
+			"delete": "नोड हटाएं"
+		}
 	}
 }

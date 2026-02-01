@@ -25,6 +25,11 @@
     "editCode": "코드 편집(곧 제공)",
     "noData": "아티팩트 데이터가 없습니다."
   },
+  "vibeCode": {
+    "verifyingAuthor": "앱 작성자 확인 중...",
+    "notAuthor": "잘못된 작업입니다. 이 앱의 작성자가 아닙니다.",
+    "fetchFailed": "Vibe Code의 최신 버전을 가져오지 못했습니다."
+  },
   "navigation": {
     "connectedToCloudAI": "클라우드 AI에 연결됨",
     "offline": "오프라인",
@@ -165,6 +170,10 @@
   },
   "homeView": {
     "title": "홈",
+    "greeting": {
+      "hello": "안녕하세요, {name}",
+      "question": "오늘 무엇을 하고 싶으세요?"
+    },
     "vibeCode": {
       "title": "무엇을 만들고 싶나요?",
       "newApp": "앱 Vibe 코드 생성",
@@ -698,14 +707,44 @@
   "fileMenu": {
     "title": "파일",
     "newProject": "새 프로젝트",
-    "openProject": "프로젝트 열기"
+    "openProject": "프로젝트 열기",
+    "newWorkflow": {
+      "name": "새 워크플로우",
+      "description": "새 워크플로우 만들기"
+    },
+    "closeWorkflow": {
+      "name": "워크플로우 닫기",
+      "description": "현재 워크플로우 닫기"
+    },
+    "exportWorkflow": {
+      "name": "워크플로우 내보내기",
+      "description": "현재 워크플로우를 JSON 파일로 내보내기"
+    },
+    "publishWorkflow": {
+      "name": "워크플로우 게시",
+      "description": "현재 워크플로우를 Pulse Marketplace에 게시"
+    }
   },
   "viewMenu": {
     "title": "보기",
     "commandViewer": "명령 뷰어",
     "console": "콘솔",
+    "viewCommandViewer": {
+      "name": "명령 뷰어 보기",
+      "description": "모든 명령과 단축키 보기"
+    },
+    "closeCommandViewer": {
+      "name": "명령 뷰어 닫기",
+      "description": "명령 뷰어 닫기"
+    },
+    "runWorkflow": {
+      "name": "워크플로우 실행",
+      "description": "선택한 또는 기본 진입점에서 현재 워크플로우 실행"
+    },
     "importWorkflow": {
+      "name": "워크플로우 가져오기",
       "title": "워크플로우 가져오기",
+      "description": "JSON 파일에서 워크플로우 가져오기",
       "invalidFile": "잘못된 워크플로우 파일입니다",
       "readError": "워크플로우 파일을 읽는 중 오류가 발생했습니다"
     }
@@ -1076,5 +1115,15 @@
   },
   "draggableItem": {
     "ariaLabel": "드래그하여 이동"
+  },
+  "canvasNode": {
+    "tooltips": {
+      "fullscreen": "노드를 전체 화면 탭으로 엽니다.",
+      "vibeCode": "Vibe Code 열기",
+      "ownedApps": "소유 앱 전환",
+      "workflowConnectors": "워크플로우 커넥터 전환",
+      "resize": "노드 크기 조정",
+      "delete": "노드 삭제"
+    }
   }
 }

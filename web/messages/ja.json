@@ -25,6 +25,11 @@
 		"editCode": "コードを編集（近日公開）",
 		"noData": "アーティファクトデータがありません。"
 	},
+	"vibeCode": {
+		"verifyingAuthor": "アプリ作成者を確認中...",
+		"notAuthor": "無効な操作です。このアプリの作成者ではありません。",
+		"fetchFailed": "Vibe Codeの最新バージョンの取得に失敗しました。"
+	},
 	"navigation": {
 		"connectedToCloudAI": "Cloud AI に接続済み",
 		"offline": "オフライン",
@@ -165,6 +170,10 @@
 	},
 	"homeView": {
 		"title": "ホーム",
+		"greeting": {
+			"hello": "こんにちは、{name}",
+			"question": "今日は何をしますか？"
+		},
 		"vibeCode": {
 			"title": "何を作りたいですか？",
 			"newApp": "Vibe Code でアプリを作成",
@@ -698,14 +707,44 @@
 	"fileMenu": {
 		"title": "ファイル",
 		"newProject": "新規プロジェクト",
-		"openProject": "プロジェクトを開く"
+		"openProject": "プロジェクトを開く",
+		"newWorkflow": {
+			"name": "新規ワークフロー",
+			"description": "新しいワークフローを作成"
+		},
+		"closeWorkflow": {
+			"name": "ワークフローを閉じる",
+			"description": "現在のワークフローを閉じる"
+		},
+		"exportWorkflow": {
+			"name": "ワークフローをエクスポート",
+			"description": "現在のワークフローをJSONファイルとしてエクスポート"
+		},
+		"publishWorkflow": {
+			"name": "ワークフローを公開",
+			"description": "現在のワークフローをPulse Marketplaceに公開"
+		}
 	},
 	"viewMenu": {
 		"title": "表示",
 		"commandViewer": "コマンドビューアー",
 		"console": "コンソール",
+		"viewCommandViewer": {
+			"name": "コマンドビューアーを表示",
+			"description": "すべてのコマンドとショートカットを表示"
+		},
+		"closeCommandViewer": {
+			"name": "コマンドビューアーを閉じる",
+			"description": "コマンドビューアーを閉じる"
+		},
+		"runWorkflow": {
+			"name": "ワークフローを実行",
+			"description": "選択したまたはデフォルトのエントリポイントから現在のワークフローを実行"
+		},
 		"importWorkflow": {
+			"name": "ワークフローをインポート",
 			"title": "ワークフローをインポート",
+			"description": "JSONファイルからワークフローをインポート",
 			"invalidFile": "無効なワークフローファイルです",
 			"readError": "ワークフローファイルの読み込み中にエラーが発生しました"
 		}
@@ -1076,5 +1115,15 @@
 	},
 	"draggableItem": {
 		"ariaLabel": "ドラッグして移動"
+	},
+	"canvasNode": {
+		"tooltips": {
+			"fullscreen": "ノードをフルスクリーンタブで開く。",
+			"vibeCode": "Vibe Codeを開く",
+			"ownedApps": "所有アプリを切り替え",
+			"workflowConnectors": "ワークフローコネクタを切り替え",
+			"resize": "ノードのサイズを変更",
+			"delete": "ノードを削除"
+		}
 	}
 }

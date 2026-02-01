@@ -25,6 +25,11 @@
     "editCode": "Edit Code (Coming Soon)",
     "noData": "No artifact data available."
   },
+  "vibeCode": {
+    "verifyingAuthor": "Verifying app author...",
+    "notAuthor": "Invalid action. You are not the author of this app.",
+    "fetchFailed": "Failed to fetch latest version of Vibe Code."
+  },
   "navigation": {
     "connectedToCloudAI": "Connected to Cloud AI",
     "offline": "Offline",
@@ -165,6 +170,10 @@
   },
   "homeView": {
     "title": "Home",
+    "greeting": {
+      "hello": "Hello, {name}",
+      "question": "What is on your mind today?"
+    },
     "vibeCode": {
       "title": "What would you like to create?",
       "newApp": "Vibe Code An App",
@@ -698,14 +707,44 @@
   "fileMenu": {
     "title": "File",
     "newProject": "New Project",
-    "openProject": "Open Project"
+    "openProject": "Open Project",
+    "newWorkflow": {
+      "name": "New Workflow",
+      "description": "Create a new Workflow"
+    },
+    "closeWorkflow": {
+      "name": "Close Workflow",
+      "description": "Close the current workflow"
+    },
+    "exportWorkflow": {
+      "name": "Export Workflow",
+      "description": "Export the current workflow as a JSON file"
+    },
+    "publishWorkflow": {
+      "name": "Publish Workflow",
+      "description": "Publish the current workflow to the Pulse Marketplace"
+    }
   },
   "viewMenu": {
     "title": "View",
     "commandViewer": "Command Viewer",
     "console": "Console",
+    "viewCommandViewer": {
+      "name": "View Command Viewer",
+      "description": "View all commands and shortcuts"
+    },
+    "closeCommandViewer": {
+      "name": "Close Command Viewer",
+      "description": "Close the command viewer"
+    },
+    "runWorkflow": {
+      "name": "Run Workflow",
+      "description": "Run the current workflow from the selected or default entry point"
+    },
     "importWorkflow": {
+      "name": "Import Workflow",
       "title": "Import Workflow",
+      "description": "Import a workflow from a JSON file",
       "invalidFile": "Invalid workflow file",
       "readError": "Error reading workflow file"
     }
@@ -1076,5 +1115,15 @@
   },
   "draggableItem": {
     "ariaLabel": "Drag to move"
+  },
+  "canvasNode": {
+    "tooltips": {
+      "fullscreen": "Open node in fullscreen tab.",
+      "vibeCode": "Open Vibe Code",
+      "ownedApps": "Toggle owned apps",
+      "workflowConnectors": "Toggle workflow connectors",
+      "resize": "Resize node",
+      "delete": "Delete node"
+    }
   }
 }
