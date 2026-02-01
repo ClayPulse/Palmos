@@ -77,7 +77,7 @@ export default function ArtifactModal({
             <Button
               onPress={() => {
                 const url = new URL(
-                  window.location.origin + "/?app=" + artifact.data.appId,
+                  "https://web.pulse-editor.com/?app=" + artifact.data.appId,
                 );
                 if (getPlatform() === PlatformEnum.Capacitor) {
                   Browser.open({
@@ -110,7 +110,9 @@ export default function ArtifactModal({
             >
               {getTranslations("artifactModal.downloadSource")}
             </Button>
-            <Button isDisabled>{getTranslations("artifactModal.editCode")}</Button>
+            <Button isDisabled>
+              {getTranslations("artifactModal.editCode")}
+            </Button>
           </div>
         </div>
       ) : (

@@ -23,6 +23,14 @@ Pulse Editor is a modular, cross-platform, AI-powered productivity platform with
 
 # Features
 
+## Vibe Coding -- AI-assisted coding on any device
+
+Watch the demo video on YouTube (click to play):
+
+[![Video title](https://img.youtube.com/vi/Hs0-nQRSjmk/0.jpg)](https://www.youtube.com/watch?v=Hs0-nQRSjmk)
+
+https://www.youtube.com/watch?v=Hs0-nQRSjmk
+
 ## Cross-platform full-stack apps collaboration workflow
 
 By leveraging [Module Federation](https://module-federation.io/),
@@ -60,6 +68,7 @@ Running vibe coding workflow in canvas view allows you to develop software on an
 ### Vibe Coding agent -- code modification
 
 ![VibeCoding_CodeEditorControl](https://cdn.pulse-editor.com/assets/VibeCode_CodeEditorControlAgent.gif)
+
 ## 2. MCP client
 
 You can connect MCP servers and Pulse full-stack apps to agentic chat. e.g. installation-free browser agent with chrome-devtools-mcp and chrome remote debugging:
@@ -68,7 +77,9 @@ You can connect MCP servers and Pulse full-stack apps to agentic chat. e.g. inst
 ## 3. Remote ComfyUI Workspace and Serverless ComfyUI Image/Video Generation (WIP)
 
 You can run workflows with [Pulse App ComfyUI Workflow](https://github.com/Shellishack/pulse-app-comfyui-workflow).
+
 ### Remote ComfyUI Workspace
+
 You can even run remote ComfyUI on Pulse Editor mobile app.
 ![Remote_ComfyUI](https://cdn.pulse-editor.com/assets/remote-comfyui.jpg)
 
@@ -111,41 +122,52 @@ have to start a [remote workspace](#start-a-remote-workspace) first.
 ![Workspace_CreateTerminalInWorkspace](https://cdn.pulse-editor.com/assets/Workspace_CreateTerminalInWorkspace.gif)
 
 ## Build your own Pulse App
+
 We made a MF-compatible full-stack development template (theoretically framework agnostic). For now, we have official support for developing Pulse App using React (more frameworks to come).
 
 ### Development
+
 To get started, download our CLI tool
+
 ```bash
 npm i -g @pulse-editor/cli
 ```
+
 Then, create a new template using:
+
 ```bash
 pulse create
 ```
+
 ![pulse-cli](https://cdn.pulse-editor.com/assets/pulse-cli.png)
 
 Next, select your development framework (only React is supported for now) and fill in your project name.
 
-You can also choose visibility of your app on Pulse Editor marketplace. 
+You can also choose visibility of your app on Pulse Editor marketplace.
+
 - Public: any user can discover and use your app
 - Unlisted: only users that you invite with a share link can use your app
 - Private: only you can access your app
 
 ### Publishing your app to Pulse Editor marketplace
+
 To publish your app to marketplace, go to https://pulse-editor.com to create a developer API key.
 Then copy your key and run:
+
 ```bash
 pulse login
 ```
+
 After you have signed in, you can use the following command to publish your app:
+
 ```bash
 pulse publish
 ```
 
-
 For detailed guides on how to start developing and using extensions locally, check out our [React template repository](https://github.com/ClayPulse/pulse-editor-extension-template).
 
 Some of our official extensions are also open-source. Feel free to take examples from them and/or contribute to them. You can find a monorepo here: [Official Pulse Apps](https://github.com/ClayPulse/official-pulse-apps), which includes:
+
 - Code View (MIT)
 - Terminal (MIT)
 - Text Node (MIT)
