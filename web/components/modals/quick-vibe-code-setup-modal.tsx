@@ -1,5 +1,6 @@
 "use client";
 
+import useActionExecutor from "@/lib/hooks/use-action-executor";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
@@ -23,10 +24,18 @@ export default function QuickVibeCodeSetupModal({
 
   const { openProject } = useProjectManager();
   const { createAppViewInCanvasView } = useTabViewManager();
+  const { runScopedAction, actions } = useActionExecutor();
 
   const [isProjectOpen, setIsProjectOpen] = useState(false);
 
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false);
+  const [initializingBaseApp, setInitializingBaseApp] = useState<
+    | {
+        baseApp: { appId: string; version: string };
+        viewId: string;
+      }
+    | undefined
+  >(undefined);
 
   const isUseWorkspace = useMemo(() => {
     const { app } =
@@ -36,6 +45,9 @@ export default function QuickVibeCodeSetupModal({
     }
     return false;
   }, [editorContext?.editorStates.modalStates?.quickVibeCodeSetup]);
+
+  const baseApp =
+    editorContext?.editorStates.modalStates?.quickVibeCodeSetup?.baseApp;
 
   // Start opening project and app when modal is opened
   useEffect(() => {
@@ -60,6 +72,37 @@ export default function QuickVibeCodeSetupModal({
 
     openWhenReady();
   }, [isWorkspaceReady, isProjectOpen, isUseWorkspace]);
+
+  useEffect(() => {
+    async function initializeBaseApp() {
+      if (!initializingBaseApp) {
+        return;
+      }
+
+      const action = actions.find(
+        (a) => a.action.name === "Fill Application Information",
+      );
+      if (!action) {
+        console.error("Fill Application Information action not found");
+        return;
+      }
+
+      await runScopedAction(
+        {
+          ...action,
+          viewId: initializingBaseApp.viewId,
+        },
+        {
+          appId: initializingBaseApp.baseApp.appId,
+          version: initializingBaseApp.baseApp.version,
+        },
+      );
+
+      setInitializingBaseApp(undefined);
+    }
+
+    initializeBaseApp();
+  }, [initializingBaseApp]);
 
   async function handleOpenInProject() {
     openProject(vibeCodeProject);
@@ -88,10 +131,12 @@ export default function QuickVibeCodeSetupModal({
   }
 
   async function openApp(app: ExtensionApp, isFullscreen?: boolean) {
+    const viewId = createAppViewId(app.config.id);
+
     const config: AppViewConfig = {
       app: app.config.id,
       requiredVersion: app.config.version,
-      viewId: createAppViewId(app.config.id),
+      viewId: viewId,
       initialHeight: app.config.recommendedHeight,
       initialWidth: app.config.recommendedWidth,
       initialIsFullscreen: isFullscreen,
@@ -103,6 +148,14 @@ export default function QuickVibeCodeSetupModal({
         isSideMenuOpen: false,
       };
     });
+
+    /* Run vibe code's action to load initial app info */
+    if (baseApp) {
+      setInitializingBaseApp({
+        baseApp,
+        viewId,
+      });
+    }
   }
 
   return (

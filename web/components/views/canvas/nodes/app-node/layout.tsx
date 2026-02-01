@@ -1,6 +1,8 @@
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import BaseAppView from "@/components/views/base/base-app-view";
+import { useVibeCode } from "@/lib/hooks/use-vibe-code";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { AppNodeData, EditorContextType } from "@/lib/types";
 import { useDroppable } from "@dnd-kit/core";
 import {
@@ -27,6 +29,7 @@ import {
 import clsx from "clsx";
 import { useContext, useEffect, useState } from "react";
 import NodeHandle from "./node-handle";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 
 export default function CanvasNodeViewLayout({
   viewId,
@@ -112,6 +115,7 @@ export default function CanvasNodeViewLayout({
                 isShowingOwnedApps={isShowingOwnedApps}
                 setIsShowingOwnedApps={setIsShowingOwnedApps}
                 isFullScreen={isFullScreen}
+                appId={node.data.config.app}
               />
             </PopoverContent>
           </Popover>
@@ -238,7 +242,7 @@ export default function CanvasNodeViewLayout({
                   />
                 </div>
               </div>
-            ),
+            )
           )}
         </div>
       </div>
@@ -256,6 +260,7 @@ function CanvasNodeControl({
   isShowingOwnedApps,
   setIsShowingOwnedApps,
   isFullScreen,
+  appId,
 }: {
   actions: Action[];
   selectedAction: Action | undefined;
@@ -265,13 +270,18 @@ function CanvasNodeControl({
   setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
   isShowingOwnedApps: boolean;
   setIsShowingOwnedApps: (showing: boolean) => void;
-  isFullScreen: boolean;
+    isFullScreen: boolean;
+    appId: string;
 }) {
+  const { openVibeCode } = useVibeCode();
+  const { getInstalledExtensionApp} = useExtensionAppManager();
+  const { getTranslations: t } = useTranslations();
+
   const [actionError, setActionError] = useState<{ [key: string]: string }>({});
 
   return (
     <div className="bg-content1 flex items-center gap-x-1 rounded-md">
-      <Tooltip content="Open node in fullscreen tab." placement="top">
+      <Tooltip content={t("canvasNode.tooltips.fullscreen")} placement="top">
         <Button
           isIconOnly
           variant="light"
@@ -289,7 +299,38 @@ function CanvasNodeControl({
         </Button>
       </Tooltip>
 
-      <Tooltip content="Toggle owned apps" placement="top">
+      <Tooltip content={t("canvasNode.tooltips.vibeCode")} placement="top">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
+          data-active={isShowingOwnedApps ? "true" : "false"}
+          onPress={async () => {
+            const nodeApp = await getInstalledExtensionApp(appId);
+            if (!nodeApp) {
+              addToast({
+                title: "Failed to open Vibe Code",
+                description:
+                  "The app associated with this node is not installed.",
+                color: "danger",
+              });
+              return;
+            }
+
+            await openVibeCode({
+              appId: nodeApp.config.id,
+              version: nodeApp.config.version,
+            });
+
+
+          }}
+        >
+          <Icon name="auto_awesome" variant="outlined" />
+        </Button>
+      </Tooltip>
+
+      <Tooltip content={t("canvasNode.tooltips.ownedApps")} placement="top">
         <Button
           isIconOnly
           variant="light"
@@ -308,7 +349,7 @@ function CanvasNodeControl({
         className="flex flex-row items-center gap-x-1"
         validationErrors={actionError}
       >
-        <Tooltip content="Toggle workflow connectors" placement="top">
+        <Tooltip content={t("canvasNode.tooltips.workflowConnectors")} placement="top">
           <Button
             isIconOnly
             variant="light"
@@ -358,7 +399,7 @@ function CanvasNodeControl({
         </Select>
       </Form>
 
-      <Tooltip content="Resize node" placement="top">
+      <Tooltip content={t("canvasNode.tooltips.resize")} placement="top">
         <div className="p-3">
           <div className="relative">
             {/* Popover is interfering with the drag area... */}
@@ -407,7 +448,7 @@ function CanvasNodeControl({
         </div>
       </Tooltip>
 
-      <Tooltip content="Delete node" placement="top">
+      <Tooltip content={t("canvasNode.tooltips.delete")} placement="top">
         <Button
           isIconOnly
           variant="light"

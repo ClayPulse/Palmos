@@ -55,7 +55,7 @@ export default function NavMenuDropdown({
                 ) : null
               }
             >
-              {action.name}
+              {action.displayName}
             </DropdownItem>
           )) ?? []}
       </DropdownMenu>

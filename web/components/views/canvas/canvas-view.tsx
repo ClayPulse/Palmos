@@ -3,6 +3,7 @@ import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-men
 import { useCanvas } from "@/lib/hooks/use-canvas";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { AppNodeData, AppViewConfig, CanvasViewConfig } from "@/lib/types";
 import { useDroppable } from "@dnd-kit/core";
 import {
@@ -38,6 +39,7 @@ export default function CanvasView({
   tabName: string;
 }) {
   const editorContext = useContext(EditorContext);
+  const { getTranslations: t, locale } = useTranslations();
 
   const { resolvedTheme } = useTheme();
   const {
@@ -133,37 +135,45 @@ export default function CanvasView({
   useRegisterMenuAction(
     {
       name: `Export Workflow (${tabName})`,
+      displayName: `${t("fileMenu.exportWorkflow.name")} (${tabName})`,
       menuCategory: "file",
-      description: "Export the current workflow as a JSON file",
+      description: t("fileMenu.exportWorkflow.description"),
       shortcut: "Ctrl+Alt+E",
       icon: "download",
     },
     async () => exportWorkflow(),
-    [exportWorkflow, isActive, tabName],
+    [exportWorkflow, isActive, tabName, locale],
     isActive,
   );
   // Run workflow
   useRegisterMenuAction(
     {
       name: `Run Workflow (${tabName})`,
+      displayName: `${t("viewMenu.runWorkflow.name")} (${tabName})`,
       menuCategory: "view",
-      description:
-        "Run the current workflow from the selected or default entry point",
+      description: t("viewMenu.runWorkflow.description"),
       shortcut: "Ctrl+Alt+R",
       icon: "play_arrow",
     },
     async () => {
       await startWorkflow();
     },
-    [entryPoint, isActive, tabName, editorContext?.persistSettings?.extensions],
+    [
+      entryPoint,
+      isActive,
+      tabName,
+      editorContext?.persistSettings?.extensions,
+      locale,
+    ],
     isActive,
   );
   // Publish workflow
   useRegisterMenuAction(
     {
       name: `Publish Workflow (${tabName})`,
+      displayName: `${t("fileMenu.publishWorkflow.name")} (${tabName})`,
       menuCategory: "file",
-      description: "Publish the current workflow to the Pulse Marketplace",
+      description: t("fileMenu.publishWorkflow.description"),
       shortcut: "Ctrl+Alt+P",
       icon: "cloud_upload",
     },
@@ -186,6 +196,7 @@ export default function CanvasView({
       editorContext?.editorStates.workflowNodes,
       entryPoint,
       saveAppsSnapshotStates,
+      locale,
     ],
     isActive,
   );

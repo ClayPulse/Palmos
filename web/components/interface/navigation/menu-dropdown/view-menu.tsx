@@ -2,14 +2,14 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { CanvasViewConfig, WorkflowContent } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
-import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useState } from "react";
 import NavMenuDropdown from "../nav-menu-dropdown";
 
 export default function ViewMenuDropDown() {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t, locale } = useTranslations();
   const editorContext = useContext(EditorContext);
   const { menuActions } = useMenuActions("view");
 
@@ -19,10 +19,11 @@ export default function ViewMenuDropDown() {
   useRegisterMenuAction(
     {
       name: "Close Command Viewer",
+      displayName: t("viewMenu.closeCommandViewer.name"),
       menuCategory: "view",
       shortcut: "F1",
       icon: "terminal",
-      description: "Close the command viewer",
+      description: t("viewMenu.closeCommandViewer.description"),
     },
     async () => {
       console.log("Closing command viewer");
@@ -31,17 +32,18 @@ export default function ViewMenuDropDown() {
         isCommandViewerOpen: false,
       }));
     },
-    [],
+    [locale],
     isCommandViewerOpen,
   );
 
   useRegisterMenuAction(
     {
       name: "View Command Viewer",
+      displayName: t("viewMenu.viewCommandViewer.name"),
       menuCategory: "view",
       shortcut: "F1",
       icon: "terminal",
-      description: "View all commands and shortcuts",
+      description: t("viewMenu.viewCommandViewer.description"),
     },
     async () => {
       console.log("Opening command viewer");
@@ -50,7 +52,7 @@ export default function ViewMenuDropDown() {
         isCommandViewerOpen: true,
       }));
     },
-    [],
+    [locale],
     !isCommandViewerOpen,
   );
 
@@ -66,8 +68,9 @@ export default function ViewMenuDropDown() {
   useRegisterMenuAction(
     {
       name: "Import Workflow",
+      displayName: t("viewMenu.importWorkflow.name"),
       menuCategory: "file",
-      description: "Import a workflow from a JSON file",
+      description: t("viewMenu.importWorkflow.description"),
       shortcut: "Ctrl+Alt+I",
       icon: "upload",
     },
@@ -107,8 +110,11 @@ export default function ViewMenuDropDown() {
     [
       editorContext?.editorStates.project,
       editorContext?.editorStates.currentWorkspace,
+      locale,
     ],
   );
 
-  return <NavMenuDropdown category="View" menuActions={menuActions} />;
+  return (
+    <NavMenuDropdown category={t("viewMenu.title")} menuActions={menuActions} />
+  );
 }

@@ -2,6 +2,7 @@ import { PlatformEnum } from "@/lib/enums";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import { useVibeCode } from "@/lib/hooks/use-vibe-code";
 import { getRemoteClientBaseURL } from "@/lib/module-federation/remote";
 import {
   checkCompatibility,
@@ -56,14 +57,11 @@ export default function AppPreviewCard({
   attributes?: DraggableAttributes;
   listeners?: SyntheticListenerMap;
 }) {
-  const {getTranslations: t} = useTranslations();
-  const {
-    disableExtensionApp,
-    enableExtensionApp,
-    uninstallExtensionApp,
-    installExtensionApp,
-  } = useExtensionAppManager();
+  const { getTranslations: t } = useTranslations();
+  const { uninstallExtensionApp, installExtensionApp } =
+    useExtensionAppManager();
   const { openAppInfoModal } = useAppInfo();
+  const { openVibeCode } = useVibeCode();
 
   const [isEnabled, setIsEnabled] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -182,18 +180,6 @@ export default function AppPreviewCard({
     loadThumbnail();
   }, [extension]);
 
-  function toggleExtension() {
-    if (isEnabled) {
-      disableExtensionApp(extension.config.id).then(() => {
-        setIsEnabled(false);
-      });
-    } else {
-      enableExtensionApp(extension.config.id).then(() => {
-        setIsEnabled(true);
-      });
-    }
-  }
-
   function showDetails() {
     openAppInfoModal({
       id: extension.config.id,
@@ -207,6 +193,13 @@ export default function AppPreviewCard({
         : undefined,
     });
     editorContext?.updateModalStates({ marketplace: { isOpen: false } });
+  }
+
+  async function handleEditApp() {
+    await openVibeCode({
+      appId: extension.config.id,
+      version: extension.config.version,
+    });
   }
 
   if (!isLoaded) {
@@ -236,9 +229,7 @@ export default function AppPreviewCard({
                 <Tooltip
                   content={
                     <div className="max-w-xs">
-                      <p>
-                        {t("appPreviewCard.requiresWorkspace")}
-                      </p>
+                      <p>{t("appPreviewCard.requiresWorkspace")}</p>
                     </div>
                   }
                 >
@@ -294,9 +285,11 @@ export default function AppPreviewCard({
                           <p>
                             {t("appPreviewCard.libIncompatible")}
                             <br />
-                            {t("appPreviewCard.hostLibVersion")} {hostLibVersion}
+                            {t("appPreviewCard.hostLibVersion")}{" "}
+                            {hostLibVersion}
                             <br />
-                            {t("appPreviewCard.appLibVersion")} {remoteLibVersion}
+                            {t("appPreviewCard.appLibVersion")}{" "}
+                            {remoteLibVersion}
                           </p>
                         )}
                       </div>
@@ -434,7 +427,10 @@ export default function AppPreviewCard({
                       .then(() => {
                         addToast({
                           title: t("appPreviewCard.extensionInstalled"),
-                          description: t("appPreviewCard.extensionInstalledDescription", { id: extension.config.id }),
+                          description: t(
+                            "appPreviewCard.extensionInstalledDescription",
+                            { id: extension.config.id },
+                          ),
                           color: "success",
                         });
                         setIsInstalled(true);
@@ -463,7 +459,10 @@ export default function AppPreviewCard({
 
                       addToast({
                         title: t("appPreviewCard.extensionUpgraded"),
-                        description: t("appPreviewCard.extensionUpgradedDescription", { id: extension.config.id }),
+                        description: t(
+                          "appPreviewCard.extensionUpgradedDescription",
+                          { id: extension.config.id },
+                        ),
                         color: "success",
                       });
                       setIsOutdated(false);
@@ -484,7 +483,10 @@ export default function AppPreviewCard({
                       uninstallExtensionApp(extension.config.id).then(() => {
                         addToast({
                           title: t("appPreviewCard.extensionUninstalled"),
-                          description: t("appPreviewCard.extensionUninstalledDescription", { id: extension.config.id }),
+                          description: t(
+                            "appPreviewCard.extensionUninstalledDescription",
+                            { id: extension.config.id },
+                          ),
                           color: "success",
                         });
                         setIsInstalled(false);
@@ -508,14 +510,19 @@ export default function AppPreviewCard({
                     uninstallExtensionApp(extension.config.id).then(() => {
                       addToast({
                         title: t("appPreviewCard.extensionUninstalled"),
-                        description: t("appPreviewCard.extensionUninstalledDescription", { id: extension.config.id }),
+                        description: t(
+                          "appPreviewCard.extensionUninstalledDescription",
+                          { id: extension.config.id },
+                        ),
                         color: "success",
                       });
                     });
                     setContextMenuState({ x: 0, y: 0, isOpen: false });
                   }}
                 >
-                  <p className="w-full text-start">{t("appPreviewCard.uninstall")}</p>
+                  <p className="w-full text-start">
+                    {t("appPreviewCard.uninstall")}
+                  </p>
                 </Button>
               ) : (
                 <Button
@@ -530,7 +537,10 @@ export default function AppPreviewCard({
                       .then(() => {
                         addToast({
                           title: t("appPreviewCard.extensionInstalled"),
-                          description: t("appPreviewCard.extensionInstalledDescription", { id: extension.config.id }),
+                          description: t(
+                            "appPreviewCard.extensionInstalledDescription",
+                            { id: extension.config.id },
+                          ),
                           color: "success",
                         });
                         setIsInstalled(true);
@@ -542,7 +552,9 @@ export default function AppPreviewCard({
                     setContextMenuState({ x: 0, y: 0, isOpen: false });
                   }}
                 >
-                  <p className="w-full text-start">{t("appPreviewCard.install")}</p>
+                  <p className="w-full text-start">
+                    {t("appPreviewCard.install")}
+                  </p>
                 </Button>
               )}
             </div>
@@ -580,18 +592,36 @@ export default function AppPreviewCard({
           <Divider />
         </div>
 
-        <div className="flex justify-end gap-x-2">
-          <div className="flex gap-x-1">
-            <div>
-              <Icon name="comment" />
-            </div>
-            <p>0</p>
+        <div className="grid w-full grid-cols-[max-content_auto] items-center">
+          <div>
+            {extension.config.author}
+
+            <Button
+              variant="light"
+              size="sm"
+              color="secondary"
+              onPress={handleEditApp}
+            >
+              <div className="flex items-center gap-x-1">
+                <Icon name="auto_awesome" />
+                <span>{t("common.edit")}</span>
+              </div>
+            </Button>
           </div>
-          <div className="flex gap-x-1">
-            <div>
-              <Icon name="favorite" />
+
+          <div className="flex justify-end gap-x-2">
+            <div className="flex gap-x-1">
+              <div>
+                <Icon name="comment" />
+              </div>
+              <p>0</p>
             </div>
-            <p>0</p>
+            <div className="flex gap-x-1">
+              <div>
+                <Icon name="favorite" />
+              </div>
+              <p>0</p>
+            </div>
           </div>
         </div>
       </div>
@@ -608,7 +638,7 @@ function EnableCheckBox({
   activeText?: string;
   inactiveText?: string;
 }) {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const { children, isSelected, getBaseProps, getLabelProps, getInputProps } =
     useCheckbox({
       onValueChange: onPress,
@@ -670,7 +700,11 @@ function EnableCheckBox({
         }}
         size="sm"
       >
-        {children ? children : isSelected ? t("appPreviewCard.enabled") : t("appPreviewCard.disabled")}
+        {children
+          ? children
+          : isSelected
+            ? t("appPreviewCard.enabled")
+            : t("appPreviewCard.disabled")}
       </Chip>
     </label>
   );

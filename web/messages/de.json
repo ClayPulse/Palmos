@@ -26,6 +26,11 @@
 		"editCode": "Code bearbeiten (demnächst)",
 		"noData": "Keine Artefaktdaten verfügbar."
 	},
+	"vibeCode": {
+		"verifyingAuthor": "App-Autor wird überprüft...",
+		"notAuthor": "Ungültige Aktion. Sie sind nicht der Autor dieser App.",
+		"fetchFailed": "Fehler beim Abrufen der neuesten Version von Vibe Code."
+	},
 	"navigation": {
 		"connectedToCloudAI": "Mit Cloud AI verbunden",
 		"offline": "Offline",
@@ -166,6 +171,10 @@
 	},
 	"homeView": {
 		"title": "Startseite",
+		"greeting": {
+			"hello": "Hallo, {name}",
+			"question": "Was hast du heute vor?"
+		},
 		"vibeCode": {
 			"title": "Was möchtest du erstellen?",
 			"newApp": "Vibe Code eine App",
@@ -680,14 +689,44 @@
 	"fileMenu": {
 		"title": "Datei",
 		"newProject": "Neues Projekt",
-		"openProject": "Projekt öffnen"
+		"openProject": "Projekt öffnen",
+		"newWorkflow": {
+			"name": "Neuer Workflow",
+			"description": "Einen neuen Workflow erstellen"
+		},
+		"closeWorkflow": {
+			"name": "Workflow schließen",
+			"description": "Den aktuellen Workflow schließen"
+		},
+		"exportWorkflow": {
+			"name": "Workflow exportieren",
+			"description": "Den aktuellen Workflow als JSON-Datei exportieren"
+		},
+		"publishWorkflow": {
+			"name": "Workflow veröffentlichen",
+			"description": "Den aktuellen Workflow auf Pulse Marketplace veröffentlichen"
+		}
 	},
 	"viewMenu": {
 		"title": "Ansicht",
 		"commandViewer": "Befehlsansicht",
 		"console": "Konsole",
+		"viewCommandViewer": {
+			"name": "Befehlsansicht anzeigen",
+			"description": "Alle Befehle und Verknüpfungen anzeigen"
+		},
+		"closeCommandViewer": {
+			"name": "Befehlsansicht schließen",
+			"description": "Die Befehlsansicht schließen"
+		},
+		"runWorkflow": {
+			"name": "Workflow ausführen",
+			"description": "Den aktuellen Workflow vom ausgewählten oder Standard-Einstiegspunkt ausführen"
+		},
 		"importWorkflow": {
+			"name": "Workflow importieren",
 			"title": "Workflow importieren",
+			"description": "Einen Workflow aus einer JSON-Datei importieren",
 			"invalidFile": "Ungültige Workflow-Datei",
 			"readError": "Fehler beim Lesen der Workflow-Datei"
 		}
@@ -1049,5 +1088,15 @@
 	},
 	"draggableItem": {
 		"ariaLabel": "Ziehen zum Verschieben"
+	},
+	"canvasNode": {
+		"tooltips": {
+			"fullscreen": "Knoten in Vollbild-Tab öffnen.",
+			"vibeCode": "Vibe Code öffnen",
+			"ownedApps": "Eigene Apps umschalten",
+			"workflowConnectors": "Workflow-Konnektoren umschalten",
+			"resize": "Knoten in der Größe ändern",
+			"delete": "Knoten löschen"
+		}
 	}
 }

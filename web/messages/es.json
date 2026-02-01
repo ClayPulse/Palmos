@@ -26,6 +26,11 @@
 		"editCode": "Editar código (próximamente)",
 		"noData": "No hay datos de artefacto disponibles."
 	},
+	"vibeCode": {
+		"verifyingAuthor": "Verificando autor de la aplicación...",
+		"notAuthor": "Acción inválida. No eres el autor de esta aplicación.",
+		"fetchFailed": "Error al obtener la última versión de Vibe Code."
+	},
 	"navigation": {
 		"connectedToCloudAI": "Conectado a Cloud AI",
 		"offline": "Sin conexión",
@@ -166,6 +171,10 @@
 	},
 	"homeView": {
 		"title": "Inicio",
+		"greeting": {
+			"hello": "Hola, {name}",
+			"question": "¿Qué tienes en mente hoy?"
+		},
 		"vibeCode": {
 			"title": "¿Qué te gustaría crear?",
 			"newApp": "Vibe Code una aplicación",
@@ -680,14 +689,44 @@
 	"fileMenu": {
 		"title": "Archivo",
 		"newProject": "Nuevo proyecto",
-		"openProject": "Abrir proyecto"
+		"openProject": "Abrir proyecto",
+		"newWorkflow": {
+			"name": "Nuevo flujo de trabajo",
+			"description": "Crear un nuevo flujo de trabajo"
+		},
+		"closeWorkflow": {
+			"name": "Cerrar flujo de trabajo",
+			"description": "Cerrar el flujo de trabajo actual"
+		},
+		"exportWorkflow": {
+			"name": "Exportar flujo de trabajo",
+			"description": "Exportar el flujo de trabajo actual como un archivo JSON"
+		},
+		"publishWorkflow": {
+			"name": "Publicar flujo de trabajo",
+			"description": "Publicar el flujo de trabajo actual en Pulse Marketplace"
+		}
 	},
 	"viewMenu": {
 		"title": "Ver",
 		"commandViewer": "Visor de comandos",
 		"console": "Consola",
+		"viewCommandViewer": {
+			"name": "Ver visor de comandos",
+			"description": "Ver todos los comandos y atajos"
+		},
+		"closeCommandViewer": {
+			"name": "Cerrar visor de comandos",
+			"description": "Cerrar el visor de comandos"
+		},
+		"runWorkflow": {
+			"name": "Ejecutar flujo de trabajo",
+			"description": "Ejecutar el flujo de trabajo actual desde el punto de entrada seleccionado o predeterminado"
+		},
 		"importWorkflow": {
+			"name": "Importar flujo de trabajo",
 			"title": "Importar flujo de trabajo",
+			"description": "Importar un flujo de trabajo desde un archivo JSON",
 			"invalidFile": "Archivo de flujo de trabajo no válido",
 			"readError": "Error al leer el archivo de flujo de trabajo"
 		}
@@ -1049,5 +1088,15 @@
 	},
 	"draggableItem": {
 		"ariaLabel": "Arrastrar para mover"
+	},
+	"canvasNode": {
+		"tooltips": {
+			"fullscreen": "Abrir nodo en pestaña de pantalla completa.",
+			"vibeCode": "Abrir Vibe Code",
+			"ownedApps": "Alternar aplicaciones propias",
+			"workflowConnectors": "Alternar conectores de flujo de trabajo",
+			"resize": "Redimensionar nodo",
+			"delete": "Eliminar nodo"
+		}
 	}
 }

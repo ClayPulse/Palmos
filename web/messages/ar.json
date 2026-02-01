@@ -26,6 +26,11 @@
 		"editCode": "تحرير الكود (قريباً)",
 		"noData": "لا توجد بيانات للأداة."
 	},
+	"vibeCode": {
+		"verifyingAuthor": "التحقق من مؤلف التطبيق...",
+		"notAuthor": "إجراء غير صالح. أنت لست مؤلف هذا التطبيق.",
+		"fetchFailed": "فشل في جلب أحدث إصدار من Vibe Code."
+	},
 	"navigation": {
 		"connectedToCloudAI": "متصل بـ Cloud AI",
 		"offline": "غير متصل",
@@ -166,6 +171,10 @@
 	},
 	"homeView": {
 		"title": "الصفحة الرئيسية",
+		"greeting": {
+			"hello": "مرحبًا، {name}",
+			"question": "ماذا تفكر به اليوم؟"
+		},
 		"vibeCode": {
 			"title": "ماذا تريد أن تنشئ؟",
 			"newApp": "Vibe Code تطبيق",
@@ -680,14 +689,44 @@
 	"fileMenu": {
 		"title": "ملف",
 		"newProject": "مشروع جديد",
-		"openProject": "فتح مشروع"
+		"openProject": "فتح مشروع",
+		"newWorkflow": {
+			"name": "سير عمل جديد",
+			"description": "إنشاء سير عمل جديد"
+		},
+		"closeWorkflow": {
+			"name": "إغلاق سير العمل",
+			"description": "إغلاق سير العمل الحالي"
+		},
+		"exportWorkflow": {
+			"name": "تصدير سير العمل",
+			"description": "تصدير سير العمل الحالي كملف JSON"
+		},
+		"publishWorkflow": {
+			"name": "نشر سير العمل",
+			"description": "نشر سير العمل الحالي على Pulse Marketplace"
+		}
 	},
 	"viewMenu": {
 		"title": "عرض",
 		"commandViewer": "عارض الأوامر",
 		"console": "وحدة التحكم",
+		"viewCommandViewer": {
+			"name": "عرض عارض الأوامر",
+			"description": "عرض جميع الأوامر والاختصارات"
+		},
+		"closeCommandViewer": {
+			"name": "إغلاق عارض الأوامر",
+			"description": "إغلاق عارض الأوامر"
+		},
+		"runWorkflow": {
+			"name": "تشغيل سير العمل",
+			"description": "تشغيل سير العمل الحالي من نقطة الدخول المحددة أو الافتراضية"
+		},
 		"importWorkflow": {
+			"name": "استيراد سير عمل",
 			"title": "استيراد سير عمل",
+			"description": "استيراد سير عمل من ملف JSON",
 			"invalidFile": "ملف سير عمل غير صالح",
 			"readError": "خطأ في قراءة ملف سير العمل"
 		}
@@ -1049,5 +1088,15 @@
 	},
 	"draggableItem": {
 		"ariaLabel": "اسحب للتحريك"
+	},
+	"canvasNode": {
+		"tooltips": {
+			"fullscreen": "افتح العقدة في علامة تبويب ملء الشاشة.",
+			"vibeCode": "افتح Vibe Code",
+			"ownedApps": "تبديل التطبيقات المملوكة",
+			"workflowConnectors": "تبديل موصلات سير العمل",
+			"resize": "تغيير حجم العقدة",
+			"delete": "حذف العقدة"
+		}
 	}
 }
