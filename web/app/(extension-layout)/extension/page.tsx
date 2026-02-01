@@ -125,9 +125,6 @@ export default function ExtensionPage({}) {
         document
           .querySelectorAll<HTMLElement>("[src^='/'], [href^='/']")
           .forEach((el) => {
-            // Skip if already patched
-            if (el.dataset.cdnPatched) return;
-
             if (
               el.tagName === "IMG" ||
               el.tagName === "VIDEO" ||
@@ -139,7 +136,7 @@ export default function ExtensionPage({}) {
                   "src",
                   `${cdnBase}/${storageContainer}/${moduleId}/${moduleVersion}/client${src}`,
                 );
-                el.dataset.cdnPatched = "true";
+
                 console.log(
                   `[RESOURCE PATCHED]: ${src} → ${el.getAttribute("src")}`,
                 );
@@ -149,7 +146,7 @@ export default function ExtensionPage({}) {
               const val = el.getAttribute(attr);
               if (val && val.startsWith("/")) {
                 el.setAttribute(attr, `${cdnBase}${val}`);
-                el.dataset.cdnPatched = "true";
+
                 console.log(
                   `[RESOURCE PATCHED]: ${val} → ${el.getAttribute(attr)}`,
                 );

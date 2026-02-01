@@ -1,14 +1,12 @@
 "use client";
 
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
-import { AppViewConfig, ExtensionApp, Workflow } from "@/lib/types";
-import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
+import { useTranslations } from "@/lib/hooks/use-translations";
+import { AppViewConfig, ExtensionApp } from "@/lib/types";
+import { createAppViewId } from "@/lib/views/view-helpers";
 import { addToast, Spinner } from "@heroui/react";
 import { useContext, useEffect, useMemo, useState } from "react";
-import { useTranslations } from '@/lib/hooks/use-translations';
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
@@ -19,23 +17,16 @@ export default function QuickVibeCodeSetupModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
-  const vibeCodeProject = t('quickVibeCodeSetupModal.vibeCodeProject');
+  const vibeCodeProject = t("quickVibeCodeSetupModal.vibeCodeProject");
 
-  const { platformApi } = usePlatformApi();
-  const { workspace, createWorkspace, selectWorkspace, isWorkspaceHealthy } =
-    useWorkspace();
-
-  const { openProject, createProject, refreshProjects } = useProjectManager();
-  const { createAppViewInCanvasView, createCanvasTabView } =
-    useTabViewManager();
+  const { openProject } = useProjectManager();
+  const { createAppViewInCanvasView } = useTabViewManager();
 
   const [isProjectOpen, setIsProjectOpen] = useState(false);
 
-  const [isCreateNewWorkspace, setIsCreateNewWorkspace] = useState(false);
   const [isWorkspaceReady, setIsWorkspaceReady] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const isUseWorkspace = useMemo(() => {
     const { app } =
@@ -52,13 +43,6 @@ export default function QuickVibeCodeSetupModal({
       handleOpenInProject();
     }
   }, [isOpen]);
-
-  // Wait until workspace is healthy
-  useEffect(() => {
-    if (isProjectOpen && isUseWorkspace && isWorkspaceHealthy) {
-      setIsWorkspaceReady(true);
-    }
-  }, [isWorkspaceHealthy, isProjectOpen, isUseWorkspace]);
 
   // If workspace is needed and ready, open the app/workflow;
   // or if workspace is not needed, open the app/workflow directly
@@ -78,8 +62,6 @@ export default function QuickVibeCodeSetupModal({
   }, [isWorkspaceReady, isProjectOpen, isUseWorkspace]);
 
   async function handleOpenInProject() {
-    setIsLoading(true);
-
     openProject(vibeCodeProject);
     setIsProjectOpen(true);
   }
@@ -92,18 +74,17 @@ export default function QuickVibeCodeSetupModal({
       );
 
       addToast({
-        title: t('quickVibeCodeSetupModal.appOpened.title'),
-        description: t('quickVibeCodeSetupModal.appOpened.description'),
+        title: t("quickVibeCodeSetupModal.appOpened.title"),
+        description: t("quickVibeCodeSetupModal.appOpened.description"),
         color: "success",
       });
     } else {
       addToast({
-        title: t('quickVibeCodeSetupModal.noAppToOpen'),
+        title: t("quickVibeCodeSetupModal.noAppToOpen"),
         color: "danger",
       });
     }
     onClose();
-    setIsLoading(false);
   }
 
   async function openApp(app: ExtensionApp, isFullscreen?: boolean) {
@@ -116,25 +97,24 @@ export default function QuickVibeCodeSetupModal({
       initialIsFullscreen: isFullscreen,
     };
     await createAppViewInCanvasView(config);
-  }
-
-  async function openWorkflow(workflow: Workflow) {
-    await createCanvasTabView(
-      {
-        viewId: createCanvasViewId(),
-        appConfigs: workflow.content.nodes.map((node) => node.data.config),
-        initialWorkflowContent: workflow.content,
-      },
-      false,
-    );
+    await editorContext?.setEditorStates((prev) => {
+      return {
+        ...prev,
+        isSideMenuOpen: false,
+      };
+    });
   }
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title={t('quickVibeCodeSetupModal.title')}>
+    <ModalWrapper
+      isOpen={isOpen}
+      onClose={onClose}
+      title={t("quickVibeCodeSetupModal.title")}
+    >
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
         <div className="flex items-center gap-x-2">
           <Spinner />
-          <p>{t('quickVibeCodeSetupModal.gettingReady')}</p>
+          <p>{t("quickVibeCodeSetupModal.gettingReady")}</p>
         </div>
       </div>
     </ModalWrapper>

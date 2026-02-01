@@ -18,6 +18,14 @@
 		"enter": "Introducir",
 		"viewAll": "Ver todo"
 	},
+	"artifactModal": {
+		"title": "¡Tu aplicación está lista!",
+		"openInCanvas": "Abrir en Canvas",
+		"openInNewTab": "Abrir en nueva pestaña",
+		"downloadSource": "Descargar código fuente",
+		"editCode": "Editar código (próximamente)",
+		"noData": "No hay datos de artefacto disponibles."
+	},
 	"navigation": {
 		"connectedToCloudAI": "Conectado a Cloud AI",
 		"offline": "Sin conexión",

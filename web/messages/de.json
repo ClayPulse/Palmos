@@ -18,6 +18,14 @@
 		"enter": "Eingeben",
 		"viewAll": "Alle anzeigen"
 	},
+	"artifactModal": {
+		"title": "Ihre App ist bereit!",
+		"openInCanvas": "In Canvas öffnen",
+		"openInNewTab": "In neuem Tab öffnen",
+		"downloadSource": "Quellcode herunterladen",
+		"editCode": "Code bearbeiten (demnächst)",
+		"noData": "Keine Artefaktdaten verfügbar."
+	},
 	"navigation": {
 		"connectedToCloudAI": "Mit Cloud AI verbunden",
 		"offline": "Offline",

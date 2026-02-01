@@ -9,6 +9,7 @@ export default function ModalWrapper({
   isShowGoBack,
   goBackCallback,
   placement = undefined,
+  variant
 }: {
   children?: React.ReactNode;
   isOpen: boolean;
@@ -24,6 +25,7 @@ export default function ModalWrapper({
     | "top-center"
     | "bottom-center"
     | undefined;
+  variant?: "default" | "fullscreen";
 }) {
   return (
     <Modal

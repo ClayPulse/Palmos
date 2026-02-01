@@ -18,6 +18,14 @@
 		"enter": "إدخال",
 		"viewAll": "عرض الكل"
 	},
+	"artifactModal": {
+		"title": "تطبيقك جاهز!",
+		"openInCanvas": "فتح في اللوحة",
+		"openInNewTab": "فتح في تبويب جديد",
+		"downloadSource": "تنزيل المصدر",
+		"editCode": "تحرير الكود (قريباً)",
+		"noData": "لا توجد بيانات للأداة."
+	},
 	"navigation": {
 		"connectedToCloudAI": "متصل بـ Cloud AI",
 		"offline": "غير متصل",

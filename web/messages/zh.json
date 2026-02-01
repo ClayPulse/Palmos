@@ -17,6 +17,14 @@
 		"add": "添加",
 		"enter": "输入"
 	},
+	"artifactModal": {
+		"title": "您的应用已准备就绪！",
+		"openInCanvas": "在画布中打开",
+		"openInNewTab": "在新标签页中打开",
+		"downloadSource": "下载源代码",
+		"editCode": "编辑代码（即将推出）",
+		"noData": "没有可用的工件数据。"
+	},
 	"navigation": {
 		"connectedToCloudAI": "已连接到云端 AI",
 		"offline": "离线",

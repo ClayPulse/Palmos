@@ -4,6 +4,7 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { ReactNode, useContext, useEffect, useState } from "react";
 import AgentConfigModal from "../modals/agent-config-modal";
 import AppInfoModal from "../modals/app-info-modal";
+import ArtifactModal from "../modals/artifact-modal";
 import EditorSettingsModal from "../modals/editor-settings-modal";
 import LoginModal from "../modals/login-modal";
 import MarketplaceModal from "../modals/marketplace-modal";
@@ -247,6 +248,20 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
           onClose={() => {
             editorContext?.updateModalStates({
               sharing: { isOpen: false },
+            });
+          }}
+        />
+      )}
+
+      {useDelayedUnmount(
+        modalStates?.artifact?.isOpen ?? false,
+        delaySeconds,
+      ) && (
+        <ArtifactModal
+          isOpen={modalStates?.artifact?.isOpen ?? false}
+          onClose={() => {
+            editorContext?.updateModalStates({
+              artifact: { isOpen: false },
             });
           }}
         />

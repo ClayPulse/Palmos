@@ -17,6 +17,14 @@
     "add": "추가",
     "enter": "입력"
   },
+  "artifactModal": {
+    "title": "앱이 준비되었습니다!",
+    "openInCanvas": "캔버스에서 열기",
+    "openInNewTab": "새 탭에서 열기",
+    "downloadSource": "소스 다운로드",
+    "editCode": "코드 편집(곧 제공)",
+    "noData": "아티팩트 데이터가 없습니다."
+  },
   "navigation": {
     "connectedToCloudAI": "클라우드 AI에 연결됨",
     "offline": "오프라인",

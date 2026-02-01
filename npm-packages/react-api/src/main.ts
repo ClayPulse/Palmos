@@ -12,6 +12,7 @@ import useOCR from "./hooks/ai-modality/use-ocr";
 import useSTT from "./hooks/ai-modality/use-stt";
 import useTTS from "./hooks/ai-modality/use-tts";
 import useVideoGen from "./hooks/ai-modality/use-video-gen";
+import { useArtifact } from "./hooks/editor/use-artifact";
 import useEditorEnv from "./hooks/editor/use-editor-env";
 import useOpenApp from "./hooks/editor/use-open-app";
 import useOpenLink from "./hooks/editor/use-open-link";
@@ -30,6 +31,7 @@ export {
   SnapshotProvider,
   useAgents,
   useAgentTools,
+  useArtifact,
   useEditorEnv,
   useFile,
   useFileSystem,

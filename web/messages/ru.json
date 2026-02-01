@@ -17,6 +17,14 @@
 		"add": "Добавить",
 		"enter": "Ввести"
 	},
+	"artifactModal": {
+		"title": "Ваше приложение готово!",
+		"openInCanvas": "Открыть в Canvas",
+		"openInNewTab": "Открыть в новой вкладке",
+		"downloadSource": "Скачать исходный код",
+		"editCode": "Редактировать код (скоро)",
+		"noData": "Нет данных артефакта."
+	},
 	"navigation": {
 		"connectedToCloudAI": "Подключено к Cloud AI",
 		"offline": "Офлайн",

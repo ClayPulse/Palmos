@@ -53,6 +53,8 @@ export enum IMCMessageTypeEnum {
   // Locale
   EditorLocaleUpdate = "editor-locale-update",
   EditorAppRequestLocale = "editor-app-request-locale",
+  // Artifact update
+  EditorArtifactUpdate = "editor-artifact-update",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)
@@ -323,3 +325,15 @@ export type ListPathOptions = {
 // input:
 // output:
 // }
+
+export type Artifact = {
+  type: "app";
+  // | "image" | "text" | "audio" | "video";
+  data: AppArtifact;
+};
+
+export type AppArtifact = {
+  appId: string;
+  version: string;
+  sourceUrl?: string;
+};
