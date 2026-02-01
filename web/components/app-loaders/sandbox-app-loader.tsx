@@ -162,6 +162,18 @@ export default function SandboxAppLoader({
     }
   }, [resolvedTheme]);
 
+  // Send locale update to the extension when locale changes
+  useEffect(() => {
+    const locale = editorContext?.persistSettings?.locale ?? "en";
+    if (currentViewId && imcContext?.polyIMC?.hasChannel(currentViewId)) {
+      imcContext?.polyIMC?.sendMessage(
+        currentViewId,
+        IMCMessageTypeEnum.EditorLocaleUpdate,
+        locale,
+      );
+    }
+  }, [editorContext?.persistSettings?.locale]);
+
   // Update handler map when editor context changes
   useEffect(() => {
     // Update the connection listener handler map if exists

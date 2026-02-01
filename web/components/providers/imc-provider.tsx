@@ -804,6 +804,16 @@ export default function InterModuleCommunicationProvider({
           }
         },
       ],
+      [
+        IMCMessageTypeEnum.EditorAppRequestLocale,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          return editorContext?.persistSettings?.locale ?? "en";
+        },
+      ],
     ]);
 
     return newMap;

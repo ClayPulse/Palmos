@@ -50,6 +50,9 @@ export enum IMCMessageTypeEnum {
   EditorOpenLink = "editor-open-link",
   // Open app in editor
   EditorOpenApp = "editor-open-app",
+  // Locale
+  EditorLocaleUpdate = "editor-locale-update",
+  EditorAppRequestLocale = "editor-app-request-locale",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)

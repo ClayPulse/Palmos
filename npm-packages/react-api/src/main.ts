@@ -17,6 +17,7 @@ import useOpenApp from "./hooks/editor/use-open-app";
 import useOpenLink from "./hooks/editor/use-open-link";
 import useOwnedAppView from "./hooks/editor/use-owned-app-view";
 import useSnapshotState from "./hooks/editor/use-snapshot-state";
+import { useTranslations } from "./hooks/editor/use-translations";
 import useFileSystem from "./hooks/workspace/use-file-system";
 import useReceiveFile from "./hooks/workspace/use-receive-file";
 import useTerminal from "./hooks/workspace/use-terminal";
@@ -27,8 +28,8 @@ import SnapshotProvider from "./providers/snapshot-provider";
 export {
   ReceiveFileProvider,
   SnapshotProvider,
-  useAgentTools,
   useAgents,
+  useAgentTools,
   useEditorEnv,
   useFile,
   useFileSystem,
@@ -42,11 +43,12 @@ export {
   useOwnedAppView,
   useReceiveFile,
   useRegisterAction,
-  useSTT,
   useSnapshotState,
-  useTTS,
+  useSTT,
   useTerminal,
   useTheme,
+  useTranslations,
+  useTTS,
   useVideoGen,
   useWorkspaceInfo,
 };
