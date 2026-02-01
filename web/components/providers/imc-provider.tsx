@@ -804,6 +804,34 @@ export default function InterModuleCommunicationProvider({
           }
         },
       ],
+      [
+        IMCMessageTypeEnum.EditorAppRequestLocale,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          return editorContext?.persistSettings?.locale ?? "en";
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorArtifactUpdate,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const artifact = message.payload;
+
+          editorContext?.updateModalStates({
+            artifact: {
+              isOpen: true,
+              artifact: artifact,
+              fromViewId: message.from,
+            },
+          });
+        },
+      ],
     ]);
 
     return newMap;

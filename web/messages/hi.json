@@ -17,6 +17,14 @@
 		"add": "जोड़ें",
 		"enter": "दर्ज करें"
 	},
+	"artifactModal": {
+		"title": "आपका ऐप तैयार है!",
+		"openInCanvas": "कैनवास में खोलें",
+		"openInNewTab": "नए टैब में खोलें",
+		"downloadSource": "स्रोत डाउनलोड करें",
+		"editCode": "कोड संपादित करें (जल्द आ रहा है)",
+		"noData": "कोई आर्टिफैक्ट डेटा उपलब्ध नहीं है।"
+	},
 	"navigation": {
 		"connectedToCloudAI": "क्लाउड AI से कनेक्टेड",
 		"offline": "ऑफ़लाइन",

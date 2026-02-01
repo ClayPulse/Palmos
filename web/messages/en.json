@@ -17,6 +17,14 @@
     "add": "Add",
     "enter": "Enter"
   },
+  "artifactModal": {
+    "title": "Your app is ready!",
+    "openInCanvas": "Open in Canvas",
+    "openInNewTab": "Open in New Tab",
+    "downloadSource": "Download Source",
+    "editCode": "Edit Code (Coming Soon)",
+    "noData": "No artifact data available."
+  },
   "navigation": {
     "connectedToCloudAI": "Connected to Cloud AI",
     "offline": "Offline",

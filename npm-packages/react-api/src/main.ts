@@ -12,11 +12,13 @@ import useOCR from "./hooks/ai-modality/use-ocr";
 import useSTT from "./hooks/ai-modality/use-stt";
 import useTTS from "./hooks/ai-modality/use-tts";
 import useVideoGen from "./hooks/ai-modality/use-video-gen";
+import { useArtifact } from "./hooks/editor/use-artifact";
 import useEditorEnv from "./hooks/editor/use-editor-env";
 import useOpenApp from "./hooks/editor/use-open-app";
 import useOpenLink from "./hooks/editor/use-open-link";
 import useOwnedAppView from "./hooks/editor/use-owned-app-view";
 import useSnapshotState from "./hooks/editor/use-snapshot-state";
+import { useTranslations } from "./hooks/editor/use-translations";
 import useFileSystem from "./hooks/workspace/use-file-system";
 import useReceiveFile from "./hooks/workspace/use-receive-file";
 import useTerminal from "./hooks/workspace/use-terminal";
@@ -27,8 +29,9 @@ import SnapshotProvider from "./providers/snapshot-provider";
 export {
   ReceiveFileProvider,
   SnapshotProvider,
-  useAgentTools,
   useAgents,
+  useAgentTools,
+  useArtifact,
   useEditorEnv,
   useFile,
   useFileSystem,
@@ -42,11 +45,12 @@ export {
   useOwnedAppView,
   useReceiveFile,
   useRegisterAction,
-  useSTT,
   useSnapshotState,
-  useTTS,
+  useSTT,
   useTerminal,
   useTheme,
+  useTranslations,
+  useTTS,
   useVideoGen,
   useWorkspaceInfo,
 };

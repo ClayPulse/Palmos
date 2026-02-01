@@ -9,6 +9,7 @@ import es from "../../messages/es.json";
 import fr from "../../messages/fr.json";
 import hi from "../../messages/hi.json";
 import ja from "../../messages/ja.json";
+import ko from "../../messages/ko.json";
 import pt from "../../messages/pt.json";
 import ru from "../../messages/ru.json";
 import zh from "../../messages/zh.json";
@@ -19,6 +20,7 @@ const messages: { [key: string]: any } = {
   fr,
   de,
   ja,
+  ko,
   zh,
   ru,
   ar,
@@ -36,6 +38,7 @@ export const locales = [
   "fr",
   "de",
   "ja",
+  "ko",
   "ru",
 ] as const;
 export type LocaleType = (typeof locales)[number];
@@ -50,6 +53,7 @@ export const languageNames: Record<LocaleType, string> = {
   fr: "Français",
   de: "Deutsch",
   ja: "日本語",
+  ko: "한국어",
   ru: "Русский",
 };
 

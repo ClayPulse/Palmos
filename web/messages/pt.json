@@ -17,6 +17,14 @@
 		"add": "Adicionar",
 		"enter": "Inserir"
 	},
+	"artifactModal": {
+		"title": "Seu aplicativo está pronto!",
+		"openInCanvas": "Abrir no Canvas",
+		"openInNewTab": "Abrir em nova aba",
+		"downloadSource": "Baixar código-fonte",
+		"editCode": "Editar código (em breve)",
+		"noData": "Nenhum dado de artefato disponível."
+	},
 	"navigation": {
 		"connectedToCloudAI": "Conectado à Cloud AI",
 		"offline": "Offline",

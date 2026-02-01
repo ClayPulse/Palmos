@@ -2,6 +2,7 @@ import {
   Action,
   Agent,
   AppConfig,
+  Artifact,
   FileSystemObject,
   ModelConfig,
   PolyIMC,
@@ -234,6 +235,11 @@ export type ModalStates = {
   quickVibeCodeSetup?: {
     isOpen?: boolean;
     app?: ExtensionApp;
+  };
+  artifact?: {
+    isOpen?: boolean;
+    artifact?: Artifact;
+    fromViewId?: string;
   };
 };
 

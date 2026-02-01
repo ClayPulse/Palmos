@@ -17,6 +17,14 @@
 		"add": "追加",
 		"enter": "入力"
 	},
+	"artifactModal": {
+		"title": "アプリの準備ができました！",
+		"openInCanvas": "キャンバスで開く",
+		"openInNewTab": "新しいタブで開く",
+		"downloadSource": "ソースをダウンロード",
+		"editCode": "コードを編集（近日公開）",
+		"noData": "アーティファクトデータがありません。"
+	},
 	"navigation": {
 		"connectedToCloudAI": "Cloud AI に接続済み",
 		"offline": "オフライン",
