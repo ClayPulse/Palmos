@@ -31,7 +31,7 @@ export default function BaseAppLoader({
       ref={iframeRef}
       className="h-full w-full"
       src={src}
-      sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+      sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-downloads"
       role="application"
       title={moduleId}
       aria-label={moduleId}
