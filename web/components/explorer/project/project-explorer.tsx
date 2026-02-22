@@ -1,6 +1,6 @@
 "use client";
 
-import { SideMenuTabEnum } from "@/lib/enums";
+import { PlatformEnum, SideMenuTabEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { ProjectInfo } from "@/lib/types";
@@ -9,6 +9,7 @@ import { useContext } from "react";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { EditorContext } from "../../providers/editor-context-provider";
 import ProjectItem from "./project-item";
+import { getPlatform } from "@/lib/platform-api/platform-checker";
 
 export default function ProjectExplorer() {
   const {getTranslations: t} = useTranslations();
@@ -19,7 +20,7 @@ export default function ProjectExplorer() {
 
   return (
     <div className="flex h-full w-full flex-col gap-2">
-      {session ? (
+      {session || getPlatform() === PlatformEnum.Electron ? (
         <div>
           <p className="text-center text-lg font-medium">{t("projectExplorer.title")}</p>
           <Button
