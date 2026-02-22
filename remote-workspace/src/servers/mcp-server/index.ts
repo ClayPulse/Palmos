@@ -28,7 +28,7 @@ export async function addMCPServers(
         },
         {
           path: `/${instanceId}/mcp-servers/terminal`,
-          stdioCmd: `${workspacePath ? `cd ${workspacePath} && ` : ""}npx -y mcp-server-commands`,
+          stdioCmd: `${workspacePath ? `cd ${workspacePath} && ` : ""}npx -y mcp-server-commands@0.6`,
         },
       ],
       corsOrigin: corsOrigin({
