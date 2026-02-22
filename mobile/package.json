@@ -9,15 +9,15 @@
   },
   "dependencies": {
     "@capacitor-community/safe-area": "^8.0.1",
-    "@capacitor/android": "^8.0.1",
-    "@capacitor/app": "^8.0.0",
-    "@capacitor/browser": "^8.0.0",
-    "@capacitor/cli": "^8.0.1",
-    "@capacitor/core": "^8.0.1",
-    "@capacitor/filesystem": "^8.0.0",
+    "@capacitor/android": "^8.1.0",
+    "@capacitor/app": "^8.0.1",
+    "@capacitor/browser": "^8.0.1",
+    "@capacitor/cli": "^8.1.0",
+    "@capacitor/core": "^8.1.0",
+    "@capacitor/filesystem": "^8.1.2",
     "@capacitor/keyboard": "^8.0.0",
-    "@capacitor/preferences": "^8.0.0",
-    "@capacitor/screen-orientation": "^8.0.0",
-    "@capawesome/capacitor-file-picker": "^8.0.0"
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/screen-orientation": "^8.0.1",
+    "@capawesome/capacitor-file-picker": "^8.0.2"
   }
 }
