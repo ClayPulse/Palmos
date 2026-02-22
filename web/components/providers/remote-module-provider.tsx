@@ -13,21 +13,21 @@ export const mfHost = createInstance({
   remotes: [],
   shared: {
     react: {
-      version: "19.2.3",
+      version: "19.2.4",
       scope: "default",
       lib: () => React,
       shareConfig: {
         singleton: true,
-        requiredVersion: "19.2.3",
+        requiredVersion: "19.2.4",
       },
     },
     "react-dom": {
-      version: "19.2.3",
+      version: "19.2.4",
       scope: "default",
       lib: () => ReactDOM,
       shareConfig: {
         singleton: true,
-        requiredVersion: "19.2.3",
+        requiredVersion: "19.2.4",
       },
     },
     // Share Workbox configuration as a module
