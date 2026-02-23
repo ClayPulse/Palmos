@@ -1,6 +1,6 @@
 {
 	"name": "@pulse-editor/cli",
-	"version": "0.1.1-beta.33",
+	"version": "0.1.1-beta.34",
 	"license": "MIT",
 	"bin": {
 		"pulse": "dist/cli.js"
@@ -54,14 +54,12 @@
 		"@types/livereload": "^0.9.5",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
-		"@vdemedes/prettier-config": "^2.0.1",
 		"ava": "^6.4.1",
 		"chalk": "^5.6.2",
 		"eslint-config-xo-react": "^0.29.0",
 		"eslint-plugin-react": "^7.37.5",
 		"eslint-plugin-react-hooks": "^7.0.1",
 		"ink-testing-library": "^4.0.0",
-		"prettier": "^3.8.1",
 		"react": "19.2.4",
 		"react-dom": "19.2.4",
 		"ts-node": "^10.9.2",
@@ -87,6 +85,5 @@
 		"rules": {
 			"react/prop-types": "off"
 		}
-	},
-	"prettier": "@vdemedes/prettier-config"
+	}
 }
