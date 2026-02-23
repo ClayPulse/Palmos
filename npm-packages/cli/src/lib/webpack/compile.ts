@@ -1,5 +1,5 @@
 import webpack from 'webpack';
-import {createWebpackConfig} from '../../lib/webpack/webpack.config.js';
+import {createWebpackConfig} from './webpack-config.js';
 
 export async function webpackCompile(
 	mode: 'development' | 'production' | 'preview',
