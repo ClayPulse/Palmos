@@ -5,7 +5,7 @@ export async function publishApp(isStage: boolean) {
 	// Upload the zip file to the server
 	// Read pulse.config.json for visibility
 	const config = JSON.parse(
-		fs.readFileSync('./dist/client/pulse.config.json', 'utf-8'),
+		fs.readFileSync('./dist/pulse.config.json', 'utf-8'),
 	);
 
 	const visibility = config.visibility as string;
