@@ -8,7 +8,11 @@ import path from "path";
 import ts from "typescript";
 import { Compiler, Configuration as WebpackConfig } from "webpack";
 import { Configuration as DevServerConfig } from "webpack-dev-server";
-import { getLocalNetworkIP, loadPulseConfig } from "./utils.js";
+import {
+  discoverAppActions,
+  getLocalNetworkIP,
+  loadPulseConfig,
+} from "./utils.js";
 
 class MFClientPlugin {
   private projectDirName: string;
@@ -139,10 +143,14 @@ export async function makeMFClientConfig(
   const projectDirName = process.cwd();
   const pulseConfig = await loadPulseConfig();
 
+  const mainComponent = "./src/main.tsx";
+
+  const actions = discoverAppActions();
+
   return {
     mode: mode,
     name: "client",
-    entry: "./src/main.tsx",
+    entry: mainComponent,
     output: {
       publicPath: "auto",
       path: path.resolve(projectDirName, "dist/client"),
@@ -160,10 +168,11 @@ export async function makeMFClientConfig(
       }),
       new ModuleFederationPlugin({
         // Do not use hyphen character '-' in the name
-        name: pulseConfig.id,
+        name: pulseConfig.id + "_client",
         filename: "remoteEntry.js",
         exposes: {
-          "./main": "./src/main.tsx",
+          "./main": mainComponent,
+          ...actions,
         },
         shared: {
           react: {

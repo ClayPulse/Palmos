@@ -4,6 +4,7 @@ import fs from "fs/promises";
 import { globSync } from "glob";
 import { networkInterfaces } from "os";
 import path from "path";
+import { Project, SyntaxKind } from "ts-morph";
 import ts from "typescript";
 import { pathToFileURL } from "url";
 
@@ -96,4 +97,56 @@ export async function readConfigFile() {
 
   const data = await fs.readFile("dist/pulse.config.json", "utf-8");
   return JSON.parse(data);
+}
+
+export function discoverAppActions() {
+  // Get all .ts files under src/action and read use default exports as entry points
+  const files = globSync("./src/action/**/*.ts");
+  const entryPoints = files
+    .map((file) => file.replaceAll("\\", "/"))
+    .map((file) => {
+      // Read default export info in the file using ts-morph to get the function name, and use the function name as the entry point key instead of the file name
+      const project = new Project({
+        tsConfigFilePath: path.join(
+          process.cwd(),
+          "node_modules/.pulse/tsconfig.server.json",
+        ),
+      });
+
+      const sourceFile = project.addSourceFileAtPath(file);
+      const defaultExportSymbol = sourceFile.getDefaultExportSymbol();
+      if (!defaultExportSymbol) {
+        console.warn(
+          `No default export found in action file ${file}. Skipping...`,
+        );
+        return null;
+      }
+
+      const defaultExportDeclarations = defaultExportSymbol.getDeclarations();
+      if (defaultExportDeclarations.length === 0) {
+        console.warn(
+          `No declarations found for default export in action file ${file}. Skipping...`,
+        );
+        return null;
+      }
+
+      const funcDecl = defaultExportDeclarations[0]?.asKind(
+        SyntaxKind.FunctionDeclaration,
+      );
+      if (!funcDecl) {
+        console.warn(
+          `Default export in action file ${file} is not a function declaration. Skipping...`,
+        );
+        return null;
+      }
+
+      return {
+        ["./action/" + funcDecl.getName()]: "./" + file,
+      };
+    })
+    .reduce((acc, curr) => {
+      return { ...acc, ...curr };
+    }, {});
+
+  return entryPoints;
 }

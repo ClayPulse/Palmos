@@ -10,7 +10,7 @@ import { globSync } from "glob";
 import path from "path";
 import { JSDoc, Node, Project, SyntaxKind } from "ts-morph";
 import wp, { Compiler, Configuration as WebpackConfig } from "webpack";
-import { loadPulseConfig } from "./utils.js";
+import { discoverAppActions, loadPulseConfig } from "./utils.js";
 
 const { NodeFederationPlugin } = mfNode;
 const { webpack } = wp;
@@ -216,6 +216,7 @@ class MFServerPlugin {
     }
 
     const funcs = discoverServerFunctions();
+    const actions = discoverAppActions();
 
     console.log(`Discovered server functions:
 ${Object.entries(funcs)
@@ -234,6 +235,7 @@ ${Object.entries(funcs)
         filename: "remoteEntry.js",
         exposes: {
           ...funcs,
+          ...actions,
         },
       } as any,
       {},
