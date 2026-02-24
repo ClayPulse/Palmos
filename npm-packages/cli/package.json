@@ -22,7 +22,7 @@
 		"@module-federation/enhanced": "2.0.1",
 		"@module-federation/node": "2.7.32",
 		"@module-federation/runtime": "2.0.1",
-		"@pulse-editor/shared-utils": "^0.1.1-beta.74",
+		"@pulse-editor/shared-utils": "^0.1.1-beta.75",
 		"concurrently": "^9.2.1",
 		"connect-livereload": "^0.6.1",
 		"copy-webpack-plugin": "^13.0.1",
