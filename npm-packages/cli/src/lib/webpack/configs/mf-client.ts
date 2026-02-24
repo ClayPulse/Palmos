@@ -9,7 +9,7 @@ import ts from "typescript";
 import { Compiler, Configuration as WebpackConfig } from "webpack";
 import { Configuration as DevServerConfig } from "webpack-dev-server";
 import {
-  discoverAppActions,
+  discoverAppSkillActions,
   getLocalNetworkIP,
   loadPulseConfig,
 } from "./utils.js";
@@ -145,7 +145,7 @@ export async function makeMFClientConfig(
 
   const mainComponent = "./src/main.tsx";
 
-  const actions = discoverAppActions();
+  const actions = discoverAppSkillActions();
 
   return {
     mode: mode,

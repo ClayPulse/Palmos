@@ -99,9 +99,9 @@ export async function readConfigFile() {
   return JSON.parse(data);
 }
 
-export function discoverAppActions() {
-  // Get all .ts files under src/action and read use default exports as entry points
-  const files = globSync("./src/action/**/*.ts");
+export function discoverAppSkillActions() {
+  // Get all .ts files under src/skill and read use default exports as entry points
+  const files = globSync("./src/skill/*/action.ts");
   const entryPoints = files
     .map((file) => file.replaceAll("\\", "/"))
     .map((file) => {
@@ -141,7 +141,7 @@ export function discoverAppActions() {
       }
 
       return {
-        ["./action/" + funcDecl.getName()]: "./" + file,
+        ["./skill/" + funcDecl.getName()]: "./" + file,
       };
     })
     .reduce((acc, curr) => {

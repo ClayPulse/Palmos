@@ -10,7 +10,7 @@ import { globSync } from "glob";
 import path from "path";
 import { JSDoc, Node, Project, SyntaxKind } from "ts-morph";
 import wp, { Compiler, Configuration as WebpackConfig } from "webpack";
-import { discoverAppActions, loadPulseConfig } from "./utils.js";
+import { discoverAppSkillActions, loadPulseConfig } from "./utils.js";
 
 const { NodeFederationPlugin } = mfNode;
 const { webpack } = wp;
@@ -46,10 +46,7 @@ class MFServerPlugin {
               )
             : false;
 
-          if (isServerFunctionChange) {
-            console.log(
-              `[Server] Detected changes in server functions. Recompiling...`,
-            );
+          if (isServerFunctionChange || isFirstRun) {
             await this.compileServerFunctions(compiler);
           }
 
@@ -59,9 +56,9 @@ class MFServerPlugin {
               )
             : false;
 
-          if (isActionChange) {
+          if (isActionChange || isFirstRun) {
             console.log(`[Server] Detected changes in actions. Recompiling...`);
-            this.compileAppActions();
+            this.compileAppActionSkills();
           }
         },
       );
@@ -102,7 +99,7 @@ class MFServerPlugin {
 
           try {
             await this.compileServerFunctions(compiler);
-            this.compileAppActions();
+            this.compileAppActionSkills();
           } catch (err) {
             console.log(`[Server] ❌ Error during compilation:`, err);
             return;
@@ -216,7 +213,7 @@ class MFServerPlugin {
     }
 
     const funcs = discoverServerFunctions();
-    const actions = discoverAppActions();
+    const actions = discoverAppSkillActions();
 
     console.log(`Discovered server functions:
 ${Object.entries(funcs)
@@ -250,9 +247,9 @@ ${Object.entries(funcs)
    *  3. Organize the functions' information into a list of Action
    * @param compiler
    */
-  private compileAppActions() {
-    // 1. Get all TypeScript files under src/action
-    const files = globSync("./src/action/**/*.ts");
+  private compileAppActionSkills() {
+    // 1. Get all TypeScript files under src/skill
+    const files = globSync("./src/skill/*/action.ts");
 
     const project = new Project({
       tsConfigFilePath: path.join(
@@ -381,7 +378,7 @@ ${Object.entries(funcs)
 
     // You can now register `actions` in Module Federation or expose them as needed
     console.log(
-      "Discovered actions:\n",
+      "Discovered skill actions:\n",
       actions.map((a) => "- " + a.name).join("\n"),
     );
 

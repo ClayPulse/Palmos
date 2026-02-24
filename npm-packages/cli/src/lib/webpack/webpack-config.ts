@@ -9,8 +9,8 @@ export async function createWebpackConfig(
   mode: "development" | "production",
 ) {
   if (isPreview) {
-    const previewClientConfig = await makePreviewClientConfig(mode);
-    const mfServerConfig = await makeMFServerConfig(mode);
+    const previewClientConfig = await makePreviewClientConfig("development");
+    const mfServerConfig = await makeMFServerConfig("development");
 
     return [previewClientConfig, mfServerConfig];
   } else if (buildTarget === "server") {
