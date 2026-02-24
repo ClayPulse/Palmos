@@ -6,7 +6,7 @@ import { compare } from "semver";
 import useSWR from "swr";
 import {
   getDefaultRemoteOrigin,
-  getRemoteClientBaseURL,
+  getRemoteBaseURL,
 } from "../module-federation/remote";
 import {
   getHostMFVersion,
@@ -221,7 +221,7 @@ export function useExtensionAppManager(fetchCategory?: string) {
   ) {
     // Fetch the remote to get config
     const configUrl =
-      getRemoteClientBaseURL(id, version, remoteOrigin) + "/pulse.config.json";
+      getRemoteBaseURL(id, version, remoteOrigin) + "/pulse.config.json";
 
     const config = await fetch(configUrl).then((res) => res.json());
 

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import fs from "fs";
+import { existsSync } from "fs";
+import fs from "fs/promises";
 import { globSync } from "glob";
 import { networkInterfaces } from "os";
 import path from "path";
@@ -27,8 +28,8 @@ export async function loadPulseConfig() {
   globSync("node_modules/.pulse/config/**/*.js", {
     cwd: projectDirName,
     absolute: true,
-  }).forEach((jsFile) => {
-    let content = fs.readFileSync(jsFile, "utf-8");
+  }).forEach(async (jsFile) => {
+    let content = await fs.readFile(jsFile, "utf-8");
     content = content.replace(
       /(from\s+["']\.\/[^\s"']+)(["'])/g,
       (match, p1, p2) => {
@@ -40,17 +41,18 @@ export async function loadPulseConfig() {
         return `${p1}.js${p2}`;
       },
     );
-    fs.writeFileSync(jsFile, content);
+    await fs.writeFile(jsFile, content);
   });
 
   // Copy package.json if exists
   const pkgPath = path.join(projectDirName, "package.json");
-  if (fs.existsSync(pkgPath)) {
+
+  if (existsSync(pkgPath)) {
     const destPath = path.join(
       projectDirName,
       "node_modules/.pulse/config/package.json",
     );
-    fs.copyFileSync(pkgPath, destPath);
+    await fs.copyFile(pkgPath, destPath);
   }
 
   const compiledConfig = path.join(
@@ -59,7 +61,7 @@ export async function loadPulseConfig() {
   );
   const mod = await import(pathToFileURL(compiledConfig).href);
   // delete the compiled config after importing
-  fs.rmSync(path.join(projectDirName, "node_modules/.pulse/config"), {
+  await fs.rm(path.join(projectDirName, "node_modules/.pulse/config"), {
     recursive: true,
     force: true,
   });
@@ -77,4 +79,21 @@ export function getLocalNetworkIP() {
     }
   }
   return "localhost"; // Fallback
+}
+
+export async function readConfigFile() {
+  // Read pulse.config.json from dist/client
+  // Wait until dist/pulse.config.json exists
+  while (true) {
+    try {
+      await fs.access("dist/pulse.config.json");
+      break;
+    } catch (err) {
+      // Wait for 100ms before trying again
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+  }
+
+  const data = await fs.readFile("dist/pulse.config.json", "utf-8");
+  return JSON.parse(data);
 }

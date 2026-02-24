@@ -64,7 +64,7 @@ class MFClientPlugin {
 
         // Write pulse config to dist
         fs.writeFileSync(
-          path.resolve(this.projectDirName, "dist/client/pulse.config.json"),
+          path.resolve(this.projectDirName, "dist/pulse.config.json"),
           JSON.stringify(this.pulseConfig, null, 2),
         );
       });
@@ -78,7 +78,7 @@ class MFClientPlugin {
 
           // Write pulse config to dist
           fs.writeFileSync(
-            path.resolve(this.projectDirName, "dist/client/pulse.config.json"),
+            path.resolve(this.projectDirName, "dist/pulse.config.json"),
             JSON.stringify(this.pulseConfig, null, 2),
           );
         }

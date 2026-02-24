@@ -52,11 +52,7 @@ class PreviewClientPlugin {
 
       // Write pulse config to dist
       fs.writeFileSync(
-        path.resolve(this.projectDirName, "dist/client/pulse.config.json"),
-        JSON.stringify(this.pulseConfig, null, 2),
-      );
-      fs.writeFileSync(
-        path.resolve(this.projectDirName, "dist/server/pulse.config.json"),
+        path.resolve(this.projectDirName, "dist/pulse.config.json"),
         JSON.stringify(this.pulseConfig, null, 2),
       );
     });

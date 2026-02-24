@@ -46,12 +46,20 @@ export function getRemote(
   ];
 }
 
+export function getRemoteBaseURL(
+  id: string,
+  version: string,
+  remoteOrigin: string = getDefaultRemoteOrigin(),
+) {
+  return `${remoteOrigin}/${id}/${version}`;
+}
+
 export function getRemoteClientBaseURL(
   id: string,
   version: string,
   remoteOrigin: string = getDefaultRemoteOrigin(),
 ) {
-  return `${remoteOrigin}/${id}/${version}/client`;
+  return `${getRemoteBaseURL(id, version, remoteOrigin)}/client`;
 }
 
 export function getRemoteServerBaseURL(
@@ -59,7 +67,7 @@ export function getRemoteServerBaseURL(
   version: string,
   remoteOrigin: string = getDefaultRemoteOrigin(),
 ) {
-  return `${remoteOrigin}/${id}/${version}/server`;
+  return `${getRemoteBaseURL(id, version, remoteOrigin)}/server`;
 }
 
 export async function getRemoteClientManifest(
@@ -84,7 +92,7 @@ export async function getRemoteClientConfig(
   remoteOrigin: string = getDefaultRemoteOrigin(),
 ) {
   const config = fetch(
-    `${getRemoteClientBaseURL(id, version, remoteOrigin)}/pulse.config.json`,
+    `${getRemoteBaseURL(id, version, remoteOrigin)}/pulse.config.json`,
   )
     .then((res) => res.json())
     .catch((err) => {
