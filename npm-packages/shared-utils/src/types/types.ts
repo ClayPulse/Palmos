@@ -242,7 +242,8 @@ export type TypedVariableType =
   // or it can be initialized by the caller.
   | "app-instance"
   | TypedVariableObjectType
-  | TypedVariableArrayType;
+  | TypedVariableArrayType
+  | string;
 
 export type TypedVariableObjectType = {
   [key: string]: TypedVariable;

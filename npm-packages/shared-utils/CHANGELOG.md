@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.76
+
+### Patch Changes
+
+- Fix type error
+
 ## 0.1.1-beta.75
 
 ### Patch Changes
