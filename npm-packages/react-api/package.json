@@ -42,6 +42,7 @@
     "react-dom": "19.2.4"
   },
   "dependencies": {
+    "@module-federation/runtime": "^2.0.1",
     "use-debounce": "^10.1.0"
   }
 }

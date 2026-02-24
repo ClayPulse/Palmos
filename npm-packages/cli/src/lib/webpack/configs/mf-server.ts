@@ -36,29 +36,33 @@ class MFServerPlugin {
 
           if (!isFirstRun) {
             console.log(`[Server] 🔄 Reloading app...`);
+            const isServerFunctionChange = compilation.modifiedFiles
+              ? Array.from(compilation.modifiedFiles).some((file) =>
+                  file.includes("src/server-function"),
+                )
+              : false;
+
+            if (isServerFunctionChange) {
+              await this.compileServerFunctions(compiler);
+            }
+
+            const isActionChange = compilation.modifiedFiles
+              ? Array.from(compilation.modifiedFiles).some((file) =>
+                  file.includes("src/action"),
+                )
+              : false;
+
+            if (isActionChange) {
+              console.log(
+                `[Server] Detected changes in actions. Recompiling...`,
+              );
+              this.compileAppActionSkills();
+            }
           } else {
             console.log(`[Server] 🔄 Building app...`);
-          }
-
-          const isServerFunctionChange = compilation.modifiedFiles
-            ? Array.from(compilation.modifiedFiles).some((file) =>
-                file.includes("src/server-function"),
-              )
-            : false;
-
-          if (isServerFunctionChange || isFirstRun) {
             await this.compileServerFunctions(compiler);
-          }
-
-          const isActionChange = compilation.modifiedFiles
-            ? Array.from(compilation.modifiedFiles).some((file) =>
-                file.includes("src/action"),
-              )
-            : false;
-
-          if (isActionChange || isFirstRun) {
-            console.log(`[Server] Detected changes in actions. Recompiling...`);
             this.compileAppActionSkills();
+            console.log(`[Server] ✅ Successfully built server.`);
           }
         },
       );
@@ -66,7 +70,6 @@ class MFServerPlugin {
       // After build finishes
       compiler.hooks.done.tap("ReloadMessagePlugin", () => {
         if (isFirstRun) {
-          console.log(`[Server] ✅ Successfully built server.`);
           isFirstRun = false;
         } else {
           console.log(`[Server] ✅ Reload finished.`);

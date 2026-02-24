@@ -80,6 +80,7 @@ export default function ExtensionPage({}) {
           return originalFetch(resource, config);
         }
 
+        // Determine if the app is hosted on a CDN origin
         const expectedCdnOrigin =
           process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com";
 
@@ -92,9 +93,22 @@ export default function ExtensionPage({}) {
           isCdnOrigin = false;
         }
 
-        const newUrl = isCdnOrigin
-          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`
-          : remoteOrigin + url;
+        const isServerFunction = url.startsWith("/server-function/");
+
+        let newUrl = "";
+        if (isCdnOrigin) {
+          if (isServerFunction) {
+            newUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/server-function/${moduleId}/${moduleVersion}/${url.replace("/server-function/", "")}`;
+          } else {
+            newUrl = `${process.env.NEXT_PUBLIC_CDN_URL}/${process.env.NEXT_PUBLIC_STORAGE_CONTAINER}/${moduleId}/${moduleVersion}/${url}`;
+          }
+        } else {
+          if (isServerFunction) {
+            newUrl = remoteOrigin + url;
+          } else {
+            newUrl = `${remoteOrigin}/${moduleId}/${moduleVersion}${url}`;
+          }
+        }
 
         console.log(`[FETCH INTERCEPTED]: ${url} → ${newUrl}`);
         console.log(`[App Info] ID: ${moduleId}, Version: ${moduleVersion}`);
@@ -102,7 +116,8 @@ export default function ExtensionPage({}) {
         const response = await originalFetch(newUrl, {
           ...config,
           // Include cookies only when remoteOrigin matches the configured CDN origin
-          credentials: isCdnOrigin ? "include" : config?.credentials,
+          credentials:
+            isCdnOrigin && isServerFunction ? "include" : config?.credentials,
         });
 
         if (!response.ok) {

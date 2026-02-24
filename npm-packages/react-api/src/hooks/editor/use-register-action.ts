@@ -1,9 +1,9 @@
+import { createInstance } from "@module-federation/runtime";
 import {
   Action,
   IMCMessage,
   IMCMessageTypeEnum,
   ReceiverHandler,
-  TypedVariable,
 } from "@pulse-editor/shared-utils";
 import { DependencyList, useEffect, useRef, useState } from "react";
 import useIMC from "../imc/use-imc";
@@ -11,6 +11,7 @@ import useIMC from "../imc/use-imc";
 /**
  * Register an app action to listen to IMC messages from the core,
  * and pass to the action to handle.
+ * This will attach side effects to the action
  *
  * @param name Name of the command.
  * @param description Description of the command.
@@ -22,14 +23,13 @@ import useIMC from "../imc/use-imc";
  * Useful for actions that need to wait for some certain app state to be ready.
  *
  */
-export default function useRegisterAction(
-  actionInfo: {
-    name: string;
-    description: string;
-    parameters?: Record<string, TypedVariable>;
-    returns?: Record<string, TypedVariable>;
+export default function useActionEffect(
+  params: {
+    actionName: string;
+    // callbackHandler: (args: any) => Promise<any>, -- this is moved to src/actions
+    beforeAction?: (args: any) => Promise<void>;
+    afterAction?: (args: any, result: any) => Promise<void>;
   },
-  callbackHandler: (args: any) => Promise<any>,
   deps: DependencyList,
   isExtReady: boolean = true,
 ) {
@@ -39,13 +39,17 @@ export default function useRegisterAction(
   const commandQueue = useRef<{ args: any; resolve: (v: any) => void }[]>([]);
   const isCommandExecuting = useRef(false);
 
-  const [action, setAction] = useState<Action>({
-    name: actionInfo.name,
-    description: actionInfo.description,
-    parameters: actionInfo.parameters ?? {},
-    returns: actionInfo.returns ?? {},
-    handler: callbackHandler,
-  });
+  const [beforeAction, setBeforeAction] = useState<
+    ((args: any) => Promise<void>) | undefined
+  >(params.beforeAction);
+
+  const [afterAction, setAfterAction] = useState<
+    ((args: any, result: any) => Promise<void>) | undefined
+  >(params.afterAction);
+
+  const [handler, setHandler] = useState<
+    ((args: any) => Promise<any>) | undefined
+  >(undefined);
 
   // Flush queued commands when isExtReady becomes true
   useEffect(() => {
@@ -70,16 +74,48 @@ export default function useRegisterAction(
   }, [isExtReady]);
 
   useEffect(() => {
+    async function getActionInfo(actionName: string): Promise<{
+      appId: string;
+      version: string;
+      actionInfo: Action;
+    }> {
+      // Read actions from pulse.config.json
+      const pulseConfig = await fetch("/pulse.config.json");
+      const config = await pulseConfig.json();
+      const actionInfo = config.actions?.find(
+        (action: Action) => action.name === actionName,
+      );
+
+      if (!actionInfo) {
+        throw new Error(`Action ${actionName} not found in pulse.config.json`);
+      }
+
+      return {
+        appId: config.id,
+        version: config.version,
+        actionInfo,
+      };
+    }
+
     async function updateAction() {
       // Register or update action.
       // This will only pass signature info to the editor.
       // The actual handler is stored in this hook,
       // so the execution happens inside the extension app.
+      const { appId, version, actionInfo } = await getActionInfo(
+        params.actionName,
+      );
+
+      // Setup handler
+      const func = await loadAppAction(actionInfo.name, appId, "/", version);
+
+      setHandler(() => func);
+
       await imc?.sendMessage(IMCMessageTypeEnum.EditorRegisterAction, {
-        name: action.name,
-        description: action.description,
-        parameters: action.parameters,
-        returns: action.returns,
+        name: actionInfo.name,
+        description: actionInfo.description,
+        parameters: actionInfo.parameters,
+        returns: actionInfo.returns,
       });
 
       // Update receiver
@@ -89,23 +125,27 @@ export default function useRegisterAction(
     if (isExtReady) {
       updateAction();
     }
-  }, [action, imc, isExtReady]);
+  }, [params.actionName, imc, isExtReady]);
 
   useEffect(() => {
-    setAction((prev) => ({
-      ...prev,
-      name: actionInfo.name,
-      description: actionInfo.description,
-      parameters: actionInfo.parameters ?? {},
-      returns: actionInfo.returns ?? {},
-      handler: callbackHandler,
-    }));
+    setBeforeAction(() => params.beforeAction ?? (async () => {}));
+    setAfterAction(() => params.afterAction ?? (async () => {}));
   }, [...deps]);
 
   async function executeAction(args: any) {
-    if (!action.handler) return;
+    if (!handler) {
+      throw new Error("Action handler is not set");
+    }
 
-    const res = await action.handler(args);
+    if (beforeAction) {
+      await beforeAction(args);
+    }
+
+    const res = await handler(args);
+
+    if (afterAction) {
+      await afterAction(args, res);
+    }
 
     return res;
   }
@@ -118,9 +158,10 @@ export default function useRegisterAction(
           const { name: requestedName, args }: { name: string; args: any } =
             message.payload;
 
-          if (actionInfo.name !== requestedName) {
+          if (params.actionName !== requestedName) {
             throw new Error("Message ignored by receiver");
           }
+          /*        This should go to where the action is actually handled   
           // Validate parameters
           const actionParams = actionInfo.parameters ?? {};
 
@@ -153,7 +194,7 @@ export default function useRegisterAction(
                 }, got ${typeof value}. Value received: ${value}`,
               );
             }
-          }
+          } */
 
           // If extension is ready, execute immediately
           if (isExtReady) {
@@ -171,7 +212,38 @@ export default function useRegisterAction(
     return receiverHandlerMap;
   }
 
+  async function loadAppAction(
+    func: string,
+    appId: string,
+    remoteOrigin: string,
+    version: string,
+  ) {
+    // here we assign the return value of the init() function, which can be used to do some more complex
+    // things with the module federation runtime
+    const instance = createInstance({
+      name: appId + "_client",
+      remotes: [
+        {
+          name: appId + "_client",
+          entry: `${remoteOrigin}/${appId}/${version}/client/remoteEntry.js`,
+        },
+      ],
+    });
+
+    console.log(
+      "Loaded remote from",
+      `${remoteOrigin}/${appId}/${version}/client/remoteEntry.js`,
+    );
+
+    const loadedFunc =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (await instance.loadRemote<any>(`${appId}_client/skill/${func}`)).default;
+
+    return loadedFunc;
+  }
+
   return {
     isReady,
+    runAppAction: handler,
   };
 }
