@@ -26,9 +26,8 @@ import useIMC from "../imc/use-imc";
 export default function useActionEffect(
   params: {
     actionName: string;
-    // callbackHandler: (args: any) => Promise<any>, -- this is moved to src/actions
-    beforeAction?: (args: any) => Promise<void>;
-    afterAction?: (args: any, result: any) => Promise<void>;
+    beforeAction?: (args: any) => Promise<any>;
+    afterAction?: (args: any, result: any) => Promise<any>;
   },
   deps: DependencyList,
   isExtReady: boolean = true,
@@ -40,11 +39,11 @@ export default function useActionEffect(
   const isCommandExecuting = useRef(false);
 
   const [beforeAction, setBeforeAction] = useState<
-    ((args: any) => Promise<void>) | undefined
+    ((args: any) => Promise<any>) | undefined
   >(params.beforeAction);
 
   const [afterAction, setAfterAction] = useState<
-    ((args: any, result: any) => Promise<void>) | undefined
+    ((args: any, result: any) => Promise<any>) | undefined
   >(params.afterAction);
 
   const [handler, setHandler] = useState<
@@ -138,13 +137,13 @@ export default function useActionEffect(
     }
 
     if (beforeAction) {
-      await beforeAction(args);
+      args = await beforeAction(args);
     }
 
-    const res = await handler(args);
+    let res = await handler(args);
 
     if (afterAction) {
-      await afterAction(args, res);
+      res = await afterAction(args, res);
     }
 
     return res;

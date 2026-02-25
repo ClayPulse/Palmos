@@ -1,41 +1,44 @@
-import webpack from 'webpack';
-import {createWebpackConfig} from './webpack-config.js';
+import webpack from "webpack";
+import { generateTempTsConfig } from "./configs/utils.js";
+import { createWebpackConfig } from "./webpack-config.js";
 
 export async function webpackCompile(
-	mode: 'development' | 'production' | 'preview',
-	buildTarget?: 'client' | 'server',
-	isWatchMode = false,
+  mode: "development" | "production" | "preview",
+  buildTarget?: "client" | "server",
+  isWatchMode = false,
 ) {
-	const configs = await createWebpackConfig(
-		mode === 'preview',
-		buildTarget ?? 'both',
-		mode === 'development'
-			? 'development'
-			: mode === 'preview'
-				? 'development'
-				: 'production',
-	);
+  generateTempTsConfig();
 
-	const compiler = webpack(configs);
+  const configs = await createWebpackConfig(
+    mode === "preview",
+    buildTarget ?? "both",
+    mode === "development"
+      ? "development"
+      : mode === "preview"
+        ? "development"
+        : "production",
+  );
 
-	if (isWatchMode) {
-		compiler.watch({}, (err, stats) => {
-			if (err) {
-				console.error('❌ Webpack build failed', err);
-				return;
-			}
-		});
+  const compiler = webpack(configs);
 
-		return compiler;
-	}
+  if (isWatchMode) {
+    compiler.watch({}, (err, stats) => {
+      if (err) {
+        console.error("❌ Webpack build failed", err);
+        return;
+      }
+    });
 
-	return new Promise<void>((resolve, reject) => {
-		compiler.run(err => {
-			if (err) {
-				reject(err);
-				return;
-			}
-			resolve();
-		});
-	});
+    return compiler;
+  }
+
+  return new Promise<void>((resolve, reject) => {
+    compiler.run((err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+      resolve();
+    });
+  });
 }

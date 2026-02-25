@@ -32,7 +32,7 @@ class MFServerPlugin {
       compiler.hooks.watchRun.tap(
         "ReloadMessagePlugin",
         async (compilation) => {
-          this.cleanDist();
+          this.cleanServerDist();
 
           if (!isFirstRun) {
             console.log(`[Server] 🔄 Reloading app...`);
@@ -98,8 +98,6 @@ class MFServerPlugin {
         if (stats.hasErrors()) {
           console.log(`[Server] ❌ Failed to build server.`);
         } else {
-          this.cleanDist();
-
           try {
             await this.compileServerFunctions(compiler);
             this.compileAppActionSkills();
@@ -113,7 +111,7 @@ class MFServerPlugin {
     }
   }
 
-  private cleanDist() {
+  private cleanServerDist() {
     // Remove existing entry points
     try {
       fs.rmSync("dist/server", { recursive: true, force: true });
@@ -132,38 +130,6 @@ class MFServerPlugin {
    * @param compiler
    */
   private async compileServerFunctions(compiler: Compiler) {
-    // Generate tsconfig for server functions
-    function generateTempTsConfig() {
-      const tempTsConfigPath = path.join(
-        process.cwd(),
-        "node_modules/.pulse/tsconfig.server.json",
-      );
-
-      const tsConfig = {
-        compilerOptions: {
-          target: "ES2020",
-          module: "esnext",
-          moduleResolution: "bundler",
-          strict: true,
-          declaration: true,
-          outDir: path.join(process.cwd(), "dist"),
-        },
-        include: [
-          path.join(process.cwd(), "src/server-function/**/*"),
-          path.join(process.cwd(), "pulse.config.ts"),
-          path.join(process.cwd(), "global.d.ts"),
-        ],
-        exclude: [
-          path.join(process.cwd(), "node_modules"),
-          path.join(process.cwd(), "dist"),
-        ],
-      };
-
-      fs.writeFileSync(tempTsConfigPath, JSON.stringify(tsConfig, null, 2));
-    }
-
-    generateTempTsConfig();
-
     // Run a new webpack compilation to pick up new server functions
     const options: any = {
       ...compiler.options,
@@ -293,56 +259,47 @@ ${Object.entries(funcs)
         const typeDefs = this.parseTypeDefs(allJSDocs);
 
         /* Extract parameter descriptions from JSDoc */
-        // Check if the function's first param is an object
-        if (funcDecl.getParameters().length !== 1) {
-          throw new Error(
-            `[Action Registration] Function ${funcName} should have exactly one parameter which is an object. Skipping...`,
-          );
-        } else if (!funcDecl.getParameters()[0]?.getType().isObject()) {
-          throw new Error(
-            `[Action Registration] Function ${funcName}'s parameter should be an object. Skipping...`,
-          );
-        }
 
-        const funcParam = funcDecl.getParameters()[0]!;
+        const funcParam = funcDecl.getParameters()[0];
         const params: Record<string, TypedVariable> = {};
+        if (funcParam) {
+          /**
+           * Extract default values from the destructured parameter
+           * (ObjectBindingPattern → BindingElement initializer)
+           */
+          const defaults = new Map<string, string>();
 
-        /**
-         * Extract default values from the destructured parameter
-         * (ObjectBindingPattern → BindingElement initializer)
-         */
-        const defaults = new Map<string, string>();
+          const nameNode = funcParam.getNameNode();
+          if (Node.isObjectBindingPattern(nameNode)) {
+            nameNode.getElements().forEach((el) => {
+              if (!Node.isBindingElement(el)) return;
 
-        const nameNode = funcParam.getNameNode();
-        if (Node.isObjectBindingPattern(nameNode)) {
-          nameNode.getElements().forEach((el) => {
-            if (!Node.isBindingElement(el)) return;
+              const name = el.getName();
+              const initializer = el.getInitializer()?.getText();
 
-            const name = el.getName();
-            const initializer = el.getInitializer()?.getText();
+              if (initializer) {
+                defaults.set(name, initializer);
+              }
+            });
+          }
 
-            if (initializer) {
-              defaults.set(name, initializer);
-            }
-          });
+          funcParam
+            .getType()
+            .getProperties()
+            .forEach((prop) => {
+              const name = prop.getName();
+              const inputTypeDef = typeDefs["input"] ?? {};
+
+              const variable: TypedVariable = {
+                description: inputTypeDef[name]?.description ?? "",
+                type: this.getType(inputTypeDef[name]?.type ?? ""),
+                optional: prop.isOptional() ? true : undefined,
+                defaultValue: defaults.get(name),
+              };
+
+              params[name] = variable;
+            });
         }
-
-        funcParam
-          .getType()
-          .getProperties()
-          .forEach((prop) => {
-            const name = prop.getName();
-            const inputTypeDef = typeDefs["input"] ?? {};
-
-            const variable: TypedVariable = {
-              description: inputTypeDef[name]?.description ?? "",
-              type: this.getType(inputTypeDef[name]?.type ?? ""),
-              optional: prop.isOptional() ? true : undefined,
-              defaultValue: defaults.get(name),
-            };
-
-            params[name] = variable;
-          });
 
         /* Extract return type from JSDoc */
         // Check if the return type is an object
@@ -440,6 +397,7 @@ ${Object.entries(funcs)
     if (text === "boolean") return "boolean";
     if (text === "any") return "object";
     if (text.endsWith("[]")) return [this.getType(text.slice(0, -2))];
+    if (text.length === 0) return "undefined";
 
     console.warn(
       `[Type Warning] Unrecognized type "${text}". Consider adding explicit types in your action's JSDoc comments for better type safety and documentation.`,
