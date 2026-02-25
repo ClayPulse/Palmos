@@ -2,7 +2,7 @@ import useAgentTools from "./hooks/agent/use-agent-tools";
 import useAgents from "./hooks/agent/use-agents";
 import useLoading from "./hooks/editor/use-loading";
 import useNotification from "./hooks/editor/use-notification";
-import useActionEffect from "./hooks/editor/use-register-action";
+import useActionEffect from "./hooks/editor/use-action-effect";
 import useTheme from "./hooks/editor/use-theme";
 import useFile from "./hooks/workspace/use-file";
 
@@ -44,7 +44,7 @@ export {
   useOpenLink,
   useOwnedAppView,
   useReceiveFile,
-  useActionEffect as useRegisterAction,
+  useActionEffect,
   useSnapshotState,
   useSTT,
   useTerminal,

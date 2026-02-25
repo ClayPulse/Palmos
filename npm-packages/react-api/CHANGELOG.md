@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.77
+
+### Patch Changes
+
+- Allow piping transformation in use action effect
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.77
+
 ## 0.1.1-beta.76
 
 ### Patch Changes

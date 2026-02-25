@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { existsSync } from "fs";
+import { existsSync, writeFileSync } from "fs";
 import fs from "fs/promises";
 import { globSync } from "glob";
 import { networkInterfaces } from "os";
@@ -149,4 +149,38 @@ export function discoverAppSkillActions() {
     }, {});
 
   return entryPoints;
+}
+
+// Generate tsconfig for server functions
+export function generateTempTsConfig() {
+  const tempTsConfigPath = path.join(
+    process.cwd(),
+    "node_modules/.pulse/tsconfig.server.json",
+  );
+
+  if (existsSync(tempTsConfigPath)) {
+    return;
+  }
+
+  const tsConfig = {
+    compilerOptions: {
+      target: "ES2020",
+      module: "esnext",
+      moduleResolution: "bundler",
+      strict: true,
+      declaration: true,
+      outDir: path.join(process.cwd(), "dist"),
+    },
+    include: [
+      path.join(process.cwd(), "src/server-function/**/*"),
+      path.join(process.cwd(), "pulse.config.ts"),
+      path.join(process.cwd(), "global.d.ts"),
+    ],
+    exclude: [
+      path.join(process.cwd(), "node_modules"),
+      path.join(process.cwd(), "dist"),
+    ],
+  };
+
+  writeFileSync(tempTsConfigPath, JSON.stringify(tsConfig, null, 2));
 }
