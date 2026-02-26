@@ -98,18 +98,18 @@ export default function useActionExecutor(appName?: string) {
     const apps = appName
       ? getApp(appName)
       : (editorContext?.persistSettings?.extensions ?? []);
-    const preRegisteredAppActions: ScopedAction[] = apps.flatMap((ext) =>
-      getPreRegisteredAppActions(ext, keyword).map((action) => ({
+    const skillActions: ScopedAction[] = apps.flatMap((ext) =>
+      getSkillActions(ext, keyword).map((action) => ({
         type: "app" as const,
         action: action,
       })),
     );
 
-    console.log("Found pre-registered app actions:", preRegisteredAppActions);
+    console.log("Found pre-registered app actions:", skillActions);
 
     setActions((prev) => [
       ...prev.filter((c) => c.type !== "app"),
-      ...preRegisteredAppActions,
+      ...skillActions,
     ]);
   }, [editorContext?.persistSettings?.extensions, keyword, appName]);
 
@@ -134,7 +134,7 @@ export default function useActionExecutor(appName?: string) {
     } else if (action.type === "app") {
       const extensions = editorContext?.persistSettings?.extensions ?? [];
       const ext = extensions.find((e) =>
-        (e.config.preRegisteredActions ?? []).some(
+        (e.config.actions ?? []).some(
           (act) => act.name === action.action.name,
         ),
       );
@@ -227,11 +227,11 @@ export default function useActionExecutor(appName?: string) {
     }
   }
 
-  function getPreRegisteredAppActions(
+  function getSkillActions(
     extension: ExtensionApp,
     keyword?: string,
   ) {
-    const actions = extension.config.preRegisteredActions ?? [];
+    const actions = extension.config.actions ?? [];
     if (keyword) {
       return actions.filter((action) =>
         action.name.toLowerCase().includes(keyword.toLowerCase().trim()),

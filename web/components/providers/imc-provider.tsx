@@ -2,6 +2,7 @@
 
 import { LLMAgentRunner } from "@/lib/agent/runners/llm-agent-runner";
 import { PlatformEnum } from "@/lib/enums";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import useRouter from "@/lib/hooks/use-router";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
@@ -53,6 +54,7 @@ export default function InterModuleCommunicationProvider({
   const { resolvedTheme } = useTheme();
   const router = useRouter();
   const { createAppViewInCanvasView } = useTabViewManager();
+  const { getInstalledExtensionApp } = useExtensionAppManager();
 
   const polyIMCRef = useRef<PolyIMC | undefined>(undefined);
   const imcInitializedMapRef = useRef<Map<string, boolean>>(new Map());
@@ -830,6 +832,44 @@ export default function InterModuleCommunicationProvider({
               fromViewId: message.from,
             },
           });
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorGetAppOrigin,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          // This is used for security check to ensure the message is from the expected app view.
+          const viewId = message.from;
+
+          // Get the view config of this viewId, and return its origin
+          const nodes = editorContext?.editorStates.workflowNodes;
+
+          const node = nodes
+            ? nodes.find((n) => n.data.config.viewId === viewId)
+            : undefined;
+
+          const name = node?.data.config.app;
+
+          if (!name) {
+            console.warn(
+              `No app name found for viewId ${viewId} in EditorGetAppOrigin handler.`,
+            );
+            return undefined;
+          }
+
+          const ext = await getInstalledExtensionApp(name);
+
+          if (!ext) {
+            console.warn(
+              `No installed extension app found with name ${name} in EditorGetAppOrigin handler.`,
+            );
+            return undefined;
+          }
+
+          return ext.remoteOrigin;
         },
       ],
     ]);
