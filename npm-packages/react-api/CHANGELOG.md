@@ -1,5 +1,29 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.80
+
+### Patch Changes
+
+- Skip piping if afterAction and beforeAction return void
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.80
+
+## 0.1.1-beta.79
+
+### Patch Changes
+
+- Add editor get app origin handling
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.79
+
+## 0.1.1-beta.78
+
+### Patch Changes
+
+- Update skill action type name
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.78
+
 ## 0.1.1-beta.77
 
 ### Patch Changes

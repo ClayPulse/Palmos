@@ -338,8 +338,8 @@ ${Object.entries(funcs)
 
     // You can now register `actions` in Module Federation or expose them as needed
     console.log(
-      "Discovered skill actions:\n",
-      actions.map((a) => "- " + a.name).join("\n"),
+      "Discovered skill actions:\n" +
+        actions.map((a) => "- " + a.name).join("\n"),
     );
 
     // Register actions in pulse config for runtime access

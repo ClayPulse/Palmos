@@ -27,7 +27,7 @@ export default function useActionEffect(
   params: {
     actionName: string;
     beforeAction?: (args: any) => Promise<any>;
-    afterAction?: (args: any, result: any) => Promise<any>;
+    afterAction?: (args: any) => Promise<any>;
   },
   deps: DependencyList,
   isExtReady: boolean = true,
@@ -38,17 +38,37 @@ export default function useActionEffect(
   const commandQueue = useRef<{ args: any; resolve: (v: any) => void }[]>([]);
   const isCommandExecuting = useRef(false);
 
+  const [remoteOrigin, setRemoteOrigin] = useState<string | undefined>(
+    undefined,
+  );
+
   const [beforeAction, setBeforeAction] = useState<
     ((args: any) => Promise<any>) | undefined
   >(params.beforeAction);
 
   const [afterAction, setAfterAction] = useState<
-    ((args: any, result: any) => Promise<any>) | undefined
+    ((result: any) => Promise<any>) | undefined
   >(params.afterAction);
 
-  const [handler, setHandler] = useState<
+  const [actionHandler, setActionHandler] = useState<
     ((args: any) => Promise<any>) | undefined
   >(undefined);
+
+  useEffect(() => {
+    async function fetchRemoteOrigin() {
+      const origin = await imc?.sendMessage(
+        IMCMessageTypeEnum.EditorGetAppOrigin,
+        {
+          actionName: params.actionName,
+        },
+      );
+      setRemoteOrigin(origin);
+    }
+
+    if (isReady) {
+      fetchRemoteOrigin();
+    }
+  }, [isReady]);
 
   // Flush queued commands when isExtReady becomes true
   useEffect(() => {
@@ -97,6 +117,11 @@ export default function useActionEffect(
     }
 
     async function updateAction() {
+      if (!remoteOrigin) {
+        console.error("Remote origin is not set yet");
+        throw new Error("Remote origin is not set yet");
+      }
+
       // Register or update action.
       // This will only pass signature info to the editor.
       // The actual handler is stored in this hook,
@@ -106,9 +131,14 @@ export default function useActionEffect(
       );
 
       // Setup handler
-      const func = await loadAppAction(actionInfo.name, appId, "/", version);
+      const func = await loadAppAction(
+        actionInfo.name,
+        appId,
+        remoteOrigin,
+        version,
+      );
 
-      setHandler(() => func);
+      setActionHandler(() => func);
 
       await imc?.sendMessage(IMCMessageTypeEnum.EditorRegisterAction, {
         name: actionInfo.name,
@@ -118,38 +148,53 @@ export default function useActionEffect(
       });
 
       // Update receiver
-      imc?.updateReceiverHandlerMap(getReceiverHandlerMap());
+      imc?.updateReceiverHandlerMap(getReceiverHandlerMap(func));
     }
 
-    if (isExtReady) {
+    if (isExtReady && remoteOrigin) {
       updateAction();
     }
-  }, [params.actionName, imc, isExtReady]);
+  }, [
+    params.actionName,
+    imc,
+    isExtReady,
+    remoteOrigin,
+    beforeAction,
+    afterAction,
+  ]);
 
   useEffect(() => {
     setBeforeAction(() => params.beforeAction ?? (async () => {}));
     setAfterAction(() => params.afterAction ?? (async () => {}));
   }, [...deps]);
 
-  async function executeAction(args: any) {
+  async function executeAction(
+    args: any,
+    actionHandlerFunc?: (args: any) => Promise<any>,
+  ) {
+    const handler = actionHandlerFunc ?? actionHandler;
     if (!handler) {
       throw new Error("Action handler is not set");
     }
 
+    let beforeRes;
     if (beforeAction) {
-      args = await beforeAction(args);
+      beforeRes = await beforeAction(args);
     }
 
-    let res = await handler(args);
+    let res = await handler(beforeRes !== undefined ? beforeRes : args);
 
+    let afterRes;
     if (afterAction) {
-      res = await afterAction(args, res);
+      afterRes = await afterAction(res);
     }
 
-    return res;
+    return afterRes !== undefined ? afterRes : res;
   }
 
-  function getReceiverHandlerMap() {
+  function getReceiverHandlerMap(
+    actionHandlerFunc?: (args: any) => Promise<any>,
+  ): Map<IMCMessageTypeEnum, ReceiverHandler> {
     const receiverHandlerMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
       [
         IMCMessageTypeEnum.EditorRunAppAction,
@@ -197,7 +242,7 @@ export default function useActionEffect(
 
           // If extension is ready, execute immediately
           if (isExtReady) {
-            const result = await executeAction(args);
+            const result = await executeAction(args, actionHandlerFunc);
             return result;
           }
 
@@ -229,11 +274,6 @@ export default function useActionEffect(
       ],
     });
 
-    console.log(
-      "Loaded remote from",
-      `${remoteOrigin}/${appId}/${version}/client/remoteEntry.js`,
-    );
-
     const loadedFunc =
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (await instance.loadRemote<any>(`${appId}_client/skill/${func}`)).default;
@@ -243,6 +283,6 @@ export default function useActionEffect(
 
   return {
     isReady,
-    runAppAction: handler,
+    runAppAction: actionHandler,
   };
 }

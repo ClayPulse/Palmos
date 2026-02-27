@@ -55,6 +55,7 @@ export enum IMCMessageTypeEnum {
   EditorAppRequestLocale = "editor-app-request-locale",
   // Artifact update
   EditorArtifactUpdate = "editor-artifact-update",
+  EditorGetAppOrigin = "editor-get-app-origin",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)
@@ -170,7 +171,7 @@ export type AppConfig = {
   // App installed agents
   agents?: Agent[];
   // Exposed actions in the modular app
-  preRegisteredActions?: Action[];
+  actions?: Action[];
   // Recommended dimensions for app view in canvas
   recommendedHeight?: number;
   recommendedWidth?: number;

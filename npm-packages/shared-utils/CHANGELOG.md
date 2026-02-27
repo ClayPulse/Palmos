@@ -1,5 +1,23 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.80
+
+### Patch Changes
+
+- Skip piping if afterAction and beforeAction return void
+
+## 0.1.1-beta.79
+
+### Patch Changes
+
+- Add editor get app origin handling
+
+## 0.1.1-beta.78
+
+### Patch Changes
+
+- Update skill action type name
+
 ## 0.1.1-beta.77
 
 ### Patch Changes

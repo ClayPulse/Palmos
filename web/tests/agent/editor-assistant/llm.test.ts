@@ -1,4 +1,4 @@
-import { describe, expect, jest } from "@jest/globals";
+import { describe, expect, jest, test } from "@jest/globals";
 import { createMockFetchAPI } from "../../utils";
 createMockFetchAPI();
 

@@ -18,10 +18,10 @@ export default function useOwnedAppView() {
     async (ownedAppViewModel: ViewModel, actionName: string, args: any) => {
       if (isReady) {
         const appViewId = ownedAppViewModel.viewId;
-        const preRegisteredActions =
-          ownedAppViewModel.appConfig.preRegisteredActions || [];
+        const skillActions =
+          ownedAppViewModel.appConfig.actions || [];
 
-        const action = preRegisteredActions.find((a) => a.name === actionName);
+        const action = skillActions.find((a) => a.name === actionName);
         if (!action) {
           throw new Error(
             `Action ${actionName} not found in owned app ${ownedAppViewModel.appConfig.id}`,
