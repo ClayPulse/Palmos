@@ -102,8 +102,8 @@ class MFServerPlugin {
             await this.compileServerFunctions(compiler);
             this.compileAppActionSkills();
           } catch (err) {
-            console.log(`[Server] ❌ Error during compilation:`, err);
-            return;
+            console.error(`[Server] ❌ Error during compilation:`, err);
+            process.exit(1);
           }
           console.log(`[Server] ✅ Successfully built server.`);
         }
@@ -251,6 +251,25 @@ ${Object.entries(funcs)
         }
 
         const defaultExportJSDocs = funcDecl.getJsDocs();
+
+        // Validate that the function has a JSDoc description
+        const descriptionText = defaultExportJSDocs
+          .map((doc) =>
+            doc
+              .getDescription()
+              .replace(/^\*+/gm, "")
+              .trim(),
+          )
+          .join("\n")
+          .trim();
+
+        if (defaultExportJSDocs.length === 0 || !descriptionText) {
+          throw new Error(
+            `[Action Validation] Action "${funcName}" in ${file} is missing a JSDoc description. ` +
+              `Please add a JSDoc comment block with a description above the function.`,
+          );
+        }
+
         const description = defaultExportJSDocs
           .map((doc) => doc.getFullText())
           .join("\n");
@@ -283,22 +302,44 @@ ${Object.entries(funcs)
             });
           }
 
-          funcParam
-            .getType()
-            .getProperties()
-            .forEach((prop) => {
-              const name = prop.getName();
-              const inputTypeDef = typeDefs["input"] ?? {};
+          const paramProperties = funcParam.getType().getProperties();
+          const inputTypeDef = typeDefs["input"] ?? {};
 
-              const variable: TypedVariable = {
-                description: inputTypeDef[name]?.description ?? "",
-                type: this.getType(inputTypeDef[name]?.type ?? ""),
-                optional: prop.isOptional() ? true : undefined,
-                defaultValue: defaults.get(name),
-              };
+          if (paramProperties.length > 0 && !typeDefs["input"]) {
+            throw new Error(
+              `[Action Validation] Action "${funcName}" in ${file} has parameters but is missing an ` +
+                `"@typedef {Object} input" JSDoc block. Please document all parameters with ` +
+                `@typedef {Object} input and @property tags.`,
+            );
+          }
 
-              params[name] = variable;
-            });
+          paramProperties.forEach((prop) => {
+            const name = prop.getName();
+
+            if (!inputTypeDef[name]) {
+              throw new Error(
+                `[Action Validation] Action "${funcName}" in ${file}: parameter "${name}" is missing ` +
+                  `a @property entry in the "input" JSDoc typedef. Please add ` +
+                  `"@property {type} ${name} - description" to the JSDoc.`,
+              );
+            }
+
+            if (!inputTypeDef[name]?.description?.trim()) {
+              throw new Error(
+                `[Action Validation] Action "${funcName}" in ${file}: parameter "${name}" has an empty ` +
+                  `description in the JSDoc @property. Please provide a meaningful description.`,
+              );
+            }
+
+            const variable: TypedVariable = {
+              description: inputTypeDef[name]?.description ?? "",
+              type: this.getType(inputTypeDef[name]?.type ?? ""),
+              optional: prop.isOptional() ? true : undefined,
+              defaultValue: defaults.get(name),
+            };
+
+            params[name] = variable;
+          });
         }
 
         /* Extract return type from JSDoc */
@@ -311,21 +352,43 @@ ${Object.entries(funcs)
         }
 
         const returns: Record<string, TypedVariable> = {};
-        funcDecl
-          .getReturnType()
-          .getProperties()
-          .forEach((prop) => {
-            const name = prop.getName();
-            const outputTypeDef = typeDefs["output"] ?? {};
+        const returnProperties = funcDecl.getReturnType().getProperties();
+        const outputTypeDef = typeDefs["output"] ?? {};
 
-            const variable: TypedVariable = {
-              description: outputTypeDef[name]?.description ?? "",
-              type: this.getType(outputTypeDef[name]?.type ?? ""),
-              optional: prop.isOptional() ? true : undefined,
-              defaultValue: undefined,
-            };
-            returns[name] = variable;
-          });
+        if (returnProperties.length > 0 && !typeDefs["output"]) {
+          throw new Error(
+            `[Action Validation] Action "${funcName}" in ${file} returns properties but is missing an ` +
+              `"@typedef {Object} output" JSDoc block. Please document all return values with ` +
+              `@typedef {Object} output and @property tags.`,
+          );
+        }
+
+        returnProperties.forEach((prop) => {
+          const name = prop.getName();
+
+          if (!outputTypeDef[name]) {
+            throw new Error(
+              `[Action Validation] Action "${funcName}" in ${file}: return property "${name}" is missing ` +
+                `a @property entry in the "output" JSDoc typedef. Please add ` +
+                `"@property {type} ${name} - description" to the JSDoc.`,
+            );
+          }
+
+          if (!outputTypeDef[name]?.description?.trim()) {
+            throw new Error(
+              `[Action Validation] Action "${funcName}" in ${file}: return property "${name}" has an empty ` +
+                `description in the JSDoc @property. Please provide a meaningful description.`,
+            );
+          }
+
+          const variable: TypedVariable = {
+            description: outputTypeDef[name]?.description ?? "",
+            type: this.getType(outputTypeDef[name]?.type ?? ""),
+            optional: prop.isOptional() ? true : undefined,
+            defaultValue: undefined,
+          };
+          returns[name] = variable;
+        });
 
         actions.push({
           name: funcName,

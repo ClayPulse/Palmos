@@ -1,6 +1,7 @@
 import os from 'os';
 import path from 'path';
 import fs from 'fs';
+import {getBackendUrl} from './backend-url.js';
 
 export function saveToken(token: string | undefined, devMode: boolean) {
 	// Save the token to .pulse-editor/config.json in user home directory
@@ -72,9 +73,7 @@ export function isTokenInEnv(devMode: boolean) {
 
 export async function checkToken(token: string, devMode: boolean) {
 	const res = await fetch(
-		devMode
-			? 'https://localhost:8080/api/api-keys/check'
-			: 'https://pulse-editor.com/api/api-keys/check',
+		`${getBackendUrl(devMode)}/api/api-keys/check`,
 		{
 			body: JSON.stringify({token}),
 			headers: {
