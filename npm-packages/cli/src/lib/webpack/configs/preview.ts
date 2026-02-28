@@ -44,7 +44,21 @@ class PreviewClientPlugin {
 `;
 
         console.log("[client-preview] ✅ Successfully built preview.");
+
+        const skillActions = this.pulseConfig?.actions || [];
+
+        const actionNames: string[] = skillActions.map((a: any) => a.name);
+
+        if (actionNames.length > 0) {
+          console.log(
+            "\n🎯 Skill action endpoints:\n" +
+              actionNames.map((n) => ` - /skill/${n}`).join("\n") +
+              "\n",
+          );
+        }
+
         console.log(previewStartupMessage);
+
         isFirstRun = false;
       } else {
         console.log("[client-preview] ✅ Reload finished");

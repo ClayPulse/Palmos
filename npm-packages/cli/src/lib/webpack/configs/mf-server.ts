@@ -10,7 +10,11 @@ import { globSync } from "glob";
 import path from "path";
 import { JSDoc, Node, Project, SyntaxKind } from "ts-morph";
 import wp, { Compiler, Configuration as WebpackConfig } from "webpack";
-import { discoverAppSkillActions, loadPulseConfig } from "./utils.js";
+import {
+  discoverAppSkillActions,
+  discoverServerFunctions,
+  loadPulseConfig,
+} from "./utils.js";
 
 const { NodeFederationPlugin } = mfNode;
 const { webpack } = wp;
@@ -28,44 +32,73 @@ class MFServerPlugin {
     if (compiler.options.mode === "development") {
       let isFirstRun = true;
 
+      compiler.hooks.environment.tap("WatchFileChangesPlugin", () => {
+        // Watch for file changes in the server-function directory to trigger server-function rebuilds
+        compiler.hooks.thisCompilation.tap(
+          "WatchServerFunctions",
+          (compilation) => {
+            compilation.contextDependencies.add(
+              path.resolve(this.projectDirName, "src/server-function"),
+            );
+          },
+        );
+
+        // Watch for file changes in the action directory to trigger action rebuilds
+        compiler.hooks.thisCompilation.tap("WatchActions", (compilation) => {
+          compilation.contextDependencies.add(
+            path.resolve(this.projectDirName, "src/skill"),
+          );
+        });
+      });
+
       // Before build starts
-      compiler.hooks.watchRun.tap(
-        "ReloadMessagePlugin",
-        async (compilation) => {
-          this.cleanServerDist();
+      compiler.hooks.beforeRun.tap("CleanDistPlugin", () => {
+        this.cleanServerDist();
+      });
 
-          if (!isFirstRun) {
-            console.log(`[Server] 🔄 Reloading app...`);
-            const isServerFunctionChange = compilation.modifiedFiles
-              ? Array.from(compilation.modifiedFiles).some((file) =>
-                  file.includes("src/server-function"),
-                )
-              : false;
+      // When a file changes and triggers a new compilation
+      compiler.hooks.watchRun.tap("ReloadMessagePlugin", async (compiler) => {
+        this.printChanges(compiler);
 
-            if (isServerFunctionChange) {
-              await this.compileServerFunctions(compiler);
-            }
+        if (!isFirstRun) {
+          console.log(`[Server] 🔄 Reloading app...`);
+          const isServerFunctionChange = compiler.modifiedFiles
+            ? Array.from(compiler.modifiedFiles).some((file) =>
+                file.includes("src/server-function"),
+              )
+            : false;
 
-            const isActionChange = compilation.modifiedFiles
-              ? Array.from(compilation.modifiedFiles).some((file) =>
-                  file.includes("src/action"),
-                )
-              : false;
-
-            if (isActionChange) {
-              console.log(
-                `[Server] Detected changes in actions. Recompiling...`,
-              );
-              this.compileAppActionSkills();
-            }
-          } else {
-            console.log(`[Server] 🔄 Building app...`);
+          if (isServerFunctionChange) {
             await this.compileServerFunctions(compiler);
-            this.compileAppActionSkills();
-            console.log(`[Server] ✅ Successfully built server.`);
           }
-        },
-      );
+
+          const isActionChange = compiler.modifiedFiles
+            ? Array.from(compiler.modifiedFiles).some((file) =>
+                file.includes("src/skill"),
+              )
+            : false;
+
+          if (isActionChange) {
+            console.log(`[Server] Detected changes in actions. Recompiling...`);
+            this.compileAppActionSkills();
+          }
+        } else {
+          console.log(`[Server] 🔄 Building app...`);
+          await this.compileServerFunctions(compiler);
+          this.compileAppActionSkills();
+          console.log(`[Server] ✅ Successfully built server.`);
+
+          const funcs = discoverServerFunctions();
+
+          console.log(`\n🛜 Server functions:
+${Object.entries(funcs)
+  .map(([name, file]) => {
+    return `  - ${name.slice(2)} (from ${file})`;
+  })
+  .join("\n")}
+`);
+        }
+      });
 
       // After build finishes
       compiler.hooks.done.tap("ReloadMessagePlugin", () => {
@@ -74,23 +107,6 @@ class MFServerPlugin {
         } else {
           console.log(`[Server] ✅ Reload finished.`);
         }
-      });
-
-      // Watch for file changes in the server-function directory to trigger server-function rebuilds
-      compiler.hooks.thisCompilation.tap(
-        "WatchServerFunctions",
-        (compilation) => {
-          compilation.contextDependencies.add(
-            path.resolve(this.projectDirName, "src/server-function"),
-          );
-        },
-      );
-
-      // Watch for file changes in the action directory to trigger action rebuilds
-      compiler.hooks.thisCompilation.tap("WatchActions", (compilation) => {
-        compilation.contextDependencies.add(
-          path.resolve(this.projectDirName, "src/action"),
-        );
       });
     } else {
       // Print build success/failed message
@@ -162,36 +178,8 @@ class MFServerPlugin {
   }
 
   private makeNodeFederationPlugin() {
-    function discoverServerFunctions() {
-      // Get all .ts files under src/server-function and read use default exports as entry points
-      const files = globSync("./src/server-function/**/*.ts");
-      const entryPoints = files
-        .map((file) => file.replaceAll("\\", "/"))
-        .map((file) => {
-          return {
-            ["./" +
-            file.replace("src/server-function/", "").replace(/\.ts$/, "")]:
-              "./" + file,
-          };
-        })
-        .reduce((acc, curr) => {
-          return { ...acc, ...curr };
-        }, {});
-
-      return entryPoints;
-    }
-
     const funcs = discoverServerFunctions();
     const actions = discoverAppSkillActions();
-
-    console.log(`Discovered server functions:
-${Object.entries(funcs)
-  .map(([name, file]) => {
-    return `  - ${name.slice(2)} (from ${file})`;
-  })
-  .join("\n")}
-`);
-
     return new NodeFederationPlugin(
       {
         name: this.pulseConfig.id + "_server",
@@ -209,9 +197,9 @@ ${Object.entries(funcs)
   }
 
   /**
-   * Register default functions defined in src/action as exposed modules in Module Federation.
+   * Register default functions defined in src/skill as exposed modules in Module Federation.
    * This will:
-   * 	1. Search for all .ts files under src/action
+   * 	1. Search for all .ts files under src/skill
    *  2. Use ts-morph to get the default function information, including function name, parameters, and JSDoc comments
    *  3. Organize the functions' information into a list of Action
    * @param compiler
@@ -254,12 +242,7 @@ ${Object.entries(funcs)
 
         // Validate that the function has a JSDoc description
         const descriptionText = defaultExportJSDocs
-          .map((doc) =>
-            doc
-              .getDescription()
-              .replace(/^\*+/gm, "")
-              .trim(),
-          )
+          .map((doc) => doc.getDescription().replace(/^\*+/gm, "").trim())
           .join("\n")
           .trim();
 
@@ -400,24 +383,8 @@ ${Object.entries(funcs)
     });
 
     // You can now register `actions` in Module Federation or expose them as needed
-    console.log(
-      "Discovered skill actions:\n" +
-        actions.map((a) => "- " + a.name).join("\n"),
-    );
-
     // Register actions in pulse config for runtime access
     this.pulseConfig.actions = actions;
-
-    // Write action names to dist/server/skill-actions.json so the express
-    // server can enumerate available skill action API endpoints at startup
-    const serverDistDir = path.join(this.projectDirName, "dist", "server");
-    if (!fs.existsSync(serverDistDir)) {
-      fs.mkdirSync(serverDistDir, { recursive: true });
-    }
-    fs.writeFileSync(
-      path.join(serverDistDir, "skill-actions.json"),
-      JSON.stringify(actions.map((a) => a.name), null, 2),
-    );
   }
 
   private parseTypeDefs(jsDocs: JSDoc[]) {
@@ -477,6 +444,26 @@ ${Object.entries(funcs)
       `[Type Warning] Unrecognized type "${text}". Consider adding explicit types in your action's JSDoc comments for better type safety and documentation.`,
     );
     return text;
+  }
+
+  private printChanges(compiler: Compiler) {
+    const modified = compiler.modifiedFiles
+      ? Array.from(compiler.modifiedFiles)
+      : [];
+
+    const removed = compiler.removedFiles
+      ? Array.from(compiler.removedFiles)
+      : [];
+
+    const allChanges = [...modified, ...removed];
+
+    if (allChanges.length > 0) {
+      console.log(
+        `[Server] ✏️ Detected file changes:\n${allChanges
+          .map((file) => `  - ${file}`)
+          .join("\n")}`,
+      );
+    }
   }
 }
 

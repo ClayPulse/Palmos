@@ -106,6 +106,7 @@ export default function useActionEffect(
       );
 
       if (!actionInfo) {
+        console.error(`Action ${actionName} not found in pulse.config.json`);
         throw new Error(`Action ${actionName} not found in pulse.config.json`);
       }
 

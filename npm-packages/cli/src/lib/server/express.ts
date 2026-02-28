@@ -6,7 +6,6 @@ import connectLivereload from "connect-livereload";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import fs from "fs";
 import livereload from "livereload";
 import { networkInterfaces } from "os";
 import path from "path";
@@ -139,19 +138,8 @@ if (isPreview) {
   app.use(express.static("dist/client"));
 
   // Expose skill actions as REST API endpoints in dev and preview modes
-  const skillActionsPath = path.resolve("dist/server/skill-actions.json");
-  const skillActionNames: string[] = fs.existsSync(skillActionsPath)
-    ? JSON.parse(fs.readFileSync(skillActionsPath, "utf-8"))
-    : [];
-
-  if (skillActionNames.length > 0) {
-    console.log(
-      "🎯 Skill action endpoints:\n" +
-        skillActionNames.map((name) => `  POST /skill/${name}`).join("\n"),
-    );
-  } else {
-    console.log("🎯 No skill actions found.");
-  }
+  const skillActions = pulseConfig?.actions || [];
+  const skillActionNames: string[] = skillActions.map((a: any) => a.name);
 
   app.post("/skill/:actionName", async (req, res) => {
     const { actionName } = req.params;
