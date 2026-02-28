@@ -6,6 +6,7 @@ import connectLivereload from "connect-livereload";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import fs from "fs";
 import livereload from "livereload";
 import { networkInterfaces } from "os";
 import path from "path";
@@ -136,6 +137,53 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
 if (isPreview) {
   /* Preview mode */
   app.use(express.static("dist/client"));
+
+  // Expose skill actions as REST API endpoints in dev and preview modes
+  const skillActionsPath = path.resolve("dist/server/skill-actions.json");
+  const skillActionNames: string[] = fs.existsSync(skillActionsPath)
+    ? JSON.parse(fs.readFileSync(skillActionsPath, "utf-8"))
+    : [];
+
+  if (skillActionNames.length > 0) {
+    console.log(
+      "🎯 Skill action endpoints:\n" +
+        skillActionNames.map((name) => `  POST /skill/${name}`).join("\n"),
+    );
+  } else {
+    console.log("🎯 No skill actions found.");
+  }
+
+  app.post("/skill/:actionName", async (req, res) => {
+    const { actionName } = req.params;
+
+    if (skillActionNames.length > 0 && !skillActionNames.includes(actionName)) {
+      res
+        .status(404)
+        .json({ error: `Skill action "${actionName}" not found.` });
+      return;
+    }
+
+    const dir = path.resolve(
+      "node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/load-remote.cjs",
+    );
+    const fileUrl = pathToFileURL(dir).href;
+    const { loadFunc } = await import(fileUrl);
+
+    try {
+      const action = await loadFunc(
+        `skill/${actionName}`,
+        pulseConfig.id,
+        "http://localhost:3030",
+        pulseConfig.version,
+      );
+      const result = await action(req.body);
+      res.json(result);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`❌ Error running skill action "${actionName}":`, message);
+      res.status(500).json({ error: message });
+    }
+  });
 
   app.listen(3030, "0.0.0.0");
 } else if (isDev) {

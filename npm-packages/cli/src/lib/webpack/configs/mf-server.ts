@@ -407,6 +407,17 @@ ${Object.entries(funcs)
 
     // Register actions in pulse config for runtime access
     this.pulseConfig.actions = actions;
+
+    // Write action names to dist/server/skill-actions.json so the express
+    // server can enumerate available skill action API endpoints at startup
+    const serverDistDir = path.join(this.projectDirName, "dist", "server");
+    if (!fs.existsSync(serverDistDir)) {
+      fs.mkdirSync(serverDistDir, { recursive: true });
+    }
+    fs.writeFileSync(
+      path.join(serverDistDir, "skill-actions.json"),
+      JSON.stringify(actions.map((a) => a.name), null, 2),
+    );
   }
 
   private parseTypeDefs(jsDocs: JSDoc[]) {
