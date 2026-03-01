@@ -1090,6 +1090,10 @@
 		"ariaLabel": "Ziehen zum Verschieben"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "Eingang",
+			"exit": "Ausgang"
+		},
 		"tooltips": {
 			"fullscreen": "Knoten in Vollbild-Tab öffnen.",
 			"vibeCode": "Vibe Code öffnen",

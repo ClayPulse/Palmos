@@ -1117,6 +1117,10 @@
     "ariaLabel": "드래그하여 이동"
   },
   "canvasNode": {
+    "labels": {
+      "entry": "진입",
+      "exit": "출구"
+    },
     "tooltips": {
       "fullscreen": "노드를 전체 화면 탭으로 엽니다.",
       "vibeCode": "Vibe Code 열기",

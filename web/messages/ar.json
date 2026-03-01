@@ -1090,6 +1090,10 @@
 		"ariaLabel": "اسحب للتحريك"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "دخول",
+			"exit": "خروج"
+		},
 		"tooltips": {
 			"fullscreen": "افتح العقدة في علامة تبويب ملء الشاشة.",
 			"vibeCode": "افتح Vibe Code",

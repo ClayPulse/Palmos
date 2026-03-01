@@ -1082,6 +1082,10 @@
 		"ariaLabel": "Перетащите, чтобы переместить"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "вход",
+			"exit": "выход"
+		},
 		"tooltips": {
 			"fullscreen": "Открыть узел в полноэкранной вкладке.",
 			"vibeCode": "Открыть Vibe Code",

@@ -1090,6 +1090,10 @@
 		"ariaLabel": "Arrastrar para mover"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "entrada",
+			"exit": "salida"
+		},
 		"tooltips": {
 			"fullscreen": "Abrir nodo en pestaña de pantalla completa.",
 			"vibeCode": "Abrir Vibe Code",

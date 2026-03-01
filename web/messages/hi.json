@@ -1117,6 +1117,10 @@
 		"ariaLabel": "खिसकाने के लिए ड्रैग करें"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "प्रवेश",
+			"exit": "निकास"
+		},
 		"tooltips": {
 			"fullscreen": "नोड को पूर्ण स्क्रीन टैब में खोलें।",
 			"vibeCode": "Vibe Code खोलें",

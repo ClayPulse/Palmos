@@ -1117,6 +1117,10 @@
 		"ariaLabel": "Faire glisser pour déplacer"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "entrée",
+			"exit": "sortie"
+		},
 		"tooltips": {
 			"fullscreen": "Ouvrir le nœud dans un onglet plein écran.",
 			"vibeCode": "Ouvrir Vibe Code",

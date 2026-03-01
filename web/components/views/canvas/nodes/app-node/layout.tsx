@@ -58,6 +58,7 @@ export default function CanvasNodeViewLayout({
 
   const [isShowingMenu, setIsShowingMenu] = useState(false);
   const [isShowingOwnedApps, setIsShowingOwnedApps] = useState(false);
+  const { getTranslations: t } = useTranslations();
 
   useEffect(() => {
     // Update node internals to ensure handles are positioned correctly
@@ -163,6 +164,22 @@ export default function CanvasNodeViewLayout({
             )}
           </div>
         </>
+      )}
+
+      {/* Entry / Exit floating labels */}
+      {node.data.isDefaultEntry && (
+        <div className="absolute top-0 left-0 z-50 -translate-y-1/2 translate-x-2 pointer-events-none">
+          <span className="bg-success text-success-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
+            {t("canvasNode.labels.entry")}
+          </span>
+        </div>
+      )}
+      {node.data.isDefaultExit && (
+        <div className="absolute top-0 right-0 z-50 -translate-y-1/2 -translate-x-2 pointer-events-none">
+          <span className="bg-danger text-danger-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
+            {t("canvasNode.labels.exit")}
+          </span>
+        </div>
       )}
 
       <NodeResizer

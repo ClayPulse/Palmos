@@ -1117,6 +1117,10 @@
     "ariaLabel": "Drag to move"
   },
   "canvasNode": {
+    "labels": {
+      "entry": "entry",
+      "exit": "exit"
+    },
     "tooltips": {
       "fullscreen": "Open node in fullscreen tab.",
       "vibeCode": "Open Vibe Code",
