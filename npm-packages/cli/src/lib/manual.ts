@@ -97,6 +97,20 @@ const upgrade = `\
 
 `;
 
+const skill = `\
+  skill           Manage skill actions for the current Pulse App.
+
+                  Subcommands:
+                    create <skill-name> --description "<description>"
+                      Generate a new skill action using AI and write it to
+                      src/skill/<skill-name>/action.ts.
+
+                    fix <action-name>
+                      Fix and apply valid JSDoc comments to an existing skill
+                      action at src/skill/<action-name>/action.ts using AI.
+
+`;
+
 export const commandsManual: Record<string, string> = {
 	help,
 	chat,
@@ -110,4 +124,5 @@ export const commandsManual: Record<string, string> = {
 	start,
 	clean,
 	upgrade,
+	skill,
 };

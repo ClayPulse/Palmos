@@ -30,6 +30,8 @@ class MFClientPlugin {
       let isFirstRun = true;
 
       // Before build starts
+
+      // When a file changes and triggers a new compilation
       compiler.hooks.watchRun.tap("ReloadMessagePlugin", () => {
         if (!isFirstRun) {
           console.log("[client] 🔄 reloading app...");

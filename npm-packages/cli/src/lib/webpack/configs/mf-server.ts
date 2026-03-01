@@ -10,7 +10,11 @@ import { globSync } from "glob";
 import path from "path";
 import { JSDoc, Node, Project, SyntaxKind } from "ts-morph";
 import wp, { Compiler, Configuration as WebpackConfig } from "webpack";
-import { discoverAppSkillActions, loadPulseConfig } from "./utils.js";
+import {
+  discoverAppSkillActions,
+  discoverServerFunctions,
+  loadPulseConfig,
+} from "./utils.js";
 
 const { NodeFederationPlugin } = mfNode;
 const { webpack } = wp;
@@ -28,44 +32,73 @@ class MFServerPlugin {
     if (compiler.options.mode === "development") {
       let isFirstRun = true;
 
+      compiler.hooks.environment.tap("WatchFileChangesPlugin", () => {
+        // Watch for file changes in the server-function directory to trigger server-function rebuilds
+        compiler.hooks.thisCompilation.tap(
+          "WatchServerFunctions",
+          (compilation) => {
+            compilation.contextDependencies.add(
+              path.resolve(this.projectDirName, "src/server-function"),
+            );
+          },
+        );
+
+        // Watch for file changes in the action directory to trigger action rebuilds
+        compiler.hooks.thisCompilation.tap("WatchActions", (compilation) => {
+          compilation.contextDependencies.add(
+            path.resolve(this.projectDirName, "src/skill"),
+          );
+        });
+      });
+
       // Before build starts
-      compiler.hooks.watchRun.tap(
-        "ReloadMessagePlugin",
-        async (compilation) => {
-          this.cleanServerDist();
+      compiler.hooks.beforeRun.tap("CleanDistPlugin", () => {
+        this.cleanServerDist();
+      });
 
-          if (!isFirstRun) {
-            console.log(`[Server] 🔄 Reloading app...`);
-            const isServerFunctionChange = compilation.modifiedFiles
-              ? Array.from(compilation.modifiedFiles).some((file) =>
-                  file.includes("src/server-function"),
-                )
-              : false;
+      // When a file changes and triggers a new compilation
+      compiler.hooks.watchRun.tap("ReloadMessagePlugin", async (compiler) => {
+        this.printChanges(compiler);
 
-            if (isServerFunctionChange) {
-              await this.compileServerFunctions(compiler);
-            }
+        if (!isFirstRun) {
+          console.log(`[Server] 🔄 Reloading app...`);
+          const isServerFunctionChange = compiler.modifiedFiles
+            ? Array.from(compiler.modifiedFiles).some((file) =>
+                file.includes("src/server-function"),
+              )
+            : false;
 
-            const isActionChange = compilation.modifiedFiles
-              ? Array.from(compilation.modifiedFiles).some((file) =>
-                  file.includes("src/action"),
-                )
-              : false;
-
-            if (isActionChange) {
-              console.log(
-                `[Server] Detected changes in actions. Recompiling...`,
-              );
-              this.compileAppActionSkills();
-            }
-          } else {
-            console.log(`[Server] 🔄 Building app...`);
+          if (isServerFunctionChange) {
             await this.compileServerFunctions(compiler);
-            this.compileAppActionSkills();
-            console.log(`[Server] ✅ Successfully built server.`);
           }
-        },
-      );
+
+          const isActionChange = compiler.modifiedFiles
+            ? Array.from(compiler.modifiedFiles).some((file) =>
+                file.includes("src/skill"),
+              )
+            : false;
+
+          if (isActionChange) {
+            console.log(`[Server] Detected changes in actions. Recompiling...`);
+            this.compileAppActionSkills();
+          }
+        } else {
+          console.log(`[Server] 🔄 Building app...`);
+          await this.compileServerFunctions(compiler);
+          this.compileAppActionSkills();
+          console.log(`[Server] ✅ Successfully built server.`);
+
+          const funcs = discoverServerFunctions();
+
+          console.log(`\n🛜 Server functions:
+${Object.entries(funcs)
+  .map(([name, file]) => {
+    return `  - ${name.slice(2)} (from ${file})`;
+  })
+  .join("\n")}
+`);
+        }
+      });
 
       // After build finishes
       compiler.hooks.done.tap("ReloadMessagePlugin", () => {
@@ -74,23 +107,6 @@ class MFServerPlugin {
         } else {
           console.log(`[Server] ✅ Reload finished.`);
         }
-      });
-
-      // Watch for file changes in the server-function directory to trigger server-function rebuilds
-      compiler.hooks.thisCompilation.tap(
-        "WatchServerFunctions",
-        (compilation) => {
-          compilation.contextDependencies.add(
-            path.resolve(this.projectDirName, "src/server-function"),
-          );
-        },
-      );
-
-      // Watch for file changes in the action directory to trigger action rebuilds
-      compiler.hooks.thisCompilation.tap("WatchActions", (compilation) => {
-        compilation.contextDependencies.add(
-          path.resolve(this.projectDirName, "src/action"),
-        );
       });
     } else {
       // Print build success/failed message
@@ -102,8 +118,8 @@ class MFServerPlugin {
             await this.compileServerFunctions(compiler);
             this.compileAppActionSkills();
           } catch (err) {
-            console.log(`[Server] ❌ Error during compilation:`, err);
-            return;
+            console.error(`[Server] ❌ Error during compilation:`, err);
+            process.exit(1);
           }
           console.log(`[Server] ✅ Successfully built server.`);
         }
@@ -162,36 +178,8 @@ class MFServerPlugin {
   }
 
   private makeNodeFederationPlugin() {
-    function discoverServerFunctions() {
-      // Get all .ts files under src/server-function and read use default exports as entry points
-      const files = globSync("./src/server-function/**/*.ts");
-      const entryPoints = files
-        .map((file) => file.replaceAll("\\", "/"))
-        .map((file) => {
-          return {
-            ["./" +
-            file.replace("src/server-function/", "").replace(/\.ts$/, "")]:
-              "./" + file,
-          };
-        })
-        .reduce((acc, curr) => {
-          return { ...acc, ...curr };
-        }, {});
-
-      return entryPoints;
-    }
-
     const funcs = discoverServerFunctions();
     const actions = discoverAppSkillActions();
-
-    console.log(`Discovered server functions:
-${Object.entries(funcs)
-  .map(([name, file]) => {
-    return `  - ${name.slice(2)} (from ${file})`;
-  })
-  .join("\n")}
-`);
-
     return new NodeFederationPlugin(
       {
         name: this.pulseConfig.id + "_server",
@@ -209,9 +197,9 @@ ${Object.entries(funcs)
   }
 
   /**
-   * Register default functions defined in src/action as exposed modules in Module Federation.
+   * Register default functions defined in src/skill as exposed modules in Module Federation.
    * This will:
-   * 	1. Search for all .ts files under src/action
+   * 	1. Search for all .ts files under src/skill
    *  2. Use ts-morph to get the default function information, including function name, parameters, and JSDoc comments
    *  3. Organize the functions' information into a list of Action
    * @param compiler
@@ -251,6 +239,20 @@ ${Object.entries(funcs)
         }
 
         const defaultExportJSDocs = funcDecl.getJsDocs();
+
+        // Validate that the function has a JSDoc description
+        const descriptionText = defaultExportJSDocs
+          .map((doc) => doc.getDescription().replace(/^\*+/gm, "").trim())
+          .join("\n")
+          .trim();
+
+        if (defaultExportJSDocs.length === 0 || !descriptionText) {
+          throw new Error(
+            `[Action Validation] Action "${funcName}" in ${file} is missing a JSDoc description. ` +
+              `Please add a JSDoc comment block with a description above the function.`,
+          );
+        }
+
         const description = defaultExportJSDocs
           .map((doc) => doc.getFullText())
           .join("\n");
@@ -283,22 +285,44 @@ ${Object.entries(funcs)
             });
           }
 
-          funcParam
-            .getType()
-            .getProperties()
-            .forEach((prop) => {
-              const name = prop.getName();
-              const inputTypeDef = typeDefs["input"] ?? {};
+          const paramProperties = funcParam.getType().getProperties();
+          const inputTypeDef = typeDefs["input"] ?? {};
 
-              const variable: TypedVariable = {
-                description: inputTypeDef[name]?.description ?? "",
-                type: this.getType(inputTypeDef[name]?.type ?? ""),
-                optional: prop.isOptional() ? true : undefined,
-                defaultValue: defaults.get(name),
-              };
+          if (paramProperties.length > 0 && !typeDefs["input"]) {
+            throw new Error(
+              `[Action Validation] Action "${funcName}" in ${file} has parameters but is missing an ` +
+                `"@typedef {Object} input" JSDoc block. Please document all parameters with ` +
+                `@typedef {Object} input and @property tags.`,
+            );
+          }
 
-              params[name] = variable;
-            });
+          paramProperties.forEach((prop) => {
+            const name = prop.getName();
+
+            if (!inputTypeDef[name]) {
+              throw new Error(
+                `[Action Validation] Action "${funcName}" in ${file}: parameter "${name}" is missing ` +
+                  `a @property entry in the "input" JSDoc typedef. Please add ` +
+                  `"@property {type} ${name} - description" to the JSDoc.`,
+              );
+            }
+
+            if (!inputTypeDef[name]?.description?.trim()) {
+              throw new Error(
+                `[Action Validation] Action "${funcName}" in ${file}: parameter "${name}" has an empty ` +
+                  `description in the JSDoc @property. Please provide a meaningful description.`,
+              );
+            }
+
+            const variable: TypedVariable = {
+              description: inputTypeDef[name]?.description ?? "",
+              type: this.getType(inputTypeDef[name]?.type ?? ""),
+              optional: prop.isOptional() ? true : undefined,
+              defaultValue: defaults.get(name),
+            };
+
+            params[name] = variable;
+          });
         }
 
         /* Extract return type from JSDoc */
@@ -311,21 +335,43 @@ ${Object.entries(funcs)
         }
 
         const returns: Record<string, TypedVariable> = {};
-        funcDecl
-          .getReturnType()
-          .getProperties()
-          .forEach((prop) => {
-            const name = prop.getName();
-            const outputTypeDef = typeDefs["output"] ?? {};
+        const returnProperties = funcDecl.getReturnType().getProperties();
+        const outputTypeDef = typeDefs["output"] ?? {};
 
-            const variable: TypedVariable = {
-              description: outputTypeDef[name]?.description ?? "",
-              type: this.getType(outputTypeDef[name]?.type ?? ""),
-              optional: prop.isOptional() ? true : undefined,
-              defaultValue: undefined,
-            };
-            returns[name] = variable;
-          });
+        if (returnProperties.length > 0 && !typeDefs["output"]) {
+          throw new Error(
+            `[Action Validation] Action "${funcName}" in ${file} returns properties but is missing an ` +
+              `"@typedef {Object} output" JSDoc block. Please document all return values with ` +
+              `@typedef {Object} output and @property tags.`,
+          );
+        }
+
+        returnProperties.forEach((prop) => {
+          const name = prop.getName();
+
+          if (!outputTypeDef[name]) {
+            throw new Error(
+              `[Action Validation] Action "${funcName}" in ${file}: return property "${name}" is missing ` +
+                `a @property entry in the "output" JSDoc typedef. Please add ` +
+                `"@property {type} ${name} - description" to the JSDoc.`,
+            );
+          }
+
+          if (!outputTypeDef[name]?.description?.trim()) {
+            throw new Error(
+              `[Action Validation] Action "${funcName}" in ${file}: return property "${name}" has an empty ` +
+                `description in the JSDoc @property. Please provide a meaningful description.`,
+            );
+          }
+
+          const variable: TypedVariable = {
+            description: outputTypeDef[name]?.description ?? "",
+            type: this.getType(outputTypeDef[name]?.type ?? ""),
+            optional: prop.isOptional() ? true : undefined,
+            defaultValue: undefined,
+          };
+          returns[name] = variable;
+        });
 
         actions.push({
           name: funcName,
@@ -337,11 +383,6 @@ ${Object.entries(funcs)
     });
 
     // You can now register `actions` in Module Federation or expose them as needed
-    console.log(
-      "Discovered skill actions:\n" +
-        actions.map((a) => "- " + a.name).join("\n"),
-    );
-
     // Register actions in pulse config for runtime access
     this.pulseConfig.actions = actions;
   }
@@ -403,6 +444,26 @@ ${Object.entries(funcs)
       `[Type Warning] Unrecognized type "${text}". Consider adding explicit types in your action's JSDoc comments for better type safety and documentation.`,
     );
     return text;
+  }
+
+  private printChanges(compiler: Compiler) {
+    const modified = compiler.modifiedFiles
+      ? Array.from(compiler.modifiedFiles)
+      : [];
+
+    const removed = compiler.removedFiles
+      ? Array.from(compiler.removedFiles)
+      : [];
+
+    const allChanges = [...modified, ...removed];
+
+    if (allChanges.length > 0) {
+      console.log(
+        `[Server] ✏️ Detected file changes:\n${allChanges
+          .map((file) => `  - ${file}`)
+          .join("\n")}`,
+      );
+    }
   }
 }
 

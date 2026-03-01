@@ -15,6 +15,7 @@ import Preview from './components/commands/preview.js';
 import Start from './components/commands/start.js';
 import Clean from './components/commands/clean.js';
 import Upgrade from './components/commands/upgrade.js';
+import Skill from './components/commands/skill.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
@@ -59,6 +60,8 @@ export default function App({cli}: {cli: Result<Flags>}) {
 				<Clean cli={cli} />
 			) : command === 'upgrade' ? (
 				<Upgrade cli={cli} />
+			) : command === 'skill' ? (
+				<Skill cli={cli} />
 			) : (
 				command !== undefined && (
 					<>

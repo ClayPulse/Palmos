@@ -1090,13 +1090,27 @@
 		"ariaLabel": "اسحب للتحريك"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "دخول",
+			"exit": "خروج"
+		},
 		"tooltips": {
 			"fullscreen": "افتح العقدة في علامة تبويب ملء الشاشة.",
 			"vibeCode": "افتح Vibe Code",
 			"ownedApps": "تبديل التطبيقات المملوكة",
 			"workflowConnectors": "تبديل موصلات سير العمل",
+			"api": "API",
+			"entry": "نقطة الدخول الافتراضية",
+			"exit": "نقطة الخروج الافتراضية",
+			"selectAction": "اختر إجراء",
 			"resize": "تغيير حجم العقدة",
 			"delete": "حذف العقدة"
+		},
+		"api": {
+			"entryLabel": "نقطة الدخول الافتراضية",
+			"entryDescription": "يستقبل سير العمل البيانات من طلبات HTTP إلى هذه العقدة",
+			"exitLabel": "نقطة الخروج الافتراضية",
+			"exitDescription": "يعيد سير العمل مخرجات هذه العقدة إلى استجابات HTTP"
 		}
 	}
 }

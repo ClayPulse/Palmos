@@ -137,6 +137,42 @@ if (isPreview) {
   /* Preview mode */
   app.use(express.static("dist/client"));
 
+  // Expose skill actions as REST API endpoints in dev and preview modes
+  const skillActions = pulseConfig?.actions || [];
+  const skillActionNames: string[] = skillActions.map((a: any) => a.name);
+
+  app.post("/skill/:actionName", async (req, res) => {
+    const { actionName } = req.params;
+
+    if (skillActionNames.length > 0 && !skillActionNames.includes(actionName)) {
+      res
+        .status(404)
+        .json({ error: `Skill action "${actionName}" not found.` });
+      return;
+    }
+
+    const dir = path.resolve(
+      "node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/load-remote.cjs",
+    );
+    const fileUrl = pathToFileURL(dir).href;
+    const { loadFunc } = await import(fileUrl);
+
+    try {
+      const action = await loadFunc(
+        `skill/${actionName}`,
+        pulseConfig.id,
+        "http://localhost:3030",
+        pulseConfig.version,
+      );
+      const result = await action(req.body);
+      res.json(result);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`❌ Error running skill action "${actionName}": ${message}`);
+      res.status(500).json({ error: message });
+    }
+  });
+
   app.listen(3030, "0.0.0.0");
 } else if (isDev) {
   /* Dev mode  */

@@ -436,12 +436,13 @@ export type Workflow = {
 export type WorkflowContent = {
   nodes: ReactFlowNode<AppNodeData>[];
   edges: ReactFlowEdge[];
-  defaultEntryPoint?: ReactFlowNode<AppNodeData>;
   snapshotStates?: { [key: string]: any };
 };
 
 export type AppNodeData = {
   config: AppViewConfig;
+  isDefaultEntry?: boolean;
+  isDefaultExit?: boolean;
   selectedAction: Action | undefined;
   isRunning: boolean;
   isShowingWorkflowConnector: boolean;

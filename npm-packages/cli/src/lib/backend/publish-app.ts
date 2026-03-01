@@ -1,4 +1,5 @@
 import {getToken} from '../token.js';
+import {getBackendUrl} from '../backend-url.js';
 import fs from 'fs';
 
 export async function publishApp(isStage: boolean) {
@@ -20,9 +21,7 @@ export async function publishApp(isStage: boolean) {
 
 	// Send the file to the server
 	const res = await fetch(
-		isStage
-			? 'https://localhost:8080/api/app/publish'
-			: 'https://pulse-editor.com/api/app/publish',
+		`${getBackendUrl(isStage)}/api/app/publish`,
 		{
 			method: 'POST',
 			headers: {

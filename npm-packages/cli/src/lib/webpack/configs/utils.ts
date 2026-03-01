@@ -99,6 +99,24 @@ export async function readConfigFile() {
   return JSON.parse(data);
 }
 
+export function discoverServerFunctions() {
+  // Get all .ts files under src/server-function and read use default exports as entry points
+  const files = globSync("./src/server-function/**/*.ts");
+  const entryPoints = files
+    .map((file) => file.replaceAll("\\", "/"))
+    .map((file) => {
+      return {
+        ["./" + file.replace("src/server-function/", "").replace(/\.ts$/, "")]:
+          "./" + file,
+      };
+    })
+    .reduce((acc, curr) => {
+      return { ...acc, ...curr };
+    }, {});
+
+  return entryPoints;
+}
+
 export function discoverAppSkillActions() {
   // Get all .ts files under src/skill and read use default exports as entry points
   const files = globSync("./src/skill/*/action.ts");

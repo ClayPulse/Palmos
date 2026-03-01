@@ -52,6 +52,10 @@ export const flags = defineFlags({
 	displayName: {
 		type: 'string',
 	},
+	description: {
+		type: 'string',
+		shortFlag: 'd',
+	},
 });
 
 export type Flags = typeof flags;

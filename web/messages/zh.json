@@ -1117,13 +1117,27 @@
 		"ariaLabel": "拖拽以移动"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "入口",
+			"exit": "出口"
+		},
 		"tooltips": {
 			"fullscreen": "在全屏标签页中打开节点。",
 			"vibeCode": "打开 Vibe Code",
 			"ownedApps": "切换拥有的应用",
 			"workflowConnectors": "切换工作流连接器",
+			"api": "API",
+			"entry": "默认入口点",
+			"exit": "默认出口点",
+			"selectAction": "选择操作",
 			"resize": "调整节点大小",
 			"delete": "删除节点"
+		},
+		"api": {
+			"entryLabel": "默认入口点",
+			"entryDescription": "工作流从 HTTP 请求中获取此节点的输入",
+			"exitLabel": "默认出口点",
+			"exitDescription": "工作流将此节点的输出通过 HTTP 响应返回"
 		}
 	}
 }

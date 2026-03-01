@@ -1117,13 +1117,27 @@
 		"ariaLabel": "Faire glisser pour déplacer"
 	},
 	"canvasNode": {
+		"labels": {
+			"entry": "entrée",
+			"exit": "sortie"
+		},
 		"tooltips": {
 			"fullscreen": "Ouvrir le nœud dans un onglet plein écran.",
 			"vibeCode": "Ouvrir Vibe Code",
 			"ownedApps": "Basculer les applications possédées",
 			"workflowConnectors": "Basculer les connecteurs de flux de travail",
+			"api": "API",
+			"entry": "Point d'entrée par défaut",
+			"exit": "Point de sortie par défaut",
+			"selectAction": "Sélectionner une action",
 			"resize": "Redimensionner le nœud",
 			"delete": "Supprimer le nœud"
+		},
+		"api": {
+			"entryLabel": "Point d'entrée par défaut",
+			"entryDescription": "Le workflow reçoit les entrées des requêtes HTTP vers ce nœud",
+			"exitLabel": "Point de sortie par défaut",
+			"exitDescription": "Le workflow retourne les sorties de ce nœud aux réponses HTTP"
 		}
 	}
 }

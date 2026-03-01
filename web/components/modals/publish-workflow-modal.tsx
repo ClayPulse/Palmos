@@ -55,7 +55,6 @@ export default function PublishWorkflowModal({
         content: {
           nodes: localNodes ?? [],
           edges: localEdges ?? [],
-          defaultEntryPoint: entryPoint,
           snapshotStates: snapshotStates,
         },
         version: version,
