@@ -1,7 +1,7 @@
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useCanvas } from "@/lib/hooks/use-canvas";
-import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
+import useWorkflowExecutor from "@/lib/hooks/use-workflow-executor";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { AppNodeData, AppViewConfig, CanvasViewConfig } from "@/lib/types";
@@ -51,7 +51,7 @@ export default function CanvasView({
     updateWorkflowNodes,
     exportWorkflow,
     saveAppsSnapshotStates,
-  } = useCanvasWorkflow(config.initialWorkflowContent);
+  } = useWorkflowExecutor(config.initialWorkflowContent);
   const viewport = useViewport();
   const { screenToFlowPosition } = useReactFlow();
   const { deleteAppViewInCanvasView } = useTabViewManager();
