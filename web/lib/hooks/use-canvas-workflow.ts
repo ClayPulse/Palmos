@@ -263,9 +263,6 @@ export default function useCanvasWorkflow(
       const { selectedAction } = node.data as AppNodeData;
       if (!selectedAction) return;
       updateWorkflowNodeData(node.id, { isRunning: true });
-      console.log(
-        `Running node ${node.id} with action \n${JSON.stringify(selectedAction)} \nand args \n${JSON.stringify(args)}`,
-      );
       const result = await runScopedAction(
         {
           action: selectedAction,

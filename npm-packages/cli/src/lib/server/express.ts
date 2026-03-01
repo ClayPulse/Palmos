@@ -168,7 +168,7 @@ if (isPreview) {
       res.json(result);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error(`❌ Error running skill action "${actionName}":`, message);
+      console.error(`❌ Error running skill action "${actionName}": ${message}`);
       res.status(500).json({ error: message });
     }
   });
