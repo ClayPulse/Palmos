@@ -144,7 +144,7 @@ export default function Login({ cli }: { cli: Result<Flags> }) {
     server.listen(0, "127.0.0.1", () => {
       const port = (server.address() as AddressInfo).port;
       const callbackUrl = `http://127.0.0.1:${port}`;
-      const url = `${baseUrl}/api/auth/signin?callbackUrl=${encodeURIComponent(callbackUrl)}`;
+      const url = `${baseUrl}/api/auth/cli?redirect=${encodeURIComponent(callbackUrl)}`;
       setAuthUrl(url);
       setFlowState("idle");
     });
