@@ -228,13 +228,28 @@ ${Object.entries(funcs)
           SyntaxKind.FunctionDeclaration,
         );
 
-        // Extract JSDoc comments
-        const funcName = funcDecl.getName() ?? "default";
+        // Get action name from path `src/skill/{actionName}/action.ts`
+        // Match `*/src/skill/{actionName}/action.ts` and extract {actionName}
+        const pattern = /src\/skill\/([^\/]+)\/action\.ts$/;
+        const match = file.replaceAll("\\", "/").match(pattern);
+        if (!match) {
+          console.warn(
+            `File path ${file} does not match pattern ${pattern}. Skipping...`,
+          );
+          return;
+        }
+        const actionName = match[1];
+        if (!actionName) {
+          console.warn(
+            `Could not extract action name from file path ${file}. Skipping...`,
+          );
+          return;
+        }
 
         // Throw an error if the funcName is duplicated with an existing action to prevent accidental overwriting
-        if (actions.some((action) => action.name === funcName)) {
+        if (actions.some((action) => action.name === actionName)) {
           throw new Error(
-            `Duplicate action name "${funcName}" detected in file ${file}. Please ensure all actions have unique names to avoid conflicts.`,
+            `Duplicate action name "${actionName}" detected in file ${file}. Please ensure all actions have unique names to avoid conflicts.`,
           );
         }
 
@@ -248,8 +263,9 @@ ${Object.entries(funcs)
 
         if (defaultExportJSDocs.length === 0 || !descriptionText) {
           throw new Error(
-            `[Action Validation] Action "${funcName}" in ${file} is missing a JSDoc description. ` +
-              `Please add a JSDoc comment block with a description above the function.`,
+            `[Action Validation] Action "${actionName}" in ${file} is missing a JSDoc description. ` +
+              `Please add a JSDoc comment block with a description above the function.` +
+              `Run \`pulse skill fix ${actionName}\` to automatically add a JSDoc template for this action.`,
           );
         }
 
@@ -290,9 +306,10 @@ ${Object.entries(funcs)
 
           if (paramProperties.length > 0 && !typeDefs["input"]) {
             throw new Error(
-              `[Action Validation] Action "${funcName}" in ${file} has parameters but is missing an ` +
+              `[Action Validation] Action "${actionName}" in ${file} has parameters but is missing an ` +
                 `"@typedef {Object} input" JSDoc block. Please document all parameters with ` +
-                `@typedef {Object} input and @property tags.`,
+                `@typedef {Object} input and @property tags.` +
+                `Run \`pulse skill fix ${actionName}\` to automatically add a JSDoc template for this action.`,
             );
           }
 
@@ -301,16 +318,18 @@ ${Object.entries(funcs)
 
             if (!inputTypeDef[name]) {
               throw new Error(
-                `[Action Validation] Action "${funcName}" in ${file}: parameter "${name}" is missing ` +
+                `[Action Validation] Action "${actionName}" in ${file}: parameter "${name}" is missing ` +
                   `a @property entry in the "input" JSDoc typedef. Please add ` +
-                  `"@property {type} ${name} - description" to the JSDoc.`,
+                  `"@property {type} ${name} - description" to the JSDoc.` +
+                  `Run \`pulse skill fix ${actionName}\` to automatically add a JSDoc template for this action.`,
               );
             }
 
             if (!inputTypeDef[name]?.description?.trim()) {
               throw new Error(
-                `[Action Validation] Action "${funcName}" in ${file}: parameter "${name}" has an empty ` +
-                  `description in the JSDoc @property. Please provide a meaningful description.`,
+                `[Action Validation] Action "${actionName}" in ${file}: parameter "${name}" has an empty ` +
+                  `description in the JSDoc @property. Please provide a meaningful description.` +
+                  `Run \`pulse skill fix ${actionName}\` to automatically add a JSDoc template for this action.`,
               );
             }
 
@@ -326,41 +345,71 @@ ${Object.entries(funcs)
         }
 
         /* Extract return type from JSDoc */
+        const rawReturnType = funcDecl.getReturnType();
+        const isPromiseLikeReturn = this.isPromiseLikeType(rawReturnType);
+        const returnType = this.unwrapPromiseLikeType(rawReturnType);
+
         // Check if the return type is an object
-        if (!funcDecl.getReturnType().isObject()) {
+        if (!returnType.isObject()) {
           console.warn(
-            `[Action Registration] Function ${funcName}'s return type should be an object. Skipping...`,
+            `[Action Registration] Function ${actionName}'s return type should be an object. Skipping...`,
           );
           return;
         }
 
         const returns: Record<string, TypedVariable> = {};
-        const returnProperties = funcDecl.getReturnType().getProperties();
+        const returnProperties = returnType.getProperties();
         const outputTypeDef = typeDefs["output"] ?? {};
+        const hasOutputTypeDef = !!typeDefs["output"];
 
-        if (returnProperties.length > 0 && !typeDefs["output"]) {
+        if (
+          returnProperties.length > 0 &&
+          !hasOutputTypeDef &&
+          !isPromiseLikeReturn
+        ) {
           throw new Error(
-            `[Action Validation] Action "${funcName}" in ${file} returns properties but is missing an ` +
-              `"@typedef {Object} output" JSDoc block. Please document all return values with ` +
-              `@typedef {Object} output and @property tags.`,
+            `[Action Validation] Action "${actionName}" in ${file} returns properties but is missing an ` +
+              `"@typedef {Output}" JSDoc block. Please document all return values with ` +
+              `@typedef {Output} and @property tags.` +
+              `Run \`pulse skill fix ${actionName}\` to automatically add a JSDoc template for this action.`,
+          );
+        }
+
+        if (returnProperties.length > 0 && !hasOutputTypeDef && isPromiseLikeReturn) {
+          console.warn(
+            `[Action Validation] Action "${actionName}" in ${file} is missing an "@typedef {Object} output" JSDoc block. ` +
+              `Falling back to TypeScript-inferred return metadata because the action returns a Promise.`,
           );
         }
 
         returnProperties.forEach((prop) => {
           const name = prop.getName();
 
+          if (!hasOutputTypeDef) {
+            const variable: TypedVariable = {
+              description: "",
+              type: this.getType(prop.getTypeAtLocation(funcDecl).getText()),
+              optional: prop.isOptional() ? true : undefined,
+              defaultValue: undefined,
+            };
+            returns[name] = variable;
+            return;
+          }
+
           if (!outputTypeDef[name]) {
             throw new Error(
-              `[Action Validation] Action "${funcName}" in ${file}: return property "${name}" is missing ` +
+              `[Action Validation] Action "${actionName}" in ${file}: return property "${name}" is missing ` +
                 `a @property entry in the "output" JSDoc typedef. Please add ` +
-                `"@property {type} ${name} - description" to the JSDoc.`,
+                `"@property {type} ${name} - description" to the JSDoc.` +
+                `Run \`pulse skill fix ${actionName}\` to automatically add a JSDoc template for this action.`,
             );
           }
 
           if (!outputTypeDef[name]?.description?.trim()) {
             throw new Error(
-              `[Action Validation] Action "${funcName}" in ${file}: return property "${name}" has an empty ` +
-                `description in the JSDoc @property. Please provide a meaningful description.`,
+              `[Action Validation] Action "${actionName}" in ${file}: return property "${name}" has an empty ` +
+                `description in the JSDoc @property. Please provide a meaningful description.` +
+                `Run \`pulse skill fix ${actionName}\` to automatically add a JSDoc template for this action.`,
             );
           }
 
@@ -374,7 +423,7 @@ ${Object.entries(funcs)
         });
 
         actions.push({
-          name: funcName,
+          name: actionName,
           description,
           parameters: params,
           returns,
@@ -414,7 +463,7 @@ ${Object.entries(funcs)
         > = {};
         let propertyMatches;
         while ((propertyMatches = propertyRegex.exec(text)) !== null) {
-          const propName = propertyMatches[2];
+          const propName = this.normalizeJSDocPropertyName(propertyMatches[2]);
           const propType = propertyMatches[1];
           const propDescription = propertyMatches[3] || "";
           if (propName && propType) {
@@ -430,6 +479,34 @@ ${Object.entries(funcs)
     });
 
     return typeDefs;
+  }
+
+  private normalizeJSDocPropertyName(name: string | undefined) {
+    if (!name) return "";
+
+    return name
+      .trim()
+      .replace(/^\[/, "")
+      .replace(/\]$/, "")
+      .split("=")[0]
+      ?.trim();
+  }
+
+  private isPromiseLikeType(type: import("ts-morph").Type) {
+    const symbolName = type.getSymbol()?.getName();
+    return symbolName === "Promise" || symbolName === "PromiseLike";
+  }
+
+  private unwrapPromiseLikeType(type: import("ts-morph").Type) {
+    const symbolName = type.getSymbol()?.getName();
+    if (
+      (symbolName === "Promise" || symbolName === "PromiseLike") &&
+      type.getTypeArguments().length > 0
+    ) {
+      return type.getTypeArguments()[0] ?? type;
+    }
+
+    return type;
   }
 
   private getType(text: string): TypedVariableType {
