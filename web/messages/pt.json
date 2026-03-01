@@ -1122,8 +1122,18 @@
 			"vibeCode": "Abrir Vibe Code",
 			"ownedApps": "Alternar aplicativos próprios",
 			"workflowConnectors": "Alternar conectores de fluxo de trabalho",
+			"api": "API",
+			"entry": "Ponto de entrada padrão",
+			"exit": "Ponto de saída padrão",
+			"selectAction": "Selecionar ação",
 			"resize": "Redimensionar nó",
 			"delete": "Excluir nó"
+		},
+		"api": {
+			"entryLabel": "Ponto de entrada padrão",
+			"entryDescription": "O fluxo de trabalho recebe entradas de requisições HTTP para este nó",
+			"exitLabel": "Ponto de saída padrão",
+			"exitDescription": "O fluxo de trabalho retorna saídas deste nó nas respostas HTTP"
 		}
 	}
 }

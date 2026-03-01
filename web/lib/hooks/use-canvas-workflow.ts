@@ -30,21 +30,29 @@ export default function useCanvasWorkflow(
     ReactFlowNode<AppNodeData> | undefined
   >(undefined);
 
+  const [exitPoint, setExitPoint] = useState<
+    ReactFlowNode<AppNodeData> | undefined
+  >(undefined);
+
   const [localNodes, setLocalNodes] = useNodesState(
     initialWorkflowContent?.nodes ?? [],
   );
   const [localEdges, setLocalEdges] = useEdgesState(
     initialWorkflowContent?.edges ?? [],
   );
-  const [defaultEntryPoint, setDefaultEntryPoint] = useState<
-    ReactFlowNode<AppNodeData> | undefined
-  >(initialWorkflowContent?.defaultEntryPoint);
 
   const [isRestored, setIsRestored] = useState(false);
 
   const debouncedGetEntryPoint = useDebouncedCallback(() => {
-    const entry = localNodes.find((node) => node.selected) ?? defaultEntryPoint;
+    const entry =
+      localNodes.find((node) => node.selected) ??
+      localNodes.find((node) => node.data.isDefaultEntry);
     setEntryPoint(entry);
+  }, 200);
+
+  const debouncedGetExitPoint = useDebouncedCallback(() => {
+    const exit = localNodes.find((node) => node.data.isDefaultExit);
+    setExitPoint(exit);
   }, 200);
 
   const debounceSetSelectedViews = useDebouncedCallback(() => {
@@ -113,7 +121,6 @@ export default function useCanvasWorkflow(
           {
             nodes: localNodes,
             edges: localEdges,
-            defaultEntryPoint: defaultEntryPoint,
             snapshotStates: await saveAppsSnapshotStates(),
           } as WorkflowContent,
           null,
@@ -130,11 +137,12 @@ export default function useCanvasWorkflow(
     a.download = "workflow.json";
     a.click();
     URL.revokeObjectURL(url);
-  }, [localNodes, localEdges, defaultEntryPoint]);
+  }, [localNodes, localEdges, entryPoint]);
 
   // Update entry points
   useEffect(() => {
     debouncedGetEntryPoint();
+    debouncedGetExitPoint();
     debounceSetSelectedViews();
   }, [localNodes]);
 
@@ -401,14 +409,17 @@ export default function useCanvasWorkflow(
     }
   }
 
+  // TODO: Implement pause functionality by keeping track of running nodes and preventing new nodes from starting until resumed
   async function pauseWorkflow() {
     setIsPaused(true);
   }
 
+  // TODO: Implement resume and reset functionality
   async function resumeWorkflow() {
     setIsPaused(false);
   }
 
+  // TODO: Implement reset functionality by clearing any running state and allowing the workflow to be started again from the entry point
   async function resetWorkflow() {
     setIsPaused(false);
 

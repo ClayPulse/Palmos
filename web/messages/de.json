@@ -1095,8 +1095,18 @@
 			"vibeCode": "Vibe Code öffnen",
 			"ownedApps": "Eigene Apps umschalten",
 			"workflowConnectors": "Workflow-Konnektoren umschalten",
+			"api": "API",
+			"entry": "Standard-Einstiegspunkt",
+			"exit": "Standard-Ausgangspunkt",
+			"selectAction": "Aktion auswählen",
 			"resize": "Knoten in der Größe ändern",
 			"delete": "Knoten löschen"
+		},
+		"api": {
+			"entryLabel": "Standard-Einstiegspunkt",
+			"entryDescription": "Workflow empfängt Eingaben über HTTP-Anfragen an diesen Knoten",
+			"exitLabel": "Standard-Ausgangspunkt",
+			"exitDescription": "Workflow gibt Ausgaben dieses Knotens über HTTP-Antworten zurück"
 		}
 	}
 }

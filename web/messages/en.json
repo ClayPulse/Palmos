@@ -1122,8 +1122,18 @@
       "vibeCode": "Open Vibe Code",
       "ownedApps": "Toggle owned apps",
       "workflowConnectors": "Toggle workflow connectors",
+      "api": "API",
+      "entry": "Default Entry Point",
+      "exit": "Default Exit Point",
+      "selectAction": "Select Action",
       "resize": "Resize node",
       "delete": "Delete node"
+    },
+    "api": {
+      "entryLabel": "Default Entry Point",
+      "entryDescription": "Workflow takes input from HTTP requests to this node",
+      "exitLabel": "Default Exit Point",
+      "exitDescription": "Workflow returns outputs of this node to HTTP responses"
     }
   }
 }

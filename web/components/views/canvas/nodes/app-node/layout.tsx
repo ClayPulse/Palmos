@@ -1,8 +1,9 @@
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import BaseAppView from "@/components/views/base/base-app-view";
-import { useVibeCode } from "@/lib/hooks/use-vibe-code";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import { useVibeCode } from "@/lib/hooks/use-vibe-code";
 import { AppNodeData, EditorContextType } from "@/lib/types";
 import { useDroppable } from "@dnd-kit/core";
 import {
@@ -18,7 +19,6 @@ import {
 } from "@heroui/react";
 import { Action, TypedVariable } from "@pulse-editor/shared-utils";
 import {
-  NodeResizeControl,
   NodeResizer,
   Position,
   Node as ReactFlowNode,
@@ -29,7 +29,6 @@ import {
 import clsx from "clsx";
 import { useContext, useEffect, useState } from "react";
 import NodeHandle from "./node-handle";
-import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 
 export default function CanvasNodeViewLayout({
   viewId,
@@ -115,7 +114,8 @@ export default function CanvasNodeViewLayout({
                 isShowingOwnedApps={isShowingOwnedApps}
                 setIsShowingOwnedApps={setIsShowingOwnedApps}
                 isFullScreen={isFullScreen}
-                appId={node.data.config.app}
+                nodeData={node.data}
+                setNodeData={(data) => updateNodeData(viewId, data)}
               />
             </PopoverContent>
           </Popover>
@@ -242,7 +242,7 @@ export default function CanvasNodeViewLayout({
                   />
                 </div>
               </div>
-            )
+            ),
           )}
         </div>
       </div>
@@ -260,7 +260,8 @@ function CanvasNodeControl({
   isShowingOwnedApps,
   setIsShowingOwnedApps,
   isFullScreen,
-  appId,
+  nodeData,
+  setNodeData,
 }: {
   actions: Action[];
   selectedAction: Action | undefined;
@@ -270,11 +271,12 @@ function CanvasNodeControl({
   setIsShowingWorkflowConnector: (showing: boolean) => Promise<void>;
   isShowingOwnedApps: boolean;
   setIsShowingOwnedApps: (showing: boolean) => void;
-    isFullScreen: boolean;
-    appId: string;
+  isFullScreen: boolean;
+  nodeData: AppNodeData;
+  setNodeData: (data: Partial<AppNodeData>) => void;
 }) {
   const { openVibeCode } = useVibeCode();
-  const { getInstalledExtensionApp} = useExtensionAppManager();
+  const { getInstalledExtensionApp } = useExtensionAppManager();
   const { getTranslations: t } = useTranslations();
 
   const [actionError, setActionError] = useState<{ [key: string]: string }>({});
@@ -305,9 +307,8 @@ function CanvasNodeControl({
           variant="light"
           size="sm"
           className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
-          data-active={isShowingOwnedApps ? "true" : "false"}
           onPress={async () => {
-            const nodeApp = await getInstalledExtensionApp(appId);
+            const nodeApp = await getInstalledExtensionApp(nodeData.config.app);
             if (!nodeApp) {
               addToast({
                 title: "Failed to open Vibe Code",
@@ -322,8 +323,6 @@ function CanvasNodeControl({
               appId: nodeApp.config.id,
               version: nodeApp.config.version,
             });
-
-
           }}
         >
           <Icon name="auto_awesome" variant="outlined" />
@@ -345,107 +344,95 @@ function CanvasNodeControl({
         </Button>
       </Tooltip>
 
-      <Form
-        className="flex flex-row items-center gap-x-1"
-        validationErrors={actionError}
+      <Tooltip
+        content={t("canvasNode.tooltips.workflowConnectors")}
+        placement="top"
       >
-        <Tooltip content={t("canvasNode.tooltips.workflowConnectors")} placement="top">
-          <Button
-            isIconOnly
-            variant="light"
-            size="sm"
-            onPress={() => {
-              if (!selectedAction) {
-                addToast({
-                  title: "No action selected",
-                  description: "Please select an action to toggle connectors.",
-                  color: "warning",
-                });
-                setActionError({ "app-action-select": " " });
-              } else {
-                setIsShowingWorkflowConnector(!isShowingWorkflowConnector);
-              }
-            }}
-            className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
-            data-active={isShowingWorkflowConnector ? "true" : "false"}
-          >
-            <Icon name="swap_calls" />
-          </Button>
-        </Tooltip>
-
-        <Select
-          name="app-action-select"
-          items={actions}
-          className="w-32"
+        <Button
+          isIconOnly
+          variant="light"
           size="sm"
-          classNames={{
-            popoverContent: "w-fit",
-            mainWrapper: "h-8",
-            trigger: "py-0.5 min-h-8",
-          }}
-          label="Node Action"
-          selectedKeys={selectedAction ? [selectedAction.name] : []}
-          onSelectionChange={(keys) => {
-            const action = actions.find((a) => a.name === Array.from(keys)[0]);
-            setSelectedAction(action);
-            if (action) {
-              setIsShowingWorkflowConnector(true);
+          onPress={() => {
+            if (!selectedAction) {
+              addToast({
+                title: "No action selected",
+                description: "Please select an action to toggle connectors.",
+                color: "warning",
+              });
+              setActionError({ "app-action-select": " " });
             } else {
-              setIsShowingWorkflowConnector(false);
+              setIsShowingWorkflowConnector(!isShowingWorkflowConnector);
             }
           }}
+          className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
+          data-active={isShowingWorkflowConnector ? "true" : "false"}
         >
-          {(item) => <SelectItem key={item.name}>{item.name}</SelectItem>}
-        </Select>
-      </Form>
+          <Icon name="swap_calls" />
+        </Button>
+      </Tooltip>
 
-      <Tooltip content={t("canvasNode.tooltips.resize")} placement="top">
-        <div className="p-3">
-          <div className="relative">
-            {/* Popover is interfering with the drag area... */}
-            <NodeResizeControl
-              style={{
-                background: "transparent",
-                border: "none",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-              }}
-              minWidth={40}
-              minHeight={40}
-              // Disable resizing events on mobile
-              // because apparently it breaks the touch resizing
-              // onResizeStart={isMobile() ? undefined : () => setIsResizing(true)}
-              // onResizeEnd={isMobile() ? undefined : () => setIsResizing(false)}
-              autoScale={false}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                strokeWidth="2"
-                className="stroke-default-foreground"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{
-                  position: "absolute",
-                  right: "50%",
-                  bottom: "50%",
-                  transform: "translate(50%, 50%)",
-                }}
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <polyline points="16 20 20 20 20 16" />
-                <line x1="14" y1="14" x2="20" y2="20" />
-                <polyline points="8 4 4 4 4 8" />
-                <line x1="4" y1="4" x2="10" y2="10" />
-              </svg>
-            </NodeResizeControl>
-          </div>
-        </div>
+      <Tooltip content={t("canvasNode.tooltips.entry")} placement="top">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          className="data-[active=true]:bg-default data-[active=true]:text-success"
+          data-active={nodeData.isDefaultEntry ? "true" : "false"}
+          onPress={() =>
+            setNodeData({ isDefaultEntry: !nodeData.isDefaultEntry })
+          }
+        >
+          <Icon name="login" variant="outlined" />
+        </Button>
+      </Tooltip>
+
+      <Tooltip content={t("canvasNode.tooltips.exit")} placement="top">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          className="data-[active=true]:bg-default data-[active=true]:text-danger"
+          data-active={nodeData.isDefaultExit ? "true" : "false"}
+          onPress={() =>
+            setNodeData({ isDefaultExit: !nodeData.isDefaultExit })
+          }
+        >
+          <Icon name="logout" variant="outlined" />
+        </Button>
+      </Tooltip>
+
+      <Tooltip content={t("canvasNode.tooltips.selectAction")} placement="top">
+        <Form
+          className="flex flex-row items-center gap-x-1"
+          validationErrors={actionError}
+        >
+          <Select
+            name="app-action-select"
+            items={actions}
+            className="w-32"
+            size="sm"
+            classNames={{
+              popoverContent: "w-fit",
+              mainWrapper: "h-8",
+              trigger: "py-0.5 min-h-8",
+            }}
+            label="Node Action"
+            selectedKeys={selectedAction ? [selectedAction.name] : []}
+            onSelectionChange={(keys) => {
+              const action = actions.find(
+                (a) => a.name === Array.from(keys)[0],
+              );
+              setSelectedAction(action);
+              if (action) {
+                setIsShowingWorkflowConnector(true);
+              } else {
+                setIsShowingWorkflowConnector(false);
+              }
+            }}
+          >
+            {(item) => <SelectItem key={item.name}>{item.name}</SelectItem>}
+          </Select>
+        </Form>
       </Tooltip>
 
       <Tooltip content={t("canvasNode.tooltips.delete")} placement="top">

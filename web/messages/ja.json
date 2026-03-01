@@ -1122,8 +1122,18 @@
 			"vibeCode": "Vibe Codeを開く",
 			"ownedApps": "所有アプリを切り替え",
 			"workflowConnectors": "ワークフローコネクタを切り替え",
+			"api": "API",
+			"entry": "デフォルト入口",
+			"exit": "デフォルト出口",
+			"selectAction": "アクションを選択",
 			"resize": "ノードのサイズを変更",
 			"delete": "ノードを削除"
+		},
+		"api": {
+			"entryLabel": "デフォルト入口",
+			"entryDescription": "ワークフローがこのノードへのHTTPリクエストから入力を受け取ります",
+			"exitLabel": "デフォルト出口",
+			"exitDescription": "ワークフローがこのノードの出力をHTTPレスポンスで返します"
 		}
 	}
 }

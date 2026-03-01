@@ -1122,8 +1122,18 @@
       "vibeCode": "Vibe Code 열기",
       "ownedApps": "소유 앱 전환",
       "workflowConnectors": "워크플로우 커넥터 전환",
+      "api": "API",
+      "entry": "기본 진입점",
+      "exit": "기본 출구점",
+      "selectAction": "액션 선택",
       "resize": "노드 크기 조정",
       "delete": "노드 삭제"
+    },
+    "api": {
+      "entryLabel": "기본 진입점",
+      "entryDescription": "워크플로우가 이 노드로의 HTTP 요청에서 입력을 받습니다",
+      "exitLabel": "기본 출구점",
+      "exitDescription": "워크플로우가 이 노드의 출력을 HTTP 응답으로 반환합니다"
     }
   }
 }
