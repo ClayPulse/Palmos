@@ -13,7 +13,7 @@ import { useDebouncedCallback } from "use-debounce";
 import { AppNodeData, WorkflowContent } from "../types";
 import useActionExecutor from "./use-action-executor";
 
-export default function useWorkflowExecutor(
+export default function useCanvasWorkflow(
   initialWorkflowContent?: WorkflowContent,
 ) {
   const editorContext = useContext(EditorContext);
