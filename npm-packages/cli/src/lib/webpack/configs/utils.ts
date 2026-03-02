@@ -158,8 +158,25 @@ export function discoverAppSkillActions() {
         return null;
       }
 
+      // Match `*/src/skill/{actionName}/action.ts` and extract {actionName}
+      const pattern = /src\/skill\/([^\/]+)\/action\.ts$/;
+      const match = file.replaceAll("\\", "/").match(pattern);
+      if (!match) {
+        console.warn(
+          `File path ${file} does not match pattern ${pattern}. Skipping...`,
+        );
+        return null;
+      }
+      const actionName = match[1];
+      if (!actionName) {
+        console.warn(
+          `Could not extract action name from file path ${file}. Skipping...`,
+        );
+        return null;
+      }
+
       return {
-        ["./skill/" + funcDecl.getName()]: "./" + file,
+        ["./skill/" + actionName]: "./" + file,
       };
     })
     .reduce((acc, curr) => {

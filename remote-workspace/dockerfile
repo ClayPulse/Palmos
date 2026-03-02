@@ -21,7 +21,7 @@ COPY . /pulse-editor/server
 # RUN git clone https://github.com/shellishack/supergateway /pulse-editor/server/src/lib/supergateway
 
 # install pulse-cli
-RUN npm install -g @pulse-editor/cli@beta
+RUN npm install -g @pulse-editor/cli@latest
 
 # install dependencies
 RUN npm install
