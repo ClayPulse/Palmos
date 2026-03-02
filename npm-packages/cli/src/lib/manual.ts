@@ -12,6 +12,18 @@ const chat = `\
 
 `;
 
+const code = `\
+  code            Generate a new Pulse App from a prompt using AI.
+
+                  Flags:
+                    --name, -n [app-name]
+                      Optional app name used for generation.
+                    --continue, -c
+                      Continue building on an existing app. Reads the app ID
+                      and version from the package.json in the current directory.
+
+`;
+
 const login = `\
   login           Login to the Pulse Editor Platform.
 
@@ -114,6 +126,7 @@ const skill = `\
 export const commandsManual: Record<string, string> = {
 	help,
 	chat,
+  code,
 	login,
 	logout,
 	publish,

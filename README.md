@@ -25,11 +25,23 @@ Pulse Editor is a modular, cross-platform, AI-powered productivity platform with
 
 ## Vibe Coding -- AI-assisted coding on any device
 
-Watch the demo video on YouTube (click to play):
-
-[![Video title](https://img.youtube.com/vi/Hs0-nQRSjmk/0.jpg)](https://www.youtube.com/watch?v=Hs0-nQRSjmk)
+Watch the demo video on YouTube:
 
 https://www.youtube.com/watch?v=Hs0-nQRSjmk
+
+## Generate full-stack dynamic apps with skills available for frontend, backend, and agents
+
+You can generate a full-stack app that can run as a modular standalone app; or as a functional node in canvas workflow editor; or as backend automation service; or as an agent skill for OpenClaw and Claude Code.
+
+```
+npx -g @pulse-editor/cli@latest
+pulse code
+```
+
+To continue to iterate on your current app, run
+```
+pulse code --continue
+```
 
 ## Cross-platform full-stack apps collaboration workflow
 
