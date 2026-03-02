@@ -1,7 +1,14 @@
 import { captureWorkflowCanvas } from "@/lib/html2canvas/print-canvas";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppNodeData, Workflow } from "@/lib/types";
-import { addToast, Button, closeToast, Input } from "@heroui/react";
+import {
+  addToast,
+  Button,
+  closeToast,
+  Input,
+  Select,
+  SelectItem,
+} from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useState } from "react";
@@ -14,7 +21,6 @@ export default function PublishWorkflowModal({
   workflowCanvas,
   localNodes,
   localEdges,
-  entryPoint,
   saveAppsSnapshotStates,
 }: {
   isOpen: boolean;
@@ -32,6 +38,14 @@ export default function PublishWorkflowModal({
 
   const [name, setName] = useState("");
   const [version, setVersion] = useState("");
+  const [visibility, setVisibility] = useState<Workflow["visibility"]>(
+    "public",
+  );
+  const visibilityOptions: Workflow["visibility"][] = [
+    "public",
+    "unlisted",
+    "private",
+  ];
 
   async function publishWorkflow() {
     try {
@@ -58,7 +72,7 @@ export default function PublishWorkflowModal({
           snapshotStates: snapshotStates,
         },
         version: version,
-        visibility: "public",
+        visibility,
         requireWorkspace: localNodes
           .map((node) => node.data.config.app)
           .some((appId) =>
@@ -130,6 +144,19 @@ export default function PublishWorkflowModal({
           label={t("publishWorkflowModal.workflowVersion")}
           placeholder={t("publishWorkflowModal.workflowVersionPlaceholder")}
         />
+
+        <Select
+          label={t("sharingModal.visibility")}
+          placeholder={t("sharingModal.visibilityPlaceholder")}
+          selectedKeys={[visibility]}
+          onChange={(e) =>
+            setVisibility(e.target.value as Workflow["visibility"])
+          }
+        >
+          {visibilityOptions.map((option) => (
+            <SelectItem key={option}>{option}</SelectItem>
+          ))}
+        </Select>
 
         <Button color="primary" onPress={handlePress}>
           {t("common.publish")}
