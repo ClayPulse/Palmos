@@ -5,7 +5,7 @@ import TextInput from "ink-text-input";
 import JSZip from "jszip";
 import { Result } from "meow";
 import path from "path";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getBackendUrl } from "../../lib/backend-url.js";
 import { Flags } from "../../lib/cli-flags.js";
 import { checkToken, getToken } from "../../lib/token.js";
@@ -131,6 +131,8 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGenerated, setIsGenerated] = useState(false);
   const [error, setError] = useState<string | undefined>(undefined);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const generationStartRef = useRef<number | undefined>(undefined);
 
   const [statusLines, setStatusLines] = useState<
     Array<{ text: string; messageId?: number; toolTitle?: string }>
@@ -199,6 +201,8 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
       setIsDownloading(false);
       setDownloadedPath(undefined);
       setDownloadError(undefined);
+      generationStartRef.current = Date.now();
+      setElapsedSeconds(0);
       setIsGenerating(true);
 
       const controller = new AbortController();
@@ -422,6 +426,11 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
         }
       } finally {
         clearTimeout(timeoutId);
+        if (generationStartRef.current !== undefined) {
+          setElapsedSeconds(
+            Math.floor((Date.now() - generationStartRef.current) / 1000),
+          );
+        }
         setIsGenerating(false);
       }
     }
@@ -430,6 +439,25 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
       runCodeGeneration(prompt, appName);
     }
   }, [prompt, appName, cli.flags.stage, isAuthenticated, token, continueData]);
+
+  useEffect(() => {
+    if (!isGenerating) return;
+    const interval = setInterval(() => {
+      if (generationStartRef.current !== undefined) {
+        setElapsedSeconds(
+          Math.floor((Date.now() - generationStartRef.current) / 1000),
+        );
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [isGenerating]);
+
+  function formatElapsed(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`;
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}m ${String(s).padStart(2, "0")}s`;
+  }
 
   function getLiveLines(
     messageId: number,
@@ -509,7 +537,8 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
           {isGenerating && (
             <Box>
               <Spinner type="dots" />
-              <Text> Generating app...</Text>
+              <Text> Generating app... </Text>
+              <Text color="gray">[{formatElapsed(elapsedSeconds)}]</Text>
             </Box>
           )}
           {statusLines.map((item, index) => {
@@ -551,7 +580,9 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
           ))}
           {error && <Text color="redBright">❌ {error}</Text>}
           {isGenerated && !error && (
-            <Text color="greenBright">✅ Code generation completed.</Text>
+            <Text color="greenBright">
+              ✅ Code generation completed in {formatElapsed(elapsedSeconds)}.
+            </Text>
           )}
           {artifact?.publishedAppLink && (
             <Text color="greenBright">
