@@ -31,7 +31,7 @@
       "@langchain/core": "^1.1.27",
       "@langchain/openai": "^1.2.9",
       "@module-federation/runtime": "2.0.1",
-      "@pulse-editor/shared-utils": "^0.1.1-beta.73",
+      "@pulse-editor/shared-utils": "^0.1.1-beta.80",
       "@ricky0123/vad-web": "0.0.30",
       "@toon-format/toon": "^2.1.0",
       "@types/lodash": "^4.17.23",
