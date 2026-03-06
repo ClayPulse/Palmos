@@ -62,6 +62,7 @@ export default function useActionEffect(
           actionName: params.actionName,
         },
       );
+
       setRemoteOrigin(origin);
     }
 
@@ -119,8 +120,8 @@ export default function useActionEffect(
 
     async function updateAction() {
       if (!remoteOrigin) {
-        console.error("Remote origin is not set yet");
-        throw new Error("Remote origin is not set yet");
+        console.error("Remote origin is not set");
+        return;
       }
 
       // Register or update action.
@@ -132,12 +133,17 @@ export default function useActionEffect(
       );
 
       // Setup handler
-      const func = await loadAppAction(
+      const func = await loadAppActionFromMF(
         actionInfo.name,
         appId,
         remoteOrigin,
         version,
       );
+
+      if (!func) {
+        console.error(`Failed to load action handler for ${actionInfo.name}`);
+        throw new Error(`Failed to load action handler for ${actionInfo.name}`);
+      }
 
       setActionHandler(() => func);
 
@@ -152,7 +158,7 @@ export default function useActionEffect(
       imc?.updateReceiverHandlerMap(getReceiverHandlerMap(func));
     }
 
-    if (isExtReady && remoteOrigin) {
+    if (isExtReady) {
       updateAction();
     }
   }, [
@@ -257,7 +263,7 @@ export default function useActionEffect(
     return receiverHandlerMap;
   }
 
-  async function loadAppAction(
+  async function loadAppActionFromMF(
     func: string,
     appId: string,
     remoteOrigin: string,

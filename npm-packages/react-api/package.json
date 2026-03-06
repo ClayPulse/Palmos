@@ -1,6 +1,6 @@
 {
   "name": "@pulse-editor/react-api",
-  "version": "0.1.1-beta.80",
+  "version": "0.1.1-beta.82",
   "main": "dist/main.js",
   "files": [
     "dist"
@@ -13,7 +13,8 @@
   "scripts": {
     "build": "npm run clean && rollup -c",
     "lint": "eslint .",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "pack": "npm run build && npm pack --pack-destination dist"
   },
   "devDependencies": {
     "@babel/core": "^7.29.0",
@@ -37,7 +38,7 @@
     "typescript-eslint": "^8.56.0"
   },
   "peerDependencies": {
-    "@pulse-editor/shared-utils": "0.1.1-beta.80",
+    "@pulse-editor/shared-utils": "0.1.1-beta.82",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
