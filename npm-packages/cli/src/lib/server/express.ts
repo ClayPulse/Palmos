@@ -135,8 +135,15 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
 
 if (isPreview) {
   /* Preview mode */
-  app.get("/pulse.config.json", (_req, res) => {
-    res.sendFile(path.resolve("dist/pulse.config.json"));
+  app.get("/pulse.config.json", async (_req, res) => {
+    try {
+      const data = await import("fs/promises").then((fs) =>
+        fs.readFile("dist/pulse.config.json", "utf-8"),
+      );
+      res.type("json").send(data);
+    } catch {
+      res.status(404).json({ error: "pulse.config.json not found" });
+    }
   });
 
   app.use(express.static("dist/client"));
