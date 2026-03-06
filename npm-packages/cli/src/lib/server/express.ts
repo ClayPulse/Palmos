@@ -135,6 +135,10 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
 
 if (isPreview) {
   /* Preview mode */
+  app.get("/pulse.config.json", (_req, res) => {
+    res.sendFile(path.resolve("dist/pulse.config.json"));
+  });
+
   app.use(express.static("dist/client"));
 
   // Expose skill actions as REST API endpoints in dev and preview modes
@@ -168,7 +172,9 @@ if (isPreview) {
       res.json(result);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error(`❌ Error running skill action "${actionName}": ${message}`);
+      console.error(
+        `❌ Error running skill action "${actionName}": ${message}`,
+      );
       res.status(500).json({ error: message });
     }
   });
