@@ -70,7 +70,45 @@ const root = ReactDOM.createRoot(
 	document.getElementById('root') as HTMLElement,
 );
 
+const PREVIEW_MODE_ERRORS = [
+	"Current window's ID is not defined.",
+];
+
+function isPreviewModeError(error: unknown) {
+	const message = error instanceof Error ? error.message : String(error);
+	return PREVIEW_MODE_ERRORS.some((msg) => message.includes(msg));
+}
+
+function showPreviewModeWarning() {
+	const existing = document.getElementById('__pulse_preview_warning__');
+	if (existing) return;
+
+	const banner = document.createElement('div');
+	banner.id = '__pulse_preview_warning__';
+	Object.assign(banner.style, {
+		position: 'fixed',
+		bottom: '1rem',
+		right: '1rem',
+		background: '#2a2000',
+		border: '1px solid #665500',
+		borderRadius: '8px',
+		padding: '0.75rem 1rem',
+		fontFamily: 'monospace',
+		fontSize: '0.8rem',
+		color: '#ffcc00',
+		maxWidth: '320px',
+		zIndex: '9999',
+		lineHeight: '1.4',
+	});
+	banner.textContent = '⚠ Preview mode: some Pulse Editor platform APIs are not available and will not work.';
+	document.body.appendChild(banner);
+}
+
 function showError(error: unknown) {
+	if (isPreviewModeError(error)) {
+		showPreviewModeWarning();
+		return;
+	}
 	root.render(<ErrorPage error={error} />);
 }
 
