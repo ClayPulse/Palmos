@@ -137,6 +137,14 @@ export async function makeMFClientConfig(
 
   const actions = discoverAppSkillActions();
 
+  console.log(`\n🧩 App skill actions:
+${Object.entries(actions)
+  .map(([name, file]) => {
+    return `  - ${name.slice(2)} (from ${file})`;
+  })
+  .join("\n")}
+`);
+
   return {
     mode: mode,
     name: "client",

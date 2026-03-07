@@ -119,14 +119,6 @@ export function discoverServerFunctions() {
       return { ...acc, ...curr };
     }, {});
 
-  console.log(`\n🛜 Server functions:
-${Object.entries(entryPoints)
-  .map(([name, file]) => {
-    return `  - ${name.slice(2)} (from ${file})`;
-  })
-  .join("\n")}
-`);
-
   return entryPoints;
 }
 
@@ -196,14 +188,6 @@ export function discoverAppSkillActions() {
     .reduce((acc, curr) => {
       return { ...acc, ...curr };
     }, {});
-
-  console.log(`\n🛜 App skill actions:
-${Object.entries(entryPoints)
-  .map(([name, file]) => {
-    return `  - ${name.slice(2)} (from ${file})`;
-  })
-  .join("\n")}
-`);
 
   return entryPoints;
 }
