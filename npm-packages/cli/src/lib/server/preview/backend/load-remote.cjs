@@ -1,6 +1,47 @@
 const {createInstance} = require('@module-federation/runtime');
 
+const FETCH_PATCH_STATE_KEY = '__pulseFetchPatchState__';
+
+function isAbsoluteUrl(url) {
+	return /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(url);
+}
+
+function ensureFetchPatched(origin) {
+	if (typeof globalThis.fetch !== 'function') {
+		return;
+	}
+
+	if (!globalThis[FETCH_PATCH_STATE_KEY]) {
+		const originalFetch = globalThis.fetch.bind(globalThis);
+		const state = {
+			baseOrigin: origin,
+			originalFetch,
+		};
+
+		globalThis.fetch = (input, init) => {
+			const currentBaseOrigin = state.baseOrigin;
+
+			if (
+				typeof input === 'string' &&
+				currentBaseOrigin &&
+				!isAbsoluteUrl(input)
+			) {
+				return state.originalFetch(new URL(input, currentBaseOrigin).toString(), init);
+			}
+
+			return state.originalFetch(input, init);
+		};
+
+		globalThis[FETCH_PATCH_STATE_KEY] = state;
+		return;
+	}
+
+	globalThis[FETCH_PATCH_STATE_KEY].baseOrigin = origin;
+}
+
 async function importRemoteModule(func, appId, origin, version) {
+	ensureFetchPatched(origin);
+
 	const instance = createInstance({
 		name: 'server_function_runner',
 		remotes: [
