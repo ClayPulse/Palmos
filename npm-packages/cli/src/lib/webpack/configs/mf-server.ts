@@ -89,14 +89,6 @@ class MFServerPlugin {
           console.log(`[Server] ✅ Successfully built server.`);
 
           const funcs = discoverServerFunctions();
-
-          console.log(`\n🛜 Server functions:
-${Object.entries(funcs)
-  .map(([name, file]) => {
-    return `  - ${name.slice(2)} (from ${file})`;
-  })
-  .join("\n")}
-`);
         }
       });
 
