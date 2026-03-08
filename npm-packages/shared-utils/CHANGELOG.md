@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.83
+
+### Patch Changes
+
+- Add local backup for action effects
+
 ## 0.1.1-beta.82
 
 ### Patch Changes

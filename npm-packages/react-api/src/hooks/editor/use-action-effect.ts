@@ -119,11 +119,6 @@ export default function useActionEffect(
     }
 
     async function updateAction() {
-      if (!remoteOrigin) {
-        console.error("Remote origin is not set");
-        return;
-      }
-
       // Register or update action.
       // This will only pass signature info to the editor.
       // The actual handler is stored in this hook,
@@ -132,17 +127,41 @@ export default function useActionEffect(
         params.actionName,
       );
 
-      // Setup handler
-      const func = await loadAppActionFromMF(
-        actionInfo.name,
-        appId,
-        remoteOrigin,
-        version,
-      );
+      let func: (args: any) => Promise<any>;
 
-      if (!func) {
-        console.error(`Failed to load action handler for ${actionInfo.name}`);
-        throw new Error(`Failed to load action handler for ${actionInfo.name}`);
+      if (remoteOrigin) {
+        // Production: load handler from Module Federation remote
+        const loadedFunc = await loadAppActionFromMF(
+          actionInfo.name,
+          appId,
+          remoteOrigin,
+          version,
+        );
+
+        if (!loadedFunc) {
+          console.error(
+            `Failed to load action handler for ${actionInfo.name}`,
+          );
+          throw new Error(
+            `Failed to load action handler for ${actionInfo.name}`,
+          );
+        }
+
+        func = loadedFunc;
+      } else {
+        // Preview mode: no MF server, call the skill endpoint via fetch
+        const origin = window.location.origin;
+        func = async (args: any) => {
+          const response = await fetch(
+            `${origin}/skill/${actionInfo.name}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(args),
+            },
+          );
+          return response.json();
+        };
       }
 
       setActionHandler(() => func);
