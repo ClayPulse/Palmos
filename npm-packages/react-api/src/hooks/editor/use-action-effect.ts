@@ -62,6 +62,7 @@ export default function useActionEffect(
           actionName: params.actionName,
         },
       );
+
       setRemoteOrigin(origin);
     }
 
@@ -118,11 +119,6 @@ export default function useActionEffect(
     }
 
     async function updateAction() {
-      if (!remoteOrigin) {
-        console.error("Remote origin is not set yet");
-        throw new Error("Remote origin is not set yet");
-      }
-
       // Register or update action.
       // This will only pass signature info to the editor.
       // The actual handler is stored in this hook,
@@ -131,13 +127,42 @@ export default function useActionEffect(
         params.actionName,
       );
 
-      // Setup handler
-      const func = await loadAppAction(
-        actionInfo.name,
-        appId,
-        remoteOrigin,
-        version,
-      );
+      let func: (args: any) => Promise<any>;
+
+      if (remoteOrigin) {
+        // Production: load handler from Module Federation remote
+        const loadedFunc = await loadAppActionFromMF(
+          actionInfo.name,
+          appId,
+          remoteOrigin,
+          version,
+        );
+
+        if (!loadedFunc) {
+          console.error(
+            `Failed to load action handler for ${actionInfo.name}`,
+          );
+          throw new Error(
+            `Failed to load action handler for ${actionInfo.name}`,
+          );
+        }
+
+        func = loadedFunc;
+      } else {
+        // Preview mode: no MF server, call the skill endpoint via fetch
+        const origin = window.location.origin;
+        func = async (args: any) => {
+          const response = await fetch(
+            `${origin}/skill/${actionInfo.name}`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(args),
+            },
+          );
+          return response.json();
+        };
+      }
 
       setActionHandler(() => func);
 
@@ -152,7 +177,7 @@ export default function useActionEffect(
       imc?.updateReceiverHandlerMap(getReceiverHandlerMap(func));
     }
 
-    if (isExtReady && remoteOrigin) {
+    if (isExtReady) {
       updateAction();
     }
   }, [
@@ -257,7 +282,7 @@ export default function useActionEffect(
     return receiverHandlerMap;
   }
 
-  async function loadAppAction(
+  async function loadAppActionFromMF(
     func: string,
     appId: string,
     remoteOrigin: string,

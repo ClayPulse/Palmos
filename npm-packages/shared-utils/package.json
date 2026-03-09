@@ -1,6 +1,6 @@
 {
     "name": "@pulse-editor/shared-utils",
-    "version": "0.1.1-beta.80",
+    "version": "0.1.1-beta.83",
     "main": "dist/main.js",
     "files": [
         "dist"
@@ -13,7 +13,8 @@
     "scripts": {
         "build": "npm run clean && rollup -c",
         "lint": "eslint .",
-        "clean": "rimraf dist"
+        "clean": "rimraf dist",
+        "pack": "npm run build && npm pack --pack-destination dist"
     },
     "devDependencies": {
         "@babel/core": "^7.29.0",

@@ -67,12 +67,6 @@ class MFClientPlugin {
         } else {
           console.log("[client] ✅ Reload finished.");
         }
-
-        // Write pulse config to dist
-        fs.writeFileSync(
-          path.resolve(this.projectDirName, "dist/pulse.config.json"),
-          JSON.stringify(this.pulseConfig, null, 2),
-        );
       });
     } else {
       // Print build success/failed message
@@ -81,12 +75,6 @@ class MFClientPlugin {
           console.log(`[client] ❌ Failed to build client.`);
         } else {
           console.log(`[client] ✅ Successfully built client.`);
-
-          // Write pulse config to dist
-          fs.writeFileSync(
-            path.resolve(this.projectDirName, "dist/pulse.config.json"),
-            JSON.stringify(this.pulseConfig, null, 2),
-          );
         }
       });
     }
@@ -148,6 +136,14 @@ export async function makeMFClientConfig(
   const mainComponent = "./src/main.tsx";
 
   const actions = discoverAppSkillActions();
+
+  console.log(`\n🧩 App skill actions:
+${Object.entries(actions)
+  .map(([name, file]) => {
+    return `  - ${name.slice(2)} (from ${file})`;
+  })
+  .join("\n")}
+`);
 
   return {
     mode: mode,

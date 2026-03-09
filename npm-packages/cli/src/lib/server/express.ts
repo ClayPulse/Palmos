@@ -35,6 +35,9 @@ if (isDev || isPreview) {
   });
 }
 
+const skillActions = pulseConfig?.actions || [];
+const skillActionNames: string[] = skillActions.map((a: any) => a.name);
+
 const app = express();
 app.use(cors());
 // Inject the client-side livereload script into HTML responses
@@ -96,10 +99,10 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
   if (price) {
     // Make func name and price bold in console
     console.log(
-      `🏃 Running function \x1b[1m${func}\x1b[0m, credits consumed: \x1b[1m${price}\x1b[0m`,
+      `🏃 Running server function \x1b[1m${func}\x1b[0m, credits consumed: \x1b[1m${price}\x1b[0m`,
     );
   } else {
-    console.log(`🏃 Running function \x1b[1m${func}\x1b[0m.`);
+    console.log(`🏃 Running server function \x1b[1m${func}\x1b[0m.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -110,37 +113,52 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
     pulseConfig.version,
   );
 
-  const response = await loadedFunc(request);
+  const funcResult = await loadedFunc(request);
 
   const streamPipeline = promisify(pipeline);
 
-  if (response) {
+  if (funcResult) {
     // 1️⃣ Set status code
-    res.status(response.status);
+    res.status(funcResult.status);
+
+    console.log(
+      `✅ Server function "${func}" completed with status ${funcResult.status}.`,
+    );
 
     // 2️⃣ Copy headers
-    response.headers.forEach((value: any, key: any) => {
+    funcResult.headers.forEach((value: any, key: any) => {
       res.setHeader(key, value);
     });
 
     // 3️⃣ Pipe body if present
-    if (response.body) {
-      const nodeStream = Readable.fromWeb(response.body);
+    if (funcResult.body) {
+      const nodeStream = Readable.fromWeb(funcResult.body);
       await streamPipeline(nodeStream, res);
     } else {
       res.end();
     }
+  } else {
+    console.log(`✅ Server function "${func}" completed with no content.`);
+    res.status(204).end();
   }
 });
 
 if (isPreview) {
   /* Preview mode */
+  app.get("/pulse.config.json", async (_req, res) => {
+    try {
+      const data = await import("fs/promises").then((fs) =>
+        fs.readFile("dist/pulse.config.json", "utf-8"),
+      );
+      res.type("json").send(data);
+    } catch {
+      res.status(404).json({ error: "pulse.config.json not found" });
+    }
+  });
+
   app.use(express.static("dist/client"));
 
   // Expose skill actions as REST API endpoints in dev and preview modes
-  const skillActions = pulseConfig?.actions || [];
-  const skillActionNames: string[] = skillActions.map((a: any) => a.name);
-
   app.post("/skill/:actionName", async (req, res) => {
     const { actionName } = req.params;
 
@@ -168,7 +186,9 @@ if (isPreview) {
       res.json(result);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : String(err);
-      console.error(`❌ Error running skill action "${actionName}": ${message}`);
+      console.error(
+        `❌ Error running skill action "${actionName}": ${message}`,
+      );
       res.status(500).json({ error: message });
     }
   });
@@ -177,6 +197,41 @@ if (isPreview) {
 } else if (isDev) {
   /* Dev mode  */
   app.use(`/${pulseConfig.id}/${pulseConfig.version}`, express.static("dist"));
+
+  // Expose skill actions as REST API endpoints in dev and preview modes
+  app.post(`/skill/:actionName`, async (req, res) => {
+    const { actionName } = req.params;
+
+    if (skillActionNames.length > 0 && !skillActionNames.includes(actionName)) {
+      res
+        .status(404)
+        .json({ error: `Skill action "${actionName}" not found.` });
+      return;
+    }
+
+    const dir = path.resolve(
+      "node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/load-remote.cjs",
+    );
+    const fileUrl = pathToFileURL(dir).href;
+    const { loadFunc } = await import(fileUrl);
+
+    try {
+      const action = await loadFunc(
+        `skill/${actionName}`,
+        pulseConfig.id,
+        "http://localhost:3030",
+        pulseConfig.version,
+      );
+      const result = await action(req.body);
+      res.json(result);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(
+        `❌ Error running skill action "${actionName}": ${message}`,
+      );
+      res.status(500).json({ error: message });
+    }
+  });
 
   app.listen(3030, "0.0.0.0");
 } else {

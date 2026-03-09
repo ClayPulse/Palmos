@@ -1,5 +1,29 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.83
+
+### Patch Changes
+
+- Add local backup for action effects
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.83
+
+## 0.1.1-beta.82
+
+### Patch Changes
+
+- Fix preview server missing skill action
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.82
+
+## 0.1.1-beta.81
+
+### Patch Changes
+
+- Add local action when opened in non-editor env
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.81
+
 ## 0.1.1-beta.80
 
 ### Patch Changes
