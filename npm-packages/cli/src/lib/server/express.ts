@@ -99,10 +99,10 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
   if (price) {
     // Make func name and price bold in console
     console.log(
-      `🏃 Running function \x1b[1m${func}\x1b[0m, credits consumed: \x1b[1m${price}\x1b[0m`,
+      `🏃 Running server function \x1b[1m${func}\x1b[0m, credits consumed: \x1b[1m${price}\x1b[0m`,
     );
   } else {
-    console.log(`🏃 Running function \x1b[1m${func}\x1b[0m.`);
+    console.log(`🏃 Running server function \x1b[1m${func}\x1b[0m.`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -113,26 +113,33 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
     pulseConfig.version,
   );
 
-  const response = await loadedFunc(request);
+  const funcResult = await loadedFunc(request);
 
   const streamPipeline = promisify(pipeline);
 
-  if (response) {
+  if (funcResult) {
     // 1️⃣ Set status code
-    res.status(response.status);
+    res.status(funcResult.status);
+
+    console.log(
+      `✅ Server function "${func}" completed with status ${funcResult.status}.`,
+    );
 
     // 2️⃣ Copy headers
-    response.headers.forEach((value: any, key: any) => {
+    funcResult.headers.forEach((value: any, key: any) => {
       res.setHeader(key, value);
     });
 
     // 3️⃣ Pipe body if present
-    if (response.body) {
-      const nodeStream = Readable.fromWeb(response.body);
+    if (funcResult.body) {
+      const nodeStream = Readable.fromWeb(funcResult.body);
       await streamPipeline(nodeStream, res);
     } else {
       res.end();
     }
+  } else {
+    console.log(`✅ Server function "${func}" completed with no content.`);
+    res.status(204).end();
   }
 });
 
@@ -190,7 +197,7 @@ if (isPreview) {
 } else if (isDev) {
   /* Dev mode  */
   app.use(`/${pulseConfig.id}/${pulseConfig.version}`, express.static("dist"));
-  
+
   // Expose skill actions as REST API endpoints in dev and preview modes
   app.post(`/skill/:actionName`, async (req, res) => {
     const { actionName } = req.params;
