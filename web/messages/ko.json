@@ -1129,6 +1129,7 @@
       "api": "API",
       "entry": "기본 진입점",
       "exit": "기본 출구점",
+      "appSettings": "앱 설정",
       "selectAction": "액션 선택",
       "resize": "노드 크기 조정",
       "delete": "노드 삭제"

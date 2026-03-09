@@ -1129,6 +1129,7 @@
 			"api": "API",
 			"entry": "默认入口点",
 			"exit": "默认出口点",
+			"appSettings": "应用设置",
 			"selectAction": "选择操作",
 			"resize": "调整节点大小",
 			"delete": "删除节点"

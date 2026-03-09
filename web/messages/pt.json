@@ -1129,6 +1129,7 @@
 			"api": "API",
 			"entry": "Ponto de entrada padrão",
 			"exit": "Ponto de saída padrão",
+			"appSettings": "Configurações do aplicativo",
 			"selectAction": "Selecionar ação",
 			"resize": "Redimensionar nó",
 			"delete": "Excluir nó"

@@ -395,7 +395,7 @@ function CanvasNodeControl({
         </Button>
       </Tooltip>
 
-      <Tooltip content={"App Settings"} placement="top">
+      <Tooltip content={t("canvasNode.tooltips.appSettings")} placement="top">
         <Button
           isIconOnly
           variant="light"

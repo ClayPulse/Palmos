@@ -1102,6 +1102,7 @@
 			"api": "API",
 			"entry": "Punto de entrada predeterminado",
 			"exit": "Punto de salida predeterminado",
+			"appSettings": "Configuración de la aplicación",
 			"selectAction": "Seleccionar acción",
 			"resize": "Redimensionar nodo",
 			"delete": "Eliminar nodo"

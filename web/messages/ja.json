@@ -1129,6 +1129,7 @@
 			"api": "API",
 			"entry": "デフォルト入口",
 			"exit": "デフォルト出口",
+			"appSettings": "アプリ設定",
 			"selectAction": "アクションを選択",
 			"resize": "ノードのサイズを変更",
 			"delete": "ノードを削除"
