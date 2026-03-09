@@ -5,6 +5,8 @@ import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { AppNodeData, AppViewConfig, CanvasViewConfig } from "@/lib/types";
+import { createAppViewId } from "@/lib/views/view-helpers";
+import { addToast } from "@heroui/react";
 import { useDroppable } from "@dnd-kit/core";
 import {
   addEdge,
@@ -58,6 +60,10 @@ export default function CanvasView({
   const { getViewCenterCoordForNode } = useCanvas();
 
   const containerRef = useRef<HTMLDivElement>(null);
+  const copiedNodesRef = useRef<ReactFlowNode<AppNodeData>[]>([]);
+  // Maps viewId -> flow position for nodes being pasted, so promoteToWorkflowNode
+  // can place them at the correct location instead of defaulting to canvas center.
+  const pastePositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
 
   // this is called when new node is added below using updateWorkflowNodes
   const onNodesChange = useCallback(
@@ -108,10 +114,9 @@ export default function CanvasView({
         );
 
         // Delete nodes
-        const deleteNodePromises = nodes.map(async (node) => {
+        for (const node of nodes) {
           await deleteAppViewInCanvasView(node.data.config.viewId);
-        });
-        await Promise.all(deleteNodePromises);
+        }
       }
 
       if (edges.length > 0) {
@@ -122,7 +127,7 @@ export default function CanvasView({
         );
       }
     },
-    [updateWorkflowEdges, updateWorkflowNodes],
+    [updateWorkflowEdges, updateWorkflowNodes, deleteAppViewInCanvasView],
   );
 
   /* Node creator functions */
@@ -236,37 +241,163 @@ export default function CanvasView({
     console.log("CanvasView active droppable:", active);
   }, [active]);
 
+  // Copy-paste handler for canvas nodes (Ctrl+C / Ctrl+V)
+  useEffect(() => {
+    if (!isActive) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === "INPUT" ||
+        target.tagName === "TEXTAREA" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (e.ctrlKey && e.key === "c") {
+        const selected = localNodes.filter((n) => n.selected);
+        if (selected.length === 0) return;
+        copiedNodesRef.current = selected;
+        const names = selected.map((n) => n.data.config.app).join(", ");
+        addToast({
+          title: `Copied ${selected.length} node${selected.length > 1 ? "s" : ""}`,
+          description: `Copied: ${names}`,
+          color: "success",
+        });
+      } else if (e.ctrlKey && e.key === "v") {
+        const copied = copiedNodesRef.current;
+        if (!copied || copied.length === 0) return;
+
+        // Compute bounding-box center of the copied selection (flow coordinates)
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        for (const node of copied) {
+          const w = node.width ?? node.data.config.initialWidth ?? 640;
+          const h = node.height ?? node.data.config.initialHeight ?? 360;
+          minX = Math.min(minX, node.position.x);
+          minY = Math.min(minY, node.position.y);
+          maxX = Math.max(maxX, node.position.x + w);
+          maxY = Math.max(maxY, node.position.y + h);
+        }
+        const selCenterX = (minX + maxX) / 2;
+        const selCenterY = (minY + maxY) / 2;
+
+        // Compute current canvas center in flow coordinates
+        const containerEl = containerRef.current;
+        const canvasCenter = containerEl
+          ? screenToFlowPosition({
+              x: containerEl.getBoundingClientRect().left + containerEl.offsetWidth / 2,
+              y: containerEl.getBoundingClientRect().top + containerEl.offsetHeight / 2,
+            })
+          : { x: selCenterX, y: selCenterY };
+
+        const dx = canvasCenter.x - selCenterX;
+        const dy = canvasCenter.y - selCenterY;
+
+        const pasteItems = copied.map((node) => {
+          const newViewId = createAppViewId(node.data.config.app);
+          const newAppConfig: AppViewConfig = {
+            ...node.data.config,
+            viewId: newViewId,
+          };
+          const pastePosition = {
+            x: node.position.x + dx,
+            y: node.position.y + dy,
+          };
+          // Register position so promoteToWorkflowNode uses it if it fires
+          // before localNodes has been updated with the pasted node.
+          pastePositionsRef.current.set(newViewId, pastePosition);
+          const newNode: ReactFlowNode<AppNodeData> = {
+            ...node,
+            id: newViewId,
+            selected: false,
+            position: pastePosition,
+            data: {
+              ...node.data,
+              config: newAppConfig,
+            },
+          };
+          return { newNode, newAppConfig };
+        });
+
+        // Insert nodes at correct positions before the config-sync effect can
+        // strip them (nodes not in config.appConfigs get removed by that effect).
+        updateWorkflowNodes((oldNodes) => [
+          ...oldNodes,
+          ...pasteItems.map((p) => p.newNode),
+        ]);
+
+        // Register new app configs in the canvas config so the cleanup effect
+        // does not remove the freshly-pasted nodes on the next config change.
+        editorContext?.setEditorStates((prev) => {
+          const currentTab = prev.tabViews[prev.tabIndex];
+          const newCanvasConfig: CanvasViewConfig = {
+            ...(currentTab.config as CanvasViewConfig),
+            appConfigs: [
+              ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
+              ...pasteItems.map((p) => p.newAppConfig),
+            ],
+          };
+          const newViews = [...prev.tabViews];
+          newViews[prev.tabIndex] = {
+            ...currentTab,
+            config: newCanvasConfig,
+          };
+          return { ...prev, tabViews: newViews };
+        });
+
+        const count = pasteItems.length;
+        addToast({
+          title: `Pasted ${count} node${count > 1 ? "s" : ""} successfully`,
+          description: `${count} node${count > 1 ? "s" : ""} added to canvas.`,
+          color: "success",
+        });
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isActive, localNodes, updateWorkflowNodes, screenToFlowPosition]);
+
   // Promote nodes to workflow nodes,
   // or remove workflow nodes that are no longer in the config
   useEffect(() => {
     function promoteToWorkflowNode(newApps: AppViewConfig[]) {
       const newNodes: ReactFlowNode<AppNodeData>[] =
         newApps?.map((appConfig) => {
-          const viewCenter = getViewCenterCoordForNode(
-            appConfig.initialWidth ?? 640,
-            appConfig.initialHeight ?? 360,
-            viewport.zoom,
+          // Priority: 1) pasted position, 2) saved workflow position, 3) canvas center
+          const pastePosition = pastePositionsRef.current.get(appConfig.viewId);
+          pastePositionsRef.current.delete(appConfig.viewId);
+          
+          const savedNode = config.initialWorkflowContent?.nodes.find(
+            (n) => n.id === appConfig.viewId,
           );
+          const position =
+            pastePosition ??
+            savedNode?.position ??
+            getViewCenterCoordForNode(
+              appConfig.initialWidth ?? 640,
+              appConfig.initialHeight ?? 360,
+              viewport.zoom,
+            );
 
           const newAppNodeData: AppNodeData = {
             config: appConfig,
             selectedAction: undefined,
             isRunning: false,
             isShowingWorkflowConnector:
-              config.initialWorkflowContent?.nodes.find(
-                (n) => n.id === appConfig.viewId,
-              )?.data.isShowingWorkflowConnector ?? false,
+              savedNode?.data.isShowingWorkflowConnector ?? false,
             ownedAppViews: {}, // Initially no owned apps
             isFullscreen: appConfig.initialIsFullscreen ?? false,
           };
 
           return {
             id: appConfig.viewId,
-            position: viewCenter,
+            position,
             data: newAppNodeData,
             type: "appNode",
-            height: appConfig.initialHeight ?? 360,
-            width: appConfig.initialWidth ?? 640,
+            height: savedNode?.height ?? appConfig.initialHeight ?? 360,
+            width: savedNode?.width ?? appConfig.initialWidth ?? 640,
           };
         }) ?? [];
 

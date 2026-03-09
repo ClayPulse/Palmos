@@ -572,17 +572,17 @@ export function useTabViewManager() {
       throw new Error("Current tab is not a canvas");
     }
 
-    const newCanvasConfig: CanvasViewConfig = {
-      ...currentTab.config,
-      appConfigs: (currentTab.config as CanvasViewConfig).appConfigs?.filter(
-        (config) => config.viewId !== viewId,
-      ),
-    };
-
     editorContext.setEditorStates((prev) => {
+      const tab = prev.tabViews[prev.tabIndex];
+      const newCanvasConfig: CanvasViewConfig = {
+        ...(tab.config as CanvasViewConfig),
+        appConfigs: (tab.config as CanvasViewConfig).appConfigs?.filter(
+          (config) => config.viewId !== viewId,
+        ),
+      };
       const newViews = [...prev.tabViews];
       newViews[prev.tabIndex] = {
-        ...currentTab,
+        ...tab,
         config: newCanvasConfig,
       };
       return {
