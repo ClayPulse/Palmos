@@ -2,7 +2,9 @@ import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { Workflow } from "@/lib/types";
 import useSWR from "swr";
 
-export function useWorkflowManager(category: "All" | "Published by Me") {
+export function useMarketplaceWorkflows(
+  category: "All" | "Published by Me",
+) {
   const { data: marketplaceWorkflows, isLoading } = useSWR<Workflow[]>(
     category === "All" || category === "Published by Me"
       ? `/api/workflow/list${category === "Published by Me" ? "?published=true" : ""}`

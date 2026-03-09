@@ -3,7 +3,7 @@ import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
 import { useCallback, useContext } from "react";
 import toast from "react-hot-toast";
 import { compare } from "semver";
-import useSWR from "swr";
+import { useMarketplaceApps } from "./marketplace/use-marketplace-apps";
 import {
   getDefaultRemoteOrigin,
   getRemoteBaseURL,
@@ -22,53 +22,12 @@ export function useExtensionAppManager(fetchCategory?: string) {
     editorContext?.persistSettings?.extensions ?? [];
 
   const {
-    data: marketplaceExtensions,
+    marketplaceExtensions,
     isLoading: isLoadingMarketplaceExtensions,
-  } = useSWR<ExtensionApp[]>(
-    fetchCategory === "All" || fetchCategory === "Published by Me"
-      ? `/api/app/list${fetchCategory === "Published by Me" ? "?published=true" : ""}`
-      : null,
-    async (url: string) => {
-      const res = await fetchAPI(url);
-      const body = await res.json();
-
-      const fetchedExts: AppMetaData[] = body;
-      try {
-        const extensions: ExtensionApp[] = await Promise.all(
-          fetchedExts
-            .filter((extMeta) => extMeta.appConfig)
-            .map(async (extMeta) => {
-              // If backend does not provide mfVersion, try to load it from the manifest
-              if (!extMeta.mfVersion) {
-                console.warn(
-                  `Server does not provide mfVersion for extension ${extMeta.name}. Trying to load from manifest...`,
-                );
-              }
-
-              const origin = getDefaultRemoteOrigin();
-
-              const mfVersion =
-                extMeta.mfVersion ??
-                (await getRemoteMFVersion(
-                  extMeta.name,
-                  extMeta.version,
-                  origin,
-                ));
-
-              return {
-                config: extMeta.appConfig!,
-                isEnabled: true,
-                remoteOrigin: origin,
-                mfVersion: mfVersion,
-              };
-            }),
-        );
-        return extensions;
-      } catch (error) {
-        console.error("Error fetching extensions:", error);
-        return [];
-      }
-    },
+  } = useMarketplaceApps(
+    (fetchCategory === "All" || fetchCategory === "Published by Me"
+      ? fetchCategory
+      : "All") as "All" | "Published by Me",
   );
 
   const installExtensionApp = useCallback(

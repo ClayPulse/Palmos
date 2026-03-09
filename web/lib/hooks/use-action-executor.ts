@@ -8,11 +8,10 @@ import {
 } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { v4 } from "uuid";
 import { ExtensionApp, ScopedAction } from "../types";
+import { createAppViewId } from "../views/view-helpers";
 import { useMenuActions } from "./menu-actions/use-menu-actions";
 import { useTabViewManager } from "./use-tab-view-manager";
-import { createAppViewId } from "../views/view-helpers";
 
 /**
  *  Use actions in active tab.
@@ -134,9 +133,7 @@ export default function useActionExecutor(appName?: string) {
     } else if (action.type === "app") {
       const extensions = editorContext?.persistSettings?.extensions ?? [];
       const ext = extensions.find((e) =>
-        (e.config.actions ?? []).some(
-          (act) => act.name === action.action.name,
-        ),
+        (e.config.actions ?? []).some((act) => act.name === action.action.name),
       );
 
       if (!ext) {
@@ -227,10 +224,7 @@ export default function useActionExecutor(appName?: string) {
     }
   }
 
-  function getSkillActions(
-    extension: ExtensionApp,
-    keyword?: string,
-  ) {
+  function getSkillActions(extension: ExtensionApp, keyword?: string) {
     const actions = extension.config.actions ?? [];
     if (keyword) {
       return actions.filter((action) =>

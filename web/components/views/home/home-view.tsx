@@ -4,41 +4,29 @@ import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
 import Icon from "@/components/misc/icon";
 import Tabs from "@/components/misc/tabs";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useEditorAIAssistantHint } from "@/lib/hooks/use-editor-ai-assistant-hint";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
-import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
+import { useTranslations } from "@/lib/hooks/use-translations";
+import { useVibeCode } from "@/lib/hooks/use-vibe-code";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
-import { useTranslations } from '@/lib/hooks/use-translations';
-import {
-  fetchLatestApp,
-  getDefaultRemoteOrigin,
-} from "@/lib/module-federation/remote";
 import { ExtensionApp, Session, TabItem, Workflow } from "@/lib/types";
-import {
-  addToast,
-  Button,
-  Divider,
-  Listbox,
-  ListboxItem,
-  Skeleton,
-} from "@heroui/react";
+import { Button, Divider, Listbox, ListboxItem, Skeleton } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
 import { useMediaQuery } from "react-responsive";
-import { useVibeCode } from "@/lib/hooks/use-vibe-code";
 
 const getVibeCodeHints = (t: (key: string) => string) => [
-  t('homeView.vibeCode.newApp'),
-  t('homeView.vibeCode.blog'),
-  t('homeView.vibeCode.portfolio'),
-  t('homeView.vibeCode.weatherApp'),
-  t('homeView.vibeCode.chatApp'),
-  t('homeView.vibeCode.socialMediaApp'),
-  t('homeView.vibeCode.fitnessTracker'),
-  t('homeView.vibeCode.recipeApp'),
+  t("homeView.vibeCode.newApp"),
+  t("homeView.vibeCode.blog"),
+  t("homeView.vibeCode.portfolio"),
+  t("homeView.vibeCode.weatherApp"),
+  t("homeView.vibeCode.chatApp"),
+  t("homeView.vibeCode.socialMediaApp"),
+  t("homeView.vibeCode.fitnessTracker"),
+  t("homeView.vibeCode.recipeApp"),
 ];
 
 export default function HomeView() {
@@ -108,12 +96,12 @@ function OverviewPanel({
   session?: Session;
   signIn: () => void;
 }) {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
-  const { openVibeCode} = useVibeCode();
+  const { openVibeCode } = useVibeCode();
 
   async function handleOpenVibeCode() {
     await openVibeCode();
@@ -135,8 +123,12 @@ function OverviewPanel({
       <div className="flex w-full flex-col items-center gap-y-2 rounded-lg px-1 py-2 @sm:w-fit @sm:px-8 @md:px-16">
         {session && (
           <>
-            <p className="text-center text-2xl">{t('homeView.greeting.hello', {name: session?.user.name})}</p>
-            <p className="text-center text-2xl">{t('homeView.greeting.question')}</p>
+            <p className="text-center text-2xl">
+              {t("homeView.greeting.hello", { name: session?.user.name })}
+            </p>
+            <p className="text-center text-2xl">
+              {t("homeView.greeting.question")}
+            </p>
 
             <Button
               className="border-divider border bg-amber-900/80 shadow-sm transition-colors hover:bg-amber-800/80 dark:border-amber-400/40 dark:bg-amber-900/30 dark:hover:bg-amber-900/20"
@@ -207,7 +199,9 @@ function OverviewPanel({
               >
                 <div className="flex items-center gap-2">
                   <Icon name="add" className="text-primary-foreground" />
-                  <p className="text-primary-foreground">{t('fileMenu.newProject')}</p>
+                  <p className="text-primary-foreground">
+                    {t("fileMenu.newProject")}
+                  </p>
                 </div>
               </Button>
               <Button
@@ -226,7 +220,9 @@ function OverviewPanel({
               >
                 <div className="flex items-center gap-2">
                   <Icon name="store" className="text-primary-foreground" />
-                  <p className="text-primary-foreground">{t('editorToolbar.marketplace.tooltip')}</p>
+                  <p className="text-primary-foreground">
+                    {t("editorToolbar.marketplace.tooltip")}
+                  </p>
                 </div>
               </Button>
             </div>
@@ -254,14 +250,16 @@ function OverviewPanel({
 
         {!session && (
           <>
-            <p className="text-xl font-semibold">{t('statusScreens.welcome.title')}</p>
-            <p className="text-xl">{t('homeView.signIn.message')}</p>
+            <p className="text-xl font-semibold">
+              {t("statusScreens.welcome.title")}
+            </p>
+            <p className="text-xl">{t("homeView.signIn.message")}</p>
             <Button onPress={() => signIn()} color="primary">
-              {t('common.signIn')}
+              {t("common.signIn")}
             </Button>
           </>
         )}
-        <p className="pt-2 text-center">{t('homeView.learnMore')}</p>
+        <p className="pt-2 text-center">{t("homeView.learnMore")}</p>
         <div className="flex gap-x-1">
           <Button
             onPress={() => {
@@ -312,7 +310,7 @@ function OverviewPanel({
             <div>
               <Icon name="code" className="p-0.5" />
             </div>
-            <p>{t('openSourceInfoModal.title')}</p>
+            <p>{t("openSourceInfoModal.title")}</p>
           </div>
         </Button>
       </div>
@@ -321,28 +319,29 @@ function OverviewPanel({
 }
 
 function MarketplaceAppsAndWorkflows() {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
     useExtensionAppManager("All");
-  const { workflows, isLoading: isLoadingWorkflow } = useWorkflowManager("All");
+  const { workflows, isLoading: isLoadingWorkflow } =
+    useMarketplaceWorkflows("All");
 
   const tabItems: TabItem[] = [
     {
-      name: t('workflowGallery.title'),
+      name: t("workflowGallery.title"),
       description: "Community workflows",
       icon: "hub",
     },
     {
-      name: t('appGallery.title'),
+      name: t("appGallery.title"),
       description: "Community apps",
       icon: "apps",
     },
   ];
 
   const [selectedTab, setSelectedTab] = useState<string>(
-    t('workflowGallery.title'),
+    t("workflowGallery.title"),
   );
 
   async function openAppInProject(ext: ExtensionApp) {
@@ -366,7 +365,7 @@ function MarketplaceAppsAndWorkflows() {
   return (
     <div className="relative w-full shrink-0 gap-y-1 overflow-x-hidden rounded-sm">
       <h2 className="pb-4 text-center text-5xl font-semibold">
-        {t('homeView.exploreMarketplace.button')}
+        {t("homeView.exploreMarketplace.button")}
       </h2>
 
       <div className="flex w-full justify-center">
@@ -375,16 +374,16 @@ function MarketplaceAppsAndWorkflows() {
             tabItems={tabItems}
             selectedItem={tabItems.find((tab) => tab.name === selectedTab)}
             setSelectedItem={(item) => {
-              setSelectedTab(item?.name ?? t('workflowGallery.title'));
+              setSelectedTab(item?.name ?? t("workflowGallery.title"));
             }}
           />
         </div>
       </div>
 
-      {selectedTab === t('appGallery.title') ? (
+      {selectedTab === t("appGallery.title") ? (
         <>
           <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
-            <h2 className="text-2xl font-semibold">{t('appGallery.title')}</h2>
+            <h2 className="text-2xl font-semibold">{t("appGallery.title")}</h2>
             <Button
               className="m-0 flex items-center gap-x-0.5 px-1 py-0"
               variant="light"
@@ -400,7 +399,7 @@ function MarketplaceAppsAndWorkflows() {
                 }));
               }}
             >
-              <p className="text-sm whitespace-nowrap">{t('common.viewAll')}</p>
+              <p className="text-sm whitespace-nowrap">{t("common.viewAll")}</p>
               <div>
                 <Icon name="arrow_outward" />
               </div>
@@ -421,7 +420,7 @@ function MarketplaceAppsAndWorkflows() {
             {marketplaceExtensions?.length === 0 &&
               !isLoadingMarketplaceExtensions && (
                 <p className="text-medium w-full py-4 text-center font-medium">
-                  {t('appGallery.noApps')}
+                  {t("appGallery.noApps")}
                 </p>
               )}
 
@@ -445,7 +444,7 @@ function MarketplaceAppsAndWorkflows() {
         <>
           <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
             <h2 className="text-2xl font-semibold whitespace-nowrap">
-              {t('workflowGallery.title')}
+              {t("workflowGallery.title")}
             </h2>
             <Button
               className="m-0 flex items-center gap-x-0.5 px-1 py-0"
@@ -462,7 +461,7 @@ function MarketplaceAppsAndWorkflows() {
                 }));
               }}
             >
-              <p className="text-sm whitespace-nowrap">{t('common.viewAll')}</p>
+              <p className="text-sm whitespace-nowrap">{t("common.viewAll")}</p>
               <div>
                 <Icon name="arrow_outward" />
               </div>
@@ -482,7 +481,7 @@ function MarketplaceAppsAndWorkflows() {
 
             {workflows?.length === 0 && !isLoadingWorkflow && (
               <p className="text-medium w-full py-4 text-center font-medium">
-                {t('workflowGallery.noWorkflows')}
+                {t("workflowGallery.noWorkflows")}
               </p>
             )}
             {workflows?.map((wf, index) => (
@@ -501,7 +500,7 @@ function MarketplaceAppsAndWorkflows() {
 }
 
 function MyAppsAndProjects({ session }: { session?: Session }) {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
@@ -510,19 +509,19 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
 
   const tabItems: TabItem[] = [
     {
-      name: t('homeView.myApps.tab'),
+      name: t("homeView.myApps.tab"),
       description: "Apps published by me",
       icon: "apps",
     },
     {
-      name: t('homeView.myProjects.tab'),
+      name: t("homeView.myProjects.tab"),
       description: "Projects created by me",
       icon: "folder",
     },
   ];
 
   const [selectedTab, setSelectedTab] = useState<string>(
-    t('homeView.myApps.tab'),
+    t("homeView.myApps.tab"),
   );
 
   async function openAppInProject(ext: ExtensionApp) {
@@ -537,7 +536,7 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
   return (
     <div className="relative w-full shrink-0 overflow-x-auto">
       <h2 className="pb-4 text-center text-5xl font-semibold">
-        {t('homeView.myAppsAndProjects')}
+        {t("homeView.myAppsAndProjects")}
       </h2>
       <div className="flex w-full justify-center">
         <div className="bg-content3/75 rounded-2xl">
@@ -545,16 +544,18 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
             tabItems={tabItems}
             selectedItem={tabItems.find((tab) => tab.name === selectedTab)}
             setSelectedItem={(item) => {
-              setSelectedTab(item?.name ?? t('homeView.myApps.tab'));
+              setSelectedTab(item?.name ?? t("homeView.myApps.tab"));
             }}
           />
         </div>
       </div>
 
-      {selectedTab === t('homeView.myApps.tab') ? (
+      {selectedTab === t("homeView.myApps.tab") ? (
         <>
           <div className="flex items-center gap-x-2 pb-1 sm:gap-x-4">
-            <h2 className="text-2xl font-semibold">{t('homeView.myApps.title')}</h2>
+            <h2 className="text-2xl font-semibold">
+              {t("homeView.myApps.title")}
+            </h2>
             <Button
               className="m-0 flex items-center gap-x-0.5 px-1 py-0"
               variant="light"
@@ -570,7 +571,7 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
                 }));
               }}
             >
-              <p className="text-sm whitespace-nowrap">{t('common.viewAll')}</p>
+              <p className="text-sm whitespace-nowrap">{t("common.viewAll")}</p>
               <div>
                 <Icon name="arrow_outward" />
               </div>
@@ -608,7 +609,9 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
         session && (
           <>
             <div className="flex items-center gap-x-4 py-1">
-              <h2 className="text-2xl font-semibold">{t('homeView.myProjects.title')}</h2>
+              <h2 className="text-2xl font-semibold">
+                {t("homeView.myProjects.title")}
+              </h2>
               <Button
                 className="m-0 flex items-center gap-x-0.5 px-1 py-0"
                 variant="light"
@@ -619,7 +622,9 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
                   }));
                 }}
               >
-                <p className="text-sm whitespace-nowrap">{t('common.viewAll')}</p>
+                <p className="text-sm whitespace-nowrap">
+                  {t("common.viewAll")}
+                </p>
                 <div>
                   <Icon name="arrow_outward" />
                 </div>
@@ -654,7 +659,7 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
 }
 
 function MyResources() {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { cloudWorkspaces } = useWorkspace();
@@ -663,7 +668,9 @@ function MyResources() {
   return (
     <div className="flex w-full shrink-0 flex-col">
       <div className="flex items-center gap-x-4 py-1">
-        <h2 className="text-2xl font-semibold">{t('homeView.yourResources')}</h2>
+        <h2 className="text-2xl font-semibold">
+          {t("homeView.yourResources")}
+        </h2>
         <Button
           className="m-0 flex items-center gap-x-0.5 px-1 py-0"
           variant="light"
@@ -673,7 +680,9 @@ function MyResources() {
             });
           }}
         >
-          <p className="text-sm whitespace-nowrap">{t('subscription.managePlan')}</p>
+          <p className="text-sm whitespace-nowrap">
+            {t("subscription.managePlan")}
+          </p>
           <div>
             <Icon name="arrow_outward" />
           </div>
@@ -681,7 +690,7 @@ function MyResources() {
       </div>
 
       <h3 className="text-medium pb-1 text-center font-medium">
-        {t('homeView.cloudWorkspaces')}
+        {t("homeView.cloudWorkspaces")}
       </h3>
       <Listbox className="w-full">
         {cloudWorkspaces?.map((ws, index) => (
@@ -727,7 +736,7 @@ function MyResources() {
                     });
                   }}
                 >
-                  {t('subscription.managePlan')}
+                  {t("subscription.managePlan")}
                 </Button>
               </div>
             }

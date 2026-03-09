@@ -1,7 +1,7 @@
 import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
 import Icon from "@/components/misc/icon";
+import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { useWorkflowManager } from "@/lib/hooks/use-workflow-manager";
 import { Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Select, SelectItem } from "@heroui/react";
@@ -12,7 +12,7 @@ export default function WorkflowGallery() {
   // const [displayedWorkflows, setDisplayedWorkflows] = useState<Workflow[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [label, setLabel] = useState<"All" | "Published by Me">("All");
-  const { isLoading, workflows } = useWorkflowManager(label);
+  const { isLoading, workflows } = useMarketplaceWorkflows(label);
   const { createCanvasTabView } = useTabViewManager();
 
   const selectLabels = [
