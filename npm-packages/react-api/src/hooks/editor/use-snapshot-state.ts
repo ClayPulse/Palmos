@@ -1,7 +1,15 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { SnapshotContext } from "../../providers/snapshot-provider";
 
-export default function useSnapShotState<T>(
+/**
+ * A hook that syncs state with a snapshot context, 
+ * allowing for state restoration across component unmounts and remounts.
+ * @param key 
+ * @param initialValue 
+ * @param onRestore 
+ * @returns 
+ */
+export default function useSnapshotState<T>(
   key: string,
   initialValue?: T,
   onRestore?: (value: T) => void

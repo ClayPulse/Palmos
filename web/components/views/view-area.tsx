@@ -76,12 +76,14 @@ export default function ViewArea() {
     async function fetchWorkflow(workflowName: string) {
       // Fetch workflow info from backend using workflowName
       // This is a placeholder implementation and should be replaced with actual API call
-      const response = await fetchAPI(`/api/workflow/get?name=${workflowName}`);
+      const response = await fetchAPI(
+        `/api/workflow/get?name=${workflowName}&latest=true`,
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch workflow info");
       }
 
-      const workflowInfo: Workflow = (await response.json())[0];
+      const workflowInfo: Workflow | undefined = await response.json();
       console.log("Fetched workflow info:", workflowInfo);
 
       return workflowInfo;
@@ -145,7 +147,16 @@ export default function ViewArea() {
         async function openWorkflow(workflowName: string) {
           // Open workflow in canvas view
           // This is for backward compatibility, as some links may directly point to a workflow without specifying canvas
-          const workflow: Workflow = await fetchWorkflow(workflowName);
+          const workflow = await fetchWorkflow(workflowName);
+
+          if (!workflow) {
+            addToast({
+              title: "Workflow Not Found",
+              description: `No workflow found with the name "${workflowName}".`,
+              color: "danger",
+            });
+            return;
+          }
 
           await createCanvasTabView({
             viewId: createCanvasViewId(),
@@ -192,8 +203,7 @@ export default function ViewArea() {
     <div className="h-full w-full overflow-hidden">
       {!editorContext?.editorStates.project &&
       app === null &&
-      canvasId === null &&
-      workflowName === null ? (
+      canvasId === null ? (
         <HomeView />
       ) : tabViews.length === 0 ? (
         <ProjectView />

@@ -65,14 +65,6 @@ export function useTabViewManager() {
       };
     }) ?? [];
 
-  // useEffect(() => {
-  //   // set isCreatingTab to false after 1 second so that initial tab creation does not trigger URL update
-  //   const timer = setTimeout(() => {
-  //     setIsCreatingTab(false);
-  //   }, 1000);
-  //   return () => clearTimeout(timer);
-  // }, []);
-
   // Update local states when editor context changes
   useEffect(() => {
     if (!editorContext) {
