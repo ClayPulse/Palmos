@@ -329,7 +329,7 @@ export function useTabViewManager() {
     return newTabView;
   }
 
-  async function createCanvasTabView(canvasConfig: CanvasViewConfig) {
+  async function createCanvasTabView(canvasConfig: CanvasViewConfig, openedFromWorkflow?: string) {
     setIsCreatingTab(true);
 
     if (!editorContext) {
@@ -409,6 +409,7 @@ export function useTabViewManager() {
     const newTabView: TabView = {
       type: ViewModeEnum.Canvas,
       config: canvasConfig,
+      openedFromWorkflow,
     };
 
     editorContext.setEditorStates((prev) => {

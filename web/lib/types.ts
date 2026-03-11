@@ -325,6 +325,8 @@ export type CanvasViewConfig = {
 export type TabView = {
   type: ViewModeEnum;
   config: AppViewConfig | CanvasViewConfig;
+  /** The name of the workflow this tab was opened from, if any. */
+  openedFromWorkflow?: string;
 };
 
 // #endregion
