@@ -3,7 +3,6 @@ import { IMCContext } from "@/components/providers/imc-provider";
 import { addToast, Button } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
-import { useTranslations } from '@/lib/hooks/use-translations';
 import { PlatformEnum, SideMenuTabEnum } from "../enums";
 import { getPlatform } from "../platform-api/platform-checker";
 import {
@@ -13,16 +12,17 @@ import {
   TabView,
 } from "../types";
 import { createAppViewId, createCanvasViewId } from "../views/view-helpers";
+import { useProjectManager } from "./use-project-manager";
 import useRouter from "./use-router";
 import { useScreenSize } from "./use-screen-size";
 
 export function useTabViewManager() {
-  const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
 
   const { isLandscape } = useScreenSize();
   const router = useRouter();
+  const { createProject, openProject } = useProjectManager();
 
   const [tabViews, setTabViews] = useState<TabView[]>(
     editorContext?.editorStates.tabViews ?? [],
@@ -65,13 +65,13 @@ export function useTabViewManager() {
       };
     }) ?? [];
 
-  useEffect(() => {
-    // set isCreatingTab to false after 1 second so that initial tab creation does not trigger URL update
-    const timer = setTimeout(() => {
-      setIsCreatingTab(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+  // useEffect(() => {
+  //   // set isCreatingTab to false after 1 second so that initial tab creation does not trigger URL update
+  //   const timer = setTimeout(() => {
+  //     setIsCreatingTab(false);
+  //   }, 1000);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   // Update local states when editor context changes
   useEffect(() => {
@@ -94,18 +94,35 @@ export function useTabViewManager() {
   useEffect(() => {
     if (isCreatingTab) return;
 
-    if (activeTabView) {
-      if (activeTabView.type === ViewModeEnum.App) {
-        const appConfig = activeTabView.config as AppViewConfig;
-        router.replace(`/?app=${appConfig.app}`);
-      } else if (activeTabView.type === ViewModeEnum.Canvas) {
-        const canvasConfig = activeTabView.config as CanvasViewConfig;
-        router.replace(`/?workflow=${canvasConfig.viewId}`);
+    const latestTabViews = editorContext?.editorStates.tabViews ?? [];
+    const latestTabIndex = editorContext?.editorStates.tabIndex ?? -1;
+    const latestActiveTabView = latestTabViews[latestTabIndex];
+
+    if (latestActiveTabView) {
+      if (latestActiveTabView.type === ViewModeEnum.App) {
+        const appConfig = latestActiveTabView.config as AppViewConfig;
+
+        router.setQueryParams({
+          ...router.getQueryParams(),
+          app: appConfig.app,
+        });
+      } else if (latestActiveTabView.type === ViewModeEnum.Canvas) {
+        const canvasConfig = latestActiveTabView.config as CanvasViewConfig;
+
+        router.setQueryParams({
+          ...router.getQueryParams(),
+          canvas: canvasConfig.viewId,
+        });
       }
-    } else {
+    } else if (latestTabViews.length === 0 || latestTabIndex === -1) {
       router.replace(`/`);
     }
-  }, [activeTabView, isCreatingTab]);
+  }, [
+    activeTabView,
+    editorContext?.editorStates.tabViews,
+    editorContext?.editorStates.tabIndex,
+    isCreatingTab,
+  ]);
 
   function selectTab(newIndex: number) {
     if (!editorContext) {
@@ -290,13 +307,14 @@ export function useTabViewManager() {
   }
 
   async function createAppTabView(appConfig: AppViewConfig) {
+    setIsCreatingTab(true);
     if (!editorContext) {
+      setIsCreatingTab(false);
       throw new Error("Editor context is not available");
     } else if (!imcContext) {
+      setIsCreatingTab(false);
       throw new Error("IMC context is not available");
     }
-
-    setIsCreatingTab(true);
 
     const newTabView: TabView = {
       type: ViewModeEnum.App,
@@ -315,44 +333,26 @@ export function useTabViewManager() {
     // app views need to load the app first before it can render the view.
     await imcContext.resolveWhenViewInitialized(appConfig.viewId);
 
+    setIsCreatingTab(false);
     return newTabView;
   }
 
-  async function createCanvasTabView(
-    canvasConfig: CanvasViewConfig,
-    openExplorer = true,
-  ) {
+  async function createCanvasTabView(canvasConfig: CanvasViewConfig) {
+    setIsCreatingTab(true);
+
     if (!editorContext) {
+      setIsCreatingTab(false);
       throw new Error("Editor context is not available");
     } else if (!imcContext) {
+      setIsCreatingTab(false);
       throw new Error("IMC context is not available");
     } else if (!editorContext.editorStates.project) {
-      addToast({
-        title: "Project Not Opened",
-        description: `No project is opened.`,
-        color: "danger",
-        endContent: (
-          <Button
-            color="danger"
-            size="sm"
-            onPress={() => {
-              editorContext?.setEditorStates((prev) => ({
-                ...prev,
-                isSideMenuOpen: true,
-                modalStates: {
-                  ...prev.modalStates,
-                  marketplace: {
-                    isOpen: false,
-                  },
-                },
-              }));
-            }}
-          >
-            Open Project
-          </Button>
-        ),
+      // Create a temporary project
+      const tempProjectName = `temp-project-${Date.now()}`;
+      await createProject({
+        name: tempProjectName,
       });
-      return undefined;
+      await openProject(tempProjectName);
     }
 
     const requireWorkspace = canvasConfig.appConfigs
@@ -394,10 +394,10 @@ export function useTabViewManager() {
           </Button>
         ),
       });
+
+      setIsCreatingTab(false);
       return undefined;
     }
-
-    setIsCreatingTab(true);
 
     // Prohibit creating canvas if any app's view ID in the canvas already exists
     const existViewId = canvasConfig.appConfigs?.find((appConfig) =>
@@ -410,6 +410,7 @@ export function useTabViewManager() {
         description: `Same app nodes already exist. Your workflow might already be opened in another tab.`,
         color: "danger",
       });
+      setIsCreatingTab(false);
       return undefined;
     }
 
@@ -426,14 +427,6 @@ export function useTabViewManager() {
       };
     });
 
-    // Open explorer for canvas views
-    if (openExplorer) {
-      editorContext.setEditorStates((prev) => ({
-        ...prev,
-        isSideMenuOpen: true,
-      }));
-    }
-
     // Close marketplace if open
     editorContext.setEditorStates((prev) => ({
       ...prev,
@@ -445,39 +438,23 @@ export function useTabViewManager() {
       },
     }));
 
+    setIsCreatingTab(false);
     return newTabView;
   }
 
+  /* Manage Canvas View Content */
   async function createAppViewInCanvasView(appConfig: AppViewConfig) {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     } else if (!editorContext.editorStates.project) {
-      addToast({
-        title: t('tabViewManager.openProject'),
-        description: `No project is opened.`,
-        color: "danger",
-        endContent: (
-          <Button
-            color="danger"
-            size="sm"
-            onPress={() => {
-              editorContext?.setEditorStates((prev) => ({
-                ...prev,
-                isSideMenuOpen: true,
-                modalStates: {
-                  ...prev.modalStates,
-                  marketplace: {
-                    isOpen: false,
-                  },
-                },
-              }));
-            }}
-          >
-            {t('tabViewManager.openProject')}
-          </Button>
-        ),
+      // if (!platformApi) return;
+
+      // Create a temporary project
+      const tempProjectName = `temp-project-${Date.now()}`;
+      await createProject({
+        name: tempProjectName,
       });
-      return;
+      await openProject(tempProjectName);
     }
 
     const requireWorkspace = appConfig.app
@@ -527,6 +504,13 @@ export function useTabViewManager() {
       currentTab = await createCanvasTabView({
         viewId: createCanvasViewId(),
       } as CanvasViewConfig);
+
+      // Open explorer for canvas views
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        isSideMenuOpen: true,
+      }));
+
       if (!currentTab) {
         console.error("Failed to create a new canvas tab");
         return;

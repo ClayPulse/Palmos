@@ -16,6 +16,12 @@ export default function ProjectView() {
     await createCanvasTabView({
       viewId: createCanvasViewId(),
     });
+
+    // Open explorer for canvas views
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isSideMenuOpen: true,
+    }));
   }, []);
 
   const openMarketplace = useCallback(() => {

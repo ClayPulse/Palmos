@@ -36,7 +36,6 @@ export default function WorkflowGallery() {
         appConfigs: workflow.content.nodes.map((node) => node.data.config),
         initialWorkflowContent: workflow.content,
       },
-      false,
     );
   }
 

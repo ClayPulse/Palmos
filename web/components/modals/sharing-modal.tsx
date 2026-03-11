@@ -23,6 +23,7 @@ export default function SharingModal({
   const params = useSearchParams();
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
+  const canvas = params.get("canvas");
   const workflow = params.get("workflow");
 
   const tabItems: TabItem[] = [
@@ -68,6 +69,8 @@ export default function SharingModal({
 
     return data;
   });
+
+  const sharedUrl = `${window.location.origin}?${app ? `app=${app}` : canvas ? `canvas=${canvas}` : workflow ? `workflow=${workflow}` : ""}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`;
 
   async function updateShareInfo(visibility: string) {
     await fetchAPI(`/api/app/update`, {
@@ -130,9 +133,7 @@ export default function SharingModal({
                 <p className="text-content4-foreground text-sm">
                   {t("sharingModal.qrCode.description")}
                 </p>
-                <QRDisplay
-                  url={`${window.location.origin}?app=${app}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`}
-                />
+                <QRDisplay url={sharedUrl} />
               </div>
             )}
 
@@ -142,13 +143,11 @@ export default function SharingModal({
                   {t("sharingModal.url.description")}
                 </p>
 
-                <p className="font-bold break-all">{`${window.location.origin}?${app ? `app=${app}` : workflow ? `workflow=${workflow}` : ""}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`}</p>
+                <p className="font-bold break-all">{sharedUrl}</p>
                 <Button
                   color="primary"
                   onPress={() => {
-                    navigator.clipboard.writeText(
-                      `${window.location.origin}?app=${app}${shareInfo?.inviteCode ? `&inviteCode=${shareInfo.inviteCode}` : ""}`,
-                    );
+                    navigator.clipboard.writeText(sharedUrl);
                     toast.success(t("sharingModal.toast.urlCopied"));
                   }}
                 >

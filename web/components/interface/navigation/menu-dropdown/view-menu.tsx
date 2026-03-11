@@ -96,6 +96,12 @@ export default function ViewMenuDropDown() {
                 ),
                 initialWorkflowContent: workflowContent,
               } as CanvasViewConfig);
+
+              // Open explorer for canvas views
+              editorContext?.setEditorStates((prev) => ({
+                ...prev,
+                isSideMenuOpen: true,
+              }));
             } else {
               alert(t("viewMenu.importWorkflow.invalidFile"));
             }

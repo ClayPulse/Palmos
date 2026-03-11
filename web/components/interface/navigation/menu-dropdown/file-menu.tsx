@@ -1,12 +1,15 @@
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useRegisterMenuAction } from "@/lib/hooks/menu-actions/use-register-menu-action";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import NavMenuDropdown from "../nav-menu-dropdown";
 
 export default function FileMenuDropDown() {
+  const editorContext = useContext(EditorContext);
+
   const { getTranslations: t, locale } = useTranslations();
   const { menuActions } = useMenuActions("file");
   const { createCanvasTabView, activeTabView, closeTabView } =
@@ -24,6 +27,12 @@ export default function FileMenuDropDown() {
     async () => {
       // Trigger new Workflow creation logic
       await createCanvasTabView({ viewId: createCanvasViewId() });
+
+      // Open explorer for canvas views
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        isSideMenuOpen: true,
+      }));
     },
     [locale],
   );

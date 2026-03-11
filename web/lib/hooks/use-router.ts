@@ -18,5 +18,23 @@ export default function useRouter() {
     window.open(url, "_blank");
   }
 
-  return { replace, refresh, openInNewTab };
+  function setQueryParams(params: Record<string, string>) {
+    const searchParams = new URLSearchParams();
+    for (const key in params) {
+      searchParams.set(key, params[key]);
+    }
+    const newRelativePathQuery = `${window.location.pathname}?${searchParams.toString()}`;
+    window.history.replaceState(null, "", newRelativePathQuery);
+  }
+
+  function getQueryParams(): Record<string, string> {
+    const searchParams = new URLSearchParams(window.location.search);
+    const params: Record<string, string> = {};
+    searchParams.forEach((value, key) => {
+      params[key] = value;
+    });
+    return params;
+  }
+
+  return { replace, refresh, openInNewTab, setQueryParams, getQueryParams };
 }

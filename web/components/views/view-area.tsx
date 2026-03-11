@@ -1,8 +1,12 @@
-'use client'
+"use client";
 
+import { usePlatformApi } from "@/lib/hooks/use-platform-api";
+import useRouter from "@/lib/hooks/use-router";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
-import { createAppViewId } from "@/lib/views/view-helpers";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { AppViewConfig, CanvasViewConfig, Workflow } from "@/lib/types";
+import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
+import { addToast, Spinner } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useSearchParams } from "next/navigation";
 import { lazy, Suspense, useContext, useEffect, useRef, useState } from "react";
@@ -10,8 +14,6 @@ import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
 import HomeView from "./home/home-view";
 import ProjectView from "./project/project-view";
-// import { MemoizedCanvasView } from "./canvas/canvas-view";
-// import { MemoizedStandaloneAppView } from "./standalone-app/standalone-app-view";
 
 const LazyCanvasView = lazy(() =>
   import("./canvas/canvas-view").then((mod) => ({
@@ -28,6 +30,7 @@ export default function ViewArea() {
   const editorContext = useContext(EditorContext);
 
   const params = useSearchParams();
+  const { platformApi } = usePlatformApi();
 
   const {
     tabViews,
@@ -36,51 +39,145 @@ export default function ViewArea() {
     selectTab,
     closeTabView,
     createAppTabView,
+    createCanvasTabView,
     activeTabView,
   } = useTabViewManager();
+  const { setQueryParams, getQueryParams } = useRouter();
 
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
 
   const isInitialized = useRef(false);
   const app = params?.get("app");
+  const canvasId = params?.get("canvas");
+  const workflowName = params?.get("workflow");
 
   useEffect(() => {
-    // Standalone app mode
+    // Standalone app / canvas / workflow mode
     const inviteCode = params?.get("inviteCode") || undefined;
     const fileUri = params?.get("fileUri") || undefined;
 
-    async function openInStandaloneApp() {
-      if (app) {
-        // Add app to tabs if not already present
-        const existingAppIndex = tabViews.findIndex(
-          (view) =>
-            view.type === ViewModeEnum.App &&
-            (view.config as AppViewConfig).app === app,
-        );
+    async function fetchCanvas(canvasViewId: string) {
+      // Fetch canvas info from backend using canvasViewId
+      // This is a placeholder implementation and should be replaced with actual API call
+      const response = await fetchAPI(`/api/canvas/get?viewId=${canvasViewId}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch canvas info");
+      }
 
-        if (existingAppIndex === -1) {
-          // Create new tab if not already exists
-          const viewId = createAppViewId(app);
-          await createAppTabView({
-            viewId,
-            app,
-            inviteCode,
-            fileUri,
-          });
-        } else {
-          selectTab(existingAppIndex);
+      const canvasInfo = await response.json();
+
+      return {
+        viewId: canvasViewId,
+        appConfigs: canvasInfo.appConfigs,
+        workflowContent: canvasInfo.workflowContent,
+      } as CanvasViewConfig;
+    }
+
+    async function fetchWorkflow(workflowName: string) {
+      // Fetch workflow info from backend using workflowName
+      // This is a placeholder implementation and should be replaced with actual API call
+      const response = await fetchAPI(`/api/workflow/get?name=${workflowName}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch workflow info");
+      }
+
+      const workflowInfo: Workflow = (await response.json())[0];
+      console.log("Fetched workflow info:", workflowInfo);
+
+      return workflowInfo;
+    }
+
+    async function openFromParam() {
+      if (app) {
+        async function openApp(app: string) {
+          // Add app to tabs if not already present
+          const existingAppIndex = tabViews.findIndex(
+            (view) =>
+              view.type === ViewModeEnum.App &&
+              (view.config as AppViewConfig).app === app,
+          );
+
+          if (existingAppIndex === -1) {
+            // Create new tab if not already exists
+            const viewId = createAppViewId(app);
+            await createAppTabView({
+              viewId,
+              app,
+              inviteCode,
+              fileUri,
+            });
+          } else {
+            selectTab(existingAppIndex);
+          }
+
+          // Hide tabs if in standalone app mode
+          setIsShowTabs(false);
         }
 
-        // Hide tabs if in standalone app mode
-        setIsShowTabs(false);
+        addToast({
+          promise: openApp(app),
+          title: "Opening App",
+          description: `Opening app "${app}"...`,
+          loadingComponent: (
+            <div>
+              <Spinner />
+            </div>
+          ),
+        });
+      } else if (canvasId) {
+        async function openCanvas(canvasId: string) {
+          const canvas: CanvasViewConfig = await fetchCanvas(canvasId);
+
+          await createCanvasTabView(canvas);
+        }
+
+        addToast({
+          promise: openCanvas(canvasId),
+          title: "Opening Canvas",
+          description: `Opening canvas...`,
+          loadingComponent: (
+            <div>
+              <Spinner />
+            </div>
+          ),
+        });
+      } else if (workflowName) {
+        async function openWorkflow(workflowName: string) {
+          // Open workflow in canvas view
+          // This is for backward compatibility, as some links may directly point to a workflow without specifying canvas
+          const workflow: Workflow = await fetchWorkflow(workflowName);
+
+          await createCanvasTabView({
+            viewId: createCanvasViewId(),
+            appConfigs: workflow.content.nodes.map((node) => node.data.config),
+            initialWorkflowContent: workflow.content,
+          });
+
+          const params = getQueryParams();
+          // Delete workflow param
+          delete params.workflow;
+
+          setQueryParams(params);
+        }
+
+        addToast({
+          promise: openWorkflow(workflowName),
+          title: "Opening Workflow",
+          description: `Opening workflow "${workflowName}"...`,
+          loadingComponent: (
+            <div>
+              <Spinner />
+            </div>
+          ),
+        });
       }
     }
 
-    if (!isInitialized.current) {
-      openInStandaloneApp();
+    if (!isInitialized.current && platformApi) {
+      openFromParam();
       isInitialized.current = true;
     }
-  }, [params]);
+  }, [app, canvasId, workflowName, platformApi]);
 
   useEffect(() => {
     // Hide tabs if only one tab
@@ -93,7 +190,10 @@ export default function ViewArea() {
 
   return (
     <div className="h-full w-full overflow-hidden">
-      {!editorContext?.editorStates.project && app === null ? (
+      {!editorContext?.editorStates.project &&
+      app === null &&
+      canvasId === null &&
+      workflowName === null ? (
         <HomeView />
       ) : tabViews.length === 0 ? (
         <ProjectView />

@@ -104,8 +104,6 @@ export default function useActionExecutor(appName?: string) {
       })),
     );
 
-    console.log("Found pre-registered app actions:", skillActions);
-
     setActions((prev) => [
       ...prev.filter((c) => c.type !== "app"),
       ...skillActions,
