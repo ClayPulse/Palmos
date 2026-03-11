@@ -48,7 +48,6 @@ export default function NavTopBar({
   const params = useSearchParams();
   // Use the 'app' query parameter to load specific extension app upon loading page
   const app = params.get("app");
-  const workflow = params.get("workflow");
 
   const { menuActions, runMenuActionByKeyboardShortcut } = useMenuActions();
 
@@ -137,7 +136,7 @@ export default function NavTopBar({
             />
           </div>
 
-          {(app || workflow) && (
+          {(app) && (
             <Button
               className="hidden sm:block"
               color="primary"

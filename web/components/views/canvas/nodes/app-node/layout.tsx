@@ -1,6 +1,7 @@
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import BaseAppView from "@/components/views/base/base-app-view";
+import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useVibeCode } from "@/lib/hooks/use-vibe-code";
@@ -168,14 +169,14 @@ export default function CanvasNodeViewLayout({
 
       {/* Entry / Exit floating labels */}
       {node.data.isDefaultEntry && (
-        <div className="absolute top-0 left-0 z-50 -translate-y-1/2 translate-x-2 pointer-events-none">
+        <div className="pointer-events-none absolute top-0 left-0 z-50 translate-x-2 -translate-y-1/2">
           <span className="bg-success text-success-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
             {t("canvasNode.labels.entry")}
           </span>
         </div>
       )}
       {node.data.isDefaultExit && (
-        <div className="absolute top-0 right-0 z-50 -translate-y-1/2 -translate-x-2 pointer-events-none">
+        <div className="pointer-events-none absolute top-0 right-0 z-50 -translate-x-2 -translate-y-1/2">
           <span className="bg-danger text-danger-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
             {t("canvasNode.labels.exit")}
           </span>
@@ -293,10 +294,9 @@ function CanvasNodeControl({
   setNodeData: (data: Partial<AppNodeData>) => void;
 }) {
   const { openVibeCode } = useVibeCode();
+  const { openAppInfoModal } = useAppInfo();
   const { getInstalledExtensionApp } = useExtensionAppManager();
   const { getTranslations: t } = useTranslations();
-
-  const [actionError, setActionError] = useState<{ [key: string]: string }>({});
 
   return (
     <div className="bg-content1 flex items-center gap-x-1 rounded-md">
@@ -346,21 +346,6 @@ function CanvasNodeControl({
         </Button>
       </Tooltip>
 
-      <Tooltip content={t("canvasNode.tooltips.ownedApps")} placement="top">
-        <Button
-          isIconOnly
-          variant="light"
-          size="sm"
-          className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
-          data-active={isShowingOwnedApps ? "true" : "false"}
-          onPress={() => {
-            setIsShowingOwnedApps(!isShowingOwnedApps);
-          }}
-        >
-          <Icon name="arrow_drop_down_circle" variant="outlined" />
-        </Button>
-      </Tooltip>
-
       <Tooltip
         content={t("canvasNode.tooltips.workflowConnectors")}
         placement="top"
@@ -370,16 +355,8 @@ function CanvasNodeControl({
           variant="light"
           size="sm"
           onPress={() => {
-            if (!selectedAction) {
-              addToast({
-                title: "No action selected",
-                description: "Please select an action to toggle connectors.",
-                color: "warning",
-              });
-              setActionError({ "app-action-select": " " });
-            } else {
-              setIsShowingWorkflowConnector(!isShowingWorkflowConnector);
-            }
+            setIsShowingWorkflowConnector(!isShowingWorkflowConnector);
+            setIsShowingOwnedApps(!isShowingWorkflowConnector);
           }}
           className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
           data-active={isShowingWorkflowConnector ? "true" : "false"}
@@ -418,11 +395,44 @@ function CanvasNodeControl({
         </Button>
       </Tooltip>
 
-      <Tooltip content={t("canvasNode.tooltips.selectAction")} placement="top">
-        <Form
-          className="flex flex-row items-center gap-x-1"
-          validationErrors={actionError}
+      <Tooltip content={t("canvasNode.tooltips.appSettings")} placement="top">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
+          data-active={isShowingOwnedApps ? "true" : "false"}
+          onPress={async () => {
+            // Open app details
+            const extension = await getInstalledExtensionApp(nodeData.config.app);
+            if (!extension) {
+              addToast({
+                title: "App not found",
+                description:
+                  "The app associated with this node is not installed.",
+                color: "danger",
+              });
+              return;
+            }
+            openAppInfoModal({
+              id: extension.config.id,
+              name: extension.config.displayName ?? extension.config.id,
+              version: extension.config.version,
+              author: extension.config.author,
+              license: extension.config.license,
+              url: extension.config.repository,
+              readme: extension.config.repository
+                ? extension.config.repository + "/README.md"
+                : undefined,
+            });
+          }}
         >
+          <Icon name="settings" variant="outlined" />
+        </Button>
+      </Tooltip>
+
+      <Tooltip content={t("canvasNode.tooltips.selectAction")} placement="top">
+        <Form className="flex flex-row items-center gap-x-1">
           <Select
             name="app-action-select"
             items={actions}

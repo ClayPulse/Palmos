@@ -125,10 +125,9 @@ export default function RemoteModuleProvider({
     mfHost.registerRemotes(remotes);
     console.log("Registered remotes", remotes);
 
+    // TODO: change this to skill
     // For each extension, load their agents
     const agents = getExtensionAgents(extensions);
-
-    console.log("Loaded agents", agents);
 
     editorContext?.setPersistSettings((prev) => {
       return {

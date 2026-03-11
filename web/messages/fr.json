@@ -1129,6 +1129,7 @@
 			"api": "API",
 			"entry": "Point d'entrée par défaut",
 			"exit": "Point de sortie par défaut",
+			"appSettings": "Paramètres de l'application",
 			"selectAction": "Sélectionner une action",
 			"resize": "Redimensionner le nœud",
 			"delete": "Supprimer le nœud"

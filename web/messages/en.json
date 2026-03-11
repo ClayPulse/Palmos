@@ -1129,6 +1129,7 @@
       "api": "API",
       "entry": "Default Entry Point",
       "exit": "Default Exit Point",
+      "appSettings": "App Settings",
       "selectAction": "Select Action",
       "resize": "Resize node",
       "delete": "Delete node"

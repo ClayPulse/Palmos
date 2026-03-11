@@ -1102,6 +1102,7 @@
 			"api": "API",
 			"entry": "Standard-Einstiegspunkt",
 			"exit": "Standard-Ausgangspunkt",
+			"appSettings": "App-Einstellungen",
 			"selectAction": "Aktion auswählen",
 			"resize": "Knoten in der Größe ändern",
 			"delete": "Knoten löschen"
