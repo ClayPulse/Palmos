@@ -3,7 +3,14 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState, Workflow } from "@/lib/types";
-import { Button, Chip, Divider, Skeleton, Tooltip } from "@heroui/react";
+import {
+  addToast,
+  Button,
+  Chip,
+  Divider,
+  Skeleton,
+  Tooltip,
+} from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import ContextMenu from "../interface/context-menu";
 
@@ -161,7 +168,7 @@ export default function WorkflowPreviewCard({
           <Divider />
         </div>
 
-        <div className="flex justify-end gap-x-2">
+        <div className="flex items-center justify-end gap-x-2">
           <div className="flex gap-x-1">
             <div>
               <Icon name="comment" />
@@ -174,6 +181,24 @@ export default function WorkflowPreviewCard({
             </div>
             <p>0</p>
           </div>
+          <Tooltip content="Copy share link">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              onPress={() => {
+                const url = `${window.location.origin}/?workflow=${encodeURIComponent(workflow.name)}`;
+                navigator.clipboard.writeText(url);
+                addToast({
+                  title: "Link copied",
+                  description: "Share link copied to clipboard.",
+                  color: "success",
+                });
+              }}
+            >
+              <Icon name="share" />
+            </Button>
+          </Tooltip>
         </div>
       </div>
     </div>
