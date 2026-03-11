@@ -236,7 +236,7 @@ export default function useCanvasWorkflow(
         await imcContext.polyIMC.sendMessage(
           app.viewId,
           IMCMessageTypeEnum.EditorAppStateSnapshotRestore,
-          { states: content.snapshotStates[app.viewId] },
+          content.snapshotStates[app.viewId],
         );
       }
     }

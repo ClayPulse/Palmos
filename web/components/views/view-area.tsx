@@ -76,12 +76,14 @@ export default function ViewArea() {
     async function fetchWorkflow(workflowName: string) {
       // Fetch workflow info from backend using workflowName
       // This is a placeholder implementation and should be replaced with actual API call
-      const response = await fetchAPI(`/api/workflow/get?name=${workflowName}`);
+      const response = await fetchAPI(
+        `/api/workflow/get?name=${workflowName}&latest=true`,
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch workflow info");
       }
 
-      const workflowInfo: Workflow | undefined = (await response.json())[0];
+      const workflowInfo: Workflow | undefined = await response.json();
       console.log("Fetched workflow info:", workflowInfo);
 
       return workflowInfo;
