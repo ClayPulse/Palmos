@@ -2,6 +2,7 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useEditorAIAssistantHint } from "@/lib/hooks/use-editor-ai-assistant-hint";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { useWorkflowPersistence } from "@/lib/hooks/use-workflow-persistence";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Input } from "@heroui/react";
 import { useCallback, useContext } from "react";
@@ -10,11 +11,19 @@ export default function ProjectView() {
   const editorContext = useContext(EditorContext);
 
   const { createCanvasTabView } = useTabViewManager();
+  const { loadWorkflow } = useWorkflowPersistence();
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
   const createNewCanvas = useCallback(async () => {
+    const savedContent = await loadWorkflow();
+
     await createCanvasTabView({
       viewId: createCanvasViewId(),
+      appConfigs:
+        savedContent?.nodes
+          .filter((node) => node?.data?.config != null)
+          .map((node) => node.data.config) ?? [],
+      initialWorkflowContent: savedContent ?? undefined,
     });
 
     // Open explorer for canvas views
@@ -22,7 +31,7 @@ export default function ProjectView() {
       ...prev,
       isSideMenuOpen: true,
     }));
-  }, []);
+  }, [loadWorkflow, createCanvasTabView, editorContext]);
 
   const openMarketplace = useCallback(() => {
     editorContext?.setEditorStates((prev) => ({

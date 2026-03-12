@@ -11,12 +11,14 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { AppNodeData, WorkflowContent } from "../types";
 import useWorkflowExecutor from "./use-workflow-executor";
+import { useWorkflowPersistence } from "./use-workflow-persistence";
 
 export default function useCanvasWorkflow(
   initialWorkflowContent?: WorkflowContent,
 ) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
+  const { saveWorkflow } = useWorkflowPersistence();
 
   const [entryPoint, setEntryPoint] = useState<
     ReactFlowNode<AppNodeData> | undefined
@@ -65,6 +67,13 @@ export default function useCanvasWorkflow(
       workflowEdges: localEdges,
     }));
   }, 500);
+
+  const debouncePersistCanvasState = useDebouncedCallback(() => {
+    saveWorkflow({
+      nodes: localNodes,
+      edges: localEdges,
+    });
+  }, 1000);
 
   const updateWorkflowNodeData = useCallback(
     (nodeViewId: string, data: Partial<AppNodeData>) => {
@@ -140,6 +149,7 @@ export default function useCanvasWorkflow(
 
   useEffect(() => {
     debounceSaveNodesAndEdges();
+    debouncePersistCanvasState();
   }, [localNodes, localEdges]);
 
   // Restore snapshot states upon loading a workflow
