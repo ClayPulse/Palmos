@@ -242,6 +242,11 @@ export type ModalStates = {
     artifact?: Artifact;
     fromViewId?: string;
   };
+  nodeNote?: {
+    isOpen?: boolean;
+    note?: string;
+    setNote?: (note: string) => void;
+  };
 };
 
 export type OpenFileDialogConfig = {
@@ -452,6 +457,7 @@ export type AppNodeData = {
   ownedAppViews: {
     [key: string]: ViewModel;
   };
+  note?: string;
 };
 
 export type FileDragData = {

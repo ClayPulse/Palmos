@@ -1086,6 +1086,11 @@
 		"ariaLabel": "Klicke auf den Knoten-Handle, um das Knotenmenü zu öffnen",
 		"required": "*erforderlich"
 	},
+	"nodeNoteModal": {
+		"title": "Notiz",
+		"placeholder": "Notiz für diesen Knoten eingeben...",
+		"save": "Speichern"
+	},
 	"draggableItem": {
 		"ariaLabel": "Ziehen zum Verschieben"
 	},
@@ -1102,6 +1107,7 @@
 			"api": "API",
 			"entry": "Standard-Einstiegspunkt",
 			"exit": "Standard-Ausgangspunkt",
+			"note": "Notiz",
 			"appSettings": "App-Einstellungen",
 			"selectAction": "Aktion auswählen",
 			"resize": "Knoten in der Größe ändern",

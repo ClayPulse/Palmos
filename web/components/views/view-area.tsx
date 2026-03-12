@@ -161,7 +161,9 @@ export default function ViewArea() {
           await createCanvasTabView(
             {
               viewId: createCanvasViewId(),
-              appConfigs: workflow.content.nodes.map((node) => node.data.config),
+              appConfigs: workflow.content.nodes.map(
+                (node) => node.data.config,
+              ),
               initialWorkflowContent: workflow.content,
             },
             workflowName,
@@ -206,7 +208,7 @@ export default function ViewArea() {
     <div className="h-full w-full overflow-hidden">
       {!editorContext?.editorStates.project &&
       app === null &&
-      canvasId === null ? (
+      workflowName === null ? (
         <HomeView />
       ) : tabViews.length === 0 ? (
         <ProjectView />

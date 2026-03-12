@@ -1113,6 +1113,11 @@
 		"ariaLabel": "Clique no manipulador do nó para abrir o menu do nó",
 		"required": "*obrigatório"
 	},
+	"nodeNoteModal": {
+		"title": "Nota",
+		"placeholder": "Insira uma nota para este nó...",
+		"save": "Salvar"
+	},
 	"draggableItem": {
 		"ariaLabel": "Arraste para mover"
 	},
@@ -1129,6 +1134,7 @@
 			"api": "API",
 			"entry": "Ponto de entrada padrão",
 			"exit": "Ponto de saída padrão",
+			"note": "Nota",
 			"appSettings": "Configurações do aplicativo",
 			"selectAction": "Selecionar ação",
 			"resize": "Redimensionar nó",

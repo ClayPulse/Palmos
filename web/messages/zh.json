@@ -1113,6 +1113,11 @@
 		"ariaLabel": "点击节点句柄以打开节点菜单",
 		"required": "*必填"
 	},
+	"nodeNoteModal": {
+		"title": "备注",
+		"placeholder": "输入此节点的备注...",
+		"save": "保存"
+	},
 	"draggableItem": {
 		"ariaLabel": "拖拽以移动"
 	},
@@ -1129,6 +1134,7 @@
 			"api": "API",
 			"entry": "默认入口点",
 			"exit": "默认出口点",
+			"note": "备注",
 			"appSettings": "应用设置",
 			"selectAction": "选择操作",
 			"resize": "调整节点大小",

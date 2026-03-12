@@ -1086,6 +1086,11 @@
 		"ariaLabel": "Haz clic en el manejador del nodo para abrir el menú del nodo",
 		"required": "*obligatorio"
 	},
+	"nodeNoteModal": {
+		"title": "Nota",
+		"placeholder": "Introduce una nota para este nodo...",
+		"save": "Guardar"
+	},
 	"draggableItem": {
 		"ariaLabel": "Arrastrar para mover"
 	},
@@ -1102,6 +1107,7 @@
 			"api": "API",
 			"entry": "Punto de entrada predeterminado",
 			"exit": "Punto de salida predeterminado",
+			"note": "Nota",
 			"appSettings": "Configuración de la aplicación",
 			"selectAction": "Seleccionar acción",
 			"resize": "Redimensionar nodo",

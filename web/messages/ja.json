@@ -1113,6 +1113,11 @@
 		"ariaLabel": "ノードハンドルをクリックしてノードメニューを開きます",
 		"required": "*必須"
 	},
+	"nodeNoteModal": {
+		"title": "ノート",
+		"placeholder": "このノードのメモを入力してください...",
+		"save": "保存"
+	},
 	"draggableItem": {
 		"ariaLabel": "ドラッグして移動"
 	},
@@ -1129,6 +1134,7 @@
 			"api": "API",
 			"entry": "デフォルト入口",
 			"exit": "デフォルト出口",
+			"note": "ノート",
 			"appSettings": "アプリ設定",
 			"selectAction": "アクションを選択",
 			"resize": "ノードのサイズを変更",

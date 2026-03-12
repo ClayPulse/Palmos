@@ -1113,6 +1113,11 @@
 		"ariaLabel": "Cliquez sur la poignée du nœud pour ouvrir le menu du nœud",
 		"required": "*obligatoire"
 	},
+	"nodeNoteModal": {
+		"title": "Note",
+		"placeholder": "Saisir une note pour ce nœud...",
+		"save": "Enregistrer"
+	},
 	"draggableItem": {
 		"ariaLabel": "Faire glisser pour déplacer"
 	},
@@ -1129,6 +1134,7 @@
 			"api": "API",
 			"entry": "Point d'entrée par défaut",
 			"exit": "Point de sortie par défaut",
+			"note": "Note",
 			"appSettings": "Paramètres de l'application",
 			"selectAction": "Sélectionner une action",
 			"resize": "Redimensionner le nœud",
