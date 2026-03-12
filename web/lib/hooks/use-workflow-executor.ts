@@ -29,23 +29,37 @@ export default function useWorkflowExecutor({
   function getExecutionSequence(
     entryPoint: ReactFlowNode<AppNodeData>,
   ): ReactFlowNode<AppNodeData>[] {
-    // 1. Build adjacency list
+    // 1. Build forward and reverse adjacency lists
     const adj: Record<string, string[]> = {};
-    for (const node of localNodes) adj[node.id] = [];
+    const radj: Record<string, string[]> = {};
+    for (const node of localNodes) {
+      adj[node.id] = [];
+      radj[node.id] = [];
+    }
     for (const edge of localEdges) {
       if (adj[edge.source]) adj[edge.source].push(edge.target);
+      if (radj[edge.target]) radj[edge.target].push(edge.source);
     }
 
-    // 2. Mark reachable nodes from entryPoint
+    // 2. Walk forward from entryPoint to find all downstream nodes
+    const downstream = new Set<string>();
+    function markDownstream(nodeId: string) {
+      if (downstream.has(nodeId)) return;
+      downstream.add(nodeId);
+      for (const neighbor of adj[nodeId] || []) markDownstream(neighbor);
+    }
+    markDownstream(entryPoint.id);
+
+    // 3. For every downstream node, walk backward to pull in upstream dependencies
     const reachable = new Set<string>();
-    function markReachable(nodeId: string) {
+    function markUpstream(nodeId: string) {
       if (reachable.has(nodeId)) return;
       reachable.add(nodeId);
-      for (const neighbor of adj[nodeId] || []) markReachable(neighbor);
+      for (const parent of radj[nodeId] || []) markUpstream(parent);
     }
-    markReachable(entryPoint.id);
+    for (const nodeId of downstream) markUpstream(nodeId);
 
-    // 3. Build inDegree only within the reachable subgraph
+    // 4. Build inDegree only within the reachable subgraph
     const inDegree: Record<string, number> = {};
     for (const nodeId of reachable) inDegree[nodeId] = 0;
     for (const edge of localEdges) {
@@ -54,7 +68,7 @@ export default function useWorkflowExecutor({
       }
     }
 
-    // 4. Kahn's algorithm over the reachable subgraph
+    // 5. Kahn's algorithm over the reachable subgraph
     const queue: string[] = [];
     for (const nodeId of reachable) {
       if (inDegree[nodeId] === 0) queue.push(nodeId);
@@ -72,7 +86,7 @@ export default function useWorkflowExecutor({
       }
     }
 
-    // 5. Cycle detection
+    // 6. Cycle detection
     if (sequence.length < reachable.size) {
       addToast({
         title: "Cycle Detected in Workflow",
