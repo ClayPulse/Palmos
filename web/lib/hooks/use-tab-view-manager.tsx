@@ -31,11 +31,10 @@ export function useTabViewManager() {
   const [tabIndex, setTabIndex] = useState<number>(
     editorContext?.editorStates.tabIndex ?? -1,
   );
-  const [activeTabView, setActiveTabView] = useState<TabView | undefined>(
-    tabViews[tabIndex],
-  );
 
-  const [isCreatingTab, setIsCreatingTab] = useState<boolean>(true);
+  const activeTabView = tabViews[tabIndex];
+
+  const [isCreatingTab, setIsCreatingTab] = useState<boolean>(false);
 
   // Generate tab names with index suffixes for duplicates
   const nameCounts: Record<string, number> = {};
@@ -73,11 +72,6 @@ export function useTabViewManager() {
     }
     setTabViews(editorContext.editorStates.tabViews);
     setTabIndex(editorContext.editorStates.tabIndex);
-    setActiveTabView(
-      editorContext?.editorStates.tabViews[
-        editorContext?.editorStates.tabIndex
-      ],
-    );
   }, [
     editorContext?.editorStates.tabViews,
     editorContext?.editorStates.tabIndex,
@@ -330,7 +324,10 @@ export function useTabViewManager() {
     return newTabView;
   }
 
-  async function createCanvasTabView(canvasConfig: CanvasViewConfig, openedWorkflow?: Workflow) {
+  async function createCanvasTabView(
+    canvasConfig: CanvasViewConfig,
+    openedWorkflow?: Workflow,
+  ) {
     setIsCreatingTab(true);
 
     if (!editorContext) {
@@ -495,9 +492,20 @@ export function useTabViewManager() {
     let currentTab = activeTabView;
 
     if (!currentTab || currentTab?.type !== ViewModeEnum.Canvas) {
-      currentTab = await createCanvasTabView({
+      const newTab = await createCanvasTabView({
         viewId: createCanvasViewId(),
       } as CanvasViewConfig);
+
+      if (!newTab) {
+        addToast({
+          title: "Error creating canvas",
+          description: `Failed to create a new canvas view.`,
+          color: "danger",
+        });
+        return undefined;
+      }
+
+      currentTab = newTab;
 
       // Open explorer for canvas views
       editorContext?.setEditorStates((prev) => ({
@@ -507,7 +515,7 @@ export function useTabViewManager() {
 
       if (!currentTab) {
         console.error("Failed to create a new canvas tab");
-        return;
+        return undefined;
       }
     }
 
