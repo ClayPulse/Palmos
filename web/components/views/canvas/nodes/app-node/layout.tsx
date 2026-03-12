@@ -182,6 +182,15 @@ export default function CanvasNodeViewLayout({
           </span>
         </div>
       )}
+      {node.data.note && (
+        <div className="pointer-events-none absolute top-0 right-0 z-50 -translate-x-2 -translate-y-1/2">
+          <span className="bg-warning text-warning-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
+            {node.data.note.split(" ").length > 3
+              ? node.data.note.split(" ").slice(0, 3).join(" ") + "…"
+              : node.data.note}
+          </span>
+        </div>
+      )}
 
       <NodeResizer
         minWidth={40}
@@ -293,6 +302,8 @@ function CanvasNodeControl({
   nodeData: AppNodeData;
   setNodeData: (data: Partial<AppNodeData>) => void;
 }) {
+  const editorContext = useContext(EditorContext);
+
   const { openVibeCode } = useVibeCode();
   const { openAppInfoModal } = useAppInfo();
   const { getInstalledExtensionApp } = useExtensionAppManager();
@@ -395,39 +406,25 @@ function CanvasNodeControl({
         </Button>
       </Tooltip>
 
-      <Tooltip content={t("canvasNode.tooltips.appSettings")} placement="top">
+      <Tooltip content={"Note"} placement="top">
         <Button
           isIconOnly
           variant="light"
           size="sm"
-          className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
-          data-active={isShowingOwnedApps ? "true" : "false"}
-          onPress={async () => {
-            // Open app details
-            const extension = await getInstalledExtensionApp(nodeData.config.app);
-            if (!extension) {
-              addToast({
-                title: "App not found",
-                description:
-                  "The app associated with this node is not installed.",
-                color: "danger",
-              });
-              return;
-            }
-            openAppInfoModal({
-              id: extension.config.id,
-              name: extension.config.displayName ?? extension.config.id,
-              version: extension.config.version,
-              author: extension.config.author,
-              license: extension.config.license,
-              url: extension.config.repository,
-              readme: extension.config.repository
-                ? extension.config.repository + "/README.md"
-                : undefined,
-            });
+          className="data-[active=true]:bg-default data-[active=true]:text-danger"
+          onPress={() => {
+            editorContext?.updateModalStates({
+              nodeNote: {
+                isOpen: true,
+                note: nodeData.note,
+                setNote: (note: string) => {
+                  setNodeData({ note });
+                }
+              },
+            })
           }}
         >
-          <Icon name="settings" variant="outlined" />
+          <Icon name="note" variant="outlined" />
         </Button>
       </Tooltip>
 
@@ -460,6 +457,44 @@ function CanvasNodeControl({
             {(item) => <SelectItem key={item.name}>{item.name}</SelectItem>}
           </Select>
         </Form>
+      </Tooltip>
+
+      <Tooltip content={t("canvasNode.tooltips.appSettings")} placement="top">
+        <Button
+          isIconOnly
+          variant="light"
+          size="sm"
+          className="data-[active=true]:bg-default data-[active=true]:text-default-foreground"
+          data-active={isShowingOwnedApps ? "true" : "false"}
+          onPress={async () => {
+            // Open app details
+            const extension = await getInstalledExtensionApp(
+              nodeData.config.app,
+            );
+            if (!extension) {
+              addToast({
+                title: "App not found",
+                description:
+                  "The app associated with this node is not installed.",
+                color: "danger",
+              });
+              return;
+            }
+            openAppInfoModal({
+              id: extension.config.id,
+              name: extension.config.displayName ?? extension.config.id,
+              version: extension.config.version,
+              author: extension.config.author,
+              license: extension.config.license,
+              url: extension.config.repository,
+              readme: extension.config.repository
+                ? extension.config.repository + "/README.md"
+                : undefined,
+            });
+          }}
+        >
+          <Icon name="settings" variant="outlined" />
+        </Button>
       </Tooltip>
 
       <Tooltip content={t("canvasNode.tooltips.delete")} placement="top">

@@ -8,6 +8,7 @@ import ArtifactModal from "../modals/artifact-modal";
 import EditorSettingsModal from "../modals/editor-settings-modal";
 import LoginModal from "../modals/login-modal";
 import MarketplaceModal from "../modals/marketplace-modal";
+import NodeNoteModal from "../modals/node-note-modal";
 import OpenInProjectModal from "../modals/open-in-project-modal";
 import OpenSourceInfoModal from "../modals/open-source-info-modal";
 import PasswordModal from "../modals/password-modal";
@@ -262,6 +263,20 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
           onClose={() => {
             editorContext?.updateModalStates({
               artifact: { isOpen: false },
+            });
+          }}
+        />
+      )}
+
+      {useDelayedUnmount(
+        modalStates?.nodeNote?.isOpen ?? false,
+        delaySeconds,
+      ) && (
+        <NodeNoteModal
+          isOpen={modalStates?.nodeNote?.isOpen ?? false}
+          onClose={() => {
+            editorContext?.updateModalStates({
+              nodeNote: { isOpen: false },
             });
           }}
         />
