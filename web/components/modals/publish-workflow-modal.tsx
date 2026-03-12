@@ -15,6 +15,18 @@ import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
+function bumpVersion(version: string): string {
+  if (!version) return version;
+  const parts = version.split(".");
+  const lastPart = parts[parts.length - 1];
+  const num = parseInt(lastPart, 10);
+  if (!isNaN(num)) {
+    parts[parts.length - 1] = String(num + 1);
+    return parts.join(".");
+  }
+  return version;
+}
+
 export default function PublishWorkflowModal({
   isOpen,
   onClose,
@@ -22,6 +34,7 @@ export default function PublishWorkflowModal({
   localNodes,
   localEdges,
   saveAppsSnapshotStates,
+  openedWorkflow,
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -32,21 +45,18 @@ export default function PublishWorkflowModal({
   saveAppsSnapshotStates?: () => Promise<{
     [key: string]: any;
   }>;
+  openedWorkflow?: Workflow;
 }) {
   const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const activeTabView =
-    editorContext?.editorStates.tabViews[
-      editorContext?.editorStates.tabIndex
-    ];
-  const openedFromWorkflow = activeTabView?.openedFromWorkflow;
+  const openedWorkflowName = openedWorkflow?.name;
 
   type PublishMode = "update" | "new";
   const [publishMode, setPublishMode] = useState<PublishMode>(
-    openedFromWorkflow ? "update" : "new",
+    openedWorkflow ? "update" : "new",
   );
-  const [name, setName] = useState(openedFromWorkflow ?? "");
+  const [name, setName] = useState(openedWorkflowName ?? "");
   const [version, setVersion] = useState("");
   const [visibility, setVisibility] = useState<Workflow["visibility"]>(
     "public",
@@ -60,18 +70,24 @@ export default function PublishWorkflowModal({
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      const defaultMode: PublishMode = openedFromWorkflow ? "update" : "new";
+      const defaultMode: PublishMode = openedWorkflow ? "update" : "new";
       setPublishMode(defaultMode);
-      setName(defaultMode === "update" ? (openedFromWorkflow ?? "") : "");
-      setVersion("");
-      setVisibility("public");
+      setName(defaultMode === "update" ? (openedWorkflowName ?? "") : "");
+
+      if (openedWorkflow) {
+        setVersion(bumpVersion(openedWorkflow.version));
+        setVisibility(openedWorkflow.visibility);
+      } else {
+        setVersion("");
+        setVisibility("public");
+      }
     }
   }, [isOpen]);
 
   // Sync name when switching modes
   function handleModeChange(mode: PublishMode) {
     setPublishMode(mode);
-    setName(mode === "update" ? (openedFromWorkflow ?? "") : "");
+    setName(mode === "update" ? (openedWorkflowName ?? "") : "");
   }
 
   async function publishWorkflow() {
@@ -158,7 +174,7 @@ export default function PublishWorkflowModal({
       placement={"center"}
     >
       <div className="flex w-full flex-col items-center gap-2">
-        {openedFromWorkflow && (
+        {openedWorkflowName && (
           <div className="border-default-200 flex w-full overflow-hidden rounded-lg border">
             <button
               className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
@@ -168,7 +184,7 @@ export default function PublishWorkflowModal({
               }`}
               onClick={() => handleModeChange("update")}
             >
-              Update &ldquo;{openedFromWorkflow}&rdquo;
+              Update &ldquo;{openedWorkflowName}&rdquo;
             </button>
             <button
               className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
@@ -213,7 +229,7 @@ export default function PublishWorkflowModal({
 
         <Button color="primary" onPress={handlePress}>
           {publishMode === "update"
-            ? `Update "${openedFromWorkflow}"`
+            ? `Update "${openedWorkflowName}"`
             : t("common.publish")}
         </Button>
       </div>

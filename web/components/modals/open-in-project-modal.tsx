@@ -203,7 +203,7 @@ export default function OpenInProjectModal({
         appConfigs: workflow.content.nodes.map((node) => node.data.config),
         initialWorkflowContent: workflow.content,
       },
-      workflow.name,
+      workflow,
     );
   }
 

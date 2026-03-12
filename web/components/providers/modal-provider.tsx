@@ -237,6 +237,7 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
           saveAppsSnapshotStates={
             modalStates?.publishWorkflow?.saveAppsSnapshotStates
           }
+          openedWorkflow={modalStates?.publishWorkflow?.openedWorkflow}
         />
       )}
 

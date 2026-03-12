@@ -176,7 +176,7 @@ export default function CanvasNodeViewLayout({
         </div>
       )}
       {node.data.isDefaultExit && (
-        <div className="pointer-events-none absolute top-0 right-0 z-50 -translate-x-2 -translate-y-1/2">
+        <div className="pointer-events-none absolute top-0 left-0 z-50 translate-x-2 -translate-y-1/2">
           <span className="bg-danger text-danger-foreground rounded-full px-2 py-0.5 text-xs font-semibold">
             {t("canvasNode.labels.exit")}
           </span>
