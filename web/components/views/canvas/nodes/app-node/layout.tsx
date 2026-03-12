@@ -406,7 +406,7 @@ function CanvasNodeControl({
         </Button>
       </Tooltip>
 
-      <Tooltip content={"Note"} placement="top">
+      <Tooltip content={t("canvasNode.tooltips.note")} placement="top">
         <Button
           isIconOnly
           variant="light"

@@ -1113,6 +1113,11 @@
     "ariaLabel": "Click on node handle to open node menu",
     "required": "*required"
   },
+  "nodeNoteModal": {
+    "title": "Note",
+    "placeholder": "Enter note for this node...",
+    "save": "Save"
+  },
   "draggableItem": {
     "ariaLabel": "Drag to move"
   },
@@ -1129,6 +1134,7 @@
       "api": "API",
       "entry": "Default Entry Point",
       "exit": "Default Exit Point",
+      "note": "Note",
       "appSettings": "App Settings",
       "selectAction": "Select Action",
       "resize": "Resize node",

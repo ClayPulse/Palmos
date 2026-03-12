@@ -12,15 +12,15 @@ export default function NodeNoteModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { getTranslations } = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const note = editorContext?.editorStates.modalStates?.nodeNote;
 
   return (
-    <ModalWrapper isOpen={isOpen} onClose={onClose} title={"Note"}>
+    <ModalWrapper isOpen={isOpen} onClose={onClose} title={t("nodeNoteModal.title")}>
       <Textarea
-        placeholder="Enter note for this node..."
+        placeholder={t("nodeNoteModal.placeholder")}
         defaultValue={note?.note ?? ""}
         onChange={(e) => {
           note?.setNote?.(e.currentTarget.value);
@@ -28,7 +28,7 @@ export default function NodeNoteModal({
       />
 
       <Button onPress={onClose} className="mt-2 w-full" color="primary">
-        Save
+        {t("nodeNoteModal.save")}
       </Button>
     </ModalWrapper>
   );

@@ -1113,6 +1113,11 @@
     "ariaLabel": "노드 핸들을 클릭하여 노드 메뉴 열기",
     "required": "*필수"
   },
+  "nodeNoteModal": {
+    "title": "메모",
+    "placeholder": "이 노드에 대한 메모를 입력하세요...",
+    "save": "저장"
+  },
   "draggableItem": {
     "ariaLabel": "드래그하여 이동"
   },
@@ -1129,6 +1134,7 @@
       "api": "API",
       "entry": "기본 진입점",
       "exit": "기본 출구점",
+      "note": "메모",
       "appSettings": "앱 설정",
       "selectAction": "액션 선택",
       "resize": "노드 크기 조정",
