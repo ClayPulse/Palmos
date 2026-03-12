@@ -158,11 +158,14 @@ export default function ViewArea() {
             return;
           }
 
-          await createCanvasTabView({
-            viewId: createCanvasViewId(),
-            appConfigs: workflow.content.nodes.map((node) => node.data.config),
-            initialWorkflowContent: workflow.content,
-          });
+          await createCanvasTabView(
+            {
+              viewId: createCanvasViewId(),
+              appConfigs: workflow.content.nodes.map((node) => node.data.config),
+              initialWorkflowContent: workflow.content,
+            },
+            workflowName,
+          );
 
           const params = getQueryParams();
           // Delete workflow param

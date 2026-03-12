@@ -11,7 +11,7 @@ import {
 } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
@@ -36,7 +36,17 @@ export default function PublishWorkflowModal({
   const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const [name, setName] = useState("");
+  const activeTabView =
+    editorContext?.editorStates.tabViews[
+      editorContext?.editorStates.tabIndex
+    ];
+  const openedFromWorkflow = activeTabView?.openedFromWorkflow;
+
+  type PublishMode = "update" | "new";
+  const [publishMode, setPublishMode] = useState<PublishMode>(
+    openedFromWorkflow ? "update" : "new",
+  );
+  const [name, setName] = useState(openedFromWorkflow ?? "");
   const [version, setVersion] = useState("");
   const [visibility, setVisibility] = useState<Workflow["visibility"]>(
     "public",
@@ -46,6 +56,23 @@ export default function PublishWorkflowModal({
     "unlisted",
     "private",
   ];
+
+  // Reset state when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const defaultMode: PublishMode = openedFromWorkflow ? "update" : "new";
+      setPublishMode(defaultMode);
+      setName(defaultMode === "update" ? (openedFromWorkflow ?? "") : "");
+      setVersion("");
+      setVisibility("public");
+    }
+  }, [isOpen]);
+
+  // Sync name when switching modes
+  function handleModeChange(mode: PublishMode) {
+    setPublishMode(mode);
+    setName(mode === "update" ? (openedFromWorkflow ?? "") : "");
+  }
 
   async function publishWorkflow() {
     try {
@@ -131,11 +158,37 @@ export default function PublishWorkflowModal({
       placement={"center"}
     >
       <div className="flex w-full flex-col items-center gap-2">
+        {openedFromWorkflow && (
+          <div className="border-default-200 flex w-full overflow-hidden rounded-lg border">
+            <button
+              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
+                publishMode === "update"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-default-100"
+              }`}
+              onClick={() => handleModeChange("update")}
+            >
+              Update &ldquo;{openedFromWorkflow}&rdquo;
+            </button>
+            <button
+              className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
+                publishMode === "new"
+                  ? "bg-primary text-primary-foreground"
+                  : "hover:bg-default-100"
+              }`}
+              onClick={() => handleModeChange("new")}
+            >
+              Publish as New
+            </button>
+          </div>
+        )}
+
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           label={t("publishWorkflowModal.workflowName")}
           placeholder={t("publishWorkflowModal.workflowNamePlaceholder")}
+          isDisabled={publishMode === "update"}
         />
 
         <Input
@@ -159,7 +212,9 @@ export default function PublishWorkflowModal({
         </Select>
 
         <Button color="primary" onPress={handlePress}>
-          {t("common.publish")}
+          {publishMode === "update"
+            ? `Update "${openedFromWorkflow}"`
+            : t("common.publish")}
         </Button>
       </div>
     </ModalWrapper>
