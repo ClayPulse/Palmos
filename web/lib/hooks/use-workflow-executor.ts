@@ -29,61 +29,50 @@ export default function useWorkflowExecutor({
   function getExecutionSequence(
     entryPoint: ReactFlowNode<AppNodeData>,
   ): ReactFlowNode<AppNodeData>[] {
-    // Build adjacency list and in-degree map
+    // 1. Build adjacency list
     const adj: Record<string, string[]> = {};
-    const inDegree: Record<string, number> = {};
-    for (const node of localNodes) {
-      adj[node.id] = [];
-      inDegree[node.id] = 0;
-    }
+    for (const node of localNodes) adj[node.id] = [];
     for (const edge of localEdges) {
-      if (adj[edge.source]) {
-        adj[edge.source].push(edge.target);
-      }
-      if (inDegree[edge.target] !== undefined) {
-        inDegree[edge.target]++;
-      }
+      if (adj[edge.source]) adj[edge.source].push(edge.target);
     }
 
-    // Find all nodes reachable from entryPoint
+    // 2. Mark reachable nodes from entryPoint
     const reachable = new Set<string>();
     function markReachable(nodeId: string) {
       if (reachable.has(nodeId)) return;
       reachable.add(nodeId);
-      for (const neighbor of adj[nodeId] || []) {
-        markReachable(neighbor);
-      }
+      for (const neighbor of adj[nodeId] || []) markReachable(neighbor);
     }
     markReachable(entryPoint.id);
 
-    // Kahn's algorithm: only process reachable nodes
-    const queue: string[] = [];
-    for (const nodeId of Object.keys(inDegree)) {
-      if (inDegree[nodeId] === 0 && reachable.has(nodeId)) {
-        queue.push(nodeId);
-      }
-    }
-    const sequence: ReactFlowNode<AppNodeData>[] = [];
-    const visited = new Set<string>();
-    while (queue.length > 0) {
-      const nodeId = queue.shift();
-      if (!nodeId) continue;
-      if (!reachable.has(nodeId) || visited.has(nodeId)) continue;
-      visited.add(nodeId);
-      const node = localNodes.find((n) => n.id === nodeId);
-      if (node) {
-        sequence.push(node);
-      }
-      for (const neighbor of adj[nodeId] || []) {
-        if (!reachable.has(neighbor)) continue;
-        inDegree[neighbor]--;
-        if (inDegree[neighbor] === 0) {
-          queue.push(neighbor);
-        }
+    // 3. Build inDegree only within the reachable subgraph
+    const inDegree: Record<string, number> = {};
+    for (const nodeId of reachable) inDegree[nodeId] = 0;
+    for (const edge of localEdges) {
+      if (reachable.has(edge.source) && reachable.has(edge.target)) {
+        inDegree[edge.target]++;
       }
     }
 
-    // Cycle detection: if not all reachable nodes are in sequence, there is a cycle
+    // 4. Kahn's algorithm over the reachable subgraph
+    const queue: string[] = [];
+    for (const nodeId of reachable) {
+      if (inDegree[nodeId] === 0) queue.push(nodeId);
+    }
+
+    const sequence: ReactFlowNode<AppNodeData>[] = [];
+    while (queue.length > 0) {
+      const nodeId = queue.shift()!;
+      const node = localNodes.find((n) => n.id === nodeId);
+      if (node) sequence.push(node);
+      for (const neighbor of adj[nodeId] || []) {
+        if (!reachable.has(neighbor)) continue;
+        inDegree[neighbor]--;
+        if (inDegree[neighbor] === 0) queue.push(neighbor);
+      }
+    }
+
+    // 5. Cycle detection
     if (sequence.length < reachable.size) {
       addToast({
         title: "Cycle Detected in Workflow",
@@ -93,12 +82,11 @@ export default function useWorkflowExecutor({
       });
       throw new Error("Cycle detected in workflow graph");
     }
+
     return sequence;
   }
 
-  function checkNodeAction(
-    sequence: ReactFlowNode<AppNodeData>[],
-  ): boolean {
+  function checkNodeAction(sequence: ReactFlowNode<AppNodeData>[]): boolean {
     let passed = true;
     for (const node of sequence) {
       const { selectedAction } = node.data as AppNodeData;
