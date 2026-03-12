@@ -29,61 +29,64 @@ export default function useWorkflowExecutor({
   function getExecutionSequence(
     entryPoint: ReactFlowNode<AppNodeData>,
   ): ReactFlowNode<AppNodeData>[] {
-    // Build adjacency list and in-degree map
+    // 1. Build forward and reverse adjacency lists
     const adj: Record<string, string[]> = {};
-    const inDegree: Record<string, number> = {};
+    const radj: Record<string, string[]> = {};
     for (const node of localNodes) {
       adj[node.id] = [];
-      inDegree[node.id] = 0;
+      radj[node.id] = [];
     }
     for (const edge of localEdges) {
-      if (adj[edge.source]) {
-        adj[edge.source].push(edge.target);
-      }
-      if (inDegree[edge.target] !== undefined) {
+      if (adj[edge.source]) adj[edge.source].push(edge.target);
+      if (radj[edge.target]) radj[edge.target].push(edge.source);
+    }
+
+    // 2. Walk forward from entryPoint to find all downstream nodes
+    const downstream = new Set<string>();
+    function markDownstream(nodeId: string) {
+      if (downstream.has(nodeId)) return;
+      downstream.add(nodeId);
+      for (const neighbor of adj[nodeId] || []) markDownstream(neighbor);
+    }
+    markDownstream(entryPoint.id);
+
+    // 3. For every downstream node, walk backward to pull in upstream dependencies
+    const reachable = new Set<string>();
+    function markUpstream(nodeId: string) {
+      if (reachable.has(nodeId)) return;
+      reachable.add(nodeId);
+      for (const parent of radj[nodeId] || []) markUpstream(parent);
+    }
+    for (const nodeId of downstream) markUpstream(nodeId);
+
+    // 4. Build inDegree only within the reachable subgraph
+    const inDegree: Record<string, number> = {};
+    for (const nodeId of reachable) inDegree[nodeId] = 0;
+    for (const edge of localEdges) {
+      if (reachable.has(edge.source) && reachable.has(edge.target)) {
         inDegree[edge.target]++;
       }
     }
 
-    // Find all nodes reachable from entryPoint
-    const reachable = new Set<string>();
-    function markReachable(nodeId: string) {
-      if (reachable.has(nodeId)) return;
-      reachable.add(nodeId);
-      for (const neighbor of adj[nodeId] || []) {
-        markReachable(neighbor);
-      }
-    }
-    markReachable(entryPoint.id);
-
-    // Kahn's algorithm: only process reachable nodes
+    // 5. Kahn's algorithm over the reachable subgraph
     const queue: string[] = [];
-    for (const nodeId of Object.keys(inDegree)) {
-      if (inDegree[nodeId] === 0 && reachable.has(nodeId)) {
-        queue.push(nodeId);
-      }
+    for (const nodeId of reachable) {
+      if (inDegree[nodeId] === 0) queue.push(nodeId);
     }
+
     const sequence: ReactFlowNode<AppNodeData>[] = [];
-    const visited = new Set<string>();
     while (queue.length > 0) {
-      const nodeId = queue.shift();
-      if (!nodeId) continue;
-      if (!reachable.has(nodeId) || visited.has(nodeId)) continue;
-      visited.add(nodeId);
+      const nodeId = queue.shift()!;
       const node = localNodes.find((n) => n.id === nodeId);
-      if (node) {
-        sequence.push(node);
-      }
+      if (node) sequence.push(node);
       for (const neighbor of adj[nodeId] || []) {
         if (!reachable.has(neighbor)) continue;
         inDegree[neighbor]--;
-        if (inDegree[neighbor] === 0) {
-          queue.push(neighbor);
-        }
+        if (inDegree[neighbor] === 0) queue.push(neighbor);
       }
     }
 
-    // Cycle detection: if not all reachable nodes are in sequence, there is a cycle
+    // 6. Cycle detection
     if (sequence.length < reachable.size) {
       addToast({
         title: "Cycle Detected in Workflow",
@@ -93,12 +96,11 @@ export default function useWorkflowExecutor({
       });
       throw new Error("Cycle detected in workflow graph");
     }
+
     return sequence;
   }
 
-  function checkNodeAction(
-    sequence: ReactFlowNode<AppNodeData>[],
-  ): boolean {
+  function checkNodeAction(sequence: ReactFlowNode<AppNodeData>[]): boolean {
     let passed = true;
     for (const node of sequence) {
       const { selectedAction } = node.data as AppNodeData;
