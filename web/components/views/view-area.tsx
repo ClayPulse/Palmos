@@ -166,7 +166,7 @@ export default function ViewArea() {
               ),
               initialWorkflowContent: workflow.content,
             },
-            workflowName,
+            workflow,
           );
 
           const params = getQueryParams();

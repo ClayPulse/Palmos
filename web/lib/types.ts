@@ -228,6 +228,7 @@ export type ModalStates = {
     saveAppsSnapshotStates?: () => Promise<{
       [key: string]: any;
     }>;
+    openedWorkflow?: Workflow;
   };
   sharing?: {
     isOpen?: boolean;
@@ -330,8 +331,8 @@ export type CanvasViewConfig = {
 export type TabView = {
   type: ViewModeEnum;
   config: AppViewConfig | CanvasViewConfig;
-  /** The name of the workflow this tab was opened from, if any. */
-  openedFromWorkflow?: string;
+  /** The workflow object this tab was opened from, if any. */
+  openedWorkflow?: Workflow;
 };
 
 // #endregion

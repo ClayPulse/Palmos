@@ -183,6 +183,9 @@ export default function CanvasView({
       icon: "cloud_upload",
     },
     async () => {
+      const tabView = editorContext?.editorStates.tabViews.find(
+        (v) => (v.config as CanvasViewConfig).viewId === config.viewId,
+      );
       editorContext?.updateModalStates({
         publishWorkflow: {
           isOpen: true,
@@ -191,6 +194,7 @@ export default function CanvasView({
           localEdges: editorContext?.editorStates.workflowEdges,
           entryPoint: entryPoint,
           saveAppsSnapshotStates: saveAppsSnapshotStates,
+          openedWorkflow: tabView?.openedWorkflow,
         },
       });
     },
