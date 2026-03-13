@@ -127,7 +127,7 @@ function PanelContent() {
   ];
 
   const selectedTab =
-    editorContext?.editorStates.sideMenuTab ?? SideMenuTabEnum.Projects;
+    editorContext?.editorStates.sideMenuTab ?? SideMenuTabEnum.Apps;
 
   function setSelectedTab(tab: SideMenuTabEnum) {
     editorContext?.setEditorStates((prev) => {
