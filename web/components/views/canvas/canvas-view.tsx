@@ -27,9 +27,23 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTheme } from "next-themes";
-import { memo, useCallback, useContext, useEffect, useRef } from "react";
+import { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
+
+function createCopiedEdgeId(source: string, target: string) {
+  const suffix =
+    typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+  return `${source}-${target}-${suffix}`;
+}
+
+type CopiedCanvasSelection = {
+  nodes: ReactFlowNode<AppNodeData>[];
+  edges: ReactFlowEdge[];
+};
 
 export default function CanvasView({
   config,
@@ -60,10 +74,19 @@ export default function CanvasView({
   const { getViewCenterCoordForNode } = useCanvas();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const copiedNodesRef = useRef<ReactFlowNode<AppNodeData>[]>([]);
+  const [copiedSelection, setCopiedSelection] = useState<CopiedCanvasSelection>({
+    nodes: [],
+    edges: [],
+  });
   // Maps viewId -> flow position for nodes being pasted, so promoteToWorkflowNode
   // can place them at the correct location instead of defaulting to canvas center.
+  // NOTE: These must stay as refs — they are written during paste and read synchronously
+  // in the promoteToWorkflowNode effect; state updates are async and would break that handshake.
   const pastePositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  // Stores full pasted node snapshots so config-sync promotion preserves node data.
+  const pastedNodesRef = useRef<Map<string, ReactFlowNode<AppNodeData>>>(
+    new Map(),
+  );
 
   // this is called when new node is added below using updateWorkflowNodes
   const onNodesChange = useCallback(
@@ -262,7 +285,19 @@ export default function CanvasView({
       if (e.ctrlKey && e.key === "c") {
         const selected = localNodes.filter((n) => n.selected);
         if (selected.length === 0) return;
-        copiedNodesRef.current = selected;
+        const selectedNodeIds = new Set(selected.map((node) => node.id));
+        // Store node references directly — ReactFlow nodes contain non-serializable
+        // internal fields (e.g. internals.domNode), so we must NOT structuredClone them.
+        setCopiedSelection({
+          nodes: selected,
+          edges: localEdges
+            .filter(
+              (edge) =>
+                selectedNodeIds.has(edge.source) &&
+                selectedNodeIds.has(edge.target),
+            )
+            .map((edge) => ({ ...edge })),
+        });
         const names = selected.map((n) => n.data.config.app).join(", ");
         addToast({
           title: `Copied ${selected.length} node${selected.length > 1 ? "s" : ""}`,
@@ -270,12 +305,13 @@ export default function CanvasView({
           color: "success",
         });
       } else if (e.ctrlKey && e.key === "v") {
-        const copied = copiedNodesRef.current;
-        if (!copied || copied.length === 0) return;
+        const { nodes: copiedNodes, edges: copiedEdges } =
+          copiedSelection;
+        if (!copiedNodes || copiedNodes.length === 0) return;
 
         // Compute bounding-box center of the copied selection (flow coordinates)
         let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-        for (const node of copied) {
+        for (const node of copiedNodes) {
           const w = node.width ?? node.data.config.initialWidth ?? 640;
           const h = node.height ?? node.data.config.initialHeight ?? 360;
           minX = Math.min(minX, node.position.x);
@@ -297,9 +333,12 @@ export default function CanvasView({
 
         const dx = canvasCenter.x - selCenterX;
         const dy = canvasCenter.y - selCenterY;
+        const nodeIdMap = new Map<string, string>();
 
-        const pasteItems = copied.map((node) => {
+        const pasteItems = copiedNodes.map((node) => {
           const newViewId = createAppViewId(node.data.config.app);
+          nodeIdMap.set(node.id, newViewId);
+
           const newAppConfig: AppViewConfig = {
             ...node.data.config,
             viewId: newViewId,
@@ -319,9 +358,30 @@ export default function CanvasView({
             data: {
               ...node.data,
               config: newAppConfig,
+              isRunning: false,
             },
           };
+          pastedNodesRef.current.set(newViewId, newNode);
           return { newNode, newAppConfig };
+        });
+
+        const newEdges = copiedEdges.flatMap((edge) => {
+          const newSource = nodeIdMap.get(edge.source);
+          const newTarget = nodeIdMap.get(edge.target);
+
+          if (!newSource || !newTarget) {
+            return [];
+          }
+
+          return [
+            {
+              ...edge,
+              id: createCopiedEdgeId(newSource, newTarget),
+              source: newSource,
+              target: newTarget,
+              selected: false,
+            },
+          ];
         });
 
         // Insert nodes at correct positions before the config-sync effect can
@@ -330,6 +390,7 @@ export default function CanvasView({
           ...oldNodes,
           ...pasteItems.map((p) => p.newNode),
         ]);
+        updateWorkflowEdges((oldEdges) => [...oldEdges, ...newEdges]);
 
         // Register new app configs in the canvas config so the cleanup effect
         // does not remove the freshly-pasted nodes on the next config change.
@@ -361,7 +422,15 @@ export default function CanvasView({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isActive, localNodes, updateWorkflowNodes, screenToFlowPosition]);
+  }, [
+    copiedSelection,
+    isActive,
+    localEdges,
+    localNodes,
+    screenToFlowPosition,
+    updateWorkflowEdges,
+    updateWorkflowNodes,
+  ]);
 
   // Promote nodes to workflow nodes,
   // or remove workflow nodes that are no longer in the config
@@ -369,6 +438,21 @@ export default function CanvasView({
     function promoteToWorkflowNode(newApps: AppViewConfig[]) {
       const newNodes: ReactFlowNode<AppNodeData>[] =
         newApps?.map((appConfig) => {
+          const pastedNode = pastedNodesRef.current.get(appConfig.viewId);
+          if (pastedNode) {
+            pastedNodesRef.current.delete(appConfig.viewId);
+            pastePositionsRef.current.delete(appConfig.viewId);
+
+            return {
+              ...pastedNode,
+              data: {
+                ...pastedNode.data,
+                config: appConfig,
+                isRunning: false,
+              },
+            };
+          }
+
           // Priority: 1) pasted position, 2) saved workflow position, 3) canvas center
           const pastePosition = pastePositionsRef.current.get(appConfig.viewId);
           pastePositionsRef.current.delete(appConfig.viewId);
