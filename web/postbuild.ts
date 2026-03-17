@@ -30,6 +30,13 @@ generateSW({
   ],
   runtimeCaching: [
     {
+      urlPattern: ({ url }) => url.search.includes("workflow="),
+      handler: "NetworkOnly",
+      options: {
+        cacheName: "workflow-routes",
+      },
+    },
+    {
       urlPattern: ({ request }) => request.mode === "navigate",
       handler: "NetworkFirst",
       options: {
