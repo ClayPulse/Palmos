@@ -1,20 +1,19 @@
 import AppExplorer from "@/components/explorer/app/app-explorer";
 import ProjectExplorer from "@/components/explorer/project/project-explorer";
 import WorkspaceExplorer from "@/components/explorer/workspace/workspace-explorer";
+import BaseSidePanel from "@/components/interface/panels/base-side-panel";
 import Tabs from "@/components/misc/tabs";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum, SideMenuTabEnum } from "@/lib/enums";
 import useExplorer from "@/lib/hooks/use-explorer";
-import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { TabItem } from "@/lib/types";
 import { Button } from "@heroui/react";
-import { AnimatePresence, motion } from "framer-motion";
 import { useContext } from "react";
 import Icon from "../../misc/icon";
 import ProjectIndicator from "../project-indicator";
 
-export default function NavSideMenu({
+export default function SideNavPanel({
   isMenuOpen,
   setIsMenuOpen,
 }: {
@@ -24,87 +23,37 @@ export default function NavSideMenu({
   const editorContext = useContext(EditorContext);
 
   return (
-    <AnimatePresence>
-      {isMenuOpen && (
-        <MenuPanel>
-          <div className="h-full w-full overflow-y-hidden min-[768px]:py-2 min-[768px]:pr-1 min-[768px]:pl-2">
-            <div className="bg-content2 grid h-full w-full grid-rows-[48px_1fr] overflow-hidden shadow-md min-[768px]:rounded-xl">
-              <div className="relative flex h-full w-full items-center justify-center">
-                <div className="absolute flex h-full w-full items-center px-2 py-1 max-[768px]:justify-end">
-                  <Button
-                    className="hidden rotate-270 max-[768px]:block"
-                    onPress={() => setIsMenuOpen(false)}
-                    isIconOnly
-                    variant="light"
-                  >
-                    <Icon name="start" variant="round" />
-                  </Button>
-                  <Button
-                    className="rotate-180 max-[768px]:hidden"
-                    onPress={() => setIsMenuOpen(false)}
-                    isIconOnly
-                    variant="light"
-                  >
-                    <Icon name="start" variant="round" />
-                  </Button>
-                </div>
-                <div className="relative">
-                  {editorContext?.editorStates.project && <ProjectIndicator />}
-                </div>
-              </div>
-
-              <PanelContent />
+    <BaseSidePanel isOpen={isMenuOpen} direction="left">
+      <div className="h-full w-full overflow-y-hidden min-[768px]:py-2 min-[768px]:pr-1 min-[768px]:pl-2">
+        <div className="bg-content2 grid h-full w-full grid-rows-[48px_1fr] overflow-hidden shadow-md min-[768px]:rounded-xl">
+          <div className="relative flex h-full w-full items-center justify-center">
+            <div className="absolute flex h-full w-full items-center px-2 py-1 max-[768px]:justify-end">
+              <Button
+                className="hidden rotate-270 max-[768px]:block"
+                onPress={() => setIsMenuOpen(false)}
+                isIconOnly
+                variant="light"
+              >
+                <Icon name="start" variant="round" />
+              </Button>
+              <Button
+                className="rotate-180 max-[768px]:hidden"
+                onPress={() => setIsMenuOpen(false)}
+                isIconOnly
+                variant="light"
+              >
+                <Icon name="start" variant="round" />
+              </Button>
+            </div>
+            <div className="relative">
+              {editorContext?.editorStates.project && <ProjectIndicator />}
             </div>
           </div>
-        </MenuPanel>
-      )}
-    </AnimatePresence>
-  );
-}
 
-function MenuPanel({ children }: { children?: React.ReactNode }) {
-  const { isLandscape } = useScreenSize();
-
-  return (
-    <>
-      {isLandscape ? (
-        <motion.div
-          className="z-50 hidden h-full w-100 shrink-0 md:block"
-          initial={{
-            x: -400,
-          }}
-          animate={{
-            x: 0,
-          }}
-          exit={{
-            x: -400,
-          }}
-          transition={{
-            type: "tween",
-          }}
-        >
-          {children}
-        </motion.div>
-      ) : (
-        <motion.div
-          className="safe-area-padding absolute top-0 left-0 z-50 h-full w-full md:hidden"
-          initial={{
-            y: "-100vh",
-          }}
-          animate={{
-            y: 0,
-          }}
-          exit={{
-            y: "-100vh",
-          }}
-          transition={{
-            type: "tween",
-          }}
-        >
-          {children}
-        </motion.div>
-      )}
-    </>
+          <PanelContent />
+        </div>
+      </div>
+    </BaseSidePanel>
   );
 }
 
