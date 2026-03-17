@@ -1,13 +1,13 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import MarkdownRender from "@/components/misc/markdown-render";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import { EditorChatMessage, UserMessage } from "@/lib/types";
 import { Button, Input, Spinner } from "@heroui/react";
 import { useContext, useEffect, useRef, useState } from "react";
 import BaseSidePanel from "./base-side-panel";
-import MarkdownRender from "@/components/misc/markdown-render";
 
 export default function ChatPanel() {
   const editorContext = useContext(EditorContext);
@@ -37,10 +37,10 @@ export default function ChatPanel() {
 
   return (
     <BaseSidePanel isOpen={isOpen} direction="right">
-      <div className="h-full w-full overflow-y-hidden min-[768px]:py-2 min-[768px]:pl-1 min-[768px]:pr-2">
-        <div className="bg-content2 grid h-full w-full grid-rows-[48px_1fr_max-content] overflow-hidden shadow-md min-[768px]:rounded-xl">
+      <div className="h-full w-full overflow-y-hidden min-[768px]:py-2 min-[768px]:pr-2 min-[768px]:pl-1">
+        <div className="bg-content2 grid h-full w-full grid-rows-[48px_1fr_max-content_max-content] overflow-hidden shadow-md min-[768px]:rounded-xl">
           {/* Header */}
-          <div className="relative flex h-full w-full items-center justify-center border-b border-default-200">
+          <div className="border-default-200 relative flex h-full w-full items-center justify-center border-b">
             <span className="text-sm font-semibold">AI Assistant</span>
             <div className="absolute right-0 flex h-full items-center px-2">
               <Button
@@ -79,7 +79,7 @@ export default function ChatPanel() {
           </div>
 
           {/* Input */}
-          <div className="flex items-center gap-2 border-t border-default-200 px-3 py-2">
+          <div className="border-default-200 flex items-center gap-2 border-t px-3 pt-2 pb-2">
             <Input
               className="flex-1"
               placeholder="Ask the AI assistant..."
@@ -93,15 +93,38 @@ export default function ChatPanel() {
               }}
               size="sm"
               isDisabled={isSending}
+              endContent={
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  color="primary"
+                  onPress={handleSend}
+                  isDisabled={!inputText.trim() || isSending}
+                >
+                  <Icon name="send" variant="round" />
+                </Button>
+              }
             />
+          </div>
+
+          {/* Quick-action buttons */}
+          <div className="flex justify-end gap-1 px-3 pb-[max(env(safe-area-inset-bottom),0.75rem)]">
             <Button
-              isIconOnly
               size="sm"
-              color="primary"
-              onPress={handleSend}
-              isDisabled={!inputText.trim() || isSending}
+              variant="flat"
+              onPress={() => setInputText("What can you help me with?")}
             >
-              <Icon name="send" variant="round" />
+              <Icon name="help" variant="round" className="text-sm" />
+              Help
+            </Button>
+            <Button
+              size="sm"
+              variant="flat"
+              onPress={() => setInputText("Show me examples of Pulse Apps")}
+            >
+              <Icon name="lightbulb" variant="round" className="text-sm" />
+              Examples
             </Button>
           </div>
         </div>
@@ -126,11 +149,7 @@ function ChatBubble({ message }: { message: EditorChatMessage }) {
             : "bg-content3 text-content3-foreground"
         }`}
       >
-        {isUser ? (
-          text
-        ) : (
-          <MarkdownRender content={text} />
-        )}
+        {isUser ? text : <MarkdownRender content={text} />}
       </div>
     </div>
   );

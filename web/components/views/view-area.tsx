@@ -337,7 +337,7 @@ export default function ViewArea() {
       ) : (
         <div>No view selected</div>
       )}
-      <div className="absolute right-3 bottom-3 z-30 flex flex-col items-center gap-1">
+      <div className="absolute right-3 bottom-3 z-20 flex flex-col items-center gap-1">
         <Tooltip content="AI Assistant" placement="left">
           <Button
             isIconOnly
