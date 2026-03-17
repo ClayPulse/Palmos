@@ -1,30 +1,15 @@
 "use client";
 
-import Icon from "@/components/misc/icon";
 import { PlatformEnum } from "@/lib/enums";
-import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
-import { AppInfoModalContent } from "@/lib/types";
-import { Button } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
-import NavSideMenu from "./nav-side-menu";
+import SideNavPanel from "../panels/side-nav-panel";
 import NavTopBar from "./nav-top-bar";
+import ChatPanel from "@/components/interface/panels/chat-panel";
 
-import packageJson from "../../../../package.json";
-import readme from "../../../../README.md";
 import WelcomeScreen from "../status-screens/welcome";
-
-const appInfo: AppInfoModalContent = {
-  id: "pulse-editor",
-  name: "Pulse Editor",
-  version: packageJson.version,
-  author: "ClayPulse",
-  license: "MIT",
-  url: "https://pulse-editor.com",
-  readme: readme,
-};
 
 export default function Nav({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
@@ -33,8 +18,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const isMenuOpen = editorContext?.editorStates.isSideMenuOpen ?? false;
 
   const { setTheme } = useTheme();
-
-  const { openAppInfoModal } = useAppInfo();
 
   const [isShowNavbar, setIsShowNavbar] = useState(true);
   const [isAnimationFinished, setIsAnimationFinished] = useState(false);
@@ -85,10 +68,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           className={`bg-default relative hidden h-full w-full overflow-hidden data-[animation-finished=true]:block`}
           data-animation-finished={isAnimationFinished}
         >
-          <div className="relative grid h-full w-full grid-cols-[max-content_auto] grid-rows-1">
+          <div className="relative grid h-full w-full grid-cols-[max-content_auto_max-content] grid-rows-1">
             <div className="h-full w-full overflow-y-hidden">
               {isShowNavbar && (
-                <NavSideMenu
+                <SideNavPanel
                   isMenuOpen={isMenuOpen}
                   setIsMenuOpen={setIsMenuOpen}
                 />
@@ -109,18 +92,10 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
               <div className={`h-full w-full overflow-hidden`}>{children}</div>
             </div>
+            <div className="h-full w-full overflow-y-hidden">
+              {isShowNavbar && <ChatPanel />}
+            </div>
           </div>
-
-          <Button
-            isIconOnly
-            className="absolute right-2 bottom-2"
-            variant="light"
-            onPress={() => {
-              openAppInfoModal(appInfo);
-            }}
-          >
-            <Icon name="info" />
-          </Button>
         </div>
       )}
     </>

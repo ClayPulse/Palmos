@@ -118,6 +118,29 @@ export default function EditorToolbar() {
                 </Button>
               </Tooltip>
 
+              <Tooltip content="Chat with AI Assistant">
+                <Button
+                  variant={
+                    editorContext?.editorStates?.isChatPanelOpen
+                      ? "solid"
+                      : "light"
+                  }
+                  isIconOnly
+                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
+                  onPress={() => {
+                    if (editorContext?.editorStates) {
+                      editorContext?.setEditorStates((prev) => ({
+                        ...prev,
+                        isChatPanelOpen:
+                          !editorContext?.editorStates.isChatPanelOpen,
+                      }));
+                    }
+                  }}
+                >
+                  <Icon name="chat" variant="outlined" />
+                </Button>
+              </Tooltip>
+
               <Tooltip content={t("editorToolbar.voiceChat.tooltip")}>
                 <Button
                   isIconOnly

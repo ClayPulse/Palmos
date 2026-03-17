@@ -87,6 +87,9 @@ export type EditorStates = {
   isSideMenuOpen?: boolean;
   sideMenuTab?: SideMenuTabEnum;
 
+  // Chat panel
+  isChatPanelOpen?: boolean;
+
   // Selected views
   selectedViewIds?: string[];
 
