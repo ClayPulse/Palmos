@@ -14,7 +14,6 @@ import {
 } from "../types";
 import { createAppViewId, createCanvasViewId } from "../views/view-helpers";
 import { useProjectManager } from "./use-project-manager";
-import useRouter from "./use-router";
 import { useScreenSize } from "./use-screen-size";
 
 export function useTabViewManager() {
@@ -22,7 +21,6 @@ export function useTabViewManager() {
   const imcContext = useContext(IMCContext);
 
   const { isLandscape } = useScreenSize();
-  const router = useRouter();
   const { createProject, openProject } = useProjectManager();
 
   const [tabViews, setTabViews] = useState<TabView[]>(
@@ -75,40 +73,6 @@ export function useTabViewManager() {
   }, [
     editorContext?.editorStates.tabViews,
     editorContext?.editorStates.tabIndex,
-  ]);
-
-  // Pend workflow or app param when tab index changes
-  useEffect(() => {
-    if (isCreatingTab) return;
-
-    const latestTabViews = editorContext?.editorStates.tabViews ?? [];
-    const latestTabIndex = editorContext?.editorStates.tabIndex ?? -1;
-    const latestActiveTabView = latestTabViews[latestTabIndex];
-
-    if (latestActiveTabView) {
-      if (latestActiveTabView.type === ViewModeEnum.App) {
-        const appConfig = latestActiveTabView.config as AppViewConfig;
-
-        router.setQueryParams({
-          ...router.getQueryParams(),
-          app: appConfig.app,
-        });
-      } else if (latestActiveTabView.type === ViewModeEnum.Canvas) {
-        const canvasConfig = latestActiveTabView.config as CanvasViewConfig;
-
-        router.setQueryParams({
-          ...router.getQueryParams(),
-          canvas: canvasConfig.viewId,
-        });
-      }
-    } else if (latestTabViews.length === 0 || latestTabIndex === -1) {
-      router.replace(`/`);
-    }
-  }, [
-    activeTabView,
-    editorContext?.editorStates.tabViews,
-    editorContext?.editorStates.tabIndex,
-    isCreatingTab,
   ]);
 
   function selectTab(newIndex: number) {
@@ -639,6 +603,7 @@ export function useTabViewManager() {
   }
 
   return {
+    isCreatingTab,
     tabViews,
     tabItems,
     tabIndex,

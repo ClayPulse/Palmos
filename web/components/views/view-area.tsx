@@ -41,12 +41,14 @@ export default function ViewArea() {
     createAppTabView,
     createCanvasTabView,
     activeTabView,
+    isCreatingTab,
   } = useTabViewManager();
-  const { setQueryParams, getQueryParams } = useRouter();
+  const { setQueryParams, getQueryParams, replace } = useRouter();
 
   const [isShowTabs, setIsShowTabs] = useState<boolean>(false);
 
   const isInitialized = useRef(false);
+  const hadActiveTabRef = useRef(false);
   const app = params?.get("app");
   const canvasId = params?.get("canvas");
   const workflowName = params?.get("workflow");
@@ -168,12 +170,6 @@ export default function ViewArea() {
             },
             workflow,
           );
-
-          const params = getQueryParams();
-          // Delete workflow param
-          delete params.workflow;
-
-          setQueryParams(params);
         }
 
         addToast({
@@ -203,6 +199,37 @@ export default function ViewArea() {
       setIsShowTabs(true);
     }
   }, [tabViews]);
+
+  // Pend workflow or app param when tab index changes
+  useEffect(() => {
+    if (isCreatingTab) return;
+
+    const latestTabViews = editorContext?.editorStates.tabViews ?? [];
+    const latestTabIndex = editorContext?.editorStates.tabIndex ?? -1;
+    const latestActiveTabView = latestTabViews[latestTabIndex];
+
+    if (latestActiveTabView) {
+      hadActiveTabRef.current = true;
+      if (latestActiveTabView.type === ViewModeEnum.App) {
+        const appConfig = latestActiveTabView.config as AppViewConfig;
+        const { workflow: _w, canvas: _c, ...otherParams } = getQueryParams();
+        setQueryParams({ ...otherParams, app: appConfig.app });
+      } else if (latestActiveTabView.type === ViewModeEnum.Canvas) {
+        const canvasConfig = latestActiveTabView.config as CanvasViewConfig;
+        const { workflow: _w, app: _a, ...otherParams } = getQueryParams();
+        setQueryParams({ ...otherParams, canvas: canvasConfig.viewId });
+      }
+    } else if (hadActiveTabRef.current) {
+      // All tabs closed — clear view params
+      const { workflow: _w, canvas: _c, app: _a, ...rest } = getQueryParams();
+      setQueryParams(rest);
+    }
+  }, [
+    activeTabView,
+    editorContext?.editorStates.tabViews,
+    editorContext?.editorStates.tabIndex,
+    isCreatingTab,
+  ]);
 
   return (
     <div className="h-full w-full overflow-hidden">
