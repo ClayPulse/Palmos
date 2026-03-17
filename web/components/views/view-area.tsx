@@ -82,7 +82,14 @@ export default function ViewArea() {
         `/api/workflow/get?name=${workflowName}&latest=true`,
       );
       if (!response.ok) {
-        throw new Error("Failed to fetch workflow info");
+        addToast({
+          title: "Error Fetching Workflow",
+          description: `Failed to fetch workflow "${workflowName}". ${await response.text()}.`,
+          color: "danger",
+        });
+        throw new Error(
+          `Failed to fetch workflow info: ${await response.text()}`,
+        );
       }
 
       const workflowInfo: Workflow | undefined = await response.json();
