@@ -38,6 +38,9 @@
 
 :root {
   --background: #ffffff;
+  --pulse-amber: #f59e0b;
+  --pulse-orange: #f97316;
+  --pulse-yellow: #fbbf24;
 }
 
 [data-theme="dark"] {
@@ -46,6 +49,35 @@
 
 body {
   font-family: sans-serif;
+}
+
+/* ── Pulse brand animations ─────────────────────────────────── */
+
+@keyframes pulse-ecg {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(251, 191, 36, 0.3); }
+  50%      { box-shadow: 0 0 20px rgba(249, 115, 22, 0.6), 0 0 40px rgba(251, 191, 36, 0.2); }
+}
+
+@keyframes pulse-send-glow {
+  0%, 100% { box-shadow: 0 0 6px rgba(251, 191, 36, 0.4); }
+  50%      { box-shadow: 0 0 16px rgba(249, 115, 22, 0.7), 0 0 32px rgba(251, 191, 36, 0.3); }
+}
+
+@utility animate-pulse-ecg {
+  animation: pulse-ecg 2s linear infinite;
+}
+
+@utility animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+@utility animate-pulse-send-glow {
+  animation: pulse-send-glow 1.5s ease-in-out infinite;
 }
 
 @layer base {
