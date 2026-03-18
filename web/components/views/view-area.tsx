@@ -1,10 +1,16 @@
 "use client";
 
+import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import useRouter from "@/lib/hooks/use-router";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { AppViewConfig, AppInfoModalContent, CanvasViewConfig, Workflow } from "@/lib/types";
+import {
+  AppInfoModalContent,
+  AppViewConfig,
+  CanvasViewConfig,
+  Workflow,
+} from "@/lib/types";
 import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
 import { addToast, Button, Spinner, Tooltip } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
@@ -13,7 +19,6 @@ import { lazy, Suspense, useContext, useEffect, useRef, useState } from "react";
 import Icon from "../misc/icon";
 import Tabs from "../misc/tabs";
 import { EditorContext } from "../providers/editor-context-provider";
-import { useAppInfo } from "@/lib/hooks/use-app-info";
 import HomeView from "./home/home-view";
 import ProjectView from "./project/project-view";
 
@@ -337,25 +342,27 @@ export default function ViewArea() {
       ) : (
         <div>No view selected</div>
       )}
-      <div className="absolute right-3 bottom-3 z-20 flex flex-col items-center gap-1">
-        <Tooltip content="AI Assistant" placement="left">
-          <Button
-            isIconOnly
-            variant={editorContext?.editorStates.isChatPanelOpen ? "solid" : "light"}
-            onPress={() =>
-              editorContext?.setEditorStates((prev) => ({
-                ...prev,
-                isChatPanelOpen: !prev.isChatPanelOpen,
-              }))
-            }
-          >
-            <Icon name="auto_awesome" className="text-amber-500" />
-          </Button>
-        </Tooltip>
+      <div className="absolute right-5 bottom-4 z-20 flex flex-col items-center gap-1">
+        {!editorContext?.editorStates.isChatPanelOpen && (
+          <Tooltip content="AI Assistant" placement="left">
+            <Button
+              isIconOnly
+              color="secondary"
+              onPress={() =>
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  isChatPanelOpen: !prev.isChatPanelOpen,
+                }))
+              }
+            >
+              <Icon name="auto_awesome" className="text-amber-500" />
+            </Button>
+          </Tooltip>
+        )}
         <Tooltip content="App Info" placement="left">
           <Button
             isIconOnly
-            variant="light"
+            color="primary"
             onPress={() => openAppInfoModal(appInfo)}
           >
             <Icon name="info" />
