@@ -1,5 +1,5 @@
 import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
-import { PersistentSettings, ProjectInfo } from "../types";
+import { PersistentSettings, ProjectInfo, WorkflowContent } from "../types";
 
 export abstract class AbstractPlatformAPI {
   // Show a selection dialogue to pick a directory.
@@ -69,4 +69,55 @@ export abstract class AbstractPlatformAPI {
 
   // Create a new terminal and get socket
   abstract createTerminal(): Promise<string>;
+
+  // Canvas state persistence
+  /**
+   * Save the canvas workflow state for the given project.
+   * The default implementation persists to localStorage for offline support.
+   *
+   * @param projectUri A stable identifier for the project
+   *   (e.g. the full file-system path or the project name for cloud environments).
+   * @param content The workflow content to persist.
+   */
+  async saveCanvasState(
+    projectUri: string,
+    content: WorkflowContent,
+  ): Promise<void> {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(
+          `pulse-canvas-${projectUri}`,
+          JSON.stringify(content),
+        );
+      } catch (err) {
+        console.error("Failed to save canvas state to localStorage:", err);
+      }
+    }
+  }
+
+  /**
+   * Load the previously saved canvas workflow state for the given project.
+   * The default implementation reads from localStorage.
+   *
+   * @param projectUri A stable identifier for the project.
+   * @returns The saved workflow content, or undefined if nothing was saved.
+   */
+  async loadCanvasState(
+    projectUri: string,
+  ): Promise<WorkflowContent | undefined> {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem(`pulse-canvas-${projectUri}`);
+        if (!stored) return undefined;
+        const parsed = JSON.parse(stored);
+        if (!Array.isArray(parsed?.nodes) || !Array.isArray(parsed?.edges)) {
+          return undefined;
+        }
+        return parsed as WorkflowContent;
+      } catch (err) {
+        console.error("Failed to load canvas state from localStorage:", err);
+      }
+    }
+    return undefined;
+  }
 }

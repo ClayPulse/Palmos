@@ -1,4 +1,4 @@
-import { PersistentSettings, ProjectInfo } from "@/lib/types";
+import { PersistentSettings, ProjectInfo, WorkflowContent } from "@/lib/types";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
@@ -330,6 +330,42 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     throw new Error(
       "Method not implemented. Please use Termux for terminal connection via SSH.",
     );
+  }
+
+  async saveCanvasState(
+    projectUri: string,
+    content: WorkflowContent,
+  ): Promise<void> {
+    const canvasFile = new File(
+      [JSON.stringify(content, null, 2)],
+      "canvas.json",
+      { type: "application/json" },
+    );
+    try {
+      await this.writeFile(canvasFile, `${projectUri}/canvas.json`);
+    } catch (err) {
+      console.error("Failed to save canvas state to file:", err);
+      await super.saveCanvasState(projectUri, content);
+    }
+  }
+
+  async loadCanvasState(
+    projectUri: string,
+  ): Promise<WorkflowContent | undefined> {
+    try {
+      const hasCanvas = await this.hasPath(`${projectUri}/canvas.json`);
+      if (!hasCanvas) return undefined;
+      const file = await this.readFile(`${projectUri}/canvas.json`);
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      if (!Array.isArray(parsed?.nodes) || !Array.isArray(parsed?.edges)) {
+        return undefined;
+      }
+      return parsed as WorkflowContent;
+    } catch (err) {
+      console.error("Failed to load canvas state from file:", err);
+      return super.loadCanvasState(projectUri);
+    }
   }
 
   private getStoragePathAndDir(uri: string): {
