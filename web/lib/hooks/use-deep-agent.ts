@@ -40,7 +40,6 @@ export default function useDeepAgent(
   const [todos, setTodos] = useState<Todo[]>([]);
 
   const messageMapRef = useRef<Map<string, BaseMessage>>(new Map());
-  const threadIdRef = useRef<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
 
   const syncDisplay = useCallback(() => {
@@ -63,11 +62,7 @@ export default function useDeepAgent(
       const controller = new AbortController();
       abortRef.current = controller;
 
-      // Create or reuse thread
-      const threadId = threadIdRef.current ?? generateThreadId();
-      threadIdRef.current = threadId;
-
-      const url = `${apiUrl}/threads/${threadId}/runs/stream`;
+      const url = `${apiUrl}/stream`;
 
       fetch(url, {
         method: "POST",
@@ -76,7 +71,6 @@ export default function useDeepAgent(
         signal: controller.signal,
         body: JSON.stringify({
           input: { messages: [{ type: "human", content: text }] },
-          stream_subgraphs: true,
         }),
       })
         .then((res) => {
@@ -86,14 +80,22 @@ export default function useDeepAgent(
           return readSSEStream(res.body!, controller.signal, {
             onMessages: (data: unknown) => {
               // "messages" event format from LangGraph:
-              // [namespace, "messages", [messageChunk, metadata]]
-              // where messageChunk is { lc, type, id, kwargs: { content, id, ... } }
-              if (!Array.isArray(data) || data.length < 3) return;
+              // Without subgraphs: [messageChunk, metadata]
+              // With subgraphs:    [namespace, "messages", [messageChunk, metadata]]
+              if (!Array.isArray(data) || data.length < 2) return;
 
-              const payloadArr = data[2];
-              if (!Array.isArray(payloadArr) || payloadArr.length === 0) return;
-
-              const chunk = payloadArr[0] as Record<string, any> | null;
+              let chunk: Record<string, any> | null;
+              if (
+                data.length >= 3 &&
+                typeof data[0] === "string" &&
+                Array.isArray(data[2])
+              ) {
+                // Subgraph format: [namespace, "messages", [chunk, meta]]
+                chunk = data[2][0] as Record<string, any> | null;
+              } else {
+                // Direct format: [chunk, meta]
+                chunk = data[0] as Record<string, any> | null;
+              }
               if (!chunk) return;
 
               // Extract from LangChain serialized format
@@ -275,8 +277,8 @@ async function readSSEStream(
           case "error":
             handlers.onError(parsed);
             break;
-          case "end":
           case "metadata":
+          case "end":
             // no-op
             break;
           default:
@@ -298,10 +300,6 @@ async function readSSEStream(
 let _idCounter = 0;
 function generateId(): string {
   return `msg-${Date.now()}-${_idCounter++}`;
-}
-
-function generateThreadId(): string {
-  return `thread-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
 /**
