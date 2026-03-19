@@ -5,29 +5,47 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import type { Transition } from "framer-motion";
 import { motion } from "framer-motion";
-import { useContext, useLayoutEffect, useRef, useState } from "react";
+import {
+  useContext,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 export default function AppModeToggle() {
   const editorContext = useContext(EditorContext);
 
-  const [appMode, setAppMode] = useState<AppModeEnum>(
-    editorContext?.editorStates.appMode ?? AppModeEnum.Agent,
-  );
+  const [appMode, setAppMode] = useState<AppModeEnum | undefined>(undefined);
 
-  const chatRef = useRef<HTMLButtonElement>(null);
+  const agentRef = useRef<HTMLButtonElement>(null);
   const editorRef = useRef<HTMLButtonElement>(null);
-  const [pillDims, setPillDims] = useState({ width: 0, x: 0 });
+  const [pillDims, setPillDims] = useState<{ width: number; x: number } | null>(null);
 
   useLayoutEffect(() => {
-    const chatBtn = chatRef.current;
+    const agentBtn = agentRef.current;
     const editorBtn = editorRef.current;
-    if (!chatBtn || !editorBtn) return;
-    if (appMode === AppModeEnum.Agent) {
-      setPillDims({ width: chatBtn.offsetWidth, x: 0 });
-    } else {
-      setPillDims({ width: editorBtn.offsetWidth, x: chatBtn.offsetWidth });
-    }
+    if (!agentBtn || !editorBtn || !appMode) return;
+
+    const measure = () => {
+      if (appMode === AppModeEnum.Agent) {
+        setPillDims({ width: agentBtn.offsetWidth, x: 0 });
+      } else {
+        setPillDims({ width: editorBtn.offsetWidth, x: agentBtn.offsetWidth });
+      }
+    };
+
+    measure();
+
+    // Re-measure if buttons resize after icon fonts load
+    const ro = new ResizeObserver(measure);
+    ro.observe(agentBtn);
+    ro.observe(editorBtn);
+    return () => ro.disconnect();
   }, [appMode]);
+
+  useLayoutEffect(() => {
+    setAppMode(editorContext?.editorStates.appMode ?? AppModeEnum.Agent);
+  }, [editorContext?.editorStates.appMode]);
 
   const setMode = (mode: AppModeEnum) => {
     setAppMode(mode);
@@ -44,8 +62,10 @@ export default function AppModeToggle() {
   return (
     <div className="border-default-200 bg-default-100 relative flex items-center rounded-full border p-0.5 dark:border-white/10 dark:bg-white/6">
       {/* Single always-rendered pill – slides, resizes, and crossfades color */}
+      {pillDims && (
       <motion.div
         className="bg-content1 absolute top-0.5 bottom-0.5 left-0.5 overflow-hidden rounded-full shadow-sm dark:bg-white/12"
+        initial={{ width: pillDims.width, x: pillDims.x }}
         animate={{ width: pillDims.width, x: pillDims.x }}
         transition={springTransition}
       >
@@ -56,9 +76,10 @@ export default function AppModeToggle() {
           transition={colorTransition}
         />
       </motion.div>
+      )}
 
       <button
-        ref={chatRef}
+        ref={agentRef}
         onClick={() => setMode(AppModeEnum.Agent)}
         className="relative z-10 flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
       >
