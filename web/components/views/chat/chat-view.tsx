@@ -2,11 +2,9 @@
 
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
-import { EditorContext } from "@/components/providers/editor-context-provider";
 import useDeepAgent, { SubagentInfo, Todo } from "@/lib/hooks/use-deep-agent";
 import { Spinner } from "@heroui/react";
-import { motion } from "framer-motion";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL + "/api/agent";
 
@@ -20,9 +18,15 @@ const STARTER_PROMPTS = [
 ];
 
 export default function ChatView() {
-  const editorContext = useContext(EditorContext);
-  const { messages, isLoading, error, todos, submit, stop, getSubagentsByMessage } =
-    useDeepAgent(agentUrl);
+  const {
+    messages,
+    isLoading,
+    error,
+    todos,
+    submit,
+    stop,
+    getSubagentsByMessage,
+  } = useDeepAgent(agentUrl);
 
   const [inputText, setInputText] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -35,7 +39,8 @@ export default function ChatView() {
       if (e.deltaY < 0) {
         userScrolledUpRef.current = true;
       } else {
-        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+        const distanceFromBottom =
+          el.scrollHeight - el.scrollTop - el.clientHeight;
         if (distanceFromBottom < 30) userScrolledUpRef.current = false;
       }
     };
@@ -56,54 +61,12 @@ export default function ChatView() {
     submit(value);
   }
 
-  function switchToEditorMode() {
-    editorContext?.setEditorStates((prev) => ({ ...prev, appMode: "editor" }));
-  }
-
   const isEmptyConversation = messages.length === 0 && !isLoading;
 
   return (
     <div className="flex h-full w-full flex-col bg-gray-50 dark:bg-[#0d0d14]">
-      {/* Header */}
-      <div className="relative flex items-center justify-center border-b border-amber-300/40 bg-white px-4 py-3.5 shadow-sm dark:border-white/8 dark:bg-white/3">
-        <div className="flex items-center gap-2">
-          <motion.span
-            className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-            animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          >
-            <Icon name="bolt" className="text-xl" />
-          </motion.span>
-          <motion.span
-            className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-base font-bold tracking-wide text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-            animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-          >
-            PULSE AI
-          </motion.span>
-        </div>
-
-        {/* Right: stop button + mode switch */}
-        <div className="absolute right-3 flex items-center gap-1.5">
-          {isLoading && (
-            <button
-              className="flex h-8 w-8 items-center justify-center rounded-full text-amber-600 transition-colors hover:bg-amber-50 dark:text-amber-400/80 dark:hover:bg-white/8"
-              onClick={stop}
-              title="Stop"
-            >
-              <Icon name="stop" variant="round" className="text-lg" />
-            </button>
-          )}
-          <button
-            className="flex items-center gap-1.5 rounded-full border border-default-200 bg-white px-3 py-1.5 text-xs font-medium text-default-600 shadow-sm transition-all hover:border-default-300 hover:shadow dark:border-white/12 dark:bg-white/6 dark:text-white/70 dark:hover:border-white/20 dark:hover:bg-white/10"
-            onClick={switchToEditorMode}
-            title="Switch to Editor mode"
-          >
-            <Icon name="code" className="text-sm" />
-            <span className="hidden sm:inline">Editor mode</span>
-          </button>
-        </div>
-      </div>
+      {/* Spacer matching ChatNavBar height (h-14 + py-2×2 = 4.5rem) */}
+      <div className="h-18 shrink-0" />
 
       {/* Messages */}
       <div
@@ -112,14 +75,18 @@ export default function ChatView() {
       >
         {isEmptyConversation && (
           <div className="flex flex-1 flex-col items-center justify-center gap-5 py-12">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-amber-100/70 p-3 animate-pulse-glow dark:bg-amber-500/10">
-              <img src="/assets/pulse-logo.svg" alt="Pulse" className="h-full w-full" />
+            <div className="animate-pulse-glow flex h-20 w-20 items-center justify-center rounded-full bg-amber-100/70 p-3 dark:bg-amber-500/10">
+              <img
+                src="/assets/pulse-logo.svg"
+                alt="Pulse"
+                className="h-full w-full"
+              />
             </div>
             <div className="text-center">
-              <h2 className="text-lg font-semibold text-default-800 dark:text-white/90">
+              <h2 className="text-default-800 text-lg font-semibold dark:text-white/90">
                 What would you like to build?
               </h2>
-              <p className="mt-1 text-sm text-default-500 dark:text-white/50">
+              <p className="text-default-500 mt-1 text-sm dark:text-white/50">
                 Describe your idea and Pulse AI will help you bring it to life.
               </p>
             </div>
@@ -131,13 +98,13 @@ export default function ChatView() {
                   className="group flex min-h-14 items-center gap-2 rounded-xl border border-amber-300/60 bg-white px-3 py-3 text-left shadow-sm transition-all hover:border-amber-400 hover:bg-amber-50 hover:shadow-[0_0_14px_rgba(245,158,11,0.14)] dark:border-white/10 dark:bg-white/5 dark:hover:border-amber-500/50 dark:hover:bg-white/10"
                   onClick={() => handleSend(prompt.label)}
                 >
-                  <div className="shrink-0 flex items-center justify-center">
+                  <div className="flex shrink-0 items-center justify-center">
                     <Icon
                       name={prompt.icon}
                       className="text-xl leading-none text-amber-600/70 transition-colors group-hover:text-amber-600 dark:text-amber-400/70 dark:group-hover:text-amber-300"
                     />
                   </div>
-                  <span className="text-xs leading-snug text-default-700 transition-colors group-hover:text-default-900 dark:text-white/70 dark:group-hover:text-white/90">
+                  <span className="text-default-700 group-hover:text-default-900 text-xs leading-snug transition-colors dark:text-white/70 dark:group-hover:text-white/90">
                     {prompt.label}
                   </span>
                 </button>
@@ -206,16 +173,16 @@ export default function ChatView() {
 
       {/* Todo list */}
       {todos.length > 0 && (
-        <div className="border-t border-amber-200/40 px-4 py-2 dark:border-white/8 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]">
+        <div className="border-t border-amber-200/40 px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8">
           <TodoList todos={todos} />
         </div>
       )}
 
       {/* Input area */}
-      <div className="border-t border-amber-200/60 bg-white px-4 pb-4 pt-3 dark:border-white/8 dark:bg-white/3 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]">
+      <div className="border-t border-amber-200/60 bg-white px-4 pt-3 pb-4 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8 dark:bg-white/3">
         <div className="flex items-center gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]">
           <input
-            className="flex-1 bg-transparent py-3 text-sm text-default-900 placeholder-default-500 outline-none dark:text-white dark:placeholder-white/45"
+            className="text-default-900 placeholder-default-500 flex-1 bg-transparent py-3 text-sm outline-none dark:text-white dark:placeholder-white/45"
             placeholder="Ask Pulse AI anything..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
@@ -228,15 +195,24 @@ export default function ChatView() {
             disabled={isLoading}
             autoFocus
           />
-          <button
-            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white transition-all disabled:opacity-30 ${
-              inputText.trim() && !isLoading ? "animate-pulse-send-glow" : ""
-            }`}
-            onClick={() => handleSend()}
-            disabled={!inputText.trim() || isLoading}
-          >
-            <Icon name="arrow_upward" variant="round" className="text-base" />
-          </button>
+          {isLoading ? (
+            <button
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 transition-all dark:bg-amber-400/20 dark:text-amber-300"
+              onClick={stop}
+            >
+              <Icon name="stop" variant="round" className="text-base" />
+            </button>
+          ) : (
+            <button
+              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white transition-all disabled:opacity-30 ${
+                inputText.trim() ? "animate-pulse-send-glow" : ""
+              }`}
+              onClick={() => handleSend()}
+              disabled={!inputText.trim()}
+            >
+              <Icon name="arrow_upward" variant="round" className="text-base" />
+            </button>
+          )}
         </div>
 
         <div className="mt-2 flex justify-end gap-1.5 pb-[max(env(safe-area-inset-bottom),0.25rem)]">
@@ -274,14 +250,24 @@ function UserBubble({ text }: { text: string }) {
 
 // ── AI response card ────────────────────────────────────────────────────────
 
-function AIResponseCard({ content, isStreaming }: { content: string; isStreaming: boolean }) {
+function AIResponseCard({
+  content,
+  isStreaming,
+}: {
+  content: string;
+  isStreaming: boolean;
+}) {
   return (
     <div className="flex justify-start">
       <div className="flex max-w-[88%] gap-2.5">
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 p-1 dark:bg-amber-500/15">
-          <img src="/assets/pulse-logo.svg" alt="Pulse" className="h-full w-full" />
+          <img
+            src="/assets/pulse-logo.svg"
+            alt="Pulse"
+            className="h-full w-full"
+          />
         </div>
-        <div className="rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm text-default-800 shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
+        <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
           <MarkdownRender content={content} />
           {isStreaming && (
             <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
@@ -297,12 +283,16 @@ function AIResponseCard({ content, isStreaming }: { content: string; isStreaming
 function SubagentCard({ subagent }: { subagent: SubagentInfo }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const description = subagent.toolCall.args.description ?? subagent.toolCall.name;
-  const agentType = subagent.toolCall.args.subagent_type ?? subagent.toolCall.name;
+  const description =
+    subagent.toolCall.args.description ?? subagent.toolCall.name;
+  const agentType =
+    subagent.toolCall.args.subagent_type ?? subagent.toolCall.name;
 
   const elapsed = subagent.startedAt
     ? Math.round(
-        ((subagent.completedAt?.getTime() ?? Date.now()) - subagent.startedAt.getTime()) / 1000,
+        ((subagent.completedAt?.getTime() ?? Date.now()) -
+          subagent.startedAt.getTime()) /
+          1000,
       )
     : 0;
 
@@ -315,11 +305,15 @@ function SubagentCard({ subagent }: { subagent: SubagentInfo }) {
     subagent.status === "running" ? (
       <Spinner size="sm" />
     ) : subagent.status === "complete" ? (
-      <Icon name="check_circle" variant="round" className="text-sm text-green-500" />
+      <Icon
+        name="check_circle"
+        variant="round"
+        className="text-sm text-green-500"
+      />
     ) : subagent.status === "error" ? (
       <Icon name="error" variant="round" className="text-sm text-red-500" />
     ) : (
-      <span className="text-xs text-default-300 dark:text-white/30">○</span>
+      <span className="text-default-300 text-xs dark:text-white/30">○</span>
     );
 
   return (
@@ -329,16 +323,18 @@ function SubagentCard({ subagent }: { subagent: SubagentInfo }) {
         onClick={() => setIsExpanded(!isExpanded)}
       >
         {statusIcon}
-        <span className="flex-1 truncate font-medium text-default-700 dark:text-white/90">
+        <span className="text-default-700 flex-1 truncate font-medium dark:text-white/90">
           {agentType}
         </span>
         {elapsed > 0 && (
-          <span className="tabular-nums text-default-400 dark:text-white/50">{elapsed}s</span>
+          <span className="text-default-400 tabular-nums dark:text-white/50">
+            {elapsed}s
+          </span>
         )}
         <Icon
           name={isExpanded ? "expand_less" : "expand_more"}
           variant="round"
-          className="text-sm text-default-400 dark:text-white/50"
+          className="text-default-400 text-sm dark:text-white/50"
         />
       </button>
 
@@ -346,14 +342,16 @@ function SubagentCard({ subagent }: { subagent: SubagentInfo }) {
         <div className="space-y-1 border-t border-amber-200/60 px-2.5 py-2 dark:border-white/8">
           <p className="text-default-500 dark:text-white/65">{description}</p>
           {latestContent && (
-            <div className="mt-1 text-default-600 dark:text-white/80">
+            <div className="text-default-600 mt-1 dark:text-white/80">
               <MarkdownRender content={latestContent} />
             </div>
           )}
           {subagent.status === "running" && (
             <div className="flex items-center gap-1.5 pt-1">
               <Spinner size="sm" />
-              <span className="text-amber-500/60 dark:text-amber-300/80">Working...</span>
+              <span className="text-amber-500/60 dark:text-amber-300/80">
+                Working...
+              </span>
             </div>
           )}
         </div>
@@ -370,13 +368,13 @@ function TodoList({ todos }: { todos: Todo[] }) {
 
   return (
     <div className="rounded-lg border border-amber-200/60 bg-white p-2.5 dark:border-white/10 dark:bg-white/5">
-      <div className="mb-2 flex items-center justify-between text-xs text-default-500 dark:text-white/50">
+      <div className="text-default-500 mb-2 flex items-center justify-between text-xs dark:text-white/50">
         <span className="font-medium">Tasks</span>
         <span>
           {completed}/{todos.length}
         </span>
       </div>
-      <div className="mb-2.5 h-1 w-full overflow-hidden rounded-full bg-default-100 dark:bg-white/10">
+      <div className="bg-default-100 mb-2.5 h-1 w-full overflow-hidden rounded-full dark:bg-white/10">
         <div
           className="h-full rounded-full bg-linear-to-r from-amber-500 to-orange-500 transition-all duration-500"
           style={{ width: `${progress}%` }}
@@ -386,11 +384,17 @@ function TodoList({ todos }: { todos: Todo[] }) {
         {todos.map((todo, i) => (
           <li key={i} className="flex items-start gap-2 text-xs">
             {todo.status === "completed" ? (
-              <Icon name="check_circle" variant="round" className="mt-px text-sm text-green-500 shrink-0" />
+              <Icon
+                name="check_circle"
+                variant="round"
+                className="mt-px shrink-0 text-sm text-green-500"
+              />
             ) : todo.status === "in_progress" ? (
               <Spinner size="sm" className="mt-px shrink-0" />
             ) : (
-              <span className="mt-0.5 text-default-300 dark:text-white/30 shrink-0">○</span>
+              <span className="text-default-300 mt-0.5 shrink-0 dark:text-white/30">
+                ○
+              </span>
             )}
             <span
               className={
@@ -408,7 +412,9 @@ function TodoList({ todos }: { todos: Todo[] }) {
   );
 }
 
-function getLastAIContent(messages: import("@langchain/core/messages").BaseMessage[]): string {
+function getLastAIContent(
+  messages: import("@langchain/core/messages").BaseMessage[],
+): string {
   for (let i = messages.length - 1; i >= 0; i--) {
     const msg = messages[i];
     if (msg._getType() === "ai") {
@@ -418,7 +424,10 @@ function getLastAIContent(messages: import("@langchain/core/messages").BaseMessa
         return content
           .filter(
             (b): b is { type: "text"; text: string } =>
-              typeof b === "object" && b !== null && "type" in b && b.type === "text",
+              typeof b === "object" &&
+              b !== null &&
+              "type" in b &&
+              b.type === "text",
           )
           .map((b) => b.text)
           .join("");

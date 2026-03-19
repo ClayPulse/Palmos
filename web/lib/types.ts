@@ -13,7 +13,7 @@ import {
 } from "@pulse-editor/shared-utils";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
-import { SideMenuTabEnum } from "./enums";
+import { AppModeEnum, SideMenuTabEnum } from "./enums";
 import { BaseLLM } from "./modalities/llm/base-llm";
 import { BaseSTT } from "./modalities/stt/base-stt";
 import { BaseTTS } from "./modalities/tts/base-tts";
@@ -90,8 +90,8 @@ export type EditorStates = {
   // Chat panel
   isChatPanelOpen?: boolean;
 
-  // App mode: 'ai' for non-technical users, 'editor' for technical users
-  appMode?: 'ai' | 'editor';
+  // App mode: 'agent' for non-technical users, 'editor' for technical users
+  appMode?: AppModeEnum;
 
   // Selected views
   selectedViewIds?: string[];

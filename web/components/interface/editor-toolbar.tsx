@@ -10,6 +10,7 @@ import { addToast, Button, Divider, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
+import { AppModeEnum } from "@/lib/enums";
 
 export default function EditorToolbar() {
   const { getTranslations: t } = useTranslations();
@@ -227,7 +228,7 @@ export default function EditorToolbar() {
                   onPress={() =>
                     editorContext?.setEditorStates((prev) => ({
                       ...prev,
-                      appMode: "ai",
+                      appMode: AppModeEnum.Agent,
                     }))
                   }
                 >

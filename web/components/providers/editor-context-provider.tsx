@@ -1,5 +1,6 @@
 "use client";
 
+import { AppModeEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getLLMModel } from "@/lib/modalities/llm/get-llm";
@@ -32,7 +33,7 @@ const defaultEditorStates: EditorStates = {
   isInlineChatEnabled: false,
   isConsolePanelOpen: false,
   isChatPanelOpen: false,
-  appMode: 'ai',
+  appMode: AppModeEnum.Agent,
   isLoadingRecorder: false,
   isRecording: false,
   isListening: false,
@@ -320,7 +321,6 @@ export default function EditorContextProvider({
 
     settings?.apiKeys,
   ]);
-
 
   const updateModalStates: Dispatch<SetStateAction<ModalStates | undefined>> = (
     patchedState,
