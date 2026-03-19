@@ -16,13 +16,13 @@ import { addToast, Button, Spinner, Tooltip } from "@heroui/react";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useSearchParams } from "next/navigation";
 import { lazy, Suspense, useContext, useEffect, useRef, useState } from "react";
-import Icon from "../misc/icon";
-import Tabs from "../misc/tabs";
-import { EditorContext } from "../providers/editor-context-provider";
+import Icon from "../../misc/icon";
+import Tabs from "../../misc/tabs";
+import { EditorContext } from "../../providers/editor-context-provider";
 import HomeView from "./home/home-view";
 import ProjectView from "./project/project-view";
 
-import packageJson from "../../../package.json";
+import packageJson from "../../../../package.json";
 import readme from "../../../README.md";
 
 const LazyCanvasView = lazy(() =>

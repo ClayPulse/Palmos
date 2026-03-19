@@ -1,3 +1,4 @@
+import SandboxAppLoader from "@/components/app-loaders/sandbox-app-loader";
 import Loading from "@/components/interface/status-screens/loading";
 import NotAuthorized from "@/components/interface/status-screens/not-authorized";
 import { IMCContext } from "@/components/providers/imc-provider";
@@ -6,7 +7,6 @@ import { AppViewConfig, ExtensionApp } from "@/lib/types";
 import { ViewModel } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useState } from "react";
 import { compare } from "semver";
-import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
 
 export default function BaseAppView({
   config,
@@ -65,7 +65,7 @@ export default function BaseAppView({
           );
           await uninstallExtensionApp(cachedExt.config.id);
         }
-        
+
         await installAndOpenApp(cachedExt);
       } else if (
         config.app?.startsWith("http://") ||

@@ -9,8 +9,8 @@ import { Browser } from "@capacitor/browser";
 import { Button } from "@heroui/react";
 import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
-import BaseAppView from "../views/base/base-app-view";
 import ModalWrapper from "./wrapper";
+import BaseAppView from "../views/editor/base/base-app-view";
 
 export default function ArtifactModal({
   isOpen,

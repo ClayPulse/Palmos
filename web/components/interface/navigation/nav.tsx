@@ -68,34 +68,39 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           className={`bg-default relative hidden h-full w-full overflow-hidden data-[animation-finished=true]:block`}
           data-animation-finished={isAnimationFinished}
         >
-          <div className="relative grid h-full w-full grid-cols-[max-content_auto_max-content] grid-rows-1">
-            <div className="h-full w-full overflow-y-hidden">
-              {isShowNavbar && (
-                <SideNavPanel
-                  isMenuOpen={isMenuOpen}
-                  setIsMenuOpen={setIsMenuOpen}
-                />
-              )}
+          {editorContext?.editorStates.appMode === "ai" ? (
+            /* AI mode: full-screen, no nav chrome */
+            <div className="h-full w-full overflow-hidden">{children}</div>
+          ) : (
+            /* Editor mode: full nav layout */
+            <div className="relative grid h-full w-full grid-cols-[max-content_auto_max-content] grid-rows-1">
+              <div className="h-full w-full overflow-y-hidden">
+                {isShowNavbar && (
+                  <SideNavPanel
+                    isMenuOpen={isMenuOpen}
+                    setIsMenuOpen={setIsMenuOpen}
+                  />
+                )}
+              </div>
+              <div className="relative h-full w-full overflow-hidden">
+                {isShowNavbar && (
+                  <NavTopBar
+                    isMenuOpen={isMenuOpen}
+                    setIsMenuOpen={setIsMenuOpen}
+                    setIsSharingOpen={() => {
+                      editorContext?.updateModalStates({
+                        sharing: { isOpen: true },
+                      });
+                    }}
+                  />
+                )}
+                <div className={`h-full w-full overflow-hidden`}>{children}</div>
+              </div>
+              <div className="h-full w-full overflow-y-hidden">
+                {isShowNavbar && <ChatPanel />}
+              </div>
             </div>
-            <div className="relative h-full w-full overflow-hidden">
-              {isShowNavbar && (
-                <NavTopBar
-                  isMenuOpen={isMenuOpen}
-                  setIsMenuOpen={setIsMenuOpen}
-                  setIsSharingOpen={() => {
-                    editorContext?.updateModalStates({
-                      sharing: { isOpen: true },
-                    });
-                  }}
-                />
-              )}
-
-              <div className={`h-full w-full overflow-hidden`}>{children}</div>
-            </div>
-            <div className="h-full w-full overflow-y-hidden">
-              {isShowNavbar && <ChatPanel />}
-            </div>
-          </div>
+          )}
         </div>
       )}
     </>

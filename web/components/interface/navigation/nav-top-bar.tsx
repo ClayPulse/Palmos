@@ -17,6 +17,7 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
+  Tooltip,
 } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
@@ -124,6 +125,22 @@ export default function NavTopBar({
           <VoiceIndicator />
         </div>
         <div className="col-start-3 flex justify-end gap-x-1">
+          <Tooltip content="Switch to AI mode">
+            <Button
+              variant="light"
+              className="flex items-center gap-1.5 px-2 text-xs font-medium text-amber-600 dark:text-amber-400"
+              onPress={() =>
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  appMode: "ai",
+                }))
+              }
+            >
+              <Icon name="bolt" variant="round" className="text-base" />
+              <span className="hidden sm:inline">AI mode</span>
+            </Button>
+          </Tooltip>
+
           <div className="hidden items-center sm:flex">
             <CloudIndicator
               onClick={() => {

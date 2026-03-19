@@ -90,6 +90,9 @@ export type EditorStates = {
   // Chat panel
   isChatPanelOpen?: boolean;
 
+  // App mode: 'ai' for non-technical users, 'editor' for technical users
+  appMode?: 'ai' | 'editor';
+
   // Selected views
   selectedViewIds?: string[];
 
