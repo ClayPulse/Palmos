@@ -450,7 +450,13 @@ export type Workflow = {
 export type WorkflowContent = {
   nodes: ReactFlowNode<AppNodeData>[];
   edges: ReactFlowEdge[];
-  snapshotStates?: { [key: string]: any };
+  snapshotStates?: {
+    [viewId: string]: {
+      states: {
+        [stateKey: string]: any; // The state value can be of any type, depending on the app's implementation. It should be serializable to JSON.
+      };
+    };
+  };
 };
 
 export type AppNodeData = {
