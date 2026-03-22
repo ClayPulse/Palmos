@@ -80,42 +80,19 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           className={`bg-default relative hidden h-full w-full overflow-hidden data-[animation-finished=true]:block`}
           data-animation-finished={isAnimationFinished}
         >
-          {/* Shared nav bar – rendered once so AppModeToggle never unmounts */}
-          {isShowNavbar && (
-            <AppNavBar
-              style={{
-                paddingTop:
-                  getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
-              }}
-              left={
-                appMode === AppModeEnum.Agent ? (
-                  <ChatNavLeft />
-                ) : (
-                  <EditorNavLeft
-                    isMenuOpen={isMenuOpen}
-                    setIsMenuOpen={setIsMenuOpen}
-                  />
-                )
-              }
-              right={
-                appMode === AppModeEnum.Agent ? (
-                  <ChatNavRight />
-                ) : (
-                  <EditorNavRight
-                    setIsSharingOpen={() =>
-                      editorContext?.updateModalStates({
-                        sharing: { isOpen: true },
-                      })
-                    }
-                  />
-                )
-              }
-            />
-          )}
-
           {appMode === AppModeEnum.Agent ? (
-            /* Chat mode: full-height content (nav floats above) */
+            /* Chat mode: nav floats over full-width content */
             <div className="relative h-full w-full overflow-hidden">
+              {isShowNavbar && (
+                <AppNavBar
+                  style={{
+                    paddingTop:
+                      getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
+                  }}
+                  left={<ChatNavLeft />}
+                  right={<ChatNavRight />}
+                />
+              )}
               {children}
             </div>
           ) : (
@@ -130,6 +107,29 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                 )}
               </div>
               <div className="relative h-full w-full overflow-hidden">
+                {isShowNavbar && (
+                  <AppNavBar
+                    style={{
+                      paddingTop:
+                        getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
+                    }}
+                    left={
+                      <EditorNavLeft
+                        isMenuOpen={isMenuOpen}
+                        setIsMenuOpen={setIsMenuOpen}
+                      />
+                    }
+                    right={
+                      <EditorNavRight
+                        setIsSharingOpen={() =>
+                          editorContext?.updateModalStates({
+                            sharing: { isOpen: true },
+                          })
+                        }
+                      />
+                    }
+                  />
+                )}
                 <div className="h-full w-full overflow-hidden">{children}</div>
               </div>
               <div className="h-full w-full overflow-y-hidden">
