@@ -1,8 +1,8 @@
 import useAgentTools from "./hooks/agent/use-agent-tools";
 import useAgents from "./hooks/agent/use-agents";
+import useActionEffect from "./hooks/editor/use-action-effect";
 import useLoading from "./hooks/editor/use-loading";
 import useNotification from "./hooks/editor/use-notification";
-import useActionEffect from "./hooks/editor/use-action-effect";
 import useTheme from "./hooks/editor/use-theme";
 import useFile from "./hooks/workspace/use-file";
 
@@ -12,6 +12,7 @@ import useOCR from "./hooks/ai-modality/use-ocr";
 import useSTT from "./hooks/ai-modality/use-stt";
 import useTTS from "./hooks/ai-modality/use-tts";
 import useVideoGen from "./hooks/ai-modality/use-video-gen";
+import useAppSettings from "./hooks/editor/use-app-settings";
 import { useArtifact } from "./hooks/editor/use-artifact";
 import useEditorEnv from "./hooks/editor/use-editor-env";
 import useOpenApp from "./hooks/editor/use-open-app";
@@ -29,8 +30,10 @@ import SnapshotProvider from "./providers/snapshot-provider";
 export {
   ReceiveFileProvider,
   SnapshotProvider,
+  useActionEffect,
   useAgents,
   useAgentTools,
+  useAppSettings,
   useArtifact,
   useEditorEnv,
   useFile,
@@ -44,7 +47,6 @@ export {
   useOpenLink,
   useOwnedAppView,
   useReceiveFile,
-  useActionEffect,
   useSnapshotState,
   useSTT,
   useTerminal,

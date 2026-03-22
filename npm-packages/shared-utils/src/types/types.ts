@@ -37,6 +37,9 @@ export enum IMCMessageTypeEnum {
   EditorShowNotification = "editor-show-notification",
   // Get environment variables
   EditorGetEnv = "editor-get-env",
+  // App settings
+  EditorGetAppSettings = "editor-get-app-settings",
+  EditorSetAppSettings = "editor-set-app-settings",
   // App state snapshot upon importing & exporting
   EditorAppStateSnapshotRestore = "editor-app-state-snapshot-restore",
   EditorAppStateSnapshotSave = "editor-app-state-snapshot-save",

@@ -1,6 +1,6 @@
 {
   "name": "@pulse-editor/react-api",
-  "version": "0.1.1-beta.83",
+  "version": "0.1.1-beta.84",
   "main": "dist/main.js",
   "files": [
     "dist"
@@ -38,7 +38,7 @@
     "typescript-eslint": "^8.56.0"
   },
   "peerDependencies": {
-    "@pulse-editor/shared-utils": "0.1.1-beta.83",
+    "@pulse-editor/shared-utils": "0.1.1-beta.84",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },

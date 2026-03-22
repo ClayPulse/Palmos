@@ -138,7 +138,7 @@ export default function EditorToolbar() {
                     }
                   }}
                 >
-                  <Icon name="chat" variant="outlined" />
+                  <Icon name="auto_awesome" variant="outlined" />
                 </Button>
               </Tooltip>
 
@@ -215,24 +215,6 @@ export default function EditorToolbar() {
                   }
                 >
                   <Icon name="settings" variant="outlined" />
-                </Button>
-              </Tooltip>
-
-              <Divider className="mx-1" orientation="vertical" />
-
-              <Tooltip content="Switch to AI mode">
-                <Button
-                  variant="light"
-                  isIconOnly
-                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
-                  onPress={() =>
-                    editorContext?.setEditorStates((prev) => ({
-                      ...prev,
-                      appMode: AppModeEnum.Agent,
-                    }))
-                  }
-                >
-                  <Icon name="bolt" variant="round" />
                 </Button>
               </Tooltip>
             </div>

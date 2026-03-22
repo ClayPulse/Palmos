@@ -64,6 +64,18 @@ export abstract class AbstractPlatformAPI {
   abstract setPersistentSettings(settings: PersistentSettings): Promise<void>;
   abstract resetPersistentSettings(): Promise<void>;
 
+  // Per-app settings
+  abstract getAppSettings(
+    appId: string,
+  ): Promise<{ id?: string; key: string; value: string; isSecret: boolean }[]>;
+  abstract setAppSetting(
+    appId: string,
+    key: string,
+    value: string,
+    isSecret: boolean,
+  ): Promise<void>;
+  abstract deleteAppSetting(appId: string, key: string): Promise<void>;
+
   // Get installation path
   abstract getInstallationPath(): Promise<string>;
 

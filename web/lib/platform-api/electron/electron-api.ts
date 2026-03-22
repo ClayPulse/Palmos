@@ -105,6 +105,25 @@ export class ElectronAPI extends AbstractPlatformAPI {
     await this.electronAPI?.setPersistentSettings({});
   }
 
+  async getAppSettings(
+    appId: string,
+  ): Promise<{ id?: string; key: string; value: string; isSecret: boolean }[]> {
+    return (await this.electronAPI?.getAppSettings(appId)) ?? [];
+  }
+
+  async setAppSetting(
+    appId: string,
+    key: string,
+    value: string,
+    isSecret: boolean,
+  ): Promise<void> {
+    await this.electronAPI?.setAppSetting(appId, key, value, isSecret);
+  }
+
+  async deleteAppSetting(appId: string, key: string): Promise<void> {
+    await this.electronAPI?.deleteAppSetting(appId, key);
+  }
+
   async getInstallationPath(): Promise<string> {
     return await this.electronAPI?.getInstallationPath();
   }

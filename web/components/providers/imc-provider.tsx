@@ -835,6 +835,40 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
+        IMCMessageTypeEnum.EditorGetAppSettings,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { appId }: { appId: string } = message.payload;
+          const settings = await platformApi?.getAppSettings(appId) ?? [];
+          const result = Object.fromEntries(settings.map(({ key, value }) => {
+            try { return [key, JSON.parse(value)]; } catch { return [key, value]; }
+          }));
+
+          return result;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorSetAppSettings,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const {
+            appId,
+            settings,
+          }: { appId: string; settings: Record<string, any> } = message.payload;
+          await Promise.all(
+            Object.entries(settings).map(([key, value]) =>
+              platformApi?.setAppSetting(appId, key, JSON.stringify(value), false),
+            ),
+          );
+        },
+      ],
+      [
         IMCMessageTypeEnum.EditorGetAppOrigin,
         async (
           senderWindow: Window,
