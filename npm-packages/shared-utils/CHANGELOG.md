@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.84
+
+### Patch Changes
+
+- Add app user settings
+
 ## 0.1.1-beta.83
 
 ### Patch Changes

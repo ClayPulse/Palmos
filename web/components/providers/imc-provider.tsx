@@ -1,6 +1,7 @@
 "use client";
 
 import { LLMAgentRunner } from "@/lib/agent/runners/llm-agent-runner";
+import { refreshOAuthToken, registerOAuthClient } from "@/lib/auth/oauth";
 import { PlatformEnum } from "@/lib/enums";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
@@ -33,6 +34,7 @@ import {
   ListPathOptions,
   LLMModelConfig,
   NotificationTypeEnum,
+  OAuthConnectConfig,
   PolyIMC,
   ReceiverHandler,
   STTModelConfig,
@@ -835,6 +837,53 @@ export default function InterModuleCommunicationProvider({
         },
       ],
       [
+        IMCMessageTypeEnum.EditorGetAppSettings,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { appId }: { appId: string } = message.payload;
+          const settings = (await platformApi?.getAppSettings(appId)) ?? {};
+
+          return settings;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorSetAppSettings,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const {
+            appId,
+            settings,
+          }: { appId: string; settings: Record<string, any> } = message.payload;
+          await Promise.all(
+            Object.entries(settings).map(([key, value]) =>
+              platformApi?.setAppSetting(
+                appId,
+                key,
+                JSON.stringify(value),
+                false,
+              ),
+            ),
+          );
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorDeleteAppSetting,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { appId, key } = message.payload;
+          await platformApi?.deleteAppSetting(appId, key);
+        },
+      ],
+      [
         IMCMessageTypeEnum.EditorGetAppOrigin,
         async (
           senderWindow: Window,
@@ -870,6 +919,121 @@ export default function InterModuleCommunicationProvider({
           }
 
           return ext.remoteOrigin;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorOAuthConnect,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const {
+            appId,
+            provider,
+            config,
+          }: {
+            appId: string;
+            provider: string;
+            config: OAuthConnectConfig;
+          } = message.payload;
+
+          // If no clientId provided, perform dynamic client registration
+          let resolvedConfig = { ...config };
+          if (!config.clientId && config.registrationEndpoint) {
+            try {
+              const { clientId } = await registerOAuthClient({
+                appId,
+                provider,
+                registrationEndpoint: config.registrationEndpoint,
+                scope: config.scope,
+              });
+              resolvedConfig.clientId = clientId;
+            } catch (err: any) {
+              addToast({
+                title: "OAuth Registration Failed",
+                description:
+                  err.message ?? "Could not register with the OAuth provider.",
+                color: "danger",
+              });
+              return;
+            }
+          }
+
+          if (!resolvedConfig.clientId) {
+            addToast({
+              title: "OAuth Configuration Error",
+              description:
+                "No client ID provided and no registration endpoint specified.",
+              color: "danger",
+            });
+            return;
+          }
+
+          // Resolve the sender app's display name from the viewId
+          const viewId = message.from;
+          const nodes = editorContext?.editorStates.workflowNodes;
+          const node = nodes?.find((n) => n.data.config.viewId === viewId);
+          const appName = node?.data.config.app ?? appId;
+
+          // Look up the installed extension to get a display name
+          let displayName = appName;
+          const ext = await getInstalledExtensionApp(appName);
+          if (ext?.config?.displayName) {
+            displayName = ext.config.displayName;
+          }
+
+          editorContext?.updateModalStates({
+            oauthConnect: {
+              isOpen: true,
+              appId,
+              appName: displayName,
+              provider,
+              config: resolvedConfig,
+            },
+          });
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorOAuthRefreshToken,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const {
+            appId,
+            provider,
+            tokenEndpoint,
+            refreshToken,
+            clientId,
+            clientSecret,
+          }: {
+            appId: string;
+            provider: string;
+            tokenEndpoint: string;
+            refreshToken: string;
+            clientId: string;
+            clientSecret?: string;
+          } = message.payload;
+
+          try {
+            return await refreshOAuthToken({
+              appId,
+              provider,
+              tokenEndpoint,
+              refreshToken,
+              clientId,
+              clientSecret,
+            });
+          } catch (err: any) {
+            addToast({
+              title: "Token Refresh Failed",
+              description: err.message ?? "Could not refresh the OAuth token.",
+              color: "danger",
+            });
+            return null;
+          }
         },
       ],
     ]);

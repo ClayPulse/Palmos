@@ -489,6 +489,39 @@ export class CloudAPI extends AbstractPlatformAPI {
     this.setPersistentSettings({});
   }
 
+  async getAppSettings(
+    appId: string,
+  ): Promise<Record<string, string>> {
+    const response = await fetchAPI(
+      `/api/app/user-settings/get?id=${encodeURIComponent(appId)}`,
+      { method: "GET" },
+    );
+    if (!response.ok) return {};
+    const { settings } = await response.json();
+    return (settings as Record<string, string>) ?? {};
+  }
+
+  async setAppSetting(
+    appId: string,
+    key: string,
+    value: string,
+    isSecret: boolean,
+  ): Promise<void> {
+    await fetchAPI("/api/app/user-settings/set", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ appId, key, value, isSecret }),
+    });
+  }
+
+  async deleteAppSetting(appId: string, key: string): Promise<void> {
+    await fetchAPI("/api/app/user-settings/delete", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ appId, key }),
+    });
+  }
+
   async getInstallationPath(): Promise<string> {
     if (!this.workspace) {
       addToast({

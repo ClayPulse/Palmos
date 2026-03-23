@@ -282,6 +282,32 @@ function handleLoadSettings(event) {
   return {};
 }
 
+const appSettingsPath = path.join(userDataPath, "app-settings.json");
+
+function handleGetAppSettings(event, appId) {
+  const all = fs.existsSync(appSettingsPath) ? JSON.parse(fs.readFileSync(appSettingsPath, "utf-8")) : {};
+  return Object.fromEntries(
+    Object.entries(all[appId] ?? {}).map(([key, entry]) => {
+      try { return [key, JSON.parse(entry.value)]; } catch { return [key, entry.value]; }
+    })
+  );
+}
+
+function handleSetAppSetting(event, appId, key, value, isSecret) {
+  const all = fs.existsSync(appSettingsPath) ? JSON.parse(fs.readFileSync(appSettingsPath, "utf-8")) : {};
+  if (!all[appId]) all[appId] = {};
+  all[appId][key] = { value, isSecret };
+  fs.writeFileSync(appSettingsPath, JSON.stringify(all, null, 2));
+}
+
+function handleDeleteAppSetting(event, appId, key) {
+  const all = fs.existsSync(appSettingsPath) ? JSON.parse(fs.readFileSync(appSettingsPath, "utf-8")) : {};
+  if (all[appId]) {
+    delete all[appId][key];
+    fs.writeFileSync(appSettingsPath, JSON.stringify(all, null, 2));
+  }
+}
+
 function handleGetInstallationPath(event) {
   // Return the installation path if the app is packaged
   if (app.isPackaged) {
@@ -451,6 +477,10 @@ app.whenReady().then(() => {
 
   ipcMain.handle("get-persistent-settings", handleLoadSettings);
   ipcMain.handle("set-persistent-settings", handleSaveSettings);
+
+  ipcMain.handle("get-app-settings", handleGetAppSettings);
+  ipcMain.handle("set-app-setting", handleSetAppSetting);
+  ipcMain.handle("delete-app-setting", handleDeleteAppSetting);
 
   ipcMain.handle("get-installation-path", handleGetInstallationPath);
 

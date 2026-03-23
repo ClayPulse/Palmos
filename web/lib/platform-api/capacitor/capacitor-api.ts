@@ -322,6 +322,46 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     });
   }
 
+  async getAppSettings(appId: string): Promise<Record<string, string>> {
+    const pathDir = this.getDataPathDir(`app-settings-${appId}.json`);
+    try {
+      const res = await Filesystem.readFile({
+        ...pathDir,
+        encoding: Encoding.UTF8,
+      });
+      return JSON.parse(res.data as string);
+    } catch (e) {
+      return {};
+    }
+  }
+
+  async setAppSetting(
+    appId: string,
+    key: string,
+    value: string,
+    _isSecret: boolean,
+  ): Promise<void> {
+    const settings = await this.getAppSettings(appId);
+    settings[key] = value;
+    const pathDir = this.getDataPathDir(`app-settings-${appId}.json`);
+    await Filesystem.writeFile({
+      ...pathDir,
+      data: JSON.stringify(settings),
+      encoding: Encoding.UTF8,
+    });
+  }
+
+  async deleteAppSetting(appId: string, key: string): Promise<void> {
+    const settings = await this.getAppSettings(appId);
+    delete settings[key];
+    const pathDir = this.getDataPathDir(`app-settings-${appId}.json`);
+    await Filesystem.writeFile({
+      ...pathDir,
+      data: JSON.stringify(settings),
+      encoding: Encoding.UTF8,
+    });
+  }
+
   async getInstallationPath(): Promise<string> {
     return "";
   }

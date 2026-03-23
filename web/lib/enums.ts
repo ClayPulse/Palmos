@@ -28,3 +28,8 @@ export enum ModelCapabilityEnum {
   Music = "music",
   Audio = "Audio",
 }
+
+export enum AppModeEnum {
+  Agent = "agent",
+  Editor = "editor",
+}

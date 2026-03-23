@@ -13,7 +13,7 @@ import {
 } from "@pulse-editor/shared-utils";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { Dispatch, RefObject, SetStateAction } from "react";
-import { SideMenuTabEnum } from "./enums";
+import { AppModeEnum, SideMenuTabEnum } from "./enums";
 import { BaseLLM } from "./modalities/llm/base-llm";
 import { BaseSTT } from "./modalities/stt/base-stt";
 import { BaseTTS } from "./modalities/tts/base-tts";
@@ -89,6 +89,9 @@ export type EditorStates = {
 
   // Chat panel
   isChatPanelOpen?: boolean;
+
+  // App mode: 'agent' for non-technical users, 'editor' for technical users
+  appMode?: AppModeEnum;
 
   // Selected views
   selectedViewIds?: string[];
@@ -250,6 +253,13 @@ export type ModalStates = {
     isOpen?: boolean;
     note?: string;
     setNote?: (note: string) => void;
+  };
+  oauthConnect?: {
+    isOpen?: boolean;
+    appId?: string;
+    appName?: string;
+    provider?: string;
+    config?: import("@pulse-editor/shared-utils").OAuthConnectConfig;
   };
 };
 
@@ -447,7 +457,13 @@ export type Workflow = {
 export type WorkflowContent = {
   nodes: ReactFlowNode<AppNodeData>[];
   edges: ReactFlowEdge[];
-  snapshotStates?: { [key: string]: any };
+  snapshotStates?: {
+    [viewId: string]: {
+      states: {
+        [stateKey: string]: any; // The state value can be of any type, depending on the app's implementation. It should be serializable to JSON.
+      };
+    };
+  };
 };
 
 export type AppNodeData = {

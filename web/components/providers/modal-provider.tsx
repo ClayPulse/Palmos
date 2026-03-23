@@ -9,6 +9,7 @@ import EditorSettingsModal from "../modals/editor-settings-modal";
 import LoginModal from "../modals/login-modal";
 import MarketplaceModal from "../modals/marketplace-modal";
 import NodeNoteModal from "../modals/node-note-modal";
+import OAuthConnectModal from "../modals/oauth-connect-modal";
 import OpenInProjectModal from "../modals/open-in-project-modal";
 import OpenSourceInfoModal from "../modals/open-source-info-modal";
 import PasswordModal from "../modals/password-modal";
@@ -278,6 +279,19 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
           onClose={() => {
             editorContext?.updateModalStates({
               nodeNote: { isOpen: false },
+            });
+          }}
+        />
+      )}
+      {useDelayedUnmount(
+        modalStates?.oauthConnect?.isOpen ?? false,
+        delaySeconds,
+      ) && (
+        <OAuthConnectModal
+          isOpen={modalStates?.oauthConnect?.isOpen ?? false}
+          onClose={() => {
+            editorContext?.updateModalStates({
+              oauthConnect: { isOpen: false },
             });
           }}
         />

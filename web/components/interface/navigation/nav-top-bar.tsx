@@ -1,4 +1,5 @@
-import { PlatformEnum } from "@/lib/enums";
+"use client";
+
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useAuth } from "@/lib/hooks/use-auth";
 import useRouter from "@/lib/hooks/use-router";
@@ -9,6 +10,7 @@ import {
 } from "@/lib/hooks/use-translations";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { getAPIUrl } from "@/lib/pulse-editor-website/backend";
+import { PlatformEnum } from "@/lib/enums";
 import { Browser } from "@capacitor/browser";
 import {
   Button,
@@ -23,18 +25,37 @@ import { useSearchParams } from "next/navigation";
 import { useContext, useEffect } from "react";
 import Icon from "../../misc/icon";
 import { EditorContext } from "../../providers/editor-context-provider";
-import ProjectIndicator from "../project-indicator";
-import VoiceIndicator from "../voice-indicator";
 import FileMenuDropDown from "./menu-dropdown/file-menu";
 import ViewMenuDropDown from "./menu-dropdown/view-menu";
 
-export default function NavTopBar({
+export function EditorNavLeft({
   isMenuOpen,
   setIsMenuOpen,
-  setIsSharingOpen,
 }: {
   isMenuOpen: boolean;
   setIsMenuOpen: (isOpen: boolean) => void;
+}) {
+  return (
+    <div className="flex items-center sm:gap-x-1">
+      {!isMenuOpen && (
+        <Button
+          isIconOnly
+          onPress={() => setIsMenuOpen(!isMenuOpen)}
+          disableRipple
+          variant="light"
+        >
+          <Icon name="menu" variant="round" />
+        </Button>
+      )}
+      <FileMenuDropDown />
+      <ViewMenuDropDown />
+    </div>
+  );
+}
+
+export function EditorNavRight({
+  setIsSharingOpen,
+}: {
   setIsSharingOpen: (isOpen: boolean) => void;
 }) {
   const { getTranslations: t, locale, setLocale } = useTranslations();
@@ -86,57 +107,20 @@ export default function NavTopBar({
     ));
 
   return (
-    <div
-      className="absolute z-40 w-full px-2 py-2"
-      style={{
-        paddingTop: getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
-      }}
-    >
-      <div
-        className={
-          "text-default-foreground bg-content1 grid h-14 w-full grid-cols-3 grid-rows-1 rounded-xl px-2 py-2 shadow-md"
-        }
-      >
-        <div className="col-start-1 flex items-center sm:gap-x-1">
-          {!isMenuOpen && (
-            <Button
-              isIconOnly
-              onPress={() => {
-                setIsMenuOpen(!isMenuOpen);
-              }}
-              disableRipple
-              variant="light"
-            >
-              <Icon name="menu" variant="round" />
-            </Button>
-          )}
+    <div className="flex items-center gap-x-1">
+      <div className="hidden items-center sm:flex">
+        <CloudIndicator
+          onClick={() => {
+            editorContext?.updateModalStates({
+              editorSettings: {
+                isOpen: true,
+              },
+            });
+          }}
+        />
+      </div>
 
-          <FileMenuDropDown />
-          <ViewMenuDropDown />
-        </div>
-        <div className="col-start-2 flex flex-col items-center justify-center">
-          {editorContext?.editorStates.project &&
-            !editorContext.editorStates.isSideMenuOpen && (
-              <div className="hidden sm:block">
-                <ProjectIndicator />
-              </div>
-            )}
-          <VoiceIndicator />
-        </div>
-        <div className="col-start-3 flex justify-end gap-x-1">
-          <div className="hidden items-center sm:flex">
-            <CloudIndicator
-              onClick={() => {
-                editorContext?.updateModalStates({
-                  editorSettings: {
-                    isOpen: true,
-                  },
-                });
-              }}
-            />
-          </div>
-
-          {(app) && (
+          {app && (
             <Button
               className="hidden sm:block"
               color="primary"
@@ -320,7 +304,5 @@ export default function NavTopBar({
             </Dropdown>
           )}
         </div>
-      </div>
-    </div>
   );
 }

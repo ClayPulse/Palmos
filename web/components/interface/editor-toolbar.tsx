@@ -5,14 +5,15 @@ import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { addToast, Button, Divider, Tooltip } from "@heroui/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import { addToast, Button, Divider, Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
+import { AppModeEnum } from "@/lib/enums";
 
 export default function EditorToolbar() {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant } = useEditorAIAssistant();
@@ -137,7 +138,7 @@ export default function EditorToolbar() {
                     }
                   }}
                 >
-                  <Icon name="chat" variant="outlined" />
+                  <Icon name="auto_awesome" variant="outlined" />
                 </Button>
               </Tooltip>
 
@@ -183,21 +184,6 @@ export default function EditorToolbar() {
                   }}
                 >
                   <Icon name="layers" variant="outlined" />
-                </Button>
-              </Tooltip>
-
-              <Tooltip content={"Installed Agents"}>
-                <Button
-                  variant="light"
-                  isIconOnly
-                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
-                  onPress={() => {
-                    editorContext.updateModalStates({
-                      agentConfig: { isOpen: true },
-                    });
-                  }}
-                >
-                  <Icon name="smart_toy" variant="outlined" />
                 </Button>
               </Tooltip>
 

@@ -12,9 +12,9 @@ import {
   useEffect,
   useState,
 } from "react";
-import SandboxAppLoader from "../../app-loaders/sandbox-app-loader";
-import Icon from "../../misc/icon";
-import { EditorContext } from "../../providers/editor-context-provider";
+import SandboxAppLoader from "../../../app-loaders/sandbox-app-loader";
+import Icon from "../../../misc/icon";
+import { EditorContext } from "../../../providers/editor-context-provider";
 import AppViewLayout from "../standalone-app/layout";
 
 function ConsoleNavBar({

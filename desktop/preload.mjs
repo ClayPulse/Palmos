@@ -31,6 +31,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setPersistentSettings: (settings) =>
     ipcRenderer.invoke("set-persistent-settings", settings),
 
+  getAppSettings: (appId) => ipcRenderer.invoke("get-app-settings", appId),
+  setAppSetting: (appId, key, value, isSecret) =>
+    ipcRenderer.invoke("set-app-setting", appId, key, value, isSecret),
+  deleteAppSetting: (appId, key) =>
+    ipcRenderer.invoke("delete-app-setting", appId, key),
+
   getInstallationPath: () => ipcRenderer.invoke("get-installation-path"),
 
   createTerminal: () => ipcRenderer.invoke("create-terminal"),

@@ -1,5 +1,13 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.84
+
+### Patch Changes
+
+- Add app user settings
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.84
+
 ## 0.1.1-beta.83
 
 ### Patch Changes

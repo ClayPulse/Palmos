@@ -1,6 +1,6 @@
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
-import BaseAppView from "@/components/views/base/base-app-view";
+import BaseAppView from "@/components/views/editor/base/base-app-view";
 import { useAppInfo } from "@/lib/hooks/use-app-info";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
@@ -419,9 +419,9 @@ function CanvasNodeControl({
                 note: nodeData.note,
                 setNote: (note: string) => {
                   setNodeData({ note });
-                }
+                },
               },
-            })
+            });
           }}
         >
           <Icon name="note" variant="outlined" />

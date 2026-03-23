@@ -1,13 +1,15 @@
 "use client";
 
-import { PlatformEnum } from "@/lib/enums";
+import ChatPanel from "@/components/interface/panels/chat-panel";
+import { AppModeEnum, PlatformEnum } from "@/lib/enums";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../../providers/editor-context-provider";
 import SideNavPanel from "../panels/side-nav-panel";
-import NavTopBar from "./nav-top-bar";
-import ChatPanel from "@/components/interface/panels/chat-panel";
+import AppNavBar from "./app-nav-bar";
+import { ChatNavLeft, ChatNavRight } from "./chat-nav-bar";
+import { EditorNavLeft, EditorNavRight } from "./nav-top-bar";
 
 import WelcomeScreen from "../status-screens/welcome";
 
@@ -16,11 +18,21 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   const editorContext = useContext(EditorContext);
   const isMenuOpen = editorContext?.editorStates.isSideMenuOpen ?? false;
+  const appMode = editorContext?.editorStates.appMode ?? AppModeEnum.Agent;
 
   const { setTheme } = useTheme();
 
   const [isShowNavbar, setIsShowNavbar] = useState(true);
-  const [isAnimationFinished, setIsAnimationFinished] = useState(false);
+
+  // Skip the welcome animation for chat mode. Check both the context state (for
+  // in-session switches) and the raw URL param (for initial page loads before the
+  // useEffect in page.tsx has applied the param to context).
+  const isChatMode =
+    appMode === AppModeEnum.Agent ||
+    (typeof window !== "undefined" &&
+      new URLSearchParams(window.location.search).get("mode") ===
+        AppModeEnum.Agent);
+  const [isAnimationFinished, setIsAnimationFinished] = useState(isChatMode);
 
   useEffect(() => {
     const platform = getPlatform();
@@ -55,8 +67,8 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* Welcome Screen - Always render and plays immediately */}
-      {!isAnimationFinished && (
+      {/* Welcome Screen - skipped for chat mode */}
+      {!isAnimationFinished && !isChatMode && (
         <div className="fixed inset-0 z-50 h-full w-full">
           <WelcomeScreen setAnimationFinished={setIsAnimationFinished} />
         </div>
@@ -68,34 +80,63 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           className={`bg-default relative hidden h-full w-full overflow-hidden data-[animation-finished=true]:block`}
           data-animation-finished={isAnimationFinished}
         >
-          <div className="relative grid h-full w-full grid-cols-[max-content_auto_max-content] grid-rows-1">
-            <div className="h-full w-full overflow-y-hidden">
-              {isShowNavbar && (
-                <SideNavPanel
-                  isMenuOpen={isMenuOpen}
-                  setIsMenuOpen={setIsMenuOpen}
-                />
-              )}
-            </div>
+          {appMode === AppModeEnum.Agent ? (
+            /* Chat mode: nav floats over full-width content */
             <div className="relative h-full w-full overflow-hidden">
               {isShowNavbar && (
-                <NavTopBar
-                  isMenuOpen={isMenuOpen}
-                  setIsMenuOpen={setIsMenuOpen}
-                  setIsSharingOpen={() => {
-                    editorContext?.updateModalStates({
-                      sharing: { isOpen: true },
-                    });
+                <AppNavBar
+                  style={{
+                    paddingTop:
+                      getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
                   }}
+                  left={<ChatNavLeft />}
+                  right={<ChatNavRight />}
                 />
               )}
-
-              <div className={`h-full w-full overflow-hidden`}>{children}</div>
+              {children}
             </div>
-            <div className="h-full w-full overflow-y-hidden">
-              {isShowNavbar && <ChatPanel />}
+          ) : (
+            /* Editor mode: side panels + main content */
+            <div className="relative grid h-full w-full grid-cols-[max-content_auto_max-content] grid-rows-1">
+              <div className="h-full w-full overflow-y-hidden">
+                {isShowNavbar && (
+                  <SideNavPanel
+                    isMenuOpen={isMenuOpen}
+                    setIsMenuOpen={setIsMenuOpen}
+                  />
+                )}
+              </div>
+              <div className="relative h-full w-full overflow-hidden">
+                {isShowNavbar && (
+                  <AppNavBar
+                    style={{
+                      paddingTop:
+                        getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
+                    }}
+                    left={
+                      <EditorNavLeft
+                        isMenuOpen={isMenuOpen}
+                        setIsMenuOpen={setIsMenuOpen}
+                      />
+                    }
+                    right={
+                      <EditorNavRight
+                        setIsSharingOpen={() =>
+                          editorContext?.updateModalStates({
+                            sharing: { isOpen: true },
+                          })
+                        }
+                      />
+                    }
+                  />
+                )}
+                <div className="h-full w-full overflow-hidden">{children}</div>
+              </div>
+              <div className="h-full w-full overflow-y-hidden">
+                {isShowNavbar && <ChatPanel />}
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </>

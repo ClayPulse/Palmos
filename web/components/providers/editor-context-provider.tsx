@@ -1,5 +1,6 @@
 "use client";
 
+import { AppModeEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { getLLMModel } from "@/lib/modalities/llm/get-llm";
@@ -31,7 +32,8 @@ const defaultEditorStates: EditorStates = {
   isDownloadClip: false,
   isInlineChatEnabled: false,
   isConsolePanelOpen: false,
-  isChatPanelOpen: true,
+  isChatPanelOpen: false,
+  appMode: AppModeEnum.Editor,
   isLoadingRecorder: false,
   isRecording: false,
   isListening: false,
@@ -114,6 +116,16 @@ export default function EditorContextProvider({
         });
     }
   }, [platformApi, session]);
+
+  // Load projects
+  useEffect(() => {
+    if (platformApi && session) {
+      const homePath = settings?.projectHomePath;
+      platformApi.listProjects(homePath).then((projects) => {
+        setEditorStates((prev) => ({ ...prev, projectsInfo: projects }));
+      });
+    }
+  }, [platformApi, session, settings?.projectHomePath]);
 
   // Save settings
   useEffect(() => {
@@ -319,7 +331,6 @@ export default function EditorContextProvider({
 
     settings?.apiKeys,
   ]);
-
 
   const updateModalStates: Dispatch<SetStateAction<ModalStates | undefined>> = (
     patchedState,

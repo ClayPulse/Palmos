@@ -1,4 +1,5 @@
 import { useTranslations } from "@/lib/hooks/use-translations";
+import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { listRemoteServerFunctions } from "@/lib/module-federation/remote";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { isAppAuthor } from "@/lib/pulse-editor-website/helpers";
@@ -27,51 +28,7 @@ export default function AppInfoModal({
   const editorContext = useContext(EditorContext);
 
   const [isDeveloperSettingsOpen, setIsDeveloperSettingsOpen] = useState(false);
-
-  // const [functions, setFunctions] = useState<
-  //   {
-  //     endpoint: string;
-  //     cost?: number;
-  //   }[]
-  // >([]);
-
-  // const [isLoadingFunctions, setIsLoadingFunctions] = useState(false);
-
-  // useEffect(() => {
-  //   async function fetchFunctions() {
-  //     const app = editorContext?.persistSettings?.extensions?.find(
-  //       (ext) => ext.config.id === appInfo.id,
-  //     );
-
-  //     setIsLoadingFunctions(true);
-  //     const funcNames = await listRemoteServerFunctions(
-  //       appInfo.id,
-  //       appInfo.version,
-  //       app?.remoteOrigin,
-  //     );
-
-  //     const url = getAPIUrl("/api/app/settings/cost/get");
-  //     url.searchParams.append("appId", appInfo.id);
-
-  //     const funcCosts: {
-  //       endpoint: string;
-  //       cost: number;
-  //     }[] = await (await fetchAPI(url)).json();
-
-  //     const funcNamesWithCosts = funcNames.map((funcName) => {
-  //       const costEntry = funcCosts.find((fc) => fc.endpoint === funcName);
-  //       return {
-  //         endpoint: funcName,
-  //         cost: costEntry ? costEntry.cost : undefined,
-  //       };
-  //     });
-
-  //     setFunctions(funcNamesWithCosts);
-  //     setIsLoadingFunctions(false);
-  //   }
-
-  //   fetchFunctions();
-  // }, [appInfo]);
+  const [isUserSettingsOpen, setIsUserSettingsOpen] = useState(false);
 
   const appInfo = editorContext?.editorStates.modalStates?.appInfo?.content;
 
@@ -120,11 +77,19 @@ export default function AppInfoModal({
     <ModalWrapper
       isOpen={isOpen}
       onClose={onClose}
-      title={isDeveloperSettingsOpen ? "Developer Settings" : appInfo.name}
+      title={
+        isDeveloperSettingsOpen
+          ? "Developer Settings"
+          : isUserSettingsOpen
+            ? "User Settings"
+            : appInfo.name
+      }
       isShowGoBack
       goBackCallback={() => {
         if (isDeveloperSettingsOpen) {
           setIsDeveloperSettingsOpen(false);
+        } else if (isUserSettingsOpen) {
+          setIsUserSettingsOpen(false);
         } else {
           editorContext?.updateModalStates({
             appInfo: { isOpen: false },
@@ -140,10 +105,13 @@ export default function AppInfoModal({
             funcNamesWithCosts={functions ?? []}
             isLoadingEndpoints={isLoadingEndpoints}
           />
+        ) : isUserSettingsOpen ? (
+          <UserSettings appInfo={appInfo} />
         ) : (
           <AppInfo
             appInfo={appInfo}
             setIsDeveloperSettingsOpen={setIsDeveloperSettingsOpen}
+            setIsUserSettingsOpen={setIsUserSettingsOpen}
             funcNamesWithCosts={functions ?? []}
             isLoadingEndpoints={isLoadingEndpoints}
           />
@@ -156,11 +124,13 @@ export default function AppInfoModal({
 function AppInfo({
   appInfo,
   setIsDeveloperSettingsOpen,
+  setIsUserSettingsOpen,
   funcNamesWithCosts,
   isLoadingEndpoints,
 }: {
   appInfo: AppInfoModalContent;
   setIsDeveloperSettingsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsUserSettingsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   funcNamesWithCosts: EndPointInfo[];
   isLoadingEndpoints: boolean;
 }) {
@@ -233,6 +203,15 @@ function AppInfo({
         )}
       </div>
 
+      <Divider />
+      <Button
+        color="primary"
+        variant="flat"
+        onPress={() => setIsUserSettingsOpen(true)}
+      >
+        User Settings
+      </Button>
+
       {isLoadingEndpoints ? (
         <Spinner />
       ) : (
@@ -274,7 +253,7 @@ function AppInfo({
         <>
           <Divider />
           <Button
-            color="primary"
+            color="secondary"
             onPress={() => setIsDeveloperSettingsOpen(true)}
           >
             Developer Settings
@@ -501,6 +480,171 @@ function DeveloperSettings({
           </Button>
         )}
       </div>
+    </div>
+  );
+}
+
+function UserSettings({ appInfo }: { appInfo: AppInfoModalContent }) {
+  const { platformApi } = usePlatformApi();
+
+  const { data: userSettings, mutate: mutateUserSettings } = useSWR<
+    Record<string, string>
+  >(`/api/app/user-settings/get?id=${appInfo.id}`, async () => {
+    return (await platformApi?.getAppSettings(appInfo.id)) ?? {};
+  });
+
+  const [newSettingKey, setNewSettingKey] = useState("");
+  const [newSettingValue, setNewSettingValue] = useState("");
+  const [newSettingIsSecret, setNewSettingIsSecret] = useState(false);
+
+  return (
+    <div className="flex w-full flex-col gap-y-2 overflow-y-auto p-1">
+      <h3 className="text-center text-lg font-semibold">App Info</h3>
+      <p>
+        <span className="font-semibold">App ID</span>: {appInfo.id}
+      </p>
+      <p className="text-default-foreground/60 text-center text-sm">
+        These settings are saved to your account and passed to the app.
+      </p>
+      <Divider />
+      {userSettings && Object.keys(userSettings).length > 0 && (
+        <div className="space-y-1">
+          {Object.entries(userSettings).map(([key, value]) => (
+            <UserSettingInput
+              key={key}
+              appId={appInfo.id}
+              setting={{ key, value }}
+              onUpdated={() => mutateUserSettings()}
+            />
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-x-1">
+        <Input
+          label="Key"
+          size="sm"
+          value={newSettingKey}
+          onValueChange={setNewSettingKey}
+        />
+        <Input
+          label="Value"
+          size="sm"
+          value={newSettingValue}
+          onValueChange={setNewSettingValue}
+          type={newSettingIsSecret ? "password" : "text"}
+        />
+        <Button
+          isIconOnly
+          variant="light"
+          onPress={() => setNewSettingIsSecret((prev) => !prev)}
+        >
+          {newSettingIsSecret ? (
+            <Icon name="lock" />
+          ) : (
+            <Icon name="lock_open" />
+          )}
+        </Button>
+        <Button
+          isIconOnly
+          variant="light"
+          isDisabled={newSettingKey.trim() === ""}
+          onPress={async () => {
+            await platformApi?.setAppSetting(
+              appInfo.id,
+              newSettingKey.trim(),
+              newSettingValue,
+              newSettingIsSecret,
+            );
+            mutateUserSettings();
+            setNewSettingKey("");
+            setNewSettingValue("");
+            setNewSettingIsSecret(false);
+          }}
+        >
+          <Icon name="add" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function UserSettingInput({
+  appId,
+  setting,
+  onUpdated,
+}: {
+  appId: string;
+  setting: { key: string; value: string };
+  onUpdated: () => void;
+}) {
+  const { platformApi } = usePlatformApi();
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedValue, setEditedValue] = useState(setting.value);
+  const [isSecret, setIsSecret] = useState(false);
+
+  return (
+    <div className="flex items-center gap-x-1">
+      <div className="w-1/3 break-all font-mono text-sm">{setting.key}</div>
+      <div className="w-2/3 break-all font-mono text-sm">
+        {isEditing ? (
+          <Input
+            size="sm"
+            value={editedValue}
+            onValueChange={setEditedValue}
+            type={isSecret ? "password" : "text"}
+          />
+        ) : (
+          <p>{isSecret ? "••••••••" : setting.value}</p>
+        )}
+      </div>
+
+      {isEditing ? (
+        <>
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={async () => {
+              await platformApi?.setAppSetting(
+                appId,
+                setting.key,
+                editedValue,
+                isSecret,
+              );
+              onUpdated();
+              setIsEditing(false);
+            }}
+          >
+            <Icon name="check" />
+          </Button>
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={() => setIsSecret((prev) => !prev)}
+          >
+            {isSecret ? <Icon name="lock" /> : <Icon name="lock_open" />}
+          </Button>
+        </>
+      ) : (
+        <>
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={() => setIsEditing(true)}
+          >
+            <Icon name="edit" />
+          </Button>
+          <Button
+            isIconOnly
+            variant="light"
+            onPress={async () => {
+              await platformApi?.deleteAppSetting(appId, setting.key);
+              onUpdated();
+            }}
+          >
+            <Icon name="delete" className="text-danger!" />
+          </Button>
+        </>
+      )}
     </div>
   );
 }

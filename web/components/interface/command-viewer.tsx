@@ -4,6 +4,7 @@ import useActionExecutor from "@/lib/hooks/use-action-executor";
 import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import { useEditorAIAssistantHint } from "@/lib/hooks/use-editor-ai-assistant-hint";
 import useRecorder from "@/lib/hooks/use-recorder";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { ScopedAction } from "@/lib/types";
 import {
   addToast,
@@ -14,7 +15,6 @@ import {
   ListboxItem,
   Spinner,
 } from "@heroui/react";
-import { useTranslations } from "@/lib/hooks/use-translations";
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -22,7 +22,7 @@ import Icon from "../misc/icon";
 import { EditorContext } from "../providers/editor-context-provider";
 
 export default function CommandViewer() {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
   const { chatWithAssistant, history } = useEditorAIAssistant();
@@ -77,8 +77,13 @@ export default function CommandViewer() {
   }, [inputTextValue]);
 
   useEffect(() => {
-    handlePressedKeys(editorContext?.editorStates.pressedKeys ?? []);
-  }, [editorContext?.editorStates.pressedKeys]);
+    if (editorContext?.editorStates.isCommandViewerOpen) {
+      handlePressedKeys(editorContext?.editorStates.pressedKeys ?? []);
+    }
+  }, [
+    editorContext?.editorStates.pressedKeys,
+    editorContext?.editorStates.isCommandViewerOpen,
+  ]);
 
   // Scroll to bottom when history changes
   useEffect(() => {

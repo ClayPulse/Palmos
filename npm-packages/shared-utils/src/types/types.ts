@@ -37,6 +37,10 @@ export enum IMCMessageTypeEnum {
   EditorShowNotification = "editor-show-notification",
   // Get environment variables
   EditorGetEnv = "editor-get-env",
+  // App settings
+  EditorGetAppSettings = "editor-get-app-settings",
+  EditorSetAppSettings = "editor-set-app-settings",
+  EditorDeleteAppSetting = "editor-delete-app-setting",
   // App state snapshot upon importing & exporting
   EditorAppStateSnapshotRestore = "editor-app-state-snapshot-restore",
   EditorAppStateSnapshotSave = "editor-app-state-snapshot-save",
@@ -56,6 +60,9 @@ export enum IMCMessageTypeEnum {
   // Artifact update
   EditorArtifactUpdate = "editor-artifact-update",
   EditorGetAppOrigin = "editor-get-app-origin",
+  // OAuth
+  EditorOAuthConnect = "editor-oauth-connect",
+  EditorOAuthRefreshToken = "editor-oauth-refresh-token",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)
@@ -327,6 +334,31 @@ export type ListPathOptions = {
 // input:
 // output:
 // }
+
+export type OAuthConnectConfig = {
+  provider: string;
+  authorizationUrl: string;
+  tokenEndpoint: string;
+  /** If omitted and registrationEndpoint is provided, the editor will
+   *  automatically perform RFC 7591 dynamic client registration. */
+  clientId?: string;
+  /** RFC 7591 dynamic client registration endpoint. When provided and
+   *  clientId is omitted, the editor registers a client automatically
+   *  using the system-managed redirect URI. */
+  registrationEndpoint?: string;
+  scope?: string;
+  state?: string;
+  responseType?: string;
+  /** PKCE code verifier. When provided, the editor generates the code_challenge
+   *  and includes it in the authorization URL, then passes the verifier to the
+   *  backend so it can complete the code-for-token exchange. */
+  codeVerifier?: string;
+  codeChallengeMethod?: "S256" | "plain";
+  /** Client secret for confidential clients. Sent only to the backend for
+   *  the token exchange, never exposed in the browser URL. */
+  clientSecret?: string;
+  additionalParams?: Record<string, string>;
+};
 
 export type Artifact = {
   type: "app";
