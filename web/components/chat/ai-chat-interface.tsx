@@ -332,6 +332,14 @@ export default function AIChatInterface({
         </div>
       </div>
 
+      {/* WIP disclaimer */}
+      <div className="flex items-center gap-1.5 border-b border-amber-200/60 bg-amber-50/80 px-3 py-1.5 dark:border-amber-500/20 dark:bg-amber-500/8">
+        <Icon name="construction" variant="round" className="text-xs text-amber-600 dark:text-amber-400" />
+        <p className="text-[10px] text-amber-700 dark:text-amber-400">
+          <span className="font-semibold">Work in progress</span> — some features may not fully function yet.
+        </p>
+      </div>
+
       {/* Messages */}
       <div
         ref={scrollContainerRef}
