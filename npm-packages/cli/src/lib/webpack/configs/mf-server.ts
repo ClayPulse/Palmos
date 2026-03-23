@@ -51,7 +51,7 @@ class MFServerPlugin {
       });
 
       // When a file changes and triggers a new compilation
-      compiler.hooks.watchRun.tap("ReloadMessagePlugin", async (compiler) => {
+      compiler.hooks.watchRun.tapPromise("ReloadMessagePlugin", async (compiler) => {
         this.printChanges(compiler);
 
         if (!isFirstRun) {
@@ -106,7 +106,7 @@ ${Object.entries(funcs)
       });
     } else {
       // Print build success/failed message
-      compiler.hooks.done.tap("BuildMessagePlugin", async (stats) => {
+      compiler.hooks.done.tapPromise("BuildMessagePlugin", async (stats) => {
         if (stats.hasErrors()) {
           console.log(`[Server] ❌ Failed to build server.`);
         } else {
