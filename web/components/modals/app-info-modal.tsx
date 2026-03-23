@@ -488,9 +488,9 @@ function UserSettings({ appInfo }: { appInfo: AppInfoModalContent }) {
   const { platformApi } = usePlatformApi();
 
   const { data: userSettings, mutate: mutateUserSettings } = useSWR<
-    { key: string; value: string; isSecret: boolean }[]
-  >(`/api/app/user-settings/list?id=${appInfo.id}`, async () => {
-    return (await platformApi?.getAppSettings(appInfo.id)) ?? [];
+    Record<string, string>
+  >(`/api/app/user-settings/get?id=${appInfo.id}`, async () => {
+    return (await platformApi?.getAppSettings(appInfo.id)) ?? {};
   });
 
   const [newSettingKey, setNewSettingKey] = useState("");
@@ -507,13 +507,13 @@ function UserSettings({ appInfo }: { appInfo: AppInfoModalContent }) {
         These settings are saved to your account and passed to the app.
       </p>
       <Divider />
-      {userSettings && userSettings.length > 0 && (
+      {userSettings && Object.keys(userSettings).length > 0 && (
         <div className="space-y-1">
-          {userSettings.map((s) => (
+          {Object.entries(userSettings).map(([key, value]) => (
             <UserSettingInput
-              key={s.key}
+              key={key}
               appId={appInfo.id}
-              setting={s}
+              setting={{ key, value }}
               onUpdated={() => mutateUserSettings()}
             />
           ))}
@@ -574,13 +574,13 @@ function UserSettingInput({
   onUpdated,
 }: {
   appId: string;
-  setting: { key: string; value: string; isSecret: boolean };
+  setting: { key: string; value: string };
   onUpdated: () => void;
 }) {
   const { platformApi } = usePlatformApi();
   const [isEditing, setIsEditing] = useState(false);
   const [editedValue, setEditedValue] = useState(setting.value);
-  const [isSecret, setIsSecret] = useState(setting.isSecret);
+  const [isSecret, setIsSecret] = useState(false);
 
   return (
     <div className="flex items-center gap-x-1">

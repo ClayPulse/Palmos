@@ -286,7 +286,11 @@ const appSettingsPath = path.join(userDataPath, "app-settings.json");
 
 function handleGetAppSettings(event, appId) {
   const all = fs.existsSync(appSettingsPath) ? JSON.parse(fs.readFileSync(appSettingsPath, "utf-8")) : {};
-  return Object.entries(all[appId] ?? {}).map(([key, entry]) => ({ key, value: entry.value, isSecret: entry.isSecret }));
+  return Object.fromEntries(
+    Object.entries(all[appId] ?? {}).map(([key, entry]) => {
+      try { return [key, JSON.parse(entry.value)]; } catch { return [key, entry.value]; }
+    })
+  );
 }
 
 function handleSetAppSetting(event, appId, key, value, isSecret) {

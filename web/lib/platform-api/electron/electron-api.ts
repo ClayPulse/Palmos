@@ -107,8 +107,10 @@ export class ElectronAPI extends AbstractPlatformAPI {
 
   async getAppSettings(
     appId: string,
-  ): Promise<{ id?: string; key: string; value: string; isSecret: boolean }[]> {
-    return (await this.electronAPI?.getAppSettings(appId)) ?? [];
+  ): Promise<Record<string, string>> {
+    const arr: { key: string; value: string }[] =
+      (await this.electronAPI?.getAppSettings(appId)) ?? [];
+    return Object.fromEntries(arr.map(({ key, value }) => [key, value]));
   }
 
   async setAppSetting(

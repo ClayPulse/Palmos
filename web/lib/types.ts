@@ -254,6 +254,13 @@ export type ModalStates = {
     note?: string;
     setNote?: (note: string) => void;
   };
+  oauthConnect?: {
+    isOpen?: boolean;
+    appId?: string;
+    appName?: string;
+    provider?: string;
+    config?: import("@pulse-editor/shared-utils").OAuthConnectConfig;
+  };
 };
 
 export type OpenFileDialogConfig = {

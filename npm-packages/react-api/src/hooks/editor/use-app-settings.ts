@@ -15,16 +15,22 @@ export default function useAppSettings(appId: string) {
 
   const { imc, isReady } = useIMC(receiverHandlerMap, "app-settings");
   const [settings, setSettings] = useState<Record<string, any>>({});
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     if (isReady) {
-      imc
-        ?.sendMessage(IMCMessageTypeEnum.EditorGetAppSettings, { appId })
-        .then((result) => {
-          setSettings(result ?? {});
-        });
+      refetch();
     }
   }, [isReady]);
+
+  async function refetch() {
+    const result = await imc?.sendMessage(
+      IMCMessageTypeEnum.EditorGetAppSettings,
+      { appId },
+    );
+    setSettings(result ?? {});
+    setIsLoaded(true);
+  }
 
   async function updateSettings(newSettings: Record<string, any>) {
     await imc?.sendMessage(IMCMessageTypeEnum.EditorSetAppSettings, {
@@ -34,9 +40,24 @@ export default function useAppSettings(appId: string) {
     setSettings((prev) => ({ ...prev, ...newSettings }));
   }
 
+  async function deleteSetting(key: string) {
+    await imc?.sendMessage(IMCMessageTypeEnum.EditorDeleteAppSetting, {
+      appId,
+      key,
+    });
+    setSettings((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      return next;
+    });
+  }
+
   return {
     isReady,
+    isLoaded,
     settings,
+    refetch,
     updateSettings,
+    deleteSetting,
   };
 }

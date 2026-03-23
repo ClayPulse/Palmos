@@ -67,7 +67,7 @@ export abstract class AbstractPlatformAPI {
   // Per-app settings
   abstract getAppSettings(
     appId: string,
-  ): Promise<{ id?: string; key: string; value: string; isSecret: boolean }[]>;
+  ): Promise<Record<string, string>>;
   abstract setAppSetting(
     appId: string,
     key: string,

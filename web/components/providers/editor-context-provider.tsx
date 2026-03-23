@@ -117,6 +117,16 @@ export default function EditorContextProvider({
     }
   }, [platformApi, session]);
 
+  // Load projects
+  useEffect(() => {
+    if (platformApi && session) {
+      const homePath = settings?.projectHomePath;
+      platformApi.listProjects(homePath).then((projects) => {
+        setEditorStates((prev) => ({ ...prev, projectsInfo: projects }));
+      });
+    }
+  }, [platformApi, session, settings?.projectHomePath]);
+
   // Save settings
   useEffect(() => {
     if (isSettingsLoaded && session) {

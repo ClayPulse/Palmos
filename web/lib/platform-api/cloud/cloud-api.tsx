@@ -491,13 +491,14 @@ export class CloudAPI extends AbstractPlatformAPI {
 
   async getAppSettings(
     appId: string,
-  ): Promise<{ id?: string; key: string; value: string; isSecret: boolean }[]> {
+  ): Promise<Record<string, string>> {
     const response = await fetchAPI(
-      `/api/app/user-settings/list?id=${encodeURIComponent(appId)}`,
+      `/api/app/user-settings/get?id=${encodeURIComponent(appId)}`,
       { method: "GET" },
     );
-    if (!response.ok) return [];
-    return response.json();
+    if (!response.ok) return {};
+    const { settings } = await response.json();
+    return (settings as Record<string, string>) ?? {};
   }
 
   async setAppSetting(

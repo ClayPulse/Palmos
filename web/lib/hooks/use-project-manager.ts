@@ -16,23 +16,6 @@ export function useProjectManager() {
 
   const projects = editorContext?.editorStates.projectsInfo;
 
-  useEffect(() => {
-    if (platformApi && session) {
-      const homePath = editorContext?.persistSettings?.projectHomePath;
-
-      setIsLoading(true);
-      platformApi.listProjects(homePath).then((projects) => {
-        editorContext?.setEditorStates((prev) => {
-          return {
-            ...prev,
-            projectsInfo: projects,
-          };
-        });
-        setIsLoading(false);
-      });
-    }
-  }, [editorContext?.persistSettings?.projectHomePath, platformApi, session]);
-
   function openProject(projectName: string) {
     editorContext?.setEditorStates((prev) => {
       return {
