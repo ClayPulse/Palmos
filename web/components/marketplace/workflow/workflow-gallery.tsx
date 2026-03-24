@@ -1,24 +1,24 @@
 import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
-import Icon from "@/components/misc/icon";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
-import {
-  Button,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-} from "@heroui/react";
 import { useEffect, useMemo, useState } from "react";
 import { compare } from "semver";
 import Loading from "../../interface/status-screens/loading";
+import GallerySearchBar from "../gallery-search-bar";
 
-type SortOption = "name-asc" | "name-desc" | "version-asc" | "version-desc";
+type SortOption =
+  | "name-asc"
+  | "name-desc"
+  | "version-asc"
+  | "version-desc"
+  | "published-desc"
+  | "published-asc";
 
 const sortLabels: { name: string; value: SortOption }[] = [
+  { name: "Published (newest)", value: "published-desc" },
+  { name: "Published (oldest)", value: "published-asc" },
   { name: "Version (newest)", value: "version-desc" },
   { name: "Version (oldest)", value: "version-asc" },
   { name: "Name (A–Z)", value: "name-asc" },
@@ -31,7 +31,7 @@ export default function WorkflowGallery() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [label, setLabel] = useState<"All" | "Published by Me">("All");
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortValue, setSortValue] = useState<SortOption>("version-desc");
+  const [sortValue, setSortValue] = useState<SortOption>("published-desc");
   const { isLoading, workflows } = useMarketplaceWorkflows(label);
   const { createCanvasTabView } = useTabViewManager();
 
@@ -70,6 +70,10 @@ export default function WorkflowGallery() {
           return compare(a.version, b.version);
         case "version-desc":
           return compare(b.version, a.version);
+        case "published-desc":
+          return (b.createdAt ?? "").localeCompare(a.createdAt ?? "");
+        case "published-asc":
+          return (a.createdAt ?? "").localeCompare(b.createdAt ?? "");
       }
     });
 
@@ -82,68 +86,15 @@ export default function WorkflowGallery() {
 
   return (
     <div className="grid h-full w-full grid-rows-[max-content_1fr] gap-y-2 overflow-y-auto">
-      <Input
-        size="sm"
-        placeholder="Search..."
-        value={searchQuery}
-        onValueChange={setSearchQuery}
-        startContent={
-          <div>
-            <Icon name="search" variant="outlined" />
-          </div>
-        }
-        endContent={
-          <div className="flex items-center gap-1">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button
-                  size="sm"
-                  variant="light"
-                  isIconOnly
-                  title={filterLabels[selectedIndex]?.name ?? "All"}
-                >
-                  <Icon
-                    name={selectedIndex === 0 ? "filter_alt_off" : "filter_alt"}
-                  />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Filter">
-                {filterLabels.map((item, index) => (
-                  <DropdownItem
-                    key={item.name}
-                    onPress={() => setSelectedIndex(index)}
-                  >
-                    {item.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger>
-                <Button
-                  size="sm"
-                  variant="light"
-                  isIconOnly
-                  title={sortLabels.find((s) => s.value === sortValue)?.name}
-                >
-                  <Icon
-                    name={sortValue.startsWith("name") ? "sort_by_alpha" : "sort"}
-                  />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Sort">
-                {sortLabels.map((item) => (
-                  <DropdownItem
-                    key={item.value}
-                    onPress={() => setSortValue(item.value)}
-                  >
-                    {item.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        }
+      <GallerySearchBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterLabels={filterLabels}
+        selectedFilterIndex={selectedIndex}
+        onFilterChange={setSelectedIndex}
+        sortLabels={sortLabels}
+        sortValue={sortValue}
+        onSortChange={setSortValue}
       />
 
       {isLoading ? (
