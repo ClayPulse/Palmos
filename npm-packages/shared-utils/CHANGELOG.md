@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.85
+
+### Patch Changes
+
+- Improve modular app oauth
+
 ## 0.1.1-beta.84
 
 ### Patch Changes

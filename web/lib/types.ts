@@ -402,6 +402,7 @@ export type ExtensionApp = {
   isEnabled: boolean;
   remoteOrigin: string;
   mfVersion?: string;
+  createdAt?: string;
 };
 
 // #endregion
@@ -441,6 +442,7 @@ export type AppMetaData = {
     name: string;
   };
   visibility: "public" | "private" | "unlisted";
+  createdAt?: string;
 };
 // #endregion
 
@@ -452,6 +454,7 @@ export type Workflow = {
   thumbnail?: string;
   visibility: "private" | "public" | "unlisted";
   requireWorkspace: boolean;
+  createdAt?: string;
 };
 
 export type WorkflowContent = {

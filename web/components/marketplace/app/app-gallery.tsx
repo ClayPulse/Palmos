@@ -1,23 +1,23 @@
-import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { ExtensionApp } from "@/lib/types";
-import {
-  Button,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
-  Input,
-} from "@heroui/react";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { compare } from "semver";
 import AppPreviewCard from "../../cards/app-preview-card";
 import Loading from "../../interface/status-screens/loading";
+import GallerySearchBar from "../gallery-search-bar";
 
-type SortOption = "name-asc" | "name-desc" | "version-asc" | "version-desc";
+type SortOption =
+  | "name-asc"
+  | "name-desc"
+  | "version-asc"
+  | "version-desc"
+  | "published-desc"
+  | "published-asc";
 
 const sortLabels: { name: string; value: SortOption }[] = [
+  { name: "Published (newest)", value: "published-desc" },
+  { name: "Published (oldest)", value: "published-asc" },
   { name: "Version (newest)", value: "version-desc" },
   { name: "Version (oldest)", value: "version-asc" },
   { name: "Name (A–Z)", value: "name-asc" },
@@ -31,7 +31,7 @@ export default function AppGallery() {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortValue, setSortValue] = useState<SortOption>("version-desc");
+  const [sortValue, setSortValue] = useState<SortOption>("published-desc");
 
   const selectLabels = [
     {
@@ -96,6 +96,10 @@ export default function AppGallery() {
           return compare(a.app.config.version, b.app.config.version);
         case "version-desc":
           return compare(b.app.config.version, a.app.config.version);
+        case "published-desc":
+          return (b.app.createdAt ?? "").localeCompare(a.app.createdAt ?? "");
+        case "published-asc":
+          return (a.app.createdAt ?? "").localeCompare(b.app.createdAt ?? "");
       }
     });
 
@@ -130,75 +134,16 @@ export default function AppGallery() {
 
   return (
     <div className="grid h-full w-full grid-rows-[max-content_1fr] gap-y-2 overflow-y-auto">
-      <Input
-        size="sm"
-        placeholder="Search..."
+      <GallerySearchBar
         className="flex-1"
-        value={searchQuery}
-        onValueChange={setSearchQuery}
-        startContent={
-          <div>
-            <Icon name="search" variant="outlined" />
-          </div>
-        }
-        endContent={
-          <div className="flex items-center gap-1">
-            <Dropdown>
-              <DropdownTrigger>
-                <Button
-                  size="sm"
-                  variant="light"
-                  isIconOnly
-                  title={selectLabels[selectedIndex]?.name ?? "All"}
-                >
-                  <Icon
-                    name={
-                      selectLabels[selectedIndex]?.name === "All"
-                        ? "filter_alt_off"
-                        : "filter_alt"
-                    }
-                  />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Filter">
-                {selectLabels.map((item, index) => (
-                  <DropdownItem
-                    key={item.name}
-                    onPress={() => setSelectedIndex(index)}
-                  >
-                    {item.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-            <Dropdown>
-              <DropdownTrigger>
-                <Button
-                  size="sm"
-                  variant="light"
-                  isIconOnly
-                  title={sortLabels.find((s) => s.value === sortValue)?.name}
-                >
-                  <Icon
-                    name={
-                      sortValue.startsWith("name") ? "sort_by_alpha" : "sort"
-                    }
-                  />
-                </Button>
-              </DropdownTrigger>
-              <DropdownMenu aria-label="Sort">
-                {sortLabels.map((item) => (
-                  <DropdownItem
-                    key={item.value}
-                    onPress={() => setSortValue(item.value)}
-                  >
-                    {item.name}
-                  </DropdownItem>
-                ))}
-              </DropdownMenu>
-            </Dropdown>
-          </div>
-        }
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        filterLabels={selectLabels}
+        selectedFilterIndex={selectedIndex}
+        onFilterChange={setSelectedIndex}
+        sortLabels={sortLabels}
+        sortValue={sortValue}
+        onSortChange={setSortValue}
       />
 
       {isLoading ? (

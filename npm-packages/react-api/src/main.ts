@@ -15,11 +15,10 @@ import useVideoGen from "./hooks/ai-modality/use-video-gen";
 import useAppSettings from "./hooks/editor/use-app-settings";
 import { useArtifact } from "./hooks/editor/use-artifact";
 import useEditorEnv from "./hooks/editor/use-editor-env";
+import useOAuth from "./hooks/editor/use-oauth";
 import useOpenApp from "./hooks/editor/use-open-app";
 import useOpenLink from "./hooks/editor/use-open-link";
 import useOwnedAppView from "./hooks/editor/use-owned-app-view";
-import useOAuth from "./hooks/editor/use-oauth";
-export type { OAuthState } from "./hooks/editor/use-oauth";
 import useSnapshotState from "./hooks/editor/use-snapshot-state";
 import { useTranslations } from "./hooks/editor/use-translations";
 import useFileSystem from "./hooks/workspace/use-file-system";
@@ -44,10 +43,10 @@ export {
   useLLM,
   useLoading,
   useNotification,
+  useOAuth,
   useOCR,
   useOpenApp,
   useOpenLink,
-  useOAuth,
   useOwnedAppView,
   useReceiveFile,
   useSnapshotState,

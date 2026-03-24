@@ -2,20 +2,11 @@ import {
   IMCMessage,
   IMCMessageTypeEnum,
   OAuthConnectConfig,
+  OAuthStatusEnum,
 } from "@pulse-editor/shared-utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useIMC from "../imc/use-imc";
 import useAppSettings from "./use-app-settings";
-
-export type OAuthState = {
-  accessToken?: string;
-  refreshToken?: string;
-  tokenType?: string;
-  scope?: string;
-  expiresAt?: string | number;
-  idToken?: string;
-  [key: string]: any;
-};
 
 function generateRandomString(length: number) {
   const array = new Uint8Array(length);
@@ -36,28 +27,32 @@ function generateRandomString(length: number) {
  * @param provider A provider identifier used to namespace the OAuth state.
  */
 export default function useOAuth(appId: string, provider = "default") {
-  const { isReady, isLoaded, settings, deleteSetting, refetch } = useAppSettings(appId);
-  const keyPrefix = `oauth:${provider}:`;
-  const oauthEntries = Object.entries(settings).filter(([k]) =>
-    k.startsWith(keyPrefix),
-  );
-  const oauthRaw =
-    oauthEntries.length > 0
-      ? Object.fromEntries(
-          oauthEntries.map(([k, v]) => [k.slice(keyPrefix.length), v]),
-        )
-      : null;
-  const oauth =
-    oauthRaw &&
-    Object.values(oauthRaw).some((v) => v !== null && v !== undefined)
-      ? (oauthRaw as OAuthState)
-      : null;
+  const { isReady, isLoaded } = useAppSettings(appId);
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const receiverHandlerMap = new Map<
     IMCMessageTypeEnum,
     (senderWindow: Window, message: IMCMessage) => Promise<void>
   >();
   const { imc, isReady: isIMCReady } = useIMC(receiverHandlerMap, "oauth");
+
+  async function checkAuthStatus() {
+    if (!isIMCReady) return;
+    try {
+      const status = await imc?.sendMessage(
+        IMCMessageTypeEnum.EditorOAuthCheckStatus,
+        { appId, provider },
+      );
+      setIsAuthenticated(status === OAuthStatusEnum.Authenticated);
+    } catch {
+      setIsAuthenticated(false);
+    }
+  }
+
+  useEffect(() => {
+    checkAuthStatus();
+  }, [isIMCReady]);
 
   /**
    * Initiate the OAuth flow. The editor handles everything:
@@ -87,78 +82,38 @@ export default function useOAuth(appId: string, provider = "default") {
   }
 
   /**
-   * Sign out: removes all stored OAuth tokens for this provider from the
-   * editor backend and resets local auth state immediately.
+   * Sign out: sends a disconnect request through the editor to remove
+   * stored OAuth tokens on the backend for this provider.
    */
   async function disconnect() {
-    // Collect keys before deletion so we don't rely on stale `oauth`
-    const keysToDelete = oauthEntries.map(([k]) => k);
-    await Promise.all(keysToDelete.map((key) => deleteSetting(key)));
+    if (!isIMCReady) {
+      throw new Error("IMC is not ready.");
+    }
+    await imc?.sendMessage(IMCMessageTypeEnum.EditorOAuthDisconnect, {
+      appId,
+      provider,
+    });
+    setIsAuthenticated(false);
   }
 
-  /**
-   * Re-fetch OAuth state from app settings.
-   * Call this after the user completes the OAuth flow in the external window.
-   */
-  async function refetchOAuth() {
-    await refetch();
-  }
-
-  // Revalidate OAuth state when the user returns to the tab
+  // Revalidate OAuth status when the user returns to the tab
   useEffect(() => {
     function handleVisibilityChange() {
       if (document.visibilityState === "visible") {
-        refetch();
+        checkAuthStatus();
       }
     }
     document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [isReady]);
-
-  /**
-   * Refresh the access token using the stored refresh token.
-   * The editor backend exchanges the refresh token with the OAuth provider
-   * and persists the new tokens automatically.
-   */
-  async function refreshToken(params: {
-    tokenEndpoint: string;
-    clientId: string;
-    clientSecret?: string;
-  }): Promise<OAuthState | null> {
-    if (!isIMCReady) {
-      throw new Error("IMC is not ready.");
-    }
-    if (!oauth?.refreshToken) {
-      throw new Error("No refresh token available.");
-    }
-
-    const result = await imc?.sendMessage(
-      IMCMessageTypeEnum.EditorOAuthRefreshToken,
-      {
-        appId,
-        provider,
-        tokenEndpoint: params.tokenEndpoint,
-        refreshToken: oauth.refreshToken,
-        clientId: params.clientId,
-        clientSecret: params.clientSecret,
-      },
-    );
-
-    // Re-fetch settings to sync local state
-    await refetchOAuth();
-    return result ?? null;
-  }
+  }, [isIMCReady]);
 
   return {
     isReady,
     isLoading: !isLoaded,
-    oauth,
-    isAuthenticated: Boolean(oauth?.accessToken),
+    isAuthenticated,
     connect,
     disconnect,
-    refetchOAuth,
-    refreshToken,
   };
 }

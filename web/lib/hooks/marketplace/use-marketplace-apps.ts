@@ -43,6 +43,7 @@ export function useMarketplaceApps(
                 isEnabled: true,
                 remoteOrigin: origin,
                 mfVersion: mfVersion,
+                createdAt: extMeta.createdAt,
               };
             }),
         );
