@@ -63,6 +63,8 @@ export enum IMCMessageTypeEnum {
   // OAuth
   EditorOAuthConnect = "editor-oauth-connect",
   EditorOAuthRefreshToken = "editor-oauth-refresh-token",
+  EditorOAuthCheckStatus = "editor-oauth-check-status",
+  EditorOAuthDisconnect = "editor-oauth-disconnect",
   // #endregion
 
   // #region Platform API interaction messages (require OS-like environment)
@@ -334,6 +336,11 @@ export type ListPathOptions = {
 // input:
 // output:
 // }
+
+export enum OAuthStatusEnum {
+  Authenticated = "authenticated",
+  Unauthenticated = "unauthenticated",
+}
 
 export type OAuthConnectConfig = {
   provider: string;

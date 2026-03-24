@@ -1,7 +1,7 @@
 "use client";
 
 import { LLMAgentRunner } from "@/lib/agent/runners/llm-agent-runner";
-import { refreshOAuthToken, registerOAuthClient } from "@/lib/auth/oauth";
+import { checkOAuthStatus, disconnectOAuth, refreshOAuthToken, registerOAuthClient } from "@/lib/auth/oauth";
 import { PlatformEnum } from "@/lib/enums";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
@@ -919,6 +919,30 @@ export default function InterModuleCommunicationProvider({
           }
 
           return ext.remoteOrigin;
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorOAuthDisconnect,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { appId, provider }: { appId: string; provider: string } =
+            message.payload;
+          await disconnectOAuth({ appId, provider });
+        },
+      ],
+      [
+        IMCMessageTypeEnum.EditorOAuthCheckStatus,
+        async (
+          senderWindow: Window,
+          message: IMCMessage,
+          abortSignal?: AbortSignal,
+        ) => {
+          const { appId, provider }: { appId: string; provider: string } =
+            message.payload;
+          return await checkOAuthStatus({ appId, provider });
         },
       ],
       [

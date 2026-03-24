@@ -1,4 +1,4 @@
-import { OAuthConnectConfig } from "@pulse-editor/shared-utils";
+import { OAuthConnectConfig, OAuthStatusEnum } from "@pulse-editor/shared-utils";
 import { fetchAPI } from "../pulse-editor-website/backend";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -146,4 +146,41 @@ export async function refreshOAuthToken(params: {
   }
 
   return res.json();
+}
+
+// ---------------------------------------------------------------------------
+// Disconnect OAuth
+// Delegates to the backend /api/app/oauth/disconnect endpoint.
+// ---------------------------------------------------------------------------
+
+export async function disconnectOAuth(params: {
+  appId: string;
+  provider: string;
+}): Promise<void> {
+  await fetchAPI(
+    `/api/app/oauth/disconnect?appId=${encodeURIComponent(params.appId)}&provider=${encodeURIComponent(params.provider)}`,
+    { method: "DELETE", credentials: "include" },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Check OAuth status
+// Delegates to the backend /api/app/oauth/check endpoint.
+// ---------------------------------------------------------------------------
+
+export async function checkOAuthStatus(params: {
+  appId: string;
+  provider: string;
+}): Promise<OAuthStatusEnum> {
+  try {
+    const res = await fetchAPI(
+      `/api/app/oauth/check?appId=${encodeURIComponent(params.appId)}&provider=${encodeURIComponent(params.provider)}`,
+      { method: "GET", credentials: "include" },
+    );
+    if (!res.ok) return OAuthStatusEnum.Unauthenticated;
+    const { connected } = await res.json();
+    return connected ? OAuthStatusEnum.Authenticated : OAuthStatusEnum.Unauthenticated;
+  } catch {
+    return OAuthStatusEnum.Unauthenticated;
+  }
 }
