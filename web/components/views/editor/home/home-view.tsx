@@ -9,10 +9,12 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { useEditorAIAssistantHint } from "@/lib/hooks/use-editor-ai-assistant-hint";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useVibeCode } from "@/lib/hooks/use-vibe-code";
 import { useWorkspace } from "@/lib/hooks/use-workspace";
-import { ExtensionApp, Session, TabItem, Workflow } from "@/lib/types";
+import { AppViewConfig, ExtensionApp, Session, TabItem, Workflow } from "@/lib/types";
+import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Divider, Listbox, ListboxItem, Skeleton } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useEffect, useState } from "react";
@@ -102,6 +104,7 @@ function OverviewPanel({
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
   const { openVibeCode } = useVibeCode();
+  const { createCanvasTabView } = useTabViewManager();
 
   async function handleOpenVibeCode() {
     await openVibeCode();
@@ -188,19 +191,20 @@ function OverviewPanel({
             <div className="flex gap-x-1">
               <Button
                 color="primary"
-                onPress={() => {
-                  editorContext?.updateModalStates({
-                    projectSettings: {
-                      isOpen: true,
-                      projectInfo: undefined,
-                    },
+                onPress={async () => {
+                  await createCanvasTabView({
+                    viewId: createCanvasViewId(),
                   });
+                  editorContext?.setEditorStates((prev) => ({
+                    ...prev,
+                    isSideMenuOpen: true,
+                  }));
                 }}
               >
                 <div className="flex items-center gap-2">
                   <Icon name="add" className="text-primary-foreground" />
                   <p className="text-primary-foreground">
-                    {t("fileMenu.newProject")}
+                    {t("homeView.createWorkflow.button")}
                   </p>
                 </div>
               </Button>
@@ -322,6 +326,8 @@ function MarketplaceAppsAndWorkflows() {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
+  const { createCanvasTabView, createAppViewInCanvasView } = useTabViewManager();
+
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
     useExtensionAppManager("All");
   const { workflows, isLoading: isLoadingWorkflow } =
@@ -345,21 +351,25 @@ function MarketplaceAppsAndWorkflows() {
   );
 
   async function openAppInProject(ext: ExtensionApp) {
-    editorContext?.updateModalStates({
-      openInProject: {
-        isOpen: true,
-        app: ext,
-      },
-    });
+    const config: AppViewConfig = {
+      app: ext.config.id,
+      requiredVersion: ext.config.version,
+      viewId: createAppViewId(ext.config.id),
+      initialHeight: ext.config.recommendedHeight,
+      initialWidth: ext.config.recommendedWidth,
+    };
+    await createAppViewInCanvasView(config);
   }
 
   async function openWorkflowInProject(workflow: Workflow) {
-    editorContext?.updateModalStates({
-      openInProject: {
-        isOpen: true,
-        workflow: workflow,
+    await createCanvasTabView(
+      {
+        viewId: createCanvasViewId(),
+        appConfigs: workflow.content.nodes.map((node) => node.data.config),
+        initialWorkflowContent: workflow.content,
       },
-    });
+      workflow,
+    );
   }
 
   return (
@@ -503,6 +513,8 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
+  const { createAppViewInCanvasView } = useTabViewManager();
+
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
     useExtensionAppManager("Published by Me");
   const { projects, isLoading: isLoadingProjects } = useProjectManager();
@@ -525,12 +537,14 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
   );
 
   async function openAppInProject(ext: ExtensionApp) {
-    editorContext?.updateModalStates({
-      openInProject: {
-        isOpen: true,
-        app: ext,
-      },
-    });
+    const config: AppViewConfig = {
+      app: ext.config.id,
+      requiredVersion: ext.config.version,
+      viewId: createAppViewId(ext.config.id),
+      initialHeight: ext.config.recommendedHeight,
+      initialWidth: ext.config.recommendedWidth,
+    };
+    await createAppViewInCanvasView(config);
   }
 
   return (

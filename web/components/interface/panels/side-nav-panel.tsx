@@ -1,5 +1,5 @@
 import AppExplorer from "@/components/explorer/app/app-explorer";
-import ProjectExplorer from "@/components/explorer/project/project-explorer";
+import WorkflowExplorer from "@/components/explorer/workflow/workflow-explorer";
 import WorkspaceExplorer from "@/components/explorer/workspace/workspace-explorer";
 import BaseSidePanel from "@/components/interface/panels/base-side-panel";
 import Tabs from "@/components/misc/tabs";
@@ -8,6 +8,7 @@ import { PlatformEnum, SideMenuTabEnum } from "@/lib/enums";
 import useExplorer from "@/lib/hooks/use-explorer";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { TabItem } from "@/lib/types";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { Button } from "@heroui/react";
 import { useContext } from "react";
 import Icon from "../../misc/icon";
@@ -62,21 +63,38 @@ function PanelContent() {
 
   const { selectAndSetProjectHome } = useExplorer();
 
-  const tabItems: TabItem[] = [
-    {
-      name: SideMenuTabEnum.Apps,
-      description: "List of apps",
-      icon: "apps",
-    },
-    {
-      name: SideMenuTabEnum.Workspace,
-      description: "Project workspace",
-      icon: "folder",
-    },
-  ];
+  const tabViews = editorContext?.editorStates.tabViews ?? [];
+  const tabIndex = editorContext?.editorStates.tabIndex ?? -1;
+  const activeTabView = tabViews[tabIndex];
+  const isInCanvas = activeTabView?.type === ViewModeEnum.Canvas;
+
+  const tabItems: TabItem[] = isInCanvas
+    ? [
+        {
+          name: SideMenuTabEnum.Apps,
+          description: "List of apps",
+          icon: "apps",
+        },
+        {
+          name: SideMenuTabEnum.Workspace,
+          description: "Project workspace",
+          icon: "folder",
+        },
+      ]
+    : [
+        {
+          name: SideMenuTabEnum.Workflows,
+          description: "My workflows",
+          icon: "hub",
+        },
+      ];
+
+  const defaultTab = isInCanvas ? SideMenuTabEnum.Apps : SideMenuTabEnum.Workflows;
 
   const selectedTab =
-    editorContext?.editorStates.sideMenuTab ?? SideMenuTabEnum.Apps;
+    tabItems.find((t) => t.name === editorContext?.editorStates.sideMenuTab)
+      ? (editorContext?.editorStates.sideMenuTab ?? defaultTab)
+      : defaultTab;
 
   function setSelectedTab(tab: SideMenuTabEnum) {
     editorContext?.setEditorStates((prev) => {
@@ -112,33 +130,28 @@ function PanelContent() {
 
   return (
     <div className="relative grid h-full w-full grid-rows-[max-content_auto] overflow-y-hidden">
-      <div className="flex w-full justify-center">
-        <div className="w-fit">
-          {editorContext?.editorStates.project && (
+      {isInCanvas && (
+        <div className="flex w-full justify-center">
+          <div className="w-fit">
             <Tabs
               tabItems={tabItems}
               selectedItem={tabItems.find((tab) => tab.name === selectedTab)}
               setSelectedItem={(item) => {
-                const index = tabItems.findIndex(
-                  (tab) => tab.name === item?.name,
-                );
                 setSelectedTab(item?.name as SideMenuTabEnum);
               }}
               isClosable={false}
             />
-          )}
-        </div>
-      </div>
-      <div className="h-full w-full overflow-y-hidden">
-        {!editorContext?.editorStates.project ? (
-          <div className="bg-content2 h-full w-full space-y-2 overflow-y-auto px-4">
-            <ProjectExplorer />
           </div>
-        ) : selectedTab === SideMenuTabEnum.Apps ? (
+        </div>
+      )}
+      <div className="h-full w-full overflow-y-hidden">
+        {selectedTab === SideMenuTabEnum.Apps ? (
           <AppExplorer />
-        ) : (
-          selectedTab === SideMenuTabEnum.Workspace && <WorkspaceExplorer />
-        )}
+        ) : selectedTab === SideMenuTabEnum.Workflows ? (
+          <WorkflowExplorer />
+        ) : selectedTab === SideMenuTabEnum.Workspace ? (
+          <WorkspaceExplorer />
+        ) : null}
       </div>
     </div>
   );

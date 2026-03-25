@@ -20,7 +20,6 @@ import Icon from "../../misc/icon";
 import Tabs from "../../misc/tabs";
 import { EditorContext } from "../../providers/editor-context-provider";
 import HomeView from "./home/home-view";
-import ProjectView from "./project/project-view";
 
 import packageJson from "../../../../package.json";
 import readme from "../../../README.md";
@@ -262,12 +261,12 @@ export default function ViewArea() {
 
   return (
     <div className="h-full w-full overflow-hidden">
-      {!editorContext?.editorStates.project &&
+      {tabViews.length === 0 &&
       app === null &&
       workflowName === null ? (
         <HomeView />
       ) : tabViews.length === 0 ? (
-        <ProjectView />
+        <HomeView />
       ) : tabIndex >= 0 && tabIndex < tabViews.length ? (
         <div
           className="relative grid h-full w-full grid-rows-1 gap-y-0.5 data-[is-show-tabs=false]:data-[type=app]:pt-17 data-[is-show-tabs=true]:data-[type=app]:grid-rows-[max-content_auto]"
