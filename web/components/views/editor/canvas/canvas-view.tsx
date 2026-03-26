@@ -4,10 +4,15 @@ import { useCanvas } from "@/lib/hooks/use-canvas";
 import useCanvasWorkflow from "@/lib/hooks/use-canvas-workflow";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import { AppNodeData, AppViewConfig, CanvasViewConfig } from "@/lib/types";
+import {
+  AppNodeData,
+  AppViewConfig,
+  CanvasViewConfig,
+  CopiedCanvasSelection,
+} from "@/lib/types";
 import { createAppViewId } from "@/lib/views/view-helpers";
-import { addToast } from "@heroui/react";
 import { useDroppable } from "@dnd-kit/core";
+import { addToast } from "@heroui/react";
 import {
   addEdge,
   applyEdgeChanges,
@@ -27,7 +32,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { useTheme } from "next-themes";
-import { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useRef } from "react";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
 
@@ -39,11 +44,6 @@ function createCopiedEdgeId(source: string, target: string) {
 
   return `${source}-${target}-${suffix}`;
 }
-
-type CopiedCanvasSelection = {
-  nodes: ReactFlowNode<AppNodeData>[];
-  edges: ReactFlowEdge[];
-};
 
 export default function CanvasView({
   config,
@@ -63,6 +63,7 @@ export default function CanvasView({
     localNodes,
     entryPoint,
     startWorkflow,
+    startWorkflowFromNode,
     updateWorkflowEdges,
     updateWorkflowNodes,
     exportWorkflow,
@@ -74,15 +75,30 @@ export default function CanvasView({
   const { getViewCenterCoordForNode } = useCanvas();
 
   const containerRef = useRef<HTMLDivElement>(null);
-  const [copiedSelection, setCopiedSelection] = useState<CopiedCanvasSelection>({
-    nodes: [],
-    edges: [],
-  });
+
+  const copiedSelection = editorContext?.editorStates.canvasClipboard;
+  const setCopiedSelection = (selection: CopiedCanvasSelection) => {
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      canvasClipboard: selection,
+    }));
+  };
+
+  // Refs so the keydown handler always reads the latest nodes/edges without
+  // needing them in the useEffect deps (which would re-register the handler
+  // on every paste, potentially losing the clipboard reference mid-operation).
+  const localNodesRef = useRef(localNodes);
+  localNodesRef.current = localNodes;
+  const localEdgesRef = useRef(localEdges);
+  localEdgesRef.current = localEdges;
+
   // Maps viewId -> flow position for nodes being pasted, so promoteToWorkflowNode
   // can place them at the correct location instead of defaulting to canvas center.
   // NOTE: These must stay as refs — they are written during paste and read synchronously
   // in the promoteToWorkflowNode effect; state updates are async and would break that handshake.
-  const pastePositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const pastePositionsRef = useRef<Map<string, { x: number; y: number }>>(
+    new Map(),
+  );
   // Stores full pasted node snapshots so config-sync promotion preserves node data.
   const pastedNodesRef = useRef<Map<string, ReactFlowNode<AppNodeData>>>(
     new Map(),
@@ -195,6 +211,28 @@ export default function CanvasView({
     ],
     isActive,
   );
+  // Run workflow from selected node (forward-only, no upstream backtrack)
+  useRegisterMenuAction(
+    {
+      name: `Run From Selected Node (${tabName})`,
+      displayName: `${t("viewMenu.runFromSelectedNode.name")} (${tabName})`,
+      menuCategory: "view",
+      description: t("viewMenu.runFromSelectedNode.description"),
+      shortcut: "Ctrl+Alt+Shift+R",
+      icon: "skip_next",
+    },
+    async () => {
+      await startWorkflowFromNode();
+    },
+    [
+      entryPoint,
+      isActive,
+      tabName,
+      editorContext?.persistSettings?.extensions,
+      locale,
+    ],
+    isActive,
+  );
   // Publish workflow
   useRegisterMenuAction(
     {
@@ -283,14 +321,14 @@ export default function CanvasView({
       }
 
       if (e.ctrlKey && e.key === "c") {
-        const selected = localNodes.filter((n) => n.selected);
+        const selected = localNodesRef.current.filter((n) => n.selected);
         if (selected.length === 0) return;
         const selectedNodeIds = new Set(selected.map((node) => node.id));
         // Store node references directly — ReactFlow nodes contain non-serializable
         // internal fields (e.g. internals.domNode), so we must NOT structuredClone them.
         setCopiedSelection({
           nodes: selected,
-          edges: localEdges
+          edges: localEdgesRef.current
             .filter(
               (edge) =>
                 selectedNodeIds.has(edge.source) &&
@@ -304,13 +342,15 @@ export default function CanvasView({
           description: `Copied: ${names}`,
           color: "success",
         });
-      } else if (e.ctrlKey && e.key === "v") {
-        const { nodes: copiedNodes, edges: copiedEdges } =
-          copiedSelection;
+      } else if (e.ctrlKey && e.key === "v" && copiedSelection) {
+        const { nodes: copiedNodes, edges: copiedEdges } = copiedSelection;
         if (!copiedNodes || copiedNodes.length === 0) return;
 
         // Compute bounding-box center of the copied selection (flow coordinates)
-        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        let minX = Infinity,
+          minY = Infinity,
+          maxX = -Infinity,
+          maxY = -Infinity;
         for (const node of copiedNodes) {
           const w = node.width ?? node.data.config.initialWidth ?? 640;
           const h = node.height ?? node.data.config.initialHeight ?? 360;
@@ -326,8 +366,12 @@ export default function CanvasView({
         const containerEl = containerRef.current;
         const canvasCenter = containerEl
           ? screenToFlowPosition({
-              x: containerEl.getBoundingClientRect().left + containerEl.offsetWidth / 2,
-              y: containerEl.getBoundingClientRect().top + containerEl.offsetHeight / 2,
+              x:
+                containerEl.getBoundingClientRect().left +
+                containerEl.offsetWidth / 2,
+              y:
+                containerEl.getBoundingClientRect().top +
+                containerEl.offsetHeight / 2,
             })
           : { x: selCenterX, y: selCenterY };
 
@@ -425,8 +469,6 @@ export default function CanvasView({
   }, [
     copiedSelection,
     isActive,
-    localEdges,
-    localNodes,
     screenToFlowPosition,
     updateWorkflowEdges,
     updateWorkflowNodes,
@@ -456,7 +498,7 @@ export default function CanvasView({
           // Priority: 1) pasted position, 2) saved workflow position, 3) canvas center
           const pastePosition = pastePositionsRef.current.get(appConfig.viewId);
           pastePositionsRef.current.delete(appConfig.viewId);
-          
+
           const savedNode = config.initialWorkflowContent?.nodes.find(
             (n) => n.id === appConfig.viewId,
           );

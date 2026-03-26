@@ -342,6 +342,9 @@
 		"runWorkflow": {
 			"tooltip": "Workflow ausführen"
 		},
+		"runFromSelectedNode": {
+			"tooltip": "Ab ausgewähltem Knoten ausführen"
+		},
 		"openConsole": {
 			"tooltip": "Agenten-Konsole öffnen"
 		},
@@ -722,6 +725,10 @@
 		"runWorkflow": {
 			"name": "Workflow ausführen",
 			"description": "Den aktuellen Workflow vom ausgewählten oder Standard-Einstiegspunkt ausführen"
+		},
+		"runFromSelectedNode": {
+			"name": "Ab ausgewähltem Knoten ausführen",
+			"description": "Den Workflow vorwärts ab dem ausgewählten Knoten ausführen, ohne vorherige Eingaben zurückzuverfolgen"
 		},
 		"importWorkflow": {
 			"name": "Workflow importieren",

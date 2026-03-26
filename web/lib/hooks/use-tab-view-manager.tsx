@@ -21,7 +21,7 @@ export function useTabViewManager() {
   const imcContext = useContext(IMCContext);
 
   const { isLandscape } = useScreenSize();
-  const { createProject, openProject } = useProjectManager();
+  const { openProject } = useProjectManager();
 
   const [tabViews, setTabViews] = useState<TabView[]>(
     editorContext?.editorStates.tabViews ?? [],
@@ -301,12 +301,9 @@ export function useTabViewManager() {
       setIsCreatingTab(false);
       throw new Error("IMC context is not available");
     } else if (!editorContext.editorStates.project) {
-      // Create a temporary project
-      const tempProjectName = `temp-project-${Date.now()}`;
-      await createProject({
-        name: tempProjectName,
-      });
-      await openProject(tempProjectName);
+      // Set an in-memory temporary project name (not persisted via PlatformAPI).
+      // The project is only created on the backend when the user explicitly saves.
+      openProject(`temp-project-${Date.now()}`);
     }
 
     const requireWorkspace = canvasConfig.appConfigs
@@ -402,14 +399,9 @@ export function useTabViewManager() {
     if (!editorContext) {
       throw new Error("Editor context is not available");
     } else if (!editorContext.editorStates.project) {
-      // if (!platformApi) return;
-
-      // Create a temporary project
-      const tempProjectName = `temp-project-${Date.now()}`;
-      await createProject({
-        name: tempProjectName,
-      });
-      await openProject(tempProjectName);
+      // Set an in-memory temporary project name (not persisted via PlatformAPI).
+      // The project is only created on the backend when the user explicitly saves.
+      openProject(`temp-project-${Date.now()}`);
     }
 
     const requireWorkspace = appConfig.app

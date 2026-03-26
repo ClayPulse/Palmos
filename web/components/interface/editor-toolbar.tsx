@@ -6,7 +6,16 @@ import useEditorAIAssistant from "@/lib/hooks/use-editor-ai-assistant";
 import useRecorder from "@/lib/hooks/use-recorder";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import { addToast, Button, Divider, Tooltip } from "@heroui/react";
+import {
+  addToast,
+  Button,
+  Divider,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Tooltip,
+} from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
@@ -79,21 +88,85 @@ export default function EditorToolbar() {
                 </Button>
               </Tooltip> */}
 
-              <Tooltip content={t("editorToolbar.runWorkflow.tooltip")}>
-                <Button
-                  variant="light"
-                  isIconOnly
-                  className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
-                  onPress={() => {
-                    runMenuActionByName(
-                      `Run Workflow (${tabItems[tabIndex].name})`,
-                      "view",
-                    );
-                  }}
-                >
-                  <Icon name="play_arrow" variant="round" />
-                </Button>
-              </Tooltip>
+              {(editorContext?.editorStates.selectedViewIds?.length ?? 0) >
+                0 &&
+              editorContext?.editorStates.workflowEdges?.some(
+                (e) =>
+                  editorContext?.editorStates.selectedViewIds?.includes(
+                    e.source,
+                  ) ||
+                  editorContext?.editorStates.selectedViewIds?.includes(
+                    e.target,
+                  ),
+              ) ? (
+                <Dropdown>
+                  <DropdownTrigger>
+                    <Button
+                      variant="light"
+                      isIconOnly
+                      className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
+                    >
+                      <Icon name="playlist_play" variant="round" />
+                    </Button>
+                  </DropdownTrigger>
+                  <DropdownMenu aria-label="Run options">
+                    <DropdownItem
+                      key="run-workflow"
+                      onPress={() => {
+                        runMenuActionByName(
+                          `Run Workflow (${tabItems[tabIndex]?.name})`,
+                          "view",
+                        );
+                      }}
+                      shortcut="Ctrl+Alt+R"
+                      description={t("viewMenu.runWorkflow.description")}
+                      startContent={
+                        <div className="w-6">
+                          <Icon name="play_arrow" variant="round" />
+                        </div>
+                      }
+                    >
+                      {t("editorToolbar.runWorkflow.tooltip")}
+                    </DropdownItem>
+                    <DropdownItem
+                      key="run-from-selected"
+                      onPress={() => {
+                        runMenuActionByName(
+                          `Run From Selected Node (${tabItems[tabIndex]?.name})`,
+                          "view",
+                        );
+                      }}
+                      shortcut="Ctrl+Alt+Shift+R"
+                      description={t(
+                        "viewMenu.runFromSelectedNode.description",
+                      )}
+                      startContent={
+                        <div className="w-6">
+                          <Icon name="skip_next" variant="round" />
+                        </div>
+                      }
+                    >
+                      {t("editorToolbar.runFromSelectedNode.tooltip")}
+                    </DropdownItem>
+                  </DropdownMenu>
+                </Dropdown>
+              ) : (
+                <Tooltip content={t("editorToolbar.runWorkflow.tooltip")}>
+                  <Button
+                    variant="light"
+                    isIconOnly
+                    className="text-default-foreground h-8 w-8 min-w-8 px-1 py-1"
+                    onPress={() => {
+                      runMenuActionByName(
+                        `Run Workflow (${tabItems[tabIndex].name})`,
+                        "view",
+                      );
+                    }}
+                  >
+                    <Icon name="play_arrow" variant="round" />
+                  </Button>
+                </Tooltip>
+              )}
 
               <Divider className="mx-1" orientation="vertical" />
               <Tooltip content={t("editorToolbar.openConsole.tooltip")}>

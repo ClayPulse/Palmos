@@ -1,7 +1,12 @@
 "use client";
 
 import { LLMAgentRunner } from "@/lib/agent/runners/llm-agent-runner";
-import { checkOAuthStatus, disconnectOAuth, refreshOAuthToken, registerOAuthClient } from "@/lib/auth/oauth";
+import {
+  checkOAuthStatus,
+  disconnectOAuth,
+  refreshOAuthToken,
+  registerOAuthClient,
+} from "@/lib/auth/oauth";
 import { PlatformEnum } from "@/lib/enums";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
@@ -21,6 +26,7 @@ import {
 } from "@/lib/modalities/utils";
 import { getVideoGenModel } from "@/lib/modalities/video-gen/get-video-gen";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { getAPIKey } from "@/lib/settings/api-manager-utils";
 import { IMCContextType } from "@/lib/types";
 import { createAppViewId } from "@/lib/views/view-helpers";
@@ -964,23 +970,61 @@ export default function InterModuleCommunicationProvider({
 
           // If no clientId provided, perform dynamic client registration
           let resolvedConfig = { ...config };
-          if (!config.clientId && config.registrationEndpoint) {
-            try {
-              const { clientId } = await registerOAuthClient({
-                appId,
-                provider,
-                registrationEndpoint: config.registrationEndpoint,
-                scope: config.scope,
-              });
-              resolvedConfig.clientId = clientId;
-            } catch (err: any) {
-              addToast({
-                title: "OAuth Registration Failed",
-                description:
-                  err.message ?? "Could not register with the OAuth provider.",
-                color: "danger",
-              });
-              return;
+          if (!config.clientId) {
+            if (config.registrationEndpoint) {
+              // Automatically register a new OAuth client and get the client ID
+              try {
+                const { clientId } = await registerOAuthClient({
+                  appId,
+                  provider,
+                  registrationEndpoint: config.registrationEndpoint,
+                  scope: config.scope,
+                });
+                resolvedConfig.clientId = clientId;
+              } catch (err: any) {
+                addToast({
+                  title: "OAuth Registration Failed",
+                  description:
+                    err.message ??
+                    "Could not register with the OAuth provider.",
+                  color: "danger",
+                });
+                return;
+              }
+            } else {
+              // No registration endpoint provided, fetch client ID from backend
+              try {
+                const clientId = await fetchAPI(
+                  `/api/app/oauth/client-id?provider=${provider}`,
+                  {
+                    method: "GET",
+                    credentials: "include",
+                  },
+                )
+                  .then((res) => {
+                    if (!res.ok) {
+                      throw new Error(
+                        `Failed to fetch OAuth client ID (${res.status})`,
+                      );
+                    }
+                    return res.json();
+                  })
+                  .then((data) => data.clientId);
+
+                if (!clientId) {
+                  throw new Error("No client ID returned from server.");
+                }
+                resolvedConfig.clientId = clientId;
+              } catch (err: any) {
+                addToast({
+                  title: "OAuth Client ID Fetch Failed",
+                  description:
+                    err.message ??
+                    "Could not fetch OAuth client ID from server.",
+                  color: "danger",
+                });
+                return;
+              }
             }
           }
 

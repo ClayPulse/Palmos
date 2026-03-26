@@ -108,6 +108,12 @@ export type EditorStates = {
     audioBuffer?: ArrayBuffer;
   };
 
+  // Shared clipboard for canvas copy/paste (shared across all canvas tabs)
+  canvasClipboard?: {
+    nodes: ReactFlowNode<AppNodeData>[];
+    edges: ReactFlowEdge[];
+  };
+
   // Read-only
   workflowNodes: ReactFlowNode<AppNodeData>[];
   // Read-only
@@ -347,6 +353,12 @@ export type TabView = {
   /** The workflow object this tab was opened from, if any. */
   openedWorkflow?: Workflow;
 };
+
+export type CopiedCanvasSelection = {
+  nodes: ReactFlowNode<AppNodeData>[];
+  edges: ReactFlowEdge[];
+};
+
 
 // #endregion
 

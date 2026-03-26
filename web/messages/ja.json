@@ -360,6 +360,9 @@
 		"runWorkflow": {
 			"tooltip": "ワークフローを実行"
 		},
+		"runFromSelectedNode": {
+			"tooltip": "選択したノードから実行"
+		},
 		"openConsole": {
 			"tooltip": "エージェントコンソールを開く"
 		},
@@ -740,6 +743,10 @@
 		"runWorkflow": {
 			"name": "ワークフローを実行",
 			"description": "選択したまたはデフォルトのエントリポイントから現在のワークフローを実行"
+		},
+		"runFromSelectedNode": {
+			"name": "選択したノードから実行",
+			"description": "上流の入力を遡らずに、選択したノードからワークフローを前方に実行"
 		},
 		"importWorkflow": {
 			"name": "ワークフローをインポート",
