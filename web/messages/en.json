@@ -360,6 +360,9 @@
     "runWorkflow": {
       "tooltip": "Run Workflow"
     },
+    "runFromSelectedNode": {
+      "tooltip": "Run From Selected Node"
+    },
     "openConsole": {
       "tooltip": "Open Agentic Console"
     },
@@ -740,6 +743,10 @@
     "runWorkflow": {
       "name": "Run Workflow",
       "description": "Run the current workflow from the selected or default entry point"
+    },
+    "runFromSelectedNode": {
+      "name": "Run From Selected Node",
+      "description": "Run the workflow forward from the selected node without tracing back upstream inputs"
     },
     "importWorkflow": {
       "name": "Import Workflow",

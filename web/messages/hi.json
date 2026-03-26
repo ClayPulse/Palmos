@@ -360,6 +360,9 @@
 		"runWorkflow": {
 			"tooltip": "वर्कफ़्लो चलाएँ"
 		},
+		"runFromSelectedNode": {
+			"tooltip": "चयनित नोड से चलाएँ"
+		},
 		"openConsole": {
 			"tooltip": "एजेंटिक कंसोल खोलें"
 		},
@@ -740,6 +743,10 @@
 		"runWorkflow": {
 			"name": "वर्कफ़्लो चलाएं",
 			"description": "चयनित या डिफ़ॉल्ट प्रवेश बिंदु से वर्तमान वर्कफ़्लो चलाएं"
+		},
+		"runFromSelectedNode": {
+			"name": "चयनित नोड से चलाएँ",
+			"description": "पिछले इनपुट को ट्रेस किए बिना चयनित नोड से वर्कफ़्लो आगे चलाएँ"
 		},
 		"importWorkflow": {
 			"name": "वर्कफ़्लो इम्पोर्ट करें",

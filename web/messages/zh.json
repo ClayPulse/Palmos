@@ -360,6 +360,9 @@
 		"runWorkflow": {
 			"tooltip": "运行工作流"
 		},
+		"runFromSelectedNode": {
+			"tooltip": "从选定节点运行"
+		},
 		"openConsole": {
 			"tooltip": "打开 Agentic 控制台"
 		},
@@ -740,6 +743,10 @@
 		"runWorkflow": {
 			"name": "运行工作流",
 			"description": "从选定或默认的入口点运行当前工作流"
+		},
+		"runFromSelectedNode": {
+			"name": "从选定节点运行",
+			"description": "从选定节点向前运行工作流，不回溯上游输入"
 		},
 		"importWorkflow": {
 			"name": "导入工作流",

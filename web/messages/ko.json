@@ -360,6 +360,9 @@
     "runWorkflow": {
       "tooltip": "워크플로우 실행"
     },
+    "runFromSelectedNode": {
+      "tooltip": "선택한 노드에서 실행"
+    },
     "openConsole": {
       "tooltip": "에이전틱 콘솔 열기"
     },
@@ -740,6 +743,10 @@
     "runWorkflow": {
       "name": "워크플로우 실행",
       "description": "선택한 또는 기본 진입점에서 현재 워크플로우 실행"
+    },
+    "runFromSelectedNode": {
+      "name": "선택한 노드에서 실행",
+      "description": "이전 입력을 추적하지 않고 선택한 노드에서 워크플로우를 앞으로 실행"
     },
     "importWorkflow": {
       "name": "워크플로우 가져오기",

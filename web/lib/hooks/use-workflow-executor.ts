@@ -229,6 +229,71 @@ export default function useWorkflowExecutor({
     });
   }
 
+  // Forward-only execution sequence: walk downstream from the given node
+  // without tracing back upstream dependencies. The starting node's incoming
+  // edges are ignored so it runs with whatever inputs it already has.
+  function getForwardExecutionSequence(
+    startNode: ReactFlowNode<AppNodeData>,
+  ): ReactFlowNode<AppNodeData>[] {
+    // Build forward adjacency list
+    const adj: Record<string, string[]> = {};
+    for (const node of localNodes) {
+      adj[node.id] = [];
+    }
+    for (const edge of localEdges) {
+      if (adj[edge.source]) adj[edge.source].push(edge.target);
+    }
+
+    // Walk forward from startNode to find all downstream nodes
+    const reachable = new Set<string>();
+    function walk(nodeId: string) {
+      if (reachable.has(nodeId)) return;
+      reachable.add(nodeId);
+      for (const neighbor of adj[nodeId] || []) walk(neighbor);
+    }
+    walk(startNode.id);
+
+    // Build in-degree only within the reachable subgraph, ignoring edges
+    // that come from outside the subgraph (i.e. upstream of startNode)
+    const inDegree: Record<string, number> = {};
+    for (const nodeId of reachable) inDegree[nodeId] = 0;
+    for (const edge of localEdges) {
+      if (reachable.has(edge.source) && reachable.has(edge.target)) {
+        inDegree[edge.target]++;
+      }
+    }
+
+    // Kahn's algorithm
+    const queue: string[] = [];
+    for (const nodeId of reachable) {
+      if (inDegree[nodeId] === 0) queue.push(nodeId);
+    }
+
+    const sequence: ReactFlowNode<AppNodeData>[] = [];
+    while (queue.length > 0) {
+      const nodeId = queue.shift()!;
+      const node = localNodes.find((n) => n.id === nodeId);
+      if (node) sequence.push(node);
+      for (const neighbor of adj[nodeId] || []) {
+        if (!reachable.has(neighbor)) continue;
+        inDegree[neighbor]--;
+        if (inDegree[neighbor] === 0) queue.push(neighbor);
+      }
+    }
+
+    if (sequence.length < reachable.size) {
+      addToast({
+        title: "Cycle Detected in Workflow",
+        description:
+          "A cycle was detected in the workflow graph. Please remove cycles to ensure correct execution.",
+        color: "danger",
+      });
+      throw new Error("Cycle detected in workflow graph");
+    }
+
+    return sequence;
+  }
+
   async function startWorkflow() {
     console.log("Starting workflow from entry point:", entryPoint);
     if (!entryPoint) {
@@ -247,6 +312,30 @@ export default function useWorkflowExecutor({
       await runSequence(seq);
     } catch (error) {
       console.error("Failed to start workflow:", error);
+      addToast({
+        title: "Failed to Start Workflow",
+        description: (error as Error).message,
+        color: "danger",
+      });
+    }
+  }
+
+  async function startWorkflowFromNode() {
+    if (!entryPoint) {
+      addToast({
+        title: "No Node Selected",
+        description: "Please select a node to run from.",
+        color: "danger",
+      });
+      return;
+    }
+    try {
+      const seq = getForwardExecutionSequence(entryPoint);
+      console.log("Execution order (from selected):", seq);
+      if (!checkNodeAction(seq)) return;
+      await runSequence(seq);
+    } catch (error) {
+      console.error("Failed to start workflow from node:", error);
       addToast({
         title: "Failed to Start Workflow",
         description: (error as Error).message,
@@ -283,6 +372,7 @@ export default function useWorkflowExecutor({
 
   return {
     startWorkflow,
+    startWorkflowFromNode,
     pauseWorkflow,
     resumeWorkflow,
     resetWorkflow,

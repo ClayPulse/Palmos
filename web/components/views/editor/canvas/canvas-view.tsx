@@ -63,6 +63,7 @@ export default function CanvasView({
     localNodes,
     entryPoint,
     startWorkflow,
+    startWorkflowFromNode,
     updateWorkflowEdges,
     updateWorkflowNodes,
     exportWorkflow,
@@ -185,6 +186,28 @@ export default function CanvasView({
     },
     async () => {
       await startWorkflow();
+    },
+    [
+      entryPoint,
+      isActive,
+      tabName,
+      editorContext?.persistSettings?.extensions,
+      locale,
+    ],
+    isActive,
+  );
+  // Run workflow from selected node (forward-only, no upstream backtrack)
+  useRegisterMenuAction(
+    {
+      name: `Run From Selected Node (${tabName})`,
+      displayName: `${t("viewMenu.runFromSelectedNode.name")} (${tabName})`,
+      menuCategory: "view",
+      description: t("viewMenu.runFromSelectedNode.description"),
+      shortcut: "Ctrl+Alt+Shift+R",
+      icon: "skip_next",
+    },
+    async () => {
+      await startWorkflowFromNode();
     },
     [
       entryPoint,

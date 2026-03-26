@@ -342,6 +342,9 @@
 		"runWorkflow": {
 			"tooltip": "Ejecutar flujo de trabajo"
 		},
+		"runFromSelectedNode": {
+			"tooltip": "Ejecutar desde el nodo seleccionado"
+		},
 		"openConsole": {
 			"tooltip": "Abrir consola agentica"
 		},
@@ -722,6 +725,10 @@
 		"runWorkflow": {
 			"name": "Ejecutar flujo de trabajo",
 			"description": "Ejecutar el flujo de trabajo actual desde el punto de entrada seleccionado o predeterminado"
+		},
+		"runFromSelectedNode": {
+			"name": "Ejecutar desde el nodo seleccionado",
+			"description": "Ejecutar el flujo de trabajo hacia adelante desde el nodo seleccionado sin rastrear entradas anteriores"
 		},
 		"importWorkflow": {
 			"name": "Importar flujo de trabajo",

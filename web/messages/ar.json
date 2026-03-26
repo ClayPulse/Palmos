@@ -342,6 +342,9 @@
 		"runWorkflow": {
 			"tooltip": "تشغيل سير العمل"
 		},
+		"runFromSelectedNode": {
+			"tooltip": "التشغيل من العقدة المحددة"
+		},
 		"openConsole": {
 			"tooltip": "فتح وحدة تحكم الوكيل"
 		},
@@ -722,6 +725,10 @@
 		"runWorkflow": {
 			"name": "تشغيل سير العمل",
 			"description": "تشغيل سير العمل الحالي من نقطة الدخول المحددة أو الافتراضية"
+		},
+		"runFromSelectedNode": {
+			"name": "التشغيل من العقدة المحددة",
+			"description": "تشغيل سير العمل للأمام من العقدة المحددة بدون تتبع المدخلات السابقة"
 		},
 		"importWorkflow": {
 			"name": "استيراد سير عمل",

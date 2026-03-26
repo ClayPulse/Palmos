@@ -360,6 +360,9 @@
 		"runWorkflow": {
 			"tooltip": "Exécuter le workflow"
 		},
+		"runFromSelectedNode": {
+			"tooltip": "Exécuter depuis le nœud sélectionné"
+		},
 		"openConsole": {
 			"tooltip": "Ouvrir la console agentique"
 		},
@@ -740,6 +743,10 @@
 		"runWorkflow": {
 			"name": "Exécuter le workflow",
 			"description": "Exécuter le workflow actuel à partir du point d'entrée sélectionné ou par défaut"
+		},
+		"runFromSelectedNode": {
+			"name": "Exécuter depuis le nœud sélectionné",
+			"description": "Exécuter le workflow en avant depuis le nœud sélectionné sans remonter les entrées en amont"
 		},
 		"importWorkflow": {
 			"name": "Importer un workflow",

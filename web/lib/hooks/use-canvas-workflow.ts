@@ -166,8 +166,13 @@ export default function useCanvasWorkflow(
     }));
   }, [updateWorkflowNodeData]);
 
-  const { startWorkflow, pauseWorkflow, resumeWorkflow, resetWorkflow } =
-    useWorkflowExecutor({
+  const {
+    startWorkflow,
+    startWorkflowFromNode,
+    pauseWorkflow,
+    resumeWorkflow,
+    resetWorkflow,
+  } = useWorkflowExecutor({
       localNodes,
       localEdges,
       entryPoint,
@@ -247,6 +252,7 @@ export default function useCanvasWorkflow(
     localEdges,
     entryPoint,
     startWorkflow,
+    startWorkflowFromNode,
     pauseWorkflow,
     resumeWorkflow,
     resetWorkflow,
