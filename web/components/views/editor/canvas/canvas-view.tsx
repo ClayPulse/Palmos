@@ -33,6 +33,7 @@ import {
 import "@xyflow/react/dist/style.css";
 import { useTheme } from "next-themes";
 import { memo, useCallback, useContext, useEffect, useRef } from "react";
+import WorkflowEdge from "./edges/workflow-edge";
 import AppNode from "./nodes/app-node/app-node";
 import "./theme.css";
 
@@ -168,6 +169,11 @@ export default function CanvasView({
     },
     [updateWorkflowEdges, updateWorkflowNodes, deleteAppViewInCanvasView],
   );
+
+  /* Edge type definitions */
+  const edgeTypes = useRef({
+    workflowEdge: WorkflowEdge,
+  }).current;
 
   /* Node creator functions */
   const createAppNode = useCallback((props: any) => {
@@ -592,10 +598,12 @@ export default function CanvasView({
           nodeTypes={{
             appNode: createAppNode,
           }}
+          edgeTypes={edgeTypes}
           deleteKeyCode={["Delete", "Backspace"]}
           onDelete={onDelete}
           onReconnect={onReconnect}
           defaultEdgeOptions={{
+            type: "workflowEdge",
             markerEnd: {
               type: "arrowclosed",
             },
@@ -610,6 +618,7 @@ export default function CanvasView({
           <Background id={config.viewId} variant={BackgroundVariant.Dots} />
         </ReactFlow>
       </div>
+
     </div>
   );
 }

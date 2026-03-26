@@ -138,7 +138,7 @@ export default function useWorkflowExecutor({
   async function runSequence(
     sequence: ReactFlowNode<AppNodeData>[],
   ): Promise<Map<string, any>> {
-    // Helper to get input args for a node
+    // Helper to get input args for a node from upstream edge results
     function getInputArgs(
       node: ReactFlowNode<AppNodeData>,
       resultMap: Map<string, any>,
@@ -168,10 +168,15 @@ export default function useWorkflowExecutor({
     // Parallel execution using in-degree tracking
     const resultMap = new Map<string, any>();
     const inDegree: Record<string, number> = {};
-    const children: Record<string, string[]> = {};
+    // blockedCount tracks how many incoming edges were skipped (failed if-condition)
+    const blockedCount: Record<string, number> = {};
+    // outEdgesMap stores outgoing edges per node (replacing the children id-list)
+    const outEdgesMap: Record<string, ReactFlowEdge[]> = {};
+
     for (const node of sequence) {
       inDegree[node.id] = 0;
-      children[node.id] = [];
+      blockedCount[node.id] = 0;
+      outEdgesMap[node.id] = [];
     }
     for (const edge of localEdges) {
       if (
@@ -179,7 +184,31 @@ export default function useWorkflowExecutor({
         inDegree[edge.source] !== undefined
       ) {
         inDegree[edge.target]++;
-        children[edge.source].push(edge.target);
+        outEdgesMap[edge.source].push(edge);
+      }
+    }
+
+    // Flush nodes whose every remaining incoming edge has been blocked by a
+    // failed if-condition. Those nodes are skipped (result = {}) and their
+    // outgoing edges are propagated so downstream nodes can still become ready.
+    function flushBlocked() {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const nodeId of Object.keys(inDegree)) {
+          if (resultMap.has(nodeId)) continue;
+          if (
+            inDegree[nodeId] > 0 &&
+            inDegree[nodeId] === blockedCount[nodeId]
+          ) {
+            resultMap.set(nodeId, {});
+            completedCount++;
+            for (const edge of outEdgesMap[nodeId]) {
+              inDegree[edge.target]--;
+            }
+            changed = true;
+          }
+        }
       }
     }
 
@@ -201,11 +230,62 @@ export default function useWorkflowExecutor({
           const inputArgs = getInputArgs(node, resultMap);
           const result = await runNode(node, inputArgs);
           resultMap.set(nodeId, result);
-          for (const childId of children[nodeId] || []) {
-            inDegree[childId]--;
-          }
           completedCount++;
           running.delete(nodeId);
+
+          // Process outgoing edges with if/forEach awareness
+          for (const edge of outEdgesMap[nodeId] || []) {
+            const flowType = (edge.data as any)?.flowType as
+              | "if"
+              | "forEach"
+              | undefined;
+
+            if (flowType === "if") {
+              const val = result[edge.sourceHandle ?? ""];
+              const conditionExpected =
+                (edge.data as any)?.condition ?? true;
+              const condMet = Boolean(val) === conditionExpected;
+              if (!condMet) {
+                blockedCount[edge.target]++;
+                continue; // don't decrement in-degree — edge is blocked
+              }
+              inDegree[edge.target]--;
+              continue;
+            }
+
+            if (flowType === "forEach") {
+              const items: any[] = Array.isArray(
+                result[edge.sourceHandle ?? ""],
+              )
+                ? result[edge.sourceHandle ?? ""]
+                : [];
+              const targetNode = sequence.find((n) => n.id === edge.target);
+              if (targetNode) {
+                const iterResults = await Promise.all(
+                  items.map((item) =>
+                    runNode(targetNode, {
+                      [edge.targetHandle ?? ""]: item,
+                      ...targetNode.data.ownedAppViews,
+                    }),
+                  ),
+                );
+                resultMap.set(edge.target, { items: iterResults });
+                completedCount++;
+                // Propagate forEach target's outgoing edges
+                for (const childEdge of outEdgesMap[edge.target] || []) {
+                  inDegree[childEdge.target]--;
+                }
+              }
+              // Consume the forEach edge (T's in-degree decremented)
+              inDegree[edge.target]--;
+              continue;
+            }
+
+            // Default edge
+            inDegree[edge.target]--;
+          }
+
+          flushBlocked();
         });
         ready = [];
         await Promise.all(promises);
