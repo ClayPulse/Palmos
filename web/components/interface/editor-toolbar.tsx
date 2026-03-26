@@ -89,7 +89,16 @@ export default function EditorToolbar() {
               </Tooltip> */}
 
               {(editorContext?.editorStates.selectedViewIds?.length ?? 0) >
-              0 ? (
+                0 &&
+              editorContext?.editorStates.workflowEdges?.some(
+                (e) =>
+                  editorContext?.editorStates.selectedViewIds?.includes(
+                    e.source,
+                  ) ||
+                  editorContext?.editorStates.selectedViewIds?.includes(
+                    e.target,
+                  ),
+              ) ? (
                 <Dropdown>
                   <DropdownTrigger>
                     <Button
