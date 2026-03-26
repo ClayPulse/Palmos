@@ -131,6 +131,43 @@ export default function useCanvasWorkflow(
     URL.revokeObjectURL(url);
   }, [localNodes, localEdges, entryPoint]);
 
+  // Remove edges whose handles no longer exist after a node's action changes
+  useEffect(() => {
+    const nodes = editorContext?.editorStates.workflowNodes;
+    const edges = editorContext?.editorStates.workflowEdges;
+    if (!nodes || !edges) return;
+
+    const staleEdgeIds: string[] = [];
+    for (const edge of edges) {
+      const sourceNode = nodes.find((n) => n.id === edge.source);
+      const targetNode = nodes.find((n) => n.id === edge.target);
+      if (!sourceNode || !targetNode) continue;
+
+      const sourceReturns = Object.keys(
+        sourceNode.data.selectedAction?.returns ?? {},
+      );
+      const targetParams = Object.keys(
+        targetNode.data.selectedAction?.parameters ?? {},
+      );
+
+      if (
+        (edge.sourceHandle && !sourceReturns.includes(edge.sourceHandle)) ||
+        (edge.targetHandle && !targetParams.includes(edge.targetHandle))
+      ) {
+        staleEdgeIds.push(edge.id);
+      }
+    }
+
+    if (staleEdgeIds.length > 0) {
+      setLocalEdges((prev) =>
+        prev.filter((e) => !staleEdgeIds.includes(e.id)),
+      );
+    }
+  }, [
+    editorContext?.editorStates.workflowNodes,
+    editorContext?.editorStates.workflowEdges,
+  ]);
+
   // Update entry points
   useEffect(() => {
     debouncedGetEntryPoint();
