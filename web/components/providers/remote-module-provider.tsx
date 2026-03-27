@@ -94,6 +94,21 @@ export default function RemoteModuleProvider({
   }, [isPreventingCSS]);
 
   useEffect(() => {
+    function deduplicateExtensions(extensions: ExtensionApp[]) {
+      const seen = new Set<string>();
+
+      return extensions.filter((ext) => {
+        const key = `${ext.config.id}:${ext.config.version}:${ext.remoteOrigin ?? ""}`;
+
+        if (seen.has(key)) {
+          return false;
+        }
+
+        seen.add(key);
+        return true;
+      });
+    }
+
     function getExtensionAgents(extensions: ExtensionApp[]) {
       const agents: ExtensionAgent[] = extensions.flatMap(
         (ext) =>
@@ -115,8 +130,9 @@ export default function RemoteModuleProvider({
 
     // Register all extensions
     const extensions = editorContext?.persistSettings?.extensions ?? [];
+    const uniqueExtensions = deduplicateExtensions(extensions);
 
-    const remotes = extensions
+    const remotes = uniqueExtensions
       .map((ext) =>
         getRemote(ext.config.id, ext.config.version, ext.remoteOrigin),
       )
@@ -127,7 +143,7 @@ export default function RemoteModuleProvider({
 
     // TODO: change this to skill
     // For each extension, load their agents
-    const agents = getExtensionAgents(extensions);
+    const agents = getExtensionAgents(uniqueExtensions);
 
     editorContext?.setPersistSettings((prev) => {
       return {

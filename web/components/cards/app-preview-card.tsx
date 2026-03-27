@@ -58,7 +58,7 @@ export default function AppPreviewCard({
   listeners?: SyntheticListenerMap;
 }) {
   const { getTranslations: t } = useTranslations();
-  const { uninstallExtensionApp, installExtensionApp } =
+  const { uninstallExtensionApp, installExtensionApp, upgradeExtensionApp } =
     useExtensionAppManager();
   const { openAppInfoModal } = useAppInfo();
   const { openVibeCode } = useVibeCode();
@@ -449,9 +449,7 @@ export default function AppPreviewCard({
                   size="sm"
                   onPress={async (e) => {
                     try {
-                      await uninstallExtensionApp(extension.config.id);
-
-                      await installExtensionApp(
+                      await upgradeExtensionApp(
                         extension.remoteOrigin,
                         extension.config.id,
                         extension.config.version,

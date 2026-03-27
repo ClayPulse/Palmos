@@ -3,7 +3,6 @@ import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
 import { useCallback, useContext } from "react";
 import toast from "react-hot-toast";
 import { compare } from "semver";
-import { useMarketplaceApps } from "./marketplace/use-marketplace-apps";
 import {
   getDefaultRemoteOrigin,
   getRemoteBaseURL,
@@ -14,21 +13,26 @@ import {
   getRemoteMFVersion,
 } from "../module-federation/version";
 import { AppMetaData, ExtensionApp } from "../types";
+import { useMarketplaceApps } from "./marketplace/use-marketplace-apps";
 
 export function useExtensionAppManager(fetchCategory?: string) {
   const editorContext = useContext(EditorContext);
 
   const installedExtensionApps =
-    editorContext?.persistSettings?.extensions ?? [];
+    editorContext?.persistSettings?.extensions?.reduceRight<ExtensionApp[]>(
+      (acc, ext) => {
+        if (acc.some((e) => e.config.id === ext.config.id)) return acc;
+        return [ext, ...acc];
+      },
+      [],
+    ) ?? [];
 
-  const {
-    marketplaceExtensions,
-    isLoading: isLoadingMarketplaceExtensions,
-  } = useMarketplaceApps(
-    (fetchCategory === "All" || fetchCategory === "Published by Me"
-      ? fetchCategory
-      : "All") as "All" | "Published by Me",
-  );
+  const { marketplaceExtensions, isLoading: isLoadingMarketplaceExtensions } =
+    useMarketplaceApps(
+      (fetchCategory === "All" || fetchCategory === "Published by Me"
+        ? fetchCategory
+        : "All") as "All" | "Published by Me",
+    );
 
   const installExtensionApp = useCallback(
     async (
@@ -39,10 +43,7 @@ export function useExtensionAppManager(fetchCategory?: string) {
       // Don't install if already installed
       if (
         editorContext?.persistSettings?.extensions?.find(
-          (ext) =>
-            ext.config.id === id &&
-            ext.config.version === version &&
-            ext.remoteOrigin === remoteOrigin,
+          (ext) => ext.config.id === id,
         )
       ) {
         console.log(`Extension ${id} is already installed`);
@@ -70,12 +71,19 @@ export function useExtensionAppManager(fetchCategory?: string) {
       }
 
       editorContext?.setPersistSettings((prev) => {
-        const installedExtensions = prev?.extensions ?? [];
-
-        const updatedExtensions = [...installedExtensions, extension];
+        const exts = prev?.extensions ?? [];
+        // Deduplicate all existing extensions by id (keep first seen), then add the new one
+        const deduped = exts.reduceRight<ExtensionApp[]>((acc, ext) => {
+          if (
+            ext.config.id === id ||
+            acc.some((e) => e.config.id === ext.config.id)
+          )
+            return acc;
+          return [ext, ...acc];
+        }, []);
         return {
           ...prev,
-          extensions: updatedExtensions,
+          extensions: [...deduped, extension],
         };
       });
 
@@ -86,22 +94,55 @@ export function useExtensionAppManager(fetchCategory?: string) {
   );
 
   async function uninstallExtensionApp(id: string): Promise<void> {
-    const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
+    const extensions = editorContext?.persistSettings?.extensions ?? [];
     const ext = extensions.find((ext) => ext.config.id === id);
 
     if (!ext) return;
 
-    const remainingExtensions = extensions.filter(
-      (ext) => ext.config.id !== id,
-    );
-
     editorContext?.setPersistSettings((prev) => ({
       ...prev,
-      extensions: remainingExtensions,
+      extensions: (prev?.extensions ?? []).filter(
+        (ext) => ext.config.id !== id,
+      ),
     }));
 
     // Remove default extension for file types
     removeDefaultExtensionApp(ext);
+  }
+
+  async function upgradeExtensionApp(
+    remoteOrigin: string,
+    id: string,
+    version: string,
+  ): Promise<void> {
+    const extension = await getExtensionInfoFromRemote(
+      remoteOrigin,
+      id,
+      version,
+    );
+
+    const remoteMFVersion = extension.mfVersion;
+    const hostMFVersion = await getHostMFVersion();
+
+    if (!remoteMFVersion) {
+      throw new Error("Remote MF version is undefined");
+    } else if (compare(remoteMFVersion, hostMFVersion) !== 0) {
+      throw new Error(
+        `Extension MF version ${remoteMFVersion} is not compatible with host MF version ${hostMFVersion}`,
+      );
+    }
+
+    editorContext?.setPersistSettings((prev) => {
+      const filtered = (prev?.extensions ?? []).filter(
+        (ext) => ext.config.id !== id,
+      );
+      return {
+        ...prev,
+        extensions: [...filtered, extension],
+      };
+    });
+
+    tryAutoSetDefaultExtensionApp(extension);
   }
 
   async function enableExtensionApp(name: string): Promise<void> {
@@ -334,5 +375,6 @@ export function useExtensionAppManager(fetchCategory?: string) {
     loadAppFromCache,
     loadAppFromRegistry,
     loadAppFromURL,
+    upgradeExtensionApp,
   };
 }

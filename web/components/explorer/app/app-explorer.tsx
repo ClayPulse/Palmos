@@ -1,7 +1,9 @@
 import AppPreviewCard from "@/components/cards/app-preview-card";
 import { DraggableItem } from "@/components/misc/draggable-item";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { isMobile } from "@/lib/platform-api/platform-checker";
 import {
   AppDragData,
@@ -13,15 +15,14 @@ import { createAppViewId } from "@/lib/views/view-helpers";
 import { useDraggable } from "@dnd-kit/core";
 import { Button } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
-import { useTranslations } from "@/lib/hooks/use-translations";
 
 export default function AppExplorer() {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const extensions = editorContext?.persistSettings?.extensions ?? [];
+  const { installedExtensionApps } = useExtensionAppManager();
 
-  const previews = extensions.map((ext, index) => (
+  const previews = installedExtensionApps.map((ext, index) => (
     <DraggableAppPreviewCard key={index} ext={ext} />
   ));
 
