@@ -174,7 +174,7 @@ export default function useActionEffect(
       });
 
       // Update receiver
-      imc?.updateReceiverHandlerMap(getReceiverHandlerMap(func));
+      imc?.updateReceiverHandlerMap(getReceiverHandlerMap(func, beforeAction, afterAction));
     }
 
     if (isExtReady) {
@@ -220,8 +220,28 @@ export default function useActionEffect(
 
   function getReceiverHandlerMap(
     actionHandlerFunc?: (args: any) => Promise<any>,
+    beforeActionFunc?: (args: any) => Promise<any>,
+    afterActionFunc?: (result: any) => Promise<any>,
   ): Map<IMCMessageTypeEnum, ReceiverHandler> {
     const receiverHandlerMap = new Map<IMCMessageTypeEnum, ReceiverHandler>([
+      [
+        IMCMessageTypeEnum.EditorRestoreActionCache,
+        async (_senderWindow: Window, message: IMCMessage) => {
+          const { name, input, output }: { name: string; input: any; output: any } =
+            message.payload;
+
+          if (params.actionName !== name) {
+            throw new Error("Message ignored by receiver");
+          }
+
+          if (beforeActionFunc && input !== undefined) {
+            await beforeActionFunc(input);
+          }
+          if (afterActionFunc && output !== undefined) {
+            await afterActionFunc(output);
+          }
+        },
+      ],
       [
         IMCMessageTypeEnum.EditorRunAppAction,
         async (_senderWindow: Window, message: IMCMessage) => {

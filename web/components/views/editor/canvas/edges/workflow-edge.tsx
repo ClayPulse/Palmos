@@ -1,4 +1,5 @@
 import Icon from "@/components/misc/icon";
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { Popover, PopoverContent, PopoverTrigger } from "@heroui/react";
 import {
   BaseEdge,
@@ -9,13 +10,19 @@ import {
   useNodes,
   useReactFlow,
 } from "@xyflow/react";
-import { useState } from "react";
+import { useContext, useRef, useState } from "react";
 
 export type WorkflowEdgeData = {
   flowType?: "if" | "forEach";
   condition?: boolean;
   /** Per-iteration results: iterationResults[i][nodeId] = that node's output */
   iterationResults?: Array<Record<string, Record<string, any>>>;
+  /** Per-iteration inputs: iterationInputsByNode[i][nodeId] = inputArgs passed to that node */
+  iterationInputsByNode?: Array<Record<string, Record<string, any>>>;
+  /** Index of the iteration currently executing (undefined when not running) */
+  activeIteration?: number;
+  /** Total number of iterations expected in this run */
+  totalExpectedIterations?: number;
 };
 
 const EDGE_STYLES: Record<string, { color: string; label: string }> = {
@@ -55,8 +62,14 @@ export default function WorkflowEdge({
   const allEdges = useEdges();
   const edges = useEdges();
   const selectedEdgeCount = edges.filter((e) => e.selected).length;
-  // Currently visible iteration index (0 = original scope nodes shown, 1+ = clone iteration)
+  const editorContext = useContext(EditorContext);
   const [visibleIteration, setVisibleIteration] = useState(0);
+  const prevIsRunning = useRef(false);
+
+  function navigateIteration(iterIdx: number) {
+    setVisibleIteration(iterIdx);
+    editorContext?.editorStates.replayForEachIteration?.(id, iterIdx);
+  }
 
 
   const [edgePath, labelX, labelY] = getBezierPath({
@@ -74,7 +87,26 @@ export default function WorkflowEdge({
   const isDefaultType = key === "default";
   const isForEach = key === "forEach";
   const iterationResults = edgeData?.iterationResults;
-  const totalIterations = iterationResults?.length ?? 0;
+  const iterationInputsByNode = edgeData?.iterationInputsByNode;
+  const activeIteration = edgeData?.activeIteration;
+  const isRunning = activeIteration !== undefined;
+  // While running, follow the live index; afterwards, use the user-controlled index
+  const displayedIteration = isRunning ? activeIteration : visibleIteration;
+  const totalIterations = isRunning
+    ? (edgeData?.totalExpectedIterations ?? 0)
+    : (iterationResults?.length ?? 0);
+
+  // When execution finishes, park the user-controlled index at the last iteration
+  if (prevIsRunning.current && !isRunning && totalIterations > 0) {
+    setVisibleIteration(totalIterations - 1);
+  }
+  prevIsRunning.current = isRunning;
+
+  // Input to the subworkflow for the current iteration (args passed to the entry node)
+  const currentIterationInput =
+    !isRunning && totalIterations > 0
+      ? iterationInputsByNode?.[displayedIteration]?.[target]
+      : undefined;
 
   // --- Downstream node bounding box for forEach frame ---
   const forEachFrame = (() => {
@@ -191,32 +223,97 @@ export default function WorkflowEdge({
                 ∀ forEach scope
               </span>
 
-              {/* Iteration navigator widget */}
-              {totalIterations > 0 && (
-                <span className="bg-content2 inline-flex select-none items-center gap-0.5 whitespace-nowrap rounded px-1 py-0.5">
+              {/* Iteration navigator widget — card is anchored here so arrow is always centered */}
+              {(totalIterations > 0 || isRunning) && (
+                <span className="bg-content2 relative inline-flex select-none items-center gap-0.5 whitespace-nowrap rounded px-1 py-0.5">
                   <button
-                    className={`border-none bg-transparent px-0.5 text-[13px] leading-none ${visibleIteration > 0 ? "text-foreground cursor-pointer" : "text-default-300 cursor-default"}`}
+                    className={`border-none bg-transparent px-0.5 text-[13px] leading-none ${!isRunning && displayedIteration > 0 ? "text-foreground cursor-pointer" : "text-default-300 cursor-default"}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (visibleIteration > 0)
-                        setVisibleIteration(visibleIteration - 1);
+                      if (!isRunning && displayedIteration > 0)
+                        navigateIteration(displayedIteration - 1);
                     }}
                   >
                     ‹
                   </button>
                   <span className="text-foreground min-w-[40px] text-center text-[11px] font-bold">
-                    {visibleIteration + 1} / {totalIterations}
+                    {displayedIteration + 1} / {totalIterations}
                   </span>
                   <button
-                    className={`border-none bg-transparent px-0.5 text-[13px] leading-none ${visibleIteration < totalIterations - 1 ? "text-foreground cursor-pointer" : "text-default-300 cursor-default"}`}
+                    className={`border-none bg-transparent px-0.5 text-[13px] leading-none ${!isRunning && displayedIteration < totalIterations - 1 ? "text-foreground cursor-pointer" : "text-default-300 cursor-default"}`}
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (visibleIteration < totalIterations - 1)
-                        setVisibleIteration(visibleIteration + 1);
+                      if (!isRunning && displayedIteration < totalIterations - 1)
+                        navigateIteration(displayedIteration + 1);
                     }}
                   >
                     ›
                   </button>
+
+                  {/* Input card — centered above the navigator, arrow points down */}
+                  {currentIterationInput && (
+                    <div
+                      className="nodrag nopan absolute"
+                      style={{
+                        bottom: "calc(100% + 10px)",
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        minWidth: 180,
+                        maxWidth: 280,
+                        pointerEvents: "all",
+                        zIndex: 10,
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className="bg-content1 border-divider overflow-hidden rounded-xl border shadow-lg">
+                        {/* Header */}
+                        <div
+                          className="flex items-center gap-1.5 px-3 py-2"
+                          style={{ background: `${FOREACH_COLOR}18` }}
+                        >
+                          <span
+                            className="h-1.5 w-1.5 shrink-0 rounded-full"
+                            style={{ background: FOREACH_COLOR }}
+                          />
+                          <span
+                            className="text-[11px] font-semibold"
+                            style={{ color: FOREACH_COLOR }}
+                          >
+                            Iteration {visibleIteration + 1} input
+                          </span>
+                        </div>
+                        {/* Key-value rows */}
+                        <div className="divide-divider divide-y">
+                          {Object.entries(currentIterationInput).map(([key, val]) => (
+                            <div key={key} className="flex items-start gap-2 px-3 py-1.5">
+                              <span className="text-default-400 mt-px shrink-0 text-[11px]">
+                                {key}
+                              </span>
+                              <span className="text-foreground line-clamp-3 min-w-0 break-all font-mono text-[11px]">
+                                {typeof val === "object"
+                                  ? JSON.stringify(val, null, 2)
+                                  : String(val ?? "")}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      {/* Arrow centered on the navigator */}
+                      <div
+                        style={{
+                          position: "absolute",
+                          bottom: -8,
+                          left: "50%",
+                          transform: "translateX(-50%)",
+                          width: 0,
+                          height: 0,
+                          borderLeft: "7px solid transparent",
+                          borderRight: "7px solid transparent",
+                          borderTop: `8px solid ${FOREACH_COLOR}55`,
+                        }}
+                      />
+                    </div>
+                  )}
                 </span>
               )}
             </div>

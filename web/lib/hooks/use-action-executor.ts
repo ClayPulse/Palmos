@@ -222,6 +222,28 @@ export default function useActionExecutor(appName?: string) {
     }
   }
 
+  async function restoreScopedActionCache(
+    action: ScopedAction,
+    input: any,
+    output: any,
+  ) {
+    if (action.type !== "app") return;
+    const extensions = editorContext?.persistSettings?.extensions ?? [];
+    const ext = extensions.find((e) =>
+      (e.config.actions ?? []).some((act) => act.name === action.action.name),
+    );
+    if (!ext) return;
+
+    const appInView = findAppInTabView(ext.config.id, action.viewId);
+    if (!appInView) return;
+
+    await imcContext?.polyIMC?.sendMessage(
+      appInView.viewId,
+      IMCMessageTypeEnum.EditorRestoreActionCache,
+      { name: action.action.name, input, output },
+    );
+  }
+
   function getSkillActions(extension: ExtensionApp, keyword?: string) {
     const actions = extension.config.actions ?? [];
     if (keyword) {
@@ -243,6 +265,7 @@ export default function useActionExecutor(appName?: string) {
 
   return {
     runScopedAction,
+    restoreScopedActionCache,
     actions,
     setKeywordFilter,
   };

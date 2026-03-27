@@ -123,6 +123,7 @@ export type EditorStates = {
     nodeViewId: string,
     data: Partial<AppNodeData>,
   ) => void;
+  replayForEachIteration?: (edgeId: string, iterIdx: number) => Promise<void>;
   canvasSize?: {
     width: number;
     height: number;

@@ -60,6 +60,7 @@ export enum IMCMessageTypeEnum {
   // Artifact update
   EditorArtifactUpdate = "editor-artifact-update",
   EditorGetAppOrigin = "editor-get-app-origin",
+  EditorRestoreActionCache = "editor-restore-action-cache",
   // OAuth
   EditorOAuthConnect = "editor-oauth-connect",
   EditorOAuthRefreshToken = "editor-oauth-refresh-token",
