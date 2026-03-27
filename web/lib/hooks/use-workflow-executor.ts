@@ -1,6 +1,6 @@
 import { addToast } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppNodeData } from "../types";
 import useActionExecutor from "./use-action-executor";
 
@@ -9,6 +9,8 @@ export default function useWorkflowExecutor({
   localEdges,
   entryPoint,
   updateWorkflowNodeData,
+  updateEdgeData,
+  restoreScopedActionCache,
 }: {
   localNodes: ReactFlowNode<AppNodeData>[];
   localEdges: ReactFlowEdge[];
@@ -17,6 +19,8 @@ export default function useWorkflowExecutor({
     nodeViewId: string,
     data: Partial<AppNodeData>,
   ) => void;
+  updateEdgeData: (edgeId: string, data: Record<string, any>) => void;
+  restoreScopedActionCache: (action: any, input: any, output: any) => Promise<void>;
 }) {
   const { runScopedAction } = useActionExecutor();
 
@@ -24,6 +28,15 @@ export default function useWorkflowExecutor({
     ReactFlowNode<AppNodeData>[]
   >([]);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  // Refs so replayIteration can be stable (no deps on localNodes/localEdges)
+  const localNodesRef = useRef(localNodes);
+  const localEdgesRef = useRef(localEdges);
+  const runNodeRef = useRef<((node: ReactFlowNode<AppNodeData>, args: any) => Promise<Record<string, any>>) | undefined>(undefined);
+  const restoreScopedActionCacheRef = useRef(restoreScopedActionCache);
+  useEffect(() => { localNodesRef.current = localNodes; }, [localNodes]);
+  useEffect(() => { localEdgesRef.current = localEdges; }, [localEdges]);
+  useEffect(() => { restoreScopedActionCacheRef.current = restoreScopedActionCache; }, [restoreScopedActionCache]);
 
   // DAG traversal using Kahn's algorithm (topological sort)
   function getExecutionSequence(
@@ -134,11 +147,12 @@ export default function useWorkflowExecutor({
     updateWorkflowNodeData(node.id, { isRunning: false });
     return result ?? {};
   }
+  useEffect(() => { runNodeRef.current = runNode; });
 
   async function runSequence(
     sequence: ReactFlowNode<AppNodeData>[],
   ): Promise<Map<string, any>> {
-    // Helper to get input args for a node
+    // Helper to get input args for a node from upstream edge results
     function getInputArgs(
       node: ReactFlowNode<AppNodeData>,
       resultMap: Map<string, any>,
@@ -168,10 +182,15 @@ export default function useWorkflowExecutor({
     // Parallel execution using in-degree tracking
     const resultMap = new Map<string, any>();
     const inDegree: Record<string, number> = {};
-    const children: Record<string, string[]> = {};
+    // blockedCount tracks how many incoming edges were skipped (failed if-condition)
+    const blockedCount: Record<string, number> = {};
+    // outEdgesMap stores outgoing edges per node (replacing the children id-list)
+    const outEdgesMap: Record<string, ReactFlowEdge[]> = {};
+
     for (const node of sequence) {
       inDegree[node.id] = 0;
-      children[node.id] = [];
+      blockedCount[node.id] = 0;
+      outEdgesMap[node.id] = [];
     }
     for (const edge of localEdges) {
       if (
@@ -179,7 +198,31 @@ export default function useWorkflowExecutor({
         inDegree[edge.source] !== undefined
       ) {
         inDegree[edge.target]++;
-        children[edge.source].push(edge.target);
+        outEdgesMap[edge.source].push(edge);
+      }
+    }
+
+    // Flush nodes whose every remaining incoming edge has been blocked by a
+    // failed if-condition. Those nodes are skipped (result = {}) and their
+    // outgoing edges are propagated so downstream nodes can still become ready.
+    function flushBlocked() {
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (const nodeId of Object.keys(inDegree)) {
+          if (resultMap.has(nodeId)) continue;
+          if (
+            inDegree[nodeId] > 0 &&
+            inDegree[nodeId] === blockedCount[nodeId]
+          ) {
+            resultMap.set(nodeId, {});
+            completedCount++;
+            for (const edge of outEdgesMap[nodeId]) {
+              inDegree[edge.target]--;
+            }
+            changed = true;
+          }
+        }
       }
     }
 
@@ -201,11 +244,166 @@ export default function useWorkflowExecutor({
           const inputArgs = getInputArgs(node, resultMap);
           const result = await runNode(node, inputArgs);
           resultMap.set(nodeId, result);
-          for (const childId of children[nodeId] || []) {
-            inDegree[childId]--;
-          }
           completedCount++;
           running.delete(nodeId);
+
+          // Process outgoing edges with if/forEach awareness
+          for (const edge of outEdgesMap[nodeId] || []) {
+            const flowType = (edge.data as any)?.flowType as
+              | "if"
+              | "forEach"
+              | undefined;
+
+            if (flowType === "if") {
+              const val = result[edge.sourceHandle ?? ""];
+              const conditionExpected =
+                (edge.data as any)?.condition ?? true;
+              const condMet = Boolean(val) === conditionExpected;
+              if (!condMet) {
+                blockedCount[edge.target]++;
+                continue; // don't decrement in-degree — edge is blocked
+              }
+              inDegree[edge.target]--;
+              continue;
+            }
+
+            if (flowType === "forEach") {
+              const items: any[] = Array.isArray(
+                result[edge.sourceHandle ?? ""],
+              )
+                ? result[edge.sourceHandle ?? ""]
+                : [];
+
+              // Collect all nodes in the forEach scope (target + downstream)
+              const scopeIds = new Set<string>();
+              const scopeQueue = [edge.target];
+              while (scopeQueue.length > 0) {
+                const nid = scopeQueue.shift()!;
+                if (scopeIds.has(nid)) continue;
+                scopeIds.add(nid);
+                for (const childEdge of outEdgesMap[nid] || []) {
+                  scopeQueue.push(childEdge.target);
+                }
+              }
+
+              const scopeNodes = sequence.filter((n) => scopeIds.has(n.id));
+              const scopeEdges = localEdges.filter(
+                (e) => scopeIds.has(e.source) && scopeIds.has(e.target),
+              );
+
+
+
+
+              // Build topological order for the scope subgraph
+              const scopeInDeg: Record<string, number> = {};
+              for (const nid of scopeIds) scopeInDeg[nid] = 0;
+              for (const e of scopeEdges) scopeInDeg[e.target]++;
+              const scopeAdj: Record<string, string[]> = {};
+              for (const nid of scopeIds) scopeAdj[nid] = [];
+              for (const e of scopeEdges) scopeAdj[e.source].push(e.target);
+              const topoQueue: string[] = [];
+              for (const nid of scopeIds) {
+                if (scopeInDeg[nid] === 0) topoQueue.push(nid);
+              }
+              const scopeSequence: ReactFlowNode<AppNodeData>[] = [];
+              while (topoQueue.length > 0) {
+                const nid = topoQueue.shift()!;
+                const node = scopeNodes.find((n) => n.id === nid);
+                if (node) scopeSequence.push(node);
+                for (const child of scopeAdj[nid] || []) {
+                  scopeInDeg[child]--;
+                  if (scopeInDeg[child] === 0) topoQueue.push(child);
+                }
+              }
+
+              // Run all iterations on the original scope nodes (no clones)
+              const iterResults: Record<string, Record<string, any>>[] = [];
+              const iterationInputsByNode: Record<string, Record<string, any>>[] = [];
+
+              // Store total count upfront so the indicator shows correct n
+              updateEdgeData(edge.id, { totalExpectedIterations: items.length });
+
+              for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                const iterResultMap = new Map<string, any>();
+                const inputsRecord: Record<string, Record<string, any>> = {};
+
+                // Advance the live indicator before running this iteration
+                updateEdgeData(edge.id, { activeIteration: i });
+
+                for (const scopeNode of scopeSequence) {
+                  let inputArgs: Record<string, any>;
+                  if (scopeNode.id === edge.target) {
+                    inputArgs = {
+                      [edge.targetHandle ?? ""]: item,
+                      ...scopeNode.data.ownedAppViews,
+                    };
+                  } else {
+                    inputArgs = {};
+                    for (const e of scopeEdges) {
+                      if (e.target !== scopeNode.id) continue;
+                      if (!e.sourceHandle || !e.targetHandle) continue;
+                      const srcResult = iterResultMap.get(e.source);
+                      if (srcResult) {
+                        inputArgs[e.targetHandle] =
+                          srcResult[e.sourceHandle];
+                      }
+                    }
+                    inputArgs = {
+                      ...inputArgs,
+                      ...scopeNode.data.ownedAppViews,
+                    };
+                  }
+                  inputsRecord[scopeNode.id] = inputArgs;
+                  const nodeResult = await runNode(scopeNode, inputArgs);
+                  iterResultMap.set(scopeNode.id, nodeResult);
+                }
+
+                const iterRecord: Record<string, Record<string, any>> = {};
+                for (const [nid, res] of iterResultMap) {
+                  iterRecord[nid] = res;
+                }
+                iterResults.push(iterRecord);
+                iterationInputsByNode.push(inputsRecord);
+              }
+
+              // Mark all original scope nodes as completed
+              for (const nid of scopeIds) {
+                if (!resultMap.has(nid)) {
+                  resultMap.set(
+                    nid,
+                    iterResults[iterResults.length - 1]?.[nid] ?? {},
+                  );
+                  completedCount++;
+                }
+              }
+
+              updateEdgeData(edge.id, {
+                iterationResults: iterResults,
+                iterationInputsByNode,
+                activeIteration: undefined,
+                totalExpectedIterations: undefined,
+              });
+
+              // Propagate edges leaving the scope
+              for (const scopeNid of scopeIds) {
+                for (const childEdge of outEdgesMap[scopeNid] || []) {
+                  if (!scopeIds.has(childEdge.target)) {
+                    inDegree[childEdge.target]--;
+                  }
+                }
+              }
+
+              // Consume the forEach edge itself
+              inDegree[edge.target]--;
+              continue;
+            }
+
+            // Default edge
+            inDegree[edge.target]--;
+          }
+
+          flushBlocked();
         });
         ready = [];
         await Promise.all(promises);
@@ -370,12 +568,80 @@ export default function useWorkflowExecutor({
     setPendingNodes([entryPoint]);
   }
 
+  // Restore cached input/output for a given forEach iteration without re-executing the skill.
+  // Uses refs so the function identity stays stable (no infinite loop from useEffect deps).
+  const replayIteration = useCallback(async (edgeId: string, iterIdx: number) => {
+    const edges = localEdgesRef.current;
+    const nodes = localNodesRef.current;
+    const restore = restoreScopedActionCacheRef.current;
+
+    const edge = edges.find((e) => e.id === edgeId);
+    if (!edge) return;
+    const edgeData = edge.data as {
+      iterationInputsByNode?: Array<Record<string, Record<string, any>>>;
+      iterationResults?: Array<Record<string, Record<string, any>>>;
+    } | undefined;
+    const inputsByNode = edgeData?.iterationInputsByNode?.[iterIdx];
+    const outputsByNode = edgeData?.iterationResults?.[iterIdx];
+    if (!inputsByNode) return;
+
+    // Collect scope node IDs (BFS forward from edge.target)
+    const adj: Record<string, string[]> = {};
+    for (const e of edges) {
+      if (!adj[e.source]) adj[e.source] = [];
+      adj[e.source].push(e.target);
+    }
+    const scopeIds = new Set<string>();
+    const queue = [edge.target];
+    while (queue.length > 0) {
+      const nid = queue.shift()!;
+      if (scopeIds.has(nid)) continue;
+      scopeIds.add(nid);
+      for (const child of adj[nid] ?? []) queue.push(child);
+    }
+
+    // Build topo order for the scope
+    const scopeEdges = edges.filter(
+      (e) => scopeIds.has(e.source) && scopeIds.has(e.target),
+    );
+    const scopeInDeg: Record<string, number> = {};
+    const scopeAdj: Record<string, string[]> = {};
+    for (const nid of scopeIds) { scopeInDeg[nid] = 0; scopeAdj[nid] = []; }
+    for (const e of scopeEdges) { scopeInDeg[e.target]++; scopeAdj[e.source].push(e.target); }
+    const topoQueue = [...scopeIds].filter((nid) => scopeInDeg[nid] === 0);
+    const scopeSequence: ReactFlowNode<AppNodeData>[] = [];
+    while (topoQueue.length > 0) {
+      const nid = topoQueue.shift()!;
+      const node = nodes.find((n) => n.id === nid);
+      if (node) scopeSequence.push(node);
+      for (const child of scopeAdj[nid] ?? []) {
+        scopeInDeg[child]--;
+        if (scopeInDeg[child] === 0) topoQueue.push(child);
+      }
+    }
+
+    for (const scopeNode of scopeSequence) {
+      const { selectedAction } = scopeNode.data as AppNodeData;
+      if (!selectedAction) continue;
+      const input = inputsByNode[scopeNode.id];
+      const output = outputsByNode?.[scopeNode.id] ?? {};
+      if (input !== undefined) {
+        await restore(
+          { action: selectedAction, viewId: scopeNode.id, type: "app" },
+          input,
+          output,
+        );
+      }
+    }
+  }, []);
+
   return {
     startWorkflow,
     startWorkflowFromNode,
     pauseWorkflow,
     resumeWorkflow,
     resetWorkflow,
+    replayIteration,
     isPaused,
     pendingNodes,
   };

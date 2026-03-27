@@ -1,5 +1,11 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.86
+
+### Patch Changes
+
+- Add cache handling in useActionEffect
+
 ## 0.1.1-beta.85
 
 ### Patch Changes

@@ -10,6 +10,8 @@ import {
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { AppNodeData, WorkflowContent } from "../types";
+
+import useActionExecutor from "./use-action-executor";
 import useWorkflowExecutor from "./use-workflow-executor";
 
 export default function useCanvasWorkflow(
@@ -17,7 +19,6 @@ export default function useCanvasWorkflow(
 ) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
-
   const [entryPoint, setEntryPoint] = useState<
     ReactFlowNode<AppNodeData> | undefined
   >(undefined);
@@ -195,13 +196,18 @@ export default function useCanvasWorkflow(
     restore();
   }, [initialWorkflowContent, imcContext, isRestored]);
 
-  // Update callback
-  useEffect(() => {
-    editorContext?.setEditorStates((prev) => ({
-      ...prev,
-      updateWorkflowNodeData: updateWorkflowNodeData,
-    }));
-  }, [updateWorkflowNodeData]);
+  const updateEdgeData = useCallback(
+    (edgeId: string, data: Record<string, any>) => {
+      setLocalEdges((prev) =>
+        prev.map((e) =>
+          e.id === edgeId ? { ...e, data: { ...(e.data ?? {}), ...data } } : e,
+        ),
+      );
+    },
+    [],
+  );
+
+  const { restoreScopedActionCache } = useActionExecutor();
 
   const {
     startWorkflow,
@@ -209,12 +215,24 @@ export default function useCanvasWorkflow(
     pauseWorkflow,
     resumeWorkflow,
     resetWorkflow,
+    replayIteration,
   } = useWorkflowExecutor({
       localNodes,
       localEdges,
       entryPoint,
       updateWorkflowNodeData,
+      updateEdgeData,
+      restoreScopedActionCache,
     });
+
+  // Update callbacks
+  useEffect(() => {
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      updateWorkflowNodeData: updateWorkflowNodeData,
+      replayForEachIteration: replayIteration,
+    }));
+  }, [updateWorkflowNodeData, replayIteration]);
 
   const saveAppsSnapshotStates = useCallback(async () => {
     const apps =
