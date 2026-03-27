@@ -6,12 +6,16 @@ import {
   EdgeProps,
   getBezierPath,
   useEdges,
+  useNodes,
   useReactFlow,
 } from "@xyflow/react";
+import { useState } from "react";
 
 export type WorkflowEdgeData = {
   flowType?: "if" | "forEach";
   condition?: boolean;
+  /** Per-iteration results: iterationResults[i][nodeId] = that node's output */
+  iterationResults?: Array<Record<string, Record<string, any>>>;
 };
 
 const EDGE_STYLES: Record<string, { color: string; label: string }> = {
@@ -23,12 +27,18 @@ const EDGE_STYLES: Record<string, { color: string; label: string }> = {
 
 function getEdgeKey(data: WorkflowEdgeData | undefined): string {
   if (!data?.flowType) return "default";
-  if (data.flowType === "if") return data.condition === false ? "if-false" : "if-true";
+  if (data.flowType === "if")
+    return data.condition === false ? "if-false" : "if-true";
   return "forEach";
 }
 
+const FOREACH_COLOR = "#a855f7";
+const FRAME_PADDING = 32;
+
 export default function WorkflowEdge({
   id,
+  source,
+  target,
   sourceX,
   sourceY,
   targetX,
@@ -41,8 +51,13 @@ export default function WorkflowEdge({
   selected,
 }: EdgeProps) {
   const { setEdges } = useReactFlow();
+  const allNodes = useNodes();
+  const allEdges = useEdges();
   const edges = useEdges();
   const selectedEdgeCount = edges.filter((e) => e.selected).length;
+  // Currently visible iteration index (0 = original scope nodes shown, 1+ = clone iteration)
+  const [visibleIteration, setVisibleIteration] = useState(0);
+
 
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
@@ -57,8 +72,49 @@ export default function WorkflowEdge({
   const key = getEdgeKey(edgeData);
   const { color, label } = EDGE_STYLES[key];
   const isDefaultType = key === "default";
+  const isForEach = key === "forEach";
+  const iterationResults = edgeData?.iterationResults;
+  const totalIterations = iterationResults?.length ?? 0;
 
-  function setFlowType(flowType: "if" | "forEach" | undefined, condition?: boolean) {
+  // --- Downstream node bounding box for forEach frame ---
+  const forEachFrame = (() => {
+    if (!isForEach) return null;
+    const adj: Record<string, string[]> = {};
+    for (const e of allEdges) {
+      if (!adj[e.source]) adj[e.source] = [];
+      adj[e.source].push(e.target);
+    }
+    const visited = new Set<string>();
+    const queue = [target];
+    while (queue.length > 0) {
+      const nid = queue.shift()!;
+      if (visited.has(nid)) continue;
+      visited.add(nid);
+      for (const child of adj[nid] ?? []) queue.push(child);
+    }
+    const scopeNodes = allNodes.filter((n) => visited.has(n.id));
+    if (scopeNodes.length === 0) return null;
+
+    let minFx = Infinity, minFy = Infinity, maxFx = -Infinity, maxFy = -Infinity;
+    for (const n of scopeNodes) {
+      minFx = Math.min(minFx, n.position.x);
+      minFy = Math.min(minFy, n.position.y);
+      maxFx = Math.max(maxFx, n.position.x + (n.measured?.width ?? n.width ?? 200));
+      maxFy = Math.max(maxFy, n.position.y + (n.measured?.height ?? n.height ?? 100));
+    }
+    return {
+      x: minFx - FRAME_PADDING,
+      y: minFy - FRAME_PADDING,
+      w: maxFx - minFx + FRAME_PADDING * 2,
+      h: maxFy - minFy + FRAME_PADDING * 2,
+    };
+  })();
+
+  // --- Edge update helpers ---
+  function setFlowType(
+    flowType: "if" | "forEach" | undefined,
+    condition?: boolean,
+  ) {
     setEdges((edges) =>
       edges.map((e) => {
         if (e.id !== id) return e;
@@ -75,6 +131,7 @@ export default function WorkflowEdge({
     setEdges((edges) => edges.filter((e) => e.id !== id));
   }
 
+
   return (
     <>
       <BaseEdge
@@ -87,8 +144,86 @@ export default function WorkflowEdge({
           filter: selected ? "drop-shadow(0 0 8px #60a5fa)" : undefined,
         }}
       />
+
       <EdgeLabelRenderer>
-        {/* Type badge — always visible for non-default edges */}
+        {/* forEach frame with iteration navigator */}
+        {isForEach && forEachFrame && (
+          <div
+            className="nodrag nopan"
+            style={{
+              position: "absolute",
+              left: forEachFrame.x,
+              top: forEachFrame.y,
+              width: forEachFrame.w,
+              height: forEachFrame.h,
+              border: `2px dashed ${FOREACH_COLOR}55`,
+              background: `${FOREACH_COLOR}08`,
+              borderRadius: 12,
+              pointerEvents: "auto",
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Top bar: label + iteration navigator */}
+            <div
+              className="nodrag nopan"
+              style={{
+                position: "absolute",
+                top: -14,
+                left: 8,
+                pointerEvents: "all",
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span
+                style={{
+                  background: FOREACH_COLOR,
+                  color: "white",
+                  fontSize: 11,
+                  fontWeight: "bold",
+                  padding: "2px 8px",
+                  borderRadius: 4,
+                  userSelect: "none",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                ∀ forEach scope
+              </span>
+
+              {/* Iteration navigator widget */}
+              {totalIterations > 0 && (
+                <span className="bg-content2 inline-flex select-none items-center gap-0.5 whitespace-nowrap rounded px-1 py-0.5">
+                  <button
+                    className={`border-none bg-transparent px-0.5 text-[13px] leading-none ${visibleIteration > 0 ? "text-foreground cursor-pointer" : "text-default-300 cursor-default"}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (visibleIteration > 0)
+                        setVisibleIteration(visibleIteration - 1);
+                    }}
+                  >
+                    ‹
+                  </button>
+                  <span className="text-foreground min-w-[40px] text-center text-[11px] font-bold">
+                    {visibleIteration + 1} / {totalIterations}
+                  </span>
+                  <button
+                    className={`border-none bg-transparent px-0.5 text-[13px] leading-none ${visibleIteration < totalIterations - 1 ? "text-foreground cursor-pointer" : "text-default-300 cursor-default"}`}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (visibleIteration < totalIterations - 1)
+                        setVisibleIteration(visibleIteration + 1);
+                    }}
+                  >
+                    ›
+                  </button>
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Type badge — always visible for non-default edges when not selected */}
         {!isDefaultType && !selected && (
           <div
             style={{
@@ -106,7 +241,7 @@ export default function WorkflowEdge({
           </div>
         )}
 
-        {/* Toolbar — shown when this edge is the only selected edge */}
+        {/* Toolbar popup — shown when this is the only selected edge */}
         {selected && selectedEdgeCount === 1 && (
           <div
             style={{
@@ -122,6 +257,7 @@ export default function WorkflowEdge({
               </PopoverTrigger>
               <PopoverContent className="p-0">
                 <div className="bg-content1 w-64 overflow-hidden rounded-lg">
+                  {/* Edge type section */}
                   <p className="text-default-400 border-content3 border-b px-3 py-2 text-xs font-semibold uppercase tracking-wider">
                     Edge type
                   </p>
@@ -140,7 +276,8 @@ export default function WorkflowEdge({
                       icon: "check",
                       iconColor: "#22c55e",
                       label: "IF — true branch",
-                      description: "Continue only when the source value is truthy.",
+                      description:
+                        "Continue only when the source value is truthy.",
                       onPress: () => setFlowType("if", true),
                     },
                     {
@@ -148,13 +285,14 @@ export default function WorkflowEdge({
                       icon: "close",
                       iconColor: "#ef4444",
                       label: "IF — false branch",
-                      description: "Continue only when the source value is falsy.",
+                      description:
+                        "Continue only when the source value is falsy.",
                       onPress: () => setFlowType("if", false),
                     },
                     {
                       edgeKey: "forEach",
                       icon: "repeat",
-                      iconColor: "#a855f7",
+                      iconColor: FOREACH_COLOR,
                       label: "∀ forEach",
                       description: "Run the next node once per item in a list.",
                       onPress: () => setFlowType("forEach"),
@@ -176,15 +314,23 @@ export default function WorkflowEdge({
                         <Icon name={icon} className="text-sm!" />
                       </span>
                       <span className="min-w-0">
-                        <p className="text-sm font-medium leading-tight">{label}</p>
-                        <p className="text-default-400 truncate text-xs">{description}</p>
+                        <p className="text-sm font-medium leading-tight">
+                          {label}
+                        </p>
+                        <p className="text-default-400 truncate text-xs">
+                          {description}
+                        </p>
                       </span>
                       {key === edgeKey && (
-                        <Icon name="check_circle" className="text-primary ml-auto shrink-0 text-sm!" />
+                        <Icon
+                          name="check_circle"
+                          className="text-primary ml-auto shrink-0 text-sm!"
+                        />
                       )}
                     </button>
                   ))}
 
+                  {/* Delete */}
                   <div className="border-content3 border-t">
                     <button
                       className="hover:bg-danger/10 flex w-full items-center gap-x-3 px-3 py-2 text-left transition-colors"
@@ -194,8 +340,12 @@ export default function WorkflowEdge({
                         <Icon name="delete" className="text-danger text-sm!" />
                       </span>
                       <span>
-                        <p className="text-danger text-sm font-medium leading-tight">Delete edge</p>
-                        <p className="text-default-400 text-xs">Remove this connection.</p>
+                        <p className="text-danger text-sm font-medium leading-tight">
+                          Delete edge
+                        </p>
+                        <p className="text-default-400 text-xs">
+                          Remove this connection.
+                        </p>
                       </span>
                     </button>
                   </div>

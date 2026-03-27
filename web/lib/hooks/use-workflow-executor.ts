@@ -9,6 +9,7 @@ export default function useWorkflowExecutor({
   localEdges,
   entryPoint,
   updateWorkflowNodeData,
+  updateEdgeData,
 }: {
   localNodes: ReactFlowNode<AppNodeData>[];
   localEdges: ReactFlowEdge[];
@@ -17,6 +18,7 @@ export default function useWorkflowExecutor({
     nodeViewId: string,
     data: Partial<AppNodeData>,
   ) => void;
+  updateEdgeData: (edgeId: string, data: Record<string, any>) => void;
 }) {
   const { runScopedAction } = useActionExecutor();
 
@@ -259,24 +261,115 @@ export default function useWorkflowExecutor({
               )
                 ? result[edge.sourceHandle ?? ""]
                 : [];
-              const targetNode = sequence.find((n) => n.id === edge.target);
-              if (targetNode) {
-                const iterResults = await Promise.all(
-                  items.map((item) =>
-                    runNode(targetNode, {
-                      [edge.targetHandle ?? ""]: item,
-                      ...targetNode.data.ownedAppViews,
-                    }),
-                  ),
-                );
-                resultMap.set(edge.target, { items: iterResults });
-                completedCount++;
-                // Propagate forEach target's outgoing edges
-                for (const childEdge of outEdgesMap[edge.target] || []) {
-                  inDegree[childEdge.target]--;
+
+              // Collect all nodes in the forEach scope (target + downstream)
+              const scopeIds = new Set<string>();
+              const scopeQueue = [edge.target];
+              while (scopeQueue.length > 0) {
+                const nid = scopeQueue.shift()!;
+                if (scopeIds.has(nid)) continue;
+                scopeIds.add(nid);
+                for (const childEdge of outEdgesMap[nid] || []) {
+                  scopeQueue.push(childEdge.target);
                 }
               }
-              // Consume the forEach edge (T's in-degree decremented)
+
+              const scopeNodes = sequence.filter((n) => scopeIds.has(n.id));
+              const scopeEdges = localEdges.filter(
+                (e) => scopeIds.has(e.source) && scopeIds.has(e.target),
+              );
+
+
+
+
+              // Build topological order for the scope subgraph
+              const scopeInDeg: Record<string, number> = {};
+              for (const nid of scopeIds) scopeInDeg[nid] = 0;
+              for (const e of scopeEdges) scopeInDeg[e.target]++;
+              const scopeAdj: Record<string, string[]> = {};
+              for (const nid of scopeIds) scopeAdj[nid] = [];
+              for (const e of scopeEdges) scopeAdj[e.source].push(e.target);
+              const topoQueue: string[] = [];
+              for (const nid of scopeIds) {
+                if (scopeInDeg[nid] === 0) topoQueue.push(nid);
+              }
+              const scopeSequence: ReactFlowNode<AppNodeData>[] = [];
+              while (topoQueue.length > 0) {
+                const nid = topoQueue.shift()!;
+                const node = scopeNodes.find((n) => n.id === nid);
+                if (node) scopeSequence.push(node);
+                for (const child of scopeAdj[nid] || []) {
+                  scopeInDeg[child]--;
+                  if (scopeInDeg[child] === 0) topoQueue.push(child);
+                }
+              }
+
+              // Run all iterations on the original scope nodes (no clones)
+              const iterResults: Record<string, Record<string, any>>[] = [];
+
+              for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                const iterResultMap = new Map<string, any>();
+
+                for (const scopeNode of scopeSequence) {
+                  let inputArgs: Record<string, any>;
+                  if (scopeNode.id === edge.target) {
+                    inputArgs = {
+                      [edge.targetHandle ?? ""]: item,
+                      ...scopeNode.data.ownedAppViews,
+                    };
+                  } else {
+                    inputArgs = {};
+                    for (const e of scopeEdges) {
+                      if (e.target !== scopeNode.id) continue;
+                      if (!e.sourceHandle || !e.targetHandle) continue;
+                      const srcResult = iterResultMap.get(e.source);
+                      if (srcResult) {
+                        inputArgs[e.targetHandle] =
+                          srcResult[e.sourceHandle];
+                      }
+                    }
+                    inputArgs = {
+                      ...inputArgs,
+                      ...scopeNode.data.ownedAppViews,
+                    };
+                  }
+                  const nodeResult = await runNode(scopeNode, inputArgs);
+                  iterResultMap.set(scopeNode.id, nodeResult);
+                }
+
+                const iterRecord: Record<string, Record<string, any>> = {};
+                for (const [nid, res] of iterResultMap) {
+                  iterRecord[nid] = res;
+                }
+                iterResults.push(iterRecord);
+              }
+
+              // Mark all original scope nodes as completed
+              for (const nid of scopeIds) {
+                if (!resultMap.has(nid)) {
+                  resultMap.set(
+                    nid,
+                    iterResults[iterResults.length - 1]?.[nid] ?? {},
+                  );
+                  completedCount++;
+                }
+              }
+
+              updateEdgeData(edge.id, {
+                iterationResults: iterResults,
+              });
+
+              // Propagate edges leaving the scope
+              for (const scopeNid of scopeIds) {
+                for (const childEdge of outEdgesMap[scopeNid] || []) {
+                  if (!scopeIds.has(childEdge.target)) {
+                    inDegree[childEdge.target]--;
+                  }
+                }
+              }
+
+              // Consume the forEach edge itself
               inDegree[edge.target]--;
               continue;
             }

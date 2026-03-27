@@ -10,6 +10,7 @@ import {
 import { useCallback, useContext, useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import { AppNodeData, WorkflowContent } from "../types";
+
 import useWorkflowExecutor from "./use-workflow-executor";
 
 export default function useCanvasWorkflow(
@@ -17,7 +18,6 @@ export default function useCanvasWorkflow(
 ) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
-
   const [entryPoint, setEntryPoint] = useState<
     ReactFlowNode<AppNodeData> | undefined
   >(undefined);
@@ -203,6 +203,17 @@ export default function useCanvasWorkflow(
     }));
   }, [updateWorkflowNodeData]);
 
+  const updateEdgeData = useCallback(
+    (edgeId: string, data: Record<string, any>) => {
+      setLocalEdges((prev) =>
+        prev.map((e) =>
+          e.id === edgeId ? { ...e, data: { ...(e.data ?? {}), ...data } } : e,
+        ),
+      );
+    },
+    [],
+  );
+
   const {
     startWorkflow,
     startWorkflowFromNode,
@@ -214,6 +225,7 @@ export default function useCanvasWorkflow(
       localEdges,
       entryPoint,
       updateWorkflowNodeData,
+      updateEdgeData,
     });
 
   const saveAppsSnapshotStates = useCallback(async () => {
