@@ -1,6 +1,8 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import A2UIView from "@/components/views/chat/a2ui-view";
+import MCPAppsView from "@/components/views/chat/mcp-apps-view";
 import PulseAppView from "@/components/views/chat/pulse-app-view";
 import { CanvasViewConfig } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
@@ -65,23 +67,9 @@ export default function ChatEmbedPanel({
 
       {/* Content area */}
       <div className="min-h-0 flex-1 overflow-hidden">
-        {activeTab === "a2ui" && (
-          <iframe
-            src="https://a2ui.org"
-            className="h-full w-full border-none"
-            title="A2UI"
-            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-          />
-        )}
+        {activeTab === "a2ui" && <A2UIView />}
 
-        {activeTab === "mcp-apps" && (
-          <iframe
-            src="https://modelcontextprotocol.io/extensions/apps/overview"
-            className="h-full w-full border-none"
-            title="MCP Apps"
-            sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-          />
-        )}
+        {activeTab === "mcp-apps" && <MCPAppsView />}
 
         {activeTab === "pulse-app" && <PulseAppView />}
 
