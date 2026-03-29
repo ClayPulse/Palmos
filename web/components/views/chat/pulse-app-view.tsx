@@ -22,7 +22,7 @@ export default function PulseAppView() {
     if (!q) return true;
     return (
       ext.config.id.toLowerCase().includes(q) ||
-      ext.config.name?.toLowerCase().includes(q) ||
+      ext.config.displayName?.toLowerCase().includes(q) ||
       ext.config.description?.toLowerCase().includes(q)
     );
   });
@@ -134,7 +134,7 @@ export default function PulseAppView() {
                   />
                 </div>
                 <p className="line-clamp-1 text-xs font-semibold text-gray-800 dark:text-white/85">
-                  {ext.config.name ?? ext.config.id}
+                  {ext.config.displayName ?? ext.config.id}
                 </p>
                 {ext.config.description && (
                   <p className="line-clamp-2 text-[10px] leading-snug text-gray-500 dark:text-white/45">
