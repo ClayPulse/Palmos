@@ -15,6 +15,9 @@ import {
 import { AppMetaData, ExtensionApp } from "../types";
 import { useMarketplaceApps } from "./marketplace/use-marketplace-apps";
 
+// Module-level cache to deduplicate concurrent loads for the same app
+const inflight = new Map<string, Promise<ExtensionApp>>();
+
 export function useExtensionAppManager(fetchCategory?: string) {
   const editorContext = useContext(EditorContext);
 
@@ -219,6 +222,21 @@ export function useExtensionAppManager(fetchCategory?: string) {
     id: string,
     version: string,
   ) {
+    const cacheKey = `remote:${remoteOrigin}:${id}:${version}`;
+    const existing = inflight.get(cacheKey);
+    if (existing) return existing;
+
+    const promise = _getExtensionInfoFromRemote(remoteOrigin, id, version);
+    inflight.set(cacheKey, promise);
+    promise.finally(() => inflight.delete(cacheKey));
+    return promise;
+  }
+
+  async function _getExtensionInfoFromRemote(
+    remoteOrigin: string,
+    id: string,
+    version: string,
+  ) {
     // Fetch the remote to get config
     const configUrl =
       getRemoteBaseURL(id, version, remoteOrigin) + "/pulse.config.json";
@@ -244,8 +262,19 @@ export function useExtensionAppManager(fetchCategory?: string) {
     return extension;
   }
 
-  // Download and load the extension app from a URL if specified
+  // Download and load the extension app from a URL if specified (with dedup)
   async function loadAppFromURL(urlStr: string) {
+    const cacheKey = `url:${urlStr}`;
+    const existing = inflight.get(cacheKey);
+    if (existing) return existing;
+
+    const promise = _loadAppFromURL(urlStr);
+    inflight.set(cacheKey, promise as Promise<ExtensionApp>);
+    promise.finally(() => inflight.delete(cacheKey));
+    return promise;
+  }
+
+  async function _loadAppFromURL(urlStr: string) {
     // the url is expected to be in the format of {remoteOrigin}/{extensionId}/{version}
 
     const url = new URL(urlStr);
@@ -297,8 +326,19 @@ export function useExtensionAppManager(fetchCategory?: string) {
     return ext;
   }
 
-  // Download and load the extension app if specified
+  // Download and load the extension app if specified (with dedup)
   async function loadAppFromRegistry(appId: string, inviteCode?: string) {
+    const cacheKey = `registry:${appId}:${inviteCode ?? ""}`;
+    const existing = inflight.get(cacheKey);
+    if (existing) return existing;
+
+    const promise = _loadAppFromRegistry(appId, inviteCode);
+    inflight.set(cacheKey, promise);
+    promise.finally(() => inflight.delete(cacheKey));
+    return promise;
+  }
+
+  async function _loadAppFromRegistry(appId: string, inviteCode?: string) {
     const url = getAPIUrl(`/api/app/get`);
     url.searchParams.set("name", appId);
     url.searchParams.set("latest", "true");

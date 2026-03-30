@@ -4,7 +4,8 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
-import { AppViewConfig, CanvasViewConfig } from "@/lib/types";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { AppViewConfig, CanvasViewConfig, InlineWidgetData } from "@/lib/types";
 import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import {
@@ -17,40 +18,11 @@ import {
   type ComponentInstance,
 } from "@a2ui/react";
 import { useCallback, useContext, useMemo } from "react";
-import { MemoizedCanvasView } from "../views/editor/canvas/canvas-view";
 
 // Initialize the A2UI component catalog once
 initializeDefaultCatalog();
 
-// ── Types ────────────────────────────────────────────────────────────────────
-
-/** Parsed widget descriptor extracted from a tool call or tool result. */
-export interface InlineWidgetData {
-  type: "a2ui" | "mcp-result" | "pulse-app" | "canvas";
-  /** A2UI: component definitions for A2UIViewer */
-  a2ui?: {
-    root: string;
-    components: ComponentInstance[];
-    data?: Record<string, unknown>;
-  };
-  /** A2UI: raw server-to-client messages for streaming surfaces */
-  a2uiMessages?: unknown[];
-  /** MCP: tool call result */
-  mcp?: {
-    toolName: string;
-    serverName?: string;
-    result: unknown;
-  };
-  /** Pulse App: app ID to embed */
-  pulseApp?: {
-    appId: string;
-  };
-  /** Canvas: node/edge data to render */
-  canvas?: {
-    nodes?: unknown[];
-    edges?: unknown[];
-  };
-}
+export type { InlineWidgetData };
 
 /**
  * Try to parse an inline widget from an AI tool_call or a ToolMessage content.
@@ -141,7 +113,8 @@ export function parseWidgetFromToolMessage(
   if (toolName) {
     try {
       const parsed = JSON.parse(content);
-      return parseWidgetFromToolCall(toolName, parsed);
+      const w = parseWidgetFromToolCall(toolName, parsed);
+      if (w) return w;
     } catch {
       // Not JSON — treat as MCP result text
       if (
@@ -176,6 +149,24 @@ export function parseWidgetFromToolMessage(
             data: parsed.data,
           },
         };
+      }
+      // Workflow: { name, content } where content is stringified { nodes, edges }
+      if (typeof parsed.name === "string" && typeof parsed.content === "string") {
+        try {
+          const workflow = JSON.parse(parsed.content);
+          if (workflow && (workflow.nodes || workflow.edges)) {
+            return {
+              type: "canvas",
+              canvas: {
+                name: parsed.name,
+                nodes: workflow.nodes,
+                edges: workflow.edges,
+              },
+            };
+          }
+        } catch {
+          // content wasn't valid JSON, ignore
+        }
       }
     }
   } catch {
@@ -381,32 +372,69 @@ function PulseAppWidget({ data }: { data: InlineWidgetData }) {
 }
 
 function CanvasWidget({ data }: { data: InlineWidgetData }) {
-  const canvasConfig = useMemo<CanvasViewConfig>(
+  const editorContext = useContext(EditorContext);
+  const { createCanvasTabView } = useTabViewManager();
+
+  const workflowContent = useMemo(
     () => ({
-      viewId: createCanvasViewId(),
-      appConfigs: [],
+      nodes: (data.canvas?.nodes ?? []) as any[],
+      edges: (data.canvas?.edges ?? []) as any[],
     }),
-    [],
+    [data.canvas],
   );
 
+  function openInNewTab() {
+    createCanvasTabView({
+      viewId: createCanvasViewId(),
+      initialWorkflowContent: workflowContent,
+    });
+  }
+
+  function applyToActiveTab() {
+    const tabViews = editorContext?.editorStates.tabViews;
+    const tabIndex = editorContext?.editorStates.tabIndex ?? 0;
+    const activeTab = tabViews?.[tabIndex];
+
+    if (activeTab?.type === ViewModeEnum.Canvas) {
+      const config = activeTab.config as CanvasViewConfig;
+      config.initialWorkflowContent = workflowContent;
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        tabViews: [...prev.tabViews],
+      }));
+    } else {
+      openInNewTab();
+    }
+  }
+
   return (
-    <div className="my-2 overflow-hidden rounded-xl border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
-      <div className="flex items-center gap-2 border-b border-amber-200/40 bg-amber-50/50 px-3 py-1.5 dark:border-white/6 dark:bg-amber-500/5">
-        <Icon
-          name="account_tree"
-          variant="round"
-          className="text-xs text-amber-600 dark:text-amber-300"
-        />
-        <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300">
-          Workflow Canvas
-        </span>
+    <div className="my-2 flex items-center gap-2.5 rounded-xl border border-amber-200/60 bg-white px-3 py-2.5 shadow-sm dark:border-white/10 dark:bg-white/6">
+      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-amber-100 dark:bg-amber-500/15">
+        <Icon name="account_tree" variant="round" className="text-base text-amber-600 dark:text-amber-300" />
       </div>
-      <div className="h-64">
-        <MemoizedCanvasView
-          config={canvasConfig}
-          isActive={true}
-          tabName="Chat Canvas"
-        />
+      <div className="min-w-0 flex-1">
+        <p className="text-xs font-medium text-default-700 dark:text-white/85">
+          Your workflow is ready.
+        </p>
+        {data.canvas?.name && (
+          <p className="text-[10px] text-default-400 dark:text-white/50">
+            {data.canvas.name}
+          </p>
+        )}
+      </div>
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={applyToActiveTab}
+          className="flex items-center gap-1.5 rounded-lg border border-default-200 bg-default-50 px-3 py-1.5 text-xs font-medium text-default-600 transition-colors hover:border-default-300 hover:bg-default-100 dark:border-white/10 dark:bg-white/5 dark:text-white/70 dark:hover:border-white/20 dark:hover:bg-white/10"
+        >
+          Preview
+        </button>
+        <button
+          onClick={applyToActiveTab}
+          className="flex items-center gap-1.5 rounded-lg border border-amber-400/60 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/20"
+        >
+          Apply
+        </button>
       </div>
     </div>
   );

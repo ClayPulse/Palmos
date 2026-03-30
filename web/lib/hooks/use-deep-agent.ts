@@ -6,36 +6,9 @@ import {
   ToolMessage,
 } from "@langchain/core/messages";
 import { useCallback, useRef, useState } from "react";
+import { SubagentInfo, Todo, WorkflowInput } from "../types";
 
-export interface WorkflowInput {
-  id: string;
-  name: string;
-  version: string;
-  content: unknown;
-}
-
-export interface Todo {
-  status: "pending" | "in_progress" | "completed";
-  content: string;
-}
-
-export interface SubagentInfo {
-  id: string;
-  status: "pending" | "running" | "complete" | "error";
-  messages: BaseMessage[];
-  result: string | null;
-  toolCall: {
-    id: string;
-    name: string;
-    args: {
-      description?: string;
-      subagent_type?: string;
-      [key: string]: unknown;
-    };
-  };
-  startedAt: Date | null;
-  completedAt: Date | null;
-}
+export type { SubagentInfo, Todo, WorkflowInput };
 
 export default function useDeepAgent(
   apiUrl: string,
@@ -77,10 +50,15 @@ export default function useDeepAgent(
             ? "assistant"
             : HumanMessage.isInstance(msg)
               ? "user"
-              : "unknown",
+              : ToolMessage.isInstance(msg)
+                ? "tool"
+                : "unknown",
           content: msg.content,
         })),
         workflows: workflows && workflows.length > 0 ? workflows : undefined,
+        options: {
+          returnWorkflowConfig: false,
+        },
       };
 
       fetch(url, {
@@ -158,8 +136,15 @@ export default function useDeepAgent(
               if (data == null || typeof data !== "object") return;
               const state = data as Record<string, unknown>;
 
-              // Manager agent result format: { agentMessage, operations }
-              if (
+              // Manager agent result format: { text, attachments } or legacy { agentMessage, operations }
+              if (typeof state.text === "string" && state.text) {
+                const id = generateId();
+                messageMapRef.current.set(
+                  id,
+                  new AIMessage({ content: state.text as string, id }),
+                );
+                syncDisplay();
+              } else if (
                 typeof state.agentMessage === "string" &&
                 state.agentMessage
               ) {

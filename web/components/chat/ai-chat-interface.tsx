@@ -200,34 +200,36 @@ export default function AIChatInterface({
     }
 
     // From ToolMessage content (the tool result contains widget data)
-    if (msg instanceof ToolMessage) {
-      const toolName = toolCallNameMap.get(
-        (msg as any).tool_call_id ?? "",
-      );
-      const w = parseWidgetFromToolMessage(
-        (msg as any).tool_call_id ?? "",
-        content,
-        toolName,
-      );
+    // Check both actual ToolMessage instances and any message whose content
+    // looks like JSON (the stream may coerce tool messages as AIMessages).
+    if (!isHuman) {
+      const toolCallId = (msg as any).tool_call_id ?? "";
+      const toolName = toolCallNameMap.get(toolCallId) ?? undefined;
+      const w = parseWidgetFromToolMessage(toolCallId, content, toolName);
       if (w) widgets.push(w);
-      // If this ToolMessage is purely a widget, don't show raw text
-      if (w && !content.replace(/^\s*\{[\s\S]*\}\s*$/, "").trim()) {
-        // Content is just JSON that we parsed — skip raw text display
-      }
     }
 
     const spawned = msg.id ? getSubagentsByMessage(msg.id) : [];
     const hasWidgets = widgets.length > 0;
 
-    // ToolMessages that are entirely widget data: render only the widget
-    if (msg instanceof ToolMessage && hasWidgets) {
+    // Filter out canvas widgets — they render as a sticky card above the input
+    const nonCanvasWidgets = widgets.filter((w) => w.type !== "canvas");
+    const hasNonCanvasWidgets = nonCanvasWidgets.length > 0;
+
+    // Messages that are entirely widget data (JSON content): render only the widgets
+    if (hasNonCanvasWidgets && content.trimStart().startsWith("{")) {
       return (
         <div key={msg.id ?? i} className="flex flex-col gap-2.5">
-          {widgets.map((w, wi) => (
+          {nonCanvasWidgets.map((w, wi) => (
             <InlineWidget key={wi} data={w} />
           ))}
         </div>
       );
+    }
+
+    // If the only widgets were canvas, and content is just JSON, skip rendering entirely
+    if (widgets.length > 0 && nonCanvasWidgets.length === 0 && content.trimStart().startsWith("{")) {
+      return null;
     }
 
     if (!content && spawned.length === 0 && !hasWidgets) return null;
@@ -259,6 +261,32 @@ export default function AIChatInterface({
       </div>
     );
   });
+
+  // Find the latest workflow widget from messages after the last user message
+  const latestWorkflow = useMemo(() => {
+    let lastHumanIdx = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i]._getType() === "human") {
+        lastHumanIdx = i;
+        break;
+      }
+    }
+    // Scan from last human message forward, keep the last canvas widget found
+    let found: InlineWidgetData | null = null;
+    for (let i = lastHumanIdx + 1; i < messages.length; i++) {
+      const msg = messages[i];
+      const content =
+        typeof msg.content === "string"
+          ? msg.content
+          : "";
+      if (!content) continue;
+      const toolCallId = (msg as any).tool_call_id ?? "";
+      const toolName = toolCallNameMap.get(toolCallId) ?? undefined;
+      const w = parseWidgetFromToolMessage(toolCallId, content, toolName);
+      if (w?.type === "canvas") found = w;
+    }
+    return found;
+  }, [messages, toolCallNameMap]);
 
   const loadingIndicator = isLoading && (
     <div className="py-1.5">
@@ -321,6 +349,13 @@ export default function AIChatInterface({
         {todos.length > 0 && (
           <div className="border-t border-amber-200/40 px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8">
             <TodoList todos={todos} />
+          </div>
+        )}
+
+        {/* Workflow card */}
+        {latestWorkflow && (
+          <div className="px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]">
+            <InlineWidget data={latestWorkflow} />
           </div>
         )}
 
@@ -443,6 +478,13 @@ export default function AIChatInterface({
       {/* Todos */}
       {todos.length > 0 && <TodoList todos={todos} />}
 
+      {/* Workflow card */}
+      {latestWorkflow && (
+        <div className="px-3 py-2">
+          <InlineWidget data={latestWorkflow} />
+        </div>
+      )}
+
       {/* Input */}
       <div className="flex flex-col gap-2 border-t border-amber-200/60 bg-white px-3 pt-3 pb-2 dark:border-white/8 dark:bg-white/3">
         <div className="flex items-center gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]">
@@ -510,7 +552,8 @@ function UserBubble({ text }: { text: string }) {
   return (
     <div className="flex justify-end">
       <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
-        {text}
+        <p className="text-xs font-semibold text-white/80">User:</p>
+        <p className="mt-0.5 text-white">{text}</p>
       </div>
     </div>
   );
@@ -538,6 +581,9 @@ function AIResponseCard({
           />
         </div>
         <div className="min-w-0 flex-1">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-default-400 dark:text-white/40">
+            AI Manager:
+          </p>
           {content && (
             <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
               <MarkdownRender content={content} />
@@ -578,7 +624,7 @@ function ResponseCard({
         <div className="flex items-center gap-2">
           <StatusIcon status={status} />
           <span className="text-default-700 text-xs font-semibold dark:text-white/90">
-            Pulse AI
+            AI Manager
           </span>
         </div>
         <div className="flex items-center gap-2">
