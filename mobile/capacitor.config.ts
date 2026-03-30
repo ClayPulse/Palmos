@@ -2,7 +2,7 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.pulse_editor.app",
-  appName: "Pulse Editor",
+  appName: "Palmos",
   webDir: "../build/next",
   android: {
     buildOptions: {

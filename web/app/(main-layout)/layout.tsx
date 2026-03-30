@@ -1,4 +1,5 @@
 import Nav from "@/components/interface/navigation/nav";
+import RebrandBanner from "@/components/interface/rebrand-banner";
 import CapacitorProvider from "@/components/providers/capacitor-provider";
 import DndProvider from "@/components/providers/dnd-provider";
 import EditorContextProvider from "@/components/providers/editor-context-provider";
@@ -15,7 +16,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pulse Editor Web",
+  title: "Palmos",
   description: "Web-based Vibe Coding Editor",
 };
 
@@ -40,6 +41,7 @@ export default async function RootLayout({
                       <RemoteModuleProvider isPreventingCSS={true}>
                         <InputDeviceProvider>
                           <Toaster />
+                          <RebrandBanner />
                           <Nav>{children}</Nav>
                         </InputDeviceProvider>
                       </RemoteModuleProvider>

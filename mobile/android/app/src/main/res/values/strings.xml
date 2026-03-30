@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Pulse Editor</string>
-    <string name="title_activity_main">Pulse Editor</string>
+    <string name="app_name">Palmos</string>
+    <string name="title_activity_main">Palmos</string>
     <string name="package_name">com.pulse_editor.app</string>
     <string name="custom_url_scheme">com.pulse_editor.app</string>
 </resources>

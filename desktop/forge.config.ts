@@ -16,7 +16,7 @@ const electronModules = ["electron-serve", "ws"];
 const config: ForgeConfig = {
   outDir: "../build/desktop",
   packagerConfig: {
-    name: "Pulse Editor",
+    name: "Palmos",
     icon: path.join(__dirname, "../shared-assets/icons/electron/pulse_editor"),
     // Copy the electron modules and the nextjs build to the electron build.
     extraResource: electronModules

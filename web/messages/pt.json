@@ -51,7 +51,7 @@
 		"value": "Valor",
 		"restartToApply": "Reinicie para aplicar",
 		"useManagedAIEndpoints": "Usar endpoints de IA gerenciados",
-		"managedCloudDescription": "Desbloqueie instantaneamente todo o poder do Pulse Editor com a nuvem gerenciada: você obtém assistência de IA ultrarrápida, sincronização entre plataformas e ferramentas criativas para se manter sempre no fluxo.",
+		"managedCloudDescription": "Desbloqueie instantaneamente todo o poder do Palmos com a nuvem gerenciada: você obtém assistência de IA ultrarrápida, sincronização entre plataformas e ferramentas criativas para se manter sempre no fluxo.",
 		"byoAPIKeysDescription": "Trazer suas próprias chaves de API permite conectar-se diretamente aos provedores de IA. Requer mais configuração, mas você mantém controle total.",
 		"yourPlan": "Seu plano: {plan}",
 		"upgradeManagePlan": "Atualizar/gerenciar plano",
@@ -90,7 +90,7 @@
 		"extensionInstalled": "Extensão instalada",
 		"extensionInstalledDescription": "Extensão {id} instalada com sucesso.",
 		"extensionDefinedSettings": "Configurações definidas pela extensão",
-		"pulseEditorTerminal": "Terminal do Pulse Editor",
+		"pulseEditorTerminal": "Terminal do Palmos",
 		"deviceHostAddress": "Endereço do dispositivo host"
 	},
 	"subscription": {
@@ -107,7 +107,7 @@
 		"title": "Conta"
 	},
 	"metadata": {
-		"title": "Pulse Editor",
+		"title": "Palmos",
 		"description": "Editor com IA para potencializar sua criatividade"
 	},
 	"cloudApi": {
@@ -329,7 +329,7 @@
 	"openSourceInfoModal": {
 		"title": "Código aberto",
 		"description": "Acreditamos em software aberto porque a transparência promove confiança, inovação e colaboração. Nossa missão é capacitar desenvolvedores no mundo todo, fornecendo acesso gratuito às ferramentas de que precisam para construir, criar e inovar sem barreiras.",
-		"pulseEditorCore": "Núcleo do Pulse Editor",
+		"pulseEditorCore": "Núcleo do Palmos",
 		"officialApps": "Apps oficiais",
 		"opensource": "Open source",
 		"cloudServices": "Ao mesmo tempo, oferecemos serviços em nuvem e um marketplace para que você gerencie seus projetos e compartilhe seu trabalho com a comunidade sem se preocupar com infraestrutura e backend.",
@@ -442,7 +442,7 @@
 		"aiSettings": {
 			"title": "Configurações de IA",
 			"useManagedEndpoints": "Usar endpoints de IA gerenciados",
-			"managedMessage": "Desbloqueie instantaneamente todo o poder do Pulse Editor com a nuvem gerenciada: você obtém assistência de IA ultrarrápida, sincronização entre plataformas e ferramentas criativas para se manter sempre no fluxo.",
+			"managedMessage": "Desbloqueie instantaneamente todo o poder do Palmos com a nuvem gerenciada: você obtém assistência de IA ultrarrápida, sincronização entre plataformas e ferramentas criativas para se manter sempre no fluxo.",
 			"byokMessage": "Trazer suas próprias chaves de API permite conectar-se diretamente aos provedores de IA. Requer mais configuração, mas você mantém controle total.",
 			"yourPlan": "Seu plano:",
 			"upgradeManagePlan": "Atualizar/gerenciar plano",
@@ -515,7 +515,7 @@
 		},
 		"extensionDefined": {
 			"title": "Configurações definidas pela extensão",
-			"pulseEditorTerminal": "Terminal do Pulse Editor",
+			"pulseEditorTerminal": "Terminal do Palmos",
 			"deviceHostAddress": "Endereço do dispositivo host"
 		}
 	},
@@ -921,7 +921,7 @@
 	},
 	"statusScreens": {
 		"welcome": {
-			"title": "Bem-vindo ao Pulse Editor",
+			"title": "Bem-vindo ao Palmos",
 			"subtitle": "Comece criando um novo projeto ou abrindo um existente",
 			"taglineLine1": "Seu próximo sistema operacional de IA, impulsionado por",
 			"taglineLine2": "Apps e fluxos de trabalho Vibe Coded"

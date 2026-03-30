@@ -51,7 +51,7 @@
     "value": "Value",
     "restartToApply": "Restart to Apply",
     "useManagedAIEndpoints": "Use Managed AI Endpoints",
-    "managedCloudDescription": "Unlock the full power of Pulse Editor instantly with managed cloud you get lightning-fast AI assistance, cross-platform syncing, creative tools. So you always stay in flow.",
+    "managedCloudDescription": "Unlock the full power of Palmos instantly with managed cloud you get lightning-fast AI assistance, cross-platform syncing, creative tools. So you always stay in flow.",
     "byoAPIKeysDescription": "Bring Your Own API Keys lets you connect directly to AI providers. More setup required, but you stay in full control.",
     "yourPlan": "Your Plan: {plan}",
     "upgradeManagePlan": "Upgrade/Manage Plan",
@@ -90,7 +90,7 @@
     "extensionInstalled": "Extension installed",
     "extensionInstalledDescription": "Extension {id} installed successfully.",
     "extensionDefinedSettings": "Extension Defined Settings",
-    "pulseEditorTerminal": "Pulse Editor Terminal",
+    "pulseEditorTerminal": "Palmos Terminal",
     "deviceHostAddress": "Device Host Address"
   },
   "subscription": {
@@ -107,7 +107,7 @@
     "title": "Account"
   },
   "metadata": {
-    "title": "Pulse Editor",
+    "title": "Palmos",
     "description": "AI powered editor to boost your creativity"
   },
   "cloudApi": {
@@ -329,7 +329,7 @@
   "openSourceInfoModal": {
     "title": "Open Source",
     "description": "We believe in open software because transparency fosters trust, innovation, and collaboration. Our mission is to empower developers worldwide by providing free access to the tools they need to build, create, and innovate without barriers.",
-    "pulseEditorCore": "Pulse Editor Core",
+    "pulseEditorCore": "Palmos Core",
     "officialApps": "Official Apps",
     "opensource": "Opensource",
     "cloudServices": "Meanwhile, we offer cloud hosted services and marketplace so you can easily manage your projects and share your work with the community without worrying about the infrastructure and backend.",
@@ -442,7 +442,7 @@
     "aiSettings": {
       "title": "AI Settings",
       "useManagedEndpoints": "Use Managed AI Endpoints",
-      "managedMessage": "Unlock the full power of Pulse Editor instantly with managed cloud you get lightning-fast AI assistance, cross-platform syncing, creative tools. So you always stay in flow.",
+      "managedMessage": "Unlock the full power of Palmos instantly with managed cloud you get lightning-fast AI assistance, cross-platform syncing, creative tools. So you always stay in flow.",
       "byokMessage": "Bring Your Own API Keys lets you connect directly to AI providers. More setup required, but you stay in full control.",
       "yourPlan": "Your Plan:",
       "upgradeManagePlan": "Upgrade/Manage Plan",
@@ -515,7 +515,7 @@
     },
     "extensionDefined": {
       "title": "Extension Defined Settings",
-      "pulseEditorTerminal": "Pulse Editor Terminal",
+      "pulseEditorTerminal": "Palmos Terminal",
       "deviceHostAddress": "Device Host Address"
     }
   },
@@ -921,7 +921,7 @@
   },
   "statusScreens": {
     "welcome": {
-      "title": "Welcome to Pulse Editor",
+      "title": "Welcome to Palmos",
       "subtitle": "Start by creating a new project or opening an existing one",
       "taglineLine1": "Your Next AI-OS Powered by",
       "taglineLine2": "Vibe Coded Apps & Workflows"
