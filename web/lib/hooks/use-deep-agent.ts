@@ -7,6 +7,13 @@ import {
 } from "@langchain/core/messages";
 import { useCallback, useRef, useState } from "react";
 
+export interface WorkflowInput {
+  id: string;
+  name: string;
+  version: string;
+  content: unknown;
+}
+
 export interface Todo {
   status: "pending" | "in_progress" | "completed";
   content: string;
@@ -47,7 +54,7 @@ export default function useDeepAgent(
   }, []);
 
   const submit = useCallback(
-    (text: string) => {
+    (text: string, workflows?: WorkflowInput[]) => {
       // Optimistically add user message
       const userMsg = new HumanMessage({ content: text });
       const uid = userMsg.id ?? generateId();
@@ -62,16 +69,26 @@ export default function useDeepAgent(
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const url = `${apiUrl}/stream`;
+      const url = `${apiUrl}/manager/stream`;
+
+      const payload = {
+        messages: [...messageMapRef.current.values()].map((msg) => ({
+          role: AIMessage.isInstance(msg)
+            ? "assistant"
+            : HumanMessage.isInstance(msg)
+              ? "user"
+              : "unknown",
+          content: msg.content,
+        })),
+        workflows: workflows && workflows.length > 0 ? workflows : undefined,
+      };
 
       fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         signal: controller.signal,
-        body: JSON.stringify({
-          input: { messages: [{ type: "human", content: text }] },
-        }),
+        body: JSON.stringify(payload),
       })
         .then((res) => {
           if (!res.ok) {
@@ -107,25 +124,22 @@ export default function useDeepAgent(
               // e.g. ["langchain_core", "messages", "AIMessageChunk"]
               const lcId = Array.isArray(chunk.id) ? chunk.id : [];
               const typeName = lcId[lcId.length - 1] ?? "";
-              const kind =
-                kwargs.type ?? kwargs.role ?? typeName ?? "";
+              const kind = kwargs.type ?? kwargs.role ?? typeName ?? "";
 
               // For streaming, we accumulate content for the same message ID
               const existing = messageMapRef.current.get(msgId);
               if (existing && existing._getType() !== "human") {
                 // Append token to existing message
                 const prev =
-                  typeof existing.content === "string"
-                    ? existing.content
-                    : "";
+                  typeof existing.content === "string" ? existing.content : "";
                 const updated = coerceToBaseMessage({
                   type: existing._getType(),
                   content: prev + content,
                   id: msgId,
                   additional_kwargs:
-                    (existing as any).additional_kwargs ?? kwargs.additional_kwargs,
-                  tool_calls:
-                    (existing as any).tool_calls ?? kwargs.tool_calls,
+                    (existing as any).additional_kwargs ??
+                    kwargs.additional_kwargs,
+                  tool_calls: (existing as any).tool_calls ?? kwargs.tool_calls,
                 });
                 if (updated) messageMapRef.current.set(msgId, updated);
               } else if (content || kind) {
@@ -141,17 +155,27 @@ export default function useDeepAgent(
               syncDisplay();
             },
             onValues: (data: unknown) => {
-              // "values" event: final state — messages are in LC serialized
-              // format. Since we already accumulated the full content via
-              // streaming chunks, only sync todos and any messages we missed.
               if (data == null || typeof data !== "object") return;
               const state = data as Record<string, unknown>;
 
+              // Manager agent result format: { agentMessage, operations }
+              if (
+                typeof state.agentMessage === "string" &&
+                state.agentMessage
+              ) {
+                const id = generateId();
+                messageMapRef.current.set(
+                  id,
+                  new AIMessage({ content: state.agentMessage, id }),
+                );
+                syncDisplay();
+              }
+
+              // LangGraph format: { messages: [...] }
               if (Array.isArray(state.messages)) {
                 for (const raw of state.messages) {
                   const msg = coerceFromLCSerialized(raw);
                   if (!msg) continue;
-                  // Skip human messages — already added optimistically
                   if (msg._getType() === "human") continue;
                   const id = msg.id ?? generateId();
                   if (!messageMapRef.current.has(id)) {
@@ -167,9 +191,7 @@ export default function useDeepAgent(
             },
             onError: (data: unknown) => {
               const errData = data as Record<string, string> | null;
-              setError(
-                new Error(errData?.message ?? "Unknown agent error"),
-              );
+              setError(new Error(errData?.message ?? "Unknown agent error"));
             },
           });
         })
@@ -272,6 +294,7 @@ async function readSSEStream(
             handlers.onMessages(parsed);
             break;
           case "values":
+          case "result":
             handlers.onValues(parsed);
             break;
           case "error":

@@ -1,12 +1,19 @@
 "use client";
 
+import InlineWidget, {
+  type InlineWidgetData,
+  parseWidgetFromToolCall,
+  parseWidgetFromToolMessage,
+} from "@/components/chat/inline-widget";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
-import useDeepAgent, { SubagentInfo, Todo } from "@/lib/hooks/use-deep-agent";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import useDeepAgent, { SubagentInfo, Todo, WorkflowInput } from "@/lib/hooks/use-deep-agent";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { Button, Spinner } from "@heroui/react";
-import { BaseMessage } from "@langchain/core/messages";
+import { AIMessage, BaseMessage, ToolMessage } from "@langchain/core/messages";
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL + "/api/agent";
 
@@ -40,11 +47,33 @@ export default function AIChatInterface({
     getSubagentsByMessage,
   } = useDeepAgent(agentUrl);
 
+  const editorContext = useContext(EditorContext);
+
   const [inputText, setInputText] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const userScrolledUpRef = useRef(false);
 
   const isPage = variant === "page";
+
+  /** Collect workflows from open canvas tabs to send as context. */
+  const getWorkflows = (): WorkflowInput[] | undefined => {
+    const tabViews = editorContext?.editorStates.tabViews;
+    if (!tabViews) return undefined;
+
+    const workflows: WorkflowInput[] = [];
+    for (const tab of tabViews) {
+      if (tab.type === ViewModeEnum.Canvas && tab.openedWorkflow) {
+        const wf = tab.openedWorkflow;
+        workflows.push({
+          id: `${wf.name}@${wf.version}`,
+          name: wf.name,
+          version: wf.version,
+          content: wf.content,
+        });
+      }
+    }
+    return workflows.length > 0 ? workflows : undefined;
+  };
 
   // Track user scroll position so we don't fight manual scrolling
   useEffect(() => {
@@ -74,7 +103,7 @@ export default function AIChatInterface({
     const value = (text ?? inputText).trim();
     if (!value || isLoading) return;
     setInputText("");
-    submit(value);
+    submit(value, getWorkflows());
   }
 
   const isEmptyConversation = messages.length === 0 && !isLoading;
@@ -124,6 +153,20 @@ export default function AIChatInterface({
     </div>
   );
 
+  // Build a map of tool_call_id → tool name from AIMessages so we can
+  // identify which ToolMessages correspond to widget-rendering tools.
+  const toolCallNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const msg of messages) {
+      if (msg instanceof AIMessage && msg.tool_calls) {
+        for (const tc of msg.tool_calls) {
+          if (tc.id) map.set(tc.id, tc.name);
+        }
+      }
+    }
+    return map;
+  }, [messages]);
+
   const messageList = messages.map((msg, i) => {
     const isHuman = msg._getType() === "human";
     const content =
@@ -142,8 +185,52 @@ export default function AIChatInterface({
               .join("")
           : "";
 
+    // ── Detect inline widgets ──────────────────────────────────────────
+    const widgets: InlineWidgetData[] = [];
+
+    // From AI tool_calls (the AI is requesting to render a widget)
+    if (msg instanceof AIMessage && msg.tool_calls) {
+      for (const tc of msg.tool_calls) {
+        const w = parseWidgetFromToolCall(
+          tc.name,
+          tc.args as Record<string, unknown>,
+        );
+        if (w) widgets.push(w);
+      }
+    }
+
+    // From ToolMessage content (the tool result contains widget data)
+    if (msg instanceof ToolMessage) {
+      const toolName = toolCallNameMap.get(
+        (msg as any).tool_call_id ?? "",
+      );
+      const w = parseWidgetFromToolMessage(
+        (msg as any).tool_call_id ?? "",
+        content,
+        toolName,
+      );
+      if (w) widgets.push(w);
+      // If this ToolMessage is purely a widget, don't show raw text
+      if (w && !content.replace(/^\s*\{[\s\S]*\}\s*$/, "").trim()) {
+        // Content is just JSON that we parsed — skip raw text display
+      }
+    }
+
     const spawned = msg.id ? getSubagentsByMessage(msg.id) : [];
-    if (!content && spawned.length === 0) return null;
+    const hasWidgets = widgets.length > 0;
+
+    // ToolMessages that are entirely widget data: render only the widget
+    if (msg instanceof ToolMessage && hasWidgets) {
+      return (
+        <div key={msg.id ?? i} className="flex flex-col gap-2.5">
+          {widgets.map((w, wi) => (
+            <InlineWidget key={wi} data={w} />
+          ))}
+        </div>
+      );
+    }
+
+    if (!content && spawned.length === 0 && !hasWidgets) return null;
 
     return (
       <div key={msg.id ?? i} className="flex flex-col gap-2.5">
@@ -153,11 +240,13 @@ export default function AIChatInterface({
           <AIResponseCard
             content={content}
             isStreaming={isLoading && i === messages.length - 1}
+            widgets={widgets}
           />
         ) : (
           <ResponseCard
             content={content}
             isStreaming={isLoading && i === messages.length - 1}
+            widgets={widgets}
           />
         )}
         {spawned.length > 0 && (
@@ -281,63 +370,63 @@ export default function AIChatInterface({
 
   return (
     <div className="grid h-full w-full grid-rows-[auto_1fr_max-content_max-content] overflow-hidden bg-gray-50 shadow-lg dark:bg-[#111118] min-[768px]:rounded-xl">
-      {/* Header */}
-      <div className="relative">
-        <div className="flex items-center justify-center border-b border-amber-300/40 bg-white px-3 py-3 dark:border-white/8 dark:bg-white/3">
-          <div className="flex items-center gap-2">
-            <motion.span
-              className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-              animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              <div>
-                <Icon name="bolt" className="text-lg" />
-              </div>
-            </motion.span>
-            <motion.span
-              className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-sm font-bold tracking-wide text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-              animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              PULSE AI
-            </motion.span>
-          </div>
-          <div className="absolute right-0 flex items-center gap-1 px-2">
-            {isLoading && (
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                className="text-amber-600 hover:text-amber-500 dark:text-amber-400/80 dark:hover:text-amber-300"
-                onPress={() => stop()}
+      {/* Header + WIP disclaimer */}
+      <div>
+        <div className="relative">
+          <div className="flex items-center justify-center border-b border-amber-300/40 bg-white px-3 py-3 dark:border-white/8 dark:bg-white/3">
+            <div className="flex items-center gap-2">
+              <motion.span
+                className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
                 <div>
-                  <Icon name="stop" variant="round" />
+                  <Icon name="bolt" className="text-lg" />
                 </div>
-              </Button>
-            )}
-            {onClose && (
-              <Button
-                isIconOnly
-                variant="light"
-                className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                onPress={onClose}
+              </motion.span>
+              <motion.span
+                className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-sm font-bold tracking-wide text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
-                <div>
-                  <Icon name="close" variant="round" />
-                </div>
-              </Button>
-            )}
+                PULSE AI
+              </motion.span>
+            </div>
+            <div className="absolute right-0 flex items-center gap-1 px-2">
+              {isLoading && (
+                <Button
+                  isIconOnly
+                  variant="light"
+                  size="sm"
+                  className="text-amber-600 hover:text-amber-500 dark:text-amber-400/80 dark:hover:text-amber-300"
+                  onPress={() => stop()}
+                >
+                  <div>
+                    <Icon name="stop" variant="round" />
+                  </div>
+                </Button>
+              )}
+              {onClose && (
+                <Button
+                  isIconOnly
+                  variant="light"
+                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
+                  onPress={onClose}
+                >
+                  <div>
+                    <Icon name="close" variant="round" />
+                  </div>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* WIP disclaimer */}
-      <div className="flex items-center gap-1.5 border-b border-amber-200/60 bg-amber-50/80 px-3 py-1.5 dark:border-amber-500/20 dark:bg-amber-500/8">
-        <Icon name="construction" variant="round" className="text-xs text-amber-600 dark:text-amber-400" />
-        <p className="text-[10px] text-amber-700 dark:text-amber-400">
-          <span className="font-semibold">Work in progress</span> — some features may not fully function yet.
-        </p>
+        <div className="flex items-center gap-1.5 border-b border-amber-200/60 bg-amber-50/80 px-3 py-1.5 dark:border-amber-500/20 dark:bg-amber-500/8">
+          <Icon name="construction" variant="round" className="text-xs text-amber-600 dark:text-amber-400" />
+          <p className="text-[10px] text-amber-700 dark:text-amber-400">
+            <span className="font-semibold">Work in progress</span> — some features may not fully function yet.
+          </p>
+        </div>
       </div>
 
       {/* Messages */}
@@ -432,9 +521,11 @@ function UserBubble({ text }: { text: string }) {
 function AIResponseCard({
   content,
   isStreaming,
+  widgets = [],
 }: {
   content: string;
   isStreaming: boolean;
+  widgets?: InlineWidgetData[];
 }) {
   return (
     <div className="flex justify-start">
@@ -446,11 +537,18 @@ function AIResponseCard({
             className="h-full w-full"
           />
         </div>
-        <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
-          <MarkdownRender content={content} />
-          {isStreaming && (
-            <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+        <div className="min-w-0 flex-1">
+          {content && (
+            <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
+              <MarkdownRender content={content} />
+              {isStreaming && (
+                <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+              )}
+            </div>
           )}
+          {widgets.map((w, wi) => (
+            <InlineWidget key={wi} data={w} />
+          ))}
         </div>
       </div>
     </div>
@@ -462,9 +560,11 @@ function AIResponseCard({
 function ResponseCard({
   content,
   isStreaming,
+  widgets = [],
 }: {
   content: string;
   isStreaming: boolean;
+  widgets?: InlineWidgetData[];
 }) {
   const [expanded, setExpanded] = useState(true);
   const status: "running" | "complete" = isStreaming ? "running" : "complete";
@@ -491,11 +591,22 @@ function ResponseCard({
         </div>
       </button>
 
-      {expanded && content && (
-        <div className="border-t border-amber-200/60 px-3 py-2.5 dark:border-white/8">
-          <MarkdownRender content={content} />
-          {isStreaming && (
-            <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+      {expanded && (
+        <div className="border-t border-amber-200/60 dark:border-white/8">
+          {content && (
+            <div className="px-3 py-2.5">
+              <MarkdownRender content={content} />
+              {isStreaming && (
+                <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+              )}
+            </div>
+          )}
+          {widgets.length > 0 && (
+            <div className="px-3 pb-3">
+              {widgets.map((w, wi) => (
+                <InlineWidget key={wi} data={w} />
+              ))}
+            </div>
           )}
         </div>
       )}

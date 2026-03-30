@@ -24,21 +24,23 @@ export default function Icon({
   }
   if (name && uri) {
     throw new Error(
-      "Icon component requires either a name or a uri prop, not both."
+      "Icon component requires either a name or a uri prop, not both.",
     );
   }
 
   if (name) {
     return (
-      <div className="flex justify-center items-center w-full h-full">
-        <span
-          className={
-            `material-icons${variant ? "-" + variant : ""}` +
-            (className ? " " + className : "")
-          }
-        >
-          {name}
-        </span>
+      <div>
+        <div className="flex h-full w-full items-center justify-center">
+          <span
+            className={
+              `material-icons${variant ? "-" + variant : ""}` +
+              (className ? " " + className : "")
+            }
+          >
+            {name}
+          </span>
+        </div>
       </div>
     );
   }
