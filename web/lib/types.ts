@@ -466,6 +466,7 @@ export type Workflow = {
   id?: string;
   name: string;
   version: string;
+  description?: string;
   content: WorkflowContent;
   thumbnail?: string;
   visibility: "private" | "public" | "unlisted";

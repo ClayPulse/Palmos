@@ -8,6 +8,7 @@ import {
   Input,
   Select,
   SelectItem,
+  Textarea,
 } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
@@ -57,6 +58,7 @@ export default function PublishWorkflowModal({
     openedWorkflow ? "update" : "new",
   );
   const [name, setName] = useState(openedWorkflowName ?? "");
+  const [description, setDescription] = useState("");
   const [version, setVersion] = useState("");
   const [visibility, setVisibility] = useState<Workflow["visibility"]>(
     "public",
@@ -77,9 +79,11 @@ export default function PublishWorkflowModal({
       if (openedWorkflow) {
         setVersion(bumpVersion(openedWorkflow.version));
         setVisibility(openedWorkflow.visibility);
+        setDescription(openedWorkflow.description ?? "");
       } else {
         setVersion("");
         setVisibility("public");
+        setDescription("");
       }
     }
   }, [isOpen]);
@@ -106,8 +110,9 @@ export default function PublishWorkflowModal({
         ? await saveAppsSnapshotStates()
         : undefined;
 
-      const workflow: Workflow = {
+      const workflow = {
         name: name,
+        description: description.trim() || undefined,
         thumbnail: dataUrl,
         content: {
           nodes: localNodes ?? [],
@@ -205,6 +210,15 @@ export default function PublishWorkflowModal({
           label={t("publishWorkflowModal.workflowName")}
           placeholder={t("publishWorkflowModal.workflowNamePlaceholder")}
           isDisabled={publishMode === "update"}
+        />
+
+        <Textarea
+          value={description}
+          onValueChange={setDescription}
+          label="Description"
+          placeholder="Briefly describe what this workflow does"
+          minRows={2}
+          maxRows={4}
         />
 
         <Input

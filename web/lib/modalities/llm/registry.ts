@@ -47,15 +47,15 @@ export const llmProviderOptions: {
     models: [
       {
         name: "pulse-ai-v1-turbo",
-        description: "Fast Pulse AI model for quick responses",
+        description: "Fast Palmos AI model for quick responses",
       },
       {
         name: "pulse-ai-v1-pro",
-        description: "Professional Pulse AI model with balanced performance",
+        description: "Professional Palmos AI model with balanced performance",
       },
       // {
       //   name: "pulse-ai-v1-max",
-      //   description: "Maximum capability Pulse AI model for complex tasks",
+      //   description: "Maximum capability Palmos AI model for complex tasks",
       // },
     ],
   },

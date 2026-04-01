@@ -30,7 +30,7 @@ export type { InlineWidgetData };
  * Tool names the agent can use:
  *  - `render_a2ui`  → A2UI widget
  *  - `mcp_tool_result` → MCP tool output
- *  - `render_pulse_app` → embed a Pulse App
+ *  - `render_pulse_app` → embed a Palmos App
  *  - `render_canvas` → workflow canvas snippet
  */
 export function parseWidgetFromToolCall(
@@ -339,7 +339,7 @@ function PulseAppWidget({ data }: { data: InlineWidgetData }) {
           className="text-xs text-amber-600 dark:text-amber-300"
         />
         <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300">
-          Pulse App
+          Palmos App
         </span>
       </div>
       <div className="flex items-center gap-3 p-3">

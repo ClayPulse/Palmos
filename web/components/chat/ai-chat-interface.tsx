@@ -9,8 +9,10 @@ import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import useDeepAgent, { SubagentInfo, Todo, WorkflowInput } from "@/lib/hooks/use-deep-agent";
+import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
+import { Workflow } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { Button, Spinner } from "@heroui/react";
+import { Button, Chip, Spinner } from "@heroui/react";
 import { AIMessage, BaseMessage, ToolMessage } from "@langchain/core/messages";
 import { motion } from "framer-motion";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
@@ -48,6 +50,7 @@ export default function AIChatInterface({
   } = useDeepAgent(agentUrl);
 
   const editorContext = useContext(EditorContext);
+  const { workflows: myWorkflows, isLoading: isLoadingMyWorkflows } = useMarketplaceWorkflows("My Workflows");
 
   const [inputText, setInputText] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -111,16 +114,16 @@ export default function AIChatInterface({
   // ── Shared content ───────────────────────────────────────────────────────
 
   const emptyState = isPage ? (
-    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-12">
+    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-12 min-h-0 overflow-hidden">
       <div className="animate-pulse-glow flex h-20 w-20 items-center justify-center rounded-full bg-amber-100/70 p-3 dark:bg-amber-500/10">
-        <img src="/assets/pulse-logo.svg" alt="Pulse" className="h-full w-full" />
+        <img src="/assets/pulse-logo.svg" alt="Palmos" className="h-full w-full" />
       </div>
       <div className="text-center">
         <h2 className="text-default-800 text-lg font-semibold dark:text-white/90">
           What would you like to build?
         </h2>
         <p className="text-default-500 mt-1 text-sm dark:text-white/50">
-          Describe your idea and Pulse AI will help you bring it to life.
+          Describe your idea and Palmos AI will help you bring it to life.
         </p>
       </div>
       <div className="grid w-full max-w-xl grid-cols-2 gap-2.5 pt-2 sm:grid-cols-3">
@@ -132,11 +135,24 @@ export default function AIChatInterface({
           />
         ))}
       </div>
+
+      {isLoadingMyWorkflows ? (
+        <div className="w-full max-w-xl pt-6 shrink-0">
+          <p className="text-default-500 mb-3 text-xs font-medium uppercase tracking-wide">
+            My Workflows
+          </p>
+          <div className="flex items-center justify-center py-4">
+            <Spinner size="sm" />
+          </div>
+        </div>
+      ) : myWorkflows && myWorkflows.length > 0 ? (
+        <MyWorkflowsCarousel workflows={myWorkflows} />
+      ) : null}
     </div>
   ) : (
     <div className="flex flex-1 flex-col items-center justify-center gap-4">
       <div className="animate-pulse-glow flex h-16 w-16 items-center justify-center rounded-full bg-amber-100/60 p-2 dark:bg-amber-500/10">
-        <img src="/assets/pulse-logo.svg" alt="Pulse" className="h-full w-full" />
+        <img src="/assets/pulse-logo.svg" alt="Palmos" className="h-full w-full" />
       </div>
       <p className="text-default-500 text-sm dark:text-white/65">
         What would you like to build?
@@ -292,7 +308,7 @@ export default function AIChatInterface({
     <div className="py-1.5">
       <div className="overflow-hidden rounded-xl border border-amber-200/40 shadow-sm dark:border-white/6">
         <p className="py-1.5 text-center text-xs text-amber-500/70 dark:text-amber-300/60">
-          Pulse is thinking...
+          Palmos is thinking...
         </p>
       </div>
     </div>
@@ -317,7 +333,7 @@ export default function AIChatInterface({
       </button>
       <button
         className="flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-50 px-2.5 py-1 text-xs text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200 dark:hover:shadow-[0_0_8px_rgba(251,191,36,0.2)]"
-        onClick={() => handleSend("Show me examples of Pulse Apps")}
+        onClick={() => handleSend("Show me examples of Palmos Apps")}
       >
         <Icon name="lightbulb" variant="round" className="text-xs" />
         Examples
@@ -364,7 +380,7 @@ export default function AIChatInterface({
           <div className="flex items-center gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]">
             <input
               className="text-default-900 placeholder-default-500 flex-1 bg-transparent py-3 text-sm outline-none dark:text-white dark:placeholder-white/45"
-              placeholder="Ask Pulse AI anything..."
+              placeholder="Ask Palmos AI anything..."
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => {
@@ -424,7 +440,7 @@ export default function AIChatInterface({
                 animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
-                PULSE AI
+                PALMOS AI
               </motion.span>
             </div>
             <div className="absolute right-0 flex items-center gap-1 px-2">
@@ -490,7 +506,7 @@ export default function AIChatInterface({
         <div className="flex items-center gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]">
           <input
             className="text-default-900 placeholder-default-500 flex-1 bg-transparent py-2.5 text-sm outline-none dark:text-white dark:placeholder-white/45"
-            placeholder="Ask Pulse AI..."
+            placeholder="Ask Palmos AI..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             onKeyDown={(e) => {
@@ -514,6 +530,69 @@ export default function AIChatInterface({
           </button>
         </div>
         {quickPills}
+      </div>
+    </div>
+  );
+}
+
+// ── My Workflows Carousel ────────────────────────────────────────────────────
+
+function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
+  const ITEMS_PER_PAGE = 3;
+  const [page, setPage] = useState(0);
+  const totalPages = Math.ceil(workflows.length / ITEMS_PER_PAGE);
+  const visible = workflows.slice(
+    page * ITEMS_PER_PAGE,
+    (page + 1) * ITEMS_PER_PAGE,
+  );
+
+  return (
+    <div className="w-full max-w-xl pt-6 shrink-0">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-default-500 text-xs font-medium uppercase tracking-wide">
+          My Workflows
+        </p>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              className="text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors px-1"
+              disabled={page === 0}
+              onClick={() => setPage((p) => p - 1)}
+            >
+              <Icon name="chevron_left" className="text-base" />
+            </button>
+            <span className="text-default-400 text-xs">
+              {page + 1}/{totalPages}
+            </span>
+            <button
+              className="text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors px-1"
+              disabled={page === totalPages - 1}
+              onClick={() => setPage((p) => p + 1)}
+            >
+              <Icon name="chevron_right" className="text-base" />
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-2">
+        {visible.map((wf) => (
+          <div
+            key={wf.id ?? wf.name}
+            className="bg-content2 border-divider flex items-center justify-between rounded-lg border px-4 py-3"
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">{wf.name}</p>
+              {wf.description && (
+                <p className="text-default-500 text-xs truncate mt-0.5">
+                  {wf.description}
+                </p>
+              )}
+            </div>
+            <Chip size="sm" variant="flat" className="ml-3 shrink-0">
+              v{wf.version}
+            </Chip>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -576,7 +655,7 @@ function AIResponseCard({
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 p-1 dark:bg-amber-500/15">
           <img
             src="/assets/pulse-logo.svg"
-            alt="Pulse"
+            alt="Palmos"
             className="h-full w-full"
           />
         </div>

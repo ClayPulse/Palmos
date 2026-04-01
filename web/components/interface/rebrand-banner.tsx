@@ -1,14 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Icon from "../misc/icon";
 
 export default function RebrandBanner() {
-  const [isVisible, setIsVisible] = useState(() => {
-    if (typeof window === "undefined") return true;
-    return !localStorage.getItem("rebrand-banner-dismissed");
-  });
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    if (!localStorage.getItem("rebrand-banner-dismissed")) {
+      setIsVisible(true);
+    }
+  }, []);
 
   const handleDismiss = () => {
     localStorage.setItem("rebrand-banner-dismissed", "true");

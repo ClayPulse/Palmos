@@ -20,7 +20,7 @@ interface ChatEmbedPanelProps {
 const TABS: { id: EmbedPanelTab; label: string; icon: string }[] = [
   { id: "a2ui", label: "A2UI", icon: "language" },
   { id: "mcp-apps", label: "MCP Apps", icon: "hub" },
-  { id: "pulse-app", label: "Pulse App", icon: "apps" },
+  { id: "pulse-app", label: "Palmos App", icon: "apps" },
   { id: "workflow-canvas", label: "Canvas", icon: "account_tree" },
 ];
 

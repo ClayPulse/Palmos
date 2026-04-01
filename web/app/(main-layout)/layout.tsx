@@ -1,5 +1,4 @@
 import Nav from "@/components/interface/navigation/nav";
-import RebrandBanner from "@/components/interface/rebrand-banner";
 import CapacitorProvider from "@/components/providers/capacitor-provider";
 import DndProvider from "@/components/providers/dnd-provider";
 import EditorContextProvider from "@/components/providers/editor-context-provider";
@@ -41,7 +40,6 @@ export default async function RootLayout({
                       <RemoteModuleProvider isPreventingCSS={true}>
                         <InputDeviceProvider>
                           <Toaster />
-                          <RebrandBanner />
                           <Nav>{children}</Nav>
                         </InputDeviceProvider>
                       </RemoteModuleProvider>
