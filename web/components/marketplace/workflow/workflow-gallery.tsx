@@ -1,8 +1,10 @@
 import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
+import CreateInviteLinkModal from "@/components/interface/create-invite-link-modal";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
+import { Button, Checkbox } from "@heroui/react";
 import { useEffect, useMemo, useState } from "react";
 import { compare } from "semver";
 import Loading from "../../interface/status-screens/loading";
@@ -25,18 +27,21 @@ const sortLabels: { name: string; value: SortOption }[] = [
   { name: "Name (Z–A)", value: "name-desc" },
 ];
 
-const filterLabels = [{ name: "All" }, { name: "Published by Me" }];
+const filterLabels = [{ name: "All" }, { name: "My Workflows" }, { name: "Published by Me" }];
 
 export default function WorkflowGallery() {
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [label, setLabel] = useState<"All" | "Published by Me">("All");
+  const [label, setLabel] = useState<"All" | "Published by Me" | "My Workflows">("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [sortValue, setSortValue] = useState<SortOption>("published-desc");
-  const { isLoading, workflows } = useMarketplaceWorkflows(label);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [myContentOnly, setMyContentOnly] = useState(false);
+  const effectiveLabel = myContentOnly ? "My Workflows" : label;
+  const { isLoading, workflows } = useMarketplaceWorkflows(effectiveLabel);
   const { createCanvasTabView } = useTabViewManager();
 
   useEffect(() => {
-    setLabel(filterLabels[selectedIndex].name as "All" | "Published by Me");
+    setLabel(filterLabels[selectedIndex].name as "All" | "Published by Me" | "My Workflows");
   }, [selectedIndex]);
 
   async function openWorkflow(workflow: Workflow) {
@@ -85,16 +90,39 @@ export default function WorkflowGallery() {
   }, [workflows, searchQuery, sortValue]);
 
   return (
-    <div className="grid h-full w-full grid-rows-[max-content_1fr] gap-y-2 overflow-y-auto">
-      <GallerySearchBar
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        filterLabels={filterLabels}
-        selectedFilterIndex={selectedIndex}
-        onFilterChange={setSelectedIndex}
-        sortLabels={sortLabels}
-        sortValue={sortValue}
-        onSortChange={setSortValue}
+    <div className="grid h-full w-full grid-rows-[max-content_max-content_1fr] gap-y-2 overflow-y-auto">
+      <div className="flex items-center gap-2">
+        <GallerySearchBar
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          filterLabels={filterLabels}
+          selectedFilterIndex={selectedIndex}
+          onFilterChange={setSelectedIndex}
+          sortLabels={sortLabels}
+          sortValue={sortValue}
+          onSortChange={setSortValue}
+          className="flex-1"
+        />
+        <Button
+          size="sm"
+          color="primary"
+          variant="flat"
+          onPress={() => setIsInviteOpen(true)}
+        >
+          Invite Link
+        </Button>
+      </div>
+      <Checkbox
+        size="sm"
+        isSelected={myContentOnly}
+        onValueChange={setMyContentOnly}
+      >
+        My Content
+      </Checkbox>
+      <CreateInviteLinkModal
+        workflows={workflows ?? []}
+        isOpen={isInviteOpen}
+        onClose={() => setIsInviteOpen(false)}
       />
 
       {isLoading ? (

@@ -463,6 +463,7 @@ export type AppMetaData = {
 
 // #region Workflow
 export type Workflow = {
+  id?: string;
   name: string;
   version: string;
   content: WorkflowContent;
