@@ -45,16 +45,12 @@ export default function useDeepAgent(
       const url = `${apiUrl}/manager/stream`;
 
       const payload = {
-        messages: [...messageMapRef.current.values()].map((msg) => ({
-          role: AIMessage.isInstance(msg)
-            ? "assistant"
-            : HumanMessage.isInstance(msg)
-              ? "user"
-              : ToolMessage.isInstance(msg)
-                ? "tool"
-                : "unknown",
-          content: msg.content,
-        })),
+        messages: [...messageMapRef.current.values()].map((msg) => {
+          return {
+            role: HumanMessage.isInstance(msg) ? "user" : "assistant",
+            content: msg.content,
+          };
+        }),
         workflows: workflows && workflows.length > 0 ? workflows : undefined,
         options: {
           returnWorkflowConfig: false,

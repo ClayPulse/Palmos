@@ -58,23 +58,41 @@ export default function AIChatInterface({
 
   const isPage = variant === "page";
 
-  /** Collect workflows from open canvas tabs to send as context. */
+  /** Collect workflows to send as context: canvas tabs (with content) + assigned (description only). */
   const getWorkflows = (): WorkflowInput[] | undefined => {
-    const tabViews = editorContext?.editorStates.tabViews;
-    if (!tabViews) return undefined;
-
     const workflows: WorkflowInput[] = [];
-    for (const tab of tabViews) {
-      if (tab.type === ViewModeEnum.Canvas && tab.openedWorkflow) {
-        const wf = tab.openedWorkflow;
-        workflows.push({
-          id: `${wf.name}@${wf.version}`,
-          name: wf.name,
-          version: wf.version,
-          content: wf.content,
-        });
+
+    // Canvas tab workflows (with full content for editing context)
+    const tabViews = editorContext?.editorStates.tabViews;
+    if (tabViews) {
+      for (const tab of tabViews) {
+        if (tab.type === ViewModeEnum.Canvas && tab.openedWorkflow) {
+          const wf = tab.openedWorkflow;
+          workflows.push({
+            id: `${wf.name}@${wf.version}`,
+            name: wf.name,
+            version: wf.version,
+            content: wf.content,
+          });
+        }
       }
     }
+
+    // Assigned workflows (lightweight — description only, no content)
+    if (myWorkflows) {
+      const canvasNames = new Set(workflows.map((w) => w.name));
+      for (const wf of myWorkflows) {
+        if (!canvasNames.has(wf.name)) {
+          workflows.push({
+            id: wf.id ?? `${wf.name}@${wf.version}`,
+            name: wf.name,
+            version: wf.version,
+            description: wf.description,
+          });
+        }
+      }
+    }
+
     return workflows.length > 0 ? workflows : undefined;
   };
 
@@ -114,7 +132,7 @@ export default function AIChatInterface({
   // ── Shared content ───────────────────────────────────────────────────────
 
   const emptyState = isPage ? (
-    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-12 min-h-0 overflow-hidden">
+    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-12 min-h-0">
       <div className="animate-pulse-glow flex h-20 w-20 items-center justify-center rounded-full bg-amber-100/70 p-3 dark:bg-amber-500/10">
         <img src="/assets/pulse-logo.svg" alt="Palmos" className="h-full w-full" />
       </div>
@@ -377,12 +395,23 @@ export default function AIChatInterface({
 
         {/* Input */}
         <div className="border-t border-amber-200/60 bg-white px-4 pt-3 pb-4 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8 dark:bg-white/3">
-          <div className="flex items-center gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]">
-            <input
-              className="text-default-900 placeholder-default-500 flex-1 bg-transparent py-3 text-sm outline-none dark:text-white dark:placeholder-white/45"
+          <div className="flex items-end gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]">
+            <textarea
+              className="text-default-900 placeholder-default-500 max-h-40 flex-1 resize-none bg-transparent py-3 text-sm leading-5 outline-none dark:text-white dark:placeholder-white/45"
+              style={{ height: "auto" }}
               placeholder="Ask Palmos AI anything..."
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              ref={(el) => {
+                if (el) {
+                  el.style.height = "auto";
+                  el.style.height = el.scrollHeight + "px";
+                }
+              }}
+              onChange={(e) => {
+                setInputText(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = e.target.scrollHeight + "px";
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -391,7 +420,16 @@ export default function AIChatInterface({
               }}
               disabled={isLoading}
               autoFocus
+              rows={1}
             />
+            {inputText && !isLoading && (
+              <button
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-gray-600 dark:text-white/30 dark:hover:text-white/60"
+                onClick={() => setInputText("")}
+              >
+                <Icon name="close" variant="round" className="text-base" />
+              </button>
+            )}
             {isLoading ? (
               <button
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 transition-all dark:bg-amber-400/20 dark:text-amber-300"
@@ -503,12 +541,23 @@ export default function AIChatInterface({
 
       {/* Input */}
       <div className="flex flex-col gap-2 border-t border-amber-200/60 bg-white px-3 pt-3 pb-2 dark:border-white/8 dark:bg-white/3">
-        <div className="flex items-center gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]">
-          <input
-            className="text-default-900 placeholder-default-500 flex-1 bg-transparent py-2.5 text-sm outline-none dark:text-white dark:placeholder-white/45"
+        <div className="flex items-end gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]">
+          <textarea
+            className="text-default-900 placeholder-default-500 max-h-40 flex-1 resize-none bg-transparent py-2.5 text-sm leading-5 outline-none dark:text-white dark:placeholder-white/45"
+            style={{ height: "auto" }}
             placeholder="Ask Palmos AI..."
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            ref={(el) => {
+              if (el) {
+                el.style.height = "auto";
+                el.style.height = el.scrollHeight + "px";
+              }
+            }}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = e.target.scrollHeight + "px";
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -516,7 +565,16 @@ export default function AIChatInterface({
               }
             }}
             disabled={isLoading}
+            rows={1}
           />
+          {inputText && !isLoading && (
+            <button
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-gray-600 dark:text-white/30 dark:hover:text-white/60"
+              onClick={() => setInputText("")}
+            >
+              <Icon name="close" variant="round" className="text-base" />
+            </button>
+          )}
           <button
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white transition-all disabled:opacity-30 ${
               inputText.trim() && !isLoading ? "animate-pulse-send-glow" : ""
@@ -555,21 +613,23 @@ function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
             <button
-              className="text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors px-1"
+              type="button"
+              className="relative z-10 h-6 w-6 flex items-center justify-center text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors"
               disabled={page === 0}
-              onClick={() => setPage((p) => p - 1)}
+              onClick={(e) => { e.stopPropagation(); setPage((p) => p - 1); }}
             >
-              <Icon name="chevron_left" className="text-base" />
+              ‹
             </button>
-            <span className="text-default-400 text-xs">
+            <span className="text-default-400 text-xs select-none">
               {page + 1}/{totalPages}
             </span>
             <button
-              className="text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors px-1"
+              type="button"
+              className="relative z-10 h-6 w-6 flex items-center justify-center text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors"
               disabled={page === totalPages - 1}
-              onClick={() => setPage((p) => p + 1)}
+              onClick={(e) => { e.stopPropagation(); setPage((p) => p + 1); }}
             >
-              <Icon name="chevron_right" className="text-base" />
+              ›
             </button>
           </div>
         )}

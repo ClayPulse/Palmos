@@ -659,7 +659,8 @@ export interface WorkflowInput {
   id: string;
   name: string;
   version: string;
-  content: unknown;
+  description?: string;
+  content?: unknown;
 }
 
 export interface Todo {
