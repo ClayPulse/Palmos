@@ -12,6 +12,9 @@ import useDeepAgent, { SubagentInfo, Todo, WorkflowInput } from "@/lib/hooks/use
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { Workflow } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { createCanvasViewId } from "@/lib/views/view-helpers";
+import { AppModeEnum } from "@/lib/enums";
 import { Button, Chip, Spinner } from "@heroui/react";
 import { AIMessage, BaseMessage, ToolMessage } from "@langchain/core/messages";
 import { motion } from "framer-motion";
@@ -603,6 +606,23 @@ function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
     page * ITEMS_PER_PAGE,
     (page + 1) * ITEMS_PER_PAGE,
   );
+  const { createCanvasTabView } = useTabViewManager();
+  const editorContext = useContext(EditorContext);
+
+  function openWorkflow(workflow: Workflow) {
+    createCanvasTabView(
+      {
+        viewId: createCanvasViewId(),
+        appConfigs: workflow.content.nodes.map((node) => node.data.config),
+        initialWorkflowContent: workflow.content,
+      },
+      workflow,
+    );
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      appMode: AppModeEnum.Editor,
+    }));
+  }
 
   return (
     <div className="w-full max-w-xl pt-6 shrink-0">
@@ -648,9 +668,20 @@ function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
                 </p>
               )}
             </div>
-            <Chip size="sm" variant="flat" className="ml-3 shrink-0">
-              v{wf.version}
-            </Chip>
+            <div className="flex items-center gap-2 ml-3 shrink-0">
+              <Chip size="sm" variant="flat">
+                v{wf.version}
+              </Chip>
+              <Button
+                size="sm"
+                variant="flat"
+                color="primary"
+                startContent={<Icon name="open_in_new" className="text-sm" />}
+                onPress={() => openWorkflow(wf)}
+              >
+                Open
+              </Button>
+            </div>
           </div>
         ))}
       </div>
