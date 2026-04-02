@@ -1166,7 +1166,7 @@ function WorkflowTaskCard({ task }: { task: WorkflowTaskState }) {
 // ── Workflow result body ─────────────────────────────────────────────────────
 
 /** Match `data:<mime>;base64,<payload>` */
-const DATA_URI_RE = /^data:([^;]+);base64,(.+)$/s;
+const DATA_URI_RE = /^data:([^;]+);base64,(.+)$/;
 
 /** Map MIME to a human-friendly extension */
 function mimeToSuffix(mime: string): string {
