@@ -91,7 +91,7 @@ export default function SharingModal({
     <ModalWrapper
       isOpen={isOpen}
       onClose={onClose}
-      title={t("sharingModal.title", { name: app ? app : "Pulse Editor" })}
+      title={t("sharingModal.title", { name: app ? app : "Palmos" })}
       placement={"center"}
     >
       <div className="flex w-full flex-col items-center gap-2">

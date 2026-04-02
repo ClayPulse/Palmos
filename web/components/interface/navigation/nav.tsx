@@ -11,6 +11,7 @@ import AppNavBar from "./app-nav-bar";
 import { ChatNavLeft, ChatNavRight } from "./chat-nav-bar";
 import { EditorNavLeft, EditorNavRight } from "./nav-top-bar";
 
+import RebrandBanner from "../rebrand-banner";
 import WelcomeScreen from "../status-screens/welcome";
 
 export default function Nav({ children }: { children: React.ReactNode }) {
@@ -73,6 +74,9 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           <WelcomeScreen setAnimationFinished={setIsAnimationFinished} />
         </div>
       )}
+
+      {/* Rebrand announcement banner */}
+      {mounted && <RebrandBanner />}
 
       {/* Main Content - Render as soon as mounted, but hidden/under welcome screen until animation finishes */}
       {mounted && (

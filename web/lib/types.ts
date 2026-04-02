@@ -11,7 +11,9 @@ import {
   ViewModeEnum,
   ViewModel,
 } from "@pulse-editor/shared-utils";
+import { type ComponentInstance } from "@a2ui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
+import { BaseMessage } from "@langchain/core/messages";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { AppModeEnum, SideMenuTabEnum } from "./enums";
 import { BaseLLM } from "./modalities/llm/base-llm";
@@ -461,8 +463,10 @@ export type AppMetaData = {
 
 // #region Workflow
 export type Workflow = {
+  id?: string;
   name: string;
   version: string;
+  description?: string;
   content: WorkflowContent;
   thumbnail?: string;
   visibility: "private" | "public" | "unlisted";
@@ -646,5 +650,69 @@ export type SpecOption = {
   vCPU: number;
   ram: number;
 };
+
+// #endregion
+
+// #region Deep Agent Types
+
+export interface WorkflowInput {
+  id: string;
+  name: string;
+  version: string;
+  description?: string;
+  content?: unknown;
+}
+
+export interface Todo {
+  status: "pending" | "in_progress" | "completed";
+  content: string;
+}
+
+export interface SubagentInfo {
+  id: string;
+  status: "pending" | "running" | "complete" | "error";
+  messages: BaseMessage[];
+  result: string | null;
+  toolCall: {
+    id: string;
+    name: string;
+    args: {
+      description?: string;
+      subagent_type?: string;
+      [key: string]: unknown;
+    };
+  };
+  startedAt: Date | null;
+  completedAt: Date | null;
+}
+
+/** Parsed widget descriptor extracted from a tool call or tool result. */
+export interface InlineWidgetData {
+  type: "a2ui" | "mcp-result" | "pulse-app" | "canvas";
+  /** A2UI: component definitions for A2UIViewer */
+  a2ui?: {
+    root: string;
+    components: ComponentInstance[];
+    data?: Record<string, unknown>;
+  };
+  /** A2UI: raw server-to-client messages for streaming surfaces */
+  a2uiMessages?: unknown[];
+  /** MCP: tool call result */
+  mcp?: {
+    toolName: string;
+    serverName?: string;
+    result: unknown;
+  };
+  /** Pulse App: app ID to embed */
+  pulseApp?: {
+    appId: string;
+  };
+  /** Canvas: node/edge data to render */
+  canvas?: {
+    name?: string;
+    nodes?: unknown[];
+    edges?: unknown[];
+  };
+}
 
 // #endregion

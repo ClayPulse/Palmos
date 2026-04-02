@@ -251,7 +251,7 @@ export default function ViewArea() {
 
   const appInfo: AppInfoModalContent = {
     id: "pulse-editor",
-    name: "Pulse Editor",
+    name: "Palmos",
     version: packageJson.version,
     author: "ClayPulse",
     license: "MIT",

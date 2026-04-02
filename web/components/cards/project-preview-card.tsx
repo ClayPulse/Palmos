@@ -49,7 +49,7 @@ export function ProjectPreviewCard({
         <div className="h-full w-full">
           <img
             src={"/assets/social-card.png"}
-            alt={"Pulse Editor project"}
+            alt={"Palmos project"}
             className="h-full w-full object-cover"
           />
         </div>

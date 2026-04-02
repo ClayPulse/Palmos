@@ -51,7 +51,7 @@
 		"value": "値",
 		"restartToApply": "再起動して反映",
 		"useManagedAIEndpoints": "マネージド AI エンドポイントを使用",
-		"managedCloudDescription": "マネージドクラウドで Pulse Editor のフルパワーを即座に解放しましょう。超高速な AI アシスト、クロスプラットフォーム同期、クリエイティブツールにより、常にフロー状態を維持できます。",
+		"managedCloudDescription": "マネージドクラウドで Palmos のフルパワーを即座に解放しましょう。超高速な AI アシスト、クロスプラットフォーム同期、クリエイティブツールにより、常にフロー状態を維持できます。",
 		"byoAPIKeysDescription": "自分の API キーを持ち込むことで、AI プロバイダーに直接接続できます。セットアップは増えますが、完全なコントロールを維持できます。",
 		"yourPlan": "ご利用プラン：{plan}",
 		"upgradeManagePlan": "プランのアップグレード / 管理",
@@ -90,7 +90,7 @@
 		"extensionInstalled": "拡張機能をインストールしました",
 		"extensionInstalledDescription": "拡張機能 {id} を正常にインストールしました。",
 		"extensionDefinedSettings": "拡張機能定義の設定",
-		"pulseEditorTerminal": "Pulse Editor ターミナル",
+		"pulseEditorTerminal": "Palmos ターミナル",
 		"deviceHostAddress": "デバイスホストアドレス"
 	},
 	"subscription": {
@@ -107,7 +107,7 @@
 		"title": "アカウント"
 	},
 	"metadata": {
-		"title": "Pulse Editor",
+		"title": "Palmos",
 		"description": "創造性を高める AI 搭載エディター"
 	},
 	"cloudApi": {
@@ -329,7 +329,7 @@
 	"openSourceInfoModal": {
 		"title": "オープンソース",
 		"description": "私たちは、透明性が信頼・イノベーション・コラボレーションを生むと信じて、オープンソフトウェアを支持しています。世界中の開発者が、制限なく構築・創造・革新できるよう、必要なツールへの無料アクセスを提供することが私たちの使命です。",
-		"pulseEditorCore": "Pulse Editor コア",
+		"pulseEditorCore": "Palmos コア",
 		"officialApps": "公式アプリ",
 		"opensource": "オープンソース",
 		"cloudServices": "同時に、クラウドホスティングされたサービスやマーケットプレイスも提供しており、インフラやバックエンドを気にすることなく、プロジェクトを簡単に管理し、コミュニティと共有することができます。",
@@ -442,7 +442,7 @@
 		"aiSettings": {
 			"title": "AI 設定",
 			"useManagedEndpoints": "マネージド AI エンドポイントを使用",
-			"managedMessage": "マネージドクラウドで Pulse Editor のフルパワーを即座に解放しましょう。超高速な AI アシスト、クロスプラットフォーム同期、クリエイティブツールにより、常にフロー状態を維持できます。",
+			"managedMessage": "マネージドクラウドで Palmos のフルパワーを即座に解放しましょう。超高速な AI アシスト、クロスプラットフォーム同期、クリエイティブツールにより、常にフロー状態を維持できます。",
 			"byokMessage": "自分の API キーを持ち込むことで、AI プロバイダーに直接接続できます。セットアップは増えますが、完全なコントロールを維持できます。",
 			"yourPlan": "ご利用プラン：",
 			"upgradeManagePlan": "プランのアップグレード / 管理",
@@ -515,7 +515,7 @@
 		},
 		"extensionDefined": {
 			"title": "拡張機能定義の設定",
-			"pulseEditorTerminal": "Pulse Editor ターミナル",
+			"pulseEditorTerminal": "Palmos ターミナル",
 			"deviceHostAddress": "デバイスホストアドレス"
 		}
 	},
@@ -921,7 +921,7 @@
 	},
 	"statusScreens": {
 		"welcome": {
-			"title": "Pulse Editor へようこそ",
+			"title": "Palmos へようこそ",
 			"subtitle": "新しいプロジェクトを作成するか、既存のプロジェクトを開いて開始しましょう",
 			"taglineLine1": "次世代の AI OS、駆動源は",
 			"taglineLine2": "Vibe Coded アプリとワークフロー"

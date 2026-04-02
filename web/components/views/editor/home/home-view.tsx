@@ -80,7 +80,7 @@ export default function HomeView() {
                   rel="noopener noreferrer"
                   className="hover:text-primary ml-1 underline"
                 >
-                  ClayPulse AI
+                  Palmos AI
                 </a>
               </p>
             </div>

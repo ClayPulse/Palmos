@@ -1,6 +1,6 @@
-# Pulse Editor
+# Palmos
 
-Pulse Editor is an editor designed to build and work with AI more naturally on cross-platform devices.
+Palmos is an editor designed to build and work with AI more naturally on cross-platform devices.
 
 ## Features
 
@@ -32,7 +32,7 @@ Click the “Open Chat View” icon in the bottom toolbar. Then select your desi
 Type anything in an open file, then a suggestion would become available in grey text. Press tab key to accept changes, or keep typing to refresh new suggest.
 
 ## Extension Settings
-Enter your AI API credentials inside the settings in Pulse Editor.
+Enter your AI API credentials inside the settings in Palmos.
 
 ## Known Issues
 

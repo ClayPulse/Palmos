@@ -34,7 +34,6 @@ export default function MarketplaceModal({
   const [selectedCategory, setSelectedCategory] = useState<TabItem | undefined>(
     extensionCategories[0],
   );
-
   return (
     <ModalWrapper isOpen={isOpen} onClose={onClose} title={t("marketplaceModal.title")}>
       <div className="grid h-full w-full grid-rows-[max-content_1fr] px-2">

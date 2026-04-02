@@ -77,7 +77,7 @@ export default function InterModuleCommunicationProvider({
 
   useEffect(() => {
     // @ts-expect-error set window viewId
-    window.viewId = "Pulse Editor Main";
+    window.viewId = "Palmos Main";
     polyIMCRef.current = new PolyIMC(getHandlerMap());
 
     return () => {

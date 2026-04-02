@@ -4,6 +4,7 @@ import { ExtensionApp } from "@/lib/types";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { compare } from "semver";
 import AppPreviewCard from "../../cards/app-preview-card";
+import { Checkbox } from "@heroui/react";
 import Loading from "../../interface/status-screens/loading";
 import GallerySearchBar from "../gallery-search-bar";
 
@@ -32,6 +33,7 @@ export default function AppGallery() {
   const [isLoading, setIsLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortValue, setSortValue] = useState<SortOption>("published-desc");
+  const [myContentOnly, setMyContentOnly] = useState(false);
 
   const selectLabels = [
     {
@@ -45,8 +47,10 @@ export default function AppGallery() {
     },
   ];
 
+  const effectiveLabel = myContentOnly ? "Installed" : selectLabels[selectedIndex]?.name;
+
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
-    useExtensionAppManager(selectLabels[selectedIndex]?.name);
+    useExtensionAppManager(effectiveLabel);
 
   // Group extensions by name
   const groupedExtensions = useMemo(
@@ -112,28 +116,27 @@ export default function AppGallery() {
 
   // Get installed Apps
   useEffect(() => {
-    const selectedLabel = selectLabels[selectedIndex];
     if (
-      selectedLabel.name === "All" ||
-      selectedLabel.name === "Published by Me"
+      effectiveLabel === "All" ||
+      effectiveLabel === "Published by Me"
     ) {
       setIsLoading(isLoadingMarketplaceExtensions);
       setDisplayedApps(marketplaceExtensions ?? []);
-    } else if (selectedLabel.name === "Installed") {
+    } else if (effectiveLabel === "Installed") {
       setIsLoading(false);
       setDisplayedApps(editorContext?.persistSettings?.extensions ?? []);
     } else {
-      console.warn("Unknown filter selected:", selectedLabel.name);
+      console.warn("Unknown filter selected:", effectiveLabel);
     }
   }, [
     editorContext?.persistSettings?.extensions,
-    selectedIndex,
+    effectiveLabel,
     marketplaceExtensions,
     isLoadingMarketplaceExtensions,
   ]);
 
   return (
-    <div className="grid h-full w-full grid-rows-[max-content_1fr] gap-y-2 overflow-y-auto">
+    <div className="grid h-full w-full grid-rows-[max-content_max-content_1fr] gap-y-2 overflow-y-auto">
       <GallerySearchBar
         className="flex-1"
         searchQuery={searchQuery}
@@ -145,6 +148,13 @@ export default function AppGallery() {
         sortValue={sortValue}
         onSortChange={setSortValue}
       />
+      <Checkbox
+        size="sm"
+        isSelected={myContentOnly}
+        onValueChange={setMyContentOnly}
+      >
+        My Content
+      </Checkbox>
 
       {isLoading ? (
         <Loading />

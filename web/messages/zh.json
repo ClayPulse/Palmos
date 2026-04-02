@@ -51,7 +51,7 @@
 		"value": "值",
 		"restartToApply": "重启以生效",
 		"useManagedAIEndpoints": "使用托管 AI 端点",
-		"managedCloudDescription": "通过托管云端立即解锁 Pulse Editor 的全部能力：闪电般快速的 AI 助手、跨平台同步以及创意工具，让你始终保持创作流。",
+		"managedCloudDescription": "通过托管云端立即解锁 Palmos 的全部能力：闪电般快速的 AI 助手、跨平台同步以及创意工具，让你始终保持创作流。",
 		"byoAPIKeysDescription": "使用自带 API Key 可直接连接到 AI 提供商。需要更多配置，但你可以完全掌控。",
 		"yourPlan": "当前套餐：{plan}",
 		"upgradeManagePlan": "升级 / 管理套餐",
@@ -90,7 +90,7 @@
 		"extensionInstalled": "扩展已安装",
 		"extensionInstalledDescription": "扩展 {id} 安装成功。",
 		"extensionDefinedSettings": "扩展定义的设置",
-		"pulseEditorTerminal": "Pulse Editor 终端",
+		"pulseEditorTerminal": "Palmos 终端",
 		"deviceHostAddress": "设备主机地址"
 	},
 	"subscription": {
@@ -107,7 +107,7 @@
 		"title": "账户"
 	},
 	"metadata": {
-		"title": "Pulse Editor",
+		"title": "Palmos",
 		"description": "AI 驱动的编辑器，助你激发创造力"
 	},
 	"cloudApi": {
@@ -329,7 +329,7 @@
 	"openSourceInfoModal": {
 		"title": "开源",
 		"description": "我们相信开源软件，因为透明度有助于建立信任、促进创新和协作。我们的使命是为全球开发者提供免费的工具，让他们能够无障碍地构建、创造与创新。",
-		"pulseEditorCore": "Pulse Editor 核心",
+		"pulseEditorCore": "Palmos 核心",
 		"officialApps": "官方应用",
 		"opensource": "开源",
 		"cloudServices": "同时，我们也提供云托管服务与应用市场，让你无需操心基础设施和后端，就能轻松管理项目并与社区分享你的作品。",
@@ -442,7 +442,7 @@
 		"aiSettings": {
 			"title": "AI 设置",
 			"useManagedEndpoints": "使用托管 AI 端点",
-			"managedMessage": "通过托管云端立即解锁 Pulse Editor 的全部能力：闪电般快速的 AI 助手、跨平台同步以及创意工具，让你始终保持创作流。",
+			"managedMessage": "通过托管云端立即解锁 Palmos 的全部能力：闪电般快速的 AI 助手、跨平台同步以及创意工具，让你始终保持创作流。",
 			"byokMessage": "使用自带 API Key 可直接连接到 AI 提供商。需要更多配置，但你可以完全掌控。",
 			"yourPlan": "当前套餐：",
 			"upgradeManagePlan": "升级 / 管理套餐",
@@ -515,7 +515,7 @@
 		},
 		"extensionDefined": {
 			"title": "扩展定义的设置",
-			"pulseEditorTerminal": "Pulse Editor 终端",
+			"pulseEditorTerminal": "Palmos 终端",
 			"deviceHostAddress": "设备主机地址"
 		}
 	},
@@ -921,7 +921,7 @@
 	},
 	"statusScreens": {
 		"welcome": {
-			"title": "欢迎使用 Pulse Editor",
+			"title": "欢迎使用 Palmos",
 			"subtitle": "从创建新项目或打开现有项目开始",
 			"taglineLine1": "你的下一代 AI 操作系统，由",
 			"taglineLine2": "Vibe Coded 应用和工作流驱动"

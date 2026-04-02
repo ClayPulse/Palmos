@@ -52,7 +52,7 @@
 		"value": "Wert",
 		"restartToApply": "Zum Anwenden neu starten",
 		"useManagedAIEndpoints": "Verwaltete KI-Endpunkte verwenden",
-		"managedCloudDescription": "Schalte die volle Power des Pulse Editors sofort mit der verwalteten Cloud frei: ultraschnelle KI-Unterstützung, plattformübergreifende Synchronisierung und Kreativ-Tools, damit du im Flow bleibst.",
+		"managedCloudDescription": "Schalte die volle Power des Palmoss sofort mit der verwalteten Cloud frei: ultraschnelle KI-Unterstützung, plattformübergreifende Synchronisierung und Kreativ-Tools, damit du im Flow bleibst.",
 		"byoAPIKeysDescription": "Mit eigenen API-Schlüsseln kannst du dich direkt mit KI-Anbietern verbinden. Erfordert mehr Einrichtung, gibt dir aber die volle Kontrolle.",
 		"yourPlan": "Dein Plan: {plan}",
 		"upgradeManagePlan": "Plan upgraden/verwalten",
@@ -108,7 +108,7 @@
 		"title": "Konto"
 	},
 	"metadata": {
-		"title": "Pulse Editor",
+		"title": "Palmos",
 		"description": "KI-gestützter Editor zur Steigerung deiner Kreativität"
 	},
 	"cloudApi": {
@@ -311,7 +311,7 @@
 	"openSourceInfoModal": {
 		"title": "Open Source",
 		"description": "Wir glauben an offene Software, weil Transparenz Vertrauen, Innovation und Zusammenarbeit fördert. Unsere Mission ist es, Entwickler weltweit zu unterstützen, indem wir kostenlosen Zugang zu den Werkzeugen bieten, die sie zum Bauen, Erschaffen und Innovieren ohne Barrieren benötigen.",
-		"pulseEditorCore": "Pulse Editor Core",
+		"pulseEditorCore": "Palmos Core",
 		"officialApps": "Offizielle Apps",
 		"opensource": "Open Source",
 		"cloudServices": "Gleichzeitig bieten wir Cloud-Services und einen Marktplatz an, damit du deine Projekte einfach verwalten und deine Arbeit mit der Community teilen kannst, ohne dir Gedanken über Infrastruktur oder Backend machen zu müssen.",
@@ -424,7 +424,7 @@
 		"aiSettings": {
 			"title": "KI-Einstellungen",
 			"useManagedEndpoints": "Verwaltete KI-Endpunkte verwenden",
-			"managedMessage": "Schalte die volle Power des Pulse Editors sofort mit der verwalteten Cloud frei: ultraschnelle KI-Unterstützung, plattformübergreifende Synchronisierung und Kreativ-Tools, damit du im Flow bleibst.",
+			"managedMessage": "Schalte die volle Power des Palmoss sofort mit der verwalteten Cloud frei: ultraschnelle KI-Unterstützung, plattformübergreifende Synchronisierung und Kreativ-Tools, damit du im Flow bleibst.",
 			"byokMessage": "Mit eigenen API-Schlüsseln kannst du dich direkt mit KI-Anbietern verbinden. Erfordert mehr Einrichtung, gibt dir aber die volle Kontrolle.",
 			"yourPlan": "Dein Plan:",
 			"upgradeManagePlan": "Plan upgraden/verwalten",
@@ -906,7 +906,7 @@
 	},
 	"statusScreens": {
 		"welcome": {
-			"title": "Willkommen beim Pulse Editor",
+			"title": "Willkommen beim Palmos",
 			"subtitle": "Erstelle ein neues Projekt oder öffne ein bestehendes, um loszulegen",
 			"taglineLine1": "Dein nächstes KI-Betriebssystem, angetrieben von",
 			"taglineLine2": "Vibe Coded Apps & Workflows"

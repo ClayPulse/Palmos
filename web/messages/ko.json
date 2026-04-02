@@ -51,7 +51,7 @@
     "value": "값",
     "restartToApply": "적용하려면 다시 시작",
     "useManagedAIEndpoints": "관리형 AI 엔드포인트 사용",
-    "managedCloudDescription": "관리형 클라우드를 통해 Pulse Editor의 모든 기능을 즉시 활용하세요. 번개같이 빠른 AI 지원, 크로스 플랫폼 동기화, 크리에이티브 도구로 항상 흐름을 유지할 수 있습니다.",
+    "managedCloudDescription": "관리형 클라우드를 통해 Palmos의 모든 기능을 즉시 활용하세요. 번개같이 빠른 AI 지원, 크로스 플랫폼 동기화, 크리에이티브 도구로 항상 흐름을 유지할 수 있습니다.",
     "byoAPIKeysDescription": "자체 API 키를 사용하면 AI 공급자에 직접 연결할 수 있습니다. 설정은 더 필요하지만, 완전한 통제권을 유지할 수 있습니다.",
     "yourPlan": "현재 플랜: {plan}",
     "upgradeManagePlan": "플랜 업그레이드/관리",
@@ -90,7 +90,7 @@
     "extensionInstalled": "확장이 설치되었습니다",
     "extensionInstalledDescription": "확장 {id} 이(가) 성공적으로 설치되었습니다.",
     "extensionDefinedSettings": "확장 정의 설정",
-    "pulseEditorTerminal": "Pulse Editor 터미널",
+    "pulseEditorTerminal": "Palmos 터미널",
     "deviceHostAddress": "디바이스 호스트 주소"
   },
   "subscription": {
@@ -107,7 +107,7 @@
     "title": "계정"
   },
   "metadata": {
-    "title": "Pulse Editor",
+    "title": "Palmos",
     "description": "창의력을 높여주는 AI 기반 에디터"
   },
   "cloudApi": {
@@ -329,7 +329,7 @@
   "openSourceInfoModal": {
     "title": "오픈 소스",
     "description": "우리는 투명성이 신뢰, 혁신, 협업을 촉진한다고 믿기 때문에 오픈 소프트웨어를 지향합니다. 우리의 사명은 전 세계 개발자들이 장벽 없이 빌드하고, 만들고, 혁신하는 데 필요한 도구에 자유롭게 접근할 수 있도록 돕는 것입니다.",
-    "pulseEditorCore": "Pulse Editor 코어",
+    "pulseEditorCore": "Palmos 코어",
     "officialApps": "공식 앱",
     "opensource": "오픈소스",
     "cloudServices": "한편, 우리는 클라우드 호스팅 서비스와 마켓플레이스를 제공하여 인프라와 백엔드를 걱정하지 않고도 프로젝트를 쉽게 관리하고 커뮤니티와 작업물을 공유할 수 있도록 합니다.",
@@ -442,7 +442,7 @@
     "aiSettings": {
       "title": "AI 설정",
       "useManagedEndpoints": "관리형 AI 엔드포인트 사용",
-      "managedMessage": "관리형 클라우드를 통해 Pulse Editor의 모든 기능을 즉시 활용하세요. 번개같이 빠른 AI 지원, 크로스 플랫폼 동기화, 크리에이티브 도구로 항상 흐름을 유지할 수 있습니다.",
+      "managedMessage": "관리형 클라우드를 통해 Palmos의 모든 기능을 즉시 활용하세요. 번개같이 빠른 AI 지원, 크로스 플랫폼 동기화, 크리에이티브 도구로 항상 흐름을 유지할 수 있습니다.",
       "byokMessage": "자체 API 키를 사용하면 AI 공급자에 직접 연결할 수 있습니다. 설정은 더 필요하지만, 완전한 통제권을 유지할 수 있습니다.",
       "yourPlan": "현재 플랜:",
       "upgradeManagePlan": "플랜 업그레이드/관리",
@@ -515,7 +515,7 @@
     },
     "extensionDefined": {
       "title": "확장 정의 설정",
-      "pulseEditorTerminal": "Pulse Editor 터미널",
+      "pulseEditorTerminal": "Palmos 터미널",
       "deviceHostAddress": "디바이스 호스트 주소"
     }
   },
@@ -921,7 +921,7 @@
   },
   "statusScreens": {
     "welcome": {
-      "title": "Pulse Editor에 오신 것을 환영합니다",
+      "title": "Palmos에 오신 것을 환영합니다",
       "subtitle": "새 프로젝트를 생성하거나 기존 프로젝트를 열어 시작하세요",
       "taglineLine1": "다음 세대 AI-OS,",
       "taglineLine2": "Vibe 코드 앱 & 워크플로우로 구동"

@@ -6,7 +6,7 @@ import { themes as prismThemes } from "prism-react-renderer";
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 const config: Config = {
-  title: "Pulse Editor Documentation",
+  title: "Palmos Documentation",
   tagline:
     "A modular, cross-platform, AI-powered creative platform built to adapt to your ideas.",
   favicon: "img/favicon.ico",
@@ -110,16 +110,16 @@ const config: Config = {
       {
         name: "keywords",
         content:
-          "Pulse Editor, AI, Vibe Coding, Documentation, API Reference",
+          "Palmos, AI, Vibe Coding, Documentation, API Reference",
       },
     ],
 
     // Replace with your project's social card
     image: "img/pulse-editor-social-card.png",
     navbar: {
-      title: "Pulse Editor Docs",
+      title: "Palmos Docs",
       logo: {
-        alt: "Pulse Editor Logo",
+        alt: "Palmos Logo",
         src: "img/logo.svg",
       },
       items: [
@@ -195,7 +195,7 @@ const config: Config = {
           title: "Website",
           items: [
             {
-              label: "Pulse Editor",
+              label: "Palmos",
               href: "https://pulse-editor.com",
             },
             {

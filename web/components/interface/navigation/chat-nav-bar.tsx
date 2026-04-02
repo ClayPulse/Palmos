@@ -40,7 +40,7 @@ export function ChatNavLeft() {
         animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
       >
-        PULSE AI
+        PALMOS AI
       </motion.span>
     </div>
   );

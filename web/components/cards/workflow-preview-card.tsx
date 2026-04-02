@@ -13,6 +13,7 @@ import {
 } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import ContextMenu from "../interface/context-menu";
+import ShareWorkflowModal from "../interface/share-workflow-modal";
 
 export default function WorkflowPreviewCard({
   workflow,
@@ -34,6 +35,8 @@ export default function WorkflowPreviewCard({
   const [isShowInfo, setIsShowInfo] = useState(false);
 
   const [isHover, setIsHover] = useState(false);
+
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -155,8 +158,23 @@ export default function WorkflowPreviewCard({
             >
               <p className="w-full text-start">Use</p>
             </Button>
+            <Button
+              className="text-medium h-12 sm:h-8 sm:text-sm"
+              variant="light"
+              onPress={() => {
+                setContextMenuState((prev) => ({ ...prev, isOpen: false }));
+                setIsShareOpen(true);
+              }}
+            >
+              <p className="w-full text-start">Share with Client</p>
+            </Button>
           </div>
         </ContextMenu>
+        <ShareWorkflowModal
+          workflow={workflow}
+          isOpen={isShareOpen}
+          onClose={() => setIsShareOpen(false)}
+        />
       </div>
       <div className="w-full">
         <div className="grid w-full grid-cols-[auto_max-content] items-center gap-x-2">
@@ -197,6 +215,16 @@ export default function WorkflowPreviewCard({
               }}
             >
               <Icon name="share" />
+            </Button>
+          </Tooltip>
+          <Tooltip content="Share with client">
+            <Button
+              isIconOnly
+              size="sm"
+              variant="light"
+              onPress={() => setIsShareOpen(true)}
+            >
+              <Icon name="send" />
             </Button>
           </Tooltip>
         </div>

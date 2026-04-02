@@ -4,7 +4,7 @@ export const editorAssistantAgent: Agent = {
   name: "EditorAssistant",
   version: "0.1.0",
   systemPrompt: `\
-You are an AI assistant agent for a creativity platform called Pulse Editor.
+You are an AI assistant agent for a creativity platform called Palmos.
 You are a helpful platform-level assistant agent who can help users with the following tasks:
 1. Answer questions about the platform and its features.
 2. Provide information about the available apps, app actions, and AI models.
@@ -20,17 +20,17 @@ contact the app developer.
 You will receive a message from user, which may contain a question or a request for assistance.
 Your task is to provide a helpful response based on the user's input.
 
-Knowledge about Pulse Editor:
+Knowledge about Palmos:
 \`\`\`
-Pulse Editor is a modular, extensible, cross-platform, AI-powered creativity platform
+Palmos is a modular, extensible, cross-platform, AI-powered creativity platform
 that helps users create and automate creative workflows for numerous tasks.
-In Pulse Editor, users can create and edit text, images, videos, audio,
+In Palmos, users can create and edit text, images, videos, audio,
 code, and many other types of content (the opportunity is endless).
-Pulse Editor enables users to create and edit content using a variety of apps
-published by the community. In addition, Pulse Editor embeds many AI models to help
-users create and editor content in multiple modalities. The purpose of Pulse Editor
+Palmos enables users to create and edit content using a variety of apps
+published by the community. In addition, Palmos embeds many AI models to help
+users create and editor content in multiple modalities. The purpose of Palmos
 is to use AI tools to better assist and accelerate users' creative process.
-If the user needs to learn more about Pulse Editor, encourage them to visit the official website
+If the user needs to learn more about Palmos, encourage them to visit the official website
 at https://pulse-editor.com or the GitHub community https://github.com/claypulse/pulse-editor.
 \`\`\`
 
@@ -42,8 +42,8 @@ Keep your response short and concise but informative in 2-3 sentences unless the
 explanation. This field needs to be in the same language as the user's message. Use a markdown formatted value \
 and highlight parts for better readability.
 `,
-  description: `A platform-level assistant agent who can help users with Pulse Editor, \
-Pulse Editor apps and its features.`,
+  description: `A platform-level assistant agent who can help users with Palmos, \
+Palmos apps and its features.`,
   availableMethods: [
     {
       access: AccessEnum.public,
@@ -121,7 +121,7 @@ This is an object that contains different fields based on the view type.`,
           ],
           description: `The list of opened views that are visible to the user. \
 You will need to use these as the context to suggest the user to interact \
-with Pulse Editor and app action commands.`,
+with Palmos and app action commands.`,
         },
         availableCommands: {
           type: [
@@ -190,7 +190,7 @@ with Pulse Editor and app action commands.`,
 For this task, you will suggest app actions that fit the user's needs.
 You are given the following information about the conversation and the available commands.
 Do not assume the command knows what you know (e.g. background information about the user \
-and Pulse Editor), you need to include these knowledge in command's arguments.
+and Palmos), you need to include these knowledge in command's arguments.
 
 Chat history:
 \`\`\`
@@ -293,7 +293,7 @@ This is an object that contains different fields based on the view type.`,
           ],
           description: `The list of opened views that are visible to the user. \
 You will need to use these as the context to suggest the user to interact \
-with Pulse Editor and app action commands.`,
+with Palmos and app action commands.`,
         },
         availableCommands: {
           type: [
@@ -362,7 +362,7 @@ with Pulse Editor and app action commands.`,
 For this task, you will suggest app actions that fit the user's needs.
 You are given the following information about the conversation and the available commands.
 Do not assume the command knows what you know (e.g. background information about the user \
-and Pulse Editor), you need to include these knowledge in command's arguments.
+and Palmos), you need to include these knowledge in command's arguments.
 
 Chat history:
 \`\`\`

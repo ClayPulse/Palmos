@@ -44,7 +44,7 @@ export default function WelcomeScreen({
           },
         }}
       >
-        Pulse Editor
+        Palmos
       </motion.h1>
 
       <motion.p

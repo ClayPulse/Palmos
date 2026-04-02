@@ -3,18 +3,27 @@ import { Workflow } from "@/lib/types";
 import useSWR from "swr";
 
 export function useMarketplaceWorkflows(
-  category: "All" | "Published by Me",
+  category: "All" | "Published by Me" | "My Workflows",
 ) {
+  function getUrl() {
+    switch (category) {
+      case "All":
+        return "/api/workflow/list";
+      case "Published by Me":
+        return "/api/workflow/list?published=true";
+      case "My Workflows":
+        return "/api/user-workflows";
+      default:
+        return null;
+    }
+  }
+
   const { data: marketplaceWorkflows, isLoading } = useSWR<Workflow[]>(
-    category === "All" || category === "Published by Me"
-      ? `/api/workflow/list${category === "Published by Me" ? "?published=true" : ""}`
-      : null,
+    getUrl(),
     async (url: string) => {
       const res = await fetchAPI(url);
       const body = await res.json();
-
-      const fetchedWorkflows: Workflow[] = body;
-      return fetchedWorkflows;
+      return body as Workflow[];
     },
   );
 

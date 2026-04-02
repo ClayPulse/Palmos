@@ -15,7 +15,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pulse Editor Web",
+  title: "Palmos",
   description: "Web-based Vibe Coding Editor",
 };
 

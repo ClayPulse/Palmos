@@ -1,12 +1,21 @@
 "use client";
 
+import InlineWidget, {
+  type InlineWidgetData,
+  parseWidgetFromToolCall,
+  parseWidgetFromToolMessage,
+} from "@/components/chat/inline-widget";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
-import useDeepAgent, { SubagentInfo, Todo } from "@/lib/hooks/use-deep-agent";
-import { Button, Spinner } from "@heroui/react";
-import { BaseMessage } from "@langchain/core/messages";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import useDeepAgent, { SubagentInfo, Todo, WorkflowInput } from "@/lib/hooks/use-deep-agent";
+import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
+import { Workflow } from "@/lib/types";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { Button, Chip, Spinner } from "@heroui/react";
+import { AIMessage, BaseMessage, ToolMessage } from "@langchain/core/messages";
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 
 const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL + "/api/agent";
 
@@ -40,11 +49,52 @@ export default function AIChatInterface({
     getSubagentsByMessage,
   } = useDeepAgent(agentUrl);
 
+  const editorContext = useContext(EditorContext);
+  const { workflows: myWorkflows, isLoading: isLoadingMyWorkflows } = useMarketplaceWorkflows("My Workflows");
+
   const [inputText, setInputText] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const userScrolledUpRef = useRef(false);
 
   const isPage = variant === "page";
+
+  /** Collect workflows to send as context: canvas tabs (with content) + assigned (description only). */
+  const getWorkflows = (): WorkflowInput[] | undefined => {
+    const workflows: WorkflowInput[] = [];
+
+    // Canvas tab workflows (with full content for editing context)
+    const tabViews = editorContext?.editorStates.tabViews;
+    if (tabViews) {
+      for (const tab of tabViews) {
+        if (tab.type === ViewModeEnum.Canvas && tab.openedWorkflow) {
+          const wf = tab.openedWorkflow;
+          workflows.push({
+            id: `${wf.name}@${wf.version}`,
+            name: wf.name,
+            version: wf.version,
+            content: wf.content,
+          });
+        }
+      }
+    }
+
+    // Assigned workflows (lightweight — description only, no content)
+    if (myWorkflows) {
+      const canvasNames = new Set(workflows.map((w) => w.name));
+      for (const wf of myWorkflows) {
+        if (!canvasNames.has(wf.name)) {
+          workflows.push({
+            id: wf.id ?? `${wf.name}@${wf.version}`,
+            name: wf.name,
+            version: wf.version,
+            description: wf.description,
+          });
+        }
+      }
+    }
+
+    return workflows.length > 0 ? workflows : undefined;
+  };
 
   // Track user scroll position so we don't fight manual scrolling
   useEffect(() => {
@@ -74,7 +124,7 @@ export default function AIChatInterface({
     const value = (text ?? inputText).trim();
     if (!value || isLoading) return;
     setInputText("");
-    submit(value);
+    submit(value, getWorkflows());
   }
 
   const isEmptyConversation = messages.length === 0 && !isLoading;
@@ -82,16 +132,16 @@ export default function AIChatInterface({
   // ── Shared content ───────────────────────────────────────────────────────
 
   const emptyState = isPage ? (
-    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-12">
+    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-12 min-h-0">
       <div className="animate-pulse-glow flex h-20 w-20 items-center justify-center rounded-full bg-amber-100/70 p-3 dark:bg-amber-500/10">
-        <img src="/assets/pulse-logo.svg" alt="Pulse" className="h-full w-full" />
+        <img src="/assets/pulse-logo.svg" alt="Palmos" className="h-full w-full" />
       </div>
       <div className="text-center">
         <h2 className="text-default-800 text-lg font-semibold dark:text-white/90">
           What would you like to build?
         </h2>
         <p className="text-default-500 mt-1 text-sm dark:text-white/50">
-          Describe your idea and Pulse AI will help you bring it to life.
+          Describe your idea and Palmos AI will help you bring it to life.
         </p>
       </div>
       <div className="grid w-full max-w-xl grid-cols-2 gap-2.5 pt-2 sm:grid-cols-3">
@@ -103,11 +153,24 @@ export default function AIChatInterface({
           />
         ))}
       </div>
+
+      {isLoadingMyWorkflows ? (
+        <div className="w-full max-w-xl pt-6 shrink-0">
+          <p className="text-default-500 mb-3 text-xs font-medium uppercase tracking-wide">
+            My Workflows
+          </p>
+          <div className="flex items-center justify-center py-4">
+            <Spinner size="sm" />
+          </div>
+        </div>
+      ) : myWorkflows && myWorkflows.length > 0 ? (
+        <MyWorkflowsCarousel workflows={myWorkflows} />
+      ) : null}
     </div>
   ) : (
     <div className="flex flex-1 flex-col items-center justify-center gap-4">
       <div className="animate-pulse-glow flex h-16 w-16 items-center justify-center rounded-full bg-amber-100/60 p-2 dark:bg-amber-500/10">
-        <img src="/assets/pulse-logo.svg" alt="Pulse" className="h-full w-full" />
+        <img src="/assets/pulse-logo.svg" alt="Palmos" className="h-full w-full" />
       </div>
       <p className="text-default-500 text-sm dark:text-white/65">
         What would you like to build?
@@ -123,6 +186,20 @@ export default function AIChatInterface({
       </div>
     </div>
   );
+
+  // Build a map of tool_call_id → tool name from AIMessages so we can
+  // identify which ToolMessages correspond to widget-rendering tools.
+  const toolCallNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const msg of messages) {
+      if (msg instanceof AIMessage && msg.tool_calls) {
+        for (const tc of msg.tool_calls) {
+          if (tc.id) map.set(tc.id, tc.name);
+        }
+      }
+    }
+    return map;
+  }, [messages]);
 
   const messageList = messages.map((msg, i) => {
     const isHuman = msg._getType() === "human";
@@ -142,8 +219,54 @@ export default function AIChatInterface({
               .join("")
           : "";
 
+    // ── Detect inline widgets ──────────────────────────────────────────
+    const widgets: InlineWidgetData[] = [];
+
+    // From AI tool_calls (the AI is requesting to render a widget)
+    if (msg instanceof AIMessage && msg.tool_calls) {
+      for (const tc of msg.tool_calls) {
+        const w = parseWidgetFromToolCall(
+          tc.name,
+          tc.args as Record<string, unknown>,
+        );
+        if (w) widgets.push(w);
+      }
+    }
+
+    // From ToolMessage content (the tool result contains widget data)
+    // Check both actual ToolMessage instances and any message whose content
+    // looks like JSON (the stream may coerce tool messages as AIMessages).
+    if (!isHuman) {
+      const toolCallId = (msg as any).tool_call_id ?? "";
+      const toolName = toolCallNameMap.get(toolCallId) ?? undefined;
+      const w = parseWidgetFromToolMessage(toolCallId, content, toolName);
+      if (w) widgets.push(w);
+    }
+
     const spawned = msg.id ? getSubagentsByMessage(msg.id) : [];
-    if (!content && spawned.length === 0) return null;
+    const hasWidgets = widgets.length > 0;
+
+    // Filter out canvas widgets — they render as a sticky card above the input
+    const nonCanvasWidgets = widgets.filter((w) => w.type !== "canvas");
+    const hasNonCanvasWidgets = nonCanvasWidgets.length > 0;
+
+    // Messages that are entirely widget data (JSON content): render only the widgets
+    if (hasNonCanvasWidgets && content.trimStart().startsWith("{")) {
+      return (
+        <div key={msg.id ?? i} className="flex flex-col gap-2.5">
+          {nonCanvasWidgets.map((w, wi) => (
+            <InlineWidget key={wi} data={w} />
+          ))}
+        </div>
+      );
+    }
+
+    // If the only widgets were canvas, and content is just JSON, skip rendering entirely
+    if (widgets.length > 0 && nonCanvasWidgets.length === 0 && content.trimStart().startsWith("{")) {
+      return null;
+    }
+
+    if (!content && spawned.length === 0 && !hasWidgets) return null;
 
     return (
       <div key={msg.id ?? i} className="flex flex-col gap-2.5">
@@ -153,11 +276,13 @@ export default function AIChatInterface({
           <AIResponseCard
             content={content}
             isStreaming={isLoading && i === messages.length - 1}
+            widgets={widgets}
           />
         ) : (
           <ResponseCard
             content={content}
             isStreaming={isLoading && i === messages.length - 1}
+            widgets={widgets}
           />
         )}
         {spawned.length > 0 && (
@@ -171,11 +296,37 @@ export default function AIChatInterface({
     );
   });
 
+  // Find the latest workflow widget from messages after the last user message
+  const latestWorkflow = useMemo(() => {
+    let lastHumanIdx = -1;
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i]._getType() === "human") {
+        lastHumanIdx = i;
+        break;
+      }
+    }
+    // Scan from last human message forward, keep the last canvas widget found
+    let found: InlineWidgetData | null = null;
+    for (let i = lastHumanIdx + 1; i < messages.length; i++) {
+      const msg = messages[i];
+      const content =
+        typeof msg.content === "string"
+          ? msg.content
+          : "";
+      if (!content) continue;
+      const toolCallId = (msg as any).tool_call_id ?? "";
+      const toolName = toolCallNameMap.get(toolCallId) ?? undefined;
+      const w = parseWidgetFromToolMessage(toolCallId, content, toolName);
+      if (w?.type === "canvas") found = w;
+    }
+    return found;
+  }, [messages, toolCallNameMap]);
+
   const loadingIndicator = isLoading && (
     <div className="py-1.5">
       <div className="overflow-hidden rounded-xl border border-amber-200/40 shadow-sm dark:border-white/6">
         <p className="py-1.5 text-center text-xs text-amber-500/70 dark:text-amber-300/60">
-          Pulse is thinking...
+          Palmos is thinking...
         </p>
       </div>
     </div>
@@ -200,7 +351,7 @@ export default function AIChatInterface({
       </button>
       <button
         className="flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-50 px-2.5 py-1 text-xs text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200 dark:hover:shadow-[0_0_8px_rgba(251,191,36,0.2)]"
-        onClick={() => handleSend("Show me examples of Pulse Apps")}
+        onClick={() => handleSend("Show me examples of Palmos Apps")}
       >
         <Icon name="lightbulb" variant="round" className="text-xs" />
         Examples
@@ -235,14 +386,32 @@ export default function AIChatInterface({
           </div>
         )}
 
+        {/* Workflow card */}
+        {latestWorkflow && (
+          <div className="px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]">
+            <InlineWidget data={latestWorkflow} />
+          </div>
+        )}
+
         {/* Input */}
         <div className="border-t border-amber-200/60 bg-white px-4 pt-3 pb-4 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8 dark:bg-white/3">
-          <div className="flex items-center gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]">
-            <input
-              className="text-default-900 placeholder-default-500 flex-1 bg-transparent py-3 text-sm outline-none dark:text-white dark:placeholder-white/45"
-              placeholder="Ask Pulse AI anything..."
+          <div className="flex items-end gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]">
+            <textarea
+              className="text-default-900 placeholder-default-500 max-h-40 flex-1 resize-none bg-transparent py-3 text-sm leading-5 outline-none dark:text-white dark:placeholder-white/45"
+              style={{ height: "auto" }}
+              placeholder="Ask Palmos AI anything..."
               value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
+              ref={(el) => {
+                if (el) {
+                  el.style.height = "auto";
+                  el.style.height = el.scrollHeight + "px";
+                }
+              }}
+              onChange={(e) => {
+                setInputText(e.target.value);
+                e.target.style.height = "auto";
+                e.target.style.height = e.target.scrollHeight + "px";
+              }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -251,7 +420,16 @@ export default function AIChatInterface({
               }}
               disabled={isLoading}
               autoFocus
+              rows={1}
             />
+            {inputText && !isLoading && (
+              <button
+                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-gray-600 dark:text-white/30 dark:hover:text-white/60"
+                onClick={() => setInputText("")}
+              >
+                <Icon name="close" variant="round" className="text-base" />
+              </button>
+            )}
             {isLoading ? (
               <button
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-amber-500/15 text-amber-600 transition-all dark:bg-amber-400/20 dark:text-amber-300"
@@ -281,63 +459,63 @@ export default function AIChatInterface({
 
   return (
     <div className="grid h-full w-full grid-rows-[auto_1fr_max-content_max-content] overflow-hidden bg-gray-50 shadow-lg dark:bg-[#111118] min-[768px]:rounded-xl">
-      {/* Header */}
-      <div className="relative">
-        <div className="flex items-center justify-center border-b border-amber-300/40 bg-white px-3 py-3 dark:border-white/8 dark:bg-white/3">
-          <div className="flex items-center gap-2">
-            <motion.span
-              className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-              animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              <div>
-                <Icon name="bolt" className="text-lg" />
-              </div>
-            </motion.span>
-            <motion.span
-              className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-sm font-bold tracking-wide text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-              animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-              transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            >
-              PULSE AI
-            </motion.span>
-          </div>
-          <div className="absolute right-0 flex items-center gap-1 px-2">
-            {isLoading && (
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                className="text-amber-600 hover:text-amber-500 dark:text-amber-400/80 dark:hover:text-amber-300"
-                onPress={() => stop()}
+      {/* Header + WIP disclaimer */}
+      <div>
+        <div className="relative">
+          <div className="flex items-center justify-center border-b border-amber-300/40 bg-white px-3 py-3 dark:border-white/8 dark:bg-white/3">
+            <div className="flex items-center gap-2">
+              <motion.span
+                className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
                 <div>
-                  <Icon name="stop" variant="round" />
+                  <Icon name="bolt" className="text-lg" />
                 </div>
-              </Button>
-            )}
-            {onClose && (
-              <Button
-                isIconOnly
-                variant="light"
-                className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                onPress={onClose}
+              </motion.span>
+              <motion.span
+                className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-sm font-bold tracking-wide text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+                animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               >
-                <div>
-                  <Icon name="close" variant="round" />
-                </div>
-              </Button>
-            )}
+                PALMOS AI
+              </motion.span>
+            </div>
+            <div className="absolute right-0 flex items-center gap-1 px-2">
+              {isLoading && (
+                <Button
+                  isIconOnly
+                  variant="light"
+                  size="sm"
+                  className="text-amber-600 hover:text-amber-500 dark:text-amber-400/80 dark:hover:text-amber-300"
+                  onPress={() => stop()}
+                >
+                  <div>
+                    <Icon name="stop" variant="round" />
+                  </div>
+                </Button>
+              )}
+              {onClose && (
+                <Button
+                  isIconOnly
+                  variant="light"
+                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
+                  onPress={onClose}
+                >
+                  <div>
+                    <Icon name="close" variant="round" />
+                  </div>
+                </Button>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* WIP disclaimer */}
-      <div className="flex items-center gap-1.5 border-b border-amber-200/60 bg-amber-50/80 px-3 py-1.5 dark:border-amber-500/20 dark:bg-amber-500/8">
-        <Icon name="construction" variant="round" className="text-xs text-amber-600 dark:text-amber-400" />
-        <p className="text-[10px] text-amber-700 dark:text-amber-400">
-          <span className="font-semibold">Work in progress</span> — some features may not fully function yet.
-        </p>
+        <div className="flex items-center gap-1.5 border-b border-amber-200/60 bg-amber-50/80 px-3 py-1.5 dark:border-amber-500/20 dark:bg-amber-500/8">
+          <Icon name="construction" variant="round" className="text-xs text-amber-600 dark:text-amber-400" />
+          <p className="text-[10px] text-amber-700 dark:text-amber-400">
+            <span className="font-semibold">Work in progress</span> — some features may not fully function yet.
+          </p>
+        </div>
       </div>
 
       {/* Messages */}
@@ -354,14 +532,32 @@ export default function AIChatInterface({
       {/* Todos */}
       {todos.length > 0 && <TodoList todos={todos} />}
 
+      {/* Workflow card */}
+      {latestWorkflow && (
+        <div className="px-3 py-2">
+          <InlineWidget data={latestWorkflow} />
+        </div>
+      )}
+
       {/* Input */}
       <div className="flex flex-col gap-2 border-t border-amber-200/60 bg-white px-3 pt-3 pb-2 dark:border-white/8 dark:bg-white/3">
-        <div className="flex items-center gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]">
-          <input
-            className="text-default-900 placeholder-default-500 flex-1 bg-transparent py-2.5 text-sm outline-none dark:text-white dark:placeholder-white/45"
-            placeholder="Ask Pulse AI..."
+        <div className="flex items-end gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]">
+          <textarea
+            className="text-default-900 placeholder-default-500 max-h-40 flex-1 resize-none bg-transparent py-2.5 text-sm leading-5 outline-none dark:text-white dark:placeholder-white/45"
+            style={{ height: "auto" }}
+            placeholder="Ask Palmos AI..."
             value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
+            ref={(el) => {
+              if (el) {
+                el.style.height = "auto";
+                el.style.height = el.scrollHeight + "px";
+              }
+            }}
+            onChange={(e) => {
+              setInputText(e.target.value);
+              e.target.style.height = "auto";
+              e.target.style.height = e.target.scrollHeight + "px";
+            }}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -369,7 +565,16 @@ export default function AIChatInterface({
               }
             }}
             disabled={isLoading}
+            rows={1}
           />
+          {inputText && !isLoading && (
+            <button
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-gray-600 dark:text-white/30 dark:hover:text-white/60"
+              onClick={() => setInputText("")}
+            >
+              <Icon name="close" variant="round" className="text-base" />
+            </button>
+          )}
           <button
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white transition-all disabled:opacity-30 ${
               inputText.trim() && !isLoading ? "animate-pulse-send-glow" : ""
@@ -383,6 +588,71 @@ export default function AIChatInterface({
           </button>
         </div>
         {quickPills}
+      </div>
+    </div>
+  );
+}
+
+// ── My Workflows Carousel ────────────────────────────────────────────────────
+
+function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
+  const ITEMS_PER_PAGE = 3;
+  const [page, setPage] = useState(0);
+  const totalPages = Math.ceil(workflows.length / ITEMS_PER_PAGE);
+  const visible = workflows.slice(
+    page * ITEMS_PER_PAGE,
+    (page + 1) * ITEMS_PER_PAGE,
+  );
+
+  return (
+    <div className="w-full max-w-xl pt-6 shrink-0">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-default-500 text-xs font-medium uppercase tracking-wide">
+          My Workflows
+        </p>
+        {totalPages > 1 && (
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              className="relative z-10 h-6 w-6 flex items-center justify-center text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors"
+              disabled={page === 0}
+              onClick={(e) => { e.stopPropagation(); setPage((p) => p - 1); }}
+            >
+              ‹
+            </button>
+            <span className="text-default-400 text-xs select-none">
+              {page + 1}/{totalPages}
+            </span>
+            <button
+              type="button"
+              className="relative z-10 h-6 w-6 flex items-center justify-center text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors"
+              disabled={page === totalPages - 1}
+              onClick={(e) => { e.stopPropagation(); setPage((p) => p + 1); }}
+            >
+              ›
+            </button>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-2">
+        {visible.map((wf) => (
+          <div
+            key={wf.id ?? wf.name}
+            className="bg-content2 border-divider flex items-center justify-between rounded-lg border px-4 py-3"
+          >
+            <div className="min-w-0">
+              <p className="text-sm font-medium truncate">{wf.name}</p>
+              {wf.description && (
+                <p className="text-default-500 text-xs truncate mt-0.5">
+                  {wf.description}
+                </p>
+              )}
+            </div>
+            <Chip size="sm" variant="flat" className="ml-3 shrink-0">
+              v{wf.version}
+            </Chip>
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -421,7 +691,8 @@ function UserBubble({ text }: { text: string }) {
   return (
     <div className="flex justify-end">
       <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
-        {text}
+        <p className="text-xs font-semibold text-white/80">User:</p>
+        <p className="mt-0.5 text-white">{text}</p>
       </div>
     </div>
   );
@@ -432,9 +703,11 @@ function UserBubble({ text }: { text: string }) {
 function AIResponseCard({
   content,
   isStreaming,
+  widgets = [],
 }: {
   content: string;
   isStreaming: boolean;
+  widgets?: InlineWidgetData[];
 }) {
   return (
     <div className="flex justify-start">
@@ -442,15 +715,25 @@ function AIResponseCard({
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 p-1 dark:bg-amber-500/15">
           <img
             src="/assets/pulse-logo.svg"
-            alt="Pulse"
+            alt="Palmos"
             className="h-full w-full"
           />
         </div>
-        <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
-          <MarkdownRender content={content} />
-          {isStreaming && (
-            <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+        <div className="min-w-0 flex-1">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-wide text-default-400 dark:text-white/40">
+            AI Manager:
+          </p>
+          {content && (
+            <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
+              <MarkdownRender content={content} />
+              {isStreaming && (
+                <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+              )}
+            </div>
           )}
+          {widgets.map((w, wi) => (
+            <InlineWidget key={wi} data={w} />
+          ))}
         </div>
       </div>
     </div>
@@ -462,9 +745,11 @@ function AIResponseCard({
 function ResponseCard({
   content,
   isStreaming,
+  widgets = [],
 }: {
   content: string;
   isStreaming: boolean;
+  widgets?: InlineWidgetData[];
 }) {
   const [expanded, setExpanded] = useState(true);
   const status: "running" | "complete" = isStreaming ? "running" : "complete";
@@ -478,7 +763,7 @@ function ResponseCard({
         <div className="flex items-center gap-2">
           <StatusIcon status={status} />
           <span className="text-default-700 text-xs font-semibold dark:text-white/90">
-            Pulse AI
+            AI Manager
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -491,11 +776,22 @@ function ResponseCard({
         </div>
       </button>
 
-      {expanded && content && (
-        <div className="border-t border-amber-200/60 px-3 py-2.5 dark:border-white/8">
-          <MarkdownRender content={content} />
-          {isStreaming && (
-            <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+      {expanded && (
+        <div className="border-t border-amber-200/60 dark:border-white/8">
+          {content && (
+            <div className="px-3 py-2.5">
+              <MarkdownRender content={content} />
+              {isStreaming && (
+                <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+              )}
+            </div>
+          )}
+          {widgets.length > 0 && (
+            <div className="px-3 pb-3">
+              {widgets.map((w, wi) => (
+                <InlineWidget key={wi} data={w} />
+              ))}
+            </div>
           )}
         </div>
       )}

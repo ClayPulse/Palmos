@@ -1,16 +1,19 @@
 <h1 align="center">
-Pulse Editor
+Palmos
 </h1>
 
-Pulse Editor is a modular, cross-platform, AI-powered productivity platform with federated app collaboration and extensible workflows.
+Palmos is a modular, cross-platform, AI-powered productivity platform with federated app collaboration and extensible workflows.
+
+> [!NOTE]
+> **Pulse Editor has been rebranded to Palmos** (from the Greek παλμός, meaning "pulse") — same heartbeat, new identity.
 
 > [!IMPORTANT]
-> 🎉🎉Pulse Editor is now in beta 2. And we won a hackathon! Read more [here](#major-beta-release-2-we-are-here).
+> 🎉🎉Palmos is now in beta 2. And we won a hackathon! Read more [here](#major-beta-release-2-we-are-here).
 >
-> Pulse Editor is still in its early development stage. We are trying hard to make sure everything works as expected for all different platforms. See [Beta Release Roadmap](#beta-release-roadmap) below.
+> Palmos is still in its early development stage. We are trying hard to make sure everything works as expected for all different platforms. See [Beta Release Roadmap](#beta-release-roadmap) below.
 
 <p align="center">
-  <img alt="Pulse Editor" src="https://raw.githubusercontent.com/ClayPulse/pulse-editor/refs/heads/main/shared-assets/icons/pulse_logo.svg"/>
+  <img alt="Palmos" src="https://raw.githubusercontent.com/ClayPulse/pulse-editor/refs/heads/main/shared-assets/icons/pulse_logo.svg"/>
 </p>
 
 <div align="center">
@@ -46,9 +49,9 @@ pulse code --continue
 ## Cross-platform full-stack apps collaboration workflow
 
 By leveraging [Module Federation](https://module-federation.io/),
-Pulse Editor allows federated app collaboration and extensible workflows with AI agents on all platform.
+Palmos allows federated app collaboration and extensible workflows with AI agents on all platform.
 
-Pulse Editor is not just another drag-and-drop backend automation tool, it is a full-stack automation platform -- a true app OS that unifies both frontend and backend in one visual environment.
+Palmos is not just another drag-and-drop backend automation tool, it is a full-stack automation platform -- a true app OS that unifies both frontend and backend in one visual environment.
 
 <table>
   <tr>
@@ -92,7 +95,7 @@ You can run workflows with [Pulse App ComfyUI Workflow](https://github.com/Shell
 
 ### Remote ComfyUI Workspace
 
-You can even run remote ComfyUI on Pulse Editor mobile app.
+You can even run remote ComfyUI on Palmos mobile app.
 ![Remote_ComfyUI](https://cdn.pulse-editor.com/assets/remote-comfyui.jpg)
 
 ### Serverless ComfyUI Inference (Coming soon)
@@ -101,7 +104,7 @@ You can even run remote ComfyUI on Pulse Editor mobile app.
 
 ## Remote or local workspace
 
-With Pulse Editor, you can manage your file system within interface.
+With Palmos, you can manage your file system within interface.
 
 On desktop, you can choose to open workspace in either local storage or remote container.
 
@@ -155,13 +158,13 @@ pulse create
 
 Next, select your development framework (only React is supported for now) and fill in your project name.
 
-You can also choose visibility of your app on Pulse Editor marketplace.
+You can also choose visibility of your app on Palmos marketplace.
 
 - Public: any user can discover and use your app
 - Unlisted: only users that you invite with a share link can use your app
 - Private: only you can access your app
 
-### Publishing your app to Pulse Editor marketplace
+### Publishing your app to Palmos marketplace
 
 To publish your app to marketplace, go to https://pulse-editor.com to create a developer API key.
 Then copy your key and run:
@@ -191,38 +194,38 @@ Some of our official extensions are also open-source. Feel free to take examples
 
 # Beta Release Roadmap
 
-🎉🎉Pulse Editor is now in beta 2.
+🎉🎉Palmos is now in beta 2.
 
 We plan to have 2-3 major beta release stages before we reach a stable release version.
 
 ### Major Beta Release 1 (June 2025):
 
-Pulse Editor is now available on Android and Desktop (tested for Windows, needs more testing for Linux and MacOS).
+Palmos is now available on Android and Desktop (tested for Windows, needs more testing for Linux and MacOS).
 
-Pulse Editor Marketplace now is available for editor users. Simply download Pulse Editor, and view all available extensions in the extension page. You can also browser and search extensions in [Marketplace Web (WIP)](https://pulse-editor.com/marketplace). As for now, the following extensions are available:
+Palmos Marketplace now is available for editor users. Simply download Palmos, and view all available extensions in the extension page. You can also browser and search extensions in [Marketplace Web (WIP)](https://pulse-editor.com/marketplace). As for now, the following extensions are available:
 
-- (Official) [Pulse Editor Code View (MIT)](https://github.com/ClayPulse/pulse-editor-code-view)
-- (Official) [Pulse Editor Terminal (MIT)](https://github.com/ClayPulse/pulse-editor-terminal)
-- (Official) [Pulse Editor Image Editor (MIT)](https://github.com/Shellishack/pulse-editor-image-editor)
-- (Official) [Pulse Editor Video Editor (MIT)](https://github.com/Shellishack/pulse-editor-video-editor)
+- (Official) [Palmos Code View (MIT)](https://github.com/ClayPulse/pulse-editor-code-view)
+- (Official) [Palmos Terminal (MIT)](https://github.com/ClayPulse/pulse-editor-terminal)
+- (Official) [Palmos Image Editor (MIT)](https://github.com/Shellishack/pulse-editor-image-editor)
+- (Official) [Palmos Video Editor (MIT)](https://github.com/Shellishack/pulse-editor-video-editor)
 
-Pulse Editor Marketplace Developer Access is now open for application. If you'd like to develop and publish your own extensions to Pulse Editor Marketplace, submit a form here [Developer Beta Access](https://pulse-editor.com/beta).
+Palmos Marketplace Developer Access is now open for application. If you'd like to develop and publish your own extensions to Palmos Marketplace, submit a form here [Developer Beta Access](https://pulse-editor.com/beta).
 
-Even if you haven't got access to publish your extensions to the marketplace, you can still explore Pulse Editor platform by developing your own extensions locally. This is a great opportunity to get an early look at Pulse Editor and start experimenting with its capabilities! See [Extension Development](#pulse-editor-extension-development) below.
+Even if you haven't got access to publish your extensions to the marketplace, you can still explore Palmos platform by developing your own extensions locally. This is a great opportunity to get an early look at Palmos and start experimenting with its capabilities! See [Extension Development](#pulse-editor-extension-development) below.
 
 ### Major Beta Release 2 (we are here)
 
-Pulse Editor beta 2 is now out. Many changes are added in this new release. And, Pulse Editor won a hackathon! Big thanks to AI Hacker House in Shanghai for the hackathon opportunity for me to showcase this project in front of dozens of AI product enthusiasts and entrepreneurs!
+Palmos beta 2 is now out. Many changes are added in this new release. And, Palmos won a hackathon! Big thanks to AI Hacker House in Shanghai for the hackathon opportunity for me to showcase this project in front of dozens of AI product enthusiasts and entrepreneurs!
 
 What's new in this release:
 
-1. Support frontend and backend module federation to allow developers to publish full-stack apps on Pulse Editor platform.
+1. Support frontend and backend module federation to allow developers to publish full-stack apps on Palmos platform.
 2. Add workflow canvas to allow collaboration among community full-stack apps.
-3. Introduce Pulse Editor cloud platform. With the cloud platform, you can start remote dev container and use it to run automation workflows.
+3. Introduce Palmos cloud platform. With the cloud platform, you can start remote dev container and use it to run automation workflows.
 4. Support web editor. Check it out at https://web.pulse-editor.com.
 5. Publish mobile app to Google Play (in-progress).
 6. Allow users to publish workflows to marketplace.
-7. Introduce Pulse Editor platform AI assistants. With the platform AI assistant, you can create productivity workflow effortless via chatting. The platform AI assistant will suggest best fitted apps for you requirements and execute the workflow on your behalf.
+7. Introduce Palmos platform AI assistants. With the platform AI assistant, you can create productivity workflow effortless via chatting. The platform AI assistant will suggest best fitted apps for you requirements and execute the workflow on your behalf.
 8. Updates to npm packages, cli tool, and [Pulse app full-stack React template](https://github.com/claypulse/pulse-app-template).
 
 ### Major Beta Release 3 (planned for 2026 Q1)
@@ -268,7 +271,7 @@ A VSCode Webview Extension with limited features is available [here](https://mar
 
 For detailed VSCode extension user guide, check out [VSCode Extension User Guide](vscode-extension/README.md)
 
-# Pulse Editor Core Development Guide
+# Palmos Core Development Guide
 
 ## Recommended Nodejs version
 
@@ -331,7 +334,7 @@ npm run desktop-build
 
 ## Web Development
 
-Pulse Editor uses Next.js as the frontend (and backend -- TBD).
+Palmos uses Next.js as the frontend (and backend -- TBD).
 You can get started with local development by running:
 
 ```bash
@@ -340,7 +343,7 @@ npm run web-dev
 
 ## Mobile Development
 
-Pulse Editor uses Capacitor.js to create mobile apps on Android and iOS. To develop mobile app locally, try the following.
+Palmos uses Capacitor.js to create mobile apps on Android and iOS. To develop mobile app locally, try the following.
 
 Start development:
 
@@ -357,7 +360,7 @@ npm run android-build
 
 ## Desktop Development
 
-Pulse Editor uses Electron.js to create desktop apps on Windows, Mac and Linux. To develop desktop app locally,
+Palmos uses Electron.js to create desktop apps on Windows, Mac and Linux. To develop desktop app locally,
 run:
 
 ```bash
@@ -373,13 +376,13 @@ If you run `npm run desktop-build` for a production build, you can find an execu
 
 > [!warning]
 > The code in `vscode-extension` might be out of date, as it was made for an Alpha Demo.  
-> Support for using Pulse Editor as an extension in VSCode might be discontinued, or get simply replaced with a webview.
+> Support for using Palmos as an extension in VSCode might be discontinued, or get simply replaced with a webview.
 
-Pulse Editor uses VSCode Webview API to create a VSCode Extension. To develop VScode Extension locally, open the `vscode-extension` in a separate VSCode window. Then press F5 to launch debug task.
+Palmos uses VSCode Webview API to create a VSCode Extension. To develop VScode Extension locally, open the `vscode-extension` in a separate VSCode window. Then press F5 to launch debug task.
 
 Note that you will also need to run the Nextjs server locally during development.
 
-## Pulse Editor NPM libraries development
+## Palmos NPM libraries development
 
 ### Versioning
 
