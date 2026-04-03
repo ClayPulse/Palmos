@@ -1,10 +1,13 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export interface ChatSession {
   id: string;
   title: string;
   createdAt: number;
   updatedAt: number;
+}
+
+export interface ChatSessionWithMessages extends ChatSession {
   messages: SerializedMessage[];
 }
 
@@ -19,9 +22,17 @@ export interface SerializedMessage {
 
 const STORAGE_KEY = "pulse-chat-sessions";
 const ACTIVE_SESSION_KEY = "pulse-active-chat-session";
-const MAX_SESSIONS = 50;
+const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-function loadSessions(): ChatSession[] {
+// ---------------------------------------------------------------------------
+// localStorage helpers (used as fast cache / offline fallback)
+// ---------------------------------------------------------------------------
+
+interface LocalSession extends ChatSession {
+  messages: SerializedMessage[];
+}
+
+function loadLocalSessions(): LocalSession[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -30,8 +41,11 @@ function loadSessions(): ChatSession[] {
   }
 }
 
-function saveSessions(sessions: ChatSession[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions.slice(0, MAX_SESSIONS)));
+function saveLocalSessions(sessions: LocalSession[]) {
+  localStorage.setItem(
+    STORAGE_KEY,
+    JSON.stringify(sessions.slice(0, 50)),
+  );
 }
 
 function getActiveSessionId(): string | null {
@@ -50,7 +64,6 @@ export function generateSessionId(): string {
   return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-/** Derive a title from the first user message, truncated. */
 function deriveTitle(messages: SerializedMessage[]): string {
   const first = messages.find((m) => m.type === "human");
   if (!first || !first.content) return "New Chat";
@@ -58,45 +71,169 @@ function deriveTitle(messages: SerializedMessage[]): string {
   return text.length > 60 ? text.slice(0, 57) + "..." : text || "New Chat";
 }
 
+// ---------------------------------------------------------------------------
+// Backend API helpers
+// ---------------------------------------------------------------------------
+
+function toBackendMessage(m: SerializedMessage) {
+  return {
+    role: m.type,
+    content: m.content,
+    toolCallId: m.tool_call_id,
+    additionalKwargs: m.additional_kwargs,
+    toolCalls: m.tool_calls,
+  };
+}
+
+function fromBackendMessage(m: any): SerializedMessage {
+  return {
+    type: m.role as SerializedMessage["type"],
+    content: m.content,
+    id: m.id,
+    tool_call_id: m.toolCallId,
+    additional_kwargs: m.additionalKwargs,
+    tool_calls: m.toolCalls,
+  };
+}
+
+async function apiFetch(path: string, init?: RequestInit) {
+  const res = await fetch(`${backendUrl}${path}`, {
+    credentials: "include",
+    ...init,
+    headers: { "Content-Type": "application/json", ...init?.headers },
+  });
+  return res;
+}
+
+// ---------------------------------------------------------------------------
+// Hook
+// ---------------------------------------------------------------------------
+
 export function useChatSessions() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveId] = useState<string | null>(null);
+  const isBackendAvailable = useRef(true);
 
-  // Load on mount
+  // Load sessions on mount — try backend first, fallback to localStorage
   useEffect(() => {
-    setSessions(loadSessions());
-    setActiveId(getActiveSessionId());
+    const storedActiveId = getActiveSessionId();
+    setActiveId(storedActiveId);
+
+    apiFetch("/api/chat/sessions")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Backend unavailable");
+        const data: Array<{
+          id: string;
+          title: string;
+          createdAt: string;
+          updatedAt: string;
+        }> = await res.json();
+        isBackendAvailable.current = true;
+        const mapped = data.map((s) => ({
+          id: s.id,
+          title: s.title,
+          createdAt: new Date(s.createdAt).getTime(),
+          updatedAt: new Date(s.updatedAt).getTime(),
+        }));
+        setSessions(mapped);
+      })
+      .catch(() => {
+        // Fallback to localStorage
+        isBackendAvailable.current = false;
+        const local = loadLocalSessions();
+        setSessions(
+          local.map(({ messages: _, ...rest }) => rest),
+        );
+      });
   }, []);
 
   const saveSession = useCallback(
-    (sessionId: string, messages: SerializedMessage[]) => {
-      setSessions((prev) => {
-        const existing = prev.find((s) => s.id === sessionId);
-        const title = deriveTitle(messages);
-        let updated: ChatSession[];
-        if (existing) {
-          updated = prev.map((s) =>
-            s.id === sessionId
-              ? { ...s, title, messages, updatedAt: Date.now() }
-              : s,
-          );
-        } else {
-          updated = [
-            {
-              id: sessionId,
-              title,
-              createdAt: Date.now(),
-              updatedAt: Date.now(),
-              messages,
-            },
-            ...prev,
-          ];
+    async (sessionId: string, messages: SerializedMessage[]) => {
+      const title = deriveTitle(messages);
+      const now = Date.now();
+
+      // Always update localStorage cache
+      const local = loadLocalSessions();
+      const existing = local.find((s) => s.id === sessionId);
+      let updatedLocal: LocalSession[];
+      if (existing) {
+        updatedLocal = local.map((s) =>
+          s.id === sessionId ? { ...s, title, messages, updatedAt: now } : s,
+        );
+      } else {
+        updatedLocal = [
+          { id: sessionId, title, createdAt: now, updatedAt: now, messages },
+          ...local,
+        ];
+      }
+      updatedLocal.sort((a, b) => b.updatedAt - a.updatedAt);
+      saveLocalSessions(updatedLocal);
+      setSessions(updatedLocal.map(({ messages: _, ...rest }) => rest));
+
+      // Sync to backend
+      if (isBackendAvailable.current) {
+        try {
+          const backendMessages = messages.map(toBackendMessage);
+          if (existing) {
+            await apiFetch(`/api/chat/sessions/${sessionId}`, {
+              method: "PUT",
+              body: JSON.stringify({ title, messages: backendMessages }),
+            });
+          } else {
+            const res = await apiFetch("/api/chat/sessions", {
+              method: "POST",
+              body: JSON.stringify({ title, messages: backendMessages }),
+            });
+            if (res.ok) {
+              const created = await res.json();
+              // Replace the local temp ID with the backend-assigned ID
+              if (created.id !== sessionId) {
+                const remap = loadLocalSessions().map((s) =>
+                  s.id === sessionId
+                    ? { ...s, id: created.id, updatedAt: new Date(created.updatedAt).getTime() }
+                    : s,
+                );
+                saveLocalSessions(remap);
+                setSessions(remap.map(({ messages: _, ...rest }) => rest));
+                // Update active session ID if it was the temp one
+                if (getActiveSessionId() === sessionId) {
+                  setActiveSessionId(created.id);
+                  setActiveId(created.id);
+                }
+                return created.id as string;
+              }
+            }
+          }
+        } catch {
+          // Backend save failed; localStorage is still the source of truth
         }
-        // Sort by most recent
-        updated.sort((a, b) => b.updatedAt - a.updatedAt);
-        saveSessions(updated);
-        return updated;
-      });
+      }
+      return sessionId;
+    },
+    [],
+  );
+
+  const fetchSessionMessages = useCallback(
+    async (sessionId: string): Promise<SerializedMessage[]> => {
+      // Try backend first
+      if (isBackendAvailable.current) {
+        try {
+          const res = await apiFetch(`/api/chat/sessions/${sessionId}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (Array.isArray(data.messages)) {
+              return data.messages.map(fromBackendMessage);
+            }
+          }
+        } catch {
+          // fall through to localStorage
+        }
+      }
+
+      // Fallback to localStorage
+      const local = loadLocalSessions();
+      const session = local.find((s) => s.id === sessionId);
+      return session?.messages ?? [];
     },
     [],
   );
@@ -116,12 +253,12 @@ export function useChatSessions() {
     return id;
   }, []);
 
-  const deleteSession = useCallback((sessionId: string) => {
-    setSessions((prev) => {
-      const updated = prev.filter((s) => s.id !== sessionId);
-      saveSessions(updated);
-      return updated;
-    });
+  const deleteSession = useCallback(async (sessionId: string) => {
+    // Remove from localStorage
+    const local = loadLocalSessions().filter((s) => s.id !== sessionId);
+    saveLocalSessions(local);
+    setSessions(local.map(({ messages: _, ...rest }) => rest));
+
     // If deleting the active session, clear it
     setActiveId((current) => {
       if (current === sessionId) {
@@ -130,14 +267,18 @@ export function useChatSessions() {
       }
       return current;
     });
-  }, []);
 
-  const getSession = useCallback(
-    (sessionId: string): ChatSession | undefined => {
-      return sessions.find((s) => s.id === sessionId);
-    },
-    [sessions],
-  );
+    // Delete from backend
+    if (isBackendAvailable.current) {
+      try {
+        await apiFetch(`/api/chat/sessions/${sessionId}`, {
+          method: "DELETE",
+        });
+      } catch {
+        // Ignore backend errors
+      }
+    }
+  }, []);
 
   return {
     sessions,
@@ -146,6 +287,6 @@ export function useChatSessions() {
     switchSession,
     startNewSession,
     deleteSession,
-    getSession,
+    fetchSessionMessages,
   };
 }

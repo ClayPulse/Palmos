@@ -1,6 +1,7 @@
 "use client";
 
 import ChatPanel from "@/components/interface/panels/chat-panel";
+import ChatSessionSidebar from "@/components/interface/panels/chat-session-sidebar";
 import { AppModeEnum, PlatformEnum } from "@/lib/enums";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { useTheme } from "next-themes";
@@ -30,6 +31,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const { setTheme } = useTheme();
 
   const [isShowNavbar, setIsShowNavbar] = useState(true);
+  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false);
 
   // Skip the welcome animation for chat mode. Check both the context state (for
   // in-session switches) and the raw URL param (for initial page loads before the
@@ -110,8 +112,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                 )}
               </div>
             )}
-            {/* Middle column: nav + children */}
-            <div className="relative flex h-full w-full flex-col overflow-hidden">
+            {/* Middle column: sidebar + nav + children */}
+            <div className="relative flex h-full w-full overflow-hidden">
+              {/* Chat session sidebar — agent mode only */}
+              {appMode === AppModeEnum.Agent && (
+                <ChatSessionSidebar
+                  isOpen={isChatSidebarOpen}
+                  onClose={() => setIsChatSidebarOpen(false)}
+                />
+              )}
+              <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
               {isShowNavbar && (
                 <AppNavBar
                   style={{
@@ -120,7 +130,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                   }}
                   left={
                     appMode === AppModeEnum.Agent ? (
-                      <ChatNavLeft />
+                      <ChatNavLeft onToggleSidebar={() => setIsChatSidebarOpen((v) => !v)} isSidebarOpen={isChatSidebarOpen} />
                     ) : (
                       <EditorNavLeft
                         isMenuOpen={isMenuOpen}
@@ -145,6 +155,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               )}
               <div className="relative min-h-0 flex-1 overflow-hidden">
                 <div className="h-full w-full overflow-hidden">{children}</div>
+              </div>
               </div>
             </div>
             {/* Right chat panel — only rendered after editor is first activated */}

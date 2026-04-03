@@ -65,20 +65,22 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     switchSession,
     startNewSession,
     deleteSession,
+    fetchSessionMessages,
   } = useChatSessions();
 
   const currentSessionIdRef = useRef<string>(activeSessionId ?? generateSessionId());
 
-  // Initialize session on mount
+  // Initialize session on mount — restore the active session's messages
   useEffect(() => {
     if (activeSessionId) {
       currentSessionIdRef.current = activeSessionId;
-      const session = sessions.find((s) => s.id === activeSessionId);
-      if (session && session.messages.length > 0) {
-        loadMessages(
-          session.messages.map(deserializeMessage).filter(Boolean) as BaseMessage[],
-        );
-      }
+      fetchSessionMessages(activeSessionId).then((msgs) => {
+        if (msgs.length > 0) {
+          loadMessages(
+            msgs.map(deserializeMessage).filter(Boolean) as BaseMessage[],
+          );
+        }
+      });
     } else {
       const id = generateSessionId();
       currentSessionIdRef.current = id;
@@ -96,7 +98,12 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
       saveSession(
         currentSessionIdRef.current,
         messages.map(serializeMessage),
-      );
+      ).then((resolvedId) => {
+        // If backend assigned a new ID, update our ref
+        if (resolvedId && resolvedId !== currentSessionIdRef.current) {
+          currentSessionIdRef.current = resolvedId;
+        }
+      });
     }, 500);
     return () => clearTimeout(saveTimeoutRef.current);
   }, [messages, saveSession]);
@@ -108,21 +115,24 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
   }, [clear, startNewSession]);
 
   const handleSwitchSession = useCallback(
-    (sessionId: string) => {
+    async (sessionId: string) => {
+      // Save current session first
       if (messages.length > 0) {
-        saveSession(currentSessionIdRef.current, messages.map(serializeMessage));
+        await saveSession(currentSessionIdRef.current, messages.map(serializeMessage));
       }
       clear();
       switchSession(sessionId);
       currentSessionIdRef.current = sessionId;
-      const session = sessions.find((s) => s.id === sessionId);
-      if (session && session.messages.length > 0) {
+
+      // Fetch messages from backend/localStorage
+      const msgs = await fetchSessionMessages(sessionId);
+      if (msgs.length > 0) {
         loadMessages(
-          session.messages.map(deserializeMessage).filter(Boolean) as BaseMessage[],
+          msgs.map(deserializeMessage).filter(Boolean) as BaseMessage[],
         );
       }
     },
-    [messages, clear, switchSession, saveSession, loadMessages, sessions],
+    [messages, clear, switchSession, saveSession, loadMessages, fetchSessionMessages],
   );
 
   const handleDeleteSession = useCallback(
@@ -170,7 +180,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 }
 
 // ---------------------------------------------------------------------------
-// Serialization helpers (moved from ai-chat-interface.tsx)
+// Serialization helpers
 // ---------------------------------------------------------------------------
 
 import {

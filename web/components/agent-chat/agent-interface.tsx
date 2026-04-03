@@ -19,7 +19,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useAutomations } from "@/lib/hooks/use-automations";
 import type { WorkflowInput } from "@/lib/types";
-import { Button, Spinner } from "@heroui/react";
+import { Button, Spinner, Tooltip } from "@heroui/react";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { motion } from "framer-motion";
@@ -649,28 +649,32 @@ export default function AgentChat({
         <div className="relative">
           <div className="flex items-center justify-center border-b border-amber-300/40 bg-white px-3 py-3 dark:border-white/8 dark:bg-white/3">
             <div className="absolute left-0 flex items-center gap-1 px-2">
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                onPress={() => setIsHistoryOpen(true)}
-              >
-                <div>
-                  <Icon name="history" variant="round" />
-                </div>
-              </Button>
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                onPress={handleNewChat}
-              >
-                <div>
-                  <Icon name="edit_square" variant="round" />
-                </div>
-              </Button>
+              <Tooltip content="Chat History" delay={400} closeDelay={0}>
+                <Button
+                  isIconOnly
+                  variant="light"
+                  size="sm"
+                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
+                  onPress={() => setIsHistoryOpen(true)}
+                >
+                  <div>
+                    <Icon name="history" variant="round" />
+                  </div>
+                </Button>
+              </Tooltip>
+              <Tooltip content="New Chat" delay={400} closeDelay={0}>
+                <Button
+                  isIconOnly
+                  variant="light"
+                  size="sm"
+                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
+                  onPress={handleNewChat}
+                >
+                  <div>
+                    <Icon name="add" variant="round" />
+                  </div>
+                </Button>
+              </Tooltip>
             </div>
             <div className="flex items-center gap-2">
               <motion.span
