@@ -27,7 +27,12 @@ import { useContext } from "react";
 
 export function ChatNavLeft() {
   return (
-    <div className="flex items-center gap-2">
+    <a
+      href="https://palmos.ai"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 no-underline"
+    >
       <motion.span
         className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
         animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
@@ -42,7 +47,7 @@ export function ChatNavLeft() {
       >
         PALMOS AI
       </motion.span>
-    </div>
+    </a>
   );
 }
 

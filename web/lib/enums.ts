@@ -19,6 +19,7 @@ export enum SideMenuTabEnum {
   Apps = "Apps",
   Workspace = "Workspace",
   Workflows = "Workflows",
+  Automations = "Automations",
 }
 
 export enum ModelCapabilityEnum {

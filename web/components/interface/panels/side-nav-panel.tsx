@@ -1,4 +1,5 @@
 import AppExplorer from "@/components/explorer/app/app-explorer";
+import AutomationExplorer from "@/components/explorer/automation/automation-explorer";
 import WorkflowExplorer from "@/components/explorer/workflow/workflow-explorer";
 import WorkspaceExplorer from "@/components/explorer/workspace/workspace-explorer";
 import BaseSidePanel from "@/components/interface/panels/base-side-panel";
@@ -80,12 +81,22 @@ function PanelContent() {
           description: "Project workspace",
           icon: "folder",
         },
+        {
+          name: SideMenuTabEnum.Automations,
+          description: "Automations",
+          icon: "smart_toy",
+        },
       ]
     : [
         {
           name: SideMenuTabEnum.Workflows,
           description: "My workflows",
           icon: "hub",
+        },
+        {
+          name: SideMenuTabEnum.Automations,
+          description: "Automations",
+          icon: "smart_toy",
         },
       ];
 
@@ -151,6 +162,8 @@ function PanelContent() {
           <WorkflowExplorer />
         ) : selectedTab === SideMenuTabEnum.Workspace ? (
           <WorkspaceExplorer />
+        ) : selectedTab === SideMenuTabEnum.Automations ? (
+          <AutomationExplorer />
         ) : null}
       </div>
     </div>

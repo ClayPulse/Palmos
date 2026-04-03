@@ -9,8 +9,9 @@ import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import useDeepAgent, { SubagentInfo, Todo, WorkflowInput } from "@/lib/hooks/use-deep-agent";
+import { useAutomations } from "@/lib/hooks/use-automations";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
-import { Workflow } from "@/lib/types";
+import { Automation, TriggerType, Workflow } from "@/lib/types";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
@@ -63,6 +64,7 @@ export default function AIChatInterface({
 
   const editorContext = useContext(EditorContext);
   const { workflows: myWorkflows, isLoading: isLoadingMyWorkflows } = useMarketplaceWorkflows("My Workflows");
+  const { automations, isLoading: isLoadingAutomations } = useAutomations();
 
   const [inputText, setInputText] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -211,7 +213,7 @@ export default function AIChatInterface({
   // ── Shared content ───────────────────────────────────────────────────────
 
   const emptyState = isPage ? (
-    <div className="flex flex-1 flex-col items-center justify-center gap-5 py-12 min-h-0">
+    <div className="flex flex-1 flex-col items-center gap-5 py-12 min-h-0">
       <div className="animate-pulse-glow flex h-20 w-20 items-center justify-center rounded-full bg-amber-100/70 p-3 dark:bg-amber-500/10">
         <img src="/assets/pulse-logo.svg" alt="Palmos" className="h-full w-full" />
       </div>
@@ -232,6 +234,31 @@ export default function AIChatInterface({
           />
         ))}
       </div>
+
+      {isLoadingAutomations ? (
+        <div className="w-full max-w-xl pt-6 shrink-0">
+          <p className="text-default-500 mb-3 text-xs font-medium uppercase tracking-wide">
+            My Automations
+          </p>
+          <div className="flex items-center justify-center py-4">
+            <Spinner size="sm" />
+          </div>
+        </div>
+      ) : (
+        <MyAutomationsCarousel
+          automations={automations}
+          onOpenEditor={(automation) => {
+            editorContext?.updateModalStates({
+              automationEditor: { isOpen: true, automation },
+            });
+          }}
+          onCreateNew={() => {
+            editorContext?.updateModalStates({
+              automationEditor: { isOpen: true },
+            });
+          }}
+        />
+      )}
 
       {isLoadingMyWorkflows ? (
         <div className="w-full max-w-xl pt-6 shrink-0">
@@ -443,8 +470,8 @@ export default function AIChatInterface({
   if (isPage) {
     return (
       <div className="flex h-full w-full flex-col bg-gray-50 dark:bg-[#0d0d14]">
-        {/* Spacer matching the chat nav-bar height */}
-        <div className="h-18 shrink-0" />
+        {/* Spacer matching the chat nav-bar height: py-2 (8px+8px) + h-14 (56px) = 72px */}
+        <div className="shrink-0" style={{ height: 72 }} />
 
         {/* Messages */}
         <div
@@ -767,6 +794,165 @@ function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
           </div>
         ))}
       </div>
+    </div>
+  );
+}
+
+// ── My Automations Carousel ─────────────────────────────────────────────────
+
+const AUTOMATION_TRIGGER_ICONS: Record<TriggerType, string> = {
+  schedule: "schedule",
+  webhook: "link",
+  manual: "play_arrow",
+  agentic: "bolt",
+};
+
+const AUTOMATION_TRIGGER_LABELS: Record<TriggerType, string> = {
+  schedule: "Scheduled",
+  webhook: "Webhook",
+  manual: "Manual",
+  agentic: "Agentic",
+};
+
+const AUTOMATION_STATUS_COLORS: Record<string, "default" | "primary" | "danger"> = {
+  idle: "default",
+  running: "primary",
+  error: "danger",
+};
+
+function MyAutomationsCarousel({
+  automations,
+  onOpenEditor,
+  onCreateNew,
+}: {
+  automations: Automation[];
+  onOpenEditor: (automation: Automation) => void;
+  onCreateNew: () => void;
+}) {
+  const ITEMS_PER_PAGE = 3;
+  const [page, setPage] = useState(0);
+  const totalPages = Math.ceil(automations.length / ITEMS_PER_PAGE);
+  const visible = automations.slice(
+    page * ITEMS_PER_PAGE,
+    (page + 1) * ITEMS_PER_PAGE,
+  );
+
+  return (
+    <div className="w-full max-w-xl pt-6 shrink-0">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <p className="text-default-500 text-xs font-medium uppercase tracking-wide">
+            My Automations
+          </p>
+          {automations.some((a) => a.status === "running") && (
+            <Chip size="sm" color="primary" variant="dot" classNames={{ content: "text-xs" }}>
+              {automations.filter((a) => a.status === "running").length} running
+            </Chip>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="flat"
+            color="primary"
+            startContent={<Icon name="add" className="text-xs" />}
+            onPress={onCreateNew}
+            className="h-6 min-w-0 px-2 text-xs"
+          >
+            New
+          </Button>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className="relative z-10 h-6 w-6 flex items-center justify-center text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors"
+                disabled={page === 0}
+                onClick={(e) => { e.stopPropagation(); setPage((p) => p - 1); }}
+              >
+                ‹
+              </button>
+              <span className="text-default-400 text-xs select-none">
+                {page + 1}/{totalPages}
+              </span>
+              <button
+                type="button"
+                className="relative z-10 h-6 w-6 flex items-center justify-center text-default-400 hover:text-default-700 disabled:opacity-30 transition-colors"
+                disabled={page === totalPages - 1}
+                onClick={(e) => { e.stopPropagation(); setPage((p) => p + 1); }}
+              >
+                ›
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {automations.length === 0 ? (
+        <button
+          type="button"
+          onClick={onCreateNew}
+          className="bg-content2 border-divider hover:bg-content3 flex w-full items-center gap-3 rounded-lg border border-dashed px-4 py-4 transition-colors"
+        >
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+            <Icon name="smart_toy" className="text-primary text-sm" />
+          </div>
+          <div className="text-left">
+            <p className="text-sm font-medium">Create your first automation</p>
+            <p className="text-default-500 text-xs mt-0.5">
+              Schedule workflows or trigger them via webhooks
+            </p>
+          </div>
+          <Icon name="arrow_forward" className="text-default-400 ml-auto text-sm" />
+        </button>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {visible.map((automation) => (
+            <div
+              key={automation.id}
+              className="bg-content2 border-divider flex items-center justify-between rounded-lg border px-4 py-3"
+            >
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <Icon
+                    name={AUTOMATION_TRIGGER_ICONS[automation.triggerType] ?? "smart_toy"}
+                    variant="round"
+                    className="text-default-400 text-sm"
+                  />
+                  <p className="text-sm font-medium truncate">{automation.name}</p>
+                  <Chip
+                    size="sm"
+                    color={AUTOMATION_STATUS_COLORS[automation.status] ?? "default"}
+                    variant={automation.status === "running" ? "dot" : "flat"}
+                    classNames={{ content: "text-xs" }}
+                  >
+                    {automation.status}
+                  </Chip>
+                </div>
+                <p className="text-default-500 text-xs truncate mt-0.5 pl-6">
+                  {automation.workflowName} · {AUTOMATION_TRIGGER_LABELS[automation.triggerType] ?? automation.triggerType}
+                  {automation.lastRun ? ` · ${automation.lastRun.creditsConsumed.toFixed(2)} credits` : ""}
+                </p>
+              </div>
+              <div className="flex items-center gap-2 ml-3 shrink-0">
+                {!automation.enabled && (
+                  <Chip size="sm" variant="flat" color="warning" classNames={{ content: "text-xs" }}>
+                    Paused
+                  </Chip>
+                )}
+                <Button
+                  size="sm"
+                  variant="flat"
+                  color="primary"
+                  startContent={<Icon name="edit" className="text-sm" />}
+                  onPress={() => onOpenEditor(automation)}
+                >
+                  Edit
+                </Button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
