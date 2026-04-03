@@ -2,7 +2,7 @@
 
 import InlineWidget, {
   type InlineWidgetData,
-} from "@/components/chat/inline-widget";
+} from "@/components/agent-chat/inline-widget";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
 import { Spinner } from "@heroui/react";

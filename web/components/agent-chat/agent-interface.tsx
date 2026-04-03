@@ -1,18 +1,18 @@
 "use client";
 
-import { MyAutomationsCarousel, MyWorkflowsCarousel } from "@/components/chat/carousels";
-import type { WorkflowTaskState } from "@/components/chat/helpers";
-import { AIResponseCard, ResponseCard, UserBubble } from "@/components/chat/message-bubbles";
-import { SessionHistoryPanel } from "@/components/chat/session-history";
-import { STARTER_PROMPTS, StarterPromptButton } from "@/components/chat/starter-prompts";
-import { SubagentCard } from "@/components/chat/subagent-card";
-import { TodoList } from "@/components/chat/todo-list";
-import { WorkflowTaskCard } from "@/components/chat/workflow-task-card";
+import { MyAutomationsCarousel, MyWorkflowsCarousel } from "@/components/agent-chat/carousels";
+import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
+import { AIResponseCard, ResponseCard, UserBubble } from "@/components/agent-chat/message-bubbles";
+import { SessionHistoryPanel } from "@/components/agent-chat/session-history";
+import { STARTER_PROMPTS, StarterPromptButton } from "@/components/agent-chat/starter-prompts";
+import { SubagentCard } from "@/components/agent-chat/subagent-card";
+import { TodoList } from "@/components/agent-chat/todo-list";
+import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
 import InlineWidget, {
   type InlineWidgetData,
   parseWidgetFromToolCall,
   parseWidgetFromToolMessage,
-} from "@/components/chat/inline-widget";
+} from "@/components/agent-chat/inline-widget";
 import Icon from "@/components/misc/icon";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
@@ -32,7 +32,7 @@ export interface AIChatInterfaceProps {
   onClose?: () => void;
 }
 
-export default function AgentInterface({
+export default function AgentChat({
   variant = "panel",
   onClose,
 }: AIChatInterfaceProps) {

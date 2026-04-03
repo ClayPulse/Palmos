@@ -1,6 +1,6 @@
 "use client";
 
-import type { WorkflowTaskState } from "@/components/chat/helpers";
+import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
 import { Spinner } from "@heroui/react";
 import { useEffect, useState } from "react";

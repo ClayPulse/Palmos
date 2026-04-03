@@ -1,6 +1,6 @@
 "use client";
 
-import { getLastAIContent } from "@/components/chat/helpers";
+import { getLastAIContent } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
 import type { SubagentInfo } from "@/lib/types";
