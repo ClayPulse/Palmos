@@ -77,7 +77,7 @@ export default function AppModeToggle() {
       {pillDims && (
       <motion.div
         className="bg-content1 absolute top-0.5 bottom-0.5 left-0.5 overflow-hidden rounded-full shadow-sm dark:bg-white/15"
-        initial={{ width: pillDims.width, x: pillDims.x }}
+        initial={false}
         animate={{ width: pillDims.width, x: pillDims.x }}
         transition={springTransition}
       >

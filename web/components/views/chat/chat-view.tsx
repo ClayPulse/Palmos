@@ -1,9 +1,9 @@
 "use client";
 
-import AIChatInterface from "@/components/chat/ai-chat-interface";
+import AgentInterface from "@/components/chat/agent-interface";
 import ChatEmbedPanel, {
   EmbedPanelTab,
-} from "@/components/chat/chat-embed-panel";
+} from "@/components/chat/embed-panel";
 import { useState } from "react";
 
 export default function ChatView() {
@@ -17,7 +17,7 @@ export default function ChatView() {
           activePanel ? "hidden md:flex md:w-1/2 lg:w-2/5" : "flex-1"
         }`}
       >
-        <AIChatInterface variant="page" />
+        <AgentInterface variant="page" />
       </div>
 
       {/* Embed display panel */}

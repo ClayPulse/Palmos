@@ -20,6 +20,12 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const editorContext = useContext(EditorContext);
   const isMenuOpen = editorContext?.editorStates.isSideMenuOpen ?? false;
   const appMode = editorContext?.editorStates.appMode ?? AppModeEnum.Agent;
+  const [editorMounted, setEditorMounted] = useState(
+    appMode === AppModeEnum.Editor,
+  );
+  useEffect(() => {
+    if (appMode === AppModeEnum.Editor) setEditorMounted(true);
+  }, [appMode]);
 
   const { setTheme } = useTheme();
 
@@ -84,25 +90,18 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           className={`bg-default relative hidden h-full w-full overflow-hidden data-[animation-finished=true]:block`}
           data-animation-finished={isAnimationFinished}
         >
-          {appMode === AppModeEnum.Agent ? (
-            /* Chat mode: nav floats over full-width content */
-            <div className="relative h-full w-full overflow-hidden">
-              {isShowNavbar && (
-                <AppNavBar
-                  style={{
-                    paddingTop:
-                      getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
-                  }}
-                  left={<ChatNavLeft />}
-                  right={<ChatNavRight />}
-                />
-              )}
-              {children}
-            </div>
-          ) : (
-            /* Editor mode: side panels + main content */
-            <div className="relative grid h-full w-full grid-cols-[max-content_auto_max-content] grid-rows-1">
-              <div className="h-full w-full overflow-y-hidden">
+          <div
+            className={`relative h-full w-full overflow-hidden ${
+              editorMounted && appMode === AppModeEnum.Editor
+                ? "grid grid-cols-[max-content_1fr_max-content] grid-rows-1"
+                : ""
+            }`}
+          >
+            {/* Left side panel — only rendered after editor is first activated */}
+            {editorMounted && (
+              <div
+                className={`h-full overflow-y-hidden ${appMode === AppModeEnum.Editor ? "block" : "hidden"}`}
+              >
                 {isShowNavbar && (
                   <SideNavPanel
                     isMenuOpen={isMenuOpen}
@@ -110,20 +109,29 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                   />
                 )}
               </div>
-              <div className="relative h-full w-full overflow-hidden">
-                {isShowNavbar && (
-                  <AppNavBar
-                    style={{
-                      paddingTop:
-                        getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
-                    }}
-                    left={
+            )}
+            {/* Middle column: nav + children */}
+            <div className="relative flex h-full w-full flex-col overflow-hidden">
+              {isShowNavbar && (
+                <AppNavBar
+                  style={{
+                    paddingTop:
+                      getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
+                  }}
+                  left={
+                    appMode === AppModeEnum.Agent ? (
+                      <ChatNavLeft />
+                    ) : (
                       <EditorNavLeft
                         isMenuOpen={isMenuOpen}
                         setIsMenuOpen={setIsMenuOpen}
                       />
-                    }
-                    right={
+                    )
+                  }
+                  right={
+                    appMode === AppModeEnum.Agent ? (
+                      <ChatNavRight />
+                    ) : (
                       <EditorNavRight
                         setIsSharingOpen={() =>
                           editorContext?.updateModalStates({
@@ -131,16 +139,23 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                           })
                         }
                       />
-                    }
-                  />
-                )}
+                    )
+                  }
+                />
+              )}
+              <div className="relative min-h-0 flex-1 overflow-hidden">
                 <div className="h-full w-full overflow-hidden">{children}</div>
               </div>
-              <div className="h-full w-full overflow-y-hidden">
+            </div>
+            {/* Right chat panel — only rendered after editor is first activated */}
+            {editorMounted && (
+              <div
+                className={`h-full overflow-y-hidden ${appMode === AppModeEnum.Editor ? "block" : "hidden"}`}
+              >
                 {isShowNavbar && <ChatPanel />}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       )}
     </>

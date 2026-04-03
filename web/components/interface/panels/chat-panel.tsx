@@ -1,7 +1,7 @@
 "use client";
 "use client";
 
-import AIChatInterface from "@/components/chat/ai-chat-interface";
+import AgentInterface from "@/components/chat/agent-interface";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useContext } from "react";
 import BaseSidePanel from "./base-side-panel";
@@ -13,7 +13,7 @@ export default function ChatPanel() {
   return (
     <BaseSidePanel isOpen={isOpen} direction="right">
       <div className="h-full w-full overflow-y-hidden min-[768px]:py-2 min-[768px]:pr-2 min-[768px]:pl-1">
-        <AIChatInterface
+        <AgentInterface
           variant="panel"
           onClose={() =>
             editorContext?.setEditorStates((prev) => ({

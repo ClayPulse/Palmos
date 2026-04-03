@@ -6,7 +6,7 @@ import EditorView from "@/components/views/editor/editor-view";
 import { AppModeEnum } from "@/lib/enums";
 import useRouter from "@/lib/hooks/use-router";
 import { useSearchParams } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 
 export default function HomePage() {
   const editorContext = useContext(EditorContext);
@@ -30,9 +30,22 @@ export default function HomePage() {
     }
   }, []);
 
-  if (appMode === AppModeEnum.Agent) {
-    return <ChatView />;
-  }
+  const [editorMounted, setEditorMounted] = useState(appMode === AppModeEnum.Editor);
 
-  return <EditorView />;
+  useEffect(() => {
+    if (appMode === AppModeEnum.Editor) setEditorMounted(true);
+  }, [appMode]);
+
+  return (
+    <>
+      <div className={appMode === AppModeEnum.Agent ? "h-full w-full" : "hidden"}>
+        <ChatView />
+      </div>
+      {editorMounted && (
+        <div className={appMode === AppModeEnum.Editor ? "h-full w-full" : "hidden"}>
+          <EditorView />
+        </div>
+      )}
+    </>
+  );
 }

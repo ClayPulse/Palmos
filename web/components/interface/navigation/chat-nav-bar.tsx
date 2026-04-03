@@ -28,7 +28,7 @@ import { useContext } from "react";
 export function ChatNavLeft() {
   return (
     <a
-      href="https://palmos.ai"
+      href="/"
       target="_blank"
       rel="noopener noreferrer"
       className="flex items-center gap-2 no-underline"

@@ -4,6 +4,7 @@ import DndProvider from "@/components/providers/dnd-provider";
 import EditorContextProvider from "@/components/providers/editor-context-provider";
 import InterModuleCommunicationProvider from "@/components/providers/imc-provider";
 import InputDeviceProvider from "@/components/providers/input-device-provider";
+import ChatProvider from "@/components/providers/chat-provider";
 import ModalProvider from "@/components/providers/modal-provider";
 import RemoteModuleProvider from "@/components/providers/remote-module-provider";
 import WrappedHeroUIProvider from "@/components/providers/wrapped-hero-ui-provider";
@@ -35,6 +36,7 @@ export default async function RootLayout({
             <EditorContextProvider>
               <CapacitorProvider>
                 <InterModuleCommunicationProvider>
+                  <ChatProvider>
                   <ModalProvider>
                     <DndProvider>
                       <RemoteModuleProvider isPreventingCSS={true}>
@@ -45,6 +47,7 @@ export default async function RootLayout({
                       </RemoteModuleProvider>
                     </DndProvider>
                   </ModalProvider>
+                  </ChatProvider>
                 </InterModuleCommunicationProvider>
               </CapacitorProvider>
             </EditorContextProvider>
