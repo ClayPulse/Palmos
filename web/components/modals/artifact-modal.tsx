@@ -77,7 +77,7 @@ export default function ArtifactModal({
             <Button
               onPress={() => {
                 const url = new URL(
-                  "https://web.pulse-editor.com/?app=" + artifact.data.appId,
+                  "https://web.palmos.ai/?app=" + artifact.data.appId,
                 );
                 if (getPlatform() === PlatformEnum.Capacitor) {
                   Browser.open({

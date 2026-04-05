@@ -80,10 +80,10 @@ export default function CapacitorProvider({
       }
       /*       
         Google Verified Links
-        Check if the url has our scheme "https://mobile.pulse-editor.com" 
+        Check if the url has our scheme "https://mobile.palmos.ai" 
       */
-      // else if (event.url.startsWith("https://pulse-editor.com/mobile")) {
-      //   const slug = event.url.replace("https://pulse-editor.com/mobile", "");
+      // else if (event.url.startsWith("https://palmos.ai/mobile")) {
+      //   const slug = event.url.replace("https://palmos.ai/mobile", "");
       //   // Navigate to the slug
       //   if (slug) {
       //     router.push(slug);

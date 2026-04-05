@@ -47,7 +47,7 @@ app.use(
   connectLivereload({
     // @ts-expect-error override server options
     host: workspaceId
-      ? `${workspaceId}.workspace.pulse-editor.com"`
+      ? `${workspaceId}.workspace.palmos.ai"`
       : undefined,
     port: workspaceId ? 443 : 35729,
   }),

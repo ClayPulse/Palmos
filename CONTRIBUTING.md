@@ -70,7 +70,7 @@ Use Prettier & ESLint — run npm run lint and npm run format.
 
 - [Discord](https://discord.com/invite/s6J54HFxQp) — for real-time support.
 
-- [Marketplace Developer Program](https://pulse-editor.com/beta) — gain access to publish extensions
+- [Marketplace Developer Program](https://palmos.ai/beta) — gain access to publish extensions
 
 # Code of Conduct 🤝
 

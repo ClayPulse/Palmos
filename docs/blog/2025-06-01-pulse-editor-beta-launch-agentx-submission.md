@@ -44,7 +44,7 @@ You can now download **Early Beta builds** for **Windows** and **Android**:
 
 We’re opening up early access for developers to build and publish extensions for the Pulse Editor Marketplace. Interested?
 
-👉 [Apply for Limited Developer Access](https://pulse-editor.com/beta)
+👉 [Apply for Limited Developer Access](https://palmos.ai/beta)
 
 ---
 
@@ -55,7 +55,7 @@ We’re opening up early access for developers to build and publish extensions f
 
 Documentation is still a work in progress, but updates are coming soon at:
 - [GitHub ReadMe](https://github.com/ClayPulse/pulse-editor)
-- [Official Docs Site](https://docs.pulse-editor.com)
+- [Official Docs Site](https://docs.palmos.ai)
 
 ---
 

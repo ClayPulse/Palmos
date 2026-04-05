@@ -18,7 +18,7 @@ Palmos is a modular, cross-platform, AI-powered productivity platform with feder
 
 <div align="center">
 
-[![Static Badge](https://img.shields.io/badge/docs-8A2BE2?style=for-the-badge)](https://docs.pulse-editor.com)
+[![Static Badge](https://img.shields.io/badge/docs-8A2BE2?style=for-the-badge)](https://docs.palmos.ai)
 [![Discord](https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/s6J54HFxQp)
 [![Licence](https://img.shields.io/github/license/Ileriayo/markdown-badges?style=for-the-badge)](./LICENSE)
 
@@ -56,11 +56,11 @@ Palmos is not just another drag-and-drop backend automation tool, it is a full-s
 <table>
   <tr>
     <td align="center" width="50%">
-      <img src="https://cdn.pulse-editor.com/assets/App_Collaboration2.gif" alt="Demo2" width="100%">
+      <img src="https://cdn.palmos.ai/assets/App_Collaboration2.gif" alt="Demo2" width="100%">
       <p>Full-stack app node (e.g. <a href="https://github.com/OpenCut-app/OpenCut">OpenCut</a>)</p>
     </td>
     <td align="center" width="50%">
-      <img src="https://cdn.pulse-editor.com/assets/App_Collaboration1.gif" alt="Demo1" width="100%">
+      <img src="https://cdn.palmos.ai/assets/App_Collaboration1.gif" alt="Demo1" width="100%">
       <p>Full-stack app workflow</p>
     </td>
   </tr>
@@ -74,20 +74,20 @@ Running vibe coding workflow in canvas view allows you to develop software on an
 
 ### Dev Server Live preview
 
-![VibeCoding_LivePrevew](https://cdn.pulse-editor.com/assets/VibeCode_LivePreview.gif)
+![VibeCoding_LivePrevew](https://cdn.palmos.ai/assets/VibeCode_LivePreview.gif)
 
 ### Vibe Coding agent -- terminal control
 
-![VibeCoding_TerminalControl](https://cdn.pulse-editor.com/assets/VibeCode_TerminalControlAgent.gif)
+![VibeCoding_TerminalControl](https://cdn.palmos.ai/assets/VibeCode_TerminalControlAgent.gif)
 
 ### Vibe Coding agent -- code modification
 
-![VibeCoding_CodeEditorControl](https://cdn.pulse-editor.com/assets/VibeCode_CodeEditorControlAgent.gif)
+![VibeCoding_CodeEditorControl](https://cdn.palmos.ai/assets/VibeCode_CodeEditorControlAgent.gif)
 
 ## 2. MCP client
 
 You can connect MCP servers and Pulse full-stack apps to agentic chat. e.g. installation-free browser agent with chrome-devtools-mcp and chrome remote debugging:
-![Browser_Controller](https://cdn.pulse-editor.com/assets/MCP_Agent.png)
+![Browser_Controller](https://cdn.palmos.ai/assets/MCP_Agent.png)
 
 ## 3. Remote ComfyUI Workspace and Serverless ComfyUI Image/Video Generation (WIP)
 
@@ -96,7 +96,7 @@ You can run workflows with [Pulse App ComfyUI Workflow](https://github.com/Shell
 ### Remote ComfyUI Workspace
 
 You can even run remote ComfyUI on Palmos mobile app.
-![Remote_ComfyUI](https://cdn.pulse-editor.com/assets/remote-comfyui.jpg)
+![Remote_ComfyUI](https://cdn.palmos.ai/assets/remote-comfyui.jpg)
 
 ### Serverless ComfyUI Inference (Coming soon)
 
@@ -115,26 +115,26 @@ have to start a [remote workspace](#start-a-remote-workspace) first.
 
 1. Create a new project or select a project <br/>
    **Create project:**
-   ![Workspace_CreateProject](https://cdn.pulse-editor.com/assets/Workspace_CreateProject.gif)
+   ![Workspace_CreateProject](https://cdn.palmos.ai/assets/Workspace_CreateProject.gif)
    **Select project:**
-   ![Workspace_SelectProject](https://cdn.pulse-editor.com/assets/Workspace_SelectProject.gif)
+   ![Workspace_SelectProject](https://cdn.palmos.ai/assets/Workspace_SelectProject.gif)
 2. Create a new workspace or select a workspace <br/>
    **Create workspace:**
-   ![Workspace_CreateWorkspace](https://cdn.pulse-editor.com/assets/Workspace_CreateWorkspace.gif)
+   ![Workspace_CreateWorkspace](https://cdn.palmos.ai/assets/Workspace_CreateWorkspace.gif)
    **Select workspace:**
-   ![Workspace_CreateWorkspace](https://cdn.pulse-editor.com/assets/Workspace_SelectWorkspace.gif)
+   ![Workspace_CreateWorkspace](https://cdn.palmos.ai/assets/Workspace_SelectWorkspace.gif)
 
 ### Create file in workspace
 
-![Workspace_CreateFile](https://cdn.pulse-editor.com/assets/Workspace_CreateFile.gif)
+![Workspace_CreateFile](https://cdn.palmos.ai/assets/Workspace_CreateFile.gif)
 
 ### Send file to app node
 
-![Workspace_OpenFile](https://cdn.pulse-editor.com/assets/Workspace_OpenFile.gif)
+![Workspace_OpenFile](https://cdn.palmos.ai/assets/Workspace_OpenFile.gif)
 
 ### Open and interact with workspace terminal
 
-![Workspace_CreateTerminalInWorkspace](https://cdn.pulse-editor.com/assets/Workspace_CreateTerminalInWorkspace.gif)
+![Workspace_CreateTerminalInWorkspace](https://cdn.palmos.ai/assets/Workspace_CreateTerminalInWorkspace.gif)
 
 ## Build your own Pulse App
 
@@ -154,7 +154,7 @@ Then, create a new template using:
 pulse create
 ```
 
-![pulse-cli](https://cdn.pulse-editor.com/assets/pulse-cli.png)
+![pulse-cli](https://cdn.palmos.ai/assets/pulse-cli.png)
 
 Next, select your development framework (only React is supported for now) and fill in your project name.
 
@@ -166,7 +166,7 @@ You can also choose visibility of your app on Palmos marketplace.
 
 ### Publishing your app to Palmos marketplace
 
-To publish your app to marketplace, go to https://pulse-editor.com to create a developer API key.
+To publish your app to marketplace, go to https://palmos.ai to create a developer API key.
 Then copy your key and run:
 
 ```bash
@@ -202,14 +202,14 @@ We plan to have 2-3 major beta release stages before we reach a stable release v
 
 Palmos is now available on Android and Desktop (tested for Windows, needs more testing for Linux and MacOS).
 
-Palmos Marketplace now is available for editor users. Simply download Palmos, and view all available extensions in the extension page. You can also browser and search extensions in [Marketplace Web (WIP)](https://pulse-editor.com/marketplace). As for now, the following extensions are available:
+Palmos Marketplace now is available for editor users. Simply download Palmos, and view all available extensions in the extension page. You can also browser and search extensions in [Marketplace Web (WIP)](https://palmos.ai/marketplace). As for now, the following extensions are available:
 
 - (Official) [Palmos Code View (MIT)](https://github.com/ClayPulse/pulse-editor-code-view)
 - (Official) [Palmos Terminal (MIT)](https://github.com/ClayPulse/pulse-editor-terminal)
 - (Official) [Palmos Image Editor (MIT)](https://github.com/Shellishack/pulse-editor-image-editor)
 - (Official) [Palmos Video Editor (MIT)](https://github.com/Shellishack/pulse-editor-video-editor)
 
-Palmos Marketplace Developer Access is now open for application. If you'd like to develop and publish your own extensions to Palmos Marketplace, submit a form here [Developer Beta Access](https://pulse-editor.com/beta).
+Palmos Marketplace Developer Access is now open for application. If you'd like to develop and publish your own extensions to Palmos Marketplace, submit a form here [Developer Beta Access](https://palmos.ai/beta).
 
 Even if you haven't got access to publish your extensions to the marketplace, you can still explore Palmos platform by developing your own extensions locally. This is a great opportunity to get an early look at Palmos and start experimenting with its capabilities! See [Extension Development](#pulse-editor-extension-development) below.
 
@@ -222,7 +222,7 @@ What's new in this release:
 1. Support frontend and backend module federation to allow developers to publish full-stack apps on Palmos platform.
 2. Add workflow canvas to allow collaboration among community full-stack apps.
 3. Introduce Palmos cloud platform. With the cloud platform, you can start remote dev container and use it to run automation workflows.
-4. Support web editor. Check it out at https://web.pulse-editor.com.
+4. Support web editor. Check it out at https://web.palmos.ai.
 5. Publish mobile app to Google Play (in-progress).
 6. Allow users to publish workflows to marketplace.
 7. Introduce Palmos platform AI assistants. With the platform AI assistant, you can create productivity workflow effortless via chatting. The platform AI assistant will suggest best fitted apps for you requirements and execute the workflow on your behalf.
@@ -240,13 +240,13 @@ Planned items:
 
 # Documentation and Guide
 
-The documentation and user guide will be available at https://docs.pulse-editor.com. For documentation contributors, the docs source repository is located [here](docs/).
+The documentation and user guide will be available at https://docs.palmos.ai. For documentation contributors, the docs source repository is located [here](docs/).
 
 # Getting Started -- User Guide
 
 ## Web Client
 
-There is a web deployment at https://web.pulse-editor.com
+There is a web deployment at https://web.palmos.ai
 
 ## Mobile Client
 

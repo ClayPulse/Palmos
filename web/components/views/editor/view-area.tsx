@@ -255,7 +255,7 @@ export default function ViewArea() {
     version: packageJson.version,
     author: "ClayPulse",
     license: "MIT",
-    url: "https://pulse-editor.com",
+    url: "https://palmos.ai",
     readme: readme,
   };
 

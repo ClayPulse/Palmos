@@ -18,7 +18,7 @@ vi.mock("os", () => ({
 
 vi.mock("../backend-url.js", () => ({
   getBackendUrl: vi.fn((stage: boolean) =>
-    stage ? "https://localhost:8080" : "https://pulse-editor.com"
+    stage ? "https://localhost:8080" : "https://palmos.ai"
   ),
 }));
 
@@ -158,7 +158,7 @@ describe("checkToken", () => {
     const result = await checkToken("valid-token", false);
     expect(result).toBe(true);
     expect(fetch).toHaveBeenCalledWith(
-      "https://pulse-editor.com/api/api-keys/check",
+      "https://palmos.ai/api/api-keys/check",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ token: "valid-token" }),

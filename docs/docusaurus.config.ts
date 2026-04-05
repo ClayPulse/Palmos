@@ -12,7 +12,7 @@ const config: Config = {
   favicon: "img/favicon.ico",
 
   // Set the production url of your site here
-  url: "https://docs.pulse-editor.com",
+  url: "https://docs.palmos.ai",
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   baseUrl: "/",
@@ -137,12 +137,12 @@ const config: Config = {
         },
         { to: "/blog", label: "Blog", position: "left" },
         {
-          href: "https://web.pulse-editor.com",
+          href: "https://web.palmos.ai",
           label: "Try App",
           position: "right",
         },
         {
-          href: "https://pulse-editor.com",
+          href: "https://palmos.ai",
           label: "Website",
           position: "right",
         },
@@ -196,11 +196,11 @@ const config: Config = {
           items: [
             {
               label: "Palmos",
-              href: "https://pulse-editor.com",
+              href: "https://palmos.ai",
             },
             {
               label: "Marketplace",
-              href: "https://pulse-editor.com/marketplace",
+              href: "https://palmos.ai/marketplace",
             },
           ],
         },

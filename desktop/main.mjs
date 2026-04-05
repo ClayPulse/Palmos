@@ -335,7 +335,7 @@ async function handleLogin(event) {
   });
 
   const signinUrl = app.isPackaged
-    ? "https://pulse-editor.com/api/auth/signin"
+    ? "https://palmos.ai/api/auth/signin"
     : "https://localhost:8080/api/auth/signin";
   await loginWindow.loadURL(signinUrl);
 

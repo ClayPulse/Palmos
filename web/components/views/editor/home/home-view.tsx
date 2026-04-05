@@ -288,7 +288,7 @@ function OverviewPanel({
           </Button>
           <Button
             onPress={() => {
-              window.open("https://docs.pulse-editor.com", "_blank");
+              window.open("https://docs.palmos.ai", "_blank");
             }}
             className="border-0"
           >

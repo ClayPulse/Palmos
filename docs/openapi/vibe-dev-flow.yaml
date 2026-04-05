@@ -16,7 +16,7 @@ info:
     `data:` event as JSON.
 
 servers:
-  - url: https://pulse-editor.com/api/server-function/vibe_dev_flow/latest
+  - url: https://palmos.ai/api/server-function/vibe_dev_flow/latest
     description: Production
   - url: http://localhost:6080/server-function
     description: Local development
@@ -97,7 +97,7 @@ paths:
                 artifact:
                   summary: Final artifact output
                   value: |
-                    data: {"type":"creation","messageId":42,"data":{"type":"artifactOutput","title":"App Published","description":"App published successfully!","result":"{\"publishedAppLink\":\"https://pulse-editor.com/code?app=my_app_x7k9q2\"}"\"sourceCodeArchiveLink\":\"https://pulse-editor.com/code?app=daily_wallpaper_3_ni63if\",\"appId\":\"daily_wallpaper_3_ni63if\",\"version\":\"0.0.2\"}"},"isFinal":true}
+                    data: {"type":"creation","messageId":42,"data":{"type":"artifactOutput","title":"App Published","description":"App published successfully!","result":"{\"publishedAppLink\":\"https://palmos.ai/code?app=my_app_x7k9q2\"}"\"sourceCodeArchiveLink\":\"https://palmos.ai/code?app=daily_wallpaper_3_ni63if\",\"appId\":\"daily_wallpaper_3_ni63if\",\"version\":\"0.0.2\"}"},"isFinal":true}
 
         "400":
           description: Bad Request (missing or invalid input)

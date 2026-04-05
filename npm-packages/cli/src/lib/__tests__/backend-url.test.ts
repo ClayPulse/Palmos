@@ -7,6 +7,6 @@ describe("getBackendUrl", () => {
   });
 
   it("should return production URL when stage is false", () => {
-    expect(getBackendUrl(false)).toBe("https://pulse-editor.com");
+    expect(getBackendUrl(false)).toBe("https://palmos.ai");
   });
 });

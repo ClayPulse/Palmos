@@ -13,7 +13,7 @@ vi.mock("../../token.js", () => ({
 
 vi.mock("../../backend-url.js", () => ({
   getBackendUrl: vi.fn((stage: boolean) =>
-    stage ? "https://localhost:8080" : "https://pulse-editor.com"
+    stage ? "https://localhost:8080" : "https://palmos.ai"
   ),
 }));
 
@@ -33,7 +33,7 @@ describe("publishApp", () => {
     const res = await publishApp(false);
 
     expect(fetch).toHaveBeenCalledWith(
-      "https://pulse-editor.com/api/app/publish",
+      "https://palmos.ai/api/app/publish",
       expect.objectContaining({
         method: "POST",
         headers: expect.objectContaining({
