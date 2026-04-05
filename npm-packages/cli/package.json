@@ -12,7 +12,8 @@
 	"scripts": {
 		"build": "tsx build.ts",
 		"dev": "tsx watch --include \"./src/**/*\" build.ts",
-		"test": "prettier --check . && xo && ava",
+		"test": "vitest run",
+		"test:coverage": "vitest run --coverage",
 		"link": "npm link",
 		"pack": "npm run build && npm pack --pack-destination dist"
 	},
@@ -58,6 +59,7 @@
 		"@types/livereload": "^0.9.5",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
+		"@vitest/coverage-v8": "^4.1.2",
 		"ava": "^6.4.1",
 		"chalk": "^5.6.2",
 		"eslint-config-xo-react": "^0.29.0",
@@ -68,6 +70,7 @@
 		"react-dom": "19.2.4",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
+		"vitest": "^4.1.2",
 		"xo": "^1.2.3"
 	},
 	"peerDependencies": {
