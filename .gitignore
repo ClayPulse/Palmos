@@ -26,3 +26,4 @@ dist/
 .git
 .claude/
 .next/
+coverage/
