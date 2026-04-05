@@ -61,7 +61,17 @@ function setActiveSessionId(id: string | null) {
 }
 
 export function generateSessionId(): string {
-  return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const randomSuffix = (() => {
+    const cryptoObj = (typeof globalThis !== "undefined" && (globalThis as any).crypto) || null;
+    if (cryptoObj && typeof cryptoObj.getRandomValues === "function") {
+      const array = new Uint32Array(1);
+      cryptoObj.getRandomValues(array);
+      return array[0].toString(36).slice(0, 6);
+    }
+    // Fallback: not cryptographically secure, but keeps functionality in non‑crypto environments
+    return Math.random().toString(36).slice(2, 8);
+  })();
+  return `session-${Date.now()}-${randomSuffix}`;
 }
 
 function deriveTitle(messages: SerializedMessage[]): string {
