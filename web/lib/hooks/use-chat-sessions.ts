@@ -111,13 +111,13 @@ async function apiFetch(path: string, init?: RequestInit) {
 
 export function useChatSessions() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
-  const [activeSessionId, setActiveId] = useState<string | null>(null);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const isBackendAvailable = useRef(true);
 
   // Load sessions on mount — try backend first, fallback to localStorage
   useEffect(() => {
     const storedActiveId = getActiveSessionId();
-    setActiveId(storedActiveId);
+    setActiveSessionId(storedActiveId);
 
     apiFetch("/api/chat/sessions")
       .then(async (res) => {
@@ -198,7 +198,7 @@ export function useChatSessions() {
                 // Update active session ID if it was the temp one
                 if (getActiveSessionId() === sessionId) {
                   setActiveSessionId(created.id);
-                  setActiveId(created.id);
+                  setActiveSessionId(created.id);
                 }
                 return created.id as string;
               }
@@ -240,7 +240,7 @@ export function useChatSessions() {
 
   const switchSession = useCallback(
     (sessionId: string) => {
-      setActiveId(sessionId);
+      setActiveSessionId(sessionId);
       setActiveSessionId(sessionId);
     },
     [],
@@ -248,7 +248,7 @@ export function useChatSessions() {
 
   const startNewSession = useCallback(() => {
     const id = generateSessionId();
-    setActiveId(id);
+    setActiveSessionId(id);
     setActiveSessionId(id);
     return id;
   }, []);
@@ -260,7 +260,7 @@ export function useChatSessions() {
     setSessions(local.map(({ messages: _, ...rest }) => rest));
 
     // If deleting the active session, clear it
-    setActiveId((current) => {
+    setActiveSessionId((current) => {
       if (current === sessionId) {
         setActiveSessionId(null);
         return null;
