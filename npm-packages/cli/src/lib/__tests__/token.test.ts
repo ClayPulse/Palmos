@@ -59,7 +59,7 @@ describe("saveToken", () => {
 
     saveToken("new-token", false);
 
-    const written = vi.mocked(fs.writeFileSync).mock.calls[0][1] as string;
+    const written = vi.mocked(fs.writeFileSync).mock.calls[0]![1] as string;
     const parsed = JSON.parse(written);
     expect(parsed.existingKey).toBe("value");
     expect(parsed.accessToken).toBe("new-token");

@@ -327,11 +327,11 @@ describe("parseTypeDefs", () => {
 
     const result = parseTypeDefs([mockDoc] as any);
     expect(result["input"]).toBeDefined();
-    expect(result["input"]["name"]).toEqual({
+    expect(result["input"]!["name"]).toEqual({
       type: "string",
       description: "The name of the user",
     });
-    expect(result["input"]["age"]).toEqual({
+    expect(result["input"]!["age"]).toEqual({
       type: "number",
       description: "The age",
     });
@@ -347,7 +347,7 @@ describe("parseTypeDefs", () => {
     };
 
     const result = parseTypeDefs([mockDoc] as any);
-    expect(result["input"]["name"]).toEqual({
+    expect(result["input"]!["name"]).toEqual({
       type: "string",
       description: "Optional name",
     });
