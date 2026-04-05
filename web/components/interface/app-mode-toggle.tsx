@@ -7,6 +7,7 @@ import type { Transition } from "framer-motion";
 import { motion } from "framer-motion";
 import {
   useContext,
+  useEffect,
   useLayoutEffect,
   useRef,
   useState,
@@ -52,6 +53,17 @@ export default function AppModeToggle() {
     editorContext?.setEditorStates((prev) => ({ ...prev, appMode: mode }));
   };
 
+  const [isDark, setIsDark] = useState(false);
+  useEffect(() => {
+    const el = document.documentElement;
+    setIsDark(el.classList.contains("dark"));
+    const observer = new MutationObserver(() => setIsDark(el.classList.contains("dark")));
+    observer.observe(el, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
+  const inactiveColor = isDark ? "#9ca3af" : "#6b7280";
+  const editorActiveColor = isDark ? "#f3f4f6" : "#1f2937";
+
   const colorTransition: Transition = { duration: 0.25, ease: "easeInOut" };
   const springTransition: Transition = {
     type: "spring",
@@ -64,8 +76,8 @@ export default function AppModeToggle() {
       {/* Single always-rendered pill – slides, resizes, and crossfades color */}
       {pillDims && (
       <motion.div
-        className="bg-content1 absolute top-0.5 bottom-0.5 left-0.5 overflow-hidden rounded-full shadow-sm dark:bg-white/12"
-        initial={{ width: pillDims.width, x: pillDims.x }}
+        className="bg-content1 absolute top-0.5 bottom-0.5 left-0.5 overflow-hidden rounded-full shadow-sm dark:bg-white/15"
+        initial={false}
         animate={{ width: pillDims.width, x: pillDims.x }}
         transition={springTransition}
       >
@@ -86,7 +98,7 @@ export default function AppModeToggle() {
         <motion.span
           className="flex items-center gap-0.5"
           animate={{
-            color: appMode === AppModeEnum.Agent ? "#ffffff" : "#6b7280",
+            color: appMode === AppModeEnum.Agent ? "#ffffff" : inactiveColor,
           }}
           transition={colorTransition}
         >
@@ -102,7 +114,7 @@ export default function AppModeToggle() {
         <motion.span
           className="flex items-center gap-1.5"
           animate={{
-            color: appMode === AppModeEnum.Editor ? "#1f2937" : "#6b7280",
+            color: appMode === AppModeEnum.Editor ? editorActiveColor : inactiveColor,
           }}
           transition={colorTransition}
         >

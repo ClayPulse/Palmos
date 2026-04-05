@@ -194,6 +194,28 @@ export default function useDeepAgent(
     setIsLoading(false);
   }, []);
 
+  const clear = useCallback(() => {
+    abortRef.current?.abort();
+    abortRef.current = null;
+    messageMapRef.current.clear();
+    setMessages([]);
+    setIsLoading(false);
+    setError(null);
+    setTodos([]);
+  }, []);
+
+  const loadMessages = useCallback(
+    (msgs: BaseMessage[]) => {
+      messageMapRef.current.clear();
+      for (const msg of msgs) {
+        const id = msg.id ?? generateId();
+        messageMapRef.current.set(id, msg);
+      }
+      syncDisplay();
+    },
+    [syncDisplay],
+  );
+
   const getSubagentsByMessage = useCallback(
     (_messageId: string): SubagentInfo[] => {
       // Subagent tracking not implemented in manual SSE mode
@@ -210,6 +232,8 @@ export default function useDeepAgent(
     subagents: [] as SubagentInfo[],
     submit,
     stop,
+    clear,
+    loadMessages,
     getSubagentsByMessage,
   };
 }

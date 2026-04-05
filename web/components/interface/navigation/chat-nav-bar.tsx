@@ -25,9 +25,33 @@ import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useContext } from "react";
 
-export function ChatNavLeft() {
+export function ChatNavLeft({
+  onToggleSidebar,
+  isSidebarOpen,
+}: {
+  onToggleSidebar?: () => void;
+  isSidebarOpen?: boolean;
+}) {
   return (
     <div className="flex items-center gap-2">
+      {onToggleSidebar && (
+        <button
+          onClick={onToggleSidebar}
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-default-500 transition-colors hover:bg-default-100 dark:text-white/60 dark:hover:bg-white/10"
+        >
+          <Icon
+            name={isSidebarOpen ? "menu_open" : "menu"}
+            variant="round"
+            className="text-xl"
+          />
+        </button>
+      )}
+      <a
+        href="/"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex items-center gap-2 no-underline"
+      >
       <motion.span
         className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
         animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
@@ -42,6 +66,7 @@ export function ChatNavLeft() {
       >
         PALMOS AI
       </motion.span>
+    </a>
     </div>
   );
 }

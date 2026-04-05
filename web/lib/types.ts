@@ -270,6 +270,10 @@ export type ModalStates = {
     provider?: string;
     config?: import("@pulse-editor/shared-utils").OAuthConnectConfig;
   };
+  automationEditor?: {
+    isOpen?: boolean;
+    automation?: Automation;
+  };
 };
 
 export type OpenFileDialogConfig = {
@@ -714,5 +718,53 @@ export interface InlineWidgetData {
     edges?: unknown[];
   };
 }
+
+// #endregion
+
+// #region Automations
+
+export type TriggerType = "schedule" | "webhook" | "manual" | "agentic";
+
+export type Automation = {
+  id: string;
+  userId: string;
+  name: string;
+  workflowName: string;
+  workflowVersion: string;
+  triggerType: TriggerType;
+  cronExpression?: string;
+  webhookToken?: string;
+  webhookSecret?: string;
+  webhookUrl?: string | null;
+  inputArgs?: Record<string, any>;
+  enabled: boolean;
+  status: "idle" | "running" | "error";
+  lastRunAt?: string;
+  lastTaskId?: string;
+  consecutiveFailures: number;
+  createdAt: string;
+  updatedAt: string;
+  _count?: { runs: number };
+  lastRun?: {
+    creditsConsumed: number;
+    status: string;
+    startedAt: string;
+  } | null;
+};
+
+export type AutomationRun = {
+  id: string;
+  automationId: string;
+  taskId: string;
+  status: "pending" | "running" | "completed" | "failed";
+  triggerSource: TriggerType;
+  triggerData?: any;
+  startedAt: string;
+  completedAt?: string;
+  durationMs?: number;
+  creditsConsumed: number;
+  nodeCount: number;
+  error?: string;
+};
 
 // #endregion
