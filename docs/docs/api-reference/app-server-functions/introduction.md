@@ -22,7 +22,7 @@ You can call App Server Functions via HTTP requests to the appropriate endpoints
 The base URL for App Server Functions deployed on Pulse Editor is:
 
 ```
-https://pulse-editor.com/api/server-function/<app_id>/<app_version>/<function_path>
+https://palmos.ai/api/server-function/<app_id>/<app_version>/<function_path>
 ```
 
 When calling the App Server Function, you must include your Pulse Editor API key in the request headers for authentication:
@@ -35,4 +35,4 @@ Authorization: Bearer <your_api_key>
 
 App Server Functions usage is billed based on the number of requests and compute time. The developer of the Pulse App may set specific pricing for their App Server Functions. Please refer to the app's pricing details on Pulse Editor Marketplace for more information.
 
-To use a paid App Server Function, ensure you have enough credits in your Pulse Editor account. You can check your balance and subscribe to a plan to add more credits. See [pricing](https://pulse-editor.com/pricing) to get more information on subscription plans.
+To use a paid App Server Function, ensure you have enough credits in your Pulse Editor account. You can check your balance and subscribe to a plan to add more credits. See [pricing](https://palmos.ai/pricing) to get more information on subscription plans.

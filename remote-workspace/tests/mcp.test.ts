@@ -18,7 +18,7 @@ describe("Test MCP", () => {
 
     const fsSystemTransport = new SSEClientTransport(
       new URL(
-        `https://${workspaceId}.workspace.pulse-editor.com/api-${workspaceId}/mcp-servers/fs/sse`,
+        `https://${workspaceId}.workspace.palmos.ai/api-${workspaceId}/mcp-servers/fs/sse`,
       ),
       {},
     );
@@ -42,7 +42,7 @@ describe("Test MCP", () => {
 
     const fsSystemTransport = new SSEClientTransport(
       new URL(
-        `https://${workspaceId}.workspace.pulse-editor.com/api-${workspaceId}/mcp-servers/terminal/sse`,
+        `https://${workspaceId}.workspace.palmos.ai/api-${workspaceId}/mcp-servers/terminal/sse`,
       ),
       {},
     );

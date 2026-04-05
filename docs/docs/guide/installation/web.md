@@ -2,7 +2,7 @@
 
 ## Use Pulse Editor in your browser
 
-No installation required. Open [Pulse Editor Web](https://web.pulse-editor.com) in browser to get started.
+No installation required. Open [Pulse Editor Web](https://web.palmos.ai) in browser to get started.
 
 :::warning
 

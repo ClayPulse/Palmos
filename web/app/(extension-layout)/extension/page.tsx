@@ -82,7 +82,7 @@ export default function ExtensionPage({}) {
 
         // Determine if the app is hosted on a CDN origin
         const expectedCdnOrigin =
-          process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com";
+          process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.palmos.ai";
 
         let isCdnOrigin = false;
         try {
@@ -133,7 +133,7 @@ export default function ExtensionPage({}) {
       // Patch DOM resources to CDN
       // -------------------
       const cdnBase =
-        process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.pulse-editor.com";
+        process.env.NEXT_PUBLIC_CDN_URL ?? "https://cdn.palmos.ai";
       const storageContainer = process.env.NEXT_PUBLIC_STORAGE_CONTAINER;
 
       const patchResources = () => {

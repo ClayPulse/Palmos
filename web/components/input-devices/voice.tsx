@@ -68,12 +68,12 @@ function VADWrapper({
     baseAssetPath:
       getPlatform() === PlatformEnum.Web &&
       process.env.NODE_ENV === "production"
-        ? "https://cdn.pulse-editor.com/assets/vad/"
+        ? "https://cdn.palmos.ai/assets/vad/"
         : "/vad/",
     onnxWASMBasePath:
       getPlatform() === PlatformEnum.Web &&
       process.env.NODE_ENV === "production"
-        ? "https://cdn.pulse-editor.com/assets/vad/"
+        ? "https://cdn.palmos.ai/assets/vad/"
         : "/vad/",
     positiveSpeechThreshold: threshold,
     onSpeechStart: () => {

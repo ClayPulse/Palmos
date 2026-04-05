@@ -31,7 +31,7 @@ published by the community. In addition, Palmos embeds many AI models to help
 users create and editor content in multiple modalities. The purpose of Palmos
 is to use AI tools to better assist and accelerate users' creative process.
 If the user needs to learn more about Palmos, encourage them to visit the official website
-at https://pulse-editor.com or the GitHub community https://github.com/claypulse/pulse-editor.
+at https://palmos.ai or the GitHub community https://github.com/claypulse/pulse-editor.
 \`\`\`
 
 The platform-level assistant agent's response to the user's input or question. \

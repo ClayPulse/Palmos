@@ -27,7 +27,7 @@ async function createEndpoints(
     // Get the requested URL
     const serverUrl = req.protocol + "://" + req.get("host") + req.originalUrl;
 
-    // Redirect to https://editor.pulse-editor.com and append
+    // Redirect to https://editor.palmos.ai and append
     // this instance's URL as a query parameter
     const url = new URL(frontendUrl);
     url.searchParams.append("instance", serverUrl);

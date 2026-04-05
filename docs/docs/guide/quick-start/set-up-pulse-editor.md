@@ -11,7 +11,7 @@ Pulse Editor is an all-in-one AI creative platform that allows you to create wor
 1. The Pulse Editor Creative AI can interact with extensions on your behalf. Most extensions expose some commands that Pulse Editor Creative AI can understand. After chatting or talking with the user, Pulse Editor Creative AI may decide to run these commands to help user with some certain tasks.
 2. Some extensions may have features that use AI models (e.g. Code Agent from Pulse Editor Code needs to have access to a LLM). Pulse Editor core exposes unified AI calling APIs to these extensions.
 
-For both scenarios, you can choose to either bring your own AI model API keys from providers, or subscribe to [Pulse Editor's plans (Coming Soon)](https://pulse-editor.com/pricing) to use our managed AI services.
+For both scenarios, you can choose to either bring your own AI model API keys from providers, or subscribe to [Pulse Editor's plans (Coming Soon)](https://palmos.ai/pricing) to use our managed AI services.
 
 :::info
 You can also choose not to set up AI if you do not need to use Pulse Editor Creative AI and installed extensions do not call AI models. There are still many non-AI functions from all kinds of extensions that might be helpful for your project. Jump to [next step](/guide/quick-start/how-to-use-extensions) to get started using extensions right away.

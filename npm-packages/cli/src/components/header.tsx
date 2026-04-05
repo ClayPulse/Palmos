@@ -6,7 +6,7 @@ export default function Header() {
 		<Box flexDirection="column" alignItems="center">
 			<Text color={'whiteBright'}>Palmos CLI</Text>
 			<Text>Version: 0.0.1</Text>
-			<Text color={'blueBright'}>https://pulse-editor.com</Text>
+			<Text color={'blueBright'}>https://palmos.ai</Text>
 		</Box>
 	);
 }

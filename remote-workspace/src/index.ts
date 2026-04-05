@@ -17,7 +17,7 @@ const serverPort = process.env.SERVER_PORT
 const certPath = process.env.SSL_CERT_PATH;
 const keyPath = process.env.SSL_KEY_PATH;
 const workspaceId = process.env.WORKSPACE_ID;
-const frontendUrl = process.env.FRONTEND_URL ?? "https://web.pulse-editor.com";
+const frontendUrl = process.env.FRONTEND_URL ?? "https://web.palmos.ai";
 
 const HOST = "0.0.0.0";
 

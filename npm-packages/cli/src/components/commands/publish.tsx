@@ -133,7 +133,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 				<Text>
 					You are not authenticated or your access token is invalid. Publishing
 					to Extension Marketplace is in Beta access. Please visit
-					<Text color={'blueBright'}> https://pulse-editor.com/beta </Text>to
+					<Text color={'blueBright'}> https://palmos.ai/beta </Text>to
 					apply for Beta access.
 				</Text>
 			) : (
