@@ -14,24 +14,9 @@ export function useWorkspace(isFetchContent: boolean = true) {
 
   const workspace = editorContext?.editorStates?.currentWorkspace;
 
-  const { data: cloudWorkspaces, mutate: mutateCloudWorkspaces } = useSWR<
-    WorkspaceConfig[]
-  >(
-    session && isFetchContent ? `/api/workspace/list` : null,
-    async (url: string) => {
-      const res = await fetchAPI(url);
-      if (!res.ok) {
-        throw new Error("Failed to fetch workspace data");
-      }
-      const {
-        workspaces,
-      }: {
-        workspaces: WorkspaceConfig[];
-      } = await res.json();
-
-      return workspaces;
-    },
-  );
+  // Workspace list fetching removed — workspace feature has been deprecated
+  const cloudWorkspaces: WorkspaceConfig[] | undefined = undefined;
+  const mutateCloudWorkspaces = async () => undefined;
 
   // Check workspace status
   const { data: isWorkspaceHealthy } = useSWR<boolean>(

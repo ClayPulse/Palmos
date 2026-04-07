@@ -32,6 +32,11 @@ export default function useAppSettings(appId: string) {
     setIsLoaded(true);
   }
 
+  /**
+   * Save new settings for the app. Keys and values will become available in the frontend via the `useAppSettings` hook;
+   * they will also be available in the backend via the process.env object.
+   * @param newSettings The new settings to be saved for the app.
+   */
   async function updateSettings(newSettings: Record<string, any>) {
     await imc?.sendMessage(IMCMessageTypeEnum.EditorSetAppSettings, {
       appId,

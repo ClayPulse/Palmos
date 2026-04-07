@@ -475,6 +475,7 @@ export type Workflow = {
   thumbnail?: string;
   visibility: "private" | "public" | "unlisted";
   requireWorkspace: boolean;
+  webhookVerifyToken?: string;
   createdAt?: string;
 };
 
