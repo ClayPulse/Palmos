@@ -149,32 +149,20 @@ export function useExtensionAppManager(fetchCategory?: string) {
   }
 
   async function enableExtensionApp(name: string): Promise<void> {
-    const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
-    const newExtensions = extensions.map((ext) => {
-      if (ext.config.id === name) {
-        ext.isEnabled = true;
-      }
-      return ext;
-    });
-
     editorContext?.setPersistSettings((prev) => ({
       ...prev,
-      extensions: newExtensions,
+      extensions: (prev?.extensions ?? []).map((ext) =>
+        ext.config.id === name ? { ...ext, isEnabled: true } : ext,
+      ),
     }));
   }
 
   async function disableExtensionApp(name: string): Promise<void> {
-    const extensions = (await editorContext?.persistSettings?.extensions) ?? [];
-    const newExtensions = extensions.map((ext) => {
-      if (ext.config.id === name) {
-        ext.isEnabled = false;
-      }
-      return ext;
-    });
-
     editorContext?.setPersistSettings((prev) => ({
       ...prev,
-      extensions: newExtensions,
+      extensions: (prev?.extensions ?? []).map((ext) =>
+        ext.config.id === name ? { ...ext, isEnabled: false } : ext,
+      ),
     }));
   }
 

@@ -768,4 +768,19 @@ export type AutomationRun = {
   error?: string;
 };
 
+export type WorkflowRun = {
+  id: string;
+  workflowId: string;
+  userId: string;
+  taskId: string;
+  status: "running" | "completed" | "failed";
+  result?: any;
+  error?: string;
+  startedAt: string;
+  completedAt?: string;
+  durationMs?: number;
+  creditsConsumed: number;
+  nodeCount: number;
+};
+
 // #endregion
