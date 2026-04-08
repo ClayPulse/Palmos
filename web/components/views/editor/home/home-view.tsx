@@ -12,12 +12,11 @@ import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useChatContext } from "@/components/providers/chat-provider";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
 import { AppViewConfig, ExtensionApp, Session, TabItem, Workflow } from "@/lib/types";
 import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
-import { Button, Divider, Input, Listbox, ListboxItem, Skeleton } from "@heroui/react";
+import { Button, Divider, Input, Skeleton } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
-import { useMediaQuery } from "react-responsive";
+
 
 export default function HomeView() {
   const editorContext = useContext(EditorContext);
@@ -616,9 +615,6 @@ function MyResources() {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const { cloudWorkspaces } = useWorkspace();
-  const isListClickable = useMediaQuery({ maxWidth: 640 });
-
   return (
     <div className="flex w-full shrink-0 flex-col">
       <div className="flex items-center gap-x-4 py-1">
@@ -642,63 +638,6 @@ function MyResources() {
           </div>
         </Button>
       </div>
-
-      <h3 className="text-medium pb-1 text-center font-medium">
-        {t("homeView.cloudWorkspaces")}
-      </h3>
-      <Listbox className="w-full">
-        {cloudWorkspaces?.map((ws, index) => (
-          <ListboxItem
-            key={index}
-            description={`vCPU:${ws.cpuLimit}, RAM:${ws.memoryLimit}, Storage:${ws.volumeSize}`}
-            className="bg-content3 w-full"
-            onPress={() => {
-              if (isListClickable) {
-                editorContext?.updateModalStates({
-                  workspaceSettings: {
-                    isOpen: true,
-                    initialWorkspace: ws,
-                    isShowUseButton: false,
-                  },
-                });
-              }
-            }}
-            endContent={
-              <div className="flex items-center gap-x-1">
-                <div
-                  data-is-running={ws.status === "running"}
-                  className="bg-warning data-[is-running=true]:bg-success h-1 w-1 rounded-full"
-                ></div>
-                <p
-                  className="data-[is-running=true]:text-success text-warning text-sm"
-                  data-is-running={ws.status === "running"}
-                >
-                  {ws.status}
-                </p>
-                <Button
-                  className="hidden sm:block"
-                  variant="light"
-                  size="sm"
-                  color="primary"
-                  onPress={() => {
-                    editorContext?.updateModalStates({
-                      workspaceSettings: {
-                        isOpen: true,
-                        initialWorkspace: ws,
-                        isShowUseButton: false,
-                      },
-                    });
-                  }}
-                >
-                  {t("subscription.managePlan")}
-                </Button>
-              </div>
-            }
-          >
-            {ws.name}
-          </ListboxItem>
-        )) ?? []}
-      </Listbox>
     </div>
   );
 }

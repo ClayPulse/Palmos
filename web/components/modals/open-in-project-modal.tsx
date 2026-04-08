@@ -1,33 +1,24 @@
 "use client";
 
-import { PlatformEnum } from "@/lib/enums";
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
-import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { useTranslations } from '@/lib/hooks/use-translations';
 import {
   AppViewConfig,
   ExtensionApp,
   ProjectInfo,
-  SpecOption,
   Workflow,
 } from "@/lib/types";
 import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
-import { getUnitFromUnitString, specsOptions } from "@/lib/workspace/specs";
 import {
   addToast,
   Button,
-  Divider,
   Input,
-  NumberInput,
   Select,
   SelectItem,
   Spinner,
 } from "@heroui/react";
-import { useContext, useEffect, useMemo, useState } from "react";
-import Icon from "../misc/icon";
+import { useContext, useEffect, useState } from "react";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
@@ -41,15 +32,6 @@ export default function OpenInProjectModal({
   const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const { platformApi } = usePlatformApi();
-  const {
-    workspace,
-    createWorkspace,
-    selectWorkspace,
-    cloudWorkspaces,
-    isWorkspaceHealthy,
-  } = useWorkspace();
-
   const { openProject, createProject, refreshProjects } = useProjectManager();
   const { createAppViewInCanvasView, createCanvasTabView } =
     useTabViewManager();
@@ -60,71 +42,22 @@ export default function OpenInProjectModal({
     ProjectInfo | undefined
   >(undefined);
   const [isProjectOpen, setIsProjectOpen] = useState(false);
-
-  const [isCreateNewWorkspace, setIsCreateNewWorkspace] = useState(false);
-  const [workspaceName, setWorkspaceName] = useState("");
-  const [storage, setStorage] = useState(5);
-  const [selectedSpec, setSelectedSpec] = useState<SpecOption>(specsOptions[0]);
-  const [isWorkspaceReady, setIsWorkspaceReady] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const isUseWorkspace = useMemo(() => {
-    const { app, workflow } =
-      editorContext?.editorStates.modalStates?.openInProject || {};
-    if (app) {
-      return app.config.requireWorkspace;
-    } else if (workflow) {
-      return workflow.requireWorkspace;
-    }
-    return false;
-  }, [editorContext?.editorStates.modalStates?.openInProject]);
-
-  // Prep workspace if needed when project is opened
-  useEffect(() => {
-    async function prepareWorkspace() {
-      if (isProjectOpen && isUseWorkspace) {
-        if (isCreateNewWorkspace) {
-          await createNewWorkspace();
-        } else {
-          await selectWorkspace(workspace?.id);
-        }
-
-        addToast({
-          title: t('openInProjectModal.toast.preparingWorkspace.title'),
-          description: t('openInProjectModal.toast.preparingWorkspace.description'),
-        });
-      }
-    }
-
-    prepareWorkspace();
-  }, [isProjectOpen, isUseWorkspace]);
-
-  // Wait until workspace is healthy
-  useEffect(() => {
-    if (isProjectOpen && isUseWorkspace && isWorkspaceHealthy) {
-      setIsWorkspaceReady(true);
-    }
-  }, [isWorkspaceHealthy, isProjectOpen, isUseWorkspace]);
-
-  // If workspace is needed and ready, open the app/workflow;
-  // or if workspace is not needed, open the app/workflow directly
+  // When project is opened, open the app/workflow directly
   useEffect(() => {
     async function openWhenReady() {
       if (isProjectOpen) {
-        if ((isUseWorkspace && isWorkspaceReady) || !isUseWorkspace) {
-          await openAppOrWorkflow(
-            editorContext?.editorStates.modalStates?.openInProject
-              ?.isOpenAppInFullscreen,
-          );
-          // Reset states
-          setIsProjectOpen(false);
-          setIsWorkspaceReady(false);
-        }
+        await openAppOrWorkflow(
+          editorContext?.editorStates.modalStates?.openInProject
+            ?.isOpenAppInFullscreen,
+        );
+        setIsProjectOpen(false);
       }
     }
 
     openWhenReady();
-  }, [isWorkspaceReady, isProjectOpen, isUseWorkspace]);
+  }, [isProjectOpen]);
 
   async function handleOpenInProject() {
     setIsLoading(true);
@@ -207,53 +140,6 @@ export default function OpenInProjectModal({
     );
   }
 
-  async function createNewWorkspace() {
-    if (!platformApi) {
-      addToast({
-        title: t('openInProjectModal.toast.unableToCreate.title'),
-        description: t('openInProjectModal.toast.unableToCreate.unknownPlatform'),
-        color: "danger",
-      });
-      return;
-    } else if (workspaceName === "") {
-      addToast({
-        title: t('openInProjectModal.toast.unableToCreate.title'),
-        description: t('openInProjectModal.toast.unableToCreate.nameRequired'),
-        color: "danger",
-      });
-      return;
-    }
-
-    // Create workspace
-    try {
-      const specs = selectedSpec.key;
-      const volumeSize = getUnitFromUnitString(storage.toString(), "Gi");
-
-      addToast({
-        title: t('openInProjectModal.toast.creatingWorkspace.title'),
-        description: t('openInProjectModal.toast.creatingWorkspace.description', {
-          name: workspaceName,
-          cpu: selectedSpec.vCPU,
-          ram: selectedSpec.ram,
-          storage: volumeSize
-        }),
-      });
-      await createWorkspace(workspaceName, specs, volumeSize);
-      addToast({
-        title: t('openInProjectModal.toast.workspaceCreated.title'),
-        description: t('openInProjectModal.toast.workspaceCreated.description', { name: workspaceName }),
-        color: "success",
-      });
-      setIsCreateNewWorkspace(false);
-    } catch (error: any) {
-      addToast({
-        title: t('openInProjectModal.toast.errorCreating.title'),
-        description: error.message,
-        color: "danger",
-      });
-    }
-  }
-
   return (
     <ModalWrapper isOpen={isOpen} onClose={onClose} title={t('openInProjectModal.title')}>
       <div className="flex h-full w-full flex-col items-center space-y-4 p-4">
@@ -291,127 +177,6 @@ export default function OpenInProjectModal({
                 <SelectItem key={project.name}>{project.name}</SelectItem>
               )) ?? []}
             </Select>
-          </div>
-        )}
-
-        {isUseWorkspace && (
-          <div className="flex flex-col items-center gap-y-1">
-            <p>
-              {t('openInProjectModal.workspaceRequired')}
-            </p>
-
-            <div className="flex w-full justify-center px-8">
-              <Select
-                color="default"
-                className="w-full"
-                classNames={{
-                  mainWrapper: "h-10",
-                  trigger: "py-0.5 min-h-10",
-                }}
-                label={t('openInProjectModal.selectWorkspace')}
-                placeholder={t('openInProjectModal.selectWorkspace')}
-                isLoading={
-                  !editorContext?.editorStates?.isSigningIn && !cloudWorkspaces
-                }
-                selectedKeys={
-                  workspace
-                    ? [workspace.id]
-                    : getPlatform() === PlatformEnum.Electron
-                      ? ["__internal-local"]
-                      : []
-                }
-                size="sm"
-                disabledKeys={workspace ? [] : ["settings"]}
-                onSelectionChange={async (key) => {
-                  if (key.currentKey === "__internal-create-new") {
-                    await selectWorkspace(undefined);
-                    setIsCreateNewWorkspace(true);
-                    return;
-                  } else if (key.currentKey === "__internal-settings") {
-                    await selectWorkspace(undefined);
-                    return;
-                  } else if (key.currentKey === "__internal-local") {
-                    await selectWorkspace(undefined);
-                    return;
-                  }
-
-                  setIsCreateNewWorkspace(false);
-
-                  const selectedWorkspace = cloudWorkspaces?.find(
-                    (workspace) => workspace.id === key.currentKey,
-                  );
-                  await selectWorkspace(selectedWorkspace?.id);
-                }}
-              >
-                <>
-                  {getPlatform() === PlatformEnum.Electron && (
-                    <SelectItem key={"__internal-local"}>
-                      {t('openInProjectModal.localComputer')}
-                    </SelectItem>
-                  )}
-                  {cloudWorkspaces?.map((workspace) => (
-                    <SelectItem key={workspace.id}>{workspace.name}</SelectItem>
-                  )) ?? []}
-                  <SelectItem
-                    key={"__internal-create-new"}
-                    className="bg-primary text-primary-foreground"
-                    color="primary"
-                    startContent={
-                      <div className="text-primary-foreground h-4 w-4">
-                        <Icon name="add" variant="round" />
-                      </div>
-                    }
-                  >
-                    {t('common.create')}
-                  </SelectItem>
-                </>
-              </Select>
-            </div>
-
-            {isCreateNewWorkspace && (
-              <>
-                <Divider />
-                <Input
-                  label={t('openInProjectModal.workspaceName')}
-                  isRequired
-                  value={workspaceName}
-                  onValueChange={setWorkspaceName}
-                />
-                <Select
-                  label={t('openInProjectModal.workspaceSpecs')}
-                  selectedKeys={[selectedSpec.key]}
-                  onSelectionChange={(key) => {
-                    const spec = specsOptions.find(
-                      (option) => option.key === key.currentKey,
-                    );
-                    if (spec) {
-                      setSelectedSpec(spec);
-                    }
-                  }}
-                  disabledKeys={["more to come"]}
-                  isDisabled={workspace ? true : false}
-                >
-                  <>
-                    {specsOptions.map((option) => (
-                      <SelectItem
-                        key={option.key}
-                      >{`${option.vCPU} vCPU, ${option.ram} GB RAM`}</SelectItem>
-                    ))}
-                    <SelectItem isReadOnly key={"more to come"}>
-                      <p className="pl-5 text-center">{t('openInProjectModal.moreToCome')}</p>
-                    </SelectItem>
-                  </>
-                </Select>
-                <NumberInput
-                  label={t('openInProjectModal.storageGB')}
-                  value={storage}
-                  onValueChange={setStorage}
-                  minValue={2}
-                  maxValue={512}
-                  isDisabled={workspace ? true : false}
-                />
-              </>
-            )}
           </div>
         )}
 
