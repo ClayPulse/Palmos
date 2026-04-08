@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useContext, useEffect, useState } from "react";
 import { AbstractPlatformAPI } from "../platform-api/abstract-platform-api";
 import { getAbstractPlatformAPI } from "../platform-api/get-platform-api";
-import { useWorkspace } from "./use-workspace";
 
 export function usePlatformApi() {
-  const { workspace } = useWorkspace();
+  const editorContext = useContext(EditorContext);
+  const workspace = editorContext?.editorStates?.currentWorkspace;
 
   const [platformApi, setPlatformApi] = useState<
     AbstractPlatformAPI | undefined

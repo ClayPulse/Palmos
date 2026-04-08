@@ -1,4 +1,6 @@
 import { captureWorkflowCanvas } from "@/lib/html2canvas/print-canvas";
+import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppNodeData, Workflow } from "@/lib/types";
 import {
@@ -8,11 +10,12 @@ import {
   Input,
   Select,
   SelectItem,
+  Spinner,
   Textarea,
 } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
-import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useEffect, useState } from "react";
+import { useSWRConfig } from "swr";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
@@ -27,6 +30,8 @@ function bumpVersion(version: string): string {
   }
   return version;
 }
+
+type PublishMode = "update" | "new";
 
 export default function PublishWorkflowModal({
   isOpen,
@@ -48,16 +53,18 @@ export default function PublishWorkflowModal({
   }>;
   openedWorkflow?: Workflow;
 }) {
-  const {getTranslations: t} = useTranslations();
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const openedWorkflowName = openedWorkflow?.name;
+  const { mutate } = useSWRConfig();
+  const { workflows: publishedWorkflows, isLoading: isLoadingWorkflows } =
+    useMarketplaceWorkflows("Published by Me");
 
-  type PublishMode = "update" | "new";
-  const [publishMode, setPublishMode] = useState<PublishMode>(
-    openedWorkflow ? "update" : "new",
-  );
-  const [name, setName] = useState(openedWorkflowName ?? "");
+  const [publishMode, setPublishMode] = useState<PublishMode>("new");
+  const [selectedWorkflow, setSelectedWorkflow] = useState<
+    Workflow | undefined
+  >(undefined);
+  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [version, setVersion] = useState("");
   const [visibility, setVisibility] = useState<Workflow["visibility"]>(
@@ -69,18 +76,23 @@ export default function PublishWorkflowModal({
     "private",
   ];
 
+  const hasPublishedWorkflows =
+    publishedWorkflows && publishedWorkflows.length > 0;
+
   // Reset state when modal opens
   useEffect(() => {
     if (isOpen) {
-      const defaultMode: PublishMode = openedWorkflow ? "update" : "new";
-      setPublishMode(defaultMode);
-      setName(defaultMode === "update" ? (openedWorkflowName ?? "") : "");
-
       if (openedWorkflow) {
+        setPublishMode("update");
+        setSelectedWorkflow(openedWorkflow);
+        setName(openedWorkflow.name);
         setVersion(bumpVersion(openedWorkflow.version));
         setVisibility(openedWorkflow.visibility);
         setDescription(openedWorkflow.description ?? "");
       } else {
+        setPublishMode("new");
+        setSelectedWorkflow(undefined);
+        setName("");
         setVersion("");
         setVisibility("public");
         setDescription("");
@@ -88,10 +100,29 @@ export default function PublishWorkflowModal({
     }
   }, [isOpen]);
 
-  // Sync name when switching modes
   function handleModeChange(mode: PublishMode) {
     setPublishMode(mode);
-    setName(mode === "update" ? (openedWorkflowName ?? "") : "");
+    if (mode === "new") {
+      setSelectedWorkflow(undefined);
+      setName("");
+      setVersion("");
+      setVisibility("public");
+      setDescription("");
+    } else if (mode === "update") {
+      // Default to openedWorkflow if available, otherwise first published
+      const defaultWf = openedWorkflow ?? publishedWorkflows?.[0];
+      if (defaultWf) {
+        handleSelectWorkflow(defaultWf);
+      }
+    }
+  }
+
+  function handleSelectWorkflow(workflow: Workflow) {
+    setSelectedWorkflow(workflow);
+    setName(workflow.name);
+    setVersion(bumpVersion(workflow.version));
+    setVisibility(workflow.visibility);
+    setDescription(workflow.description ?? "");
   }
 
   async function publishWorkflow() {
@@ -144,6 +175,11 @@ export default function PublishWorkflowModal({
         );
       }
 
+      // Revalidate workflow lists so the UI reflects the new version
+      mutate("/api/workflow/list");
+      mutate("/api/workflow/list?published=true");
+      mutate("/api/user-workflows");
+
       addToast({
         title: t("publishWorkflowModal.toast.published.title"),
         description: t("publishWorkflowModal.toast.published.description"),
@@ -171,6 +207,11 @@ export default function PublishWorkflowModal({
     });
   }
 
+  const isUpdate = publishMode === "update";
+  const updateLabel = selectedWorkflow
+    ? `Update "${selectedWorkflow.name}"`
+    : t("common.publish");
+
   return (
     <ModalWrapper
       isOpen={isOpen}
@@ -179,21 +220,22 @@ export default function PublishWorkflowModal({
       placement={"center"}
     >
       <div className="flex w-full flex-col items-center gap-2">
-        {openedWorkflowName && (
+        {/* Mode toggle — always show if user has published workflows */}
+        {hasPublishedWorkflows && (
           <div className="border-default-200 flex w-full overflow-hidden rounded-lg border">
             <button
               className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
-                publishMode === "update"
+                isUpdate
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-default-100"
               }`}
               onClick={() => handleModeChange("update")}
             >
-              Update &ldquo;{openedWorkflowName}&rdquo;
+              Update Existing
             </button>
             <button
               className={`flex-1 px-3 py-2 text-sm font-medium transition-colors ${
-                publishMode === "new"
+                !isUpdate
                   ? "bg-primary text-primary-foreground"
                   : "hover:bg-default-100"
               }`}
@@ -204,12 +246,40 @@ export default function PublishWorkflowModal({
           </div>
         )}
 
+        {/* Workflow selector for update mode */}
+        {isUpdate && hasPublishedWorkflows && (
+          <Select
+            label="Select workflow to update"
+            placeholder="Choose a workflow"
+            selectedKeys={selectedWorkflow?.name ? [selectedWorkflow.name] : []}
+            onChange={(e) => {
+              const wf = publishedWorkflows?.find(
+                (w) => w.name === e.target.value,
+              );
+              if (wf) handleSelectWorkflow(wf);
+            }}
+          >
+            {publishedWorkflows!.map((wf) => (
+              <SelectItem key={wf.name}>
+                {wf.name}
+                {wf.version ? ` (v${wf.version})` : ""}
+              </SelectItem>
+            ))}
+          </Select>
+        )}
+
+        {isUpdate && isLoadingWorkflows && (
+          <div className="flex w-full items-center justify-center py-2">
+            <Spinner size="sm" />
+          </div>
+        )}
+
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
           label={t("publishWorkflowModal.workflowName")}
           placeholder={t("publishWorkflowModal.workflowNamePlaceholder")}
-          isDisabled={publishMode === "update"}
+          isDisabled={isUpdate}
         />
 
         <Textarea
@@ -242,9 +312,7 @@ export default function PublishWorkflowModal({
         </Select>
 
         <Button color="primary" onPress={handlePress}>
-          {publishMode === "update"
-            ? `Update "${openedWorkflowName}"`
-            : t("common.publish")}
+          {isUpdate ? updateLabel : t("common.publish")}
         </Button>
       </div>
     </ModalWrapper>

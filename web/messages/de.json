@@ -735,7 +735,12 @@
 			"title": "Workflow importieren",
 			"description": "Einen Workflow aus einer JSON-Datei importieren",
 			"invalidFile": "Ungültige Workflow-Datei",
-			"readError": "Fehler beim Lesen der Workflow-Datei"
+			"readError": "Fehler beim Lesen der Workflow-Datei",
+			"chooseDestination": "Where would you like to import this workflow?",
+			"newTab": "New Canvas Tab",
+			"newTabDescription": "Open the workflow in a new canvas tab",
+			"currentCanvas": "Current Canvas",
+			"currentCanvasDescription": "Replace the current canvas with this workflow"
 		}
 	},
 	"fsExplorer": {

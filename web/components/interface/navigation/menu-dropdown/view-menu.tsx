@@ -5,8 +5,10 @@ import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { CanvasViewConfig, WorkflowContent } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
-import { useContext, useEffect, useState } from "react";
+import { ViewModeEnum } from "@pulse-editor/shared-utils";
+import { useContext, useEffect, useRef, useState } from "react";
 import NavMenuDropdown from "../nav-menu-dropdown";
+import ImportWorkflowModal from "@/components/modals/import-workflow-modal";
 
 export default function ViewMenuDropDown() {
   const { getTranslations: t, locale } = useTranslations();
@@ -64,6 +66,35 @@ export default function ViewMenuDropDown() {
 
   // Workflow
   const { createCanvasTabView } = useTabViewManager();
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const pendingWorkflowContent = useRef<WorkflowContent | null>(null);
+
+  const isCurrentTabCanvas =
+    editorContext?.editorStates.tabViews[
+      editorContext?.editorStates.tabIndex
+    ]?.type === ViewModeEnum.Canvas;
+
+  function importToNewTab(workflowContent: WorkflowContent) {
+    const viewId = createCanvasViewId();
+    createCanvasTabView({
+      viewId,
+      appConfigs: workflowContent.nodes.map((node) => node.data.config),
+      initialWorkflowContent: workflowContent,
+    } as CanvasViewConfig);
+
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      isSideMenuOpen: true,
+    }));
+  }
+
+  function importToCurrentCanvas(workflowContent: WorkflowContent) {
+    if (!editorContext) return;
+    editorContext.setEditorStates((prev) => ({
+      ...prev,
+      pendingWorkflowImport: workflowContent,
+    }));
+  }
 
   useRegisterMenuAction(
     {
@@ -87,21 +118,12 @@ export default function ViewMenuDropDown() {
               event.target?.result as string,
             ) as WorkflowContent;
             if (workflowContent) {
-              // Create a new tab view with the imported workflow
-              const viewId = createCanvasViewId();
-              await createCanvasTabView({
-                viewId,
-                appConfigs: workflowContent.nodes.map(
-                  (node) => node.data.config,
-                ),
-                initialWorkflowContent: workflowContent,
-              } as CanvasViewConfig);
-
-              // Open explorer for canvas views
-              editorContext?.setEditorStates((prev) => ({
-                ...prev,
-                isSideMenuOpen: true,
-              }));
+              if (isCurrentTabCanvas) {
+                pendingWorkflowContent.current = workflowContent;
+                setImportModalOpen(true);
+              } else {
+                importToNewTab(workflowContent);
+              }
             } else {
               alert(t("viewMenu.importWorkflow.invalidFile"));
             }
@@ -121,6 +143,33 @@ export default function ViewMenuDropDown() {
   );
 
   return (
-    <NavMenuDropdown category={t("viewMenu.title")} menuActions={menuActions} />
+    <>
+      <NavMenuDropdown
+        category={t("viewMenu.title")}
+        menuActions={menuActions}
+      />
+      <ImportWorkflowModal
+        isOpen={importModalOpen}
+        onClose={() => {
+          setImportModalOpen(false);
+          pendingWorkflowContent.current = null;
+        }}
+        onSelectNewTab={() => {
+          if (pendingWorkflowContent.current) {
+            importToNewTab(pendingWorkflowContent.current);
+          }
+          setImportModalOpen(false);
+          pendingWorkflowContent.current = null;
+        }}
+        onSelectCurrentCanvas={() => {
+          if (pendingWorkflowContent.current) {
+            importToCurrentCanvas(pendingWorkflowContent.current);
+          }
+          setImportModalOpen(false);
+          pendingWorkflowContent.current = null;
+        }}
+        isCurrentTabCanvas={isCurrentTabCanvas}
+      />
+    </>
   );
 }

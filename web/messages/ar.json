@@ -735,7 +735,12 @@
 			"title": "استيراد سير عمل",
 			"description": "استيراد سير عمل من ملف JSON",
 			"invalidFile": "ملف سير عمل غير صالح",
-			"readError": "خطأ في قراءة ملف سير العمل"
+			"readError": "خطأ في قراءة ملف سير العمل",
+			"chooseDestination": "Where would you like to import this workflow?",
+			"newTab": "New Canvas Tab",
+			"newTabDescription": "Open the workflow in a new canvas tab",
+			"currentCanvas": "Current Canvas",
+			"currentCanvasDescription": "Replace the current canvas with this workflow"
 		}
 	},
 	"fsExplorer": {

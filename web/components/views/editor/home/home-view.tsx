@@ -11,25 +11,12 @@ import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import { useVibeCode } from "@/lib/hooks/use-vibe-code";
-import { useWorkspace } from "@/lib/hooks/use-workspace";
+import { useChatContext } from "@/components/providers/chat-provider";
 import { AppViewConfig, ExtensionApp, Session, TabItem, Workflow } from "@/lib/types";
 import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
-import { Button, Divider, Listbox, ListboxItem, Skeleton } from "@heroui/react";
-import { AnimatePresence, motion } from "framer-motion";
+import { Button, Divider, Input, Skeleton } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
-import { useMediaQuery } from "react-responsive";
 
-const getVibeCodeHints = (t: (key: string) => string) => [
-  t("homeView.vibeCode.newApp"),
-  t("homeView.vibeCode.blog"),
-  t("homeView.vibeCode.portfolio"),
-  t("homeView.vibeCode.weatherApp"),
-  t("homeView.vibeCode.chatApp"),
-  t("homeView.vibeCode.socialMediaApp"),
-  t("homeView.vibeCode.fitnessTracker"),
-  t("homeView.vibeCode.recipeApp"),
-];
 
 export default function HomeView() {
   const editorContext = useContext(EditorContext);
@@ -103,23 +90,9 @@ function OverviewPanel({
 
   const { hint: inputPlaceholder } = useEditorAIAssistantHint();
 
-  const { openVibeCode } = useVibeCode();
   const { createCanvasTabView } = useTabViewManager();
-
-  async function handleOpenVibeCode() {
-    await openVibeCode();
-  }
-
-  const vibeCodeHints = getVibeCodeHints(t);
-  const [currentHintIndex, setCurrentHintIndex] = useState(0);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setCurrentHintIndex((prev) => (prev + 1) % vibeCodeHints.length);
-    }, 5000);
-
-    return () => clearInterval(intervalId);
-  }, []);
+  const { submit } = useChatContext();
+  const [chatInput, setChatInput] = useState("");
 
   return (
     <div className="@container relative flex h-3/4 w-full shrink-0 flex-col items-center justify-center">
@@ -133,60 +106,44 @@ function OverviewPanel({
               {t("homeView.greeting.question")}
             </p>
 
-            <Button
-              className="border-divider border bg-amber-900/80 shadow-sm transition-colors hover:bg-amber-800/80 dark:border-amber-400/40 dark:bg-amber-900/30 dark:hover:bg-amber-900/20"
-              onPress={handleOpenVibeCode}
+            <form
+              className="w-full @sm:w-100"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const trimmed = chatInput.trim();
+                if (!trimmed) return;
+                submit(trimmed);
+                setChatInput("");
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  isChatPanelOpen: true,
+                }));
+              }}
             >
-              <motion.div
-                className="flex items-center gap-2 rounded-full px-3 py-1"
-                initial={{ opacity: 0, y: -8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              >
-                <motion.span
-                  className="bg-gradient-to-r from-amber-400 via-amber-100 to-amber-400 bg-[length:200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-                  initial={{ backgroundPosition: "200% 50%" }}
-                  animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-                  transition={{
-                    backgroundPosition: {
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: "linear",
-                    },
-                  }}
-                >
-                  <Icon name="bolt" />
-                </motion.span>
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.p
-                    key={vibeCodeHints[currentHintIndex]}
-                    className="bg-gradient-to-r from-amber-400 via-amber-100 to-amber-400 bg-[length:200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-                    initial={{
-                      opacity: 0,
-                      y: -20,
-                      backgroundPosition: "200% 50%",
-                    }}
-                    animate={{
-                      opacity: 1,
-                      y: 0,
-                      backgroundPosition: ["200% 50%", "0% 50%"],
-                    }}
-                    exit={{ opacity: 0, y: 20 }}
-                    transition={{
-                      duration: 0.6,
-                      ease: "easeOut",
-                      backgroundPosition: {
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "linear",
-                      },
-                    }}
-                  >
-                    {vibeCodeHints[currentHintIndex]}
-                  </motion.p>
-                </AnimatePresence>
-              </motion.div>
-            </Button>
+              <Input
+                className="w-full"
+                value={chatInput}
+                onValueChange={setChatInput}
+                placeholder={inputPlaceholder}
+                startContent={
+                  <div>
+                    <Icon name="auto_awesome" />
+                  </div>
+                }
+                endContent={
+                  chatInput.trim() ? (
+                    <Button
+                      isIconOnly
+                      size="sm"
+                      variant="light"
+                      type="submit"
+                    >
+                      <Icon name="send" />
+                    </Button>
+                  ) : undefined
+                }
+              />
+            </form>
 
             <div className="flex gap-x-1">
               <Button
@@ -231,24 +188,6 @@ function OverviewPanel({
               </Button>
             </div>
 
-            {/* TODO: Add back in the future when AI chat simplifies */}
-            {/* <Input
-              className="w-full @sm:w-100"
-              onFocus={() => {
-                // Open command viewer
-                editorContext?.setEditorStates((prev) => ({
-                  ...prev,
-                  isCommandViewerOpen: true,
-                }));
-              }}
-              placeholder={inputPlaceholder}
-              label="AI Assistant"
-              startContent={
-                <div>
-                  <Icon name="auto_awesome" />
-                </div>
-              }
-            /> */}
           </>
         )}
 
@@ -676,9 +615,6 @@ function MyResources() {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const { cloudWorkspaces } = useWorkspace();
-  const isListClickable = useMediaQuery({ maxWidth: 640 });
-
   return (
     <div className="flex w-full shrink-0 flex-col">
       <div className="flex items-center gap-x-4 py-1">
@@ -702,63 +638,6 @@ function MyResources() {
           </div>
         </Button>
       </div>
-
-      <h3 className="text-medium pb-1 text-center font-medium">
-        {t("homeView.cloudWorkspaces")}
-      </h3>
-      <Listbox className="w-full">
-        {cloudWorkspaces?.map((ws, index) => (
-          <ListboxItem
-            key={index}
-            description={`vCPU:${ws.cpuLimit}, RAM:${ws.memoryLimit}, Storage:${ws.volumeSize}`}
-            className="bg-content3 w-full"
-            onPress={() => {
-              if (isListClickable) {
-                editorContext?.updateModalStates({
-                  workspaceSettings: {
-                    isOpen: true,
-                    initialWorkspace: ws,
-                    isShowUseButton: false,
-                  },
-                });
-              }
-            }}
-            endContent={
-              <div className="flex items-center gap-x-1">
-                <div
-                  data-is-running={ws.status === "running"}
-                  className="bg-warning data-[is-running=true]:bg-success h-1 w-1 rounded-full"
-                ></div>
-                <p
-                  className="data-[is-running=true]:text-success text-warning text-sm"
-                  data-is-running={ws.status === "running"}
-                >
-                  {ws.status}
-                </p>
-                <Button
-                  className="hidden sm:block"
-                  variant="light"
-                  size="sm"
-                  color="primary"
-                  onPress={() => {
-                    editorContext?.updateModalStates({
-                      workspaceSettings: {
-                        isOpen: true,
-                        initialWorkspace: ws,
-                        isShowUseButton: false,
-                      },
-                    });
-                  }}
-                >
-                  {t("subscription.managePlan")}
-                </Button>
-              </div>
-            }
-          >
-            {ws.name}
-          </ListboxItem>
-        )) ?? []}
-      </Listbox>
     </div>
   );
 }

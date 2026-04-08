@@ -116,6 +116,9 @@ export type EditorStates = {
     edges: ReactFlowEdge[];
   };
 
+  // Pending workflow import to merge into the active canvas tab
+  pendingWorkflowImport?: WorkflowContent;
+
   // Read-only
   workflowNodes: ReactFlowNode<AppNodeData>[];
   // Read-only
@@ -475,6 +478,7 @@ export type Workflow = {
   thumbnail?: string;
   visibility: "private" | "public" | "unlisted";
   requireWorkspace: boolean;
+  webhookVerifyToken?: string;
   createdAt?: string;
 };
 
@@ -765,6 +769,21 @@ export type AutomationRun = {
   creditsConsumed: number;
   nodeCount: number;
   error?: string;
+};
+
+export type WorkflowRun = {
+  id: string;
+  workflowId: string;
+  userId: string;
+  taskId: string;
+  status: "running" | "completed" | "failed";
+  result?: any;
+  error?: string;
+  startedAt: string;
+  completedAt?: string;
+  durationMs?: number;
+  creditsConsumed: number;
+  nodeCount: number;
 };
 
 // #endregion

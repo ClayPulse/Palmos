@@ -480,6 +480,131 @@ export default function CanvasView({
     updateWorkflowNodes,
   ]);
 
+  // Import workflow into current canvas (merge nodes & edges, same as paste)
+  const pendingImport = editorContext?.editorStates.pendingWorkflowImport;
+  useEffect(() => {
+    if (!pendingImport || !isActive || !editorContext) return;
+
+    // Clear the pending import immediately
+    editorContext.setEditorStates((prev) => ({
+      ...prev,
+      pendingWorkflowImport: undefined,
+    }));
+
+    const importedNodes = pendingImport.nodes ?? [];
+    const importedEdges = pendingImport.edges ?? [];
+
+    if (importedNodes.length === 0) return;
+
+    // Compute bounding-box center of imported nodes
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    for (const node of importedNodes) {
+      const w = node.width ?? node.data.config.initialWidth ?? 640;
+      const h = node.height ?? node.data.config.initialHeight ?? 360;
+      minX = Math.min(minX, node.position.x);
+      minY = Math.min(minY, node.position.y);
+      maxX = Math.max(maxX, node.position.x + w);
+      maxY = Math.max(maxY, node.position.y + h);
+    }
+    const selCenterX = (minX + maxX) / 2;
+    const selCenterY = (minY + maxY) / 2;
+
+    // Compute current canvas center in flow coordinates
+    const containerEl = containerRef.current;
+    const canvasCenter = containerEl
+      ? screenToFlowPosition({
+          x:
+            containerEl.getBoundingClientRect().left +
+            containerEl.offsetWidth / 2,
+          y:
+            containerEl.getBoundingClientRect().top +
+            containerEl.offsetHeight / 2,
+        })
+      : { x: selCenterX, y: selCenterY };
+
+    const dx = canvasCenter.x - selCenterX;
+    const dy = canvasCenter.y - selCenterY;
+    const nodeIdMap = new Map<string, string>();
+
+    const pasteItems = importedNodes.map((node) => {
+      const newViewId = createAppViewId(node.data.config.app);
+      nodeIdMap.set(node.id, newViewId);
+
+      const newAppConfig: AppViewConfig = {
+        ...node.data.config,
+        viewId: newViewId,
+      };
+      const pastePosition = {
+        x: node.position.x + dx,
+        y: node.position.y + dy,
+      };
+      pastePositionsRef.current.set(newViewId, pastePosition);
+      const newNode: ReactFlowNode<AppNodeData> = {
+        ...node,
+        id: newViewId,
+        selected: false,
+        position: pastePosition,
+        data: {
+          ...node.data,
+          config: newAppConfig,
+          isRunning: false,
+        },
+      };
+      pastedNodesRef.current.set(newViewId, newNode);
+      return { newNode, newAppConfig };
+    });
+
+    const newEdges = importedEdges.flatMap((edge) => {
+      const newSource = nodeIdMap.get(edge.source);
+      const newTarget = nodeIdMap.get(edge.target);
+      if (!newSource || !newTarget) return [];
+      return [
+        {
+          ...edge,
+          id: createCopiedEdgeId(newSource, newTarget),
+          source: newSource,
+          target: newTarget,
+          selected: false,
+        },
+      ];
+    });
+
+    // Insert nodes and edges (same order as paste)
+    updateWorkflowNodes((oldNodes) => [
+      ...oldNodes,
+      ...pasteItems.map((p) => p.newNode),
+    ]);
+    updateWorkflowEdges((oldEdges) => [...oldEdges, ...newEdges]);
+
+    // Register new app configs so the cleanup effect doesn't remove them
+    editorContext.setEditorStates((prev) => {
+      const currentTab = prev.tabViews[prev.tabIndex];
+      const newCanvasConfig: CanvasViewConfig = {
+        ...(currentTab.config as CanvasViewConfig),
+        appConfigs: [
+          ...((currentTab.config as CanvasViewConfig).appConfigs ?? []),
+          ...pasteItems.map((p) => p.newAppConfig),
+        ],
+      };
+      const newViews = [...prev.tabViews];
+      newViews[prev.tabIndex] = {
+        ...currentTab,
+        config: newCanvasConfig,
+      };
+      return { ...prev, tabViews: newViews };
+    });
+
+    const count = pasteItems.length;
+    addToast({
+      title: `Imported ${count} node${count > 1 ? "s" : ""}`,
+      description: `${count} node${count > 1 ? "s" : ""} added to canvas.`,
+      color: "success",
+    });
+  }, [pendingImport, isActive]);
+
   // Promote nodes to workflow nodes,
   // or remove workflow nodes that are no longer in the config
   useEffect(() => {

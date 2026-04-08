@@ -433,26 +433,53 @@ export default function useWorkflowExecutor({
   function getForwardExecutionSequence(
     startNode: ReactFlowNode<AppNodeData>,
   ): ReactFlowNode<AppNodeData>[] {
-    // Build forward adjacency list
+    // Build forward and reverse adjacency lists
     const adj: Record<string, string[]> = {};
+    const radj: Record<string, string[]> = {};
     for (const node of localNodes) {
       adj[node.id] = [];
+      radj[node.id] = [];
     }
     for (const edge of localEdges) {
       if (adj[edge.source]) adj[edge.source].push(edge.target);
+      if (radj[edge.target]) radj[edge.target].push(edge.source);
     }
 
-    // Walk forward from startNode to find all downstream nodes
-    const reachable = new Set<string>();
-    function walk(nodeId: string) {
-      if (reachable.has(nodeId)) return;
+    // 1. Walk forward from startNode to find all downstream nodes
+    const downstream = new Set<string>();
+    function walkForward(nodeId: string) {
+      if (downstream.has(nodeId)) return;
+      downstream.add(nodeId);
+      for (const neighbor of adj[nodeId] || []) walkForward(neighbor);
+    }
+    walkForward(startNode.id);
+
+    // 2. Find nodes strictly upstream of startNode (these are excluded)
+    const upstreamOfStart = new Set<string>();
+    function walkUpstreamOfStart(nodeId: string) {
+      if (upstreamOfStart.has(nodeId)) return;
+      upstreamOfStart.add(nodeId);
+      for (const parent of radj[nodeId] || []) walkUpstreamOfStart(parent);
+    }
+    for (const parent of radj[startNode.id] || []) {
+      walkUpstreamOfStart(parent);
+    }
+
+    // 3. For each downstream node (except startNode), walk backward to
+    //    gather upstream dependencies that feed into them (e.g. sibling
+    //    branches), but exclude anything upstream of startNode.
+    const reachable = new Set<string>(downstream);
+    function walkUpstream(nodeId: string) {
+      if (reachable.has(nodeId) || upstreamOfStart.has(nodeId)) return;
       reachable.add(nodeId);
-      for (const neighbor of adj[nodeId] || []) walk(neighbor);
+      for (const parent of radj[nodeId] || []) walkUpstream(parent);
     }
-    walk(startNode.id);
+    for (const nodeId of downstream) {
+      if (nodeId === startNode.id) continue;
+      for (const parent of radj[nodeId] || []) walkUpstream(parent);
+    }
 
-    // Build in-degree only within the reachable subgraph, ignoring edges
-    // that come from outside the subgraph (i.e. upstream of startNode)
+    // 4. Build in-degree within the reachable subgraph
     const inDegree: Record<string, number> = {};
     for (const nodeId of reachable) inDegree[nodeId] = 0;
     for (const edge of localEdges) {
@@ -461,7 +488,7 @@ export default function useWorkflowExecutor({
       }
     }
 
-    // Kahn's algorithm
+    // 5. Kahn's algorithm
     const queue: string[] = [];
     for (const nodeId of reachable) {
       if (inDegree[nodeId] === 0) queue.push(nodeId);

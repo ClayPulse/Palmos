@@ -350,19 +350,51 @@ export function useTabViewManager() {
       return undefined;
     }
 
-    // Prohibit creating canvas if any app's view ID in the canvas already exists
-    const existViewId = canvasConfig.appConfigs?.find((appConfig) =>
+    // Remap view IDs that already exist in another tab so each tab has
+    // its own isolated set of node instances.
+    const hasCollision = canvasConfig.appConfigs?.some((appConfig) =>
       imcContext?.polyIMC?.hasChannel(appConfig.viewId),
     );
 
-    if (existViewId) {
-      addToast({
-        title: "Error creating canvas",
-        description: `Same app nodes already exist. Your workflow might already be opened in another tab.`,
-        color: "danger",
+    if (hasCollision && canvasConfig.appConfigs) {
+      const idMap = new Map<string, string>();
+      const remappedAppConfigs = canvasConfig.appConfigs.map((appConfig) => {
+        const newViewId = createAppViewId(appConfig.app);
+        idMap.set(appConfig.viewId, newViewId);
+        return { ...appConfig, viewId: newViewId };
       });
-      setIsCreatingTab(false);
-      return undefined;
+
+      let remappedWorkflow = canvasConfig.initialWorkflowContent;
+      if (remappedWorkflow) {
+        const remappedNodes = remappedWorkflow.nodes.map((node) => {
+          const newId = idMap.get(node.id) ?? node.id;
+          const newConfig = idMap.has(node.data.config.viewId)
+            ? { ...node.data.config, viewId: idMap.get(node.data.config.viewId)! }
+            : node.data.config;
+          return {
+            ...node,
+            id: newId,
+            data: { ...node.data, config: newConfig },
+          };
+        });
+        const remappedEdges = remappedWorkflow.edges.map((edge) => ({
+          ...edge,
+          id: `${idMap.get(edge.source) ?? edge.source}-${idMap.get(edge.target) ?? edge.target}-${Date.now()}`,
+          source: idMap.get(edge.source) ?? edge.source,
+          target: idMap.get(edge.target) ?? edge.target,
+        }));
+        remappedWorkflow = {
+          ...remappedWorkflow,
+          nodes: remappedNodes,
+          edges: remappedEdges,
+        };
+      }
+
+      canvasConfig = {
+        ...canvasConfig,
+        appConfigs: remappedAppConfigs,
+        initialWorkflowContent: remappedWorkflow,
+      };
     }
 
     const newTabView: TabView = {

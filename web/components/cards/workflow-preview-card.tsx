@@ -13,7 +13,7 @@ import {
 } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import ContextMenu from "../interface/context-menu";
-import ShareWorkflowModal from "../interface/share-workflow-modal";
+import WorkflowDetailsModal from "../interface/workflow-details-modal";
 
 export default function WorkflowPreviewCard({
   workflow,
@@ -36,7 +36,7 @@ export default function WorkflowPreviewCard({
 
   const [isHover, setIsHover] = useState(false);
 
-  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
 
   useEffect(() => {
     setIsLoaded(true);
@@ -140,7 +140,11 @@ export default function WorkflowPreviewCard({
               Use
             </Button>
 
-            <Button color="secondary" size="sm">
+            <Button
+              color="secondary"
+              size="sm"
+              onPress={() => setIsDetailsOpen(true)}
+            >
               Details
             </Button>
           </div>
@@ -158,22 +162,12 @@ export default function WorkflowPreviewCard({
             >
               <p className="w-full text-start">Use</p>
             </Button>
-            <Button
-              className="text-medium h-12 sm:h-8 sm:text-sm"
-              variant="light"
-              onPress={() => {
-                setContextMenuState((prev) => ({ ...prev, isOpen: false }));
-                setIsShareOpen(true);
-              }}
-            >
-              <p className="w-full text-start">Share with Client</p>
-            </Button>
           </div>
         </ContextMenu>
-        <ShareWorkflowModal
+        <WorkflowDetailsModal
           workflow={workflow}
-          isOpen={isShareOpen}
-          onClose={() => setIsShareOpen(false)}
+          isOpen={isDetailsOpen}
+          onClose={() => setIsDetailsOpen(false)}
         />
       </div>
       <div className="w-full">
@@ -215,16 +209,6 @@ export default function WorkflowPreviewCard({
               }}
             >
               <Icon name="share" />
-            </Button>
-          </Tooltip>
-          <Tooltip content="Share with client">
-            <Button
-              isIconOnly
-              size="sm"
-              variant="light"
-              onPress={() => setIsShareOpen(true)}
-            >
-              <Icon name="send" />
             </Button>
           </Tooltip>
         </div>
