@@ -116,6 +116,9 @@ export type EditorStates = {
     edges: ReactFlowEdge[];
   };
 
+  // Pending workflow import to merge into the active canvas tab
+  pendingWorkflowImport?: WorkflowContent;
+
   // Read-only
   workflowNodes: ReactFlowNode<AppNodeData>[];
   // Read-only

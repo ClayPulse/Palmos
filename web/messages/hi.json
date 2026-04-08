@@ -753,7 +753,12 @@
 			"title": "वर्कफ़्लो इम्पोर्ट करें",
 			"description": "JSON फ़ाइल से वर्कफ़्लो इम्पोर्ट करें",
 			"invalidFile": "अमान्य वर्कफ़्लो फाइल",
-			"readError": "वर्कफ़्लो फाइल पढ़ने में त्रुटि"
+			"readError": "वर्कफ़्लो फाइल पढ़ने में त्रुटि",
+			"chooseDestination": "Where would you like to import this workflow?",
+			"newTab": "New Canvas Tab",
+			"newTabDescription": "Open the workflow in a new canvas tab",
+			"currentCanvas": "Current Canvas",
+			"currentCanvasDescription": "Replace the current canvas with this workflow"
 		}
 	},
 	"fsExplorer": {

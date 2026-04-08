@@ -734,7 +734,12 @@
 			"title": "Импортировать рабочий процесс",
 			"description": "Импортировать рабочий процесс из файла JSON",
 			"invalidFile": "Неверный файл рабочего процесса",
-			"readError": "Ошибка чтения файла рабочего процесса"
+			"readError": "Ошибка чтения файла рабочего процесса",
+			"chooseDestination": "Where would you like to import this workflow?",
+			"newTab": "New Canvas Tab",
+			"newTabDescription": "Open the workflow in a new canvas tab",
+			"currentCanvas": "Current Canvas",
+			"currentCanvasDescription": "Replace the current canvas with this workflow"
 		}
 	},
 	"fsExplorer": {

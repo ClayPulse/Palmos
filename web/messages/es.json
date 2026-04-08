@@ -735,7 +735,12 @@
 			"title": "Importar flujo de trabajo",
 			"description": "Importar un flujo de trabajo desde un archivo JSON",
 			"invalidFile": "Archivo de flujo de trabajo no válido",
-			"readError": "Error al leer el archivo de flujo de trabajo"
+			"readError": "Error al leer el archivo de flujo de trabajo",
+			"chooseDestination": "Where would you like to import this workflow?",
+			"newTab": "New Canvas Tab",
+			"newTabDescription": "Open the workflow in a new canvas tab",
+			"currentCanvas": "Current Canvas",
+			"currentCanvasDescription": "Replace the current canvas with this workflow"
 		}
 	},
 	"fsExplorer": {

@@ -753,7 +753,12 @@
 			"title": "ワークフローをインポート",
 			"description": "JSONファイルからワークフローをインポート",
 			"invalidFile": "無効なワークフローファイルです",
-			"readError": "ワークフローファイルの読み込み中にエラーが発生しました"
+			"readError": "ワークフローファイルの読み込み中にエラーが発生しました",
+			"chooseDestination": "Where would you like to import this workflow?",
+			"newTab": "New Canvas Tab",
+			"newTabDescription": "Open the workflow in a new canvas tab",
+			"currentCanvas": "Current Canvas",
+			"currentCanvasDescription": "Replace the current canvas with this workflow"
 		}
 	},
 	"fsExplorer": {
