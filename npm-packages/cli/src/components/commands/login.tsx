@@ -185,7 +185,7 @@ export default function Login({ cli }: { cli: Result<Flags> }) {
     <>
       {isShowLoginMethod && (
         <>
-          <Text>Login to the Pulse Editor Platform</Text>
+          <Text>Login to the Palmos Platform</Text>
           <SelectInput
             items={loginMethodItems}
             onSelect={(item) => {
@@ -202,7 +202,7 @@ export default function Login({ cli }: { cli: Result<Flags> }) {
         loginMethod === "token" &&
         (token.length === 0 ? (
           <>
-            <Text>Enter your Pulse Editor access token:</Text>
+            <Text>Enter your Palmos access token:</Text>
             <TextInput
               mask="*"
               value={tokenInput}
@@ -260,7 +260,7 @@ export default function Login({ cli }: { cli: Result<Flags> }) {
               )}
             {isTokenSaved && (
               <Text>
-                Token saved to {path.join(os.homedir(), ".pulse-editor")}
+                Token saved to {path.join(os.homedir(), ".palmos")}
               </Text>
             )}
           </>

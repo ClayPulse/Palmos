@@ -40,7 +40,7 @@ const skillActionNames: string[] = skillActions.map((a: any) => a.name);
 
 const app = express();
 app.use(cors());
-// Inject the client-side livereload script into HTML responses
+// Inject the client-side livereload script into HTML responses in workspace
 app.use(
   // The port might not be right here for the ingress.
   // I need this route to be exposed
