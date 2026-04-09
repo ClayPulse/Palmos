@@ -62,6 +62,171 @@ export default function AgentChat({
 
   const isPage = variant === "page";
 
+  // ── File uploads ────────────────────────────────────────────────────────
+  interface ChatUpload {
+    id: string; // server-assigned ID once uploaded; temp key while pending
+    filename: string;
+    sizeBytes: number;
+    status: "uploading" | "ready" | "error";
+    error?: string;
+    tempKey: string; // stable local key for React + in-flight tracking
+  }
+  const [uploads, setUploads] = useState<ChatUpload[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const selected = Array.from(files);
+    e.target.value = ""; // reset so selecting the same file again triggers change
+
+    if (!backendUrl) {
+      console.error("NEXT_PUBLIC_BACKEND_URL is not set");
+      return;
+    }
+
+    for (const file of selected) {
+      const tempKey = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      setUploads((prev) => [
+        ...prev,
+        {
+          id: tempKey,
+          filename: file.name,
+          sizeBytes: file.size,
+          status: "uploading",
+          tempKey,
+        },
+      ]);
+
+      try {
+        const form = new FormData();
+        form.append("file", file);
+        // Only include sessionId if the session is likely persisted on
+        // the backend — otherwise the upload endpoint returns 404.
+        if (messages.length > 0 && currentSessionIdRef.current) {
+          form.append("sessionId", currentSessionIdRef.current);
+        }
+
+        const res = await fetch(`${backendUrl}/api/chat/upload`, {
+          method: "POST",
+          credentials: "include",
+          body: form,
+        });
+
+        if (!res.ok) {
+          let msg = `Upload failed (${res.status})`;
+          try {
+            const data = await res.json();
+            if (data?.error) msg = data.error;
+          } catch {
+            /* ignore */
+          }
+          throw new Error(msg);
+        }
+
+        const data = (await res.json()) as { id: string };
+        setUploads((prev) =>
+          prev.map((u) =>
+            u.tempKey === tempKey
+              ? { ...u, id: data.id, status: "ready" }
+              : u,
+          ),
+        );
+      } catch (err) {
+        setUploads((prev) =>
+          prev.map((u) =>
+            u.tempKey === tempKey
+              ? {
+                  ...u,
+                  status: "error",
+                  error: err instanceof Error ? err.message : String(err),
+                }
+              : u,
+          ),
+        );
+      }
+    }
+  }
+
+  async function handleRemoveUpload(upload: ChatUpload) {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    setUploads((prev) => prev.filter((u) => u.tempKey !== upload.tempKey));
+    if (upload.status === "ready" && backendUrl) {
+      try {
+        await fetch(`${backendUrl}/api/chat/uploads/${upload.id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
+      } catch {
+        // Best-effort cleanup — the UI has already removed it.
+      }
+    }
+  }
+
+  function formatFileSize(bytes: number): string {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  const attachmentChips =
+    uploads.length > 0 ? (
+      <div className="flex flex-wrap gap-1.5">
+        {uploads.map((u) => (
+          <div
+            key={u.tempKey}
+            className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
+              u.status === "error"
+                ? "border-red-300/60 bg-red-50/80 dark:border-red-500/30 dark:bg-red-500/10"
+                : "border-amber-300/60 bg-amber-50/80 dark:border-white/15 dark:bg-white/8"
+            }`}
+            title={
+              u.status === "error"
+                ? u.error
+                : `${u.filename} (${formatFileSize(u.sizeBytes)})`
+            }
+          >
+            {u.status === "uploading" ? (
+              <Spinner size="sm" />
+            ) : u.status === "error" ? (
+              <Icon
+                name="error_outline"
+                variant="round"
+                className="text-sm text-red-500"
+              />
+            ) : (
+              <Icon
+                name="description"
+                variant="round"
+                className="text-sm text-amber-600 dark:text-amber-400"
+              />
+            )}
+            <span className="text-default-800 max-w-[12rem] truncate dark:text-white/85">
+              {u.filename}
+            </span>
+            <button
+              className="text-gray-400 hover:text-gray-700 dark:text-white/40 dark:hover:text-white/80"
+              onClick={() => handleRemoveUpload(u)}
+              aria-label="Remove attachment"
+            >
+              <Icon name="close" variant="round" className="text-xs" />
+            </button>
+          </div>
+        ))}
+      </div>
+    ) : null;
+
+  const hiddenFileInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      multiple
+      className="hidden"
+      onChange={handleFileSelect}
+    />
+  );
+
   /** Collect workflows to send as context: canvas tabs (with content) + assigned (description only). */
   const getWorkflows = (): WorkflowInput[] | undefined => {
     const workflows: WorkflowInput[] = [];
@@ -560,8 +725,20 @@ export default function AgentChat({
         )}
 
         {/* Input */}
-        <div className="border-t border-amber-200/60 bg-white px-4 pt-3 pb-4 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8 dark:bg-white/3">
+        <div className="flex flex-col gap-2 border-t border-amber-200/60 bg-white px-4 pt-3 pb-4 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8 dark:bg-white/3">
+          {attachmentChips}
+          {hiddenFileInput}
           <div className="flex items-end gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]">
+            <Tooltip content="Attach file" delay={400} closeDelay={0}>
+              <button
+                className="flex h-9 w-9 shrink-0 items-center justify-center self-end rounded-full text-gray-400 transition-colors hover:text-amber-600 disabled:opacity-30 dark:text-white/40 dark:hover:text-amber-400"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading}
+                aria-label="Attach file"
+              >
+                <Icon name="attach_file" variant="round" className="text-base" />
+              </button>
+            </Tooltip>
             <textarea
               className="text-default-900 placeholder-default-500 max-h-40 flex-1 resize-none bg-transparent py-3 text-sm leading-5 outline-none dark:text-white dark:placeholder-white/45"
               style={{ height: "auto" }}
@@ -762,7 +939,19 @@ export default function AgentChat({
 
       {/* Input */}
       <div className="flex flex-col gap-2 border-t border-amber-200/60 bg-white px-3 pt-3 pb-2 dark:border-white/8 dark:bg-white/3">
+        {attachmentChips}
+        {hiddenFileInput}
         <div className="flex items-end gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]">
+          <Tooltip content="Attach file" delay={400} closeDelay={0}>
+            <button
+              className="flex h-8 w-8 shrink-0 items-center justify-center self-end rounded-full text-gray-400 transition-colors hover:text-amber-600 disabled:opacity-30 dark:text-white/40 dark:hover:text-amber-400"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isLoading}
+              aria-label="Attach file"
+            >
+              <Icon name="attach_file" variant="round" className="text-base" />
+            </button>
+          </Tooltip>
           <textarea
             className="text-default-900 placeholder-default-500 max-h-40 flex-1 resize-none bg-transparent py-2.5 text-sm leading-5 outline-none dark:text-white dark:placeholder-white/45"
             style={{ height: "auto" }}
