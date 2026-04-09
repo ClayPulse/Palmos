@@ -265,12 +265,6 @@ Linux, MacOS, Windows clients are available in release page.
 
 For detailed desktop user guide, check out [Desktop User Guide](desktop/README.md)
 
-## VSCode Extension (deprecated)
-
-A VSCode Webview Extension with limited features is available [here](https://marketplace.visualstudio.com/items?itemName=shellishack.pulse-editor).
-
-For detailed VSCode extension user guide, check out [VSCode Extension User Guide](vscode-extension/README.md)
-
 # Palmos Core Development Guide
 
 ## Recommended Nodejs version
@@ -371,16 +365,6 @@ npm run desktop-build
 ```
 
 If you run `npm run desktop-build` for a production build, you can find an executable file inside `build/desktop`.
-
-## VSCode Extension Development
-
-> [!warning]
-> The code in `vscode-extension` might be out of date, as it was made for an Alpha Demo.  
-> Support for using Palmos as an extension in VSCode might be discontinued, or get simply replaced with a webview.
-
-Palmos uses VSCode Webview API to create a VSCode Extension. To develop VScode Extension locally, open the `vscode-extension` in a separate VSCode window. Then press F5 to launch debug task.
-
-Note that you will also need to run the Nextjs server locally during development.
 
 ## Palmos NPM libraries development
 

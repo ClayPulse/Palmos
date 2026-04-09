@@ -5,7 +5,6 @@
     "@pulse-editor/mobile": "0.0.1",
     "@pulse-editor/react-api": "0.1.1-alpha.54",
     "@pulse-editor/shared-utils": "0.1.1-alpha.54",
-    "pulse-editor-vscode": "0.0.3",
     "@pulse-editor/web": "0.1.1-alpha.13"
   },
   "changesets": [

@@ -5,7 +5,6 @@
   "workspaces": [
     "web",
     "mobile",
-    "vscode-extension",
     "npm-packages/react-api",
     "npm-packages/shared-utils"
   ],
