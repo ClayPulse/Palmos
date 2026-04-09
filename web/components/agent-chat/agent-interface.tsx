@@ -173,47 +173,78 @@ export default function AgentChat({
   const attachmentChips =
     uploads.length > 0 ? (
       <div className="flex flex-wrap gap-1.5">
-        {uploads.map((u) => (
-          <div
-            key={u.tempKey}
-            className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
-              u.status === "error"
-                ? "border-red-300/60 bg-red-50/80 dark:border-red-500/30 dark:bg-red-500/10"
-                : "border-amber-300/60 bg-amber-50/80 dark:border-white/15 dark:bg-white/8"
-            }`}
-            title={
-              u.status === "error"
-                ? u.error
-                : `${u.filename} (${formatFileSize(u.sizeBytes)})`
-            }
-          >
-            {u.status === "uploading" ? (
-              <Spinner size="sm" />
-            ) : u.status === "error" ? (
-              <Icon
-                name="error_outline"
-                variant="round"
-                className="text-sm text-red-500"
-              />
-            ) : (
-              <Icon
-                name="description"
-                variant="round"
-                className="text-sm text-amber-600 dark:text-amber-400"
-              />
-            )}
-            <span className="text-default-800 max-w-[12rem] truncate dark:text-white/85">
-              {u.filename}
-            </span>
-            <button
-              className="text-gray-400 hover:text-gray-700 dark:text-white/40 dark:hover:text-white/80"
-              onClick={() => handleRemoveUpload(u)}
-              aria-label="Remove attachment"
+        {uploads.map((u) => {
+          const chip = (
+            <div
+              className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
+                u.status === "error"
+                  ? "border-red-300/60 bg-red-50/80 dark:border-red-500/30 dark:bg-red-500/10"
+                  : "border-amber-300/60 bg-amber-50/80 dark:border-white/15 dark:bg-white/8"
+              }`}
             >
-              <Icon name="close" variant="round" className="text-xs" />
-            </button>
-          </div>
-        ))}
+              {u.status === "uploading" ? (
+                <Spinner size="sm" />
+              ) : u.status === "error" ? (
+                <Icon
+                  name="error_outline"
+                  variant="round"
+                  className="text-sm text-red-500"
+                />
+              ) : (
+                <Icon
+                  name="description"
+                  variant="round"
+                  className="text-sm text-amber-600 dark:text-amber-400"
+                />
+              )}
+              <span className="text-default-800 max-w-[12rem] truncate dark:text-white/85">
+                {u.filename}
+              </span>
+              <button
+                className="text-gray-400 hover:text-gray-700 dark:text-white/40 dark:hover:text-white/80"
+                onClick={() => handleRemoveUpload(u)}
+                aria-label="Remove attachment"
+              >
+                <Icon name="close" variant="round" className="text-xs" />
+              </button>
+            </div>
+          );
+
+          if (u.status === "error") {
+            return (
+              <Tooltip
+                key={u.tempKey}
+                content={
+                  <div className="max-w-xs px-1 py-0.5 text-xs">
+                    <p className="mb-0.5 font-semibold text-red-500">
+                      Upload failed
+                    </p>
+                    <p className="text-default-700 break-words dark:text-white/80">
+                      {u.error ?? "Unknown error"}
+                    </p>
+                  </div>
+                }
+                delay={200}
+                closeDelay={0}
+                placement="top"
+              >
+                {chip}
+              </Tooltip>
+            );
+          }
+
+          return (
+            <Tooltip
+              key={u.tempKey}
+              content={`${u.filename} (${formatFileSize(u.sizeBytes)})`}
+              delay={400}
+              closeDelay={0}
+              placement="top"
+            >
+              {chip}
+            </Tooltip>
+          );
+        })}
       </div>
     ) : null;
 
