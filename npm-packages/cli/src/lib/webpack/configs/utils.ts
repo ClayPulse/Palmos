@@ -71,7 +71,19 @@ export async function loadPulseConfig() {
     recursive: true,
     force: true,
   });
-  return mod.default;
+
+  const config = mod.default;
+
+  // Always use the version from package.json as the source of truth
+  const pkgJsonPath = path.join(projectDirName, "package.json");
+  if (existsSync(pkgJsonPath)) {
+    const pkg = JSON.parse(await fs.readFile(pkgJsonPath, "utf-8"));
+    if (pkg.version) {
+      config.version = pkg.version;
+    }
+  }
+
+  return config;
 }
 
 export function getLocalNetworkIP() {
