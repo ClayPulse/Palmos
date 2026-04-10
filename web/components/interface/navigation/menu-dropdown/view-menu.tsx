@@ -5,6 +5,10 @@ import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { CanvasViewConfig, WorkflowContent } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
+import {
+  convertSimplifiedToWorkflowContent,
+  isSimplifiedWorkflow,
+} from "@/lib/workflow/simplified-workflow";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useRef, useState } from "react";
 import NavMenuDropdown from "../nav-menu-dropdown";
@@ -114,9 +118,15 @@ export default function ViewMenuDropDown() {
         const reader = new FileReader();
         reader.onload = async (event) => {
           try {
-            const workflowContent = JSON.parse(
-              event.target?.result as string,
-            ) as WorkflowContent;
+            const parsed = JSON.parse(event.target?.result as string);
+            // Accept either the full ReactFlow-compatible WorkflowContent or
+            // the simplified authoring DAG format. Detect and compile the
+            // latter down to WorkflowContent before proceeding.
+            const workflowContent: WorkflowContent = isSimplifiedWorkflow(
+              parsed,
+            )
+              ? convertSimplifiedToWorkflowContent(parsed)
+              : (parsed as WorkflowContent);
             if (workflowContent) {
               if (isCurrentTabCanvas) {
                 pendingWorkflowContent.current = workflowContent;
