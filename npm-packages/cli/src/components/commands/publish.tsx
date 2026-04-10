@@ -7,6 +7,7 @@ import Spinner from 'ink-spinner';
 import fs from 'fs';
 import {$} from 'execa';
 import {publishApp} from '../../lib/backend/publish-app.js';
+import {buildProd} from '../../lib/build-prod.js';
 
 export default function Publish({cli}: {cli: Result<Flags>}) {
 	const [isInProjectDir, setIsInProjectDir] = useState(false);
@@ -60,16 +61,36 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 			if (cli.flags.build) {
 				setIsBuilding(true);
 				try {
-					await $`npm run build`;
-				} catch (error) {
+					// Run the same in-process build pipeline as `pulse build`. We
+					// deliberately do NOT shell out to `npm run build` here — that
+					// would resolve a different `pulse` binary (project-local vs
+					// global) and potentially load a different webpack/MF tree.
+					await buildProd(
+						cli.flags.target as 'client' | 'server' | undefined,
+					);
+				} catch (error: any) {
 					setIsBuildingError(true);
 					setFailureMessage(
-						'Build failed. Please run `npm run build` to see the error.',
+						error?.stack || error?.message || String(error),
 					);
 					return;
 				} finally {
 					setIsBuilding(false);
 				}
+			}
+
+			// Halt if the build did not actually produce a dist/ directory —
+			// this catches cases where the build script exited 0 but emitted
+			// nothing (or where --no-build was passed without a prior build).
+			if (!fs.existsSync('dist') || fs.readdirSync('dist').length === 0) {
+				setIsBuildingError(true);
+				setFailureMessage(
+					'No build output found at `dist/`. ' +
+						(cli.flags.build
+							? 'The build script completed but did not produce any output.'
+							: 'Run `pulse build` first, or omit `--no-build`.'),
+				);
+				return;
 			}
 
 			setIsZipping(true);
@@ -145,10 +166,12 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 						</Box>
 					)}
 					{isBuildingError && (
-						<Text color={'redBright'}>
-							❌ Error building the extension. Please run `npm run build` to see
-							the error.
-						</Text>
+						<>
+							<Text color={'redBright'}>❌ Error building the extension.</Text>
+							{failureMessage && (
+								<Text color={'redBright'}>{failureMessage}</Text>
+							)}
+						</>
 					)}
 					{isZipping && (
 						<Box>
