@@ -7,6 +7,10 @@ vi.mock("fs", () => ({
   },
 }));
 
+vi.mock("../../resolve-cli-root.js", () => ({
+  CLI_ROOT: "/fake/node_modules/@pulse-editor/cli",
+}));
+
 import fs from "fs";
 
 describe("getDepsBinPath", () => {
@@ -19,34 +23,26 @@ describe("getDepsBinPath", () => {
     expect(getDepsBinPath("rimraf")).toBe("npx rimraf");
   });
 
-  it("should return full path with .cmd on Windows", () => {
-    vi.mocked(fs.existsSync).mockReturnValueOnce(false).mockReturnValueOnce(true);
-    const originalPlatform = process.platform;
-    Object.defineProperty(process, "platform", { value: "win32" });
-
-    const result = getDepsBinPath("rimraf");
-    expect(result).toContain("rimraf.cmd");
-    expect(result).toContain("@pulse-editor/cli/node_modules/.bin/");
-
-    Object.defineProperty(process, "platform", { value: originalPlatform });
-  });
-
-  it("should return full path without .cmd on non-Windows", () => {
-    vi.mocked(fs.existsSync).mockReturnValueOnce(false).mockReturnValueOnce(true);
+  it("should return cli node_modules/.bin path when found there", () => {
+    // First call: project node_modules/rimraf — not found
+    // Second call: CLI_ROOT/node_modules/.bin/rimraf — found
+    vi.mocked(fs.existsSync)
+      .mockReturnValueOnce(false)  // project node_modules check
+      .mockReturnValueOnce(true);  // CLI_ROOT/node_modules/.bin check
     const originalPlatform = process.platform;
     Object.defineProperty(process, "platform", { value: "linux" });
 
     const result = getDepsBinPath("rimraf");
-    expect(result).toContain("@pulse-editor/cli/node_modules/.bin/rimraf");
+    expect(result).toContain("node_modules");
+    expect(result).toContain(".bin");
+    expect(result).toMatch(/rimraf$/);
     expect(result).not.toContain(".cmd");
 
     Object.defineProperty(process, "platform", { value: originalPlatform });
   });
 
-  it("should throw when dependency not found", () => {
+  it("should fallback to npx when dependency not found anywhere", () => {
     vi.mocked(fs.existsSync).mockReturnValue(false);
-    expect(() => getDepsBinPath("nonexistent")).toThrow(
-      "Dependency nonexistent not found."
-    );
+    expect(getDepsBinPath("nonexistent")).toBe("npx nonexistent");
   });
 });

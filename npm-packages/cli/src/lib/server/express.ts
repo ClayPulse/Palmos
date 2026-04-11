@@ -13,6 +13,7 @@ import { pipeline, Readable } from "stream";
 import { pathToFileURL } from "url";
 import { promisify } from "util";
 import { readConfigFile } from "../webpack/configs/utils.js";
+import { resolveCliDist } from "../resolve-cli-root.js";
 
 dotenv.config({
   quiet: true,
@@ -82,7 +83,7 @@ app.all(/^\/server-function\/(.*)/, async (req, res) => {
   });
 
   const dir = path.resolve(
-    "node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/load-remote.cjs",
+    resolveCliDist("lib/server/preview/backend/load-remote.cjs"),
   );
 
   const fileUrl = pathToFileURL(dir).href;
@@ -170,7 +171,7 @@ if (isPreview) {
     }
 
     const dir = path.resolve(
-      "node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/load-remote.cjs",
+      resolveCliDist("lib/server/preview/backend/load-remote.cjs"),
     );
     const fileUrl = pathToFileURL(dir).href;
     const { loadFunc } = await import(fileUrl);
@@ -210,7 +211,7 @@ if (isPreview) {
     }
 
     const dir = path.resolve(
-      "node_modules/@pulse-editor/cli/dist/lib/server/preview/backend/load-remote.cjs",
+      resolveCliDist("lib/server/preview/backend/load-remote.cjs"),
     );
     const fileUrl = pathToFileURL(dir).href;
     const { loadFunc } = await import(fileUrl);
