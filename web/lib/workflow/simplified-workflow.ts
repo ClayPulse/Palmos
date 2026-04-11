@@ -45,6 +45,8 @@ export interface SimplifiedWorkflowDAG {
   description?: string;
   entry: string;
   nodes: SimplifiedWorkflowNode[];
+  /** Environment variables required by this workflow. Keys are var names, values are descriptions. */
+  env?: Record<string, string>;
 }
 
 // #endregion
