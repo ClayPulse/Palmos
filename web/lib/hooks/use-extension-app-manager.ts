@@ -361,7 +361,10 @@ export function useExtensionAppManager(fetchCategory?: string) {
             (await getRemoteMFVersion(extMeta.name, extMeta.version, origin));
 
           return {
-            config: extMeta.appConfig!,
+            config: {
+              ...extMeta.appConfig!,
+              version: extMeta.version ?? extMeta.appConfig!.version,
+            },
             isEnabled: true,
             remoteOrigin: origin,
             mfVersion: mfVersion,

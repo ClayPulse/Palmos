@@ -112,13 +112,17 @@ export default function ViewMenuDropDown() {
     async () => {
       const input = document.createElement("input");
       input.type = "file";
-      input.accept = "application/json";
+      input.accept = ".json,.yaml,.yml";
       input.onchange = (e: any) => {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onload = async (event) => {
           try {
-            const parsed = JSON.parse(event.target?.result as string);
+            const raw = event.target?.result as string;
+            const isYaml = file.name.endsWith(".yaml") || file.name.endsWith(".yml");
+            const parsed = isYaml
+              ? (await import("js-yaml")).load(raw)
+              : JSON.parse(raw);
             // Accept either the full ReactFlow-compatible WorkflowContent or
             // the simplified authoring DAG format. Detect and compile the
             // latter down to WorkflowContent before proceeding.

@@ -39,7 +39,12 @@ export function useMarketplaceApps(
                 ));
 
               return {
-                config: extMeta.appConfig!,
+                config: {
+                  ...extMeta.appConfig!,
+                  // The DB version (from mf-manifest buildVersion) is authoritative;
+                  // appConfig.version (from pulse.config.json) may be stale.
+                  version: extMeta.version ?? extMeta.appConfig!.version,
+                },
                 isEnabled: true,
                 remoteOrigin: origin,
                 mfVersion: mfVersion,

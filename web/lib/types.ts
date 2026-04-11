@@ -248,6 +248,10 @@ export type ModalStates = {
     }>;
     openedWorkflow?: Workflow;
   };
+  workflowSettings?: {
+    isOpen?: boolean;
+    workflowName?: string;
+  };
   sharing?: {
     isOpen?: boolean;
   };
