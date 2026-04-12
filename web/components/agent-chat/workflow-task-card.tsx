@@ -113,7 +113,7 @@ export function WorkflowTaskCard({
 function AgentProgressLog({
   log,
 }: {
-  log: { type: string; text?: string; tool?: string }[];
+  log: { type: string; text?: string; tool?: string; output?: string }[];
 }) {
   const [expanded, setExpanded] = useState(false);
 
@@ -141,12 +141,31 @@ function AgentProgressLog({
 
       {expanded ? (
         <div className="flex max-h-48 flex-col gap-1.5 overflow-y-auto">
-          {log.map((entry, i) => (
-            <LogEntry key={i} entry={entry} />
-          ))}
+          {log.map((entry, i) => {
+            // Skip tool_result entries — they render inline with their tool_use
+            if (entry.type === "tool_result") return null;
+            const nextEntry = log[i + 1];
+            const toolOutput =
+              entry.type === "tool_use" && nextEntry?.type === "tool_result"
+                ? nextEntry.output
+                : undefined;
+            return <LogEntry key={i} entry={entry} toolOutput={toolOutput} />;
+          })}
         </div>
       ) : (
-        <LogEntry entry={lastEntry} />
+        (() => {
+          // For collapsed view, show last meaningful entry with its output if applicable
+          const lastIdx = log.length - 1;
+          const last = log[lastIdx];
+          if (last.type === "tool_result" && lastIdx > 0) {
+            // Show the tool_use before it with output attached
+            const prev = log[lastIdx - 1];
+            if (prev.type === "tool_use") {
+              return <LogEntry entry={prev} toolOutput={last.output} />;
+            }
+          }
+          return <LogEntry entry={last} />;
+        })()
       )}
     </div>
   );
@@ -154,37 +173,58 @@ function AgentProgressLog({
 
 function LogEntry({
   entry,
+  toolOutput,
 }: {
-  entry: { type: string; text?: string; tool?: string };
+  entry: { type: string; text?: string; tool?: string; output?: string };
+  toolOutput?: string;
 }) {
-  return (
-    <div className="flex items-start gap-1.5 text-xs">
-      {entry.type === "tool_use" ? (
-        <>
+  const [showOutput, setShowOutput] = useState(false);
+
+  if (entry.type === "tool_use") {
+    return (
+      <div>
+        <div className="flex items-center gap-1.5 text-xs">
           <Icon
             name="build"
             variant="round"
-            className="mt-0.5 shrink-0 text-xs text-amber-500 dark:text-amber-400"
+            className="shrink-0 text-xs text-amber-500 dark:text-amber-400"
           />
-          <span className="text-default-600 break-words dark:text-white/60">
+          <span className="text-default-600 min-w-0 flex-1 break-words dark:text-white/60">
             Using tool:{" "}
             <span className="font-medium text-amber-700 dark:text-amber-300">
               {entry.tool}
             </span>
           </span>
-        </>
-      ) : (
-        <>
-          <Icon
-            name="chat_bubble"
-            variant="round"
-            className="mt-0.5 shrink-0 text-xs text-blue-500 dark:text-blue-400"
-          />
-          <span className="text-default-600 min-w-0 break-words whitespace-pre-wrap dark:text-white/60">
-            {entry.text}
-          </span>
-        </>
-      )}
+          {toolOutput && (
+            <button
+              onClick={() => setShowOutput((p) => !p)}
+              className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium text-green-600 transition-colors hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-500/10"
+            >
+              {showOutput ? "Hide" : "See output"}
+            </button>
+          )}
+        </div>
+        {showOutput && toolOutput && (
+          <div className="ml-5 mt-1 rounded border border-green-200/60 bg-green-50/50 px-2.5 py-1.5 dark:border-green-500/15 dark:bg-green-500/5">
+            <pre className="text-default-600 max-h-32 overflow-auto text-[11px] break-words whitespace-pre-wrap dark:text-white/60">
+              {toolOutput}
+            </pre>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-1.5 text-xs">
+      <Icon
+        name="chat_bubble"
+        variant="round"
+        className="mt-0.5 shrink-0 text-xs text-blue-500 dark:text-blue-400"
+      />
+      <span className="text-default-600 min-w-0 break-words whitespace-pre-wrap dark:text-white/60">
+        {entry.text}
+      </span>
     </div>
   );
 }

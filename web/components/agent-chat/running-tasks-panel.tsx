@@ -24,11 +24,12 @@ interface TaskItem {
  */
 function deriveLatestProgress(task: TaskItem): string | undefined {
   const log = task.result?.log as
-    | { type: string; text?: string; tool?: string }[]
+    | { type: string; text?: string; tool?: string; output?: string }[]
     | undefined;
   if (!log || log.length === 0) return undefined;
   const last = log[log.length - 1];
   if (last.type === "tool_use") return `Using tool: ${last.tool}`;
+  if (last.type === "tool_result" && last.output) return last.output;
   if (last.text) return last.text;
   return undefined;
 }
