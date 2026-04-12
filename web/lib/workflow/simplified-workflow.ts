@@ -44,6 +44,8 @@ export interface SimplifiedWorkflowDAG {
   version: string;
   description?: string;
   entry: string;
+  /** Node ID whose output is the workflow's return value. */
+  exit?: string;
   nodes: SimplifiedWorkflowNode[];
   /** Environment variables required by this workflow. Keys are var names, values are descriptions. */
   env?: Record<string, string>;
@@ -224,6 +226,7 @@ export function convertSimplifiedToWorkflowContent(
       isFullscreen: false,
       note,
       isDefaultEntry: n.id === dag.entry ? true : undefined,
+      isDefaultExit: dag.exit && n.id === dag.exit ? true : undefined,
     };
 
     return {
