@@ -12,7 +12,7 @@ export function useMarketplaceWorkflows(
       case "Published by Me":
         return "/api/workflow/list?published=true";
       case "My Workflows":
-        return "/api/user-workflows";
+        return "/api/user-workflows/list";
       default:
         return null;
     }

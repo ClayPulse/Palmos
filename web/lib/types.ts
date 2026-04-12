@@ -248,6 +248,10 @@ export type ModalStates = {
     }>;
     openedWorkflow?: Workflow;
   };
+  workflowSettings?: {
+    isOpen?: boolean;
+    workflowId?: string;
+  };
   sharing?: {
     isOpen?: boolean;
   };
@@ -322,6 +326,7 @@ export type AppInfoModalContent = {
   url?: string;
   author?: string;
   license?: string;
+  visibility?: "public" | "private" | "unlisted";
 };
 
 export type MenuAction = {
@@ -479,6 +484,8 @@ export type Workflow = {
   visibility: "private" | "public" | "unlisted";
   requireWorkspace: boolean;
   webhookVerifyToken?: string;
+  forkedFromId?: string;
+  forkedAt?: string;
   createdAt?: string;
 };
 

@@ -30,7 +30,7 @@ const login = `\
                   Flags:
                     --token [token]
                       Login using an access token. This is the default if the
-                      token is set in the environment variable PE_ACCESS_TOKEN.
+					  token is set in the environment variable PALMOS_API_KEY.
                     --flow
                       Login using a browser flow.
 
@@ -109,6 +109,19 @@ const upgrade = `\
 
 `;
 
+const publishWorkflow = `\
+  publish-workflow <file>
+                  Publish a workflow from a .yaml file to the Pulse Editor Platform.
+                  Flags:
+                    --name, -n [name]
+                      The name of the workflow (overrides the name in the YAML).
+                    --visibility, -v [visibility]
+                      The visibility of the workflow. Options: public, unlisted, private.
+                    --description, -d [description]
+                      A description for the workflow.
+
+`;
+
 const skill = `\
   skill           Manage skill actions for the current Pulse App.
 
@@ -130,6 +143,7 @@ export const commandsManual: Record<string, string> = {
 	login,
 	logout,
 	publish,
+	'publish-workflow': publishWorkflow,
 	create,
 	preview,
 	dev,

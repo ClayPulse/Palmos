@@ -16,7 +16,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Palmos",
+  title: "Palmos: The Runtime Where AI Agents Build, Ship, and Evolve",
   description: "Web-based Vibe Coding Editor",
 };
 

@@ -5,10 +5,16 @@ import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { CanvasViewConfig, WorkflowContent } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
+import {
+  convertSimplifiedToWorkflowContent,
+  isSimplifiedWorkflow,
+  type SimplifiedWorkflowDAG,
+} from "@/lib/workflow/simplified-workflow";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useRef, useState } from "react";
 import NavMenuDropdown from "../nav-menu-dropdown";
 import ImportWorkflowModal from "@/components/modals/import-workflow-modal";
+import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
 
 export default function ViewMenuDropDown() {
   const { getTranslations: t, locale } = useTranslations();
@@ -68,6 +74,10 @@ export default function ViewMenuDropDown() {
   const { createCanvasTabView } = useTabViewManager();
   const [importModalOpen, setImportModalOpen] = useState(false);
   const pendingWorkflowContent = useRef<WorkflowContent | null>(null);
+  const [envSetup, setEnvSetup] = useState<{
+    isOpen: boolean;
+    env: Record<string, string>;
+  } | null>(null);
 
   const isCurrentTabCanvas =
     editorContext?.editorStates.tabViews[
@@ -86,6 +96,16 @@ export default function ViewMenuDropDown() {
       ...prev,
       isSideMenuOpen: true,
     }));
+  }
+
+  function proceedWithImport(workflowContent: WorkflowContent) {
+    if (isCurrentTabCanvas) {
+      pendingWorkflowContent.current = workflowContent;
+      setImportModalOpen(true);
+    } else {
+      importToNewTab(workflowContent);
+      pendingWorkflowContent.current = null;
+    }
   }
 
   function importToCurrentCanvas(workflowContent: WorkflowContent) {
@@ -108,21 +128,40 @@ export default function ViewMenuDropDown() {
     async () => {
       const input = document.createElement("input");
       input.type = "file";
-      input.accept = "application/json";
+      input.accept = ".json,.yaml,.yml";
       input.onchange = (e: any) => {
         const file = e.target.files[0];
         const reader = new FileReader();
         reader.onload = async (event) => {
           try {
-            const workflowContent = JSON.parse(
-              event.target?.result as string,
-            ) as WorkflowContent;
+            const raw = event.target?.result as string;
+            const isYaml = file.name.endsWith(".yaml") || file.name.endsWith(".yml");
+            const parsed = isYaml
+              ? (await import("js-yaml")).load(raw)
+              : JSON.parse(raw);
+            // Accept either the full ReactFlow-compatible WorkflowContent or
+            // the simplified authoring DAG format. Detect and compile the
+            // latter down to WorkflowContent before proceeding.
+            const isSimplified = isSimplifiedWorkflow(parsed);
+            const workflowContent: WorkflowContent = isSimplified
+              ? convertSimplifiedToWorkflowContent(parsed as SimplifiedWorkflowDAG)
+              : (parsed as WorkflowContent);
             if (workflowContent) {
-              if (isCurrentTabCanvas) {
-                pendingWorkflowContent.current = workflowContent;
-                setImportModalOpen(true);
+              // Stash the content so the env-setup or import-modal callbacks
+              // can pick it up after user interaction completes.
+              pendingWorkflowContent.current = workflowContent;
+
+              // If the simplified DAG declares env vars, prompt the user first.
+              const env = isSimplified
+                ? (parsed as SimplifiedWorkflowDAG).env
+                : undefined;
+              if (env && Object.keys(env).length > 0) {
+                setEnvSetup({
+                  isOpen: true,
+                  env,
+                });
               } else {
-                importToNewTab(workflowContent);
+                proceedWithImport(workflowContent);
               }
             } else {
               alert(t("viewMenu.importWorkflow.invalidFile"));
@@ -148,6 +187,23 @@ export default function ViewMenuDropDown() {
         category={t("viewMenu.title")}
         menuActions={menuActions}
       />
+      {envSetup && (
+        <WorkflowEnvSetupModal
+          isOpen={envSetup.isOpen}
+          workflowId={undefined}
+          envEntries={envSetup.env}
+          onClose={() => {
+            setEnvSetup(null);
+            pendingWorkflowContent.current = null;
+          }}
+          onComplete={() => {
+            setEnvSetup(null);
+            if (pendingWorkflowContent.current) {
+              proceedWithImport(pendingWorkflowContent.current);
+            }
+          }}
+        />
+      )}
       <ImportWorkflowModal
         isOpen={importModalOpen}
         onClose={() => {

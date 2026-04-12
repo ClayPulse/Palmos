@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { Workflow, WorkflowRun } from "@/lib/types";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { useWorkflowRuns } from "@/lib/hooks/use-workflow-runs";
 import Icon from "@/components/misc/icon";
+import { useWorkflowRuns } from "@/lib/hooks/use-workflow-runs";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { Workflow, WorkflowRun } from "@/lib/types";
+import {
+  deleteWorkflowSetting,
+  setWorkflowSetting,
+} from "@/lib/workflow-settings";
 import {
   addToast,
   Button,
@@ -23,6 +26,8 @@ import {
   Spinner,
   Tooltip,
 } from "@heroui/react";
+import { useState } from "react";
+import useSWR from "swr";
 
 function CopyRow({ label, value }: { label: string; value: string }) {
   return (
@@ -66,8 +71,7 @@ export default function WorkflowDetailsModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const apiBaseUrl =
-    process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://palmos.ai";
+  const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://palmos.ai";
   const apiEndpoint = workflow.id
     ? `${apiBaseUrl}/api/workflow/run/${workflow.id}`
     : null;
@@ -103,19 +107,25 @@ export default function WorkflowDetailsModal({
 
           {/* Description */}
           {workflow.description && (
-            <p className="text-sm text-default-500">{workflow.description}</p>
+            <p className="text-default-500 text-sm">{workflow.description}</p>
           )}
 
           <Divider />
 
           {/* Copyable fields */}
           <div className="flex flex-col gap-y-3">
-            {workflow.id && (
-              <CopyRow label="Workflow ID" value={workflow.id} />
-            )}
+            {workflow.id && <CopyRow label="Workflow ID" value={workflow.id} />}
             <CopyRow label="Name" value={workflow.name} />
             <CopyRow label="Version" value={workflow.version} />
           </div>
+
+          {/* Workflow-level User Settings */}
+          {workflow.id && (
+            <>
+              <Divider />
+              <WorkflowUserSettings workflowId={workflow.id} />
+            </>
+          )}
 
           {/* API Endpoint */}
           {apiEndpoint && (
@@ -129,7 +139,7 @@ export default function WorkflowDetailsModal({
                 </p>
                 <CopyRow label="URL" value={apiEndpoint} />
                 <div className="bg-content2 rounded-lg p-3">
-                  <p className="text-xs font-mono opacity-80 whitespace-pre-wrap">{`curl -X POST ${apiEndpoint} \\
+                  <p className="font-mono text-xs whitespace-pre-wrap opacity-80">{`curl -X POST ${apiEndpoint} \\
   -H "Authorization: Bearer <YOUR_API_KEY>" \\
   -H "Content-Type: application/json" \\
   -d '{"input-text": "hello"}'`}</p>
@@ -307,8 +317,8 @@ function WebhookSetupSection({
       {apiKey ? (
         <CopyRow label="Pulse API Key" value={apiKey} />
       ) : noBeta ? (
-        <div className="bg-warning-50 rounded-lg p-3 flex flex-col gap-y-2">
-          <p className="text-xs text-warning-700">
+        <div className="bg-warning-50 flex flex-col gap-y-2 rounded-lg p-3">
+          <p className="text-warning-700 text-xs">
             Beta access is required to generate API keys.
           </p>
           <Link href="/beta" size="sm" color="warning" isExternal>
@@ -452,7 +462,7 @@ function RunRow({ run }: { run: WorkflowRun }) {
 
       {expanded && run.error && (
         <div className="bg-danger-50 dark:bg-danger-50/10 mx-3 mb-2 rounded px-3 py-2">
-          <p className="text-danger text-xs font-mono break-all">{run.error}</p>
+          <p className="text-danger font-mono text-xs break-all">{run.error}</p>
         </div>
       )}
     </div>
@@ -505,6 +515,112 @@ function WorkflowRunHistory({ workflowId }: { workflowId: string }) {
           </Button>
         </div>
       )}
+    </div>
+  );
+}
+
+function WorkflowUserSettings({ workflowId }: { workflowId: string }) {
+  const { data: settings, mutate } = useSWR<Record<string, string>>(
+    `/api/workflow/user-settings/get?workflowId=${encodeURIComponent(workflowId)}`,
+  );
+
+  const [newKey, setNewKey] = useState("");
+  const [newValue, setNewValue] = useState("");
+  const [newIsSecret, setNewIsSecret] = useState(false);
+
+  return (
+    <div className="flex flex-col gap-y-2">
+      <p className="text-sm font-semibold">User Settings</p>
+      <p className="text-default-500 text-xs">
+        These settings apply to all apps in this workflow. Per-app settings take
+        priority over workflow-level settings.
+      </p>
+      {settings && Object.keys(settings).length > 0 && (
+        <div className="space-y-1">
+          {Object.entries(settings).map(([key, value]) => (
+            <WorkflowSettingInput
+              key={key}
+              workflowId={workflowId}
+              setting={{ key, value }}
+              onUpdated={() => mutate()}
+            />
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-x-1">
+        <Input label="Key" size="sm" value={newKey} onValueChange={setNewKey} />
+        <Input
+          label="Value"
+          size="sm"
+          value={newValue}
+          onValueChange={setNewValue}
+          type={newIsSecret ? "password" : "text"}
+        />
+        <Button
+          isIconOnly
+          variant="light"
+          onPress={() => setNewIsSecret((prev) => !prev)}
+        >
+          {newIsSecret ? <Icon name="lock" /> : <Icon name="lock_open" />}
+        </Button>
+        <Button
+          isIconOnly
+          variant="light"
+          isDisabled={newKey.trim() === ""}
+          onPress={async () => {
+            await setWorkflowSetting(
+              workflowId,
+              newKey.trim(),
+              newValue,
+              newIsSecret,
+            );
+            mutate();
+            setNewKey("");
+            setNewValue("");
+            setNewIsSecret(false);
+          }}
+        >
+          <Icon name="add" />
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function WorkflowSettingInput({
+  workflowId,
+  setting,
+  onUpdated,
+}: {
+  workflowId: string;
+  setting: { key: string; value: string };
+  onUpdated: () => void;
+}) {
+  const isRedacted = setting.value === "redacted";
+
+  return (
+    <div className="flex items-center gap-x-1">
+      <Input
+        label={setting.key}
+        size="sm"
+        value={setting.value}
+        isReadOnly
+        type={isRedacted ? "password" : "text"}
+      />
+      <Tooltip content="Delete setting">
+        <Button
+          isIconOnly
+          variant="light"
+          color="danger"
+          size="sm"
+          onPress={async () => {
+            await deleteWorkflowSetting(workflowId, setting.key);
+            onUpdated();
+          }}
+        >
+          <Icon name="delete" />
+        </Button>
+      </Tooltip>
     </div>
   );
 }

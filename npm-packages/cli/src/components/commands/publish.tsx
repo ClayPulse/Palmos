@@ -7,9 +7,10 @@ import Spinner from 'ink-spinner';
 import fs from 'fs';
 import {$} from 'execa';
 import {publishApp} from '../../lib/backend/publish-app.js';
+import {buildProd} from '../../lib/build-prod.js';
 
 export default function Publish({cli}: {cli: Result<Flags>}) {
-	const [isInProjectDir, setIsInProjectDir] = useState(false);
+	const [isInProjectDir, setIsInProjectDir] = useState<boolean | null>(null);
 	const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [isBuilding, setIsBuilding] = useState(false);
@@ -24,14 +25,26 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		undefined,
 	);
 
+	// Exit with error code when a terminal failure state is reached
+	useEffect(() => {
+		const failed =
+			isInProjectDir === false ||
+			(!isCheckingAuth && !isAuthenticated) ||
+			isBuildingError ||
+			isZippingError ||
+			isPublishingError;
+		if (!failed) return undefined;
+		// Defer so Ink can flush the error text before the process exits
+		const timer = setTimeout(() => process.exit(1), 0);
+		return () => clearTimeout(timer);
+	}, [isInProjectDir, isCheckingAuth, isAuthenticated, isBuildingError, isZippingError, isPublishingError]);
+
 	useEffect(() => {
 		async function checkConfig() {
 			// Check if the current dir contains pulse.config.ts
 			const currentDir = process.cwd();
 			const pulseConfigPath = `${currentDir}/pulse.config.ts`;
-			if (fs.existsSync(pulseConfigPath)) {
-				setIsInProjectDir(true);
-			}
+			setIsInProjectDir(fs.existsSync(pulseConfigPath));
 		}
 		checkConfig();
 	}, []);
@@ -60,16 +73,36 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 			if (cli.flags.build) {
 				setIsBuilding(true);
 				try {
-					await $`npm run build`;
-				} catch (error) {
+					// Run the same in-process build pipeline as `pulse build`. We
+					// deliberately do NOT shell out to `npm run build` here — that
+					// would resolve a different `pulse` binary (project-local vs
+					// global) and potentially load a different webpack/MF tree.
+					await buildProd(
+						cli.flags.target as 'client' | 'server' | undefined,
+					);
+				} catch (error: any) {
 					setIsBuildingError(true);
 					setFailureMessage(
-						'Build failed. Please run `npm run build` to see the error.',
+						error?.stack || error?.message || String(error),
 					);
 					return;
 				} finally {
 					setIsBuilding(false);
 				}
+			}
+
+			// Halt if the build did not actually produce a dist/ directory —
+			// this catches cases where the build script exited 0 but emitted
+			// nothing (or where --no-build was passed without a prior build).
+			if (!fs.existsSync('dist') || fs.readdirSync('dist').length === 0) {
+				setIsBuildingError(true);
+				setFailureMessage(
+					'No build output found at `dist/`. ' +
+						(cli.flags.build
+							? 'The build script completed but did not produce any output.'
+							: 'Run `pulse build` first, or omit `--no-build`.'),
+				);
+				return;
 			}
 
 			setIsZipping(true);
@@ -120,7 +153,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 
 	return (
 		<>
-			{!isInProjectDir ? (
+			{isInProjectDir === false ? (
 				<Text color={'redBright'}>
 					⛔ The current directory does not contain a Pulse Editor project.
 				</Text>
@@ -145,10 +178,12 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 						</Box>
 					)}
 					{isBuildingError && (
-						<Text color={'redBright'}>
-							❌ Error building the extension. Please run `npm run build` to see
-							the error.
-						</Text>
+						<>
+							<Text color={'redBright'}>❌ Error building the extension.</Text>
+							{failureMessage && (
+								<Text color={'redBright'}>{failureMessage}</Text>
+							)}
+						</>
 					)}
 					{isZipping && (
 						<Box>

@@ -78,8 +78,8 @@ describe("getToken", () => {
     process.env = originalEnv;
   });
 
-  it("should return env var PE_ACCESS_TOKEN when set", () => {
-    process.env["PE_ACCESS_TOKEN"] = "env-token";
+  it("should return env var PALMOS_API_KEY when set", () => {
+	process.env["PALMOS_API_KEY"] = "env-token";
     expect(getToken(false)).toBe("env-token");
   });
 
@@ -89,7 +89,7 @@ describe("getToken", () => {
   });
 
   it("should read from config file when env not set", () => {
-    delete process.env["PE_ACCESS_TOKEN"];
+	delete process.env["PALMOS_API_KEY"];
     vi.mocked(fs.existsSync).mockReturnValue(true);
     vi.mocked(fs.readFileSync).mockReturnValue('{"accessToken": "file-token"}');
 
@@ -97,13 +97,13 @@ describe("getToken", () => {
   });
 
   it("should return undefined when no env and no file", () => {
-    delete process.env["PE_ACCESS_TOKEN"];
+  delete process.env["PALMOS_API_KEY"];
     vi.mocked(fs.existsSync).mockReturnValue(false);
     expect(getToken(false)).toBeUndefined();
   });
 
   it("should handle malformed JSON gracefully", () => {
-    delete process.env["PE_ACCESS_TOKEN"];
+  delete process.env["PALMOS_API_KEY"];
     vi.mocked(fs.existsSync).mockReturnValue(true);
     vi.mocked(fs.readFileSync).mockReturnValue("not json");
 
@@ -132,13 +132,18 @@ describe("isTokenInEnv", () => {
     process.env = originalEnv;
   });
 
-  it("should return true when PE_ACCESS_TOKEN is set", () => {
-    process.env["PE_ACCESS_TOKEN"] = "token";
+  it("should return true when PALMOS_API_KEY is set", () => {
+  process.env["PALMOS_API_KEY"] = "token";
     expect(isTokenInEnv(false)).toBe(true);
   });
 
-  it("should return false when PE_ACCESS_TOKEN is not set", () => {
-    delete process.env["PE_ACCESS_TOKEN"];
+  it("should not use PALMOS_API_KEY in dev mode", () => {
+    process.env["PALMOS_API_KEY"] = "token";
+    expect(isTokenInEnv(true)).toBe(false);
+  });
+
+  it("should return false when PALMOS_API_KEY is not set", () => {
+  delete process.env["PALMOS_API_KEY"];
     expect(isTokenInEnv(false)).toBe(false);
   });
 

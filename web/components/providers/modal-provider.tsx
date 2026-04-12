@@ -18,6 +18,7 @@ import ProjectSettingsModal from "../modals/project-settings-modal";
 import PublishWorkflowModal from "../modals/publish-workflow-modal";
 import QuickVibeCodeSetupModal from "../modals/quick-vibe-code-setup-modal";
 import SharingModal from "../modals/sharing-modal";
+import WorkflowSettingsModal from "../modals/workflow-settings-modal";
 import WorkspaceSettingsModal from "../modals/workspace-settings-model";
 import { EditorContext } from "./editor-context-provider";
 
@@ -242,6 +243,22 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
           openedWorkflow={modalStates?.publishWorkflow?.openedWorkflow}
         />
       )}
+
+      {useDelayedUnmount(
+        modalStates?.workflowSettings?.isOpen ?? false,
+        delaySeconds,
+      ) &&
+        modalStates?.workflowSettings?.workflowId && (
+          <WorkflowSettingsModal
+            isOpen={modalStates?.workflowSettings?.isOpen ?? false}
+            workflowId={modalStates.workflowSettings.workflowId}
+            onClose={() =>
+              editorContext?.updateModalStates({
+                workflowSettings: { isOpen: false },
+              })
+            }
+          />
+        )}
 
       {useDelayedUnmount(
         modalStates?.sharing?.isOpen ?? false,

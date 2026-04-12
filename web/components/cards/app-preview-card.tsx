@@ -191,6 +191,7 @@ export default function AppPreviewCard({
       readme: extension.config.repository
         ? extension.config.repository + "/README.md"
         : undefined,
+      visibility: extension.config.visibility,
     });
     editorContext?.updateModalStates({ marketplace: { isOpen: false } });
   }

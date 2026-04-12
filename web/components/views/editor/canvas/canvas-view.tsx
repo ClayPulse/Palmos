@@ -277,6 +277,33 @@ export default function CanvasView({
     isActive,
   );
 
+  const openedWorkflow = editorContext?.editorStates.tabViews.find(
+    (v) => (v.config as CanvasViewConfig).viewId === config.viewId,
+  )?.openedWorkflow;
+  const openedWorkflowId = openedWorkflow?.id;
+
+  useRegisterMenuAction(
+    {
+      name: `Workflow Settings (${tabName})`,
+      displayName: `Workflow Settings (${tabName})`,
+      menuCategory: "file",
+      description: "Configure user settings for this workflow",
+      shortcut: "Ctrl+Alt+S",
+      icon: "tune",
+    },
+    async () => {
+      if (!openedWorkflowId) return;
+      editorContext?.updateModalStates({
+        workflowSettings: {
+          isOpen: true,
+          workflowId: openedWorkflowId,
+        },
+      });
+    },
+    [isActive, tabName, openedWorkflowId, locale],
+    isActive && !!openedWorkflowId,
+  );
+
   const { setNodeRef, isOver, active } = useDroppable({
     id: "canvas-view-" + config.viewId,
   });

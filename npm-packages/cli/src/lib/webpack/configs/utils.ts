@@ -4,7 +4,7 @@ import type {
   TypedVariable,
   TypedVariableType,
 } from "@pulse-editor/shared-utils/dist/types/types.js";
-import { existsSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import fs from "fs/promises";
 import { globSync } from "glob";
 import { networkInterfaces } from "os";
@@ -71,7 +71,19 @@ export async function loadPulseConfig() {
     recursive: true,
     force: true,
   });
-  return mod.default;
+
+  const config = mod.default;
+
+  // Always use the version from package.json as the source of truth
+  const pkgJsonPath = path.join(projectDirName, "package.json");
+  if (existsSync(pkgJsonPath)) {
+    const pkg = JSON.parse(await fs.readFile(pkgJsonPath, "utf-8"));
+    if (pkg.version) {
+      config.version = pkg.version;
+    }
+  }
+
+  return config;
 }
 
 export function getLocalNetworkIP() {
@@ -497,14 +509,16 @@ export function compileAppActionSkills(pulseConfig: any) {
 
 // Generate tsconfig for server functions
 export function generateTempTsConfig() {
-  const tempTsConfigPath = path.join(
-    process.cwd(),
-    "node_modules/.pulse/tsconfig.server.json",
-  );
+  const tempTsConfigDir = path.join(process.cwd(), "node_modules/.pulse");
+  const tempTsConfigPath = path.join(tempTsConfigDir, "tsconfig.server.json");
 
-  if (existsSync(tempTsConfigPath)) {
-    return;
-  }
+  // Always regenerate: the previous implementation skipped regeneration when
+  // the file existed, but the tsconfig bakes in absolute paths derived from
+  // process.cwd(). If the project is moved/renamed (or was generated from a
+  // different parent dir) the stale cache causes ts-loader TS18003 errors.
+  // Ensure the parent directory exists so we don't ENOENT on fresh installs
+  // or when `.pulse` has been wiped.
+  mkdirSync(tempTsConfigDir, { recursive: true });
 
   const tsConfig = {
     compilerOptions: {

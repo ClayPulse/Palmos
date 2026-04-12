@@ -229,7 +229,7 @@ export default function Login({ cli }: { cli: Result<Flags> }) {
                 <>
                   <Text>
                     🟢 It is recommended to save your access token as an
-                    environment variable PE_ACCESS_TOKEN.
+					environment variable PALMOS_API_KEY.
                   </Text>
                   <Box>
                     <Text>

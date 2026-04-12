@@ -71,6 +71,9 @@ export function WorkflowTaskCard({ task }: { task: WorkflowTaskState }) {
           </p>
         </div>
       </div>
+      {isRunning && task.result?.log && (
+        <AgentProgressLog log={task.result.log} />
+      )}
       {isCompleted && task.result != null && (
         <WorkflowResultBody
           result={task.result}
@@ -82,6 +85,53 @@ export function WorkflowTaskCard({ task }: { task: WorkflowTaskState }) {
           <p className="text-xs text-red-600 dark:text-red-400">{task.error}</p>
         </div>
       )}
+    </div>
+  );
+}
+
+// ── Agent progress log ──────────────────────────────────────────────────────
+
+function AgentProgressLog({
+  log,
+}: {
+  log: { type: string; text?: string; tool?: string }[];
+}) {
+  if (!log || log.length === 0) return null;
+
+  return (
+    <div className="border-t border-amber-200/60 bg-white/60 px-3.5 py-2 dark:border-amber-500/15 dark:bg-white/3">
+      <div className="flex max-h-32 flex-col gap-1 overflow-y-auto">
+        {log.map((entry, i) => (
+          <div key={i} className="flex items-center gap-1.5 text-xs">
+            {entry.type === "tool_use" ? (
+              <>
+                <Icon
+                  name="build"
+                  variant="round"
+                  className="text-xs text-amber-500 dark:text-amber-400"
+                />
+                <span className="text-default-600 dark:text-white/60">
+                  Using tool:{" "}
+                  <span className="font-medium text-amber-700 dark:text-amber-300">
+                    {entry.tool}
+                  </span>
+                </span>
+              </>
+            ) : (
+              <>
+                <Icon
+                  name="chat_bubble"
+                  variant="round"
+                  className="text-xs text-blue-500 dark:text-blue-400"
+                />
+                <span className="text-default-600 min-w-0 truncate dark:text-white/60">
+                  {entry.text}
+                </span>
+              </>
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

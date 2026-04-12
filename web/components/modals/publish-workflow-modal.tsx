@@ -1,6 +1,6 @@
-import { captureWorkflowCanvas } from "@/lib/html2canvas/print-canvas";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import { captureWorkflowCanvas } from "@/lib/html2canvas/print-canvas";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AppNodeData, Workflow } from "@/lib/types";
 import {
@@ -15,7 +15,6 @@ import {
 } from "@heroui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
 import { useContext, useEffect, useState } from "react";
-import { useSWRConfig } from "swr";
 import { EditorContext } from "../providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 
@@ -56,7 +55,6 @@ export default function PublishWorkflowModal({
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
 
-  const { mutate } = useSWRConfig();
   const { workflows: publishedWorkflows, isLoading: isLoadingWorkflows } =
     useMarketplaceWorkflows("Published by Me");
 
@@ -67,9 +65,8 @@ export default function PublishWorkflowModal({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [version, setVersion] = useState("");
-  const [visibility, setVisibility] = useState<Workflow["visibility"]>(
-    "public",
-  );
+  const [visibility, setVisibility] =
+    useState<Workflow["visibility"]>("public");
   const visibilityOptions: Workflow["visibility"][] = [
     "public",
     "unlisted",
@@ -174,12 +171,6 @@ export default function PublishWorkflowModal({
           "Failed to publish workflow. " + (await response.text()),
         );
       }
-
-      // Revalidate workflow lists so the UI reflects the new version
-      mutate("/api/workflow/list");
-      mutate("/api/workflow/list?published=true");
-      mutate("/api/user-workflows");
-
       addToast({
         title: t("publishWorkflowModal.toast.published.title"),
         description: t("publishWorkflowModal.toast.published.description"),
