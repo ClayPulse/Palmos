@@ -5,7 +5,13 @@ import Icon from "@/components/misc/icon";
 import { Spinner } from "@heroui/react";
 import { useEffect, useState } from "react";
 
-export function WorkflowTaskCard({ task }: { task: WorkflowTaskState }) {
+export function WorkflowTaskCard({
+  task,
+  onTerminate,
+}: {
+  task: WorkflowTaskState;
+  onTerminate?: (taskId: string) => void;
+}) {
   const [elapsed, setElapsed] = useState(0);
   const [finalElapsed, setFinalElapsed] = useState<number | null>(null);
 
@@ -69,7 +75,20 @@ export function WorkflowTaskCard({ task }: { task: WorkflowTaskState }) {
                 ? `Completed in ${timeStr}`
                 : `Failed after ${timeStr}`}
           </p>
+          {isRunning && task.latestProgress && (
+            <p className="text-default-500 mt-0.5 truncate text-xs italic dark:text-white/40">
+              {task.latestProgress}
+            </p>
+          )}
         </div>
+        {isRunning && onTerminate && (
+          <button
+            onClick={() => onTerminate(task.taskId)}
+            className="shrink-0 rounded-md border border-red-300/60 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
+          >
+            Terminate
+          </button>
+        )}
       </div>
       {isRunning && task.result?.log && (
         <AgentProgressLog log={task.result.log} />

@@ -7,6 +7,7 @@ import { SessionHistoryPanel } from "@/components/agent-chat/session-history";
 import { STARTER_PROMPTS, StarterPromptButton } from "@/components/agent-chat/starter-prompts";
 import { SubagentCard } from "@/components/agent-chat/subagent-card";
 import { TodoList } from "@/components/agent-chat/todo-list";
+import RunningTasksPanel from "@/components/agent-chat/running-tasks-panel";
 import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
 import InlineWidget, {
   type InlineWidgetData,
@@ -359,20 +360,30 @@ export default function AgentChat({
           );
           if (!res.ok) return;
           const data = await res.json();
+          // Derive latest progress from log
+          const log = data.result?.log as { type: string; text?: string; tool?: string }[] | undefined;
+          let latestProgress: string | undefined;
+          if (log && log.length > 0) {
+            const last = log[log.length - 1];
+            latestProgress = last.type === "tool_use" ? `Using tool: ${last.tool}` : last.text;
+          }
+
+          setWorkflowTasks((prev) =>
+            prev.map((t) =>
+              t.taskId === taskId
+                ? {
+                    ...t,
+                    status: data.status === "completed" || data.status === "failed" ? data.status : t.status,
+                    result: data.result,
+                    error: data.error,
+                    latestProgress,
+                  }
+                : t,
+            ),
+          );
+
           if (data.status === "completed" || data.status === "failed") {
             clearInterval(poll);
-            setWorkflowTasks((prev) =>
-              prev.map((t) =>
-                t.taskId === taskId
-                  ? {
-                      ...t,
-                      status: data.status,
-                      result: data.result,
-                      error: data.error,
-                    }
-                  : t,
-              ),
-            );
           }
         } catch {
           // Network error — keep polling
@@ -403,6 +414,31 @@ export default function AgentChat({
   }
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+  const [isTasksOpen, setIsTasksOpen] = useState(false);
+
+  const handleTerminateTask = async (taskId: string) => {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (!backendUrl) return;
+    try {
+      const res = await fetch(`${backendUrl}/api/workflow/run/terminate`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ taskId }),
+      });
+      if (res.ok) {
+        setWorkflowTasks((prev) =>
+          prev.map((t) =>
+            t.taskId === taskId
+              ? { ...t, status: "failed", error: "Terminated by user" }
+              : t,
+          ),
+        );
+      }
+    } catch {
+      // silent
+    }
+  };
 
   const isEmptyConversation = messages.length === 0 && !isLoading;
 
@@ -694,6 +730,13 @@ export default function AgentChat({
               )}
             </button>
             <button
+              onClick={() => setIsTasksOpen(true)}
+              className="border-default-200 text-default-600 hover:bg-default-100 flex items-center gap-1 rounded-lg border bg-white px-2.5 py-1.5 text-xs transition-colors dark:border-white/10 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
+            >
+              <Icon name="task_alt" variant="round" className="text-sm" />
+              Tasks
+            </button>
+            <button
               onClick={handleNewChat}
               className="flex items-center gap-1 rounded-lg border border-amber-400/50 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:bg-amber-500/15"
             >
@@ -726,6 +769,19 @@ export default function AgentChat({
           </div>
         )}
 
+        {/* Tasks panel overlay */}
+        {isTasksOpen && (
+          <div className="absolute inset-0 z-30 flex">
+            <div className="w-full max-w-sm">
+              <RunningTasksPanel onClose={() => setIsTasksOpen(false)} />
+            </div>
+            <div
+              className="flex-1 bg-black/20 dark:bg-black/40"
+              onClick={() => setIsTasksOpen(false)}
+            />
+          </div>
+        )}
+
         {/* Messages */}
         <div
           ref={scrollContainerRef}
@@ -734,7 +790,7 @@ export default function AgentChat({
           {isEmptyConversation && emptyState}
           {messageList}
           {workflowTasks.map((task) => (
-            <WorkflowTaskCard key={task.taskId} task={task} />
+            <WorkflowTaskCard key={task.taskId} task={task} onTerminate={handleTerminateTask} />
           ))}
           {loadingIndicator}
           {errorBanner}
@@ -852,6 +908,13 @@ export default function AgentChat({
         />
       )}
 
+      {/* Tasks panel overlay (panel) */}
+      {isTasksOpen && (
+        <div className="absolute inset-0 z-30">
+          <RunningTasksPanel onClose={() => setIsTasksOpen(false)} />
+        </div>
+      )}
+
       {/* Header + WIP disclaimer */}
       <div>
         <div className="relative">
@@ -880,6 +943,19 @@ export default function AgentChat({
                 >
                   <div>
                     <Icon name="add" variant="round" />
+                  </div>
+                </Button>
+              </Tooltip>
+              <Tooltip content="Tasks" delay={400} closeDelay={0}>
+                <Button
+                  isIconOnly
+                  variant="light"
+                  size="sm"
+                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
+                  onPress={() => setIsTasksOpen(true)}
+                >
+                  <div>
+                    <Icon name="task_alt" variant="round" />
                   </div>
                 </Button>
               </Tooltip>
