@@ -30,7 +30,7 @@ const login = `\
                   Flags:
                     --token [token]
                       Login using an access token. This is the default if the
-                      token is set in the environment variable PE_ACCESS_TOKEN.
+					  token is set in the environment variable PALMOS_API_KEY.
                     --flow
                       Login using a browser flow.
 
