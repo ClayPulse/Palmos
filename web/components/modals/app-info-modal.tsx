@@ -161,9 +161,24 @@ function AppInfo({
         <p>
           <span className="font-semibold">ID</span>: {appInfo?.id}
         </p>
-        <p>
+        <div className="flex items-center gap-x-2">
           <span className="font-semibold">Version</span>: {appInfo?.version}
-        </p>
+          {appInfo?.visibility && (
+            <Chip
+              size="sm"
+              variant="flat"
+              color={
+                appInfo.visibility === "public"
+                  ? "success"
+                  : appInfo.visibility === "unlisted"
+                    ? "warning"
+                    : "default"
+              }
+            >
+              {appInfo.visibility}
+            </Chip>
+          )}
+        </div>
         {appInfo?.author && (
           <p>
             <span className="font-semibold">Author</span>: {appInfo?.author}

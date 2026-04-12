@@ -326,6 +326,7 @@ export type AppInfoModalContent = {
   url?: string;
   author?: string;
   license?: string;
+  visibility?: "public" | "private" | "unlisted";
 };
 
 export type MenuAction = {
