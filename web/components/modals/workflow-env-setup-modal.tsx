@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
+import { setWorkflowSetting } from "@/lib/workflow-settings";
 import {
   Button,
   Input,
@@ -34,7 +34,6 @@ export default function WorkflowEnvSetupModal({
   /** { VAR_NAME: "human-readable description" } from the YAML `env` block. */
   envEntries: Record<string, string>;
 }) {
-  const { platformApi } = usePlatformApi();
   const keys = Object.keys(envEntries);
 
   const [values, setValues] = useState<Record<string, string>>(() =>
@@ -52,7 +51,7 @@ export default function WorkflowEnvSetupModal({
     try {
       await Promise.all(
         keys.map((key) =>
-          platformApi?.setWorkflowSetting(
+          setWorkflowSetting(
             workflowId,
             key,
             values[key] ?? "",

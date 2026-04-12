@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import useSWR from "swr";
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import Icon from "@/components/misc/icon";
+import {
+  deleteWorkflowSetting,
+  setWorkflowSetting,
+} from "@/lib/workflow-settings";
 import {
   Button,
   Divider,
@@ -15,6 +16,8 @@ import {
   ModalHeader,
   Tooltip,
 } from "@heroui/react";
+import { useState } from "react";
+import useSWR from "swr";
 
 export default function WorkflowSettingsModal({
   workflowId,
@@ -35,8 +38,8 @@ export default function WorkflowSettingsModal({
         <ModalBody>
           <p className="text-default-500 text-xs">
             Settings defined here apply to all apps in{" "}
-            <span className="font-semibold">{workflowId}</span>. Per-app
-            user settings take priority over these workflow-level settings.
+            <span className="font-semibold">{workflowId}</span>. Per-app user
+            settings take priority over these workflow-level settings.
           </p>
           <Divider />
           <WorkflowSettingsEditor workflowId={workflowId} />
@@ -50,13 +53,8 @@ export default function WorkflowSettingsModal({
 }
 
 function WorkflowSettingsEditor({ workflowId }: { workflowId: string }) {
-  const { platformApi } = usePlatformApi();
-
   const { data: settings, mutate } = useSWR<Record<string, string>>(
     `/api/workflow/user-settings/get?workflowId=${encodeURIComponent(workflowId)}`,
-    async () => {
-      return (await platformApi?.getWorkflowSettings(workflowId)) ?? {};
-    },
   );
 
   const [newKey, setNewKey] = useState("");
@@ -79,12 +77,7 @@ function WorkflowSettingsEditor({ workflowId }: { workflowId: string }) {
         </div>
       )}
       <div className="flex items-center gap-x-1">
-        <Input
-          label="Key"
-          size="sm"
-          value={newKey}
-          onValueChange={setNewKey}
-        />
+        <Input label="Key" size="sm" value={newKey} onValueChange={setNewKey} />
         <Input
           label="Value"
           size="sm"
@@ -104,7 +97,7 @@ function WorkflowSettingsEditor({ workflowId }: { workflowId: string }) {
           variant="light"
           isDisabled={newKey.trim() === ""}
           onPress={async () => {
-            await platformApi?.setWorkflowSetting(
+            await setWorkflowSetting(
               workflowId,
               newKey.trim(),
               newValue,
@@ -134,7 +127,6 @@ function SettingRow({
   settingValue: string;
   onUpdated: () => void;
 }) {
-  const { platformApi } = usePlatformApi();
   const isRedacted = settingValue === "redacted";
 
   return (
@@ -153,7 +145,7 @@ function SettingRow({
           color="danger"
           size="sm"
           onPress={async () => {
-            await platformApi?.deleteWorkflowSetting(workflowId, settingKey);
+            await deleteWorkflowSetting(workflowId, settingKey);
             onUpdated();
           }}
         >

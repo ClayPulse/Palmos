@@ -522,42 +522,6 @@ export class CloudAPI extends AbstractPlatformAPI {
     });
   }
 
-  async getWorkflowSettings(
-    workflowName: string,
-  ): Promise<Record<string, string>> {
-    const response = await fetchAPI(
-      `/api/workflow/user-settings/get?name=${encodeURIComponent(workflowName)}`,
-      { method: "GET" },
-    );
-    if (!response.ok) return {};
-    const { settings } = await response.json();
-    return (settings as Record<string, string>) ?? {};
-  }
-
-  async setWorkflowSetting(
-    workflowName: string,
-    key: string,
-    value: string,
-    isSecret: boolean,
-  ): Promise<void> {
-    await fetchAPI("/api/workflow/user-settings/set", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workflowName, key, value, isSecret }),
-    });
-  }
-
-  async deleteWorkflowSetting(
-    workflowName: string,
-    key: string,
-  ): Promise<void> {
-    await fetchAPI("/api/workflow/user-settings/delete", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ workflowName, key }),
-    });
-  }
-
   async getInstallationPath(): Promise<string> {
     if (!this.workspace) {
       addToast({

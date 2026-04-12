@@ -126,19 +126,6 @@ export class ElectronAPI extends AbstractPlatformAPI {
     await this.electronAPI?.deleteAppSetting(appId, key);
   }
 
-  async getWorkflowSettings(_workflowName: string): Promise<Record<string, string>> {
-    return {};
-  }
-
-  async setWorkflowSetting(
-    _workflowName: string,
-    _key: string,
-    _value: string,
-    _isSecret: boolean,
-  ): Promise<void> {}
-
-  async deleteWorkflowSetting(_workflowName: string, _key: string): Promise<void> {}
-
   async getInstallationPath(): Promise<string> {
     return await this.electronAPI?.getInstallationPath();
   }

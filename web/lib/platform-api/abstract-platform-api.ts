@@ -76,21 +76,6 @@ export abstract class AbstractPlatformAPI {
   ): Promise<void>;
   abstract deleteAppSetting(appId: string, key: string): Promise<void>;
 
-  // Per-workflow settings
-  abstract getWorkflowSettings(
-    workflowName: string,
-  ): Promise<Record<string, string>>;
-  abstract setWorkflowSetting(
-    workflowName: string,
-    key: string,
-    value: string,
-    isSecret: boolean,
-  ): Promise<void>;
-  abstract deleteWorkflowSetting(
-    workflowName: string,
-    key: string,
-  ): Promise<void>;
-
   // Get installation path
   abstract getInstallationPath(): Promise<string>;
 
