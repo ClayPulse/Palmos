@@ -17,6 +17,7 @@ import Clean from './components/commands/clean.js';
 import Upgrade from './components/commands/upgrade.js';
 import Skill from './components/commands/skill.js';
 import Code from './components/commands/code.js';
+import PublishWorkflow from './components/commands/publish-workflow.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
@@ -63,6 +64,8 @@ export default function App({cli}: {cli: Result<Flags>}) {
 				<Upgrade cli={cli} />
 			) : command === 'skill' ? (
 				<Skill cli={cli} />
+			) : command === 'publish-workflow' ? (
+				<PublishWorkflow cli={cli} />
 			) : command === 'code' ? (
 				<Code cli={cli} />
 			) : (
