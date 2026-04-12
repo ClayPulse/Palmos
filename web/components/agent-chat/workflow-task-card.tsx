@@ -115,42 +115,76 @@ function AgentProgressLog({
 }: {
   log: { type: string; text?: string; tool?: string }[];
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   if (!log || log.length === 0) return null;
+
+  const lastEntry = log[log.length - 1];
 
   return (
     <div className="border-t border-amber-200/60 bg-white/60 px-3.5 py-2 dark:border-amber-500/15 dark:bg-white/3">
-      <div className="flex max-h-32 flex-col gap-1 overflow-y-auto">
-        {log.map((entry, i) => (
-          <div key={i} className="flex items-center gap-1.5 text-xs">
-            {entry.type === "tool_use" ? (
-              <>
-                <Icon
-                  name="build"
-                  variant="round"
-                  className="text-xs text-amber-500 dark:text-amber-400"
-                />
-                <span className="text-default-600 dark:text-white/60">
-                  Using tool:{" "}
-                  <span className="font-medium text-amber-700 dark:text-amber-300">
-                    {entry.tool}
-                  </span>
-                </span>
-              </>
-            ) : (
-              <>
-                <Icon
-                  name="chat_bubble"
-                  variant="round"
-                  className="text-xs text-blue-500 dark:text-blue-400"
-                />
-                <span className="text-default-600 min-w-0 truncate dark:text-white/60">
-                  {entry.text}
-                </span>
-              </>
-            )}
-          </div>
-        ))}
-      </div>
+      {/* Header: count + expand toggle */}
+      <button
+        onClick={() => setExpanded((p) => !p)}
+        className="mb-1 flex w-full items-center gap-1.5 text-[10px] text-default-400 transition-colors hover:text-default-600 dark:text-white/40 dark:hover:text-white/60"
+      >
+        <Icon
+          name={expanded ? "expand_less" : "expand_more"}
+          variant="round"
+          className="text-xs"
+        />
+        <span>
+          {log.length} message{log.length !== 1 ? "s" : ""}
+          {!expanded && " — latest:"}
+        </span>
+      </button>
+
+      {expanded ? (
+        <div className="flex max-h-48 flex-col gap-1.5 overflow-y-auto">
+          {log.map((entry, i) => (
+            <LogEntry key={i} entry={entry} />
+          ))}
+        </div>
+      ) : (
+        <LogEntry entry={lastEntry} />
+      )}
+    </div>
+  );
+}
+
+function LogEntry({
+  entry,
+}: {
+  entry: { type: string; text?: string; tool?: string };
+}) {
+  return (
+    <div className="flex items-start gap-1.5 text-xs">
+      {entry.type === "tool_use" ? (
+        <>
+          <Icon
+            name="build"
+            variant="round"
+            className="mt-0.5 shrink-0 text-xs text-amber-500 dark:text-amber-400"
+          />
+          <span className="text-default-600 break-words dark:text-white/60">
+            Using tool:{" "}
+            <span className="font-medium text-amber-700 dark:text-amber-300">
+              {entry.tool}
+            </span>
+          </span>
+        </>
+      ) : (
+        <>
+          <Icon
+            name="chat_bubble"
+            variant="round"
+            className="mt-0.5 shrink-0 text-xs text-blue-500 dark:text-blue-400"
+          />
+          <span className="text-default-600 min-w-0 break-words whitespace-pre-wrap dark:text-white/60">
+            {entry.text}
+          </span>
+        </>
+      )}
     </div>
   );
 }
