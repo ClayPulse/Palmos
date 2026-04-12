@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import Icon from "@/components/misc/icon";
+import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import {
   Button,
   Input,
@@ -12,6 +11,7 @@ import {
   ModalFooter,
   ModalHeader,
 } from "@heroui/react";
+import { useState } from "react";
 
 /**
  * Shown when importing a workflow whose YAML declares an `env` block.
@@ -22,32 +22,38 @@ export default function WorkflowEnvSetupModal({
   isOpen,
   onClose,
   onComplete,
-  workflowName,
+  workflowId,
   envEntries,
 }: {
   isOpen: boolean;
   onClose: () => void;
   /** Called after the user saves (or skips) all env values. */
   onComplete: () => void;
-  workflowName: string;
+  /** The workflow ID to save settings against. */
+  workflowId?: string;
   /** { VAR_NAME: "human-readable description" } from the YAML `env` block. */
   envEntries: Record<string, string>;
 }) {
   const { platformApi } = usePlatformApi();
   const keys = Object.keys(envEntries);
 
-  const [values, setValues] = useState<Record<string, string>>(
-    () => Object.fromEntries(keys.map((k) => [k, ""])),
+  const [values, setValues] = useState<Record<string, string>>(() =>
+    Object.fromEntries(keys.map((k) => [k, ""])),
   );
   const [saving, setSaving] = useState(false);
 
   async function handleSave() {
+    if (!workflowId) {
+      onComplete();
+      return;
+    }
+
     setSaving(true);
     try {
       await Promise.all(
         keys.map((key) =>
           platformApi?.setWorkflowSetting(
-            workflowName,
+            workflowId,
             key,
             values[key] ?? "",
             true, // treat all env vars as secrets
@@ -75,8 +81,8 @@ export default function WorkflowEnvSetupModal({
         </ModalHeader>
         <ModalBody>
           <p className="text-default-500 text-xs">
-            This workflow requires the following environment variables. Fill them
-            in now or skip and configure later via{" "}
+            This workflow requires the following environment variables. Fill
+            them in now or skip and configure later via{" "}
             <span className="font-semibold">Workflow Settings</span>.
           </p>
           <div className="mt-2 flex flex-col gap-y-3">
@@ -105,11 +111,7 @@ export default function WorkflowEnvSetupModal({
           >
             Skip
           </Button>
-          <Button
-            color="primary"
-            isLoading={saving}
-            onPress={handleSave}
-          >
+          <Button color="primary" isLoading={saving} onPress={handleSave}>
             Save & Continue
           </Button>
         </ModalFooter>

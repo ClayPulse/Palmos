@@ -277,9 +277,10 @@ export default function CanvasView({
     isActive,
   );
 
-  const openedWorkflowName = editorContext?.editorStates.tabViews.find(
+  const openedWorkflow = editorContext?.editorStates.tabViews.find(
     (v) => (v.config as CanvasViewConfig).viewId === config.viewId,
-  )?.openedWorkflow?.name;
+  )?.openedWorkflow;
+  const openedWorkflowId = openedWorkflow?.id;
 
   useRegisterMenuAction(
     {
@@ -291,16 +292,16 @@ export default function CanvasView({
       icon: "tune",
     },
     async () => {
-      if (!openedWorkflowName) return;
+      if (!openedWorkflowId) return;
       editorContext?.updateModalStates({
         workflowSettings: {
           isOpen: true,
-          workflowName: openedWorkflowName,
+          workflowId: openedWorkflowId,
         },
       });
     },
-    [isActive, tabName, openedWorkflowName, locale],
-    isActive && !!openedWorkflowName,
+    [isActive, tabName, openedWorkflowId, locale],
+    isActive && !!openedWorkflowId,
   );
 
   const { setNodeRef, isOver, active } = useDroppable({

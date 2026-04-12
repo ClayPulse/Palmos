@@ -250,7 +250,7 @@ export type ModalStates = {
   };
   workflowSettings?: {
     isOpen?: boolean;
-    workflowName?: string;
+    workflowId?: string;
   };
   sharing?: {
     isOpen?: boolean;
@@ -483,6 +483,8 @@ export type Workflow = {
   visibility: "private" | "public" | "unlisted";
   requireWorkspace: boolean;
   webhookVerifyToken?: string;
+  forkedFromId?: string;
+  forkedAt?: string;
   createdAt?: string;
 };
 

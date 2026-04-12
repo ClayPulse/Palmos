@@ -17,11 +17,11 @@ import {
 } from "@heroui/react";
 
 export default function WorkflowSettingsModal({
-  workflowName,
+  workflowId,
   isOpen,
   onClose,
 }: {
-  workflowName: string;
+  workflowId: string;
   isOpen: boolean;
   onClose: () => void;
 }) {
@@ -35,11 +35,11 @@ export default function WorkflowSettingsModal({
         <ModalBody>
           <p className="text-default-500 text-xs">
             Settings defined here apply to all apps in{" "}
-            <span className="font-semibold">{workflowName}</span>. Per-app
+            <span className="font-semibold">{workflowId}</span>. Per-app
             user settings take priority over these workflow-level settings.
           </p>
           <Divider />
-          <WorkflowSettingsEditor workflowName={workflowName} />
+          <WorkflowSettingsEditor workflowId={workflowId} />
         </ModalBody>
         <ModalFooter>
           <Button onPress={onClose}>Close</Button>
@@ -49,13 +49,13 @@ export default function WorkflowSettingsModal({
   );
 }
 
-function WorkflowSettingsEditor({ workflowName }: { workflowName: string }) {
+function WorkflowSettingsEditor({ workflowId }: { workflowId: string }) {
   const { platformApi } = usePlatformApi();
 
   const { data: settings, mutate } = useSWR<Record<string, string>>(
-    `/api/workflow/user-settings/get?name=${encodeURIComponent(workflowName)}`,
+    `/api/workflow/user-settings/get?workflowId=${encodeURIComponent(workflowId)}`,
     async () => {
-      return (await platformApi?.getWorkflowSettings(workflowName)) ?? {};
+      return (await platformApi?.getWorkflowSettings(workflowId)) ?? {};
     },
   );
 
@@ -70,7 +70,7 @@ function WorkflowSettingsEditor({ workflowName }: { workflowName: string }) {
           {Object.entries(settings).map(([key, value]) => (
             <SettingRow
               key={key}
-              workflowName={workflowName}
+              workflowId={workflowId}
               settingKey={key}
               settingValue={value}
               onUpdated={() => mutate()}
@@ -105,7 +105,7 @@ function WorkflowSettingsEditor({ workflowName }: { workflowName: string }) {
           isDisabled={newKey.trim() === ""}
           onPress={async () => {
             await platformApi?.setWorkflowSetting(
-              workflowName,
+              workflowId,
               newKey.trim(),
               newValue,
               newIsSecret,
@@ -124,12 +124,12 @@ function WorkflowSettingsEditor({ workflowName }: { workflowName: string }) {
 }
 
 function SettingRow({
-  workflowName,
+  workflowId,
   settingKey,
   settingValue,
   onUpdated,
 }: {
-  workflowName: string;
+  workflowId: string;
   settingKey: string;
   settingValue: string;
   onUpdated: () => void;
@@ -153,7 +153,7 @@ function SettingRow({
           color="danger"
           size="sm"
           onPress={async () => {
-            await platformApi?.deleteWorkflowSetting(workflowName, settingKey);
+            await platformApi?.deleteWorkflowSetting(workflowId, settingKey);
             onUpdated();
           }}
         >

@@ -248,10 +248,10 @@ export default function ModalProvider({ children }: { children: ReactNode }) {
         modalStates?.workflowSettings?.isOpen ?? false,
         delaySeconds,
       ) &&
-        modalStates?.workflowSettings?.workflowName && (
+        modalStates?.workflowSettings?.workflowId && (
           <WorkflowSettingsModal
             isOpen={modalStates?.workflowSettings?.isOpen ?? false}
-            workflowName={modalStates.workflowSettings.workflowName}
+            workflowId={modalStates.workflowSettings.workflowId}
             onClose={() =>
               editorContext?.updateModalStates({
                 workflowSettings: { isOpen: false },

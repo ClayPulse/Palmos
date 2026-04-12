@@ -120,8 +120,12 @@ export default function WorkflowDetailsModal({
           </div>
 
           {/* Workflow-level User Settings */}
-          <Divider />
-          <WorkflowUserSettings workflowName={workflow.name} />
+          {workflow.id && (
+            <>
+              <Divider />
+              <WorkflowUserSettings workflowId={workflow.id} />
+            </>
+          )}
 
           {/* API Endpoint */}
           {apiEndpoint && (
@@ -515,13 +519,13 @@ function WorkflowRunHistory({ workflowId }: { workflowId: string }) {
   );
 }
 
-function WorkflowUserSettings({ workflowName }: { workflowName: string }) {
+function WorkflowUserSettings({ workflowId }: { workflowId: string }) {
   const { platformApi } = usePlatformApi();
 
   const { data: settings, mutate } = useSWR<Record<string, string>>(
-    `/api/workflow/user-settings/get?name=${encodeURIComponent(workflowName)}`,
+    `/api/workflow/user-settings/get?workflowId=${encodeURIComponent(workflowId)}`,
     async () => {
-      return (await platformApi?.getWorkflowSettings(workflowName)) ?? {};
+      return (await platformApi?.getWorkflowSettings(workflowId)) ?? {};
     },
   );
 
@@ -541,7 +545,7 @@ function WorkflowUserSettings({ workflowName }: { workflowName: string }) {
           {Object.entries(settings).map(([key, value]) => (
             <WorkflowSettingInput
               key={key}
-              workflowName={workflowName}
+              workflowId={workflowId}
               setting={{ key, value }}
               onUpdated={() => mutate()}
             />
@@ -575,7 +579,7 @@ function WorkflowUserSettings({ workflowName }: { workflowName: string }) {
           isDisabled={newKey.trim() === ""}
           onPress={async () => {
             await platformApi?.setWorkflowSetting(
-              workflowName,
+              workflowId,
               newKey.trim(),
               newValue,
               newIsSecret,
@@ -594,11 +598,11 @@ function WorkflowUserSettings({ workflowName }: { workflowName: string }) {
 }
 
 function WorkflowSettingInput({
-  workflowName,
+  workflowId,
   setting,
   onUpdated,
 }: {
-  workflowName: string;
+  workflowId: string;
   setting: { key: string; value: string };
   onUpdated: () => void;
 }) {
@@ -622,7 +626,7 @@ function WorkflowSettingInput({
           size="sm"
           onPress={async () => {
             await platformApi?.deleteWorkflowSetting(
-              workflowName,
+              workflowId,
               setting.key,
             );
             onUpdated();

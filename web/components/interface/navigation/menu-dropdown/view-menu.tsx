@@ -76,7 +76,6 @@ export default function ViewMenuDropDown() {
   const pendingWorkflowContent = useRef<WorkflowContent | null>(null);
   const [envSetup, setEnvSetup] = useState<{
     isOpen: boolean;
-    workflowName: string;
     env: Record<string, string>;
   } | null>(null);
 
@@ -159,7 +158,6 @@ export default function ViewMenuDropDown() {
               if (env && Object.keys(env).length > 0) {
                 setEnvSetup({
                   isOpen: true,
-                  workflowName: (parsed as SimplifiedWorkflowDAG).name,
                   env,
                 });
               } else {
@@ -192,7 +190,7 @@ export default function ViewMenuDropDown() {
       {envSetup && (
         <WorkflowEnvSetupModal
           isOpen={envSetup.isOpen}
-          workflowName={envSetup.workflowName}
+          workflowId={undefined}
           envEntries={envSetup.env}
           onClose={() => {
             setEnvSetup(null);
