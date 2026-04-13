@@ -41,13 +41,15 @@ export default function WorkflowGallery() {
   const effectiveLabel = myContentOnly ? "My Workflows" : label;
   const { isLoading, workflows } = useMarketplaceWorkflows(effectiveLabel);
   const { createCanvasTabView } = useTabViewManager();
-  const { envSetup, checkMissingEnvs, closeEnvSetup } = useWorkflowEnvCheck();
+  const { envSetup, checkMissingEnvs, openEnvSetup, closeEnvSetup } =
+    useWorkflowEnvCheck();
+  const [pendingWorkflow, setPendingWorkflow] = useState<Workflow | null>(null);
 
   useEffect(() => {
     setLabel(filterLabels[selectedIndex].name as "All" | "Published by Me" | "My Workflows");
   }, [selectedIndex]);
 
-  async function openWorkflow(workflow: Workflow) {
+  async function proceedToCanvas(workflow: Workflow) {
     await createCanvasTabView(
       {
         viewId: createCanvasViewId(),
@@ -56,9 +58,16 @@ export default function WorkflowGallery() {
       },
       workflow,
     );
+  }
 
-    // Check for missing user settings and prompt if needed
-    await checkMissingEnvs(workflow.id);
+  async function openWorkflow(workflow: Workflow) {
+    const missing = await checkMissingEnvs(workflow.id);
+    if (missing && workflow.id) {
+      setPendingWorkflow(workflow);
+      openEnvSetup(workflow.id, missing);
+    } else {
+      await proceedToCanvas(workflow);
+    }
   }
 
   const previews = useMemo(() => {
@@ -152,8 +161,17 @@ export default function WorkflowGallery() {
           isOpen={envSetup.isOpen}
           workflowId={envSetup.workflowId}
           envEntries={envSetup.env}
-          onClose={closeEnvSetup}
-          onComplete={closeEnvSetup}
+          onClose={() => {
+            closeEnvSetup();
+            setPendingWorkflow(null);
+          }}
+          onComplete={async () => {
+            closeEnvSetup();
+            if (pendingWorkflow) {
+              await proceedToCanvas(pendingWorkflow);
+              setPendingWorkflow(null);
+            }
+          }}
         />
       )}
     </div>

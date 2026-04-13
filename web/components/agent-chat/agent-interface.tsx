@@ -660,6 +660,17 @@ export default function AgentChat({
         <p className="text-default-500 mt-1 text-sm dark:text-white/50">
           Describe your idea and Palmos AI will help you bring it to life.
         </p>
+        <p className="text-default-400 mt-2 text-xs dark:text-white/40">
+          Also available on WhatsApp, Telegram, Discord &amp; more at{" "}
+          <a
+            href="https://im.palmos.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            im.palmos.ai
+          </a>
+        </p>
       </div>
       <div className="grid w-full max-w-xl grid-cols-2 gap-2.5 pt-2 sm:grid-cols-3">
         {STARTER_PROMPTS.map((prompt) => (
