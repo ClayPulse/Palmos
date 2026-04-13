@@ -7,6 +7,8 @@ export type WorkflowTaskState = {
   status: "running" | "completed" | "failed";
   result?: any;
   error?: string;
+  isManagedAgent?: boolean;
+  latestProgress?: string;
 };
 
 export function getLastAIContent(messages: BaseMessage[]): string {
