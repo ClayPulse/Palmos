@@ -164,17 +164,26 @@ function AgentProgressLog({
         </div>
       ) : (
         (() => {
-          // For collapsed view, show last meaningful entry with its output if applicable
-          const lastIdx = log.length - 1;
-          const last = log[lastIdx];
-          if (last.type === "tool_result" && lastIdx > 0) {
-            // Show the tool_use before it with output attached
-            const prev = log[lastIdx - 1];
-            if (prev.type === "tool_use") {
-              return <LogEntry entry={prev} toolOutput={last.output} />;
+          // For collapsed view, find the last meaningful entry (skip tool_result)
+          for (let i = log.length - 1; i >= 0; i--) {
+            const entry = log[i];
+            if (entry.type === "tool_result") {
+              // If preceded by a tool_use, show tool_use with output
+              if (i > 0 && log[i - 1].type === "tool_use") {
+                return <LogEntry entry={log[i - 1]} toolOutput={entry.output} />;
+              }
+              continue;
             }
+            // For tool_use, check if next entry is a tool_result with output
+            if (entry.type === "tool_use") {
+              const next = log[i + 1];
+              const toolOutput =
+                next?.type === "tool_result" ? next.output : undefined;
+              return <LogEntry entry={entry} toolOutput={toolOutput} />;
+            }
+            return <LogEntry entry={entry} />;
           }
-          return <LogEntry entry={last} />;
+          return <LogEntry entry={log[log.length - 1]} />;
         })()
       )}
     </div>
