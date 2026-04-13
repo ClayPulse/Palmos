@@ -1,13 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ModuleFederationPlugin } from "@module-federation/enhanced/webpack";
-import CopyWebpackPlugin from "copy-webpack-plugin";
+import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
+import { CopyRspackPlugin, CssExtractRspackPlugin, type Compiler, type RspackOptions } from "@rspack/core";
 import fs from "fs";
 import { globSync } from "glob";
-import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
 import ts from "typescript";
-import { Compiler, Configuration as WebpackConfig } from "webpack";
-import { Configuration as DevServerConfig } from "webpack-dev-server";
 import {
   discoverAppSkillActions,
   getLocalNetworkIP,
@@ -29,8 +26,6 @@ class MFClientPlugin {
     if (compiler.options.mode === "development") {
       let isFirstRun = true;
 
-      // Before build starts
-
       // When a file changes and triggers a new compilation
       compiler.hooks.watchRun.tap("ReloadMessagePlugin", () => {
         if (!isFirstRun) {
@@ -50,7 +45,7 @@ class MFClientPlugin {
       });
 
       const devStartupMessage = `
-🎉 Your Pulse extension \x1b[1m${this.pulseConfig.displayName}\x1b[0m is LIVE! 
+🎉 Your Pulse extension \x1b[1m${this.pulseConfig.displayName}\x1b[0m is LIVE!
 
 ⚡️ Local: http://localhost:3030/${this.pulseConfig.id}/${this.pulseConfig.version}/
 ⚡️ Network: http://${this.origin}:3030/${this.pulseConfig.id}/${this.pulseConfig.version}/
@@ -129,7 +124,7 @@ class MFClientPlugin {
 
 export async function makeMFClientConfig(
   mode: "development" | "production",
-): Promise<WebpackConfig & DevServerConfig> {
+): Promise<RspackOptions> {
   const projectDirName = process.cwd();
   const pulseConfig = await loadPulseConfig();
 
@@ -150,22 +145,20 @@ ${Object.entries(actions)
     name: "client",
     entry: mainComponent,
     output: {
-      publicPath: "auto",
+      publicPath: `./${pulseConfig.id}/${pulseConfig.version}/client/`,
       path: path.resolve(projectDirName, "dist/client"),
     },
     resolve: {
       extensions: [".ts", ".tsx", ".js"],
     },
     plugins: [
-      new MiniCssExtractPlugin({
+      new CssExtractRspackPlugin({
         filename: "globals.css",
       }),
-      // Copy assets to dist
-      new CopyWebpackPlugin({
+      new CopyRspackPlugin({
         patterns: [{ from: "src/assets", to: "assets" }],
       }),
       new ModuleFederationPlugin({
-        // Do not use hyphen character '-' in the name
         name: pulseConfig.id + "_client",
         filename: "remoteEntry.js",
         exposes: {
@@ -175,14 +168,14 @@ ${Object.entries(actions)
         shared: {
           react: {
             requiredVersion: "19.2.0",
-            import: "react", // the "react" package will be used a provided and fallback module
-            shareKey: "react", // under this name the shared module will be placed in the share scope
-            shareScope: "default", // share scope with this name will be used
-            singleton: true, // only a single version of the shared module is allowed
+            import: "react",
+            shareKey: "react",
+            shareScope: "default",
+            singleton: true,
           },
           "react-dom": {
             requiredVersion: "19.2.0",
-            singleton: true, // only a single version of the shared module is allowed
+            singleton: true,
           },
         },
       }),
@@ -192,18 +185,23 @@ ${Object.entries(actions)
       rules: [
         {
           test: /\.tsx?$/,
-          use: "ts-loader",
+          use: {
+            loader: "builtin:swc-loader",
+            options: {
+              jsc: {
+                parser: {
+                  syntax: "typescript",
+                  tsx: true,
+                },
+              },
+            },
+          },
           exclude: [/node_modules/, /dist/],
         },
         {
           test: /\.css$/i,
-          use: [
-            MiniCssExtractPlugin.loader,
-            "css-loader",
-            {
-              loader: "postcss-loader",
-            },
-          ],
+          use: [CssExtractRspackPlugin.loader, "css-loader", "postcss-loader"],
+          type: "javascript/auto",
           exclude: [/dist/],
         },
       ],

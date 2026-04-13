@@ -1,4 +1,4 @@
-import webpack from "webpack";
+import { rspack } from "@rspack/core";
 import { generateTempTsConfig } from "./configs/utils.js";
 import { createWebpackConfig } from "./webpack-config.js";
 
@@ -19,12 +19,12 @@ export async function webpackCompile(
         : "production",
   );
 
-  const compiler = webpack(configs);
+  const compiler = rspack(configs);
 
   if (isWatchMode) {
     compiler.watch({}, (err, stats) => {
       if (err) {
-        console.error("❌ Webpack build failed", err);
+        console.error("❌ Rspack build failed", err);
         return;
       }
     });
