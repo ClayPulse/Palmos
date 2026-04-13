@@ -325,6 +325,15 @@ export default function AgentChat({
   const [workflowTasks, setWorkflowTasks] = useState<WorkflowTaskState[]>([]);
   const polledTaskIdsRef = useRef<Set<string>>(new Set());
 
+  // Clear workflow tasks and uploads when a new chat session starts (messages cleared)
+  useEffect(() => {
+    if (messages.length === 0) {
+      setWorkflowTasks([]);
+      polledTaskIdsRef.current.clear();
+      setUploads([]);
+    }
+  }, [messages.length]);
+
   useEffect(() => {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backendUrl) return;

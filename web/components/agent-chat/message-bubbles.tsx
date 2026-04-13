@@ -65,17 +65,21 @@ export function AIResponseCard({
           />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-center justify-between">
+          <div className="mb-1">
             <p className="text-default-400 text-[10px] font-semibold tracking-wide uppercase dark:text-white/40">
               AI Manager:
             </p>
-            {content && !isStreaming && <CopyButton text={content} />}
           </div>
           {content && (
             <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
               <MarkdownRender content={content} />
               {isStreaming && (
                 <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+              )}
+              {!isStreaming && (
+                <div className="mt-2 flex justify-end border-t border-amber-200/40 pt-1.5 dark:border-white/8">
+                  <CopyButton text={content} />
+                </div>
               )}
             </div>
           )}

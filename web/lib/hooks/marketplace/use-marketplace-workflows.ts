@@ -27,8 +27,17 @@ export function useMarketplaceWorkflows(
     },
   );
 
+  // Deduplicate by name, keeping only the latest version (API returns newest first)
+  const deduped = marketplaceWorkflows
+    ? Array.from(
+        new Map(
+          marketplaceWorkflows.map((wf) => [wf.name, wf]),
+        ).values(),
+      )
+    : undefined;
+
   return {
-    workflows: marketplaceWorkflows,
+    workflows: deduped,
     isLoading,
   };
 }
