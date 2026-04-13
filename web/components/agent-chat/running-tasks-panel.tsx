@@ -223,6 +223,7 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
               <WorkflowTaskCard
                 key={task.taskId}
                 task={toWorkflowTaskState(task)}
+                isTerminating={terminatingIds.has(task.taskId)}
                 onTerminate={
                   task.status === "running" || task.status === "pending"
                     ? handleTerminate

@@ -416,9 +416,12 @@ export default function AgentChat({
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTasksOpen, setIsTasksOpen] = useState(false);
 
+  const [terminatingTaskIds, setTerminatingTaskIds] = useState<Set<string>>(new Set());
+
   const handleTerminateTask = async (taskId: string) => {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backendUrl) return;
+    setTerminatingTaskIds((prev) => new Set(prev).add(taskId));
     try {
       const res = await fetch(`${backendUrl}/api/workflow/run/terminate`, {
         method: "POST",
@@ -437,6 +440,12 @@ export default function AgentChat({
       }
     } catch {
       // silent
+    } finally {
+      setTerminatingTaskIds((prev) => {
+        const next = new Set(prev);
+        next.delete(taskId);
+        return next;
+      });
     }
   };
 
@@ -790,7 +799,7 @@ export default function AgentChat({
           {isEmptyConversation && emptyState}
           {messageList}
           {workflowTasks.map((task) => (
-            <WorkflowTaskCard key={task.taskId} task={task} onTerminate={handleTerminateTask} />
+            <WorkflowTaskCard key={task.taskId} task={task} onTerminate={handleTerminateTask} isTerminating={terminatingTaskIds.has(task.taskId)} />
           ))}
           {loadingIndicator}
           {errorBanner}

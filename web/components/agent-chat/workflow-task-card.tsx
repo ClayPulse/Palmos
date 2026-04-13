@@ -8,9 +8,11 @@ import { useEffect, useState } from "react";
 export function WorkflowTaskCard({
   task,
   onTerminate,
+  isTerminating,
 }: {
   task: WorkflowTaskState;
   onTerminate?: (taskId: string) => void;
+  isTerminating?: boolean;
 }) {
   const [elapsed, setElapsed] = useState(0);
   const [finalElapsed, setFinalElapsed] = useState<number | null>(null);
@@ -84,9 +86,17 @@ export function WorkflowTaskCard({
         {isRunning && onTerminate && (
           <button
             onClick={() => onTerminate(task.taskId)}
-            className="shrink-0 rounded-md border border-red-300/60 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
+            disabled={isTerminating}
+            className="shrink-0 rounded-md border border-red-300/60 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
           >
-            Terminate
+            {isTerminating ? (
+              <span className="flex items-center gap-1.5">
+                <Spinner size="sm" classNames={{ wrapper: "h-3 w-3" }} />
+                Terminating...
+              </span>
+            ) : (
+              "Terminate"
+            )}
           </button>
         )}
       </div>
