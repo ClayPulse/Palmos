@@ -570,16 +570,39 @@ export default function AgentChat({
     }
   }, [messages]);
 
-  function handleSend(text?: string) {
-    const value = (text ?? inputText).trim();
-    if (!value || isLoading) return;
+  const pendingSendRef = useRef<string | null>(null);
+
+  const uploadsInProgress = uploads.some(
+    (u) => u.status === "uploading" || u.status === "processing",
+  );
+
+  function doSend(value: string) {
     const readyUploadIds = uploads
       .filter((u) => u.status === "ready")
       .map((u) => u.id);
     setInputText("");
     setUploads([]);
+    pendingSendRef.current = null;
     submit(value, getWorkflows(), readyUploadIds.length > 0 ? readyUploadIds : undefined);
   }
+
+  function handleSend(text?: string) {
+    const value = (text ?? inputText).trim();
+    if (!value || isLoading) return;
+    if (uploadsInProgress) {
+      // Queue the send — it will fire once all uploads finish
+      pendingSendRef.current = value;
+      return;
+    }
+    doSend(value);
+  }
+
+  // Auto-send when uploads finish if a message was queued
+  useEffect(() => {
+    if (!uploadsInProgress && pendingSendRef.current) {
+      doSend(pendingSendRef.current);
+    }
+  }, [uploadsInProgress]);
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isTasksOpen, setIsTasksOpen] = useState(false);
@@ -793,7 +816,32 @@ export default function AgentChat({
       return null;
     }
 
-    if (!content && spawned.length === 0 && !hasWidgets) return null;
+    // Collect tool call names from AI messages
+    const toolCallNames: string[] = [];
+    if (msg instanceof AIMessage && msg.tool_calls) {
+      for (const tc of msg.tool_calls) {
+        if (tc.name) toolCallNames.push(tc.name);
+      }
+    }
+
+    if (!content && spawned.length === 0 && !hasWidgets && toolCallNames.length === 0) return null;
+
+    // Hide tool result messages — they are internal plumbing (raw JSON from tool
+    // execution). The tool call *names* are shown as badges on the AI message
+    // that invoked them, so no information is lost.
+    if (!isHuman && (msg as any).tool_call_id) return null;
+
+    // Hide AI messages that are purely JSON tool output with no widgets
+    if (
+      !isHuman &&
+      !hasNonCanvasWidgets &&
+      spawned.length === 0 &&
+      toolCallNames.length === 0 &&
+      content.trimStart().startsWith("{") &&
+      content.trimStart().endsWith("}")
+    ) {
+      return null;
+    }
 
     return (
       <div key={msg.id ?? i} className="flex flex-col gap-2.5">
@@ -810,12 +858,14 @@ export default function AgentChat({
             content={content}
             isStreaming={isLoading && i === messages.length - 1}
             widgets={widgets}
+            toolCallNames={toolCallNames}
           />
         ) : (
           <ResponseCard
             content={content}
             isStreaming={isLoading && i === messages.length - 1}
             widgets={widgets}
+            toolCallNames={toolCallNames}
           />
         )}
         {spawned.length > 0 && (
@@ -1103,16 +1153,20 @@ export default function AgentChat({
             ) : (
               <button
                 className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white transition-all disabled:opacity-30 ${
-                  inputText.trim() ? "animate-pulse-send-glow" : ""
+                  inputText.trim() && !uploadsInProgress ? "animate-pulse-send-glow" : ""
                 }`}
                 onClick={() => handleSend()}
                 disabled={!inputText.trim()}
               >
+                {uploadsInProgress && pendingSendRef.current ? (
+                  <Spinner size="sm" classNames={{ wrapper: "h-4 w-4" }} />
+                ) : (
                 <Icon
                   name="arrow_upward"
                   variant="round"
                   className="text-base"
                 />
+                )}
               </button>
             )}
           </div>
@@ -1352,14 +1406,16 @@ export default function AgentChat({
           )}
           <button
             className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-linear-to-r from-amber-500 to-orange-500 text-white transition-all disabled:opacity-30 ${
-              inputText.trim() && !isLoading ? "animate-pulse-send-glow" : ""
+              inputText.trim() && !isLoading && !uploadsInProgress ? "animate-pulse-send-glow" : ""
             }`}
             onClick={() => handleSend()}
             disabled={!inputText.trim() || isLoading}
           >
-            <div>
+            {uploadsInProgress && pendingSendRef.current ? (
+              <Spinner size="sm" classNames={{ wrapper: "h-4 w-4" }} />
+            ) : (
               <Icon name="arrow_upward" variant="round" className="text-base" />
-            </div>
+            )}
           </button>
         </div>
         <div className="flex items-center gap-2 pb-[max(env(safe-area-inset-bottom),0.25rem)]">

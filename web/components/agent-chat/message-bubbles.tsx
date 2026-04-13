@@ -118,14 +118,33 @@ export function UserBubble({
   );
 }
 
+function ToolCallBadges({ names }: { names: string[] }) {
+  if (names.length === 0) return null;
+  return (
+    <div className="mb-1.5 flex flex-wrap gap-1">
+      {names.map((name, i) => (
+        <span
+          key={i}
+          className="inline-flex items-center gap-1 rounded-md bg-amber-100/80 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
+        >
+          <Icon name="build" variant="round" className="text-[10px]" />
+          Called tool: {name}
+        </span>
+      ))}
+    </div>
+  );
+}
+
 export function AIResponseCard({
   content,
   isStreaming,
   widgets = [],
+  toolCallNames = [],
 }: {
   content: string;
   isStreaming: boolean;
   widgets?: InlineWidgetData[];
+  toolCallNames?: string[];
 }) {
   return (
     <div className="flex justify-start">
@@ -143,6 +162,7 @@ export function AIResponseCard({
               AI Manager:
             </p>
           </div>
+          <ToolCallBadges names={toolCallNames} />
           {content && (
             <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
               <MarkdownRender content={content} />
@@ -169,10 +189,12 @@ export function ResponseCard({
   content,
   isStreaming,
   widgets = [],
+  toolCallNames = [],
 }: {
   content: string;
   isStreaming: boolean;
   widgets?: InlineWidgetData[];
+  toolCallNames?: string[];
 }) {
   const [expanded, setExpanded] = useState(true);
   const status: "running" | "complete" = isStreaming ? "running" : "complete";
@@ -202,6 +224,11 @@ export function ResponseCard({
 
       {expanded && (
         <div className="border-t border-amber-200/60 dark:border-white/8">
+          {toolCallNames.length > 0 && (
+            <div className="px-3 pt-2">
+              <ToolCallBadges names={toolCallNames} />
+            </div>
+          )}
           {content && (
             <div className="px-3 py-2.5">
               <MarkdownRender content={content} />
