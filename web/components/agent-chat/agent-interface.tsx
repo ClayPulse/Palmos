@@ -14,6 +14,8 @@ import InlineWidget, {
   parseWidgetFromToolCall,
   parseWidgetFromToolMessage,
 } from "@/components/agent-chat/inline-widget";
+import KnowledgeFiles from "@/components/agent-chat/knowledge-files";
+import ProjectPicker from "@/components/agent-chat/project-picker";
 import Icon from "@/components/misc/icon";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
@@ -68,86 +70,166 @@ export default function AgentChat({
     id: string; // server-assigned ID once uploaded; temp key while pending
     filename: string;
     sizeBytes: number;
-    status: "uploading" | "ready" | "error";
+    status: "uploading" | "processing" | "ready" | "error";
     error?: string;
+    progress: number; // 0–100 upload progress percentage
     tempKey: string; // stable local key for React + in-flight tracking
+    indexed?: boolean; // true if saved to RAG
+    indexing?: boolean; // true while indexing in progress
   }
   const [uploads, setUploads] = useState<ChatUpload[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
 
-  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    const selected = Array.from(files);
-    e.target.value = ""; // reset so selecting the same file again triggers change
+  function uploadSingleFile(file: File, backendUrl: string): Promise<void> {
+    const tempKey = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    setUploads((prev) => [
+      ...prev,
+      {
+        id: tempKey,
+        filename: file.name,
+        sizeBytes: file.size,
+        status: "uploading",
+        progress: 0,
+        tempKey,
+      },
+    ]);
 
-    if (!backendUrl) {
-      console.error("NEXT_PUBLIC_BACKEND_URL is not set");
-      return;
-    }
+    return new Promise<void>((resolve) => {
+      const form = new FormData();
+      form.append("file", file);
+      if (messages.length > 0 && currentSessionIdRef.current) {
+        form.append("sessionId", currentSessionIdRef.current);
+      }
 
-    for (const file of selected) {
-      const tempKey = `upload-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-      setUploads((prev) => [
-        ...prev,
-        {
-          id: tempKey,
-          filename: file.name,
-          sizeBytes: file.size,
-          status: "uploading",
-          tempKey,
-        },
-      ]);
+      const xhr = new XMLHttpRequest();
+      xhr.open("POST", `${backendUrl}/api/chat/upload`);
+      xhr.withCredentials = true;
 
-      try {
-        const form = new FormData();
-        form.append("file", file);
-        // Only include sessionId if the session is likely persisted on
-        // the backend — otherwise the upload endpoint returns 404.
-        if (messages.length > 0 && currentSessionIdRef.current) {
-          form.append("sessionId", currentSessionIdRef.current);
+      xhr.upload.addEventListener("progress", (e) => {
+        if (e.lengthComputable) {
+          const pct = Math.round((e.loaded / e.total) * 100);
+          setUploads((prev) =>
+            prev.map((u) =>
+              u.tempKey === tempKey ? { ...u, progress: pct } : u,
+            ),
+          );
         }
+      });
 
-        const res = await fetch(`${backendUrl}/api/chat/upload`, {
-          method: "POST",
-          credentials: "include",
-          body: form,
-        });
+      // All bytes sent — server is now processing (storage / RAG)
+      xhr.upload.addEventListener("loadend", () => {
+        setUploads((prev) =>
+          prev.map((u) =>
+            u.tempKey === tempKey
+              ? { ...u, status: "processing", progress: 100 }
+              : u,
+          ),
+        );
+      });
 
-        if (!res.ok) {
-          let msg = `Upload failed (${res.status})`;
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
           try {
-            const data = await res.json();
+            const data = JSON.parse(xhr.responseText) as { id: string };
+            setUploads((prev) =>
+              prev.map((u) =>
+                u.tempKey === tempKey
+                  ? { ...u, id: data.id, status: "ready", progress: 100 }
+                  : u,
+              ),
+            );
+          } catch {
+            setUploads((prev) =>
+              prev.map((u) =>
+                u.tempKey === tempKey
+                  ? { ...u, status: "error", error: "Invalid server response" }
+                  : u,
+              ),
+            );
+          }
+        } else {
+          let msg = `Upload failed (${xhr.status})`;
+          try {
+            const data = JSON.parse(xhr.responseText);
             if (data?.error) msg = data.error;
           } catch {
             /* ignore */
           }
-          throw new Error(msg);
+          setUploads((prev) =>
+            prev.map((u) =>
+              u.tempKey === tempKey ? { ...u, status: "error", error: msg } : u,
+            ),
+          );
         }
+        resolve();
+      });
 
-        const data = (await res.json()) as { id: string };
+      xhr.addEventListener("error", () => {
         setUploads((prev) =>
           prev.map((u) =>
             u.tempKey === tempKey
-              ? { ...u, id: data.id, status: "ready" }
+              ? { ...u, status: "error", error: "Network error" }
               : u,
           ),
         );
-      } catch (err) {
-        setUploads((prev) =>
-          prev.map((u) =>
-            u.tempKey === tempKey
-              ? {
-                  ...u,
-                  status: "error",
-                  error: err instanceof Error ? err.message : String(err),
-                }
-              : u,
-          ),
-        );
-      }
+        resolve();
+      });
+
+      xhr.send(form);
+    });
+  }
+
+  async function uploadFiles(selected: File[]) {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (!backendUrl) {
+      console.error("NEXT_PUBLIC_BACKEND_URL is not set");
+      return;
     }
+    await Promise.all(selected.map((file) => uploadSingleFile(file, backendUrl)));
+  }
+
+  async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    const selected = Array.from(files);
+    e.target.value = ""; // reset so selecting the same file again triggers change
+    await uploadFiles(selected);
+  }
+
+  function handleDragEnter(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current++;
+    if (e.dataTransfer.types.includes("Files")) {
+      setIsDragging(true);
+    }
+  }
+
+  function handleDragOver(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  function handleDragLeave(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current--;
+    if (dragCounterRef.current === 0) {
+      setIsDragging(false);
+    }
+  }
+
+  async function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragging(false);
+    if (isLoading) return;
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length === 0) return;
+    await uploadFiles(files);
   }
 
   async function handleRemoveUpload(upload: ChatUpload) {
@@ -165,6 +247,43 @@ export default function AgentChat({
     }
   }
 
+  async function handleIndexUpload(upload: ChatUpload) {
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (!backendUrl || upload.indexed || upload.indexing) return;
+    setUploads((prev) =>
+      prev.map((u) =>
+        u.tempKey === upload.tempKey ? { ...u, indexing: true } : u,
+      ),
+    );
+    try {
+      const res = await fetch(
+        `${backendUrl}/api/chat/uploads/${upload.id}/index`,
+        { method: "POST", credentials: "include" },
+      );
+      if (res.ok) {
+        setUploads((prev) =>
+          prev.map((u) =>
+            u.tempKey === upload.tempKey
+              ? { ...u, indexed: true, indexing: false }
+              : u,
+          ),
+        );
+      } else {
+        setUploads((prev) =>
+          prev.map((u) =>
+            u.tempKey === upload.tempKey ? { ...u, indexing: false } : u,
+          ),
+        );
+      }
+    } catch {
+      setUploads((prev) =>
+        prev.map((u) =>
+          u.tempKey === upload.tempKey ? { ...u, indexing: false } : u,
+        ),
+      );
+    }
+  }
+
   function formatFileSize(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -177,37 +296,72 @@ export default function AgentChat({
         {uploads.map((u) => {
           const chip = (
             <div
-              className={`flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs ${
+              className={`relative overflow-hidden rounded-md border text-xs ${
                 u.status === "error"
                   ? "border-red-300/60 bg-red-50/80 dark:border-red-500/30 dark:bg-red-500/10"
                   : "border-amber-300/60 bg-amber-50/80 dark:border-white/15 dark:bg-white/8"
               }`}
             >
-              {u.status === "uploading" ? (
-                <Spinner size="sm" />
-              ) : u.status === "error" ? (
-                <Icon
-                  name="error_outline"
-                  variant="round"
-                  className="text-sm text-red-500"
-                />
-              ) : (
-                <Icon
-                  name="description"
-                  variant="round"
-                  className="text-sm text-amber-600 dark:text-amber-400"
-                />
-              )}
-              <span className="text-default-800 max-w-[12rem] truncate dark:text-white/85">
-                {u.filename}
-              </span>
-              <button
-                className="text-gray-400 hover:text-gray-700 dark:text-white/40 dark:hover:text-white/80"
-                onClick={() => handleRemoveUpload(u)}
-                aria-label="Remove attachment"
-              >
-                <Icon name="close" variant="round" className="text-xs" />
-              </button>
+              <div className="relative flex items-center gap-1.5 px-2 py-1">
+                {u.status === "uploading" ? (
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    <div className="h-1.5 w-16 overflow-hidden rounded-full bg-amber-200/60 dark:bg-white/10">
+                      <div
+                        className="h-full rounded-full bg-amber-500 transition-[width] duration-200 ease-out dark:bg-amber-400"
+                        style={{ width: `${u.progress}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] font-medium tabular-nums text-amber-600 dark:text-amber-400">
+                      {u.progress}%
+                    </span>
+                  </div>
+                ) : u.status === "processing" ? (
+                  <Spinner size="sm" />
+                ) : u.status === "error" ? (
+                  <Icon
+                    name="error_outline"
+                    variant="round"
+                    className="text-sm text-red-500"
+                  />
+                ) : (
+                  <Icon
+                    name="description"
+                    variant="round"
+                    className="text-sm text-amber-600 dark:text-amber-400"
+                  />
+                )}
+                <span className="text-default-800 max-w-[12rem] truncate dark:text-white/85">
+                  {u.filename}
+                </span>
+                {u.status === "ready" && !u.indexed && !u.indexing && (
+                  <Tooltip content="Save to knowledge" delay={300} closeDelay={0}>
+                    <button
+                      className="text-gray-400 hover:text-amber-600 dark:text-white/40 dark:hover:text-amber-400"
+                      onClick={() => handleIndexUpload(u)}
+                      aria-label="Save to knowledge"
+                    >
+                      <Icon name="cloud_upload" variant="round" className="text-xs" />
+                    </button>
+                  </Tooltip>
+                )}
+                {u.indexing && <Spinner size="sm" />}
+                {u.indexed && (
+                  <Tooltip content="Saved to knowledge" delay={300} closeDelay={0}>
+                    <Icon
+                      name="check_circle"
+                      variant="round"
+                      className="text-xs text-green-500 dark:text-green-400"
+                    />
+                  </Tooltip>
+                )}
+                <button
+                  className="text-gray-400 hover:text-gray-700 dark:text-white/40 dark:hover:text-white/80"
+                  onClick={() => handleRemoveUpload(u)}
+                  aria-label="Remove attachment"
+                >
+                  <Icon name="close" variant="round" className="text-xs" />
+                </button>
+              </div>
             </div>
           );
 
@@ -249,19 +403,6 @@ export default function AgentChat({
       </div>
     ) : null;
 
-  const boundProject = editorContext?.editorStates.project;
-  const projectChip = boundProject ? (
-    <div className="flex items-center gap-1.5 rounded-md border border-amber-300/60 bg-amber-50/80 px-2 py-1 text-xs dark:border-amber-500/30 dark:bg-amber-500/10">
-      <Icon
-        name="folder"
-        variant="round"
-        className="text-sm text-amber-600 dark:text-amber-400"
-      />
-      <span className="max-w-[10rem] truncate text-default-800 dark:text-white/85">
-        {boundProject}
-      </span>
-    </div>
-  ) : null;
 
   const hiddenFileInput = (
     <input
@@ -432,8 +573,12 @@ export default function AgentChat({
   function handleSend(text?: string) {
     const value = (text ?? inputText).trim();
     if (!value || isLoading) return;
+    const readyUploadIds = uploads
+      .filter((u) => u.status === "ready")
+      .map((u) => u.id);
     setInputText("");
-    submit(value, getWorkflows());
+    setUploads([]);
+    submit(value, getWorkflows(), readyUploadIds.length > 0 ? readyUploadIds : undefined);
   }
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -650,10 +795,30 @@ export default function AgentChat({
 
     if (!content && spawned.length === 0 && !hasWidgets) return null;
 
+    // Hide tool result messages (raw JSON responses from tool calls like file search).
+    if (!isHuman && (msg as any).tool_call_id) return null;
+
+    // Hide AI messages that are just tool invocations with no user-facing text,
+    // or raw JSON output not associated with a widget.
+    if (
+      !isHuman &&
+      !hasNonCanvasWidgets &&
+      spawned.length === 0 &&
+      content.trimStart().startsWith("{") &&
+      content.trimStart().endsWith("}")
+    ) {
+      return null;
+    }
+
     return (
       <div key={msg.id ?? i} className="flex flex-col gap-2.5">
         {isHuman ? (
-          content && <UserBubble text={content} />
+          content && (
+            <UserBubble
+              text={content}
+              attachmentCount={msg.additional_kwargs?.attachmentCount as number | undefined}
+            />
+          )
         ) : isPage ? (
           <AIResponseCard
             content={content}
@@ -702,11 +867,42 @@ export default function AgentChat({
   }, [messages, toolCallNameMap]);
 
   const loadingIndicator = isLoading && (
-    <div className="py-1.5">
-      <div className="overflow-hidden rounded-xl border border-amber-200/40 shadow-sm dark:border-white/6">
-        <p className="py-1.5 text-center text-xs text-amber-500/70 dark:text-amber-300/60">
-          Palmos is thinking...
-        </p>
+    <div className="py-2">
+      <div className="relative overflow-hidden rounded-xl border border-amber-300/40 bg-gradient-to-r from-amber-50/80 via-orange-50/50 to-amber-50/80 shadow-sm dark:border-amber-500/15 dark:from-amber-500/5 dark:via-orange-500/8 dark:to-amber-500/5">
+        {/* Animated shimmer bar */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/20 to-transparent dark:via-amber-400/10"
+          animate={{ x: ["-100%", "100%"] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="relative flex items-center justify-center gap-2.5 py-2.5">
+          {/* Pulsing dots */}
+          <div className="flex items-center gap-1">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400"
+                animate={{
+                  scale: [1, 1.4, 1],
+                  opacity: [0.4, 1, 0.4],
+                }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+          </div>
+          <motion.p
+            className="text-xs font-medium text-amber-600/80 dark:text-amber-300/70"
+            animate={{ opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            Palmos is thinking
+          </motion.p>
+        </div>
       </div>
     </div>
   );
@@ -842,7 +1038,21 @@ export default function AgentChat({
         )}
 
         {/* Input */}
-        <div className="flex flex-col gap-2 border-t border-amber-200/60 bg-white px-4 pt-3 pb-4 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8 dark:bg-white/3">
+        <div
+          className="relative flex flex-col gap-2 border-t border-amber-200/60 bg-white px-4 pt-3 pb-4 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8 dark:bg-white/3"
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          {isDragging && (
+            <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-xl border-2 border-dashed border-amber-500 bg-amber-50/80 dark:border-amber-400 dark:bg-amber-900/30">
+              <div className="flex flex-col items-center gap-1 text-amber-600 dark:text-amber-400">
+                <Icon name="upload_file" variant="round" className="text-3xl" />
+                <span className="text-sm font-medium">Drop files to attach</span>
+              </div>
+            </div>
+          )}
           {attachmentChips}
           {hiddenFileInput}
           <div className="flex items-center gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]">
@@ -876,6 +1086,13 @@ export default function AgentChat({
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
                   handleSend();
+                }
+              }}
+              onPaste={(e) => {
+                const files = Array.from(e.clipboardData.files);
+                if (files.length > 0) {
+                  e.preventDefault();
+                  uploadFiles(files);
                 }
               }}
               disabled={isLoading}
@@ -913,8 +1130,9 @@ export default function AgentChat({
               </button>
             )}
           </div>
-          <div className={`flex items-center pb-[max(env(safe-area-inset-bottom),0.25rem)] ${isPage ? "mt-2" : ""}`}>
-            {projectChip}
+          <div className={`flex items-center gap-2 pb-[max(env(safe-area-inset-bottom),0.25rem)] ${isPage ? "mt-2" : ""}`}>
+            <ProjectPicker />
+            <KnowledgeFiles />
             <div className="ml-auto flex gap-1.5">{quickPillButtons}</div>
           </div>
         </div>
@@ -1078,7 +1296,21 @@ export default function AgentChat({
       )}
 
       {/* Input */}
-      <div className="flex flex-col gap-2 border-t border-amber-200/60 bg-white px-3 pt-3 pb-2 dark:border-white/8 dark:bg-white/3">
+      <div
+        className="relative flex flex-col gap-2 border-t border-amber-200/60 bg-white px-3 pt-3 pb-2 dark:border-white/8 dark:bg-white/3"
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+        {isDragging && (
+          <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-lg border-2 border-dashed border-amber-500 bg-amber-50/80 dark:border-amber-400 dark:bg-amber-900/30">
+            <div className="flex flex-col items-center gap-1 text-amber-600 dark:text-amber-400">
+              <Icon name="upload_file" variant="round" className="text-2xl" />
+              <span className="text-xs font-medium">Drop files to attach</span>
+            </div>
+          </div>
+        )}
         {attachmentChips}
         {hiddenFileInput}
         <div className="flex items-end gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]">
@@ -1114,6 +1346,13 @@ export default function AgentChat({
                 handleSend();
               }
             }}
+            onPaste={(e) => {
+              const files = Array.from(e.clipboardData.files);
+              if (files.length > 0) {
+                e.preventDefault();
+                uploadFiles(files);
+              }
+            }}
             disabled={isLoading}
             rows={1}
           />
@@ -1137,8 +1376,9 @@ export default function AgentChat({
             </div>
           </button>
         </div>
-        <div className="flex items-center pb-[max(env(safe-area-inset-bottom),0.25rem)]">
-          {projectChip}
+        <div className="flex items-center gap-2 pb-[max(env(safe-area-inset-bottom),0.25rem)]">
+          <ProjectPicker />
+          <KnowledgeFiles />
           <div className="ml-auto flex gap-1.5">{quickPillButtons}</div>
         </div>
       </div>

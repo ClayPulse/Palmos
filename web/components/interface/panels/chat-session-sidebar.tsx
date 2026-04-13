@@ -1,10 +1,12 @@
 "use client";
 
+import KnowledgeFiles from "@/components/agent-chat/knowledge-files";
 import Icon from "@/components/misc/icon";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
+import { Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
 
@@ -19,6 +21,7 @@ export default function ChatSessionSidebar({
   const { projects, openProject } = useProjectManager();
   const currentProject = editorContext?.editorStates.project;
   const [isProjectListOpen, setIsProjectListOpen] = useState(false);
+  const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(false);
 
   const {
     sessions,
@@ -43,20 +46,41 @@ export default function ChatSessionSidebar({
             {/* Project section */}
             <div className="shrink-0 border-b border-default-200 dark:border-white/8">
               <div className="flex items-center justify-between px-3 pt-3 pb-2">
-                <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-400 dark:text-white/40">
+                <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500 dark:text-default-500">
                   Project
                 </h3>
-                <button
-                  onClick={() => {
-                    editorContext?.updateModalStates({
-                      projectSettings: { isOpen: true },
-                    });
-                  }}
-                  className="flex h-5 w-5 items-center justify-center rounded text-default-400 hover:text-amber-600 dark:text-white/30 dark:hover:text-amber-400"
-                >
-                  <Icon name="add" variant="round" className="text-sm" />
-                </button>
+                <div className="flex items-center gap-2">
+                  <Tooltip content="Knowledge files" delay={400} closeDelay={0} size="sm">
+                    <button
+                      onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
+                      className={`flex h-5 w-5 items-center justify-center rounded transition-colors ${
+                        isKnowledgeOpen
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
+                      }`}
+                    >
+                      <Icon name="menu_book" variant="round" className="text-sm" />
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="New project" delay={400} closeDelay={0} size="sm">
+                    <button
+                      onClick={() => {
+                        editorContext?.updateModalStates({
+                          projectSettings: { isOpen: true },
+                        });
+                      }}
+                      className="flex h-5 w-5 items-center justify-center rounded text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
+                    >
+                      <Icon name="add" variant="round" className="text-sm" />
+                    </button>
+                  </Tooltip>
+                </div>
               </div>
+              {isKnowledgeOpen && (
+                <div className="px-2 pb-2">
+                  <KnowledgeFiles variant="inline" />
+                </div>
+              )}
               {!isProjectListOpen ? (
                 /* Collapsed: show active project or empty placeholder */
                 <div className="px-2 pb-2">
@@ -86,7 +110,7 @@ export default function ChatSessionSidebar({
                               },
                             });
                           }}
-                          className="flex h-5 w-5 items-center justify-center rounded text-default-300 hover:text-default-600 dark:text-white/25 dark:hover:text-white/60"
+                          className="flex h-5 w-5 items-center justify-center rounded text-default-500 hover:text-default-600 dark:text-default-500 dark:hover:text-white/60"
                         >
                           <Icon name="settings" variant="round" className="text-xs" />
                         </button>
@@ -95,7 +119,7 @@ export default function ChatSessionSidebar({
                             e.stopPropagation();
                             openProject("");
                           }}
-                          className="flex h-5 w-5 items-center justify-center rounded text-default-300 hover:text-red-500 dark:text-white/25 dark:hover:text-red-400"
+                          className="flex h-5 w-5 items-center justify-center rounded text-default-500 hover:text-red-500 dark:text-default-500 dark:hover:text-red-400"
                         >
                           <Icon name="close" variant="round" className="text-xs" />
                         </button>
@@ -103,7 +127,7 @@ export default function ChatSessionSidebar({
                       <Icon
                         name="unfold_more"
                         variant="round"
-                        className="shrink-0 text-sm text-default-300 dark:text-white/25"
+                        className="shrink-0 text-sm text-default-500 dark:text-default-500"
                       />
                     </div>
                   ) : (
@@ -114,15 +138,15 @@ export default function ChatSessionSidebar({
                       <Icon
                         name="folder_open"
                         variant="round"
-                        className="shrink-0 text-sm text-default-400 dark:text-white/40"
+                        className="shrink-0 text-sm text-default-500 dark:text-default-500"
                       />
-                      <span className="min-w-0 flex-1 text-xs text-default-400 dark:text-white/40">
+                      <span className="min-w-0 flex-1 text-xs text-default-500 dark:text-default-500">
                         Select a project
                       </span>
                       <Icon
                         name="unfold_more"
                         variant="round"
-                        className="shrink-0 text-sm text-default-300 dark:text-white/25"
+                        className="shrink-0 text-sm text-default-500 dark:text-default-500"
                       />
                     </div>
                   )}
@@ -149,14 +173,14 @@ export default function ChatSessionSidebar({
                         className={`shrink-0 text-sm ${
                           p.name === currentProject
                             ? "text-amber-500 dark:text-amber-400"
-                            : "text-default-400 dark:text-white/40"
+                            : "text-default-500 dark:text-default-500"
                         }`}
                       />
                       <span className="min-w-0 flex-1 truncate text-xs font-medium text-default-700 dark:text-white/80">
                         {p.name}
                       </span>
                       {p.role && p.role !== "owner" && (
-                        <span className="shrink-0 text-[10px] text-default-400 dark:text-white/30">
+                        <span className="shrink-0 text-[10px] text-default-500 dark:text-default-500">
                           {p.role}
                         </span>
                       )}
@@ -167,7 +191,7 @@ export default function ChatSessionSidebar({
                             projectSettings: { isOpen: true, projectInfo: p },
                           });
                         }}
-                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-default-300 opacity-0 transition-all group-hover:opacity-100 hover:text-default-600 dark:text-white/20 dark:hover:text-white/60"
+                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-default-500 opacity-0 transition-all group-hover:opacity-100 hover:text-default-600 dark:text-default-500 dark:hover:text-white/60"
                       >
                         <Icon name="settings" variant="round" className="text-xs" />
                       </button>
@@ -175,7 +199,7 @@ export default function ChatSessionSidebar({
                   ))}
                 </div>
               ) : (
-                <p className="px-2 py-2 pb-3 text-center text-[10px] text-default-400 dark:text-white/35">
+                <p className="px-2 py-2 pb-3 text-center text-[10px] text-default-500 dark:text-default-500">
                   No projects yet
                 </p>
               )}
@@ -183,7 +207,7 @@ export default function ChatSessionSidebar({
 
             {/* Chat History Header */}
             <div className="flex shrink-0 items-center justify-between px-3 py-3">
-              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-400 dark:text-white/40">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500 dark:text-default-500">
                 Chat History
               </h3>
               <div className="flex items-center gap-1">
@@ -198,7 +222,7 @@ export default function ChatSessionSidebar({
                 </button>
                 <button
                   onClick={onClose}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-default-400 hover:text-default-600 dark:text-white/40 dark:hover:text-white/70"
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-default-500 hover:text-default-600 dark:text-default-500 dark:hover:text-white/70"
                 >
                   <Icon name="chevron_left" variant="round" className="text-base" />
                 </button>
@@ -208,7 +232,7 @@ export default function ChatSessionSidebar({
             {/* Session list */}
             <div className="scrollbar-transparent flex-1 overflow-y-auto px-2 pb-2">
               {sessions.length === 0 ? (
-                <p className="py-12 text-center text-xs text-default-400 dark:text-white/40">
+                <p className="py-12 text-center text-xs text-default-500 dark:text-default-500">
                   No chat history yet
                 </p>
               ) : (
@@ -226,13 +250,13 @@ export default function ChatSessionSidebar({
                       <Icon
                         name="chat_bubble_outline"
                         variant="round"
-                        className="shrink-0 text-sm text-default-400 dark:text-white/40"
+                        className="shrink-0 text-sm text-default-500 dark:text-default-500"
                       />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-xs font-medium text-default-700 dark:text-white/80">
                           {s.title}
                         </p>
-                        <p className="text-[10px] text-default-400 dark:text-white/35">
+                        <p className="text-[10px] text-default-500 dark:text-default-500">
                           {formatRelativeTime(s.createdAt)}
                         </p>
                       </div>
@@ -241,7 +265,7 @@ export default function ChatSessionSidebar({
                           e.stopPropagation();
                           handleDeleteSession(s.id);
                         }}
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-default-300 opacity-0 transition-all group-hover:opacity-100 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
+                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-default-500 opacity-0 transition-all group-hover:opacity-100 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
                       >
                         <Icon
                           name="delete_outline"

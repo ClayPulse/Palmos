@@ -19,7 +19,7 @@ export interface ChatContextValue {
   isLoading: boolean;
   error: Error | null;
   todos: Todo[];
-  submit: (text: string, workflows?: WorkflowInput[]) => void;
+  submit: (text: string, workflows?: WorkflowInput[], uploadIds?: string[]) => void;
   stop: () => void;
   clear: () => void;
   loadMessages: (msgs: BaseMessage[]) => void;

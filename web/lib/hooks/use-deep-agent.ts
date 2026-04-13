@@ -27,9 +27,14 @@ export default function useDeepAgent(
   }, []);
 
   const submit = useCallback(
-    (text: string, workflows?: WorkflowInput[], projectId?: string) => {
+    (text: string, workflows?: WorkflowInput[], uploadIds?: string[], projectId?: string) => {
       // Optimistically add user message
-      const userMsg = new HumanMessage({ content: text });
+      const userMsg = new HumanMessage({
+        content: text,
+        additional_kwargs: uploadIds && uploadIds.length > 0
+          ? { attachmentCount: uploadIds.length }
+          : undefined,
+      });
       const uid = userMsg.id ?? generateId();
       messageMapRef.current.set(uid, userMsg);
       syncDisplay();
@@ -52,6 +57,7 @@ export default function useDeepAgent(
           };
         }),
         workflows: workflows && workflows.length > 0 ? workflows : undefined,
+        uploadIds: uploadIds && uploadIds.length > 0 ? uploadIds : undefined,
         projectId,
         options: {
           returnWorkflowConfig: false,

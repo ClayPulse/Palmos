@@ -34,12 +34,51 @@ function CopyButton({ text }: { text: string }) {
   );
 }
 
-export function UserBubble({ text }: { text: string }) {
+export function UserBubble({
+  text,
+  attachmentCount,
+}: {
+  text: string;
+  attachmentCount?: number;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [text]);
+
   return (
-    <div className="flex justify-end">
+    <div className="group flex justify-end">
       <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
         <p className="text-xs font-semibold text-white/80">User:</p>
         <p className="mt-0.5 text-white">{text}</p>
+        <div className="mt-1.5 flex items-center border-t border-white/20 pt-1.5">
+          {attachmentCount != null && attachmentCount > 0 && (
+            <div className="flex items-center gap-0.5 text-[10px] text-white/60">
+              <Icon name="attach_file" variant="round" className="text-[10px]" />
+              <span>
+                {attachmentCount} file{attachmentCount > 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
+          <div className="ml-auto pl-4 opacity-0 transition-opacity group-hover:opacity-100">
+            <Tooltip content={copied ? "Copied!" : "Copy"} size="sm">
+              <button
+                onClick={handleCopy}
+                className="text-white/50 transition-colors hover:text-white/90"
+              >
+                <Icon
+                  name={copied ? "check" : "content_copy"}
+                  variant="round"
+                  className="text-xs"
+                />
+              </button>
+            </Tooltip>
+          </div>
+        </div>
       </div>
     </div>
   );
