@@ -360,11 +360,14 @@ export function WorkflowResultBody({
     const isImage = /^image\//.test(blobResult.mime);
     const fileName = `${workflowName.replace(/[^a-zA-Z0-9_-]/g, "_")}.${suffix}`;
 
-    const handleOpen = () => window.open(blobResult.__blobUrl, "_blank");
+    // Proxy through backend to get a signed URL (blob storage is protected)
+    const proxyUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workflow/result-file?url=${encodeURIComponent(blobResult.__blobUrl)}`;
+
+    const handleOpen = () => window.open(proxyUrl, "_blank");
 
     const handleDownload = () => {
       const a = document.createElement("a");
-      a.href = blobResult.__blobUrl;
+      a.href = proxyUrl;
       a.download = fileName;
       a.target = "_blank";
       a.click();
@@ -375,7 +378,7 @@ export function WorkflowResultBody({
         {isImage && (
           <div className="flex justify-center px-3.5 pt-3">
             <img
-              src={blobResult.__blobUrl}
+              src={proxyUrl}
               alt={workflowName}
               className="max-h-64 rounded-lg object-contain"
             />
