@@ -1,5 +1,5 @@
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { PersistentSettings, ProjectInfo, WorkspaceConfig } from "@/lib/types";
+import { PersistentSettings, WorkspaceConfig } from "@/lib/types";
 import { addToast, Button } from "@heroui/react";
 import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
@@ -42,33 +42,6 @@ export class CloudAPI extends AbstractPlatformAPI {
     throw new Error("Method not implemented.");
   }
 
-  async listProjects(
-    projectHomePath: string | undefined,
-  ): Promise<ProjectInfo[]> {
-    // projectHomePath is ignored in cloud environment
-
-    const response = await fetchAPI("/api/project/list");
-
-    if (!response.ok) {
-      addToast({
-        title: "Failed to fetch projects",
-        description:
-          response.status === 401
-            ? "Cannot list projects. Are you signed in?"
-            : undefined,
-        color: "danger",
-      });
-    }
-
-    const projects = await response.json();
-
-    const projectsInfo: ProjectInfo[] = projects.map((proj: any) => ({
-      name: proj.name,
-      ctime: new Date(proj.createdAt),
-    }));
-    return projectsInfo;
-  }
-
   async listPathContent(
     uri: string,
     options: ListPathOptions,
@@ -109,46 +82,6 @@ export class CloudAPI extends AbstractPlatformAPI {
 
     const data = await response.json();
     return data;
-  }
-
-  async createProject(uri: string): Promise<void> {
-    const response = await fetchAPI("/api/project/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: uri }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to create project");
-    }
-  }
-
-  async deleteProject(uri: string): Promise<void> {
-    const response = await fetchAPI("/api/project/delete", {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: uri }),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to delete project");
-    }
-  }
-
-  async updateProject(uri: string, updatedInfo: ProjectInfo): Promise<void> {
-    const response = await fetchAPI("/api/project/update", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ name: uri, updatedInfo }),
-    });
-    if (!response.ok) {
-      throw new Error("Failed to update project");
-    }
   }
 
   async createFolder(uri: string): Promise<void> {

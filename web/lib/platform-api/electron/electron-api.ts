@@ -1,6 +1,5 @@
 import {
   PersistentSettings,
-  ProjectInfo,
 } from "@/lib/types";
 import { AbstractPlatformAPI } from "../abstract-platform-api";
 import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
@@ -23,32 +22,11 @@ export class ElectronAPI extends AbstractPlatformAPI {
     return new File([data], "file");
   }
 
-  async listProjects(
-    projectHomePath: string | undefined,
-  ): Promise<ProjectInfo[]> {
-    if (!projectHomePath) {
-      throw new Error("Project home path is undefined");
-    }
-    return await this.electronAPI?.listProjects(projectHomePath);
-  }
-
   async listPathContent(
     uri: string,
     options: ListPathOptions,
   ): Promise<FileSystemObject[]> {
     return await this.electronAPI?.listPathContent(uri, options);
-  }
-
-  async createProject(uri: string): Promise<void> {
-    await this.electronAPI?.createProject(uri);
-  }
-
-  async deleteProject(uri: string): Promise<void> {
-    await this.electronAPI?.deleteProject(uri);
-  }
-
-  async updateProject(uri: string, updatedInfo: ProjectInfo): Promise<void> {
-    await this.electronAPI?.updateProject(uri, updatedInfo);
   }
 
   async createFolder(uri: string): Promise<void> {

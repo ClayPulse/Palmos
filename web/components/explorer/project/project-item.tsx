@@ -1,5 +1,6 @@
 import { ContextMenuState, ProjectInfo } from "@/lib/types";
-import { Button } from "@heroui/react";
+import { useProjectManager } from "@/lib/hooks/use-project-manager";
+import { Button, Chip } from "@heroui/react";
 import { useContext, useState } from "react";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import ContextMenu from "../../interface/context-menu";
@@ -14,6 +15,8 @@ export default function ProjectItem({
 }) {
   const {getTranslations: t} = useTranslations();
   const editorContext = useContext(EditorContext);
+  const { activeProjectId, setActiveProject } = useProjectManager();
+  const isActive = project.id != null && project.id === activeProjectId;
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
     x: 0,
@@ -64,7 +67,19 @@ export default function ProjectItem({
         }}
       >
         <div className="flex w-full flex-col items-start justify-center">
-          <p>{projectName}</p>
+          <div className="flex items-center gap-2">
+            <p>{projectName}</p>
+            {isActive && (
+              <Chip size="sm" color="primary" variant="flat">
+                AI
+              </Chip>
+            )}
+            {project.role && project.role !== "owner" && (
+              <Chip size="sm" variant="flat">
+                {project.role}
+              </Chip>
+            )}
+          </div>
           <p className="text-xs">{t("projectItem.created") + projectCtime}</p>
         </div>
       </Button>
@@ -81,6 +96,20 @@ export default function ProjectItem({
             }}
           >
             <p className="w-full text-start">{t("projectItem.projectSettings")}</p>
+          </Button>
+          <Button
+            className="text-medium h-12 sm:h-8 sm:text-sm"
+            variant="light"
+            onPress={() => {
+              if (project.id) {
+                setActiveProject(isActive ? undefined : project.id);
+              }
+              setContextMenuState({ x: 0, y: 0, isOpen: false });
+            }}
+          >
+            <p className="w-full text-start">
+              {isActive ? "Unbind from AI" : "Bind to AI Manager"}
+            </p>
           </Button>
           <Button
             className="text-medium h-12 sm:h-8 sm:text-sm"

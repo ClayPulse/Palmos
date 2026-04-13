@@ -27,7 +27,7 @@ export default function useDeepAgent(
   }, []);
 
   const submit = useCallback(
-    (text: string, workflows?: WorkflowInput[]) => {
+    (text: string, workflows?: WorkflowInput[], projectId?: string) => {
       // Optimistically add user message
       const userMsg = new HumanMessage({ content: text });
       const uid = userMsg.id ?? generateId();
@@ -52,6 +52,7 @@ export default function useDeepAgent(
           };
         }),
         workflows: workflows && workflows.length > 0 ? workflows : undefined,
+        projectId,
         options: {
           returnWorkflowConfig: false,
         },

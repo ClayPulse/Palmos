@@ -3,6 +3,7 @@
 import { AppModeEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { getLLMModel } from "@/lib/modalities/llm/get-llm";
 import { getSTTModel } from "@/lib/modalities/stt/get-stt";
 import { getTTSModel } from "@/lib/modalities/tts/get-tts";
@@ -19,6 +20,7 @@ import React, {
   Dispatch,
   SetStateAction,
   useEffect,
+  useRef,
   useState,
 } from "react";
 
@@ -105,38 +107,69 @@ export default function EditorContextProvider({
     };
   }, []);
 
-  // Load settings
+  // Load settings (only once — guard prevents session ref changes from re-fetching)
   useEffect(() => {
-    if (platformApi && session) {
+    if (platformApi && session && !isSettingsLoaded) {
       platformApi
         ?.getPersistentSettings()
         .then((loadedSettings: PersistentSettings) => {
+          if (loadedSettings.lastProject) {
+            setEditorStates((prev) => ({
+              ...prev,
+              project: loadedSettings.lastProject ?? "",
+            }));
+          }
           setSettings(loadedSettings);
           setIsSettingsLoaded(true);
         });
     }
   }, [platformApi, session]);
 
-  // Load projects
+  // Load projects from cloud
   useEffect(() => {
-    if (platformApi && session) {
-      const homePath = settings?.projectHomePath;
-      platformApi.listProjects(homePath).then((projects) => {
-        setEditorStates((prev) => ({ ...prev, projectsInfo: projects }));
-      });
+    if (session) {
+      fetchAPI("/api/project/list")
+        .then((res) => (res.ok ? res.json() : []))
+        .then((data: any[]) => {
+          const projectsInfo = data.map((proj: any) => ({
+            id: proj.id,
+            name: proj.name,
+            ctime: new Date(proj.createdAt),
+            role: proj.role,
+            memberCount: proj.memberCount,
+          }));
+          setEditorStates((prev) => ({ ...prev, projectsInfo }));
+        })
+        .catch(() => {});
     }
-  }, [platformApi, session, settings?.projectHomePath]);
+  }, [session]);
 
-  // Save settings
+  // Save settings (debounced to prevent rapid overwrites)
   useEffect(() => {
-    if (isSettingsLoaded && session) {
+    if (!isSettingsLoaded || !session) return;
+    const timer = setTimeout(() => {
       if (settings) {
         platformApi?.setPersistentSettings(settings);
       } else {
         platformApi?.resetPersistentSettings();
       }
-    }
+    }, 500);
+    return () => clearTimeout(timer);
   }, [settings, session, isSettingsLoaded]);
+
+  // Persist active project to settings
+  const isProjectInitialized = useRef(false);
+  useEffect(() => {
+    if (!isSettingsLoaded) return;
+    // Skip the first run — that's the restored value, not a user change
+    if (!isProjectInitialized.current) {
+      isProjectInitialized.current = true;
+      return;
+    }
+    setSettings((prev) =>
+      prev ? { ...prev, lastProject: editorStates.project || undefined } : prev,
+    );
+  }, [editorStates.project, isSettingsLoaded]);
 
   // Load STT
   useEffect(() => {

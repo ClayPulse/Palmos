@@ -32,7 +32,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   const { setTheme } = useTheme();
 
   const [isShowNavbar, setIsShowNavbar] = useState(true);
-  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false);
+  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(true);
 
   // Skip the welcome animation for chat mode. Check both the context state (for
   // in-session switches) and the raw URL param (for initial page loads before the

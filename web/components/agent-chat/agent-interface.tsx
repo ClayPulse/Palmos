@@ -249,6 +249,20 @@ export default function AgentChat({
       </div>
     ) : null;
 
+  const boundProject = editorContext?.editorStates.project;
+  const projectChip = boundProject ? (
+    <div className="flex items-center gap-1.5 rounded-md border border-amber-300/60 bg-amber-50/80 px-2 py-1 text-xs dark:border-amber-500/30 dark:bg-amber-500/10">
+      <Icon
+        name="folder"
+        variant="round"
+        className="text-sm text-amber-600 dark:text-amber-400"
+      />
+      <span className="max-w-[10rem] truncate text-default-800 dark:text-white/85">
+        {boundProject}
+      </span>
+    </div>
+  ) : null;
+
   const hiddenFileInput = (
     <input
       ref={fileInputRef}
@@ -703,10 +717,8 @@ export default function AgentChat({
     </div>
   );
 
-  const quickPills = (
-    <div
-      className={`flex justify-end gap-1.5 pb-[max(env(safe-area-inset-bottom),0.25rem)] ${isPage ? "mt-2" : ""}`}
-    >
+  const quickPillButtons = (
+    <>
       <button
         className="flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-50 px-2.5 py-1 text-xs text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200 dark:hover:shadow-[0_0_8px_rgba(251,191,36,0.2)]"
         onClick={() => handleSend("What can you help me with?")}
@@ -721,7 +733,7 @@ export default function AgentChat({
         <Icon name="lightbulb" variant="round" className="text-xs" />
         Examples
       </button>
-    </div>
+    </>
   );
 
   // ── Page layout ──────────────────────────────────────────────────────────
@@ -901,7 +913,10 @@ export default function AgentChat({
               </button>
             )}
           </div>
-          {quickPills}
+          <div className={`flex items-center pb-[max(env(safe-area-inset-bottom),0.25rem)] ${isPage ? "mt-2" : ""}`}>
+            {projectChip}
+            <div className="ml-auto flex gap-1.5">{quickPillButtons}</div>
+          </div>
         </div>
       </div>
     );
@@ -1122,7 +1137,10 @@ export default function AgentChat({
             </div>
           </button>
         </div>
-        {quickPills}
+        <div className="flex items-center pb-[max(env(safe-area-inset-bottom),0.25rem)]">
+          {projectChip}
+          <div className="ml-auto flex gap-1.5">{quickPillButtons}</div>
+        </div>
       </div>
     </div>
   );

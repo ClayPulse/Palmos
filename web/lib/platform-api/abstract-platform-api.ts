@@ -1,5 +1,5 @@
 import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
-import { PersistentSettings, ProjectInfo } from "../types";
+import { PersistentSettings } from "../types";
 
 export abstract class AbstractPlatformAPI {
   // Show a selection dialogue to pick a directory.
@@ -9,39 +9,11 @@ export abstract class AbstractPlatformAPI {
   // Pick a file
   abstract selectFile(fileExtension?: string): Promise<File>;
 
-  // List all projects in a path
-  abstract listProjects(
-    projectHomePath: string | undefined,
-  ): Promise<ProjectInfo[]>;
   // Discover project content
   abstract listPathContent(
     uri: string,
     options: ListPathOptions,
   ): Promise<FileSystemObject[]>;
-
-  // Project operations
-  /**
-   * Create a new project at the given URI.
-   *
-   * @param uri The URI where the project should be created. This
-   * should include the project name as the last segment.
-   */
-  abstract createProject(uri: string): Promise<void>;
-  /**
-   * Delete the project at the given URI.
-   *
-   * @param uri The URI of the project to be deleted. This should include
-   * the project name as the last segment.
-   */
-  abstract deleteProject(uri: string): Promise<void>;
-  /**
-   * Update the project information, such as renaming the project.
-   * This does not change the project location.
-   *
-   * @param uri The current URI of the project.
-   * @param updatedInfo The updated project information.
-   */
-  abstract updateProject(uri: string, updatedInfo: ProjectInfo): Promise<void>;
 
   // Create folder
   abstract createFolder(uri: string): Promise<void>;
