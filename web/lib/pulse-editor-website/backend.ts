@@ -2,6 +2,7 @@ import { CapacitorHttp } from "@capacitor/core";
 import { Preferences } from "@capacitor/preferences";
 import { PlatformEnum } from "../enums";
 import { getPlatform } from "../platform-api/platform-checker";
+import { getViewAsUserId } from "../view-as";
 
 export async function fetchAPI(
   relativeUrl: string | URL,
@@ -45,6 +46,12 @@ export async function fetchAPI(
     const exp = expPref.value;
 
     const headers = new Headers(options?.headers ?? {});
+    const capUrlPath = typeof relativeUrl === "string" ? relativeUrl : relativeUrl.pathname;
+    const capSkipViewAs = capUrlPath.startsWith("/api/auth/") || capUrlPath.startsWith("/api/billing/");
+    const capViewAsId = getViewAsUserId();
+    if (capViewAsId && !capSkipViewAs) {
+      headers.set("X-View-As-User-Id", capViewAsId);
+    }
     if (token) {
       headers.append(
         "Cookie",
@@ -104,6 +111,16 @@ export async function fetchAPI(
       headers: nativeResponse.headers,
     });
     return fetchResponse;
+  }
+
+  // Inject View-As header for admin user-switching (skip auth/billing endpoints)
+  const urlPath = typeof relativeUrl === "string" ? relativeUrl : relativeUrl.pathname;
+  const skipViewAs = urlPath.startsWith("/api/auth/") || urlPath.startsWith("/api/billing/");
+  const viewAsId = getViewAsUserId();
+  if (viewAsId && !skipViewAs) {
+    const headers = new Headers(options?.headers ?? {});
+    headers.set("X-View-As-User-Id", viewAsId);
+    options = { ...options, headers };
   }
 
   return await fetch(url, {

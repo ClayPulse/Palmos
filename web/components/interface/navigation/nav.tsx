@@ -12,6 +12,7 @@ import AppNavBar from "./app-nav-bar";
 import { ChatNavLeft, ChatNavRight } from "./chat-nav-bar";
 import { EditorNavLeft, EditorNavRight } from "./nav-top-bar";
 
+import { ViewAsBanner } from "@/components/misc/view-as-user-picker";
 import RebrandBanner from "../rebrand-banner";
 import WelcomeScreen from "../status-screens/welcome";
 
@@ -85,6 +86,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
       {/* Rebrand announcement banner */}
       {mounted && <RebrandBanner />}
+      {mounted && <ViewAsBanner />}
 
       {/* Main Content - Render as soon as mounted, but hidden/under welcome screen until animation finishes */}
       {mounted && (

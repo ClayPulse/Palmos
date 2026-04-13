@@ -1,5 +1,6 @@
 "use client";
 
+import { ViewAsModal } from "@/components/misc/view-as-user-picker";
 import { useMenuActions } from "@/lib/hooks/menu-actions/use-menu-actions";
 import { useAuth } from "@/lib/hooks/use-auth";
 import useRouter from "@/lib/hooks/use-router";
@@ -22,7 +23,7 @@ import {
 } from "@heroui/react";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import Icon from "../../misc/icon";
 import { EditorContext } from "../../providers/editor-context-provider";
 import FileMenuDropDown from "./menu-dropdown/file-menu";
@@ -63,6 +64,7 @@ export function EditorNavRight({
 
   const { session, signOut, subscription, usage } = useAuth();
   const { resolvedTheme, setTheme } = useTheme();
+  const [isViewAsOpen, setIsViewAsOpen] = useState(false);
   const router = useRouter();
 
   // #region Load specified app if app query parameter is present
@@ -290,6 +292,16 @@ export function EditorNavRight({
                   >
                     API Keys
                   </DropdownItem>
+                  {session.user.isAdmin && (
+                    <DropdownItem
+                      key={"view-as"}
+                      startContent={<Icon name="visibility" className="text-sm" />}
+                      onPress={() => setIsViewAsOpen(true)}
+                      className="text-warning"
+                    >
+                      View as User
+                    </DropdownItem>
+                  )}
                   <DropdownItem
                     key={"sign-out"}
                     onPress={() => {
@@ -302,6 +314,13 @@ export function EditorNavRight({
                 </DropdownSection>
               </DropdownMenu>
             </Dropdown>
+          )}
+          {session?.user.isAdmin && (
+            <ViewAsModal
+              isOpen={isViewAsOpen}
+              onClose={() => setIsViewAsOpen(false)}
+              isAdmin
+            />
           )}
         </div>
   );

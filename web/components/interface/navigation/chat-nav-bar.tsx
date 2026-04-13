@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import { ViewAsModal } from "@/components/misc/view-as-user-picker";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -23,7 +24,7 @@ import {
 } from "@heroui/react";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 
 export function ChatNavLeft({
   onToggleSidebar,
@@ -77,6 +78,7 @@ export function ChatNavRight() {
   const { resolvedTheme, setTheme } = useTheme();
   const { getTranslations: t, locale, setLocale } = useTranslations();
   const router = useRouter();
+  const [isViewAsOpen, setIsViewAsOpen] = useState(false);
 
   return (
     <div className="flex items-center gap-x-1">
@@ -207,6 +209,16 @@ export function ChatNavRight() {
               >
                 API Keys
               </DropdownItem>
+              {session.user.isAdmin && (
+                <DropdownItem
+                  key={"view-as"}
+                  startContent={<Icon name="visibility" className="text-sm" />}
+                  onPress={() => setIsViewAsOpen(true)}
+                  className="text-warning"
+                >
+                  View as User
+                </DropdownItem>
+              )}
               <DropdownItem
                 key={"sign-out"}
                 onPress={() => signOut()}
@@ -217,6 +229,13 @@ export function ChatNavRight() {
             </DropdownSection>
           </DropdownMenu>
         </Dropdown>
+      )}
+      {session?.user.isAdmin && (
+        <ViewAsModal
+          isOpen={isViewAsOpen}
+          onClose={() => setIsViewAsOpen(false)}
+          isAdmin
+        />
       )}
     </div>
   );
