@@ -1,4 +1,4 @@
-import { PersistentSettings, ProjectInfo } from "@/lib/types";
+import { PersistentSettings } from "@/lib/types";
 import { Directory, Encoding, Filesystem } from "@capacitor/filesystem";
 import { FilePicker } from "@capawesome/capacitor-file-picker";
 import { FileSystemObject, ListPathOptions } from "@pulse-editor/shared-utils";
@@ -61,25 +61,7 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     );
   }
 
-  async listProjects(
-    projectHomePath: string | undefined,
-  ): Promise<ProjectInfo[]> {
-    if (!projectHomePath) {
-      throw new Error("Project home path is undefined");
-    }
 
-    const pathDir = this.getStoragePathAndDir(projectHomePath);
-    const files = await Filesystem.readdir(pathDir);
-
-    const folders = files.files
-      .filter((file) => file.type === "directory")
-      .map((file) => ({
-        name: file.name,
-        ctime: file.ctime ? new Date(file.ctime) : new Date(),
-      }));
-
-    return folders;
-  }
 
   async listPathContent(
     uri: string,
@@ -160,28 +142,6 @@ export class CapacitorAPI extends AbstractPlatformAPI {
     const fileSystemObjects = await Promise.all(promise);
 
     return fileSystemObjects;
-  }
-
-  async createProject(uri: string): Promise<void> {
-    const pathDir = this.getStoragePathAndDir(uri);
-    await Filesystem.mkdir({
-      ...pathDir,
-    });
-  }
-
-  async deleteProject(uri: string): Promise<void> {
-    // Delete the project directory and all its contents
-    const pathDir = this.getStoragePathAndDir(uri);
-    await Filesystem.rmdir({
-      ...pathDir,
-      recursive: true,
-    });
-  }
-
-  async updateProject(uri: string, updatedInfo: ProjectInfo): Promise<void> {
-    // For now, only support renaming the project
-    const newUri = path.join(path.dirname(uri), updatedInfo.name);
-    await this.rename(uri, newUri);
   }
 
   async createFolder(uri: string): Promise<void> {

@@ -3,7 +3,7 @@ import CreateInviteLinkModal from "@/components/interface/create-invite-link-mod
 import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { useWorkflowEnvCheck } from "@/lib/hooks/use-workflow-env-check";
 import { Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Checkbox } from "@heroui/react";
@@ -38,14 +38,10 @@ export default function WorkflowGallery() {
   const [sortValue, setSortValue] = useState<SortOption>("published-desc");
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [myContentOnly, setMyContentOnly] = useState(false);
-  const [envSetup, setEnvSetup] = useState<{
-    isOpen: boolean;
-    workflowId: string;
-    env: Record<string, string>;
-  } | null>(null);
   const effectiveLabel = myContentOnly ? "My Workflows" : label;
   const { isLoading, workflows } = useMarketplaceWorkflows(effectiveLabel);
   const { createCanvasTabView } = useTabViewManager();
+  const { envSetup, checkMissingEnvs, closeEnvSetup } = useWorkflowEnvCheck();
 
   useEffect(() => {
     setLabel(filterLabels[selectedIndex].name as "All" | "Published by Me" | "My Workflows");
@@ -62,25 +58,7 @@ export default function WorkflowGallery() {
     );
 
     // Check for missing user settings and prompt if needed
-    if (workflow.id) {
-      try {
-        const res = await fetchAPI(
-          `/api/workflow/user-settings/check-missing?workflowId=${encodeURIComponent(workflow.id)}`,
-        );
-        if (res.ok) {
-          const { missing } = await res.json();
-          if (missing && Object.keys(missing).length > 0) {
-            setEnvSetup({
-              isOpen: true,
-              workflowId: workflow.id,
-              env: missing,
-            });
-          }
-        }
-      } catch {
-        // Silently ignore — settings can be configured later
-      }
-    }
+    await checkMissingEnvs(workflow.id);
   }
 
   const previews = useMemo(() => {
@@ -174,8 +152,8 @@ export default function WorkflowGallery() {
           isOpen={envSetup.isOpen}
           workflowId={envSetup.workflowId}
           envEntries={envSetup.env}
-          onClose={() => setEnvSetup(null)}
-          onComplete={() => setEnvSetup(null)}
+          onClose={closeEnvSetup}
+          onComplete={closeEnvSetup}
         />
       )}
     </div>

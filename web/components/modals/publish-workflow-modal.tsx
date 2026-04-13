@@ -2,7 +2,7 @@ import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { captureWorkflowCanvas } from "@/lib/html2canvas/print-canvas";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { AppNodeData, Workflow } from "@/lib/types";
+import { AppNodeData, Workflow, WorkflowEnvDef } from "@/lib/types";
 import {
   addToast,
   Button,
@@ -67,6 +67,7 @@ export default function PublishWorkflowModal({
   const [version, setVersion] = useState("");
   const [visibility, setVisibility] =
     useState<Workflow["visibility"]>("public");
+  const [requiredEnvs, setRequiredEnvs] = useState<WorkflowEnvDef[]>([]);
   const visibilityOptions: Workflow["visibility"][] = [
     "public",
     "unlisted",
@@ -86,6 +87,7 @@ export default function PublishWorkflowModal({
         setVersion(bumpVersion(openedWorkflow.version));
         setVisibility(openedWorkflow.visibility);
         setDescription(openedWorkflow.description ?? "");
+        setRequiredEnvs(openedWorkflow.content.requiredEnvs ?? []);
       } else {
         setPublishMode("new");
         setSelectedWorkflow(undefined);
@@ -93,6 +95,7 @@ export default function PublishWorkflowModal({
         setVersion("");
         setVisibility("public");
         setDescription("");
+        setRequiredEnvs([]);
       }
     }
   }, [isOpen]);
@@ -120,6 +123,7 @@ export default function PublishWorkflowModal({
     setVersion(bumpVersion(workflow.version));
     setVisibility(workflow.visibility);
     setDescription(workflow.description ?? "");
+    setRequiredEnvs(workflow.content.requiredEnvs ?? []);
   }
 
   async function publishWorkflow() {
@@ -145,6 +149,7 @@ export default function PublishWorkflowModal({
         content: {
           nodes: localNodes ?? [],
           edges: localEdges ?? [],
+          requiredEnvs: requiredEnvs.length > 0 ? requiredEnvs : undefined,
           snapshotStates: snapshotStates,
         },
         version: version,
@@ -301,6 +306,76 @@ export default function PublishWorkflowModal({
             <SelectItem key={option}>{option}</SelectItem>
           ))}
         </Select>
+
+        {/* Required Environment Variables */}
+        <div className="w-full">
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-small text-foreground">
+              Required Environment Variables
+            </label>
+            <Button
+              size="sm"
+              variant="flat"
+              onPress={() =>
+                setRequiredEnvs((prev) => [
+                  ...prev,
+                  { key: "", description: "" },
+                ])
+              }
+            >
+              + Add
+            </Button>
+          </div>
+          {requiredEnvs.length === 0 && (
+            <p className="text-tiny text-default-400">
+              No required envs. Users won't be prompted for any variables.
+            </p>
+          )}
+          <div className="flex flex-col gap-2">
+            {requiredEnvs.map((env, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <Input
+                  size="sm"
+                  label="Key"
+                  placeholder="e.g. OPENAI_API_KEY"
+                  value={env.key}
+                  onValueChange={(v) =>
+                    setRequiredEnvs((prev) =>
+                      prev.map((e, j) => (j === i ? { ...e, key: v } : e)),
+                    )
+                  }
+                  className="flex-1"
+                />
+                <Input
+                  size="sm"
+                  label="Description"
+                  placeholder="e.g. Your OpenAI key"
+                  value={env.description}
+                  onValueChange={(v) =>
+                    setRequiredEnvs((prev) =>
+                      prev.map((e, j) =>
+                        j === i ? { ...e, description: v } : e,
+                      ),
+                    )
+                  }
+                  className="flex-1"
+                />
+                <Button
+                  isIconOnly
+                  size="sm"
+                  variant="light"
+                  color="danger"
+                  className="mt-1"
+                  onPress={() =>
+                    setRequiredEnvs((prev) => prev.filter((_, j) => j !== i))
+                  }
+                >
+                  ✕
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <Button color="primary" onPress={handlePress}>
           {isUpdate ? updateLabel : t("common.publish")}

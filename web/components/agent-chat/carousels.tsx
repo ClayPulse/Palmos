@@ -1,9 +1,11 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { useWorkflowEnvCheck } from "@/lib/hooks/use-workflow-env-check";
 import type { Automation, TriggerType, Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Chip } from "@heroui/react";
@@ -19,9 +21,10 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
   );
   const { createCanvasTabView } = useTabViewManager();
   const editorContext = useContext(EditorContext);
+  const { envSetup, checkMissingEnvs, closeEnvSetup } = useWorkflowEnvCheck();
 
-  function openWorkflow(workflow: Workflow) {
-    createCanvasTabView(
+  async function openWorkflow(workflow: Workflow) {
+    await createCanvasTabView(
       {
         viewId: createCanvasViewId(),
         appConfigs: workflow.content.nodes.map((node) => node.data.config),
@@ -33,6 +36,7 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
       ...prev,
       appMode: AppModeEnum.Editor,
     }));
+    await checkMissingEnvs(workflow.id);
   }
 
   return (
@@ -102,6 +106,15 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
           </div>
         ))}
       </div>
+      {envSetup && (
+        <WorkflowEnvSetupModal
+          isOpen={envSetup.isOpen}
+          onClose={closeEnvSetup}
+          onComplete={closeEnvSetup}
+          workflowId={envSetup.workflowId}
+          envEntries={envSetup.env}
+        />
+      )}
     </div>
   );
 }

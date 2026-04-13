@@ -58,6 +58,7 @@ export type EditorStates = {
 
   project?: string;
   projectsInfo?: ProjectInfo[];
+  activeProjectId?: string;
 
   explorerSelectedNodeRefs: RefObject<TreeViewNodeRef | null>[];
 
@@ -195,6 +196,8 @@ export type PersistentSettings = {
   };
 
   locale?: string;
+
+  lastProject?: string;
 };
 // #endregion
 
@@ -490,9 +493,15 @@ export type Workflow = {
   createdAt?: string;
 };
 
+export type WorkflowEnvDef = {
+  key: string;
+  description: string;
+};
+
 export type WorkflowContent = {
   nodes: ReactFlowNode<AppNodeData>[];
   edges: ReactFlowEdge[];
+  requiredEnvs?: WorkflowEnvDef[];
   snapshotStates?: {
     [viewId: string]: {
       states: {
@@ -637,8 +646,20 @@ export type AssistantEditorContextArgs = {
 // #region Project
 
 export type ProjectInfo = {
+  id?: string;
   name: string;
   ctime?: Date;
+  role?: string;
+  memberCount?: number;
+};
+
+export type ProjectMemberInfo = {
+  id: string;
+  userId: string;
+  name: string | null;
+  email: string;
+  image: string | null;
+  role: string;
 };
 
 export type ProjectAsset = {

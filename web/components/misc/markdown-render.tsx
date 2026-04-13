@@ -7,7 +7,7 @@ import "remark-github-blockquote-alert/alert.css";
 
 export default function MarkdownRender({ content }: { content: string }) {
   return (
-    <div className="markdown-styles">
+    <div className="markdown-styles break-words" style={{ overflowWrap: "anywhere" }}>
       <Markdown
         remarkPlugins={[remarkGfm, remarkAlert]}
         rehypePlugins={[rehypeRaw, () => rehypeSanitize(customSchema)]}
