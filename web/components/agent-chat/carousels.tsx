@@ -21,9 +21,11 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
   );
   const { createCanvasTabView } = useTabViewManager();
   const editorContext = useContext(EditorContext);
-  const { envSetup, checkMissingEnvs, closeEnvSetup } = useWorkflowEnvCheck();
+  const { envSetup, checkMissingEnvs, openEnvSetup, closeEnvSetup } =
+    useWorkflowEnvCheck();
+  const [pendingWorkflow, setPendingWorkflow] = useState<Workflow | null>(null);
 
-  async function openWorkflow(workflow: Workflow) {
+  async function proceedToCanvas(workflow: Workflow) {
     await createCanvasTabView(
       {
         viewId: createCanvasViewId(),
@@ -36,7 +38,16 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
       ...prev,
       appMode: AppModeEnum.Editor,
     }));
-    await checkMissingEnvs(workflow.id);
+  }
+
+  async function openWorkflow(workflow: Workflow) {
+    const missing = await checkMissingEnvs(workflow.id);
+    if (missing && workflow.id) {
+      setPendingWorkflow(workflow);
+      openEnvSetup(workflow.id, missing);
+    } else {
+      await proceedToCanvas(workflow);
+    }
   }
 
   return (
@@ -109,8 +120,17 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
       {envSetup && (
         <WorkflowEnvSetupModal
           isOpen={envSetup.isOpen}
-          onClose={closeEnvSetup}
-          onComplete={closeEnvSetup}
+          onClose={() => {
+            closeEnvSetup();
+            setPendingWorkflow(null);
+          }}
+          onComplete={async () => {
+            closeEnvSetup();
+            if (pendingWorkflow) {
+              await proceedToCanvas(pendingWorkflow);
+              setPendingWorkflow(null);
+            }
+          }}
           workflowId={envSetup.workflowId}
           envEntries={envSetup.env}
         />
