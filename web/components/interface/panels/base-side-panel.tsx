@@ -21,7 +21,7 @@ export default function BaseSidePanel({
         <>
           {isLandscape ? (
             <motion.div
-              className="z-50 hidden h-full w-100 shrink-0 md:block"
+              className="z-50 hidden h-full w-100 shrink-0 overflow-hidden md:block"
               initial={{ x: xOffset }}
               animate={{ x: 0 }}
               exit={{ x: xOffset }}

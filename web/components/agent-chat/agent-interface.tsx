@@ -476,6 +476,17 @@ export default function AgentChat({
     if (el) el.scrollTop = el.scrollHeight;
   }, [messages, todos]);
 
+  // Continuous auto-scroll during streaming (content grows within the same message)
+  useEffect(() => {
+    if (!isLoading) return;
+    const id = setInterval(() => {
+      if (userScrolledUpRef.current) return;
+      const el = scrollContainerRef.current;
+      if (el) el.scrollTop = el.scrollHeight;
+    }, 100);
+    return () => clearInterval(id);
+  }, [isLoading]);
+
   // ── Poll for async workflow task results ──────────────────────────────────
   const [workflowTasks, setWorkflowTasks] = useState<WorkflowTaskState[]>([]);
   const polledTaskIdsRef = useRef<Set<string>>(new Set());
@@ -1291,18 +1302,6 @@ export default function AgentChat({
                 >
                   <div>
                     <Icon name="stop" variant="round" />
-                  </div>
-                </Button>
-              )}
-              {onClose && (
-                <Button
-                  isIconOnly
-                  variant="light"
-                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                  onPress={onClose}
-                >
-                  <div>
-                    <Icon name="close" variant="round" />
                   </div>
                 </Button>
               )}
