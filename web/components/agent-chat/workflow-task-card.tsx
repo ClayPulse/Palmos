@@ -253,6 +253,33 @@ function LogEntry({
 /** Match `data:<mime>;base64,<payload>` */
 const DATA_URI_RE = /^data:([^;]+);base64,(.+)$/;
 
+/** Marker left by the runner when a large result was uploaded to blob storage */
+interface BlobResult {
+  __blobUrl: string;
+  mime: string;
+}
+
+/** Walk an object recursively and find the first blob-upload marker */
+function findBlobResult(obj: unknown): BlobResult | null {
+  if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+    const rec = obj as Record<string, unknown>;
+    if (typeof rec.__blobUrl === "string" && typeof rec.mime === "string") {
+      return { __blobUrl: rec.__blobUrl, mime: rec.mime };
+    }
+    for (const val of Object.values(rec)) {
+      const found = findBlobResult(val);
+      if (found) return found;
+    }
+  }
+  if (Array.isArray(obj)) {
+    for (const val of obj) {
+      const found = findBlobResult(val);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 /** Map MIME to a human-friendly extension */
 function mimeToSuffix(mime: string): string {
   const map: Record<string, string> = {
@@ -326,7 +353,63 @@ export function WorkflowResultBody({
     );
   }
 
-  // Check for data URI (file result)
+  // Check for blob-uploaded file result (large files uploaded to Azure storage)
+  const blobResult = findBlobResult(result);
+  if (blobResult) {
+    const suffix = mimeToSuffix(blobResult.mime);
+    const isImage = /^image\//.test(blobResult.mime);
+    const fileName = `${workflowName.replace(/[^a-zA-Z0-9_-]/g, "_")}.${suffix}`;
+
+    const handleOpen = () => window.open(blobResult.__blobUrl, "_blank");
+
+    const handleDownload = () => {
+      const a = document.createElement("a");
+      a.href = blobResult.__blobUrl;
+      a.download = fileName;
+      a.target = "_blank";
+      a.click();
+    };
+
+    return (
+      <div className="border-t border-green-200/60 bg-white/60 dark:border-green-500/15 dark:bg-white/3">
+        {isImage && (
+          <div className="flex justify-center px-3.5 pt-3">
+            <img
+              src={blobResult.__blobUrl}
+              alt={workflowName}
+              className="max-h-64 rounded-lg object-contain"
+            />
+          </div>
+        )}
+        <div className="flex items-center gap-2 px-3.5 py-2.5">
+          <Icon
+            name={isImage ? "image" : "description"}
+            variant="round"
+            className="text-base text-green-600 dark:text-green-400"
+          />
+          <span className="text-default-700 min-w-0 flex-1 truncate text-xs dark:text-white/70">
+            {fileName}
+          </span>
+          <button
+            onClick={handleOpen}
+            className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
+          >
+            <Icon name="open_in_new" variant="round" className="text-xs" />
+            Open
+          </button>
+          <button
+            onClick={handleDownload}
+            className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
+          >
+            <Icon name="download" variant="round" className="text-xs" />
+            Download
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Check for data URI (file result — inline base64, for smaller files)
   const dataUri = findDataUri(result);
   if (dataUri) {
     const suffix = mimeToSuffix(dataUri.mime);
