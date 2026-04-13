@@ -285,5 +285,10 @@ export function convertSimplifiedToWorkflowContent(
     }
   }
 
-  return { nodes: rfNodes, edges: rfEdges };
+  // Carry over env declarations as requiredEnvs
+  const requiredEnvs = dag.env
+    ? Object.entries(dag.env).map(([key, description]) => ({ key, description }))
+    : undefined;
+
+  return { nodes: rfNodes, edges: rfEdges, ...(requiredEnvs && { requiredEnvs }) };
 }

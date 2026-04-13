@@ -490,9 +490,15 @@ export type Workflow = {
   createdAt?: string;
 };
 
+export type WorkflowEnvDef = {
+  key: string;
+  description: string;
+};
+
 export type WorkflowContent = {
   nodes: ReactFlowNode<AppNodeData>[];
   edges: ReactFlowEdge[];
+  requiredEnvs?: WorkflowEnvDef[];
   snapshotStates?: {
     [viewId: string]: {
       states: {
