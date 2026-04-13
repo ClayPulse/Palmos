@@ -6,7 +6,7 @@ import InlineWidget, {
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
 import { Spinner, Tooltip } from "@heroui/react";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -37,11 +37,26 @@ function CopyButton({ text }: { text: string }) {
 export function UserBubble({
   text,
   attachmentCount,
+  uploadIds,
 }: {
   text: string;
   attachmentCount?: number;
+  uploadIds?: string[];
 }) {
   const [copied, setCopied] = useState(false);
+  const [fileNames, setFileNames] = useState<{ id: string; filename: string; mimeType: string }[]>([]);
+
+  useEffect(() => {
+    if (!uploadIds || uploadIds.length === 0) return;
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (!backendUrl) return;
+    fetch(`${backendUrl}/api/chat/uploads?ids=${uploadIds.join(",")}`, {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setFileNames(data))
+      .catch(() => {});
+  }, [uploadIds]);
 
   const handleCopy = useCallback(() => {
     navigator.clipboard.writeText(text).then(() => {
@@ -50,13 +65,32 @@ export function UserBubble({
     });
   }, [text]);
 
+  const hasFiles = fileNames.length > 0 || (attachmentCount != null && attachmentCount > 0);
+
   return (
     <div className="group flex justify-end">
       <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
         <p className="text-xs font-semibold text-white/80">User:</p>
         <p className="mt-0.5 text-white">{text}</p>
+        {fileNames.length > 0 && (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {fileNames.map((f) => (
+              <span
+                key={f.id}
+                className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] text-white/90"
+              >
+                <Icon
+                  name={f.mimeType.startsWith("image/") ? "image" : "description"}
+                  variant="round"
+                  className="text-[10px]"
+                />
+                {f.filename}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="mt-1.5 flex items-center border-t border-white/20 pt-1.5">
-          {attachmentCount != null && attachmentCount > 0 && (
+          {hasFiles && fileNames.length === 0 && attachmentCount != null && attachmentCount > 0 && (
             <div className="flex items-center gap-0.5 text-[10px] text-white/60">
               <Icon name="attach_file" variant="round" className="text-[10px]" />
               <span>

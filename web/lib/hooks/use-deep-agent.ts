@@ -32,7 +32,7 @@ export default function useDeepAgent(
       const userMsg = new HumanMessage({
         content: text,
         additional_kwargs: uploadIds && uploadIds.length > 0
-          ? { attachmentCount: uploadIds.length }
+          ? { attachmentCount: uploadIds.length, uploadIds }
           : undefined,
       });
       const uid = userMsg.id ?? generateId();

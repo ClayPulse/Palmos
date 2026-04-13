@@ -795,21 +795,6 @@ export default function AgentChat({
 
     if (!content && spawned.length === 0 && !hasWidgets) return null;
 
-    // Hide tool result messages (raw JSON responses from tool calls like file search).
-    if (!isHuman && (msg as any).tool_call_id) return null;
-
-    // Hide AI messages that are just tool invocations with no user-facing text,
-    // or raw JSON output not associated with a widget.
-    if (
-      !isHuman &&
-      !hasNonCanvasWidgets &&
-      spawned.length === 0 &&
-      content.trimStart().startsWith("{") &&
-      content.trimStart().endsWith("}")
-    ) {
-      return null;
-    }
-
     return (
       <div key={msg.id ?? i} className="flex flex-col gap-2.5">
         {isHuman ? (
@@ -817,6 +802,7 @@ export default function AgentChat({
             <UserBubble
               text={content}
               attachmentCount={msg.additional_kwargs?.attachmentCount as number | undefined}
+              uploadIds={msg.additional_kwargs?.uploadIds as string[] | undefined}
             />
           )
         ) : isPage ? (
