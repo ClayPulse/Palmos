@@ -209,16 +209,6 @@ export function ChatNavRight() {
               >
                 API Keys
               </DropdownItem>
-              {session.user.isAdmin && (
-                <DropdownItem
-                  key={"view-as"}
-                  startContent={<Icon name="visibility" className="text-sm" />}
-                  onPress={() => setIsViewAsOpen(true)}
-                  className="text-warning"
-                >
-                  View as User
-                </DropdownItem>
-              )}
               <DropdownItem
                 key={"sign-out"}
                 onPress={() => signOut()}
@@ -227,6 +217,24 @@ export function ChatNavRight() {
                 {t("common.signOut")}
               </DropdownItem>
             </DropdownSection>
+            {session.user.isAdmin ? (
+              <DropdownSection title="Admin">
+                <DropdownItem
+                  key={"view-as"}
+                  startContent={<Icon name="visibility" className="text-sm" />}
+                  onPress={() => setIsViewAsOpen(true)}
+                  className="text-warning"
+                >
+                  View as User
+                </DropdownItem>
+              </DropdownSection>
+            ) : (
+              <DropdownSection className="hidden">
+                <DropdownItem key={"view-as-hidden"} className="hidden">
+                  {null}
+                </DropdownItem>
+              </DropdownSection>
+            )}
           </DropdownMenu>
         </Dropdown>
       )}
