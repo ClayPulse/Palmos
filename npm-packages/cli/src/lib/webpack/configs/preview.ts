@@ -1,11 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import CopyWebpackPlugin from "copy-webpack-plugin";
+import { CopyRspackPlugin, CssExtractRspackPlugin, HtmlRspackPlugin, type Compiler, type RspackOptions } from "@rspack/core";
 import fs from "fs";
-import HtmlWebpackPlugin from "html-webpack-plugin";
-import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import path from "path";
-import { Compiler, Configuration as WebpackConfig } from "webpack";
-import { Configuration as DevServerConfig } from "webpack-dev-server";
 import { getLocalNetworkIP, loadPulseConfig } from "./utils.js";
 
 class PreviewClientPlugin {
@@ -35,7 +31,7 @@ class PreviewClientPlugin {
     compiler.hooks.done.tap("ReloadMessagePlugin", () => {
       if (isFirstRun) {
         const previewStartupMessage = `
-🎉 Your Pulse extension preview \x1b[1m${this.pulseConfig.displayName}\x1b[0m is LIVE! 
+🎉 Your Pulse extension preview \x1b[1m${this.pulseConfig.displayName}\x1b[0m is LIVE!
 
 ⚡️ Local: http://localhost:3030
 ⚡️ Network: http://${this.origin}:3030
@@ -75,7 +71,7 @@ class PreviewClientPlugin {
 
 export async function makePreviewClientConfig(
   mode: "development" | "production",
-): Promise<WebpackConfig & DevServerConfig> {
+): Promise<RspackOptions> {
   const projectDirName = process.cwd();
   const pulseConfig = await loadPulseConfig();
 
@@ -91,13 +87,13 @@ export async function makePreviewClientConfig(
       extensions: [".ts", ".tsx", ".js"],
     },
     plugins: [
-      new HtmlWebpackPlugin({
+      new HtmlRspackPlugin({
         template: "./node_modules/.pulse/server/preview/frontend/index.html",
       }),
-      new MiniCssExtractPlugin({
+      new CssExtractRspackPlugin({
         filename: "globals.css",
       }),
-      new CopyWebpackPlugin({
+      new CopyRspackPlugin({
         patterns: [{ from: "src/assets", to: "assets" }],
       }),
       new PreviewClientPlugin(pulseConfig),
@@ -109,18 +105,23 @@ export async function makePreviewClientConfig(
       rules: [
         {
           test: /\.tsx?$/,
-          use: "ts-loader",
+          use: {
+            loader: "builtin:swc-loader",
+            options: {
+              jsc: {
+                parser: {
+                  syntax: "typescript",
+                  tsx: true,
+                },
+              },
+            },
+          },
           exclude: [/node_modules/, /dist/],
         },
         {
           test: /\.css$/i,
-          use: [
-            MiniCssExtractPlugin.loader,
-            "css-loader",
-            {
-              loader: "postcss-loader",
-            },
-          ],
+          use: [CssExtractRspackPlugin.loader, "css-loader", "postcss-loader"],
+          type: "javascript/auto",
         },
       ],
     },

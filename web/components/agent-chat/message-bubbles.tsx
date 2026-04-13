@@ -5,8 +5,34 @@ import InlineWidget, {
 } from "@/components/agent-chat/inline-widget";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
-import { Spinner } from "@heroui/react";
-import { useState } from "react";
+import { Spinner, Tooltip } from "@heroui/react";
+import { useCallback, useState } from "react";
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [text]);
+
+  return (
+    <Tooltip content={copied ? "Copied!" : "Copy"} size="sm">
+      <button
+        onClick={handleCopy}
+        className="text-default-300 hover:text-default-500 dark:text-white/20 dark:hover:text-white/60 transition-colors"
+      >
+        <Icon
+          name={copied ? "check" : "content_copy"}
+          variant="round"
+          className="text-sm"
+        />
+      </button>
+    </Tooltip>
+  );
+}
 
 export function UserBubble({ text }: { text: string }) {
   return (
@@ -39,9 +65,12 @@ export function AIResponseCard({
           />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-default-400 mb-1 text-[10px] font-semibold tracking-wide uppercase dark:text-white/40">
-            AI Manager:
-          </p>
+          <div className="mb-1 flex items-center justify-between">
+            <p className="text-default-400 text-[10px] font-semibold tracking-wide uppercase dark:text-white/40">
+              AI Manager:
+            </p>
+            {content && !isStreaming && <CopyButton text={content} />}
+          </div>
           {content && (
             <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
               <MarkdownRender content={content} />
@@ -84,6 +113,7 @@ export function ResponseCard({
           </span>
         </div>
         <div className="flex items-center gap-2">
+          {!isStreaming && content && <CopyButton text={content} />}
           <StatusBadge status={status} />
           <Icon
             name={expanded ? "expand_less" : "expand_more"}

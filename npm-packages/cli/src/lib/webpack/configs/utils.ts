@@ -31,10 +31,11 @@ export async function loadPulseConfig() {
   program.emit();
 
   // Fix imports in the generated js file for all files in node_modules/.pulse/config
-  globSync("node_modules/.pulse/config/**/*.js", {
+  const jsFiles = globSync("node_modules/.pulse/config/**/*.js", {
     cwd: projectDirName,
     absolute: true,
-  }).forEach(async (jsFile) => {
+  });
+  for (const jsFile of jsFiles) {
     let content = await fs.readFile(jsFile, "utf-8");
     content = content.replace(
       /(from\s+["']\.\/[^\s"']+)(["'])/g,
@@ -48,7 +49,7 @@ export async function loadPulseConfig() {
       },
     );
     await fs.writeFile(jsFile, content);
-  });
+  }
 
   // Copy package.json if exists
   const pkgPath = path.join(projectDirName, "package.json");
@@ -515,7 +516,7 @@ export function generateTempTsConfig() {
   // Always regenerate: the previous implementation skipped regeneration when
   // the file existed, but the tsconfig bakes in absolute paths derived from
   // process.cwd(). If the project is moved/renamed (or was generated from a
-  // different parent dir) the stale cache causes ts-loader TS18003 errors.
+  // different parent dir) the stale cache causes TS18003 errors.
   // Ensure the parent directory exists so we don't ENOENT on fresh installs
   // or when `.pulse` has been wiped.
   mkdirSync(tempTsConfigDir, { recursive: true });

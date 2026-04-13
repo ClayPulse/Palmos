@@ -1,17 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import mfNode from "@module-federation/node";
+import { ModuleFederationPlugin } from "@module-federation/enhanced/rspack";
+import { rspack, type Compiler, type RspackOptions } from "@rspack/core";
 import fs from "fs";
 import path from "path";
-import wp, { Compiler, Configuration as WebpackConfig } from "webpack";
 import {
   compileAppActionSkills,
   discoverAppSkillActions,
   discoverServerFunctions,
   loadPulseConfig,
 } from "./utils.js";
-
-const { NodeFederationPlugin } = mfNode;
-const { webpack } = wp;
 
 class MFServerPlugin {
   private projectDirName: string;
@@ -143,26 +140,19 @@ ${Object.entries(funcs)
   }
 
   /**
-   * Programmatically call webpack to compile server functions
+   * Programmatically call rspack to compile server functions
    * whenever there are changes in the src/server-function directory.
-   * This is necessary because Module Federation needs to know about
-   * all the exposed modules at build time, so we have to trigger a
-   * new compilation whenever server functions are added/removed/changed.
-   * @param compiler
    */
   private async compileServerFunctions(compiler: Compiler) {
-    // Run a new webpack compilation to pick up new server functions
     const options: any = {
       ...compiler.options,
       watch: false,
       plugins: [
-        // Add a new NodeFederationPlugin with updated entry points
         this.makeNodeFederationPlugin(),
       ],
     };
-    const newCompiler = webpack(options);
+    const newCompiler = rspack(options);
 
-    // Run the new compiler
     return new Promise<void>((resolve, reject) => {
       newCompiler?.run((err, stats) => {
         if (err) {
@@ -171,7 +161,7 @@ ${Object.entries(funcs)
         } else if (stats?.hasErrors()) {
           console.error(
             `[Server] ❌ Compilation errors:`,
-            stats.toJson().errors,
+            stats.toJson({ errors: true }).errors,
           );
           reject(new Error("Compilation errors"));
         } else {
@@ -185,20 +175,16 @@ ${Object.entries(funcs)
   private makeNodeFederationPlugin() {
     const funcs = discoverServerFunctions();
     const actions = discoverAppSkillActions();
-    return new NodeFederationPlugin(
-      {
-        name: this.pulseConfig.id + "_server",
-        remoteType: "script",
-        useRuntimePlugin: true,
-        library: { type: "commonjs-module" },
-        filename: "remoteEntry.js",
-        exposes: {
-          ...funcs,
-          ...actions,
-        },
-      } as any,
-      {},
-    );
+    return new ModuleFederationPlugin({
+      name: this.pulseConfig.id + "_server",
+      remoteType: "script",
+      library: { type: "commonjs-module" },
+      filename: "remoteEntry.js",
+      exposes: {
+        ...funcs,
+        ...actions,
+      },
+    });
   }
 
   private printChanges(compiler: Compiler) {
@@ -224,7 +210,7 @@ ${Object.entries(funcs)
 
 export async function makeMFServerConfig(
   mode: "development" | "production",
-): Promise<WebpackConfig> {
+): Promise<RspackOptions> {
   const projectDirName = process.cwd();
   const pulseConfig = await loadPulseConfig();
 
@@ -234,7 +220,7 @@ export async function makeMFServerConfig(
     entry: {},
     target: "async-node",
     output: {
-      publicPath: "auto",
+      publicPath: `./${pulseConfig.id}/${pulseConfig.version}/server/`, 
       path: path.resolve(projectDirName, "dist/server"),
     },
     resolve: {
@@ -246,9 +232,14 @@ export async function makeMFServerConfig(
         {
           test: /\.tsx?$/,
           use: {
-            loader: "ts-loader",
+            loader: "builtin:swc-loader",
             options: {
-              configFile: "node_modules/.pulse/tsconfig.server.json",
+              jsc: {
+                parser: {
+                  syntax: "typescript",
+                  tsx: true,
+                },
+              },
             },
           },
           exclude: [/node_modules/, /dist/],

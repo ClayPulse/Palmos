@@ -5,7 +5,15 @@ import Icon from "@/components/misc/icon";
 import { Spinner } from "@heroui/react";
 import { useEffect, useState } from "react";
 
-export function WorkflowTaskCard({ task }: { task: WorkflowTaskState }) {
+export function WorkflowTaskCard({
+  task,
+  onTerminate,
+  isTerminating,
+}: {
+  task: WorkflowTaskState;
+  onTerminate?: (taskId: string) => void;
+  isTerminating?: boolean;
+}) {
   const [elapsed, setElapsed] = useState(0);
   const [finalElapsed, setFinalElapsed] = useState<number | null>(null);
 
@@ -69,7 +77,28 @@ export function WorkflowTaskCard({ task }: { task: WorkflowTaskState }) {
                 ? `Completed in ${timeStr}`
                 : `Failed after ${timeStr}`}
           </p>
+          {isRunning && task.latestProgress && (
+            <p className="text-default-500 mt-0.5 truncate text-xs italic dark:text-white/40">
+              {task.latestProgress}
+            </p>
+          )}
         </div>
+        {isRunning && onTerminate && (
+          <button
+            onClick={() => onTerminate(task.taskId)}
+            disabled={isTerminating}
+            className="shrink-0 rounded-md border border-red-300/60 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
+          >
+            {isTerminating ? (
+              <span className="flex items-center gap-1.5">
+                <Spinner size="sm" classNames={{ wrapper: "h-3 w-3" }} />
+                Terminating...
+              </span>
+            ) : (
+              "Terminate"
+            )}
+          </button>
+        )}
       </div>
       {isRunning && task.result?.log && (
         <AgentProgressLog log={task.result.log} />
@@ -94,44 +123,118 @@ export function WorkflowTaskCard({ task }: { task: WorkflowTaskState }) {
 function AgentProgressLog({
   log,
 }: {
-  log: { type: string; text?: string; tool?: string }[];
+  log: { type: string; text?: string; tool?: string; output?: string }[];
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   if (!log || log.length === 0) return null;
+
+  const lastEntry = log[log.length - 1];
 
   return (
     <div className="border-t border-amber-200/60 bg-white/60 px-3.5 py-2 dark:border-amber-500/15 dark:bg-white/3">
-      <div className="flex max-h-32 flex-col gap-1 overflow-y-auto">
-        {log.map((entry, i) => (
-          <div key={i} className="flex items-center gap-1.5 text-xs">
-            {entry.type === "tool_use" ? (
-              <>
-                <Icon
-                  name="build"
-                  variant="round"
-                  className="text-xs text-amber-500 dark:text-amber-400"
-                />
-                <span className="text-default-600 dark:text-white/60">
-                  Using tool:{" "}
-                  <span className="font-medium text-amber-700 dark:text-amber-300">
-                    {entry.tool}
-                  </span>
-                </span>
-              </>
-            ) : (
-              <>
-                <Icon
-                  name="chat_bubble"
-                  variant="round"
-                  className="text-xs text-blue-500 dark:text-blue-400"
-                />
-                <span className="text-default-600 min-w-0 truncate dark:text-white/60">
-                  {entry.text}
-                </span>
-              </>
-            )}
+      {/* Header: count + expand toggle */}
+      <button
+        onClick={() => setExpanded((p) => !p)}
+        className="mb-1 flex w-full items-center gap-1.5 text-[10px] text-default-400 transition-colors hover:text-default-600 dark:text-white/40 dark:hover:text-white/60"
+      >
+        <Icon
+          name={expanded ? "expand_less" : "expand_more"}
+          variant="round"
+          className="text-xs"
+        />
+        <span>
+          {log.length} message{log.length !== 1 ? "s" : ""}
+          {!expanded && " — latest:"}
+        </span>
+      </button>
+
+      {expanded ? (
+        <div className="flex max-h-48 flex-col gap-1.5 overflow-y-auto">
+          {log.map((entry, i) => {
+            // Skip tool_result entries — they render inline with their tool_use
+            if (entry.type === "tool_result") return null;
+            const nextEntry = log[i + 1];
+            const toolOutput =
+              entry.type === "tool_use" && nextEntry?.type === "tool_result"
+                ? nextEntry.output
+                : undefined;
+            return <LogEntry key={i} entry={entry} toolOutput={toolOutput} />;
+          })}
+        </div>
+      ) : (
+        (() => {
+          // For collapsed view, show last meaningful entry with its output if applicable
+          const lastIdx = log.length - 1;
+          const last = log[lastIdx];
+          if (last.type === "tool_result" && lastIdx > 0) {
+            // Show the tool_use before it with output attached
+            const prev = log[lastIdx - 1];
+            if (prev.type === "tool_use") {
+              return <LogEntry entry={prev} toolOutput={last.output} />;
+            }
+          }
+          return <LogEntry entry={last} />;
+        })()
+      )}
+    </div>
+  );
+}
+
+function LogEntry({
+  entry,
+  toolOutput,
+}: {
+  entry: { type: string; text?: string; tool?: string; output?: string };
+  toolOutput?: string;
+}) {
+  const [showOutput, setShowOutput] = useState(false);
+
+  if (entry.type === "tool_use") {
+    return (
+      <div>
+        <div className="flex items-center gap-1.5 text-xs">
+          <Icon
+            name="build"
+            variant="round"
+            className="shrink-0 text-xs text-amber-500 dark:text-amber-400"
+          />
+          <span className="text-default-600 min-w-0 flex-1 break-words dark:text-white/60">
+            Using tool:{" "}
+            <span className="font-medium text-amber-700 dark:text-amber-300">
+              {entry.tool}
+            </span>
+          </span>
+          {toolOutput && (
+            <button
+              onClick={() => setShowOutput((p) => !p)}
+              className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium text-green-600 transition-colors hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-500/10"
+            >
+              {showOutput ? "Hide" : "See output"}
+            </button>
+          )}
+        </div>
+        {showOutput && toolOutput && (
+          <div className="ml-5 mt-1 rounded border border-green-200/60 bg-green-50/50 px-2.5 py-1.5 dark:border-green-500/15 dark:bg-green-500/5">
+            <pre className="text-default-600 max-h-32 overflow-auto text-[11px] break-words whitespace-pre-wrap dark:text-white/60">
+              {toolOutput}
+            </pre>
           </div>
-        ))}
+        )}
       </div>
+    );
+  }
+
+  return (
+    <div className="flex items-start gap-1.5 text-xs">
+      <Icon
+        name="chat_bubble"
+        variant="round"
+        className="mt-0.5 shrink-0 text-xs text-blue-500 dark:text-blue-400"
+      />
+      <span className="text-default-600 min-w-0 break-words whitespace-pre-wrap dark:text-white/60">
+        {entry.text}
+      </span>
     </div>
   );
 }
