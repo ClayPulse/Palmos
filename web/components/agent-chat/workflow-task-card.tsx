@@ -334,6 +334,99 @@ function findError(obj: unknown): string | null {
   return null;
 }
 
+/** Fetches a signed URL from the backend, then opens or downloads via that URL. */
+async function getSignedBlobUrl(blobUrl: string): Promise<string> {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workflow/result-file?url=${encodeURIComponent(blobUrl)}`,
+    { credentials: "include" },
+  );
+  if (!res.ok) throw new Error("Failed to get signed URL");
+  const { signedUrl } = await res.json();
+  return signedUrl;
+}
+
+function BlobResultBody({
+  blobResult,
+  workflowName,
+}: {
+  blobResult: BlobResult;
+  workflowName: string;
+}) {
+  const suffix = mimeToSuffix(blobResult.mime);
+  const isImage = /^image\//.test(blobResult.mime);
+  const fileName = `${workflowName.replace(/[^a-zA-Z0-9_-]/g, "_")}.${suffix}`;
+
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
+
+  // Eagerly fetch a signed URL for image preview
+  useEffect(() => {
+    if (isImage) {
+      getSignedBlobUrl(blobResult.__blobUrl).then(setSignedUrl).catch(() => {});
+    }
+  }, [blobResult.__blobUrl, isImage]);
+
+  const handleOpen = async () => {
+    try {
+      const url = signedUrl ?? (await getSignedBlobUrl(blobResult.__blobUrl));
+      window.open(url, "_blank");
+    } catch {
+      // fallback
+      window.open(blobResult.__blobUrl, "_blank");
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const url = signedUrl ?? (await getSignedBlobUrl(blobResult.__blobUrl));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+    } catch {
+      // fallback
+      window.open(blobResult.__blobUrl, "_blank");
+    }
+  };
+
+  return (
+    <div className="border-t border-green-200/60 bg-white/60 dark:border-green-500/15 dark:bg-white/3">
+      {isImage && signedUrl && (
+        <div className="flex justify-center px-3.5 pt-3">
+          <img
+            src={signedUrl}
+            alt={workflowName}
+            className="max-h-64 rounded-lg object-contain"
+          />
+        </div>
+      )}
+      <div className="flex items-center gap-2 px-3.5 py-2.5">
+        <Icon
+          name={isImage ? "image" : "description"}
+          variant="round"
+          className="text-base text-green-600 dark:text-green-400"
+        />
+        <span className="text-default-700 min-w-0 flex-1 truncate text-xs dark:text-white/70">
+          {fileName}
+        </span>
+        <button
+          onClick={handleOpen}
+          className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
+        >
+          <Icon name="open_in_new" variant="round" className="text-xs" />
+          Open
+        </button>
+        <button
+          onClick={handleDownload}
+          className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
+        >
+          <Icon name="download" variant="round" className="text-xs" />
+          Download
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function WorkflowResultBody({
   result,
   workflowName,
@@ -356,59 +449,8 @@ export function WorkflowResultBody({
   // Check for blob-uploaded file result (large files uploaded to Azure storage)
   const blobResult = findBlobResult(result);
   if (blobResult) {
-    const suffix = mimeToSuffix(blobResult.mime);
-    const isImage = /^image\//.test(blobResult.mime);
-    const fileName = `${workflowName.replace(/[^a-zA-Z0-9_-]/g, "_")}.${suffix}`;
-
-    // Proxy through backend to get a signed URL (blob storage is protected)
-    const proxyUrl = `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workflow/result-file?url=${encodeURIComponent(blobResult.__blobUrl)}`;
-
-    const handleOpen = () => window.open(proxyUrl, "_blank");
-
-    const handleDownload = () => {
-      const a = document.createElement("a");
-      a.href = proxyUrl;
-      a.download = fileName;
-      a.target = "_blank";
-      a.click();
-    };
-
     return (
-      <div className="border-t border-green-200/60 bg-white/60 dark:border-green-500/15 dark:bg-white/3">
-        {isImage && (
-          <div className="flex justify-center px-3.5 pt-3">
-            <img
-              src={proxyUrl}
-              alt={workflowName}
-              className="max-h-64 rounded-lg object-contain"
-            />
-          </div>
-        )}
-        <div className="flex items-center gap-2 px-3.5 py-2.5">
-          <Icon
-            name={isImage ? "image" : "description"}
-            variant="round"
-            className="text-base text-green-600 dark:text-green-400"
-          />
-          <span className="text-default-700 min-w-0 flex-1 truncate text-xs dark:text-white/70">
-            {fileName}
-          </span>
-          <button
-            onClick={handleOpen}
-            className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
-          >
-            <Icon name="open_in_new" variant="round" className="text-xs" />
-            Open
-          </button>
-          <button
-            onClick={handleDownload}
-            className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
-          >
-            <Icon name="download" variant="round" className="text-xs" />
-            Download
-          </button>
-        </div>
-      </div>
+      <BlobResultBody blobResult={blobResult} workflowName={workflowName} />
     );
   }
 
