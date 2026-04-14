@@ -80,6 +80,7 @@ export async function checkToken(token: string, devMode: boolean) {
 				'Content-Type': 'application/json',
 			},
 			method: 'POST',
+			signal: AbortSignal.timeout(15000),
 		},
 	);
 
