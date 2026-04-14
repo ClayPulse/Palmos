@@ -683,7 +683,7 @@ export default function AgentChat({
           </a>
         </p>
       </div>
-      <div className="grid w-full max-w-xl grid-cols-2 gap-2.5 pt-2 sm:grid-cols-3">
+      <div className="grid w-full max-w-xl grid-cols-1 gap-2.5 pt-2 sm:grid-cols-2 md:grid-cols-3">
         {STARTER_PROMPTS.map((prompt) => (
           <StarterPromptButton
             key={prompt.label}
@@ -743,7 +743,7 @@ export default function AgentChat({
       <p className="text-default-500 text-sm dark:text-white/65">
         What would you like to build?
       </p>
-      <div className="grid w-full grid-cols-2 gap-2 pt-2">
+      <div className="grid w-full grid-cols-1 gap-2 pt-2 min-[400px]:grid-cols-2">
         {STARTER_PROMPTS.map((prompt) => (
           <StarterPromptButton
             key={prompt.label}
@@ -973,20 +973,22 @@ export default function AgentChat({
 
   const quickPillButtons = (
     <>
-      <button
-        className="flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-50 px-2.5 py-1 text-xs text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200 dark:hover:shadow-[0_0_8px_rgba(251,191,36,0.2)]"
-        onClick={() => handleSend("What can you help me with?")}
-      >
-        <Icon name="help" variant="round" className="text-xs" />
-        Help
-      </button>
-      <button
-        className="flex items-center gap-1 rounded-full border border-amber-400/50 bg-amber-50 px-2.5 py-1 text-xs text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200 dark:hover:shadow-[0_0_8px_rgba(251,191,36,0.2)]"
-        onClick={() => handleSend("Show me examples of Palmos Apps")}
-      >
-        <Icon name="lightbulb" variant="round" className="text-xs" />
-        Examples
-      </button>
+      <Tooltip content="Help" delay={400} closeDelay={0}>
+        <button
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-amber-400/50 bg-amber-50 text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200"
+          onClick={() => handleSend("What can you help me with?")}
+        >
+          <Icon name="help" variant="round" className="text-sm" />
+        </button>
+      </Tooltip>
+      <Tooltip content="Examples" delay={400} closeDelay={0}>
+        <button
+          className="flex h-7 w-7 items-center justify-center rounded-full border border-amber-400/50 bg-amber-50 text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200"
+          onClick={() => handleSend("Show me examples of Palmos Apps")}
+        >
+          <Icon name="lightbulb" variant="round" className="text-sm" />
+        </button>
+      </Tooltip>
     </>
   );
 
@@ -994,11 +996,10 @@ export default function AgentChat({
 
   if (isPage) {
     return (
-      <div className="relative flex h-full w-full flex-col bg-gray-50 dark:bg-[#0d0d14]">
-        {/* Spacer matching the chat nav-bar height: py-2 (8px+8px) + h-14 (56px) = 72px */}
+      <div className="relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-gray-50 dark:bg-[#0d0d14]">
+        {/* Spacer matching the chat nav-bar height */}
         <div
-          className="flex shrink-0 items-end justify-end px-4 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]"
-          style={{ height: 72 }}
+          className="flex h-[60px] shrink-0 items-end justify-end px-4 sm:px-8 md:h-[72px] md:px-16 lg:px-[max(4rem,calc(50%-36rem))]"
         >
           <div className="flex items-center gap-1.5 pb-2">
             <button
@@ -1205,7 +1206,7 @@ export default function AgentChat({
   // ── Panel layout ─────────────────────────────────────────────────────────
 
   return (
-    <div className="relative grid h-full w-full grid-rows-[auto_1fr_max-content_max-content] overflow-hidden bg-gray-50 shadow-lg min-[768px]:rounded-xl dark:bg-[#111118]">
+    <div className="relative grid h-full w-full min-w-0 grid-rows-[auto_1fr_max-content_max-content] overflow-hidden bg-gray-50 shadow-lg min-[768px]:rounded-xl dark:bg-[#111118] [&>*]:min-w-0 [&>*]:overflow-hidden">
       {/* Session history overlay (panel) */}
       {isHistoryOpen && (
         <SessionHistoryPanel
@@ -1305,6 +1306,21 @@ export default function AgentChat({
                   </div>
                 </Button>
               )}
+              {onClose && (
+                <Tooltip content="Close chat" delay={400} closeDelay={0}>
+                  <Button
+                    isIconOnly
+                    variant="light"
+                    size="sm"
+                    className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
+                    onPress={onClose}
+                  >
+                    <div>
+                      <Icon name="close" variant="round" />
+                    </div>
+                  </Button>
+                </Tooltip>
+              )}
             </div>
           </div>
         </div>
@@ -1324,7 +1340,7 @@ export default function AgentChat({
       {/* Messages */}
       <div
         ref={scrollContainerRef}
-        className="flex flex-col gap-3 overflow-y-auto p-3"
+        className="flex min-w-0 flex-col gap-3 overflow-y-auto p-3"
       >
         {isEmptyConversation && emptyState}
         {messageList}

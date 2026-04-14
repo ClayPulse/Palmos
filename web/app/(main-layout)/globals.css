@@ -33,7 +33,27 @@
 }
 
 @utility markdown-styles {
-  @apply prose prose-sm dark:prose-invert prose-h1:mb-0 prose-h2:mb-0 prose-h3:mb-0 prose-h4:mb-0 prose-h5:mb-0 prose-h6:mb-0;
+  @apply prose prose-sm dark:prose-invert prose-h1:mb-0 prose-h2:mb-0 prose-h3:mb-0 prose-h4:mb-0 prose-h5:mb-0 prose-h6:mb-0 max-w-full;
+
+  & pre {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  & code {
+    word-break: break-all;
+  }
+
+  & table {
+    display: block;
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  & img {
+    max-width: 100%;
+    height: auto;
+  }
 }
 
 :root {

@@ -10,10 +10,10 @@ export default function ChatView() {
   const [activePanel, setActivePanel] = useState<EmbedPanelTab | null>(null);
 
   return (
-    <div className="relative flex h-full w-full overflow-hidden">
+    <div className="relative flex h-full w-full min-w-0 overflow-hidden">
       {/* Chat column — hidden on small screens when a panel is open */}
       <div
-        className={`flex h-full flex-col ${
+        className={`flex h-full min-w-0 flex-col ${
           activePanel ? "hidden md:flex md:w-1/2 lg:w-2/5" : "flex-1"
         }`}
       >

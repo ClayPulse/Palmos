@@ -44,7 +44,7 @@ export function SubagentCard({ subagent }: { subagent: SubagentInfo }) {
     );
 
   return (
-    <div className="rounded-lg border border-amber-200/60 bg-white text-xs shadow-sm dark:border-white/10 dark:bg-white/6">
+    <div className="min-w-0 overflow-hidden rounded-lg border border-amber-200/60 bg-white text-xs shadow-sm dark:border-white/10 dark:bg-white/6">
       <button
         className="flex w-full items-center gap-2 px-2.5 py-1.5 text-left"
         onClick={() => setIsExpanded(!isExpanded)}

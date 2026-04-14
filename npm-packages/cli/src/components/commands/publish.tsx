@@ -128,6 +128,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 
 				if (res.status === 200) {
 					setIsPublished(true);
+					setTimeout(() => process.exit(0), 0);
 				} else {
 					setIsPublishingError(true);
 					const msg = await res.json();

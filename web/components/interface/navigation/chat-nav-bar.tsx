@@ -22,6 +22,7 @@ import {
   DropdownSection,
   DropdownTrigger,
 } from "@heroui/react";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useContext, useState } from "react";
@@ -53,15 +54,15 @@ export function ChatNavLeft({
         rel="noopener noreferrer"
         className="flex items-center gap-2 no-underline"
       >
+      <Image
+        src="/assets/pulse-logo.svg"
+        alt="Palmos"
+        width={24}
+        height={24}
+        className="shrink-0"
+      />
       <motion.span
-        className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-        animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-      >
-        <Icon name="bolt" className="text-xl" />
-      </motion.span>
-      <motion.span
-        className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-base font-bold tracking-wide text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
+        className="hidden bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-base font-bold tracking-wide text-transparent sm:inline dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
         animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
         transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
       >
@@ -81,10 +82,11 @@ export function ChatNavRight() {
   const [isViewAsOpen, setIsViewAsOpen] = useState(false);
 
   return (
-    <div className="flex items-center gap-x-1">
+    <div className="flex items-center gap-x-0.5 md:gap-x-1">
       <Button
         className="data-[hover=true]:bg-transparent"
         isIconOnly
+        size="sm"
         variant="light"
         onPress={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
       >
@@ -97,6 +99,24 @@ export function ChatNavRight() {
 
       {!session && (
         <Button
+          size="sm"
+          isIconOnly
+          variant="light"
+          className="md:hidden"
+          onPress={() =>
+            editorContext?.setEditorStates((prev) => ({
+              ...prev,
+              isSigningIn: true,
+            }))
+          }
+        >
+          <Icon name="login" variant="round" />
+        </Button>
+      )}
+      {!session && (
+        <Button
+          size="sm"
+          className="hidden md:flex"
           onPress={() =>
             editorContext?.setEditorStates((prev) => ({
               ...prev,
@@ -113,6 +133,7 @@ export function ChatNavRight() {
           <Button
             className="data-[hover=true]:bg-transparent"
             isIconOnly
+            size="sm"
             variant="light"
             onPress={() => {}}
           >

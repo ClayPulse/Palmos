@@ -28,6 +28,7 @@ export async function publishApp(isStage: boolean) {
 				Authorization: `Bearer ${getToken(isStage)}`,
 			},
 			body: formData,
+			signal: AbortSignal.timeout(60000),
 		},
 	);
 
