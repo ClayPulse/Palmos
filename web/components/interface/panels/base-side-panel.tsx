@@ -31,7 +31,7 @@ export default function BaseSidePanel({
             </motion.div>
           ) : (
             <motion.div
-              className="safe-area-padding absolute top-0 left-0 z-50 h-full w-full md:hidden"
+              className="safe-area-padding absolute top-0 left-0 z-50 h-full w-full pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)] md:hidden"
               initial={{ y: "-100vh" }}
               animate={{ y: 0 }}
               exit={{ y: "-100vh" }}

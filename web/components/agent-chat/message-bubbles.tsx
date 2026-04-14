@@ -77,12 +77,12 @@ export function UserBubble({
             {fileNames.map((f) => (
               <span
                 key={f.id}
-                className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] text-white/90"
+                className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-xs text-white/90"
               >
                 <Icon
                   name={f.mimeType.startsWith("image/") ? "image" : "description"}
                   variant="round"
-                  className="text-[10px]"
+                  className="text-xs"
                 />
                 {f.filename}
               </span>
@@ -98,11 +98,11 @@ export function UserBubble({
               </span>
             </div>
           )}
-          <div className="ml-auto pl-4 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="ml-auto pl-4">
             <Tooltip content={copied ? "Copied!" : "Copy"} size="sm">
               <button
                 onClick={handleCopy}
-                className="text-white/70 transition-colors hover:text-white"
+                className="flex h-8 w-8 items-center justify-center text-white/70 transition-colors hover:text-white"
               >
                 <Icon
                   name={copied ? "check" : "content_copy"}

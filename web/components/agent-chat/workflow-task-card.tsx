@@ -378,10 +378,16 @@ function BlobResultBody({
   const handleDownload = async () => {
     try {
       const url = signedUrl ?? (await getSignedBlobUrl(blobResult.__blobUrl));
+      // Fetch the file and create a local blob URL so the download attribute works
+      // (cross-origin URLs ignore the download attribute and open in a new tab)
+      const res = await fetch(url);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = objectUrl;
       a.download = fileName;
       a.click();
+      URL.revokeObjectURL(objectUrl);
     } catch {
       // fallback
       window.open(blobResult.__blobUrl, "_blank");

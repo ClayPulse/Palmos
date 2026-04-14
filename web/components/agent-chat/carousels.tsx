@@ -60,7 +60,7 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
           <div className="flex items-center gap-1">
             <button
               type="button"
-              className="text-default-400 hover:text-default-700 relative z-10 flex h-6 w-6 items-center justify-center transition-colors disabled:opacity-30"
+              className="text-default-400 hover:text-default-700 relative z-10 flex h-8 w-8 items-center justify-center transition-colors disabled:opacity-30"
               disabled={page === 0}
               onClick={(e) => {
                 e.stopPropagation();
@@ -74,7 +74,7 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
             </span>
             <button
               type="button"
-              className="text-default-400 hover:text-default-700 relative z-10 flex h-6 w-6 items-center justify-center transition-colors disabled:opacity-30"
+              className="text-default-400 hover:text-default-700 relative z-10 flex h-8 w-8 items-center justify-center transition-colors disabled:opacity-30"
               disabled={page === totalPages - 1}
               onClick={(e) => {
                 e.stopPropagation();
@@ -214,7 +214,7 @@ export function MyAutomationsCarousel({
             <div className="flex items-center gap-1">
               <button
                 type="button"
-                className="text-default-400 hover:text-default-700 relative z-10 flex h-6 w-6 items-center justify-center transition-colors disabled:opacity-30"
+                className="text-default-400 hover:text-default-700 relative z-10 flex h-8 w-8 items-center justify-center transition-colors disabled:opacity-30"
                 disabled={page === 0}
                 onClick={(e) => {
                   e.stopPropagation();
@@ -228,7 +228,7 @@ export function MyAutomationsCarousel({
               </span>
               <button
                 type="button"
-                className="text-default-400 hover:text-default-700 relative z-10 flex h-6 w-6 items-center justify-center transition-colors disabled:opacity-30"
+                className="text-default-400 hover:text-default-700 relative z-10 flex h-8 w-8 items-center justify-center transition-colors disabled:opacity-30"
                 disabled={page === totalPages - 1}
                 onClick={(e) => {
                   e.stopPropagation();

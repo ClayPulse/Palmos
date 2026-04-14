@@ -298,7 +298,7 @@ export default function EditorToolbar() {
       {editorContext?.editorStates.isToolbarOpen ? (
         <Button
           isIconOnly
-          className="bg-content2 h-5 w-12"
+          className="bg-content2 h-8 w-12"
           onPress={() => {
             setIsOpen(false);
           }}
@@ -311,7 +311,7 @@ export default function EditorToolbar() {
       ) : (
         <Button
           isIconOnly
-          className="bg-content2 h-5 w-12"
+          className="bg-content2 h-8 w-12"
           onPress={() => {
             setIsOpen(true);
           }}
