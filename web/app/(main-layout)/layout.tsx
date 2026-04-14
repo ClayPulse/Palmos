@@ -10,7 +10,7 @@ import RemoteModuleProvider from "@/components/providers/remote-module-provider"
 import WrappedHeroUIProvider from "@/components/providers/wrapped-hero-ui-provider";
 import { Analytics } from "@vercel/analytics/next";
 import "material-icons/iconfont/material-icons.css";
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
@@ -18,6 +18,13 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Palmos: The Runtime Where AI Agents Build, Ship, and Evolve",
   description: "Web-based Vibe Coding Editor",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: "cover",
 };
 
 export default async function RootLayout({
@@ -28,7 +35,7 @@ export default async function RootLayout({
   return (
     <html suppressHydrationWarning>
       <body
-        className={`bg-default h-[100dvh] w-[100dvw] pt-[env(safe-area-inset-top)] antialiased`}
+        className={`bg-default h-[100dvh] w-full overflow-hidden pt-[env(safe-area-inset-top)] antialiased`}
       >
         <Analytics />
         <Suspense>

@@ -93,7 +93,7 @@ export default function AppModeToggle() {
       <button
         ref={agentRef}
         onClick={() => setMode(AppModeEnum.Agent)}
-        className="relative z-10 flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+        className="relative z-10 flex items-center justify-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium md:gap-1.5 md:px-3 md:py-1.5 md:text-xs"
       >
         <motion.span
           className="flex items-center gap-0.5"
@@ -103,23 +103,23 @@ export default function AppModeToggle() {
           transition={colorTransition}
         >
           <Icon name="bolt" variant="round" className="text-sm" />
-          Agent
+          <span className="hidden sm:inline">Agent</span>
         </motion.span>
       </button>
       <button
         ref={editorRef}
         onClick={() => setMode(AppModeEnum.Editor)}
-        className="relative z-10 flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium"
+        className="relative z-10 flex items-center justify-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium md:gap-1.5 md:px-3 md:py-1.5 md:text-xs"
       >
         <motion.span
-          className="flex items-center gap-1.5"
+          className="flex items-center gap-1 md:gap-1.5"
           animate={{
             color: appMode === AppModeEnum.Editor ? editorActiveColor : inactiveColor,
           }}
           transition={colorTransition}
         >
           <Icon name="code" className="text-sm" />
-          Editor
+          <span className="hidden sm:inline">Editor</span>
         </motion.span>
       </button>
     </div>

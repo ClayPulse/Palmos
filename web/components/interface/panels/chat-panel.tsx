@@ -12,7 +12,7 @@ export default function ChatPanel() {
 
   return (
     <BaseSidePanel isOpen={isOpen} direction="right">
-      <div className="h-full w-full overflow-y-hidden min-[768px]:py-2 min-[768px]:pr-2 min-[768px]:pl-1">
+      <div className="h-full w-full overflow-hidden min-[768px]:py-2 min-[768px]:pr-2 min-[768px]:pl-1">
         <AgentChat
           variant="panel"
           onClose={() =>

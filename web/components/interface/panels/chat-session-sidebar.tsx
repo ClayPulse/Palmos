@@ -6,6 +6,7 @@ import { useChatContext } from "@/components/providers/chat-provider";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
+import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { Tooltip } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
@@ -22,6 +23,7 @@ export default function ChatSessionSidebar({
   const currentProject = editorContext?.editorStates.project;
   const [isProjectListOpen, setIsProjectListOpen] = useState(false);
   const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(false);
+  const { isLandscape } = useScreenSize();
 
   const {
     sessions,
@@ -35,6 +37,8 @@ export default function ChatSessionSidebar({
   return (
     <AnimatePresence>
       {isOpen && (
+        isLandscape ? (
+        /* Desktop: inline side panel */
         <motion.div
           className="h-full shrink-0 overflow-hidden"
           initial={{ width: 0 }}
@@ -274,6 +278,169 @@ export default function ChatSessionSidebar({
             </div>
           </div>
         </motion.div>
+        ) : (
+        /* Mobile: full-screen overlay */
+        <motion.div
+          className="absolute inset-0 z-50 h-full w-full"
+          initial={{ x: "-100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "-100%" }}
+          transition={{ type: "tween", duration: 0.2 }}
+        >
+          <div className="flex h-full w-full flex-col bg-default-50 dark:bg-[#0d0d14]">
+            {/* Close button for mobile */}
+            <div className="flex shrink-0 items-center justify-between border-b border-default-200 px-3 py-2 dark:border-white/8">
+              <span className="text-xs font-semibold uppercase tracking-wider text-default-500">
+                Menu
+              </span>
+              <button
+                onClick={onClose}
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-default-500 transition-colors hover:bg-default-100 dark:text-white/60 dark:hover:bg-white/10"
+              >
+                <Icon name="close" variant="round" className="text-xl" />
+              </button>
+            </div>
+            {/* Reuse same project + chat history sections */}
+            {/* Project section */}
+            <div className="shrink-0 border-b border-default-200 dark:border-white/8">
+              <div className="flex items-center justify-between px-3 pt-3 pb-2">
+                <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500 dark:text-default-500">
+                  Project
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Tooltip content="Knowledge files" delay={400} closeDelay={0} size="sm">
+                    <button
+                      onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
+                      className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
+                        isKnowledgeOpen
+                          ? "text-amber-600 dark:text-amber-400"
+                          : "text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
+                      }`}
+                    >
+                      <Icon name="menu_book" variant="round" className="text-base" />
+                    </button>
+                  </Tooltip>
+                  <Tooltip content="New project" delay={400} closeDelay={0} size="sm">
+                    <button
+                      onClick={() => {
+                        editorContext?.updateModalStates({
+                          projectSettings: { isOpen: true },
+                        });
+                      }}
+                      className="flex h-8 w-8 items-center justify-center rounded text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
+                    >
+                      <Icon name="add" variant="round" className="text-base" />
+                    </button>
+                  </Tooltip>
+                </div>
+              </div>
+              {isKnowledgeOpen && (
+                <div className="px-2 pb-2">
+                  <KnowledgeFiles variant="inline" />
+                </div>
+              )}
+              {currentProject ? (
+                <div className="px-2 pb-2">
+                  <div
+                    className="flex items-center gap-2 rounded-lg bg-amber-100/80 px-2.5 py-2.5 dark:bg-amber-500/15"
+                    onClick={() => {}}
+                  >
+                    <Icon
+                      name="folder"
+                      variant="round"
+                      className="shrink-0 text-sm text-amber-500 dark:text-amber-400"
+                    />
+                    <span className="min-w-0 flex-1 truncate text-sm font-medium text-default-700 dark:text-white/80">
+                      {currentProject}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="px-2 pb-2">
+                  <div
+                    className="flex items-center gap-2 rounded-lg border border-dashed border-default-300 px-2.5 py-2.5 dark:border-white/15"
+                    onClick={() => {
+                      editorContext?.updateModalStates({
+                        projectSettings: { isOpen: true },
+                      });
+                    }}
+                  >
+                    <Icon
+                      name="folder_open"
+                      variant="round"
+                      className="shrink-0 text-sm text-default-500"
+                    />
+                    <span className="text-sm text-default-500">Select a project</span>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Chat History */}
+            <div className="flex shrink-0 items-center justify-between px-3 py-3">
+              <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500">
+                Chat History
+              </h3>
+              <button
+                onClick={() => {
+                  handleNewChat();
+                  onClose();
+                }}
+                className="flex items-center gap-1 rounded-lg border border-amber-400/50 bg-amber-50 px-2.5 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300"
+              >
+                <Icon name="add" variant="round" className="text-base" />
+                New
+              </button>
+            </div>
+            <div className="scrollbar-transparent flex-1 overflow-y-auto px-2 pb-2">
+              {sessions.length === 0 ? (
+                <p className="py-12 text-center text-sm text-default-500">
+                  No chat history yet
+                </p>
+              ) : (
+                <div className="flex flex-col gap-1">
+                  {sessions.map((s) => (
+                    <div
+                      key={s.id}
+                      className={`flex items-center gap-2 rounded-lg px-3 py-3 text-left transition-colors ${
+                        s.id === (activeSessionId ?? currentSessionIdRef.current)
+                          ? "bg-amber-100/80 dark:bg-amber-500/15"
+                          : "hover:bg-default-100 dark:hover:bg-white/5"
+                      }`}
+                      onClick={() => {
+                        handleSwitchSession(s.id);
+                        onClose();
+                      }}
+                    >
+                      <Icon
+                        name="chat_bubble_outline"
+                        variant="round"
+                        className="shrink-0 text-base text-default-500"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-default-700 dark:text-white/80">
+                          {s.title}
+                        </p>
+                        <p className="text-xs text-default-500">
+                          {formatRelativeTime(s.createdAt)}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteSession(s.id);
+                        }}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-default-500 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
+                      >
+                        <Icon name="delete_outline" variant="round" className="text-base" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </motion.div>
+        )
       )}
     </AnimatePresence>
   );

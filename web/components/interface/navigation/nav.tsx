@@ -6,6 +6,7 @@ import { AppModeEnum, PlatformEnum } from "@/lib/enums";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
+import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { EditorContext } from "../../providers/editor-context-provider";
 import SideNavPanel from "../panels/side-nav-panel";
 import AppNavBar from "./app-nav-bar";
@@ -31,8 +32,14 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   const { setTheme } = useTheme();
 
+  const { isLandscape } = useScreenSize();
   const [isShowNavbar, setIsShowNavbar] = useState(true);
-  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(true);
+  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false);
+
+  // Open sidebar by default on desktop, keep closed on mobile
+  useEffect(() => {
+    setIsChatSidebarOpen(isLandscape);
+  }, [isLandscape]);
 
   // Skip the welcome animation for chat mode. Check both the context state (for
   // in-session switches) and the raw URL param (for initial page loads before the
@@ -84,27 +91,26 @@ export default function Nav({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      {/* Rebrand announcement banner */}
-      {mounted && <RebrandBanner />}
-      {mounted && <ViewAsBanner />}
-
       {/* Main Content - Render as soon as mounted, but hidden/under welcome screen until animation finishes */}
       {mounted && (
         <div
-          className={`bg-default relative hidden h-full w-full overflow-hidden data-[animation-finished=true]:block`}
+          className={`bg-default relative hidden h-full w-full flex-col overflow-hidden data-[animation-finished=true]:flex`}
           data-animation-finished={isAnimationFinished}
         >
+          {/* Rebrand announcement banner */}
+          <RebrandBanner />
+          <ViewAsBanner />
           <div
-            className={`relative h-full w-full overflow-hidden ${
+            className={`relative min-h-0 flex-1 w-full overflow-hidden ${
               editorMounted && appMode === AppModeEnum.Editor
-                ? "grid grid-cols-[max-content_1fr_max-content] grid-rows-1"
-                : ""
+                ? "flex flex-col md:grid md:grid-cols-[max-content_1fr_max-content] md:grid-rows-1"
+                : "flex"
             }`}
           >
             {/* Left side panel — only rendered after editor is first activated */}
             {editorMounted && (
               <div
-                className={`h-full overflow-y-hidden ${appMode === AppModeEnum.Editor ? "block" : "hidden"}`}
+                className={`overflow-y-hidden ${appMode === AppModeEnum.Editor ? "md:h-full" : "hidden"}`}
               >
                 {isShowNavbar && (
                   <SideNavPanel
@@ -115,7 +121,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
               </div>
             )}
             {/* Middle column: sidebar + nav + children */}
-            <div className="relative flex h-full w-full overflow-hidden">
+            <div className="relative flex h-full min-h-0 min-w-0 flex-1 overflow-hidden">
               {/* Chat session sidebar — agent mode only */}
               {appMode === AppModeEnum.Agent && (
                 <ChatSessionSidebar
@@ -163,7 +169,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
             {/* Right chat panel — only rendered after editor is first activated */}
             {editorMounted && (
               <div
-                className={`h-full overflow-y-hidden ${appMode === AppModeEnum.Editor ? "block" : "hidden"}`}
+                className={`overflow-y-hidden ${appMode === AppModeEnum.Editor ? "md:h-full" : "hidden"}`}
               >
                 {isShowNavbar && <ChatPanel />}
               </div>

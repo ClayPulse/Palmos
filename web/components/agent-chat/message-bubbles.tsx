@@ -68,10 +68,10 @@ export function UserBubble({
   const hasFiles = fileNames.length > 0 || (attachmentCount != null && attachmentCount > 0);
 
   return (
-    <div className="group flex justify-end">
-      <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
+    <div className="group flex min-w-0 justify-end">
+      <div className="min-w-0 max-w-[80%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
         <p className="text-xs font-semibold text-white/80">User:</p>
-        <p className="mt-0.5 whitespace-pre-wrap text-white">{text}</p>
+        <p className="mt-0.5 whitespace-pre-wrap break-words text-white">{text}</p>
         {fileNames.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
             {fileNames.map((f) => (
@@ -147,8 +147,8 @@ export function AIResponseCard({
   toolCallNames?: string[];
 }) {
   return (
-    <div className="flex justify-start">
-      <div className="flex max-w-[88%] gap-2.5">
+    <div className="flex min-w-0 justify-start">
+      <div className="flex min-w-0 max-w-[88%] gap-2.5">
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 p-1 dark:bg-amber-500/15">
           <img
             src="/assets/pulse-logo.svg"
@@ -164,7 +164,7 @@ export function AIResponseCard({
           </div>
           <ToolCallBadges names={toolCallNames} />
           {content && (
-            <div className="text-default-800 rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
+            <div className="text-default-800 overflow-hidden rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
               <MarkdownRender content={content} />
               {isStreaming && (
                 <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
@@ -200,7 +200,7 @@ export function ResponseCard({
   const status: "running" | "complete" = isStreaming ? "running" : "complete";
 
   return (
-    <div className="rounded-lg border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
+    <div className="min-w-0 overflow-hidden rounded-lg border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
       <button
         onClick={() => setExpanded(!expanded)}
         className="flex w-full items-center justify-between px-3 py-2"
