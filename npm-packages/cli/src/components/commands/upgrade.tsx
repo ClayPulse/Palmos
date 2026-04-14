@@ -79,12 +79,10 @@ export default function Upgrade({cli}: {cli: Result<Flags>}) {
 					<Text> Checking configuration...</Text>
 				</Box>
 			) : step === 'upgrade' ? (
-				<>
-					<Box>
-						<Spinner type="dots" />
-						<Text> Upgrading packages...</Text>
-					</Box>
-				</>
+				<Box>
+					<Spinner type="dots" />
+					<Text> Upgrading packages...</Text>
+				</Box>
 			) : (
 				<Box>
 					<Text color={'greenBright'}>✅ Upgrade completed successfully.</Text>

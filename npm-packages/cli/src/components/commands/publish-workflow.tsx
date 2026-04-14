@@ -107,7 +107,7 @@ export default function PublishWorkflow({cli}: {cli: Result<Flags>}) {
 				</Box>
 			)}
 			{!isCheckingAuth && !isAuthenticated && (
-				<Text>
+				<Text color="redBright">
 					You are not authenticated. Run{' '}
 					<Text color="blueBright">pulse login</Text> first.
 				</Text>
