@@ -53,7 +53,7 @@ export default function ChatSessionSidebar({
                   <Tooltip content="Knowledge files" delay={400} closeDelay={0} size="sm">
                     <button
                       onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
-                      className={`flex h-5 w-5 items-center justify-center rounded transition-colors ${
+                      className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${
                         isKnowledgeOpen
                           ? "text-amber-600 dark:text-amber-400"
                           : "text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
@@ -69,7 +69,7 @@ export default function ChatSessionSidebar({
                           projectSettings: { isOpen: true },
                         });
                       }}
-                      className="flex h-5 w-5 items-center justify-center rounded text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
+                      className="flex h-7 w-7 items-center justify-center rounded text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
                     >
                       <Icon name="add" variant="round" className="text-sm" />
                     </button>
@@ -110,7 +110,7 @@ export default function ChatSessionSidebar({
                               },
                             });
                           }}
-                          className="flex h-5 w-5 items-center justify-center rounded text-default-500 hover:text-default-600 dark:text-default-500 dark:hover:text-white/60"
+                          className="flex h-7 w-7 items-center justify-center rounded text-default-500 hover:text-default-600 dark:text-default-500 dark:hover:text-white/60"
                         >
                           <Icon name="settings" variant="round" className="text-xs" />
                         </button>
@@ -119,7 +119,7 @@ export default function ChatSessionSidebar({
                             e.stopPropagation();
                             openProject("");
                           }}
-                          className="flex h-5 w-5 items-center justify-center rounded text-default-500 hover:text-red-500 dark:text-default-500 dark:hover:text-red-400"
+                          className="flex h-7 w-7 items-center justify-center rounded text-default-500 hover:text-red-500 dark:text-default-500 dark:hover:text-red-400"
                         >
                           <Icon name="close" variant="round" className="text-xs" />
                         </button>
@@ -191,7 +191,7 @@ export default function ChatSessionSidebar({
                             projectSettings: { isOpen: true, projectInfo: p },
                           });
                         }}
-                        className="flex h-5 w-5 shrink-0 items-center justify-center rounded text-default-500 opacity-0 transition-all group-hover:opacity-100 hover:text-default-600 dark:text-default-500 dark:hover:text-white/60"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-default-500 opacity-0 transition-all group-hover:opacity-100 hover:text-default-600 dark:text-default-500 dark:hover:text-white/60"
                       >
                         <Icon name="settings" variant="round" className="text-xs" />
                       </button>
@@ -219,12 +219,6 @@ export default function ChatSessionSidebar({
                 >
                   <Icon name="add" variant="round" className="text-sm" />
                   New
-                </button>
-                <button
-                  onClick={onClose}
-                  className="flex h-7 w-7 items-center justify-center rounded-lg text-default-500 hover:text-default-600 dark:text-default-500 dark:hover:text-white/70"
-                >
-                  <Icon name="chevron_left" variant="round" className="text-base" />
                 </button>
               </div>
             </div>
@@ -265,7 +259,7 @@ export default function ChatSessionSidebar({
                           e.stopPropagation();
                           handleDeleteSession(s.id);
                         }}
-                        className="flex h-6 w-6 shrink-0 items-center justify-center rounded text-default-500 opacity-0 transition-all group-hover:opacity-100 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
+                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-default-500 opacity-0 transition-all group-hover:opacity-100 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
                       >
                         <Icon
                           name="delete_outline"

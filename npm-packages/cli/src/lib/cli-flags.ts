@@ -60,6 +60,11 @@ export const flags = defineFlags({
 		type: 'boolean',
 		default: false,
 	},
+	silent: {
+		type: 'boolean',
+		shortFlag: 's',
+		default: false,
+	},
 });
 
 export type Flags = typeof flags;

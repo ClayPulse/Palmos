@@ -37,7 +37,7 @@ export function ProjectPreviewCard({
 
   return (
     <Button
-      className="relative m-0 flex h-full w-full min-w-80 flex-col-reverse justify-start overflow-hidden rounded-lg p-0"
+      className="relative m-0 flex h-full w-full min-w-[min(100%,20rem)] flex-col-reverse justify-start overflow-hidden rounded-lg p-0"
       onPress={(e) => {
         // Only open project if context menu is not open
         if (!contextMenuState.isOpen) {

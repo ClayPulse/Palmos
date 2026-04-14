@@ -29,7 +29,7 @@ export function StarterPromptButton({
           className="text-xl leading-none text-amber-600/70 transition-colors group-hover:text-amber-600 dark:text-amber-400/70 dark:group-hover:text-amber-300"
         />
       </div>
-      <span className="text-default-700 group-hover:text-default-900 text-xs leading-snug transition-colors dark:text-white/70 dark:group-hover:text-white/90">
+      <span className="text-default-700 group-hover:text-default-900 text-sm leading-snug transition-colors dark:text-white/70 dark:group-hover:text-white/90">
         {prompt.label}
       </span>
     </button>

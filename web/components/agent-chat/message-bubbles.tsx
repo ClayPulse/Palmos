@@ -71,18 +71,18 @@ export function UserBubble({
     <div className="group flex justify-end">
       <div className="max-w-[80%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
         <p className="text-xs font-semibold text-white/80">User:</p>
-        <p className="mt-0.5 text-white">{text}</p>
+        <p className="mt-0.5 whitespace-pre-wrap text-white">{text}</p>
         {fileNames.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
             {fileNames.map((f) => (
               <span
                 key={f.id}
-                className="inline-flex items-center gap-0.5 rounded-full bg-white/20 px-2 py-0.5 text-[10px] text-white/90"
+                className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-xs text-white/90"
               >
                 <Icon
                   name={f.mimeType.startsWith("image/") ? "image" : "description"}
                   variant="round"
-                  className="text-[10px]"
+                  className="text-xs"
                 />
                 {f.filename}
               </span>
@@ -98,11 +98,11 @@ export function UserBubble({
               </span>
             </div>
           )}
-          <div className="ml-auto pl-4 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className="ml-auto pl-4">
             <Tooltip content={copied ? "Copied!" : "Copy"} size="sm">
               <button
                 onClick={handleCopy}
-                className="text-white/50 transition-colors hover:text-white/90"
+                className="flex h-8 w-8 items-center justify-center text-white/70 transition-colors hover:text-white"
               >
                 <Icon
                   name={copied ? "check" : "content_copy"}
