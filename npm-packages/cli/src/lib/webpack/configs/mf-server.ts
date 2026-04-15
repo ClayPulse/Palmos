@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import mfNode from "@module-federation/node";
+import { createRequire } from "node:module";
+import { NodeFederationPlugin } from "@module-federation/node";
 import fs from "fs";
 import path from "path";
+
+const require = createRequire(import.meta.url);
 import wp, { Compiler, Configuration as WebpackConfig } from "webpack";
 import {
   compileAppActionSkills,
@@ -10,7 +13,6 @@ import {
   loadPulseConfig,
 } from "./utils.js";
 
-const { NodeFederationPlugin } = mfNode;
 const { webpack } = wp;
 
 class MFServerPlugin {
@@ -51,50 +53,55 @@ class MFServerPlugin {
       });
 
       // When a file changes and triggers a new compilation
-      compiler.hooks.watchRun.tapPromise("ReloadMessagePlugin", async (compiler) => {
-        this.printChanges(compiler);
+      compiler.hooks.watchRun.tapPromise(
+        "ReloadMessagePlugin",
+        async (compiler) => {
+          this.printChanges(compiler);
 
-        if (!isFirstRun) {
-          console.log(`[Server] 🔄 Reloading app...`);
-          const isServerFunctionChange = compiler.modifiedFiles
-            ? Array.from(compiler.modifiedFiles).some((file) =>
-                file.includes("src/server-function"),
-              )
-            : false;
+          if (!isFirstRun) {
+            console.log(`[Server] 🔄 Reloading app...`);
+            const isServerFunctionChange = compiler.modifiedFiles
+              ? Array.from(compiler.modifiedFiles).some((file) =>
+                  file.includes("src/server-function"),
+                )
+              : false;
 
-          if (isServerFunctionChange) {
+            if (isServerFunctionChange) {
+              await this.compileServerFunctions(compiler);
+            }
+
+            const isActionChange = compiler.modifiedFiles
+              ? Array.from(compiler.modifiedFiles).some((file) =>
+                  file.includes("src/skill"),
+                )
+              : false;
+
+            if (isActionChange) {
+              console.log(
+                `[Server] Detected changes in actions. Recompiling...`,
+              );
+              this.pulseConfig = compileAppActionSkills(this.pulseConfig);
+              this.saveConfig();
+            }
+          } else {
+            console.log(`[Server] 🔄 Building app...`);
             await this.compileServerFunctions(compiler);
-          }
-
-          const isActionChange = compiler.modifiedFiles
-            ? Array.from(compiler.modifiedFiles).some((file) =>
-                file.includes("src/skill"),
-              )
-            : false;
-
-          if (isActionChange) {
-            console.log(`[Server] Detected changes in actions. Recompiling...`);
             this.pulseConfig = compileAppActionSkills(this.pulseConfig);
             this.saveConfig();
-          }
-        } else {
-          console.log(`[Server] 🔄 Building app...`);
-          await this.compileServerFunctions(compiler);
-          this.pulseConfig = compileAppActionSkills(this.pulseConfig);
-          this.saveConfig();
-          console.log(`[Server] ✅ Successfully built server.`);
+            console.log(`[Server] ✅ Successfully built server.`);
 
-          const funcs = discoverServerFunctions();
+            const funcs = discoverServerFunctions();
 
-          console.log(`\n🛜 Server functions:
+            console.log(`\n🛜 Server functions:
 ${Object.entries(funcs)
   .map(([name, file]) => {
     return `  - ${name.slice(2)} (from ${file})`;
   })
   .join("\n")}
 `);
-        }
-      });
+          }
+        },
+      );
 
       // After build finishes
       compiler.hooks.done.tap("ReloadMessagePlugin", () => {
@@ -185,11 +192,20 @@ ${Object.entries(funcs)
   private makeNodeFederationPlugin() {
     const funcs = discoverServerFunctions();
     const actions = discoverAppSkillActions();
+
+    // Resolve the runtime plugin path manually because NodeFederationPlugin's
+    // internal require.resolve fails due to rolldown virtual module shim.
+    const runtimePluginPath = path.resolve(
+      path.dirname(require.resolve("@module-federation/node/package.json")),
+      "dist/src/runtimePlugin.mjs",
+    );
+
     return new NodeFederationPlugin(
       {
         name: this.pulseConfig.id + "_server",
         remoteType: "script",
-        useRuntimePlugin: true,
+        useRuntimePlugin: false,
+        runtimePlugins: [runtimePluginPath],
         library: { type: "commonjs-module" },
         filename: "remoteEntry.js",
         exposes: {
