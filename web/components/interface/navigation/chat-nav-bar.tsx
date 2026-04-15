@@ -1,9 +1,11 @@
 "use client";
 
+import ShareChatModal from "@/components/agent-chat/share-chat-modal";
 import Icon from "@/components/misc/icon";
 import { ViewAsModal } from "@/components/misc/view-as-user-picker";
 import { useInbox } from "@/components/agent-chat/inbox-panel";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
+import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -26,6 +28,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Tooltip,
 } from "@heroui/react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -86,9 +89,34 @@ export function ChatNavRight() {
   const router = useRouter();
   const [isViewAsOpen, setIsViewAsOpen] = useState(false);
   const { messages: inboxMessages, unreadCount, markAllRead } = useInbox();
+  const { currentSessionIdRef, messages: chatMessages } = useChatContext();
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   return (
     <div className="flex items-center gap-x-0.5 md:gap-x-1">
+      {/* Share chat modal */}
+      <ShareChatModal
+        sessionId={currentSessionIdRef.current}
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+      />
+
+      {/* Share */}
+      {session && currentSessionIdRef.current && chatMessages.length > 0 && (
+        <Tooltip content="Share chat" delay={400} closeDelay={0}>
+          <Button
+            className="data-[hover=true]:bg-transparent"
+            isIconOnly
+            size="sm"
+            variant="light"
+            isDisabled={!currentSessionIdRef.current}
+            onPress={() => setIsShareOpen(true)}
+          >
+            <Icon name="share" variant="round" />
+          </Button>
+        </Tooltip>
+      )}
+
       {/* Inbox */}
       {session && (
         <Popover placement="bottom-end" onOpenChange={(open) => { if (open) markAllRead(); }}>

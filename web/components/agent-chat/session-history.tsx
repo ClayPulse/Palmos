@@ -10,6 +10,7 @@ export function SessionHistoryPanel({
   onDelete,
   onNewChat,
   onClose,
+  onShare,
 }: {
   sessions: { id: string; title: string; updatedAt: number }[];
   activeSessionId: string;
@@ -17,6 +18,7 @@ export function SessionHistoryPanel({
   onDelete: (id: string) => void;
   onNewChat: () => void;
   onClose: () => void;
+  onShare?: (id: string) => void;
 }) {
   return (
     <motion.div
@@ -78,19 +80,36 @@ export function SessionHistoryPanel({
                     {formatRelativeTime(s.updatedAt)}
                   </p>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDelete(s.id);
-                  }}
-                  className="text-default-300 flex h-6 w-6 shrink-0 items-center justify-center rounded opacity-0 transition-all group-hover:opacity-100 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
-                >
-                  <Icon
-                    name="delete_outline"
-                    variant="round"
-                    className="text-sm"
-                  />
-                </button>
+                <div className="flex shrink-0 items-center gap-0.5">
+                  {onShare && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onShare(s.id);
+                      }}
+                      className="text-default-400 flex h-6 w-6 items-center justify-center rounded transition-colors hover:text-amber-600 dark:text-white/30 dark:hover:text-amber-400"
+                    >
+                      <Icon
+                        name="share"
+                        variant="round"
+                        className="text-sm"
+                      />
+                    </button>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDelete(s.id);
+                    }}
+                    className="text-default-300 flex h-6 w-6 items-center justify-center rounded opacity-0 transition-all group-hover:opacity-100 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
+                  >
+                    <Icon
+                      name="delete_outline"
+                      variant="round"
+                      className="text-sm"
+                    />
+                  </button>
+                </div>
               </div>
             ))}
           </div>

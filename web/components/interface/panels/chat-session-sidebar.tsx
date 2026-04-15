@@ -1,13 +1,20 @@
 "use client";
 
 import KnowledgeFiles from "@/components/agent-chat/knowledge-files";
+import ShareChatModal from "@/components/agent-chat/share-chat-modal";
 import Icon from "@/components/misc/icon";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useScreenSize } from "@/lib/hooks/use-screen-size";
-import { Tooltip } from "@heroui/react";
+import {
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownTrigger,
+  Tooltip,
+} from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
 
@@ -23,6 +30,7 @@ export default function ChatSessionSidebar({
   const currentProject = editorContext?.editorStates.project;
   const [isProjectListOpen, setIsProjectListOpen] = useState(false);
   const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(false);
+  const [shareSessionId, setShareSessionId] = useState<string | null>(null);
   const { isLandscape } = useScreenSize();
 
   const {
@@ -35,6 +43,12 @@ export default function ChatSessionSidebar({
   } = useChatContext();
 
   return (
+    <>
+    <ShareChatModal
+      sessionId={shareSessionId}
+      isOpen={!!shareSessionId}
+      onClose={() => setShareSessionId(null)}
+    />
     <AnimatePresence>
       {isOpen && (
         isLandscape ? (
@@ -258,19 +272,36 @@ export default function ChatSessionSidebar({
                           {formatRelativeTime(s.createdAt)}
                         </p>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteSession(s.id);
-                        }}
-                        className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-default-500 opacity-0 transition-all group-hover:opacity-100 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
-                      >
-                        <Icon
-                          name="delete_outline"
-                          variant="round"
-                          className="text-sm"
-                        />
-                      </button>
+                      <Dropdown placement="bottom-end">
+                        <DropdownTrigger>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded text-default-400 opacity-0 transition-all group-hover:opacity-100 hover:text-default-600 dark:text-white/30 dark:hover:text-white/60"
+                          >
+                            <Icon name="more_vert" variant="round" className="text-sm" />
+                          </button>
+                        </DropdownTrigger>
+                        <DropdownMenu
+                          onAction={(key) => {
+                            if (key === "share") setShareSessionId(s.id);
+                            if (key === "delete") handleDeleteSession(s.id);
+                          }}
+                        >
+                          <DropdownItem
+                            key="share"
+                            startContent={<Icon name="share" variant="round" className="text-sm" />}
+                          >
+                            Share
+                          </DropdownItem>
+                          <DropdownItem
+                            key="delete"
+                            className="text-danger"
+                            startContent={<Icon name="delete_outline" variant="round" className="text-sm" />}
+                          >
+                            Delete
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
                     </div>
                   ))}
                 </div>
@@ -424,15 +455,36 @@ export default function ChatSessionSidebar({
                           {formatRelativeTime(s.createdAt)}
                         </p>
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteSession(s.id);
-                        }}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-default-500 hover:text-red-500 dark:text-white/20 dark:hover:text-red-400"
-                      >
-                        <Icon name="delete_outline" variant="round" className="text-base" />
-                      </button>
+                      <Dropdown placement="bottom-end">
+                        <DropdownTrigger>
+                          <button
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex h-8 w-8 shrink-0 items-center justify-center rounded text-default-400 hover:text-default-600 dark:text-white/30 dark:hover:text-white/60"
+                          >
+                            <Icon name="more_vert" variant="round" className="text-base" />
+                          </button>
+                        </DropdownTrigger>
+                        <DropdownMenu
+                          onAction={(key) => {
+                            if (key === "share") setShareSessionId(s.id);
+                            if (key === "delete") handleDeleteSession(s.id);
+                          }}
+                        >
+                          <DropdownItem
+                            key="share"
+                            startContent={<Icon name="share" variant="round" className="text-sm" />}
+                          >
+                            Share
+                          </DropdownItem>
+                          <DropdownItem
+                            key="delete"
+                            className="text-danger"
+                            startContent={<Icon name="delete_outline" variant="round" className="text-sm" />}
+                          >
+                            Delete
+                          </DropdownItem>
+                        </DropdownMenu>
+                      </Dropdown>
                     </div>
                   ))}
                 </div>
@@ -443,5 +495,6 @@ export default function ChatSessionSidebar({
         )
       )}
     </AnimatePresence>
+    </>
   );
 }
