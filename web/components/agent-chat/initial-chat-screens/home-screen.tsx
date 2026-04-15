@@ -8,6 +8,7 @@ import { useContext, useState } from "react";
 
 const PROJECTS_PER_PAGE = 4;
 
+
 interface HomeScreenProps {
   onSend: (text: string) => void;
   projects: ProjectInfo[];
@@ -54,6 +55,7 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
       {projects.length > 0 && (
         <ProjectExplorer projects={projects} onOpen={openProject} />
       )}
+
     </div>
   );
 }
