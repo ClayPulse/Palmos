@@ -1,11 +1,12 @@
 "use client";
 
-import useDeepAgent from "@/lib/hooks/use-deep-agent";
+import useDeepAgent, { type InterruptState } from "@/lib/hooks/use-deep-agent";
 import {
   useChatSessions,
   generateSessionId,
   type ChatSession,
   type SerializedMessage,
+  type WorkflowBuild,
 } from "@/lib/hooks/use-chat-sessions";
 import type { BaseMessage } from "@langchain/core/messages";
 import type { SubagentInfo, Todo, WorkflowInput } from "@/lib/types";
@@ -20,8 +21,10 @@ export interface ChatContextValue {
   error: Error | null;
   todos: Todo[];
   submit: (text: string, workflows?: WorkflowInput[], uploadIds?: string[]) => void;
+  resume: (reply: string) => void;
   stop: () => void;
   clear: () => void;
+  activeInterrupt: InterruptState | null;
   loadMessages: (msgs: BaseMessage[]) => void;
   getSubagentsByMessage: (messageId: string) => SubagentInfo[];
   // Session state
@@ -33,6 +36,9 @@ export interface ChatContextValue {
   handleDeleteSession: (sessionId: string) => void;
   saveCurrentSession: () => void;
   isLoadingSession: boolean;
+  // Workflow builder results persisted per session
+  workflowBuilds: WorkflowBuild[];
+  saveWorkflowBuild: (publishedWorkflowId: string) => void;
   // Serialization helpers exposed for external use
   serializeMessage: (msg: BaseMessage) => SerializedMessage;
   deserializeMessage: (msg: SerializedMessage) => BaseMessage | null;
@@ -52,7 +58,9 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     isLoading,
     error,
     todos,
+    activeInterrupt,
     submit,
+    resume,
     stop,
     clear,
     loadMessages,
@@ -67,7 +75,10 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     startNewSession,
     deleteSession,
     fetchSessionMessages,
+    saveWorkflowBuild: saveWorkflowBuildAPI,
   } = useChatSessions();
+
+  const [workflowBuilds, setWorkflowBuilds] = useState<WorkflowBuild[]>([]);
 
   const currentSessionIdRef = useRef<string>(activeSessionId ?? generateSessionId());
   const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -76,12 +87,13 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (activeSessionId) {
       currentSessionIdRef.current = activeSessionId;
-      fetchSessionMessages(activeSessionId).then((msgs) => {
-        if (msgs.length > 0) {
+      fetchSessionMessages(activeSessionId).then((data) => {
+        if (data.messages.length > 0) {
           loadMessages(
-            msgs.map(deserializeMessage).filter(Boolean) as BaseMessage[],
+            data.messages.map(deserializeMessage).filter(Boolean) as BaseMessage[],
           );
         }
+        setWorkflowBuilds(data.workflowBuilds ?? []);
       });
     } else {
       const id = generateSessionId();
@@ -112,9 +124,21 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
   const handleNewChat = useCallback(() => {
     clear();
+    setWorkflowBuilds([]);
     const id = startNewSession();
     currentSessionIdRef.current = id;
   }, [clear, startNewSession]);
+
+  const saveWorkflowBuild = useCallback(
+    (publishedWorkflowId: string) => {
+      setWorkflowBuilds((prev) => {
+        if (prev.some((r) => r.workflowId === publishedWorkflowId)) return prev;
+        return [...prev, { id: "", workflowId: publishedWorkflowId, status: "completed", completedAt: new Date().toISOString(), workflow: null }];
+      });
+      saveWorkflowBuildAPI(currentSessionIdRef.current, publishedWorkflowId);
+    },
+    [saveWorkflowBuildAPI],
+  );
 
   const handleSwitchSession = useCallback(
     async (sessionId: string) => {
@@ -129,12 +153,13 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
       // Fetch messages from backend/localStorage
       try {
-        const msgs = await fetchSessionMessages(sessionId);
-        if (msgs.length > 0) {
+        const data = await fetchSessionMessages(sessionId);
+        if (data.messages.length > 0) {
           loadMessages(
-            msgs.map(deserializeMessage).filter(Boolean) as BaseMessage[],
+            data.messages.map(deserializeMessage).filter(Boolean) as BaseMessage[],
           );
         }
+        setWorkflowBuilds(data.workflowBuilds ?? []);
       } finally {
         setIsLoadingSession(false);
       }
@@ -166,8 +191,10 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         error,
         todos,
         submit,
+        resume,
         stop,
         clear,
+        activeInterrupt,
         loadMessages,
         getSubagentsByMessage,
         sessions,
@@ -178,6 +205,8 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         handleDeleteSession,
         saveCurrentSession,
         isLoadingSession,
+        workflowBuilds,
+        saveWorkflowBuild,
         serializeMessage,
         deserializeMessage,
       }}

@@ -35,9 +35,12 @@ export function useProjectManager() {
       const projectsInfo: ProjectInfo[] = data.map((proj: any) => ({
         id: proj.id,
         name: proj.name,
+        description: proj.description,
+        onboardingCompleted: proj.onboardingCompleted,
         ctime: new Date(proj.createdAt),
         role: proj.role,
         memberCount: proj.memberCount,
+        workflowCount: proj.workflowCount,
       }));
       editorContext?.setEditorStates((prev) => ({
         ...prev,

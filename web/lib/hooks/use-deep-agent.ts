@@ -10,6 +10,12 @@ import { SubagentInfo, Todo, WorkflowInput } from "../types";
 
 export type { SubagentInfo, Todo, WorkflowInput };
 
+export interface InterruptState {
+  threadId: string;
+  question: string;
+  context?: string;
+}
+
 export default function useDeepAgent(
   apiUrl: string,
   _assistantId: string = "pulse-editor-assistant",
@@ -18,6 +24,7 @@ export default function useDeepAgent(
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [activeInterrupt, setActiveInterrupt] = useState<InterruptState | null>(null);
 
   const messageMapRef = useRef<Map<string, BaseMessage>>(new Map());
   const abortRef = useRef<AbortController | null>(null);
@@ -181,6 +188,17 @@ export default function useDeepAgent(
               const errData = data as Record<string, string> | null;
               setError(new Error(errData?.message ?? "Unknown agent error"));
             },
+            onInterrupt: (data: unknown) => {
+              const d = data as { threadId?: string; interrupts?: Array<{ value?: { question?: string; context?: string } }> } | null;
+              if (d?.threadId && d.interrupts?.[0]?.value) {
+                const val = d.interrupts[0].value;
+                setActiveInterrupt({
+                  threadId: d.threadId,
+                  question: val.question ?? "",
+                  context: val.context,
+                });
+              }
+            },
           });
         })
         .catch((err) => {
@@ -193,6 +211,90 @@ export default function useDeepAgent(
         });
     },
     [apiUrl, syncDisplay],
+  );
+
+  const resume = useCallback(
+    (reply: string) => {
+      if (!activeInterrupt) return;
+      const { threadId } = activeInterrupt;
+      setActiveInterrupt(null);
+      setIsLoading(true);
+      setError(null);
+
+      abortRef.current?.abort();
+      const controller = new AbortController();
+      abortRef.current = controller;
+
+      const url = `${apiUrl}/manager/stream`;
+
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        signal: controller.signal,
+        body: JSON.stringify({
+          messages: [...messageMapRef.current.values()].map((msg) => ({
+            role: HumanMessage.isInstance(msg) ? "user" : "assistant",
+            content: msg.content,
+          })),
+          threadId,
+          resume: reply,
+          options: { returnWorkflowConfig: false },
+        }),
+      })
+        .then((res) => {
+          if (!res.ok) throw new Error(`Resume request failed: ${res.status}`);
+          return readSSEStream(res.body!, controller.signal, {
+            onMessages: (data: unknown) => {
+              if (!Array.isArray(data) || data.length < 2) return;
+              let chunk: Record<string, any> | null;
+              if (data.length >= 3 && typeof data[0] === "string" && Array.isArray(data[2])) {
+                chunk = data[2][0] as Record<string, any> | null;
+              } else {
+                chunk = data[0] as Record<string, any> | null;
+              }
+              if (!chunk) return;
+              const kwargs = chunk.kwargs ?? chunk;
+              const content = kwargs.content ?? "";
+              const msgId = kwargs.id ?? chunk.id ?? generateId();
+              const lcId = Array.isArray(chunk.id) ? chunk.id : [];
+              const typeName = lcId[lcId.length - 1] ?? "";
+              const kind = kwargs.type ?? kwargs.role ?? typeName ?? "";
+              const existing = messageMapRef.current.get(msgId);
+              if (existing && existing._getType() !== "human") {
+                const prev = typeof existing.content === "string" ? existing.content : "";
+                const updated = coerceToBaseMessage({ type: existing._getType(), content: prev + content, id: msgId, additional_kwargs: (existing as any).additional_kwargs ?? kwargs.additional_kwargs, tool_calls: (existing as any).tool_calls ?? kwargs.tool_calls });
+                if (updated) messageMapRef.current.set(msgId, updated);
+              } else if (content || kind) {
+                const msg = coerceToBaseMessage({ ...kwargs, type: kind, content, id: msgId });
+                if (msg) messageMapRef.current.set(msgId, msg);
+              }
+              syncDisplay();
+            },
+            onValues: () => {},
+            onError: (data: unknown) => {
+              const errData = data as Record<string, string> | null;
+              setError(new Error(errData?.message ?? "Unknown agent error"));
+            },
+            onInterrupt: (data: unknown) => {
+              const d = data as { threadId?: string; interrupts?: Array<{ value?: { question?: string; context?: string } }> } | null;
+              if (d?.threadId && d.interrupts?.[0]?.value) {
+                const val = d.interrupts[0].value;
+                setActiveInterrupt({ threadId: d.threadId, question: val.question ?? "", context: val.context });
+              }
+            },
+          });
+        })
+        .catch((err) => {
+          if (err.name !== "AbortError") {
+            setError(err instanceof Error ? err : new Error(String(err)));
+          }
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    },
+    [apiUrl, syncDisplay, activeInterrupt],
   );
 
   const stop = useCallback(() => {
@@ -209,6 +311,7 @@ export default function useDeepAgent(
     setIsLoading(false);
     setError(null);
     setTodos([]);
+    setActiveInterrupt(null);
   }, []);
 
   const loadMessages = useCallback(
@@ -237,7 +340,9 @@ export default function useDeepAgent(
     error,
     todos,
     subagents: [] as SubagentInfo[],
+    activeInterrupt,
     submit,
+    resume,
     stop,
     clear,
     loadMessages,
@@ -253,6 +358,7 @@ interface SSEHandlers {
   onMessages: (data: unknown) => void;
   onValues: (data: unknown) => void;
   onError: (data: unknown) => void;
+  onInterrupt?: (data: unknown) => void;
 }
 
 async function readSSEStream(
@@ -311,6 +417,9 @@ async function readSSEStream(
             break;
           case "error":
             handlers.onError(parsed);
+            break;
+          case "interrupt":
+            handlers.onInterrupt?.(parsed);
             break;
           case "metadata":
           case "end":

@@ -1,10 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+export interface WorkflowBuild {
+  id: string;
+  workflowId: string | null;
+  status: string;
+  completedAt: string | null;
+  workflow: { name: string } | null;
+}
+
 export interface ChatSession {
   id: string;
   title: string;
   createdAt: number;
   updatedAt: number;
+  workflowBuilds?: WorkflowBuild[];
 }
 
 export interface ChatSessionWithMessages extends ChatSession {
@@ -214,16 +223,17 @@ export function useChatSessions() {
   );
 
   const fetchSessionMessages = useCallback(
-    async (sessionId: string): Promise<SerializedMessage[]> => {
+    async (sessionId: string): Promise<{ messages: SerializedMessage[]; workflowBuilds?: WorkflowBuild[] }> => {
       // Try backend first
       if (isBackendAvailable.current) {
         try {
           const res = await apiFetch(`/api/chat/sessions/${sessionId}`);
           if (res.ok) {
             const data = await res.json();
-            if (Array.isArray(data.messages)) {
-              return data.messages.map(fromBackendMessage);
-            }
+            return {
+              messages: Array.isArray(data.messages) ? data.messages.map(fromBackendMessage) : [],
+              workflowBuilds: data.workflowBuilds ?? undefined,
+            };
           }
         } catch {
           // fall through to localStorage
@@ -233,7 +243,22 @@ export function useChatSessions() {
       // Fallback to localStorage
       const local = loadLocalSessions();
       const session = local.find((s) => s.id === sessionId);
-      return session?.messages ?? [];
+      return { messages: session?.messages ?? [] };
+    },
+    [],
+  );
+
+  const saveWorkflowBuild = useCallback(
+    async (sessionId: string, publishedWorkflowId: string) => {
+      if (!isBackendAvailable.current) return;
+      try {
+        await apiFetch(`/api/chat/sessions/${sessionId}`, {
+          method: "PATCH",
+          body: JSON.stringify({ publishedWorkflowId }),
+        });
+      } catch {
+        // silent
+      }
     },
     [],
   );
@@ -288,5 +313,6 @@ export function useChatSessions() {
     startNewSession,
     deleteSession,
     fetchSessionMessages,
+    saveWorkflowBuild,
   };
 }

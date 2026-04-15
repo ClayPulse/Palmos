@@ -1,12 +1,13 @@
 "use client";
 
-import { MyAutomationsCarousel, MyWorkflowsCarousel } from "@/components/agent-chat/carousels";
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
+import HomeScreen from "@/components/agent-chat/initial-chat-screens/home-screen";
+import ProjectScreen from "@/components/agent-chat/initial-chat-screens/project-screen";
 import { AIResponseCard, ResponseCard, UserBubble } from "@/components/agent-chat/message-bubbles";
 import { SessionHistoryPanel } from "@/components/agent-chat/session-history";
-import { STARTER_PROMPTS, StarterPromptButton } from "@/components/agent-chat/starter-prompts";
 import { SubagentCard } from "@/components/agent-chat/subagent-card";
 import { TodoList } from "@/components/agent-chat/todo-list";
+import InterruptCard from "@/components/agent-chat/interrupt-card";
 import RunningTasksPanel from "@/components/agent-chat/running-tasks-panel";
 import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
 import InlineWidget, {
@@ -20,13 +21,40 @@ import Icon from "@/components/misc/icon";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
-import { useAutomations } from "@/lib/hooks/use-automations";
 import type { WorkflowInput } from "@/lib/types";
 import { Button, Spinner, Tooltip } from "@heroui/react";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { motion } from "framer-motion";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+
+/** Walk an object recursively to find a publishedWorkflowId */
+function extractPublishedWorkflowId(obj: unknown): string | null {
+  if (typeof obj === "string") {
+    try {
+      const parsed = JSON.parse(obj);
+      if (typeof parsed.publishedWorkflowId === "string") return parsed.publishedWorkflowId;
+    } catch {
+      const m = obj.match(/"publishedWorkflowId"\s*:\s*"([^"]+)"/);
+      if (m) return m[1];
+    }
+  }
+  if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+    const rec = obj as Record<string, unknown>;
+    if (typeof rec.publishedWorkflowId === "string") return rec.publishedWorkflowId;
+    for (const val of Object.values(rec)) {
+      const found = extractPublishedWorkflowId(val);
+      if (found) return found;
+    }
+  }
+  if (Array.isArray(obj)) {
+    for (const val of obj) {
+      const found = extractPublishedWorkflowId(val);
+      if (found) return found;
+    }
+  }
+  return null;
+}
 
 export interface AIChatInterfaceProps {
   /** "panel" = narrow side-panel chrome; "page" = full-page layout */
@@ -53,12 +81,15 @@ export default function AgentChat({
     handleDeleteSession,
     getSubagentsByMessage,
     isLoadingSession,
+    workflowBuilds,
+    saveWorkflowBuild,
+    activeInterrupt,
+    resume,
   } = useChatContext();
 
   const editorContext = useContext(EditorContext);
-  const { workflows: myWorkflows, isLoading: isLoadingMyWorkflows } =
-    useMarketplaceWorkflows("My Workflows");
-  const { automations, isLoading: isLoadingAutomations } = useAutomations();
+  const projects = editorContext?.editorStates.projectsInfo;
+  const { workflows: myWorkflows } = useMarketplaceWorkflows("My Workflows");
 
   const [inputText, setInputText] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -501,6 +532,24 @@ export default function AgentChat({
     }
   }, [messages.length]);
 
+  // Seed workflow tasks from persisted workflowBuilds on session load
+  useEffect(() => {
+    if (workflowBuilds.length === 0) return;
+    setWorkflowTasks((prev) => {
+      const existingIds = new Set(prev.map((t) => t.taskId));
+      const newTasks = workflowBuilds
+        .filter((r) => r.workflowId && !existingIds.has(r.workflowId))
+        .map((r) => ({
+          taskId: r.workflowId!,
+          workflowName: r.workflow?.name ?? "Workflow",
+          startedAt: r.completedAt ? new Date(r.completedAt).getTime() : Date.now(),
+          status: "completed" as const,
+          result: { publishedWorkflowId: r.workflowId },
+        }));
+      return newTasks.length > 0 ? [...prev, ...newTasks] : prev;
+    });
+  }, [workflowBuilds]);
+
   useEffect(() => {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
     if (!backendUrl) return;
@@ -560,6 +609,13 @@ export default function AgentChat({
 
           if (data.status === "completed" || data.status === "failed") {
             clearInterval(poll);
+            // Persist workflow builder result if it has a publishedWorkflowId
+            if (data.status === "completed" && data.result) {
+              const pwfId = extractPublishedWorkflowId(data.result);
+              if (pwfId) {
+                saveWorkflowBuild(pwfId);
+              }
+            }
           }
         } catch {
           // Network error — keep polling
@@ -653,107 +709,13 @@ export default function AgentChat({
   };
 
   const isEmptyConversation = messages.length === 0 && !isLoading && !isLoadingSession;
+  const activeProjectName = editorContext?.editorStates.project;
+  const activeProject = projects?.find((p) => p.name === activeProjectName);
 
-  // ── Shared content ───────────────────────────────────────────────────────
-
-  const emptyState = isPage ? (
-    <div className="flex min-h-0 flex-1 flex-col items-center gap-5 py-12">
-      <div className="animate-pulse-glow flex h-20 w-20 items-center justify-center rounded-full bg-amber-100/70 p-3 dark:bg-amber-500/10">
-        <img
-          src="/assets/pulse-logo.svg"
-          alt="Palmos"
-          className="h-full w-full"
-        />
-      </div>
-      <div className="text-center">
-        <h2 className="text-default-800 text-lg font-semibold dark:text-white/90">
-          What would you like to build?
-        </h2>
-        <p className="text-default-500 mt-1 text-sm dark:text-white/50">
-          Describe your idea and Palmos AI will help you bring it to life.
-        </p>
-        <p className="text-default-400 mt-2 text-xs dark:text-white/40">
-          Also available on WhatsApp, Telegram, Discord &amp; more at{" "}
-          <a
-            href="https://im.palmos.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary hover:underline"
-          >
-            im.palmos.ai
-          </a>
-        </p>
-      </div>
-      <div className="grid w-full max-w-xl grid-cols-1 gap-2.5 pt-2 sm:grid-cols-2 md:grid-cols-3">
-        {STARTER_PROMPTS.map((prompt) => (
-          <StarterPromptButton
-            key={prompt.label}
-            prompt={prompt}
-            onSend={handleSend}
-          />
-        ))}
-      </div>
-
-      {isLoadingAutomations ? (
-        <div className="w-full max-w-xl shrink-0 pt-6">
-          <p className="text-default-500 mb-3 text-xs font-medium tracking-wide uppercase">
-            My Automations
-          </p>
-          <div className="flex items-center justify-center py-4">
-            <Spinner size="sm" />
-          </div>
-        </div>
-      ) : (
-        <MyAutomationsCarousel
-          automations={automations}
-          onOpenEditor={(automation) => {
-            editorContext?.updateModalStates({
-              automationEditor: { isOpen: true, automation },
-            });
-          }}
-          onCreateNew={() => {
-            editorContext?.updateModalStates({
-              automationEditor: { isOpen: true },
-            });
-          }}
-        />
-      )}
-
-      {isLoadingMyWorkflows ? (
-        <div className="w-full max-w-xl shrink-0 pt-6">
-          <p className="text-default-500 mb-3 text-xs font-medium tracking-wide uppercase">
-            My Workflows
-          </p>
-          <div className="flex items-center justify-center py-4">
-            <Spinner size="sm" />
-          </div>
-        </div>
-      ) : myWorkflows && myWorkflows.length > 0 ? (
-        <MyWorkflowsCarousel workflows={myWorkflows} />
-      ) : null}
-    </div>
+  const emptyState = activeProject ? (
+    <ProjectScreen onSend={handleSend} project={activeProject} />
   ) : (
-    <div className="flex flex-1 flex-col items-center justify-center gap-4">
-      <div className="animate-pulse-glow flex h-16 w-16 items-center justify-center rounded-full bg-amber-100/60 p-2 dark:bg-amber-500/10">
-        <img
-          src="/assets/pulse-logo.svg"
-          alt="Palmos"
-          className="h-full w-full"
-        />
-      </div>
-      <p className="text-default-500 text-sm dark:text-white/65">
-        What would you like to build?
-      </p>
-      <div className="grid w-full grid-cols-1 gap-2 pt-2 min-[400px]:grid-cols-2">
-        {STARTER_PROMPTS.map((prompt) => (
-          <StarterPromptButton
-            key={prompt.label}
-            prompt={prompt}
-            onSend={handleSend}
-          />
-        ))}
-      </div>
-    </div>
+    <HomeScreen onSend={handleSend} projects={projects ?? []} />
   );
 
   // Build a map of tool_call_id → tool name from AIMessages so we can
@@ -1095,6 +1057,13 @@ export default function AgentChat({
               {workflowTasks.map((task) => (
                 <WorkflowTaskCard key={task.taskId} task={task} onTerminate={handleTerminateTask} isTerminating={terminatingTaskIds.has(task.taskId)} />
               ))}
+              {activeInterrupt && (
+                <InterruptCard
+                  interrupt={activeInterrupt}
+                  onReply={resume}
+                  isLoading={isLoading}
+                />
+              )}
               {loadingIndicator}
               {errorBanner}
             </>
@@ -1371,6 +1340,13 @@ export default function AgentChat({
             {workflowTasks.map((task) => (
               <WorkflowTaskCard key={task.taskId} task={task} />
             ))}
+            {activeInterrupt && (
+              <InterruptCard
+                interrupt={activeInterrupt}
+                onReply={resume}
+                isLoading={isLoading}
+              />
+            )}
             {loadingIndicator}
             {errorBanner}
           </>
