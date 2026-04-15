@@ -17,10 +17,11 @@ ${Object.entries(commandsManual)
 	.map(([_, description]) => `${description}`)
 	.join('')}
 Global Flags
-  --silent, -s  Run silently. Suppresses all output on success.
-                Errors are printed to stderr on failure.
-                Interactive prompts are not supported — pass all
-                required values via flags or arguments.
+  --log-level <level>  Output level: normal (default), minimal, or silent.
+                       normal   — full UI with spinners and progress.
+                       minimal  — results and errors only, no progress UI.
+                       silent   — completely silent; errors printed to stderr on failure.
+                       Non-normal modes require all input via flags/arguments.
 
 Examples
   pulse help publish
@@ -32,8 +33,10 @@ Examples
 	},
 );
 
-if (cli.flags.silent) {
-	// ── Guard: reject interactive usage in silent mode ──────────────
+const verboseLevel = (cli.flags.logLevel ?? 'normal') as string;
+
+if (verboseLevel !== 'normal') {
+	// ── Guard: reject interactive usage in non-normal modes ─────────
 	const command = cli.input[0];
 
 	const missingArgs: Record<string, string> = {};
@@ -65,45 +68,49 @@ if (cli.flags.silent) {
 			.map(([flag, hint]) => `  ${flag}: ${hint}`)
 			.join('\n');
 		process.stderr.write(
-			`\x1b[31mError: --silent requires all input via flags/arguments. Missing:\n${details}\x1b[0m\n`,
+			`\x1b[31mError: --log-level ${verboseLevel} requires all input via flags/arguments. Missing:\n${details}\x1b[0m\n`,
 		);
 		process.exit(1);
 	}
 
-	// ── Suppress all output ────────────────────────────────────────
-	process.stdout.write = (() => true) as any;
-	const origStderrWrite = process.stderr.write.bind(process.stderr);
-	process.stderr.write = (() => true) as any;
+	if (verboseLevel === 'silent') {
+		// ── Silent: suppress ALL output ──────────────────────────────
+		process.stdout.write = (() => true) as any;
+		const origStderrWrite = process.stderr.write.bind(process.stderr);
+		process.stderr.write = (() => true) as any;
 
-	// Silence all console methods
-	console.log = () => {};
-	console.info = () => {};
-	console.warn = () => {};
+		console.log = () => {};
+		console.info = () => {};
+		console.warn = () => {};
 
-	// Collect stderr so it can be flushed on failure
-	const stderrBuffer: string[] = [];
-	console.error = (...args: any[]) => {
-		const msg = args
-			.map(a => (typeof a === 'string' ? a : JSON.stringify(a)))
-			.join(' ');
-		stderrBuffer.push(msg);
-	};
+		const stderrBuffer: string[] = [];
+		console.error = (...args: any[]) => {
+			const msg = args
+				.map(a => (typeof a === 'string' ? a : JSON.stringify(a)))
+				.join(' ');
+			stderrBuffer.push(msg);
+		};
 
-	// Flush collected stderr in red on non-zero exit
-	process.on('exit', (code) => {
-		if (code !== 0 && stderrBuffer.length > 0) {
-			origStderrWrite(`\x1b[31m${stderrBuffer.join('\n')}\x1b[0m\n`);
-		}
-	});
+		process.on('exit', (code) => {
+			if (code !== 0 && stderrBuffer.length > 0) {
+				origStderrWrite(`\x1b[31m${stderrBuffer.join('\n')}\x1b[0m\n`);
+			}
+		});
 
-	// Uncaught errors: buffer message and exit
-	const handleError = (err: unknown) => {
-		const message = err instanceof Error ? err.message : String(err);
-		stderrBuffer.push(message);
-		process.exitCode = 1;
-	};
-	process.on('uncaughtException', handleError);
-	process.on('unhandledRejection', handleError);
+		const handleError = (err: unknown) => {
+			const message = err instanceof Error ? err.message : String(err);
+			stderrBuffer.push(message);
+			process.exitCode = 1;
+		};
+		process.on('uncaughtException', handleError);
+		process.on('unhandledRejection', handleError);
+	} else if (verboseLevel === 'minimal') {
+		// ── Minimal: suppress noisy console but keep Ink rendering ───
+		// Components are responsible for hiding spinners/progress in minimal mode.
+		console.log = () => {};
+		console.info = () => {};
+		console.warn = () => {};
+	}
 
 	// Silence forked child processes (e.g. Module Federation DTS plugin)
 	const origFork = cp.fork.bind(cp);

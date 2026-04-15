@@ -439,6 +439,38 @@ function BlobResultBody({
   );
 }
 
+/** Walk an object/string to find a publishedWorkflowId from managed agent output */
+function findPublishedWorkflowId(obj: unknown): string | null {
+  if (typeof obj === "string") {
+    // Try JSON parse from agent final message
+    try {
+      const parsed = JSON.parse(obj);
+      if (typeof parsed.publishedWorkflowId === "string")
+        return parsed.publishedWorkflowId;
+    } catch {
+      // Try regex match
+      const m = obj.match(/"publishedWorkflowId"\s*:\s*"([^"]+)"/);
+      if (m) return m[1];
+    }
+  }
+  if (obj && typeof obj === "object" && !Array.isArray(obj)) {
+    const rec = obj as Record<string, unknown>;
+    if (typeof rec.publishedWorkflowId === "string")
+      return rec.publishedWorkflowId;
+    for (const val of Object.values(rec)) {
+      const found = findPublishedWorkflowId(val);
+      if (found) return found;
+    }
+  }
+  if (Array.isArray(obj)) {
+    for (const val of obj) {
+      const found = findPublishedWorkflowId(val);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 export function WorkflowResultBody({
   result,
   workflowName,
@@ -446,6 +478,55 @@ export function WorkflowResultBody({
   result: unknown;
   workflowName: string;
 }) {
+  // Check for publishedWorkflowId — workflow build complete
+  const publishedId = findPublishedWorkflowId(result);
+  if (publishedId) {
+    return (
+      <div className="border-t border-green-200/60 bg-white/60 px-3.5 py-3 dark:border-green-500/15 dark:bg-white/3">
+        <div className="flex items-center gap-2.5">
+          <Icon
+            name="rocket_launch"
+            variant="round"
+            className="text-xl text-green-600 dark:text-green-400"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium text-default-800 dark:text-white/85">
+              Workflow built successfully!
+            </p>
+            <p className="text-xs text-default-500 dark:text-white/50">
+              Your workflow is ready for testing.
+            </p>
+          </div>
+        </div>
+        <div className="mt-3 flex items-center gap-2">
+          <button
+            onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.set("workflowId", publishedId);
+              url.searchParams.set("run", "true");
+              window.location.href = url.toString();
+            }}
+            className="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
+          >
+            <Icon name="play_arrow" variant="round" className="text-sm" />
+            Try Workflow
+          </button>
+          <button
+            onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.set("workflowId", publishedId);
+              window.location.href = url.toString();
+            }}
+            className="flex items-center gap-1.5 rounded-lg border border-green-300/60 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
+          >
+            <Icon name="open_in_new" variant="round" className="text-sm" />
+            Open
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   // Check for error in the result object
   const errorMsg = findError(result);
   if (errorMsg) {
