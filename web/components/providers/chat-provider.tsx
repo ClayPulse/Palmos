@@ -21,7 +21,7 @@ export interface ChatContextValue {
   isLoading: boolean;
   error: Error | null;
   todos: Todo[];
-  submit: (text: string, workflows?: WorkflowInput[], uploadIds?: string[]) => void;
+  submit: (text: string, workflows?: WorkflowInput[], uploadIds?: string[], projectId?: string) => void;
   resume: (reply: string) => void;
   stop: () => void;
   clear: () => void;
