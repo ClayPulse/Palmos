@@ -1,6 +1,6 @@
 {
 	"name": "@pulse-editor/cli",
-	"version": "0.1.25",
+	"version": "0.1.26",
 	"license": "MIT",
 	"bin": {
 		"pulse": "dist/cli.js"
@@ -15,22 +15,22 @@
 		"test": "vitest run",
 		"test:coverage": "vitest run --coverage",
 		"link": "npm link",
-		"pack": "npm run build && npm pack --pack-destination dist"
+		"pack": "rimraf dist && npm run build && npm pack --pack-destination dist"
 	},
 	"files": [
 		"dist"
 	],
 	"dependencies": {
-		"@module-federation/enhanced": "2.0.1",
-		"@module-federation/node": "2.7.32",
-		"@module-federation/runtime": "2.0.1",
+		"@module-federation/enhanced": "^2.3.2",
+		"@module-federation/node": "^2.7.40",
+		"@module-federation/runtime": "^2.3.2",
 		"@pulse-editor/shared-utils": "^0.1.1-beta.85",
 		"concurrently": "^9.2.1",
 		"connect-livereload": "^0.6.1",
 		"copy-webpack-plugin": "^14.0.0",
 		"cors": "^2.8.6",
 		"cross-env": "^10.1.0",
-		"dotenv": "^17.3.1",
+		"dotenv": "^17.4.2",
 		"execa": "^9.6.1",
 		"express": "^5.2.1",
 		"glob": "^13.0.6",
@@ -42,12 +42,12 @@
 		"jszip": "^3.10.1",
 		"livereload": "^0.10.3",
 		"meow": "^14.1.0",
-		"mini-css-extract-plugin": "^2.10.0",
-		"openid-client": "^6.8.2",
+		"mini-css-extract-plugin": "^2.10.2",
+		"openid-client": "^6.8.3",
 		"rimraf": "^6.1.3",
-		"ts-morph": "^27.0.2",
+		"ts-morph": "^28.0.0",
 		"tsx": "^4.21.0",
-		"webpack": "^5.105.2",
+		"webpack": "^5.106.1",
 		"webpack-dev-server": "^5.2.3"
 	},
 	"devDependencies": {
@@ -55,14 +55,14 @@
 		"@types/connect-livereload": "^0.6.3",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
-		"@types/jszip": "^3.4.0",
+		"@types/jszip": "^3.4.1",
 		"@types/livereload": "^0.9.5",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.3",
-		"@vitest/coverage-v8": "^4.1.2",
-		"ava": "^6.4.1",
+		"@vitest/coverage-v8": "^4.1.4",
+		"ava": "^7.0.0",
 		"chalk": "^5.6.2",
-		"eslint-config-xo-react": "^0.29.0",
+		"eslint-config-xo-react": "^0.30.0",
 		"eslint-plugin-react": "^7.37.5",
 		"eslint-plugin-react-hooks": "^7.0.1",
 		"ink-testing-library": "^4.0.0",
@@ -70,8 +70,8 @@
 		"react-dom": "19.2.4",
 		"ts-node": "^10.9.2",
 		"typescript": "^5.9.3",
-		"vitest": "^4.1.2",
-		"xo": "^1.2.3"
+		"vitest": "^4.1.4",
+		"xo": "^2.0.2"
 	},
 	"peerDependencies": {
 		"react": "19.2.4",
