@@ -1,9 +1,11 @@
 "use client";
 
+import ShareChatModal from "@/components/agent-chat/share-chat-modal";
 import Icon from "@/components/misc/icon";
 import { ViewAsModal } from "@/components/misc/view-as-user-picker";
 import { useInbox } from "@/components/agent-chat/inbox-panel";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
+import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -26,6 +28,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
+  Tooltip,
 } from "@heroui/react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -86,9 +89,34 @@ export function ChatNavRight() {
   const router = useRouter();
   const [isViewAsOpen, setIsViewAsOpen] = useState(false);
   const { messages: inboxMessages, unreadCount, markAllRead } = useInbox();
+  const { currentSessionIdRef, messages: chatMessages } = useChatContext();
+  const [isShareOpen, setIsShareOpen] = useState(false);
 
   return (
     <div className="flex items-center gap-x-0.5 md:gap-x-1">
+      {/* Share chat modal */}
+      <ShareChatModal
+        sessionId={currentSessionIdRef.current}
+        isOpen={isShareOpen}
+        onClose={() => setIsShareOpen(false)}
+      />
+
+      {/* Share */}
+      {session && currentSessionIdRef.current && chatMessages.length > 0 && (
+        <Tooltip content="Share chat" delay={400} closeDelay={0}>
+          <Button
+            className="data-[hover=true]:bg-transparent"
+            isIconOnly
+            size="sm"
+            variant="light"
+            isDisabled={!currentSessionIdRef.current}
+            onPress={() => setIsShareOpen(true)}
+          >
+            <Icon name="share" variant="round" />
+          </Button>
+        </Tooltip>
+      )}
+
       {/* Inbox */}
       {session && (
         <Popover placement="bottom-end" onOpenChange={(open) => { if (open) markAllRead(); }}>
@@ -164,6 +192,90 @@ export function ChatNavRight() {
           </PopoverContent>
         </Popover>
       )}
+
+      {/* Connect / Platforms dropdown */}
+      <Dropdown>
+        <DropdownTrigger>
+          <Button
+            className="data-[hover=true]:bg-transparent"
+            isIconOnly
+            size="sm"
+            variant="light"
+          >
+            <Icon name="download" variant="round" />
+          </Button>
+        </DropdownTrigger>
+        <DropdownMenu>
+          <DropdownSection title="Use Palmos on">
+            <DropdownItem
+              key="web"
+              startContent={<Icon name="language" variant="round" className="text-sm" />}
+              onPress={() => window.open("https://web.palmos.ai", "_blank")}
+            >
+              Web App
+            </DropdownItem>
+            <DropdownItem
+              key="desktop"
+              startContent={<Icon name="computer" variant="round" className="text-sm" />}
+              onPress={() => window.open("https://github.com/claypulse/pulse-editor/releases/latest", "_blank")}
+            >
+              Desktop
+            </DropdownItem>
+            <DropdownItem
+              key="android"
+              startContent={<Icon name="phone_android" variant="round" className="text-sm" />}
+              onPress={() => window.open("https://play.google.com/store/apps/details?id=com.pulse_editor.app", "_blank")}
+            >
+              Android
+            </DropdownItem>
+            <DropdownItem
+              key="cli"
+              startContent={<Icon name="terminal" variant="round" className="text-sm" />}
+              onPress={() => window.open("https://www.npmjs.com/package/@pulse-editor/cli", "_blank")}
+            >
+              CLI
+            </DropdownItem>
+          </DropdownSection>
+          <DropdownSection title="Connect via messaging">
+            <DropdownItem
+              key="whatsapp"
+              startContent={<Image src="/assets/im-icons/whatsapp.svg" alt="WhatsApp" width={16} height={16} className="shrink-0 dark:invert" />}
+              onPress={() => window.open("https://im.palmos.ai", "_blank")}
+            >
+              WhatsApp
+            </DropdownItem>
+            <DropdownItem
+              key="discord"
+              startContent={<Image src="/assets/im-icons/discord.svg" alt="Discord" width={16} height={16} className="shrink-0 dark:invert" />}
+              onPress={() => window.open("https://im.palmos.ai", "_blank")}
+            >
+              Discord
+            </DropdownItem>
+            <DropdownItem
+              key="telegram"
+              startContent={<Image src="/assets/im-icons/telegram.svg" alt="Telegram" width={16} height={16} className="shrink-0 dark:invert" />}
+              onPress={() => window.open("https://im.palmos.ai", "_blank")}
+            >
+              Telegram
+            </DropdownItem>
+            <DropdownItem
+              key="slack"
+              startContent={<Image src="/assets/im-icons/slack.svg" alt="Slack" width={16} height={16} className="shrink-0 dark:invert" />}
+              onPress={() => window.open("https://im.palmos.ai", "_blank")}
+            >
+              Slack
+            </DropdownItem>
+            <DropdownItem
+              key="more-im"
+              startContent={<Icon name="more_horiz" variant="round" className="text-sm" />}
+              description="LINE, Teams, Signal, WeChat & more"
+              onPress={() => window.open("https://im.palmos.ai", "_blank")}
+            >
+              More Platforms
+            </DropdownItem>
+          </DropdownSection>
+        </DropdownMenu>
+      </Dropdown>
 
       <Button
         className="data-[hover=true]:bg-transparent"

@@ -54,6 +54,18 @@ export default function RemoteModuleProvider({
     if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
       console.log("Registering service worker.");
       const wb = new Workbox("/service-worker.js");
+
+      // When a new service worker has installed and is waiting to activate,
+      // tell it to skip waiting (activate immediately), then reload so the
+      // client loads assets that match the new precache manifest.
+      wb.addEventListener("waiting", () => {
+        console.log("New service worker waiting. Activating and reloading...");
+        wb.addEventListener("controlling", () => {
+          window.location.reload();
+        });
+        wb.messageSkipWaiting();
+      });
+
       wb.register();
     }
   }, []);

@@ -2,8 +2,14 @@
 
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import { AppModeEnum } from "@/lib/enums";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import type { Workflow } from "@/lib/types";
+import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Spinner } from "@heroui/react";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 
 export function WorkflowTaskCard({
   task,
@@ -471,6 +477,89 @@ function findPublishedWorkflowId(obj: unknown): string | null {
   return null;
 }
 
+function WorkflowBuiltCard({
+  publishedId,
+  workflowName,
+}: {
+  publishedId: string;
+  workflowName: string;
+}) {
+  const { createCanvasTabView } = useTabViewManager();
+  const editorContext = useContext(EditorContext);
+  const [isOpening, setIsOpening] = useState(false);
+
+  async function openInEditor() {
+    setIsOpening(true);
+    try {
+      const res = await fetchAPI(
+        `/api/workflow/get?name=${encodeURIComponent(workflowName)}&latest=true`,
+      );
+      if (!res.ok) return;
+      const workflow: Workflow = await res.json();
+      await createCanvasTabView(
+        {
+          viewId: createCanvasViewId(),
+          appConfigs: workflow.content.nodes.map((n) => n.data.config),
+          initialWorkflowContent: workflow.content,
+        },
+        workflow,
+      );
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        appMode: AppModeEnum.Editor,
+      }));
+    } finally {
+      setIsOpening(false);
+    }
+  }
+
+  return (
+    <div className="border-t border-green-200/60 bg-white/60 px-3.5 py-3 dark:border-green-500/15 dark:bg-white/3">
+      <div className="flex items-center gap-2.5">
+        <Icon
+          name="rocket_launch"
+          variant="round"
+          className="text-xl text-green-600 dark:text-green-400"
+        />
+        <div className="min-w-0 flex-1">
+          <p className="text-sm font-medium text-default-800 dark:text-white/85">
+            Workflow built successfully!
+          </p>
+          <p className="text-xs text-default-500 dark:text-white/50">
+            {workflowName}
+          </p>
+        </div>
+      </div>
+      <div className="mt-3 flex items-center gap-2">
+        <button
+          onClick={openInEditor}
+          disabled={isOpening}
+          className="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-green-700 disabled:opacity-50 dark:bg-green-500 dark:hover:bg-green-600"
+        >
+          {isOpening ? (
+            <Spinner size="sm" classNames={{ wrapper: "h-3.5 w-3.5" }} />
+          ) : (
+            <Icon name="edit" variant="round" className="text-sm" />
+          )}
+          Open in Editor
+        </button>
+        <button
+          onClick={() => {
+            const url = new URL(window.location.href);
+            url.searchParams.set("workflowId", publishedId);
+            url.searchParams.set("run", "true");
+            window.location.href = url.toString();
+          }}
+          className="flex items-center gap-1.5 rounded-lg border border-green-300/60 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
+        >
+          <Icon name="play_arrow" variant="round" className="text-sm" />
+          Run Workflow
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function WorkflowResultBody({
   result,
   workflowName,
@@ -482,48 +571,10 @@ export function WorkflowResultBody({
   const publishedId = findPublishedWorkflowId(result);
   if (publishedId) {
     return (
-      <div className="border-t border-green-200/60 bg-white/60 px-3.5 py-3 dark:border-green-500/15 dark:bg-white/3">
-        <div className="flex items-center gap-2.5">
-          <Icon
-            name="rocket_launch"
-            variant="round"
-            className="text-xl text-green-600 dark:text-green-400"
-          />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-default-800 dark:text-white/85">
-              Workflow built successfully!
-            </p>
-            <p className="text-xs text-default-500 dark:text-white/50">
-              Your workflow is ready for testing.
-            </p>
-          </div>
-        </div>
-        <div className="mt-3 flex items-center gap-2">
-          <button
-            onClick={() => {
-              const url = new URL(window.location.href);
-              url.searchParams.set("workflowId", publishedId);
-              url.searchParams.set("run", "true");
-              window.location.href = url.toString();
-            }}
-            className="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
-          >
-            <Icon name="play_arrow" variant="round" className="text-sm" />
-            Try Workflow
-          </button>
-          <button
-            onClick={() => {
-              const url = new URL(window.location.href);
-              url.searchParams.set("workflowId", publishedId);
-              window.location.href = url.toString();
-            }}
-            className="flex items-center gap-1.5 rounded-lg border border-green-300/60 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
-          >
-            <Icon name="open_in_new" variant="round" className="text-sm" />
-            Open
-          </button>
-        </div>
-      </div>
+      <WorkflowBuiltCard
+        publishedId={publishedId}
+        workflowName={workflowName}
+      />
     );
   }
 
