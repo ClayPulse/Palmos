@@ -32,7 +32,7 @@ export default function ProjectScreen({ onSend, project }: ProjectScreenProps) {
   const { automations, isLoading: isLoadingAutomations } = useAutomations();
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
-  const activeAutomations = automations.filter((a) => a.status === "active");
+  const activeAutomations = automations.filter((a) => a.enabled);
   const workflowCount = myWorkflows?.length ?? 0;
   const showNudge = !nudgeDismissed && project.onboardingCompleted === false;
 
