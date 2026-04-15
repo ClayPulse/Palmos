@@ -1,9 +1,13 @@
 "use client";
 
+import { MyAutomationsCarousel, MyWorkflowsCarousel } from "@/components/agent-chat/carousels";
 import { STARTER_PROMPTS, StarterPromptButton } from "@/components/agent-chat/starter-prompts";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
+import { useAutomations } from "@/lib/hooks/use-automations";
 import type { ProjectInfo } from "@/lib/types";
+import { Spinner } from "@heroui/react";
 import { useContext, useState } from "react";
 
 const PROJECTS_PER_PAGE = 4;
@@ -16,6 +20,9 @@ interface HomeScreenProps {
 
 export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
   const editorContext = useContext(EditorContext);
+  const { workflows: myWorkflows, isLoading: isLoadingWorkflows } =
+    useMarketplaceWorkflows("My Workflows");
+  const { automations, isLoading: isLoadingAutomations } = useAutomations();
 
   function openProject(name: string) {
     editorContext?.setEditorStates((prev) => ({ ...prev, project: name }));
@@ -56,6 +63,39 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
         <ProjectExplorer projects={projects} onOpen={openProject} />
       )}
 
+      {/* Automations */}
+      <div className="w-full max-w-xl">
+        {isLoadingAutomations ? (
+          <div className="flex items-center justify-center py-3">
+            <Spinner size="sm" />
+          </div>
+        ) : (
+          <MyAutomationsCarousel
+            automations={automations}
+            onOpenEditor={(automation) => {
+              editorContext?.updateModalStates({
+                automationEditor: { isOpen: true, automation },
+              });
+            }}
+            onCreateNew={() => {
+              editorContext?.updateModalStates({
+                automationEditor: { isOpen: true },
+              });
+            }}
+          />
+        )}
+      </div>
+
+      {/* Workflows (unassigned / all) */}
+      <div className="w-full max-w-xl">
+        {isLoadingWorkflows ? (
+          <div className="flex items-center justify-center py-3">
+            <Spinner size="sm" />
+          </div>
+        ) : myWorkflows && myWorkflows.length > 0 ? (
+          <MyWorkflowsCarousel workflows={myWorkflows} />
+        ) : null}
+      </div>
     </div>
   );
 }

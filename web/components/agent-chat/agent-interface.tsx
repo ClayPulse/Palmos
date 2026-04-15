@@ -89,7 +89,9 @@ export default function AgentChat({
 
   const editorContext = useContext(EditorContext);
   const projects = editorContext?.editorStates.projectsInfo;
-  const { workflows: myWorkflows } = useMarketplaceWorkflows("My Workflows");
+  const activeProjectName = editorContext?.editorStates.project;
+  const activeProject = projects?.find((p) => p.name === activeProjectName);
+  const { workflows: myWorkflows } = useMarketplaceWorkflows("My Workflows", activeProject?.id);
 
   const [inputText, setInputText] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -651,7 +653,7 @@ export default function AgentChat({
     setInputText("");
     setUploads([]);
     pendingSendRef.current = null;
-    submit(value, getWorkflows(), readyUploadIds.length > 0 ? readyUploadIds : undefined);
+    submit(value, getWorkflows(), readyUploadIds.length > 0 ? readyUploadIds : undefined, activeProject?.id);
   }
 
   function handleSend(text?: string) {
@@ -709,8 +711,6 @@ export default function AgentChat({
   };
 
   const isEmptyConversation = messages.length === 0 && !isLoading && !isLoadingSession;
-  const activeProjectName = editorContext?.editorStates.project;
-  const activeProject = projects?.find((p) => p.name === activeProjectName);
 
   const emptyState = activeProject ? (
     <ProjectScreen onSend={handleSend} project={activeProject} />

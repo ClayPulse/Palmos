@@ -28,7 +28,7 @@ interface ProjectScreenProps {
 export default function ProjectScreen({ onSend, project }: ProjectScreenProps) {
   const editorContext = useContext(EditorContext);
   const { workflows: myWorkflows, isLoading: isLoadingMyWorkflows } =
-    useMarketplaceWorkflows("My Workflows");
+    useMarketplaceWorkflows("My Workflows", project.id);
   const { automations, isLoading: isLoadingAutomations } = useAutomations();
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
 

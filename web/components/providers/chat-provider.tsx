@@ -10,6 +10,7 @@ import {
 } from "@/lib/hooks/use-chat-sessions";
 import type { BaseMessage } from "@langchain/core/messages";
 import type { SubagentInfo, Todo, WorkflowInput } from "@/lib/types";
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL + "/api/agent";
@@ -78,6 +79,8 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     saveWorkflowBuild: saveWorkflowBuildAPI,
   } = useChatSessions();
 
+  const editorContext = useContext(EditorContext);
+
   const [workflowBuilds, setWorkflowBuilds] = useState<WorkflowBuild[]>([]);
 
   const currentSessionIdRef = useRef<string>(activeSessionId ?? generateSessionId());
@@ -109,9 +112,14 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     if (messages.length === 0) return;
     clearTimeout(saveTimeoutRef.current);
     saveTimeoutRef.current = setTimeout(() => {
+      // Capture the current project so the session is tagged
+      const currentProjectId = editorContext?.editorStates.projectsInfo?.find(
+        (p) => p.name === editorContext?.editorStates.project,
+      )?.id ?? null;
       saveSession(
         currentSessionIdRef.current,
         messages.map(serializeMessage),
+        currentProjectId,
       ).then((resolvedId) => {
         // If backend assigned a new ID, update our ref
         if (resolvedId && resolvedId !== currentSessionIdRef.current) {
@@ -160,11 +168,32 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
           );
         }
         setWorkflowBuilds(data.workflowBuilds ?? []);
+
+        // Restore or clear the project context based on the session
+        const sessionProjectId = data.projectId ?? null;
+        if (sessionProjectId) {
+          // Find the project name from the ID and restore it
+          const proj = editorContext?.editorStates.projectsInfo?.find(
+            (p) => p.id === sessionProjectId,
+          );
+          if (proj) {
+            editorContext?.setEditorStates((prev) => ({
+              ...prev,
+              project: proj.name,
+            }));
+          }
+        } else {
+          // Session had no project — clear active project
+          editorContext?.setEditorStates((prev) => ({
+            ...prev,
+            project: undefined,
+          }));
+        }
       } finally {
         setIsLoadingSession(false);
       }
     },
-    [messages, clear, switchSession, saveSession, loadMessages, fetchSessionMessages],
+    [messages, clear, switchSession, saveSession, loadMessages, fetchSessionMessages, editorContext],
   );
 
   const handleDeleteSession = useCallback(

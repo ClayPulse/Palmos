@@ -4,8 +4,13 @@ import useSWR from "swr";
 
 export function useMarketplaceWorkflows(
   category: "All" | "Published by Me" | "My Workflows",
+  projectId?: string,
 ) {
   function getUrl() {
+    // When a projectId is provided, fetch only that project's workflows
+    if (projectId) {
+      return `/api/project/workflows?projectId=${encodeURIComponent(projectId)}`;
+    }
     switch (category) {
       case "All":
         return "/api/workflow/list";

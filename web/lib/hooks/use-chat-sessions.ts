@@ -11,6 +11,7 @@ export interface WorkflowBuild {
 export interface ChatSession {
   id: string;
   title: string;
+  projectId?: string | null;
   createdAt: number;
   updatedAt: number;
   workflowBuilds?: WorkflowBuild[];
@@ -134,6 +135,7 @@ export function useChatSessions() {
         const data: Array<{
           id: string;
           title: string;
+          projectId?: string | null;
           createdAt: string;
           updatedAt: string;
         }> = await res.json();
@@ -141,6 +143,7 @@ export function useChatSessions() {
         const mapped = data.map((s) => ({
           id: s.id,
           title: s.title,
+          projectId: s.projectId ?? null,
           createdAt: new Date(s.createdAt).getTime(),
           updatedAt: new Date(s.updatedAt).getTime(),
         }));
@@ -157,7 +160,7 @@ export function useChatSessions() {
   }, []);
 
   const saveSession = useCallback(
-    async (sessionId: string, messages: SerializedMessage[]) => {
+    async (sessionId: string, messages: SerializedMessage[], projectId?: string | null) => {
       const title = deriveTitle(messages);
       const now = Date.now();
 
@@ -167,11 +170,11 @@ export function useChatSessions() {
       let updatedLocal: LocalSession[];
       if (existing) {
         updatedLocal = local.map((s) =>
-          s.id === sessionId ? { ...s, title, messages, updatedAt: now } : s,
+          s.id === sessionId ? { ...s, title, messages, updatedAt: now, ...(projectId !== undefined ? { projectId } : {}) } : s,
         );
       } else {
         updatedLocal = [
-          { id: sessionId, title, createdAt: now, updatedAt: now, messages },
+          { id: sessionId, title, projectId: projectId ?? null, createdAt: now, updatedAt: now, messages },
           ...local,
         ];
       }
@@ -186,12 +189,12 @@ export function useChatSessions() {
           if (existing) {
             await apiFetch(`/api/chat/sessions/${sessionId}`, {
               method: "PUT",
-              body: JSON.stringify({ title, messages: backendMessages }),
+              body: JSON.stringify({ title, projectId, messages: backendMessages }),
             });
           } else {
             const res = await apiFetch("/api/chat/sessions", {
               method: "POST",
-              body: JSON.stringify({ title, messages: backendMessages }),
+              body: JSON.stringify({ title, projectId, messages: backendMessages }),
             });
             if (res.ok) {
               const created = await res.json();
@@ -223,7 +226,7 @@ export function useChatSessions() {
   );
 
   const fetchSessionMessages = useCallback(
-    async (sessionId: string): Promise<{ messages: SerializedMessage[]; workflowBuilds?: WorkflowBuild[] }> => {
+    async (sessionId: string): Promise<{ messages: SerializedMessage[]; workflowBuilds?: WorkflowBuild[]; projectId?: string | null }> => {
       // Try backend first
       if (isBackendAvailable.current) {
         try {
@@ -233,6 +236,7 @@ export function useChatSessions() {
             return {
               messages: Array.isArray(data.messages) ? data.messages.map(fromBackendMessage) : [],
               workflowBuilds: data.workflowBuilds ?? undefined,
+              projectId: data.projectId ?? null,
             };
           }
         } catch {
@@ -243,7 +247,7 @@ export function useChatSessions() {
       // Fallback to localStorage
       const local = loadLocalSessions();
       const session = local.find((s) => s.id === sessionId);
-      return { messages: session?.messages ?? [] };
+      return { messages: session?.messages ?? [], projectId: (session as any)?.projectId ?? null };
     },
     [],
   );
