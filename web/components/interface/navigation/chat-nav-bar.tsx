@@ -2,6 +2,8 @@
 
 import Icon from "@/components/misc/icon";
 import { ViewAsModal } from "@/components/misc/view-as-user-picker";
+import { useInbox } from "@/components/agent-chat/inbox-panel";
+import { formatRelativeTime } from "@/components/agent-chat/session-history";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -21,6 +23,9 @@ import {
   DropdownMenu,
   DropdownSection,
   DropdownTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
 } from "@heroui/react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -80,9 +85,86 @@ export function ChatNavRight() {
   const { getTranslations: t, locale, setLocale } = useTranslations();
   const router = useRouter();
   const [isViewAsOpen, setIsViewAsOpen] = useState(false);
+  const { messages: inboxMessages, unreadCount, markAllRead } = useInbox();
 
   return (
     <div className="flex items-center gap-x-0.5 md:gap-x-1">
+      {/* Inbox */}
+      {session && (
+        <Popover placement="bottom-end" onOpenChange={(open) => { if (open) markAllRead(); }}>
+          <PopoverTrigger>
+            <Button
+              className="relative data-[hover=true]:bg-transparent"
+              isIconOnly
+              size="sm"
+              variant="light"
+            >
+              <Icon name="notifications" variant="round" />
+              {unreadCount > 0 && (
+                <>
+                  <span className="absolute top-0.5 right-0.5 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                  <span className="absolute top-0.5 right-0.5 h-3.5 w-3.5 animate-ping rounded-full bg-red-400 opacity-75" />
+                </>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80 p-0">
+            <div className="flex items-center gap-2 border-b border-default-200 px-3 py-2.5 dark:border-white/8">
+              <Icon name="notifications" variant="round" className="text-base text-amber-500 dark:text-amber-400" />
+              <span className="text-sm font-semibold text-default-700 dark:text-white/80">Inbox</span>
+            </div>
+            <div className="max-h-80 overflow-y-auto">
+              {inboxMessages.length === 0 ? (
+                <div className="flex flex-col items-center py-8 text-center">
+                  <Icon name="notifications_none" variant="round" className="mb-1.5 text-2xl text-default-300 dark:text-white/20" />
+                  <p className="text-xs text-default-500 dark:text-white/40">No notifications yet</p>
+                </div>
+              ) : (
+                [...inboxMessages].reverse().map((msg) => {
+                  const kwargs = msg.additionalKwargs;
+                  const isWorkflowBuild = kwargs?.type === "workflow_build_complete";
+                  return (
+                    <div key={msg.id} className="border-b border-default-100 px-3 py-2.5 last:border-b-0 dark:border-white/5">
+                      <div className="flex items-start gap-2">
+                        <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isWorkflowBuild ? "bg-green-100 dark:bg-green-500/15" : "bg-amber-100 dark:bg-amber-500/15"}`}>
+                          <Icon
+                            name={isWorkflowBuild ? "rocket_launch" : "notifications"}
+                            variant="round"
+                            className={`text-xs ${isWorkflowBuild ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}
+                          />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs text-default-700 dark:text-white/75">{msg.content}</p>
+                          <p className="mt-0.5 text-[10px] text-default-400 dark:text-white/30">
+                            {formatRelativeTime(msg.createdAt)}
+                          </p>
+                          {isWorkflowBuild && kwargs?.workflowId && (
+                            <button
+                              onClick={() => {
+                                const url = new URL(window.location.href);
+                                url.searchParams.set("workflowId", kwargs.workflowId);
+                                url.searchParams.set("run", "true");
+                                window.location.href = url.toString();
+                              }}
+                              className="mt-1.5 flex items-center gap-1 rounded-md bg-green-600 px-2.5 py-1 text-[11px] font-semibold text-white transition-colors hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
+                            >
+                              <Icon name="play_arrow" variant="round" className="text-xs" />
+                              Try Workflow
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </PopoverContent>
+        </Popover>
+      )}
+
       <Button
         className="data-[hover=true]:bg-transparent"
         isIconOnly

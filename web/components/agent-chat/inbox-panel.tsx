@@ -93,7 +93,7 @@ export default function InboxPanel({
         ) : messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
             <Icon
-              name="notifications_none"
+              name="notifications"
               variant="round"
               className="mb-2 text-3xl text-default-300 dark:text-white/20"
             />
