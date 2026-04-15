@@ -1,6 +1,7 @@
 "use client";
 
 import KnowledgeFiles from "@/components/agent-chat/knowledge-files";
+import InboxPanel, { useInbox } from "@/components/agent-chat/inbox-panel";
 import Icon from "@/components/misc/icon";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
@@ -23,6 +24,8 @@ export default function ChatSessionSidebar({
   const currentProject = editorContext?.editorStates.project;
   const [isProjectListOpen, setIsProjectListOpen] = useState(false);
   const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(false);
+  const [isInboxOpen, setIsInboxOpen] = useState(false);
+  const { unreadCount, markAllRead } = useInbox();
   const { isLandscape } = useScreenSize();
 
   const {
@@ -215,6 +218,26 @@ export default function ChatSessionSidebar({
                 Chat History
               </h3>
               <div className="flex items-center gap-1">
+                <Tooltip content="Inbox" delay={400} closeDelay={0} size="sm">
+                  <button
+                    onClick={() => {
+                      setIsInboxOpen(!isInboxOpen);
+                      if (!isInboxOpen) markAllRead();
+                    }}
+                    className={`relative flex h-7 w-7 items-center justify-center rounded transition-colors ${
+                      isInboxOpen
+                        ? "text-amber-600 dark:text-amber-400"
+                        : "text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
+                    }`}
+                  >
+                    <Icon name="inbox" variant="round" className="text-sm" />
+                    {unreadCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                    )}
+                  </button>
+                </Tooltip>
                 <button
                   onClick={() => {
                     handleNewChat();
@@ -227,7 +250,14 @@ export default function ChatSessionSidebar({
               </div>
             </div>
 
-            {/* Session list */}
+            {/* Inbox panel (inline, replaces session list when open) */}
+            {isInboxOpen ? (
+              <InboxPanel
+                isOpen={isInboxOpen}
+                onClose={() => setIsInboxOpen(false)}
+              />
+            ) : (
+            /* Session list */
             <div className="scrollbar-transparent flex-1 overflow-y-auto px-2 pb-2">
               {sessions.length === 0 ? (
                 <p className="py-12 text-center text-xs text-default-500 dark:text-default-500">
@@ -276,6 +306,7 @@ export default function ChatSessionSidebar({
                 </div>
               )}
             </div>
+            )}
           </div>
         </motion.div>
         ) : (
@@ -380,17 +411,43 @@ export default function ChatSessionSidebar({
               <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500">
                 Chat History
               </h3>
-              <button
-                onClick={() => {
-                  handleNewChat();
-                  onClose();
-                }}
-                className="flex items-center gap-1 rounded-lg border border-amber-400/50 bg-amber-50 px-2.5 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300"
-              >
-                <Icon name="add" variant="round" className="text-base" />
-                New
-              </button>
+              <div className="flex items-center gap-1.5">
+                <button
+                  onClick={() => {
+                    setIsInboxOpen(!isInboxOpen);
+                    if (!isInboxOpen) markAllRead();
+                  }}
+                  className={`relative flex h-8 w-8 items-center justify-center rounded transition-colors ${
+                    isInboxOpen
+                      ? "text-amber-600 dark:text-amber-400"
+                      : "text-default-500 hover:text-amber-600 dark:text-default-500 dark:hover:text-amber-400"
+                  }`}
+                >
+                  <Icon name="inbox" variant="round" className="text-base" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 flex h-3.5 min-w-[14px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </button>
+                <button
+                  onClick={() => {
+                    handleNewChat();
+                    onClose();
+                  }}
+                  className="flex items-center gap-1 rounded-lg border border-amber-400/50 bg-amber-50 px-2.5 py-1.5 text-sm font-medium text-amber-700 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300"
+                >
+                  <Icon name="add" variant="round" className="text-base" />
+                  New
+                </button>
+              </div>
             </div>
+            {isInboxOpen ? (
+              <InboxPanel
+                isOpen={isInboxOpen}
+                onClose={() => setIsInboxOpen(false)}
+              />
+            ) : (
             <div className="scrollbar-transparent flex-1 overflow-y-auto px-2 pb-2">
               {sessions.length === 0 ? (
                 <p className="py-12 text-center text-sm text-default-500">
@@ -438,6 +495,7 @@ export default function ChatSessionSidebar({
                 </div>
               )}
             </div>
+            )}
           </div>
         </motion.div>
         )
