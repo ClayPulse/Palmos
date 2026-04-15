@@ -16,7 +16,6 @@ generateSW({
   ],
   globIgnores: ["**/service-worker.js"],
   clientsClaim: true,
-  skipWaiting: true,
   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
   // Fallback to / for SPA routing
   navigateFallback: "/",
