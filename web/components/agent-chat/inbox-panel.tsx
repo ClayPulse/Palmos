@@ -53,6 +53,21 @@ export function useInbox() {
     setUnreadCount(0);
   }, []);
 
+  const dismiss = useCallback(async (messageId: string) => {
+    setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    setUnreadCount((prev) => Math.max(0, prev - 1));
+    try {
+      await fetch(`${backendUrl}/api/chat/inbox`, {
+        method: "DELETE",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messageId }),
+      });
+    } catch {
+      // Best-effort — message already removed from UI
+    }
+  }, []);
+
   // Poll every 30 seconds
   useEffect(() => {
     fetchInbox();
@@ -60,7 +75,7 @@ export function useInbox() {
     return () => clearInterval(interval);
   }, [fetchInbox]);
 
-  return { messages, unreadCount, markAllRead, refetch: fetchInbox };
+  return { messages, unreadCount, markAllRead, dismiss, refetch: fetchInbox };
 }
 
 export default function InboxPanel({
@@ -70,7 +85,7 @@ export default function InboxPanel({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const { messages, markAllRead } = useInbox();
+  const { messages, markAllRead, dismiss } = useInbox();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -104,7 +119,7 @@ export default function InboxPanel({
         ) : (
           <div className="flex flex-col">
             {[...messages].reverse().map((msg) => (
-              <InboxMessageCard key={msg.id} message={msg} />
+              <InboxMessageCard key={msg.id} message={msg} onDismiss={dismiss} />
             ))}
           </div>
         )}
@@ -113,12 +128,18 @@ export default function InboxPanel({
   );
 }
 
-function InboxMessageCard({ message }: { message: InboxMessage }) {
+function InboxMessageCard({
+  message,
+  onDismiss,
+}: {
+  message: InboxMessage;
+  onDismiss?: (id: string) => void;
+}) {
   const kwargs = message.additionalKwargs;
   const isWorkflowBuild = kwargs?.type === "workflow_build_complete";
 
   return (
-    <div className="border-b border-default-100 px-3.5 py-3 dark:border-white/5">
+    <div className="group border-b border-default-100 px-3.5 py-3 dark:border-white/5">
       <div className="flex items-start gap-2.5">
         <div
           className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full ${
@@ -159,6 +180,14 @@ function InboxMessageCard({ message }: { message: InboxMessage }) {
             </button>
           )}
         </div>
+        {onDismiss && (
+          <button
+            onClick={() => onDismiss(message.id)}
+            className="shrink-0 text-default-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-default-500 dark:text-white/20 dark:hover:text-white/50"
+          >
+            <Icon name="close" variant="round" className="text-sm" />
+          </button>
+        )}
       </div>
     </div>
   );

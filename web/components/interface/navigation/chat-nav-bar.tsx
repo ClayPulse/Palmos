@@ -88,7 +88,7 @@ export function ChatNavRight() {
   const { getTranslations: t, locale, setLocale } = useTranslations();
   const router = useRouter();
   const [isViewAsOpen, setIsViewAsOpen] = useState(false);
-  const { messages: inboxMessages, unreadCount, markAllRead } = useInbox();
+  const { messages: inboxMessages, unreadCount, markAllRead, dismiss: dismissInbox } = useInbox();
   const { currentSessionIdRef, messages: chatMessages } = useChatContext();
   const [isShareOpen, setIsShareOpen] = useState(false);
 
@@ -154,7 +154,7 @@ export function ChatNavRight() {
                   const kwargs = msg.additionalKwargs;
                   const isWorkflowBuild = kwargs?.type === "workflow_build_complete";
                   return (
-                    <div key={msg.id} className="border-b border-default-100 px-3 py-2.5 last:border-b-0 dark:border-white/5">
+                    <div key={msg.id} className="group border-b border-default-100 px-3 py-2.5 last:border-b-0 dark:border-white/5">
                       <div className="flex items-start gap-2">
                         <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isWorkflowBuild ? "bg-green-100 dark:bg-green-500/15" : "bg-amber-100 dark:bg-amber-500/15"}`}>
                           <Icon
@@ -183,6 +183,12 @@ export function ChatNavRight() {
                             </button>
                           )}
                         </div>
+                        <button
+                          onClick={() => dismissInbox(msg.id)}
+                          className="shrink-0 text-default-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-default-500 dark:text-white/20 dark:hover:text-white/50"
+                        >
+                          <Icon name="close" variant="round" className="text-sm" />
+                        </button>
                       </div>
                     </div>
                   );
