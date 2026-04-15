@@ -69,7 +69,7 @@ export function UserBubble({
 
   return (
     <div className="group flex min-w-0 justify-end">
-      <div className="min-w-0 max-w-[80%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
+      <div className="min-w-0 max-w-[95%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
         <p className="text-xs font-semibold text-white/80">User:</p>
         <p className="mt-0.5 whitespace-pre-wrap break-words text-white">{text}</p>
         {fileNames.length > 0 && (
@@ -148,7 +148,7 @@ export function AIResponseCard({
 }) {
   return (
     <div className="flex min-w-0 justify-start">
-      <div className="flex min-w-0 max-w-[88%] gap-2.5">
+      <div className="flex min-w-0 w-full gap-2.5">
         <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 p-1 dark:bg-amber-500/15">
           <img
             src="/assets/pulse-logo.svg"
