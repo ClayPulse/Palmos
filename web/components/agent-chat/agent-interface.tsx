@@ -13,9 +13,11 @@ import InlineWidget, {
   parseWidgetFromToolCall,
   parseWidgetFromToolMessage,
 } from "@/components/agent-chat/inline-widget";
+import AgentChatPaywall from "@/components/agent-chat/agent-chat-paywall";
 import ChatInputBar, { type ChatUpload } from "@/components/agent-chat/chat-input-bar";
 import ChatMessageArea from "@/components/agent-chat/chat-message-area";
 import Icon from "@/components/misc/icon";
+import { useAgentAccess } from "@/lib/hooks/use-agent-access";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
@@ -84,6 +86,8 @@ export default function AgentChat({
     activeInterrupt,
     resume,
   } = useChatContext();
+
+  const { allowed: agentChatAllowed, isLoading: isLoadingAccess } = useAgentAccess();
 
   const editorContext = useContext(EditorContext);
   const projects = editorContext?.editorStates.projectsInfo;
@@ -771,6 +775,11 @@ export default function AgentChat({
     onRemoveUpload: handleRemoveUpload,
     onIndexUpload: handleIndexUpload,
   } as const;
+
+  // ── Gate: paywall for users without agent chat access ────────────────────
+  if (!isLoadingAccess && !agentChatAllowed) {
+    return <AgentChatPaywall />;
+  }
 
   // ── Page layout ──────────────────────────────────────────────────────────
 

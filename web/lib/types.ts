@@ -654,6 +654,7 @@ export type ProjectInfo = {
   role?: string;
   memberCount?: number;
   workflowCount?: number;
+  agentChatAllowed?: boolean;
 };
 
 export type ProjectMemberInfo = {
