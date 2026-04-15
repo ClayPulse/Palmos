@@ -118,6 +118,12 @@ export function WorkflowTaskCard({
   );
 }
 
+/** Parse `workflow:\n  name: <name>` from result text */
+function parseWorkflowName(text: string): string | null {
+  const match = text.match(/workflow:\s*\n\s*name:\s*(.+)/);
+  return match ? match[1].trim() : null;
+}
+
 // ── Agent progress log ──────────────────────────────────────────────────────
 
 function AgentProgressLog({
@@ -533,11 +539,29 @@ export function WorkflowResultBody({
   const textContent =
     typeof result === "string" ? result : JSON.stringify(result, null, 2);
 
+  // Parse workflow name from YAML-like output: workflow:\n  name: (name)
+  const parsedWorkflowName = parseWorkflowName(textContent);
+
   return (
     <div className="border-t border-green-200/60 bg-white/60 px-3.5 py-2 dark:border-green-500/15 dark:bg-white/3">
       <pre className="text-default-700 max-h-48 overflow-auto text-xs break-all whitespace-pre-wrap dark:text-white/70">
         {textContent}
       </pre>
+      {parsedWorkflowName && (
+        <div className="mt-2 flex items-center gap-2">
+          <button
+            onClick={() => {
+              const url = new URL(window.location.href);
+              url.searchParams.set("workflow", parsedWorkflowName);
+              window.location.href = url.toString();
+            }}
+            className="flex items-center gap-1.5 rounded-lg border border-green-300/60 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
+          >
+            <Icon name="open_in_new" variant="round" className="text-sm" />
+            Open {parsedWorkflowName}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

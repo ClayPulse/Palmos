@@ -9,7 +9,7 @@ import {
 } from "@/lib/hooks/use-chat-sessions";
 import type { BaseMessage } from "@langchain/core/messages";
 import type { SubagentInfo, Todo, WorkflowInput } from "@/lib/types";
-import { createContext, useCallback, useContext, useEffect, useRef } from "react";
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 
 const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL + "/api/agent";
 
@@ -32,6 +32,7 @@ export interface ChatContextValue {
   handleSwitchSession: (sessionId: string) => void;
   handleDeleteSession: (sessionId: string) => void;
   saveCurrentSession: () => void;
+  isLoadingSession: boolean;
   // Serialization helpers exposed for external use
   serializeMessage: (msg: BaseMessage) => SerializedMessage;
   deserializeMessage: (msg: SerializedMessage) => BaseMessage | null;
@@ -69,6 +70,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
   } = useChatSessions();
 
   const currentSessionIdRef = useRef<string>(activeSessionId ?? generateSessionId());
+  const [isLoadingSession, setIsLoadingSession] = useState(false);
 
   // Initialize session on mount — restore the active session's messages
   useEffect(() => {
@@ -121,15 +123,20 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         await saveSession(currentSessionIdRef.current, messages.map(serializeMessage));
       }
       clear();
+      setIsLoadingSession(true);
       switchSession(sessionId);
       currentSessionIdRef.current = sessionId;
 
       // Fetch messages from backend/localStorage
-      const msgs = await fetchSessionMessages(sessionId);
-      if (msgs.length > 0) {
-        loadMessages(
-          msgs.map(deserializeMessage).filter(Boolean) as BaseMessage[],
-        );
+      try {
+        const msgs = await fetchSessionMessages(sessionId);
+        if (msgs.length > 0) {
+          loadMessages(
+            msgs.map(deserializeMessage).filter(Boolean) as BaseMessage[],
+          );
+        }
+      } finally {
+        setIsLoadingSession(false);
       }
     },
     [messages, clear, switchSession, saveSession, loadMessages, fetchSessionMessages],
@@ -170,6 +177,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         handleSwitchSession,
         handleDeleteSession,
         saveCurrentSession,
+        isLoadingSession,
         serializeMessage,
         deserializeMessage,
       }}

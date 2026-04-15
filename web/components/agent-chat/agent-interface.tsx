@@ -52,6 +52,7 @@ export default function AgentChat({
     handleSwitchSession,
     handleDeleteSession,
     getSubagentsByMessage,
+    isLoadingSession,
   } = useChatContext();
 
   const editorContext = useContext(EditorContext);
@@ -651,7 +652,7 @@ export default function AgentChat({
     }
   };
 
-  const isEmptyConversation = messages.length === 0 && !isLoading;
+  const isEmptyConversation = messages.length === 0 && !isLoading && !isLoadingSession;
 
   // ── Shared content ───────────────────────────────────────────────────────
 
@@ -965,6 +966,19 @@ export default function AgentChat({
     </div>
   );
 
+  const sessionLoadingIndicator = isLoadingSession && (
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12">
+      <Spinner size="lg" />
+      <motion.p
+        className="text-sm font-medium text-amber-600/80 dark:text-amber-300/70"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+      >
+        Loading conversation...
+      </motion.p>
+    </div>
+  );
+
   const errorBanner = !!error && (
     <div className="rounded-lg border border-red-300/40 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
       {error instanceof Error ? error.message : "An error occurred."}
@@ -1072,25 +1086,31 @@ export default function AgentChat({
           ref={scrollContainerRef}
           className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-5 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]"
         >
-          {isEmptyConversation && emptyState}
-          {messageList}
-          {workflowTasks.map((task) => (
-            <WorkflowTaskCard key={task.taskId} task={task} onTerminate={handleTerminateTask} isTerminating={terminatingTaskIds.has(task.taskId)} />
-          ))}
-          {loadingIndicator}
-          {errorBanner}
+          {isLoadingSession ? (
+            sessionLoadingIndicator
+          ) : (
+            <>
+              {isEmptyConversation && emptyState}
+              {messageList}
+              {workflowTasks.map((task) => (
+                <WorkflowTaskCard key={task.taskId} task={task} onTerminate={handleTerminateTask} isTerminating={terminatingTaskIds.has(task.taskId)} />
+              ))}
+              {loadingIndicator}
+              {errorBanner}
+            </>
+          )}
           <div className="h-2" />
         </div>
 
         {/* Todos */}
-        {todos.length > 0 && (
+        {!isLoadingSession && todos.length > 0 && (
           <div className="border-t border-amber-200/40 px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8">
             <TodoList todos={todos} />
           </div>
         )}
 
         {/* Workflow card */}
-        {latestWorkflow && (
+        {!isLoadingSession && latestWorkflow && (
           <div className="px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]">
             <InlineWidget data={latestWorkflow} />
           </div>
@@ -1342,20 +1362,26 @@ export default function AgentChat({
         ref={scrollContainerRef}
         className="flex min-w-0 flex-col gap-3 overflow-y-auto p-3"
       >
-        {isEmptyConversation && emptyState}
-        {messageList}
-        {workflowTasks.map((task) => (
-          <WorkflowTaskCard key={task.taskId} task={task} />
-        ))}
-        {loadingIndicator}
-        {errorBanner}
+        {isLoadingSession ? (
+          sessionLoadingIndicator
+        ) : (
+          <>
+            {isEmptyConversation && emptyState}
+            {messageList}
+            {workflowTasks.map((task) => (
+              <WorkflowTaskCard key={task.taskId} task={task} />
+            ))}
+            {loadingIndicator}
+            {errorBanner}
+          </>
+        )}
       </div>
 
       {/* Todos */}
-      {todos.length > 0 && <TodoList todos={todos} />}
+      {!isLoadingSession && todos.length > 0 && <TodoList todos={todos} />}
 
       {/* Workflow card */}
-      {latestWorkflow && (
+      {!isLoadingSession && latestWorkflow && (
         <div className="px-3 py-2">
           <InlineWidget data={latestWorkflow} />
         </div>
