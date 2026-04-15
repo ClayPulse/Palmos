@@ -60,10 +60,9 @@ export const flags = defineFlags({
 		type: 'boolean',
 		default: false,
 	},
-	silent: {
-		type: 'boolean',
-		shortFlag: 's',
-		default: false,
+	logLevel: {
+		type: 'string',
+		default: 'normal',
 	},
 });
 

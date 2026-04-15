@@ -13,10 +13,14 @@ export default function PublishWorkflow({cli}: {cli: Result<Flags>}) {
 	const [isAuthenticated, setIsAuthenticated] = useState(false);
 	const [isPublishing, setIsPublishing] = useState(false);
 	const [isPublished, setIsPublished] = useState(false);
+	const [publishedId, setPublishedId] = useState<string | undefined>(undefined);
 	const [errorMessage, setErrorMessage] = useState<string | undefined>(
 		undefined,
 	);
 
+	const verboseLevel = (cli.flags.logLevel ?? 'normal') as string;
+	const isSilent = verboseLevel === 'silent';
+	const isMinimal = verboseLevel === 'minimal';
 	const filePath = cli.input[1];
 
 	// Validate file path
@@ -75,6 +79,9 @@ export default function PublishWorkflow({cli}: {cli: Result<Flags>}) {
 				);
 
 				if (res.status === 200) {
+					const body = await res.json();
+					const id = body.id || body.workflowId;
+					setPublishedId(id);
 					setIsPublished(true);
 				} else {
 					const body = await res.json();
@@ -98,6 +105,40 @@ export default function PublishWorkflow({cli}: {cli: Result<Flags>}) {
 		return <Text color="redBright">⛔ {fileError}</Text>;
 	}
 
+	// Silent: no rendering at all (ID written directly via originalStdoutWrite)
+	if (isSilent) {
+		return null;
+	}
+
+	// Minimal: results and errors only, no spinners/progress
+	if (isMinimal) {
+		return (
+			<>
+				{!isCheckingAuth && !isAuthenticated && (
+					<Text color="redBright">
+						You are not authenticated. Run{' '}
+						<Text color="blueBright">pulse login</Text> first.
+					</Text>
+				)}
+				{errorMessage && (
+					<>
+						<Text color="redBright">❌ Failed to publish workflow.</Text>
+						<Text color="redBright">Error: {errorMessage}</Text>
+					</>
+				)}
+				{isPublished && (
+					<>
+						<Text color="greenBright">✅ Workflow published successfully.</Text>
+						{publishedId && (
+							<Text>Workflow ID: {publishedId}</Text>
+						)}
+					</>
+				)}
+			</>
+		);
+	}
+
+	// Normal: full UI
 	return (
 		<>
 			{isCheckingAuth && (
@@ -125,7 +166,12 @@ export default function PublishWorkflow({cli}: {cli: Result<Flags>}) {
 				</>
 			)}
 			{isPublished && (
-				<Text color="greenBright">✅ Workflow published successfully.</Text>
+				<>
+					<Text color="greenBright">✅ Workflow published successfully.</Text>
+					{publishedId && (
+						<Text>Workflow ID: {publishedId}</Text>
+					)}
+				</>
 			)}
 		</>
 	);
