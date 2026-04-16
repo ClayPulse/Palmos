@@ -4,8 +4,9 @@ export interface WorkflowBuild {
   id: string;
   /** The task ID originally reported by the build_workflow tool. Used on
    * session reload to correlate the build back to its originating AI message
-   * so the built card can render inline. */
-  taskId: string | null;
+   * so the built card can render inline. Optional for locally-constructed
+   * builds that haven't been hydrated from the backend. */
+  taskId?: string | null;
   workflowId: string | null;
   status: string;
   completedAt: string | null;
