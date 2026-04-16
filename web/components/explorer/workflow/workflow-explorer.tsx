@@ -55,7 +55,6 @@ export default function WorkflowExplorer() {
             key={index}
             workflow={wf}
             onPress={openWorkflow}
-            isOwner
             onDelete={() => mutate()}
           />
         ))}

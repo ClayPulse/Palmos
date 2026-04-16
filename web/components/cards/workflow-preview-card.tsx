@@ -20,12 +20,10 @@ import WorkflowDetailsModal from "../interface/workflow-details-modal";
 export default function WorkflowPreviewCard({
   workflow,
   onPress,
-  isOwner,
   onDelete,
 }: {
   workflow: Workflow;
   onPress?: (workflow: Workflow) => void;
-  isOwner?: boolean;
   onDelete?: () => void;
 }) {
   const editorContext = useContext(EditorContext);
@@ -198,7 +196,6 @@ export default function WorkflowPreviewCard({
           workflow={workflow}
           isOpen={isDetailsOpen}
           onClose={() => setIsDetailsOpen(false)}
-          isOwner={isOwner}
           onDelete={onDelete}
         />
       </div>

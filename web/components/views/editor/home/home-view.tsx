@@ -269,7 +269,7 @@ function MarketplaceAppsAndWorkflows() {
 
   const { marketplaceExtensions, isLoadingMarketplaceExtensions } =
     useExtensionAppManager("All");
-  const { workflows, isLoading: isLoadingWorkflow } =
+  const { workflows, isLoading: isLoadingWorkflow, mutate: mutateWorkflows } =
     useMarketplaceWorkflows("All");
 
   const tabItems: TabItem[] = [
@@ -438,6 +438,7 @@ function MarketplaceAppsAndWorkflows() {
                 <WorkflowPreviewCard
                   workflow={wf}
                   onPress={openWorkflowInProject}
+                  onDelete={() => mutateWorkflows()}
                 />
               </div>
             ))}

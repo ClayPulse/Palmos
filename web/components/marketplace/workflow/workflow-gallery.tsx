@@ -40,7 +40,6 @@ export default function WorkflowGallery() {
   const [myContentOnly, setMyContentOnly] = useState(false);
   const effectiveLabel = myContentOnly ? "My Workflows" : label;
   const { isLoading, workflows, mutate } = useMarketplaceWorkflows(effectiveLabel);
-  const isOwnerView = effectiveLabel === "My Workflows" || effectiveLabel === "Published by Me";
   const { createCanvasTabView } = useTabViewManager();
   const { envSetup, checkMissingEnvs, openEnvSetup, closeEnvSetup } =
     useWorkflowEnvCheck();
@@ -103,7 +102,6 @@ export default function WorkflowGallery() {
         <WorkflowPreviewCard
           workflow={workflow}
           onPress={openWorkflow}
-          isOwner={isOwnerView}
           onDelete={() => mutate()}
         />
       </div>

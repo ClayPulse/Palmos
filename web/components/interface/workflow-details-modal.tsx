@@ -62,13 +62,11 @@ export default function WorkflowDetailsModal({
   workflow,
   isOpen,
   onClose,
-  isOwner,
   onDelete,
 }: {
   workflow: Workflow;
   isOpen: boolean;
   onClose: () => void;
-  isOwner?: boolean;
   onDelete?: () => void;
 }) {
   const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://palmos.ai";
@@ -168,15 +166,13 @@ export default function WorkflowDetailsModal({
           )}
         </ModalBody>
         <ModalFooter>
-          {isOwner && (
-            <DeleteWorkflowButton
-              workflowId={workflow.id}
-              onDeleted={() => {
-                onClose();
-                onDelete?.();
-              }}
-            />
-          )}
+          <DeleteWorkflowButton
+            workflowId={workflow.id}
+            onDeleted={() => {
+              onClose();
+              onDelete?.();
+            }}
+          />
           <Button onPress={onClose}>Close</Button>
         </ModalFooter>
       </ModalContent>
