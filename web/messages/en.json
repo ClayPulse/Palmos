@@ -726,6 +726,10 @@
     "publishWorkflow": {
       "name": "Publish Workflow",
       "description": "Publish the current workflow to the Pulse Marketplace"
+    },
+    "uploadWorkflow": {
+      "name": "Upload Workflow",
+      "description": "Upload a YAML or JSON workflow to your library"
     }
   },
   "viewMenu": {

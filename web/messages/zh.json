@@ -726,6 +726,10 @@
 		"publishWorkflow": {
 			"name": "发布工作流",
 			"description": "将当前工作流发布到 Pulse Marketplace"
+		},
+		"uploadWorkflow": {
+			"name": "上传工作流",
+			"description": "上传 YAML 或 JSON 工作流到你的工作流库"
 		}
 	},
 	"viewMenu": {

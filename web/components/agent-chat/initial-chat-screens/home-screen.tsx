@@ -8,8 +8,8 @@ import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace
 import { useAutomations } from "@/lib/hooks/use-automations";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import type { ProjectInfo } from "@/lib/types";
-import { Spinner } from "@heroui/react";
-import { useContext, useState } from "react";
+import { Checkbox, Spinner } from "@heroui/react";
+import { useContext, useMemo, useState } from "react";
 
 const PROJECTS_PER_PAGE = 4;
 
@@ -22,9 +22,16 @@ interface HomeScreenProps {
 export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
-  const { workflows: myWorkflows, isLoading: isLoadingWorkflows, mutate: mutateWorkflows } =
+  const { workflows: allWorkflows, isLoading: isLoadingWorkflows, mutate: mutateWorkflows } =
     useMarketplaceWorkflows("My Workflows");
   const { automations, isLoading: isLoadingAutomations } = useAutomations();
+  const [showAll, setShowAll] = useState(false);
+
+  const myWorkflows = useMemo(() => {
+    if (!allWorkflows) return undefined;
+    if (showAll) return allWorkflows;
+    return allWorkflows.filter((wf) => !wf.projectId);
+  }, [allWorkflows, showAll]);
 
   function openProject(name: string) {
     editorContext?.setEditorStates((prev) => ({ ...prev, project: name }));
@@ -95,7 +102,16 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
             <Spinner size="sm" />
           </div>
         ) : myWorkflows && myWorkflows.length > 0 ? (
-          <MyWorkflowsCarousel workflows={myWorkflows} onMutate={() => mutateWorkflows()} />
+          <MyWorkflowsCarousel
+            workflows={myWorkflows}
+            onMutate={() => mutateWorkflows()}
+            showAllToggle={
+              <Checkbox size="sm" isSelected={showAll} onValueChange={setShowAll}>
+                <span className="text-default-400 text-xs">Show all</span>
+              </Checkbox>
+            }
+            showProjectName={showAll}
+          />
         ) : null}
       </div>
     </div>
