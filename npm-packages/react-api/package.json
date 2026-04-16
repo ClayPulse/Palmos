@@ -1,6 +1,6 @@
 {
   "name": "@pulse-editor/react-api",
-  "version": "0.1.1-beta.87",
+  "version": "0.1.1-beta.89",
   "main": "dist/main.js",
   "files": [
     "dist"
@@ -44,12 +44,12 @@
     "vitest": "^4.1.2"
   },
   "peerDependencies": {
-    "@pulse-editor/shared-utils": "0.1.1-beta.87",
+    "@pulse-editor/shared-utils": "0.1.1-beta.89",
     "react": "19.2.4",
     "react-dom": "19.2.4"
   },
   "dependencies": {
-    "@module-federation/runtime": "^2.3.2",
+    "@module-federation/runtime": "2.3.3",
     "use-debounce": "^10.1.0"
   }
 }

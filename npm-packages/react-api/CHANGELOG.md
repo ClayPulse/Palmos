@@ -1,5 +1,21 @@
 # @pulse-editor/react-api
 
+## 0.1.1-beta.89
+
+### Patch Changes
+
+- Update packages
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.89
+
+## 0.1.1-beta.88
+
+### Patch Changes
+
+- Update MF version
+- Updated dependencies
+  - @pulse-editor/shared-utils@0.1.1-beta.88
+
 ## 0.1.1-beta.87
 
 ### Patch Changes
