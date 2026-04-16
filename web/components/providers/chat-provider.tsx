@@ -115,18 +115,31 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
   useEffect(() => {
     if (messages.length === 0 || isViewingSharedRef.current) return;
     clearTimeout(saveTimeoutRef.current);
+    // Capture the session id + project id NOW (enqueue time) so that if the
+    // user switches sessions before the timer fires, the pending save still
+    // writes to the session these messages actually belong to. Reading
+    // currentSessionIdRef.current inside the timer would let a stale save
+    // clobber a different session's history.
+    const sessionIdAtEnqueue = currentSessionIdRef.current;
+    const projectIdAtEnqueue = editorContext?.editorStates.projectsInfo?.find(
+      (p) => p.name === editorContext?.editorStates.project,
+    )?.id ?? null;
+    const messagesAtEnqueue = messages.map(serializeMessage);
     saveTimeoutRef.current = setTimeout(() => {
-      // Capture the current project so the session is tagged
-      const currentProjectId = editorContext?.editorStates.projectsInfo?.find(
-        (p) => p.name === editorContext?.editorStates.project,
-      )?.id ?? null;
       saveSession(
-        currentSessionIdRef.current,
-        messages.map(serializeMessage),
-        currentProjectId,
+        sessionIdAtEnqueue,
+        messagesAtEnqueue,
+        projectIdAtEnqueue,
       ).then((resolvedId) => {
-        // If backend assigned a new ID, update our ref
-        if (resolvedId && resolvedId !== currentSessionIdRef.current) {
+        // If backend assigned a new ID, update our ref — but only if the ref
+        // is still pointing at the session we just saved. Otherwise the user
+        // has already switched away and updating the ref would misroute
+        // future saves.
+        if (
+          resolvedId &&
+          resolvedId !== sessionIdAtEnqueue &&
+          currentSessionIdRef.current === sessionIdAtEnqueue
+        ) {
           currentSessionIdRef.current = resolvedId;
         }
       });
@@ -153,21 +166,52 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     [saveWorkflowBuildAPI],
   );
 
+  const isSwitchingRef = useRef(false);
   const handleSwitchSession = useCallback(
     async (sessionId: string) => {
-      // Save current session first (skip if viewing a shared chat)
-      if (messages.length > 0 && !isViewingSharedRef.current) {
-        await saveSession(currentSessionIdRef.current, messages.map(serializeMessage));
-      }
-      isViewingSharedRef.current = false;
+      // Guard against re-entrant switches (rapid clicks): only one switch
+      // may be in flight at a time, otherwise concurrent invocations can
+      // interleave their state updates and load messages under the wrong
+      // session.
+      if (isSwitchingRef.current) return;
+      if (sessionId === currentSessionIdRef.current) return;
+      isSwitchingRef.current = true;
+      // Cancel any pending debounced auto-save before we mutate state — the
+      // enqueued save would otherwise write stale messages under whatever
+      // session id it captured, which is fine on its own but we'd rather
+      // flush it explicitly below.
+      clearTimeout(saveTimeoutRef.current);
+      // Snapshot what we need from the outgoing session before clearing.
+      const outgoingSessionId = currentSessionIdRef.current;
+      const outgoingMessages = messages;
+      const wasSharedView = isViewingSharedRef.current;
+      // Abort any in-flight stream FIRST so late SSE chunks can't leak
+      // messages into the next session's messageMapRef.
       clear();
+      isViewingSharedRef.current = false;
       setIsLoadingSession(true);
       switchSession(sessionId);
       currentSessionIdRef.current = sessionId;
 
+      // Flush the outgoing session's messages (skip if it was a read-only
+      // shared chat view).
+      if (outgoingMessages.length > 0 && !wasSharedView) {
+        try {
+          await saveSession(
+            outgoingSessionId,
+            outgoingMessages.map(serializeMessage),
+          );
+        } catch {
+          // Best-effort; don't block the switch on a save failure.
+        }
+      }
+
       // Fetch messages from backend/localStorage
       try {
         const data = await fetchSessionMessages(sessionId);
+        // Guard: if the user switched again while we were fetching, don't
+        // load these results into the currently-active session.
+        if (currentSessionIdRef.current !== sessionId) return;
         if (data.messages.length > 0) {
           loadMessages(
             data.messages.map(deserializeMessage).filter(Boolean) as BaseMessage[],
@@ -197,6 +241,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         }
       } finally {
         setIsLoadingSession(false);
+        isSwitchingRef.current = false;
       }
     },
     [messages, clear, switchSession, saveSession, loadMessages, fetchSessionMessages, editorContext],

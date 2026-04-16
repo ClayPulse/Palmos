@@ -35,58 +35,10 @@ export interface SerializedMessage {
   tool_calls?: unknown[];
 }
 
-const STORAGE_KEY = "pulse-chat-sessions";
-const ACTIVE_SESSION_KEY = "pulse-active-chat-session";
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-// ---------------------------------------------------------------------------
-// localStorage helpers (used as fast cache / offline fallback)
-// ---------------------------------------------------------------------------
-
-interface LocalSession extends ChatSession {
-  messages: SerializedMessage[];
-}
-
-function loadLocalSessions(): LocalSession[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveLocalSessions(sessions: LocalSession[]) {
-  localStorage.setItem(
-    STORAGE_KEY,
-    JSON.stringify(sessions.slice(0, 50)),
-  );
-}
-
-function getActiveSessionId(): string | null {
-  return localStorage.getItem(ACTIVE_SESSION_KEY);
-}
-
-function setActiveSessionId(id: string | null) {
-  if (id) {
-    localStorage.setItem(ACTIVE_SESSION_KEY, id);
-  } else {
-    localStorage.removeItem(ACTIVE_SESSION_KEY);
-  }
-}
-
 export function generateSessionId(): string {
-  const randomSuffix = (() => {
-    const cryptoObj = (typeof globalThis !== "undefined" && (globalThis as any).crypto) || null;
-    if (cryptoObj && typeof cryptoObj.getRandomValues === "function") {
-      const array = new Uint32Array(1);
-      cryptoObj.getRandomValues(array);
-      return array[0].toString(36).slice(0, 6);
-    }
-    // Fallback: not cryptographically secure, but keeps functionality in non‑crypto environments
-    return Math.random().toString(36).slice(2, 8);
-  })();
-  return `session-${Date.now()}-${randomSuffix}`;
+  return `session-${crypto.randomUUID()}`;
 }
 
 function deriveTitle(messages: SerializedMessage[]): string {
@@ -137,13 +89,14 @@ async function apiFetch(path: string, init?: RequestInit) {
 export function useChatSessions() {
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const isBackendAvailable = useRef(true);
+  /** IDs the backend has acknowledged — used to decide PUT vs POST on save
+   *  without needing any client-side persistence. Populated from the initial
+   *  list fetch and whenever a POST assigns a new id. */
+  const knownSessionIdsRef = useRef<Set<string>>(new Set());
 
-  // Load sessions on mount — try backend first, fallback to localStorage
+  // Load sessions on mount from backend. No client-side persistence — if the
+  // backend is unavailable the list is simply empty.
   useEffect(() => {
-    const storedActiveId = getActiveSessionId();
-    setActiveSessionId(storedActiveId);
-
     apiFetch("/api/chat/sessions")
       .then(async (res) => {
         if (!res.ok) throw new Error("Backend unavailable");
@@ -154,7 +107,6 @@ export function useChatSessions() {
           createdAt: string;
           updatedAt: string;
         }> = await res.json();
-        isBackendAvailable.current = true;
         const mapped = data.map((s) => ({
           id: s.id,
           title: s.title,
@@ -162,114 +114,118 @@ export function useChatSessions() {
           createdAt: new Date(s.createdAt).getTime(),
           updatedAt: new Date(s.updatedAt).getTime(),
         }));
+        knownSessionIdsRef.current = new Set(mapped.map((s) => s.id));
         setSessions(mapped);
       })
       .catch(() => {
-        // Fallback to localStorage
-        isBackendAvailable.current = false;
-        const local = loadLocalSessions();
-        setSessions(
-          local.map(({ messages: _, ...rest }) => rest),
-        );
+        // Backend unreachable — start with an empty list.
+        setSessions([]);
       });
   }, []);
 
   const saveSession = useCallback(
-    async (sessionId: string, messages: SerializedMessage[], projectId?: string | null) => {
+    async (
+      sessionId: string,
+      messages: SerializedMessage[],
+      projectId?: string | null,
+    ) => {
       const title = deriveTitle(messages);
       const now = Date.now();
+      const backendMessages = messages.map(toBackendMessage);
+      const existsOnBackend = knownSessionIdsRef.current.has(sessionId);
 
-      // Always update localStorage cache
-      const local = loadLocalSessions();
-      const existing = local.find((s) => s.id === sessionId);
-      let updatedLocal: LocalSession[];
-      if (existing) {
-        updatedLocal = local.map((s) =>
-          s.id === sessionId ? { ...s, title, messages, updatedAt: now, ...(projectId !== undefined ? { projectId } : {}) } : s,
-        );
-      } else {
-        updatedLocal = [
-          { id: sessionId, title, projectId: projectId ?? null, createdAt: now, updatedAt: now, messages },
-          ...local,
-        ];
-      }
-      updatedLocal.sort((a, b) => b.createdAt - a.createdAt);
-      saveLocalSessions(updatedLocal);
-      setSessions(updatedLocal.map(({ messages: _, ...rest }) => rest));
-
-      // Sync to backend
-      if (isBackendAvailable.current) {
-        try {
-          const backendMessages = messages.map(toBackendMessage);
-          if (existing) {
-            await apiFetch(`/api/chat/sessions/${sessionId}`, {
-              method: "PUT",
-              body: JSON.stringify({ title, projectId, messages: backendMessages }),
-            });
-          } else {
-            const res = await apiFetch("/api/chat/sessions", {
-              method: "POST",
-              body: JSON.stringify({ title, projectId, messages: backendMessages }),
-            });
-            if (res.ok) {
-              const created = await res.json();
-              // Replace the local temp ID with the backend-assigned ID
-              if (created.id !== sessionId) {
-                const remap = loadLocalSessions().map((s) =>
-                  s.id === sessionId
-                    ? { ...s, id: created.id, updatedAt: new Date(created.updatedAt).getTime() }
-                    : s,
-                );
-                saveLocalSessions(remap);
-                setSessions(remap.map(({ messages: _, ...rest }) => rest));
-                // Update active session ID if it was the temp one
-                if (getActiveSessionId() === sessionId) {
-                  setActiveSessionId(created.id);
-                  setActiveSessionId(created.id);
-                }
-                return created.id as string;
-              }
-            }
-          }
-        } catch {
-          // Backend save failed; localStorage is still the source of truth
+      try {
+        if (existsOnBackend) {
+          await apiFetch(`/api/chat/sessions/${sessionId}`, {
+            method: "PUT",
+            body: JSON.stringify({ title, projectId, messages: backendMessages }),
+          });
+          setSessions((prev) => {
+            const next = prev.map((s) =>
+              s.id === sessionId
+                ? {
+                    ...s,
+                    title,
+                    updatedAt: now,
+                    ...(projectId !== undefined ? { projectId } : {}),
+                  }
+                : s,
+            );
+            next.sort((a, b) => b.updatedAt - a.updatedAt);
+            return next;
+          });
+          return sessionId;
         }
+
+        // New session — POST and let the backend assign the canonical id.
+        const res = await apiFetch("/api/chat/sessions", {
+          method: "POST",
+          body: JSON.stringify({ title, projectId, messages: backendMessages }),
+        });
+        if (!res.ok) return sessionId;
+        const created = await res.json();
+        const createdId = created.id as string;
+        const createdAt = new Date(created.createdAt ?? now).getTime();
+        const updatedAt = new Date(created.updatedAt ?? now).getTime();
+        knownSessionIdsRef.current.add(createdId);
+        setSessions((prev) => {
+          const withoutTemp = prev.filter((s) => s.id !== sessionId);
+          const next = [
+            {
+              id: createdId,
+              title,
+              projectId: projectId ?? null,
+              createdAt,
+              updatedAt,
+            },
+            ...withoutTemp,
+          ];
+          next.sort((a, b) => b.updatedAt - a.updatedAt);
+          return next;
+        });
+        // If the caller's temp id was the active session, swap it over.
+        setActiveSessionId((current) =>
+          current === sessionId ? createdId : current,
+        );
+        return createdId;
+      } catch {
+        // Backend save failed — nothing to fall back to.
+        return sessionId;
       }
-      return sessionId;
     },
     [],
   );
 
   const fetchSessionMessages = useCallback(
-    async (sessionId: string): Promise<{ messages: SerializedMessage[]; workflowBuilds?: WorkflowBuild[]; projectId?: string | null }> => {
-      // Try backend first
-      if (isBackendAvailable.current) {
-        try {
-          const res = await apiFetch(`/api/chat/sessions/${sessionId}`);
-          if (res.ok) {
-            const data = await res.json();
-            return {
-              messages: Array.isArray(data.messages) ? data.messages.map(fromBackendMessage) : [],
-              workflowBuilds: data.workflowBuilds ?? undefined,
-              projectId: data.projectId ?? null,
-            };
-          }
-        } catch {
-          // fall through to localStorage
+    async (
+      sessionId: string,
+    ): Promise<{
+      messages: SerializedMessage[];
+      workflowBuilds?: WorkflowBuild[];
+      projectId?: string | null;
+    }> => {
+      try {
+        const res = await apiFetch(`/api/chat/sessions/${sessionId}`);
+        if (res.ok) {
+          const data = await res.json();
+          return {
+            messages: Array.isArray(data.messages)
+              ? data.messages.map(fromBackendMessage)
+              : [],
+            workflowBuilds: data.workflowBuilds ?? undefined,
+            projectId: data.projectId ?? null,
+          };
         }
+      } catch {
+        // fall through
       }
-
-      // Fallback to localStorage
-      const local = loadLocalSessions();
-      const session = local.find((s) => s.id === sessionId);
-      return { messages: session?.messages ?? [], projectId: (session as any)?.projectId ?? null };
+      return { messages: [], projectId: null };
     },
     [],
   );
 
   const saveWorkflowBuild = useCallback(
     async (sessionId: string, publishedWorkflowId: string) => {
-      if (!isBackendAvailable.current) return;
       try {
         await apiFetch(`/api/chat/sessions/${sessionId}`, {
           method: "PATCH",
@@ -282,45 +238,24 @@ export function useChatSessions() {
     [],
   );
 
-  const switchSession = useCallback(
-    (sessionId: string) => {
-      setActiveSessionId(sessionId);
-      setActiveSessionId(sessionId);
-    },
-    [],
-  );
+  const switchSession = useCallback((sessionId: string) => {
+    setActiveSessionId(sessionId);
+  }, []);
 
   const startNewSession = useCallback(() => {
     const id = generateSessionId();
-    setActiveSessionId(id);
     setActiveSessionId(id);
     return id;
   }, []);
 
   const deleteSession = useCallback(async (sessionId: string) => {
-    // Remove from localStorage
-    const local = loadLocalSessions().filter((s) => s.id !== sessionId);
-    saveLocalSessions(local);
-    setSessions(local.map(({ messages: _, ...rest }) => rest));
-
-    // If deleting the active session, clear it
-    setActiveSessionId((current) => {
-      if (current === sessionId) {
-        setActiveSessionId(null);
-        return null;
-      }
-      return current;
-    });
-
-    // Delete from backend
-    if (isBackendAvailable.current) {
-      try {
-        await apiFetch(`/api/chat/sessions/${sessionId}`, {
-          method: "DELETE",
-        });
-      } catch {
-        // Ignore backend errors
-      }
+    setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+    knownSessionIdsRef.current.delete(sessionId);
+    setActiveSessionId((current) => (current === sessionId ? null : current));
+    try {
+      await apiFetch(`/api/chat/sessions/${sessionId}`, { method: "DELETE" });
+    } catch {
+      // Ignore backend errors
     }
   }, []);
 
