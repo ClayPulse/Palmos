@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import { formatRelativeTime } from "@/components/agent-chat/session-history";
+import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import type {
   InboxMessage,

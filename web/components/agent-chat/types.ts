@@ -128,17 +128,6 @@ export interface ChatEmbedPanelProps {
 
 export type Session = { id: string; title: string; updatedAt: number };
 
-export interface HistoryOverlayProps {
-  isPage: boolean;
-  sessions: Session[];
-  activeSessionId: string;
-  onSwitch: (id: string) => void;
-  onDelete: (id: string) => void;
-  onNewChat: () => void;
-  onClose: () => void;
-  onShare?: (id: string) => void;
-}
-
 // ── Inbox panel ─────────────────────────────────────────────────────────────
 
 export interface InboxMessage {

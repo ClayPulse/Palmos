@@ -5,7 +5,6 @@ import ShareChatModal from "@/components/modals/share-chat-modal";
 import Icon from "@/components/misc/icon";
 import MoveToProjectModal from "@/components/misc/move-to-project-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
-import { formatRelativeTime } from "@/components/agent-chat/session-history";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
@@ -20,6 +19,7 @@ import {
 } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useContext, useState } from "react";
+import { formatRelativeTime } from "@/components/agent-chat/helpers";
 
 export default function ChatSessionSidebar({
   isOpen,

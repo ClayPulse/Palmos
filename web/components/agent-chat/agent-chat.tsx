@@ -2,7 +2,7 @@
 
 import { SubagentCard } from "@/components/agent-chat/cards/subagent-card";
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
-import HistoryOverlay from "@/components/agent-chat/history-overlay";
+import ChatHistoryPanel from "@/components/interface/panels/chat-history-panel";
 import HomeScreen from "@/components/agent-chat/initial-chat-screens/home-screen";
 import ProjectScreen from "@/components/agent-chat/initial-chat-screens/project-screen";
 import {
@@ -800,20 +800,8 @@ export default function AgentChat({
     />
   );
 
-  const historyOverlay = isHistoryOpen && (
-    <HistoryOverlay
-      isPage={isPage}
-      sessions={sessions}
-      activeSessionId={currentSessionIdRef.current}
-      onSwitch={handleSwitchSession}
-      onDelete={handleDeleteSession}
-      onNewChat={() => {
-        handleNewChat();
-        setIsHistoryOpen(false);
-      }}
-      onClose={() => setIsHistoryOpen(false)}
-      onShare={isPage ? (id) => setShareSessionId(id) : undefined}
-    />
+  const historyOverlay = (
+    <ChatHistoryPanel isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
   );
 
   const tasksOverlay = isTasksOpen && (
