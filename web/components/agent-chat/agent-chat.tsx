@@ -1,7 +1,7 @@
 "use client";
 
 import { SubagentCard } from "@/components/agent-chat/cards/subagent-card";
-import { WorkflowBuiltCard } from "@/components/agent-chat/cards/workflow-task-card";
+import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import ChatHistoryPanel from "@/components/interface/panels/chat-history-panel";
 import HomeScreen from "@/components/agent-chat/initial-chat-screens/home-screen";
@@ -375,6 +375,9 @@ export default function AgentChat({
         )
         .map((r) => ({
           taskId: r.workflowId!,
+          // Preserve the originating build_workflow tool-call taskId so the
+          // card can be rendered inline under its AI message on reload.
+          originalTaskId: r.taskId ?? undefined,
           workflowName: r.workflow?.name ?? "Workflow",
           startedAt: r.completedAt
             ? new Date(r.completedAt).getTime()
@@ -649,70 +652,49 @@ export default function AgentChat({
     return map;
   }, [messages]);
 
-  // Map originalTaskId -> completed build task (with publishedWorkflowId).
-  const completedBuildTaskByOriginalId = useMemo(() => {
-    const map = new Map<string, WorkflowTaskState>();
-    for (const t of workflowTasks) {
-      if (t.status !== "completed" || !t.originalTaskId) continue;
-      if (!extractPublishedWorkflowId(t.result)) continue;
-      map.set(t.originalTaskId, t);
-    }
-    return map;
-  }, [workflowTasks]);
+  // Attach each workflow task to its originating AI message. Walks the
+  // messages array looking for any message whose content contains the task's
+  // original ID (covers both ToolMessage results and any message that embeds
+  // the JSON), then walks backwards to the nearest non-human / AI message to
+  // find the "owner" message under which to render the task card.
+  const aiMessageWorkflowTask = useMemo(() => {
+    const byMsg = new WeakMap<object, WorkflowTaskState>();
+    const attached = new Set<string>();
 
-  // Each AIMessage that issued a `build_workflow` tool call is paired with its
-  // resulting workflow run (resolved via the matching ToolMessage's taskId and
-  // the completed workflowTasks state). Rendering uses this so an AI message
-  // carries its content AND workflow run status together, instead of the card
-  // trailing at the bottom of the chat.
-  type WorkflowRunAssoc = {
-    publishedWorkflowId: string;
-    workflowName: string;
-    /** task.taskId (rewritten to pwfId on completion) — used to dedupe the
-     * bottom task list once the card has been rendered inline with its AI
-     * message. */
-    dedupeTaskId: string;
-  };
-  const aiMessageWorkflowRun = useMemo(() => {
-    // Build tool_call_id -> ToolMessage content for quick lookup
-    const toolResultByCallId = new Map<string, string>();
-    for (const msg of messages) {
-      const tcid = (msg as any).tool_call_id as string | undefined;
-      if (!tcid) continue;
-      const c = typeof msg.content === "string" ? msg.content : "";
-      if (c) toolResultByCallId.set(tcid, c);
-    }
+    for (const task of workflowTasks) {
+      const origId = task.originalTaskId;
+      if (!origId || attached.has(origId)) continue;
 
-    const byMessageKey = new Map<string, WorkflowRunAssoc>();
-    for (let idx = 0; idx < messages.length; idx++) {
-      const msg = messages[idx];
-      if (!(msg instanceof AIMessage) || !msg.tool_calls) continue;
-      for (const tc of msg.tool_calls) {
-        if (tc.name !== "build_workflow" || !tc.id) continue;
-        const resultContent = toolResultByCallId.get(tc.id);
-        if (!resultContent) continue;
-        let taskId: string | undefined;
-        try {
-          taskId = (JSON.parse(resultContent) as { taskId?: string }).taskId;
-        } catch {
-          continue;
+      // Find any message whose content mentions this task ID.
+      let matchIdx = -1;
+      for (let k = 0; k < messages.length; k++) {
+        const m = messages[k];
+        const c = typeof m.content === "string" ? m.content : "";
+        if (c.includes(origId)) {
+          matchIdx = k;
+          break;
         }
-        if (!taskId) continue;
-        const task = completedBuildTaskByOriginalId.get(taskId);
-        const pwfId = task && extractPublishedWorkflowId(task.result);
-        if (!task || !pwfId) continue;
-        byMessageKey.set(msg.id ?? String(idx), {
-          publishedWorkflowId: pwfId,
-          workflowName: task.workflowName,
-          dedupeTaskId: task.taskId,
-        });
-        break; // one build_workflow per AI message is the expected case
       }
-    }
-    return byMessageKey;
-  }, [messages, completedBuildTaskByOriginalId]);
+      if (matchIdx < 0) continue;
 
-  const inlinedBuildTaskIds = new Set<string>();
+      // Walk backwards to find the AI message that owns this tool call.
+      let ownerIdx = matchIdx;
+      while (
+        ownerIdx >= 0 &&
+        (messages[ownerIdx]._getType() === "human" ||
+          (messages[ownerIdx] as any).tool_call_id)
+      ) {
+        ownerIdx--;
+      }
+      if (ownerIdx < 0) continue; // no preceding AI message — leave for bottom list
+
+      byMsg.set(messages[ownerIdx], task);
+      attached.add(origId);
+    }
+    return byMsg;
+  }, [messages, workflowTasks]);
+
+  const inlinedTaskIds = new Set<string>();
 
   const messageList = messages.map((msg, i) => {
     const isHuman = msg._getType() === "human";
@@ -751,14 +733,11 @@ export default function AgentChat({
       if (w) widgets.push(w);
     }
 
-    // An AI message that issued a build_workflow tool call owns the resulting
-    // workflow run. Pair the two so the card renders alongside the message
-    // content rather than trailing at the bottom of the chat.
-    const workflowRun =
-      msg instanceof AIMessage
-        ? aiMessageWorkflowRun.get(msg.id ?? String(i))
-        : undefined;
-    if (workflowRun) inlinedBuildTaskIds.add(workflowRun.dedupeTaskId);
+    // An AI message that issued a build_workflow / run_workflow tool call
+    // owns the resulting workflow task. Pair the two so the task card renders
+    // alongside the message content rather than trailing at the bottom.
+    const workflowTask = aiMessageWorkflowTask.get(msg);
+    if (workflowTask) inlinedTaskIds.add(workflowTask.taskId);
 
     const spawned = msg.id ? getSubagentsByMessage(msg.id) : [];
     const nonCanvasWidgets = widgets.filter((w) => w.type !== "canvas");
@@ -794,7 +773,7 @@ export default function AgentChat({
       spawned.length === 0 &&
       !widgets.length &&
       toolCallNames.length === 0 &&
-      !workflowRun
+      !workflowTask
     )
       return null;
     if (!isHuman && (msg as any).tool_call_id) return null;
@@ -845,13 +824,12 @@ export default function AgentChat({
             ))}
           </div>
         )}
-        {workflowRun && (
-          <div className="overflow-hidden rounded-xl border border-green-300/60 bg-green-50/50 shadow-sm dark:border-green-500/30 dark:bg-green-500/5">
-            <WorkflowBuiltCard
-              publishedId={workflowRun.publishedWorkflowId}
-              workflowName={workflowRun.workflowName}
-            />
-          </div>
+        {workflowTask && (
+          <WorkflowTaskCard
+            task={workflowTask}
+            onTerminate={handleTerminateTask}
+            isTerminating={terminatingTaskIds?.has(workflowTask.taskId)}
+          />
         )}
       </div>
     );
@@ -904,7 +882,7 @@ export default function AgentChat({
     isEmptyConversation,
     emptyState,
     messageList,
-    workflowTasks: workflowTasks.filter((t) => !inlinedBuildTaskIds.has(t.taskId)),
+    workflowTasks: workflowTasks.filter((t) => !inlinedTaskIds.has(t.taskId)),
     onTerminateTask: handleTerminateTask,
     terminatingTaskIds,
     activeInterrupt,
