@@ -38,7 +38,7 @@ export interface SerializedMessage {
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export function generateSessionId(): string {
-  return `session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  return `session-${crypto.randomUUID()}`;
 }
 
 function deriveTitle(messages: SerializedMessage[]): string {
