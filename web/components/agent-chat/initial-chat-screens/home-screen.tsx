@@ -22,7 +22,7 @@ interface HomeScreenProps {
 export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
-  const { workflows: myWorkflows, isLoading: isLoadingWorkflows } =
+  const { workflows: myWorkflows, isLoading: isLoadingWorkflows, mutate: mutateWorkflows } =
     useMarketplaceWorkflows("My Workflows");
   const { automations, isLoading: isLoadingAutomations } = useAutomations();
 
@@ -95,7 +95,7 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
             <Spinner size="sm" />
           </div>
         ) : myWorkflows && myWorkflows.length > 0 ? (
-          <MyWorkflowsCarousel workflows={myWorkflows} />
+          <MyWorkflowsCarousel workflows={myWorkflows} onMutate={() => mutateWorkflows()} />
         ) : null}
       </div>
     </div>

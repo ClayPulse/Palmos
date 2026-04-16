@@ -1254,7 +1254,7 @@
 		"done": "已完成",
 		"failed": "失败",
 		"runningCount": "运行中",
-		"noTasks": "暂无任务。工作流运行和托管代理任务将显示在此处。",
+		"noTasks": "暂无任务。工作流运行和托管智能体任务将显示在此处。",
 		"noFilteredTasks": "没有{filter}任务。"
 	},
 	"sessionHistory": {
@@ -1289,13 +1289,13 @@
 		"latest": "最新："
 	},
 	"agentChatPaywall": {
-		"upgradeTitle": "升级以使用 AI 代理",
-		"upgradeDescription": "代理聊天需要付费计划（Starter 或更高）。您也可以通过被邀请加入付费用户的项目来获得访问权限。",
+		"upgradeTitle": "升级以使用 AI 智能体",
+		"upgradeDescription": "智能体聊天需要付费计划（Starter 或更高）。您也可以通过被邀请加入付费用户的项目来获得访问权限。",
 		"viewPlans": "查看计划",
-		"alreadyMember": "已经是付费项目的成员？从项目选择器中选择它以开始使用 AI 代理。"
+		"alreadyMember": "已经是付费项目的成员？从项目选择器中选择它以开始使用 AI 智能体。"
 	},
 	"appModeToggle": {
-		"agent": "代理",
+		"agent": "智能体",
 		"editor": "编辑器"
 	},
 	"createInviteLinkModal": {

@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import WorkflowDetailsModal from "@/components/interface/workflow-details-modal";
 import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
@@ -12,7 +13,7 @@ import { Button, Chip } from "@heroui/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useState } from "react";
 
-export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
+export function MyWorkflowsCarousel({ workflows, onMutate, projectId }: { workflows: Workflow[]; onMutate?: () => void; projectId?: string }) {
   const { getTranslations: t } = useTranslations();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);
@@ -26,6 +27,7 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
   const { envSetup, checkMissingEnvs, openEnvSetup, closeEnvSetup } =
     useWorkflowEnvCheck();
   const [pendingWorkflow, setPendingWorkflow] = useState<Workflow | null>(null);
+  const [detailsWorkflow, setDetailsWorkflow] = useState<Workflow | null>(null);
 
   async function proceedToCanvas(workflow: Workflow) {
     await createCanvasTabView(
@@ -109,6 +111,14 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
               <Button
                 size="sm"
                 variant="flat"
+                onPress={() => setDetailsWorkflow(wf)}
+                startContent={<Icon name="info" className="text-sm" />}
+              >
+                Details
+              </Button>
+              <Button
+                size="sm"
+                variant="flat"
                 color="primary"
                 startContent={<Icon name="open_in_new" className="text-sm" />}
                 onPress={() => openWorkflow(wf)}
@@ -135,6 +145,14 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
           }}
           workflowId={envSetup.workflowId}
           envEntries={envSetup.env}
+        />
+      )}
+      {detailsWorkflow && (
+        <WorkflowDetailsModal
+          workflow={{ ...detailsWorkflow, projectId: detailsWorkflow.projectId ?? projectId ?? null }}
+          isOpen={!!detailsWorkflow}
+          onClose={() => setDetailsWorkflow(null)}
+          onDelete={onMutate}
         />
       )}
     </div>
