@@ -18,10 +18,6 @@ export default function MarketplaceModal({
   
   const extensionCategories: TabItem[] = [
     {
-      name: MarketplaceCategoryEnum.Featured,
-      description: t("marketplaceModal.tabs.featuredDescription"),
-    },
-    {
       name: MarketplaceCategoryEnum.Workflows,
       description: t("marketplaceModal.tabs.workflowsDescription"),
     },
@@ -47,9 +43,7 @@ export default function MarketplaceModal({
           </div>
         </div>
 
-        {selectedCategory?.name === MarketplaceCategoryEnum.Featured ? (
-          <AppGallery />
-        ) : selectedCategory?.name === MarketplaceCategoryEnum.Apps ? (
+        {selectedCategory?.name === MarketplaceCategoryEnum.Apps ? (
           <AppGallery />
         ) : (
           selectedCategory?.name === MarketplaceCategoryEnum.Workflows && (

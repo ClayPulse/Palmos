@@ -1,6 +1,8 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import MoveToProjectModal from "@/components/misc/move-to-project-modal";
+import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useWorkflowRuns } from "@/lib/hooks/use-workflow-runs";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { Workflow, WorkflowRun } from "@/lib/types";
@@ -69,12 +71,16 @@ export default function WorkflowDetailsModal({
   onClose: () => void;
   onDelete?: () => void;
 }) {
+  const { assignWorkflowToProject } = useProjectManager();
+  const [isMoveOpen, setIsMoveOpen] = useState(false);
+
   const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://palmos.ai";
   const apiEndpoint = workflow.id
     ? `${apiBaseUrl}/api/workflow/run/${workflow.id}`
     : null;
 
   return (
+    <>
     <Modal isOpen={isOpen} onClose={onClose} size="lg" scrollBehavior="inside">
       <ModalContent>
         <ModalHeader className="flex items-center gap-x-2">
@@ -173,10 +179,45 @@ export default function WorkflowDetailsModal({
               onDelete?.();
             }}
           />
+          {workflow.id && (
+            <Button
+              variant="flat"
+              onPress={() => setIsMoveOpen(true)}
+              startContent={<Icon name="drive_file_move" />}
+            >
+              Move to Project
+            </Button>
+          )}
           <Button onPress={onClose}>Close</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
+    <MoveToProjectModal
+      isOpen={isMoveOpen}
+      onClose={() => setIsMoveOpen(false)}
+      onSelect={async (projectId) => {
+        setIsMoveOpen(false);
+        if (workflow.id) {
+          if (projectId) {
+            await assignWorkflowToProject(projectId, workflow.id);
+          } else if (workflow.projectId) {
+            await fetchAPI("/api/project/workflows", {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ projectId: workflow.projectId, workflowId: workflow.id }),
+            });
+          }
+          addToast({
+            title: projectId ? "Moved to project" : "Removed from project",
+            color: "success",
+          });
+          onDelete?.();
+        }
+      }}
+      currentProjectId={workflow.projectId}
+      title="Move Workflow to Project"
+    />
+    </>
   );
 }
 

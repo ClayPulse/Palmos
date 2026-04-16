@@ -27,7 +27,7 @@ export default function MoveToProjectModal({
   const { projects } = useProjectManager();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} size="sm">
+    <Modal isOpen={isOpen} onClose={onClose} size="sm" scrollBehavior="inside">
       <ModalContent>
         <ModalHeader>{title}</ModalHeader>
         <ModalBody>

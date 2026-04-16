@@ -12,13 +12,13 @@ import { Spinner } from "@heroui/react";
 import { useContext, useState } from "react";
 
 const PROJECT_CATEGORIES = [
-  { labelKey: "projectScreen.categoryMarketing", icon: "campaign" },
-  { labelKey: "projectScreen.categorySales", icon: "handshake" },
-  { labelKey: "projectScreen.categorySupport", icon: "support_agent" },
-  { labelKey: "projectScreen.categoryOperations", icon: "settings" },
-  { labelKey: "projectScreen.categoryEcommerce", icon: "shopping_cart" },
-  { labelKey: "projectScreen.categoryContent", icon: "edit_note" },
-  { labelKey: "projectScreen.categoryData", icon: "analytics" },
+  { labelKey: "projectScreen.categories.marketingGrowth", icon: "campaign" },
+  { labelKey: "projectScreen.categories.salesCRM", icon: "handshake" },
+  { labelKey: "projectScreen.categories.customerSupport", icon: "support_agent" },
+  { labelKey: "projectScreen.categories.internalOperations", icon: "settings" },
+  { labelKey: "projectScreen.categories.ecommerce", icon: "shopping_cart" },
+  { labelKey: "projectScreen.categories.contentSocialMedia", icon: "edit_note" },
+  { labelKey: "projectScreen.categories.dataAnalytics", icon: "analytics" },
 ] as const;
 
 interface ProjectScreenProps {
@@ -29,7 +29,7 @@ interface ProjectScreenProps {
 export default function ProjectScreen({ onSend, project }: ProjectScreenProps) {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
-  const { workflows: myWorkflows, isLoading: isLoadingMyWorkflows } =
+  const { workflows: myWorkflows, isLoading: isLoadingMyWorkflows, mutate: mutateWorkflows } =
     useMarketplaceWorkflows("My Workflows", project.id);
   const { automations, isLoading: isLoadingAutomations } = useAutomations();
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
@@ -150,7 +150,7 @@ export default function ProjectScreen({ onSend, project }: ProjectScreenProps) {
             <Spinner size="sm" />
           </div>
         ) : myWorkflows && myWorkflows.length > 0 ? (
-          <MyWorkflowsCarousel workflows={myWorkflows} />
+          <MyWorkflowsCarousel workflows={myWorkflows} onMutate={() => mutateWorkflows()} projectId={project.id} />
         ) : null}
       </div>
     </div>
