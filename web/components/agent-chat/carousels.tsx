@@ -11,9 +11,9 @@ import type { Automation, TriggerType, Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Chip } from "@heroui/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import { useContext, useState } from "react";
+import { type ReactNode, useContext, useState } from "react";
 
-export function MyWorkflowsCarousel({ workflows, onMutate, projectId }: { workflows: Workflow[]; onMutate?: () => void; projectId?: string }) {
+export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllToggle, showProjectName }: { workflows: Workflow[]; onMutate?: () => void; projectId?: string; showAllToggle?: ReactNode; showProjectName?: boolean }) {
   const { getTranslations: t } = useTranslations();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);
@@ -57,9 +57,12 @@ export function MyWorkflowsCarousel({ workflows, onMutate, projectId }: { workfl
   return (
     <div className="w-full max-w-xl shrink-0 pt-6">
       <div className="mb-3 flex items-center justify-between">
-        <p className="text-default-500 text-xs font-medium tracking-wide uppercase">
-          {t("carousels.myWorkflows")}
-        </p>
+        <div className="flex items-center gap-3">
+          <p className="text-default-500 text-xs font-medium tracking-wide uppercase">
+            {t("carousels.myWorkflows")}
+          </p>
+          {showAllToggle}
+        </div>
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
             <button
@@ -97,7 +100,14 @@ export function MyWorkflowsCarousel({ workflows, onMutate, projectId }: { workfl
             className="bg-content2 border-divider flex items-center justify-between rounded-lg border px-4 py-3"
           >
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{wf.name}</p>
+              <div className="flex items-center gap-2">
+                {showProjectName && wf.project?.name && (
+                  <Chip size="sm" variant="flat" color="secondary" startContent={<Icon name="folder" className="text-xs" />} className="shrink-0">
+                    {wf.project.name}
+                  </Chip>
+                )}
+                <p className="truncate text-sm font-medium">{wf.name}</p>
+              </div>
               {wf.description && (
                 <p className="text-default-500 mt-0.5 truncate text-xs">
                   {wf.description}

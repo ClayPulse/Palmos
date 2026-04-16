@@ -188,7 +188,7 @@ export function useChatSessions() {
           ...local,
         ];
       }
-      updatedLocal.sort((a, b) => b.updatedAt - a.updatedAt);
+      updatedLocal.sort((a, b) => b.createdAt - a.createdAt);
       saveLocalSessions(updatedLocal);
       setSessions(updatedLocal.map(({ messages: _, ...rest }) => rest));
 

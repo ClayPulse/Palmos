@@ -212,6 +212,7 @@ export default function WorkflowDetailsModal({
             color: "success",
           });
           onDelete?.();
+          onClose();
         }
       }}
       currentProjectId={workflow.projectId}

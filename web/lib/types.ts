@@ -492,6 +492,7 @@ export type Workflow = {
   forkedAt?: string;
   createdAt?: string;
   projectId?: string | null;
+  project?: { name: string } | null;
 };
 
 export type WorkflowEnvDef = {

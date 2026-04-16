@@ -120,7 +120,7 @@ export function useProjectManager() {
     }
   }
 
-  async function deleteProject(projectName: string) {
+  async function deleteProject(projectName: string, deleteWorkflows?: boolean) {
     if (!projectName) {
       addToast({
         title: "Unable to delete project.",
@@ -134,7 +134,7 @@ export function useProjectManager() {
       const res = await fetchAPI("/api/project/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: projectName }),
+        body: JSON.stringify({ name: projectName, deleteWorkflows }),
       });
       if (!res.ok) throw new Error("Failed to delete project");
       addToast({
