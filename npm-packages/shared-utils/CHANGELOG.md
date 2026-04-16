@@ -1,5 +1,17 @@
 # @pulse-editor/shared-utils
 
+## 0.1.1-beta.89
+
+### Patch Changes
+
+- Update packages
+
+## 0.1.1-beta.88
+
+### Patch Changes
+
+- Update MF version
+
 ## 0.1.1-beta.87
 
 ### Patch Changes

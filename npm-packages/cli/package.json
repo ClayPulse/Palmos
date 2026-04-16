@@ -1,6 +1,6 @@
 {
 	"name": "@pulse-editor/cli",
-	"version": "0.1.31",
+	"version": "0.1.32",
 	"license": "MIT",
 	"bin": {
 		"pulse": "dist/cli.js"
@@ -21,10 +21,10 @@
 		"dist"
 	],
 	"dependencies": {
-		"@module-federation/enhanced": "^2.3.2",
-		"@module-federation/node": "^2.7.40",
-		"@module-federation/runtime": "^2.3.2",
-		"@pulse-editor/shared-utils": "^0.1.1-beta.85",
+		"@module-federation/enhanced": "2.3.3",
+		"@module-federation/node": "2.7.41",
+		"@module-federation/runtime": "2.3.3",
+		"@pulse-editor/shared-utils": "^0.1.1-beta.89",
 		"concurrently": "^9.2.1",
 		"connect-livereload": "^0.6.1",
 		"copy-webpack-plugin": "^14.0.0",
@@ -47,7 +47,7 @@
 		"rimraf": "^6.1.3",
 		"ts-morph": "^28.0.0",
 		"tsx": "^4.21.0",
-		"webpack": "^5.106.1",
+		"webpack": "^5.106.2",
 		"webpack-dev-server": "^5.2.3"
 	},
 	"devDependencies": {
