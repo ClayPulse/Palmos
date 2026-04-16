@@ -4,6 +4,7 @@ import Icon from "@/components/misc/icon";
 import {
   deleteWorkflowSetting,
   setWorkflowSetting,
+  workflowSettingsFetcher,
 } from "@/lib/workflow-settings";
 import {
   Button,
@@ -55,6 +56,7 @@ export default function WorkflowSettingsModal({
 function WorkflowSettingsEditor({ workflowId }: { workflowId: string }) {
   const { data: settings, mutate } = useSWR<Record<string, string>>(
     `/api/workflow/user-settings/get?workflowId=${encodeURIComponent(workflowId)}`,
+    workflowSettingsFetcher,
   );
 
   const [newKey, setNewKey] = useState("");
