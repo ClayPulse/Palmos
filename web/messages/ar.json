@@ -1254,6 +1254,7 @@
 		"workflowBuilt": "تم بناء سير العمل بنجاح!",
 		"openInEditor": "فتح في المحرر",
 		"runWorkflow": "تشغيل سير العمل",
+		"setupEnvs": "إعداد المتغيرات",
 		"usingTool": "يستخدم أداة:",
 		"seeOutput": "عرض المخرجات",
 		"hide": "إخفاء",

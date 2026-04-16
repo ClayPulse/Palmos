@@ -11,12 +11,14 @@ import type {
   WorkflowTaskCardProps,
   WorkflowTaskState,
 } from "@/components/agent-chat/types";
+import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import { useWorkflowEnvCheck } from "@/lib/hooks/use-workflow-env-check";
 import type { Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Spinner } from "@heroui/react";
@@ -624,6 +626,22 @@ function WorkflowBuiltCard({
   const { submit } = useChatContext();
   const editorContext = useContext(EditorContext);
   const [isOpening, setIsOpening] = useState(false);
+  const { envSetup, checkMissingEnvs, openEnvSetup, closeEnvSetup } =
+    useWorkflowEnvCheck();
+  const [missingEnvs, setMissingEnvs] = useState<Record<string, string> | null>(
+    null,
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const missing = await checkMissingEnvs(publishedId);
+      if (!cancelled) setMissingEnvs(missing);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [publishedId, checkMissingEnvs]);
 
   async function openInEditor() {
     setIsOpening(true);
@@ -691,7 +709,28 @@ function WorkflowBuiltCard({
           <Icon name="play_arrow" variant="round" className="text-sm" />
           {t("workflowTaskCard.runWorkflow")}
         </button>
+        {missingEnvs && Object.keys(missingEnvs).length > 0 && (
+          <button
+            onClick={() => openEnvSetup(publishedId, missingEnvs)}
+            className="flex items-center gap-1.5 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
+          >
+            <Icon name="key" variant="round" className="text-sm" />
+            {t("workflowTaskCard.setupEnvs")}
+          </button>
+        )}
       </div>
+      {envSetup && (
+        <WorkflowEnvSetupModal
+          isOpen={envSetup.isOpen}
+          onClose={closeEnvSetup}
+          onComplete={() => {
+            closeEnvSetup();
+            setMissingEnvs(null);
+          }}
+          workflowId={envSetup.workflowId}
+          envEntries={envSetup.env}
+        />
+      )}
     </div>
   );
 }

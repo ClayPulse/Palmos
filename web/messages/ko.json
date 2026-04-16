@@ -1281,6 +1281,7 @@
     "workflowBuilt": "워크플로우가 성공적으로 빌드되었습니다!",
     "openInEditor": "편집기에서 열기",
     "runWorkflow": "워크플로우 실행",
+    "setupEnvs": "환경변수 설정",
     "usingTool": "도구 사용 중:",
     "seeOutput": "출력 보기",
     "hide": "숨기기",
