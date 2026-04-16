@@ -1,24 +1,16 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import {
-  deleteWorkflowSetting,
-  setWorkflowSetting,
-  workflowSettingsFetcher,
-} from "@/lib/workflow-settings";
+import WorkflowUserSettings from "@/components/interface/workflow-user-settings";
 import {
   Button,
   Divider,
-  Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Tooltip,
 } from "@heroui/react";
-import { useState } from "react";
-import useSWR from "swr";
 
 export default function WorkflowSettingsModal({
   workflowId,
@@ -37,123 +29,13 @@ export default function WorkflowSettingsModal({
           Workflow Settings
         </ModalHeader>
         <ModalBody>
-          <p className="text-default-500 text-xs">
-            Settings defined here apply to all apps in{" "}
-            <span className="font-semibold">{workflowId}</span>. Per-app user
-            settings take priority over these workflow-level settings.
-          </p>
           <Divider />
-          <WorkflowSettingsEditor workflowId={workflowId} />
+          <WorkflowUserSettings workflowId={workflowId} />
         </ModalBody>
         <ModalFooter>
           <Button onPress={onClose}>Close</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
-  );
-}
-
-function WorkflowSettingsEditor({ workflowId }: { workflowId: string }) {
-  const { data: settings, mutate } = useSWR<Record<string, string>>(
-    `/api/workflow/user-settings/get?workflowId=${encodeURIComponent(workflowId)}`,
-    workflowSettingsFetcher,
-  );
-
-  const [newKey, setNewKey] = useState("");
-  const [newValue, setNewValue] = useState("");
-  const [newIsSecret, setNewIsSecret] = useState(false);
-
-  return (
-    <div className="flex flex-col gap-y-2">
-      {settings && Object.keys(settings).length > 0 && (
-        <div className="space-y-1">
-          {Object.entries(settings).map(([key, value]) => (
-            <SettingRow
-              key={key}
-              workflowId={workflowId}
-              settingKey={key}
-              settingValue={value}
-              onUpdated={() => mutate()}
-            />
-          ))}
-        </div>
-      )}
-      <div className="flex items-center gap-x-1">
-        <Input label="Key" size="sm" value={newKey} onValueChange={setNewKey} />
-        <Input
-          label="Value"
-          size="sm"
-          value={newValue}
-          onValueChange={setNewValue}
-          type={newIsSecret ? "password" : "text"}
-        />
-        <Button
-          isIconOnly
-          variant="light"
-          onPress={() => setNewIsSecret((prev) => !prev)}
-        >
-          {newIsSecret ? <Icon name="lock" /> : <Icon name="lock_open" />}
-        </Button>
-        <Button
-          isIconOnly
-          variant="light"
-          isDisabled={newKey.trim() === ""}
-          onPress={async () => {
-            await setWorkflowSetting(
-              workflowId,
-              newKey.trim(),
-              newValue,
-              newIsSecret,
-            );
-            mutate();
-            setNewKey("");
-            setNewValue("");
-            setNewIsSecret(false);
-          }}
-        >
-          <Icon name="add" />
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function SettingRow({
-  workflowId,
-  settingKey,
-  settingValue,
-  onUpdated,
-}: {
-  workflowId: string;
-  settingKey: string;
-  settingValue: string;
-  onUpdated: () => void;
-}) {
-  const isRedacted = settingValue === "redacted";
-
-  return (
-    <div className="flex items-center gap-x-1">
-      <Input
-        label={settingKey}
-        size="sm"
-        value={settingValue}
-        isReadOnly
-        type={isRedacted ? "password" : "text"}
-      />
-      <Tooltip content="Delete setting">
-        <Button
-          isIconOnly
-          variant="light"
-          color="danger"
-          size="sm"
-          onPress={async () => {
-            await deleteWorkflowSetting(workflowId, settingKey);
-            onUpdated();
-          }}
-        >
-          <Icon name="delete" />
-        </Button>
-      </Tooltip>
-    </div>
   );
 }

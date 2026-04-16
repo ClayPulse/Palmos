@@ -13,7 +13,7 @@ import { isMobile } from "@/lib/platform-api/platform-checker";
 export default function WorkflowExplorer() {
   const editorContext = useContext(EditorContext);
   const { createCanvasTabView } = useTabViewManager();
-  const { workflows, isLoading } = useMarketplaceWorkflows("Published by Me");
+  const { workflows, isLoading, mutate } = useMarketplaceWorkflows("Published by Me");
 
   async function openWorkflow(workflow: Workflow) {
     if (isMobile()) {
@@ -55,6 +55,8 @@ export default function WorkflowExplorer() {
             key={index}
             workflow={wf}
             onPress={openWorkflow}
+            isOwner
+            onDelete={() => mutate()}
           />
         ))}
       </div>
