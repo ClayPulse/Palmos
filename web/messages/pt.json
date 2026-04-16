@@ -1281,6 +1281,7 @@
 		"workflowBuilt": "Fluxo de trabalho criado com sucesso!",
 		"openInEditor": "Abrir no Editor",
 		"runWorkflow": "Executar Fluxo de Trabalho",
+		"setupEnvs": "Configurar Variáveis",
 		"usingTool": "Usando ferramenta:",
 		"seeOutput": "Ver saída",
 		"hide": "Ocultar",

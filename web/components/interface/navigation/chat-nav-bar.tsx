@@ -1,10 +1,10 @@
 "use client";
 
-import ShareChatModal from "@/components/agent-chat/share-chat-modal";
+import ShareChatModal from "@/components/modals/share-chat-modal";
 import Icon from "@/components/misc/icon";
 import { ViewAsModal } from "@/components/misc/view-as-user-picker";
-import { useInbox } from "@/components/agent-chat/inbox-panel";
-import { formatRelativeTime } from "@/components/agent-chat/session-history";
+import { useInbox } from "@/components/agent-chat/panels/inbox-panel";
+import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";

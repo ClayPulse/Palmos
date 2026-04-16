@@ -1,39 +1,46 @@
 "use client";
 
+import { SubagentCard } from "@/components/agent-chat/cards/subagent-card";
+import { WorkflowBuiltCard } from "@/components/agent-chat/cards/workflow-task-card";
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
+import ChatHistoryPanel from "@/components/interface/panels/chat-history-panel";
 import HomeScreen from "@/components/agent-chat/initial-chat-screens/home-screen";
 import ProjectScreen from "@/components/agent-chat/initial-chat-screens/project-screen";
-import { AIResponseCard, ResponseCard, UserBubble } from "@/components/agent-chat/message-bubbles";
-import { SessionHistoryPanel } from "@/components/agent-chat/session-history";
-import { SubagentCard } from "@/components/agent-chat/subagent-card";
-import RunningTasksPanel from "@/components/agent-chat/running-tasks-panel";
-import ShareChatModal from "@/components/agent-chat/share-chat-modal";
+import {
+  AgentChatPageLayout,
+  AgentChatPanelLayout,
+} from "@/components/agent-chat/layouts/agent-chat-layouts";
+import AgentChatPaywall from "@/components/agent-chat/screens/agent-chat-paywall";
 import InlineWidget, {
   type InlineWidgetData,
   parseWidgetFromToolCall,
   parseWidgetFromToolMessage,
-} from "@/components/agent-chat/inline-widget";
-import AgentChatPaywall from "@/components/agent-chat/agent-chat-paywall";
-import ChatInputBar, { type ChatUpload } from "@/components/agent-chat/chat-input-bar";
-import ChatMessageArea from "@/components/agent-chat/chat-message-area";
-import Icon from "@/components/misc/icon";
-import { useAgentAccess } from "@/lib/hooks/use-agent-access";
+} from "@/components/agent-chat/widgets/inline-widget";
+import { type ChatUpload } from "@/components/agent-chat/widgets/input/chat-input-bar";
+import {
+  AIResponseCard,
+  ResponseCard,
+  UserBubble,
+} from "@/components/agent-chat/widgets/message/message-bubbles";
+import QuickPillButtons from "@/components/agent-chat/widgets/quick-pill-buttons";
+import ShareChatModal from "@/components/modals/share-chat-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
+import { useAgentAccess } from "@/lib/hooks/use-agent-access";
 import type { WorkflowInput } from "@/lib/types";
-import { Button, Tooltip } from "@heroui/react";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { motion } from "framer-motion";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import RunningTasksPanel from "./panels/running-tasks-panel";
 
 /** Walk an object recursively to find a publishedWorkflowId */
 function extractPublishedWorkflowId(obj: unknown): string | null {
   if (typeof obj === "string") {
     try {
       const parsed = JSON.parse(obj);
-      if (typeof parsed.publishedWorkflowId === "string") return parsed.publishedWorkflowId;
+      if (typeof parsed.publishedWorkflowId === "string")
+        return parsed.publishedWorkflowId;
     } catch {
       const m = obj.match(/"publishedWorkflowId"\s*:\s*"([^"]+)"/);
       if (m) return m[1];
@@ -41,7 +48,8 @@ function extractPublishedWorkflowId(obj: unknown): string | null {
   }
   if (obj && typeof obj === "object" && !Array.isArray(obj)) {
     const rec = obj as Record<string, unknown>;
-    if (typeof rec.publishedWorkflowId === "string") return rec.publishedWorkflowId;
+    if (typeof rec.publishedWorkflowId === "string")
+      return rec.publishedWorkflowId;
     for (const val of Object.values(rec)) {
       const found = extractPublishedWorkflowId(val);
       if (found) return found;
@@ -56,17 +64,15 @@ function extractPublishedWorkflowId(obj: unknown): string | null {
   return null;
 }
 
-export interface AIChatInterfaceProps {
+export default function AgentChat({
+  variant = "panel",
+  onClose,
+}: {
   /** "panel" = narrow side-panel chrome; "page" = full-page layout */
   variant?: "panel" | "page";
   /** Callback for the close button (panel variant only) */
   onClose?: () => void;
-}
-
-export default function AgentChat({
-  variant = "panel",
-  onClose,
-}: AIChatInterfaceProps) {
+}) {
   const {
     messages,
     isLoading,
@@ -87,13 +93,17 @@ export default function AgentChat({
     resume,
   } = useChatContext();
 
-  const { allowed: agentChatAllowed, isLoading: isLoadingAccess } = useAgentAccess();
+  const { allowed: agentChatAllowed, isLoading: isLoadingAccess } =
+    useAgentAccess();
 
   const editorContext = useContext(EditorContext);
   const projects = editorContext?.editorStates.projectsInfo;
   const activeProjectName = editorContext?.editorStates.project;
   const activeProject = projects?.find((p) => p.name === activeProjectName);
-  const { workflows: myWorkflows } = useMarketplaceWorkflows("My Workflows", activeProject?.id);
+  const { workflows: myWorkflows } = useMarketplaceWorkflows(
+    "My Workflows",
+    activeProject?.id,
+  );
 
   const [inputText, setInputText] = useState("");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -208,7 +218,9 @@ export default function AgentChat({
       console.error("NEXT_PUBLIC_BACKEND_URL is not set");
       return;
     }
-    await Promise.all(selected.map((file) => uploadSingleFile(file, backendUrl)));
+    await Promise.all(
+      selected.map((file) => uploadSingleFile(file, backendUrl)),
+    );
   }
 
   async function handleRemoveUpload(upload: ChatUpload) {
@@ -304,7 +316,8 @@ export default function AgentChat({
       if (e.deltaY < 0) {
         userScrolledUpRef.current = true;
       } else {
-        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+        const distanceFromBottom =
+          el.scrollHeight - el.scrollTop - el.clientHeight;
         if (distanceFromBottom < 30) userScrolledUpRef.current = false;
       }
     };
@@ -348,12 +361,24 @@ export default function AgentChat({
     if (workflowBuilds.length === 0) return;
     setWorkflowTasks((prev) => {
       const existingIds = new Set(prev.map((t) => t.taskId));
+      const existingPublishedIds = new Set(
+        prev
+          .map((t) => extractPublishedWorkflowId(t.result))
+          .filter((id): id is string => !!id),
+      );
       const newTasks = workflowBuilds
-        .filter((r) => r.workflowId && !existingIds.has(r.workflowId))
+        .filter(
+          (r) =>
+            r.workflowId &&
+            !existingIds.has(r.workflowId) &&
+            !existingPublishedIds.has(r.workflowId),
+        )
         .map((r) => ({
           taskId: r.workflowId!,
           workflowName: r.workflow?.name ?? "Workflow",
-          startedAt: r.completedAt ? new Date(r.completedAt).getTime() : Date.now(),
+          startedAt: r.completedAt
+            ? new Date(r.completedAt).getTime()
+            : Date.now(),
           status: "completed" as const,
           result: { publishedWorkflowId: r.workflowId },
         }));
@@ -383,65 +408,145 @@ export default function AgentChat({
       const taskId = parsed.taskId;
       const workflowName = parsed.workflowName ?? "Workflow";
 
+      // Seed as "loading" — we'll check the DB before deciding whether this
+      // task is actually still running.
       setWorkflowTasks((prev) => [
         ...prev,
-        { taskId, workflowName, startedAt: Date.now(), status: "running" },
+        {
+          taskId,
+          originalTaskId: taskId,
+          workflowName,
+          startedAt: Date.now(),
+          status: "loading",
+        },
       ]);
 
-      const poll = setInterval(async () => {
+      const applyStatus = (data: {
+        status?: string;
+        result?: unknown;
+        error?: string | null;
+      }) => {
+        const log = (data.result as { log?: unknown })?.log as
+          | { type: string; text?: string; tool?: string }[]
+          | undefined;
+        let latestProgress: string | undefined;
+        if (log && log.length > 0) {
+          const last = log[log.length - 1];
+          latestProgress =
+            last.type === "tool_use" ? `Using tool: ${last.tool}` : last.text;
+        }
+
+        setWorkflowTasks((prev) =>
+          prev.map((t) =>
+            t.taskId === taskId
+              ? {
+                  ...t,
+                  status:
+                    data.status === "completed" ||
+                    data.status === "failed" ||
+                    data.status === "running"
+                      ? (data.status as "completed" | "failed" | "running")
+                      : t.status,
+                  result: data.result,
+                  error: data.error ?? undefined,
+                  latestProgress,
+                }
+              : t,
+          ),
+        );
+
+        if (data.status === "completed" && data.result) {
+          const pwfId = extractPublishedWorkflowId(data.result);
+          if (pwfId) {
+            setWorkflowTasks((prev) =>
+              prev.map((t) =>
+                t.taskId === taskId ? { ...t, taskId: pwfId } : t,
+              ),
+            );
+            saveWorkflowBuild(pwfId);
+            // Resolve the real workflow name (the tool reports "Workflow
+            // Builder" — we want the built workflow's actual name).
+            fetch(`${backendUrl}/api/workflow/get?id=${pwfId}`, {
+              credentials: "include",
+            })
+              .then((r) => (r.ok ? r.json() : null))
+              .then((wf: { name?: string } | null) => {
+                if (!wf?.name) return;
+                setWorkflowTasks((prev) =>
+                  prev.map((t) =>
+                    t.taskId === pwfId ? { ...t, workflowName: wf.name! } : t,
+                  ),
+                );
+              })
+              .catch(() => {});
+          }
+        }
+      };
+
+      // One-shot DB check on load: decide between final state vs. still running.
+      (async () => {
         try {
           const res = await fetch(
             `${backendUrl}/api/workflow/run/status?taskId=${taskId}`,
             { credentials: "include" },
           );
-          if (!res.ok) return;
-          const data = await res.json();
-          const log = data.result?.log as { type: string; text?: string; tool?: string }[] | undefined;
-          let latestProgress: string | undefined;
-          if (log && log.length > 0) {
-            const last = log[log.length - 1];
-            latestProgress = last.type === "tool_use" ? `Using tool: ${last.tool}` : last.text;
+          if (!res.ok) {
+            // Can't determine — fall back to running so we start polling.
+            setWorkflowTasks((prev) =>
+              prev.map((t) =>
+                t.taskId === taskId ? { ...t, status: "running" } : t,
+              ),
+            );
+            startPoll();
+            return;
           }
-
-          setWorkflowTasks((prev) =>
-            prev.map((t) =>
-              t.taskId === taskId
-                ? {
-                    ...t,
-                    status: data.status === "completed" || data.status === "failed" ? data.status : t.status,
-                    result: data.result,
-                    error: data.error,
-                    latestProgress,
-                  }
-                : t,
-            ),
-          );
-
-          if (data.status === "completed" || data.status === "failed") {
-            clearInterval(poll);
-            if (data.status === "completed" && data.result) {
-              const pwfId = extractPublishedWorkflowId(data.result);
-              if (pwfId) saveWorkflowBuild(pwfId);
-            }
+          const data = await res.json();
+          applyStatus(data);
+          if (data.status !== "completed" && data.status !== "failed") {
+            startPoll();
           }
         } catch {
-          // Network error — keep polling
-        }
-      }, 2000);
-
-      setTimeout(
-        () => {
-          clearInterval(poll);
           setWorkflowTasks((prev) =>
             prev.map((t) =>
-              t.taskId === taskId && t.status === "running"
-                ? { ...t, status: "failed", error: "Timed out after 1 hour" }
-                : t,
+              t.taskId === taskId ? { ...t, status: "running" } : t,
             ),
           );
-        },
-        60 * 60 * 1000,
-      );
+          startPoll();
+        }
+      })();
+
+      function startPoll() {
+        const poll = setInterval(async () => {
+          try {
+            const res = await fetch(
+              `${backendUrl}/api/workflow/run/status?taskId=${taskId}`,
+              { credentials: "include" },
+            );
+            if (!res.ok) return;
+            const data = await res.json();
+            applyStatus(data);
+            if (data.status === "completed" || data.status === "failed") {
+              clearInterval(poll);
+            }
+          } catch {
+            // Network error — keep polling
+          }
+        }, 2000);
+
+        setTimeout(
+          () => {
+            clearInterval(poll);
+            setWorkflowTasks((prev) =>
+              prev.map((t) =>
+                t.taskId === taskId && t.status === "running"
+                  ? { ...t, status: "failed", error: "Timed out after 1 hour" }
+                  : t,
+              ),
+            );
+          },
+          60 * 60 * 1000,
+        );
+      }
     }
   }, [messages]);
 
@@ -458,7 +563,12 @@ export default function AgentChat({
     setInputText("");
     setUploads([]);
     pendingSendRef.current = null;
-    submit(value, getWorkflows(), readyUploadIds.length > 0 ? readyUploadIds : undefined, activeProject?.id);
+    submit(
+      value,
+      getWorkflows(),
+      readyUploadIds.length > 0 ? readyUploadIds : undefined,
+      activeProject?.id,
+    );
   }
 
   function handleSend(text?: string) {
@@ -482,7 +592,9 @@ export default function AgentChat({
   const [isTasksOpen, setIsTasksOpen] = useState(false);
   const [shareSessionId, setShareSessionId] = useState<string | null>(null);
 
-  const [terminatingTaskIds, setTerminatingTaskIds] = useState<Set<string>>(new Set());
+  const [terminatingTaskIds, setTerminatingTaskIds] = useState<Set<string>>(
+    new Set(),
+  );
 
   const handleTerminateTask = async (taskId: string) => {
     const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -515,7 +627,8 @@ export default function AgentChat({
     }
   };
 
-  const isEmptyConversation = messages.length === 0 && !isLoading && !isLoadingSession;
+  const isEmptyConversation =
+    messages.length === 0 && !isLoading && !isLoadingSession;
 
   const emptyState = activeProject ? (
     <ProjectScreen onSend={handleSend} project={activeProject} />
@@ -535,6 +648,71 @@ export default function AgentChat({
     }
     return map;
   }, [messages]);
+
+  // Map originalTaskId -> completed build task (with publishedWorkflowId).
+  const completedBuildTaskByOriginalId = useMemo(() => {
+    const map = new Map<string, WorkflowTaskState>();
+    for (const t of workflowTasks) {
+      if (t.status !== "completed" || !t.originalTaskId) continue;
+      if (!extractPublishedWorkflowId(t.result)) continue;
+      map.set(t.originalTaskId, t);
+    }
+    return map;
+  }, [workflowTasks]);
+
+  // Each AIMessage that issued a `build_workflow` tool call is paired with its
+  // resulting workflow run (resolved via the matching ToolMessage's taskId and
+  // the completed workflowTasks state). Rendering uses this so an AI message
+  // carries its content AND workflow run status together, instead of the card
+  // trailing at the bottom of the chat.
+  type WorkflowRunAssoc = {
+    publishedWorkflowId: string;
+    workflowName: string;
+    /** task.taskId (rewritten to pwfId on completion) — used to dedupe the
+     * bottom task list once the card has been rendered inline with its AI
+     * message. */
+    dedupeTaskId: string;
+  };
+  const aiMessageWorkflowRun = useMemo(() => {
+    // Build tool_call_id -> ToolMessage content for quick lookup
+    const toolResultByCallId = new Map<string, string>();
+    for (const msg of messages) {
+      const tcid = (msg as any).tool_call_id as string | undefined;
+      if (!tcid) continue;
+      const c = typeof msg.content === "string" ? msg.content : "";
+      if (c) toolResultByCallId.set(tcid, c);
+    }
+
+    const byMessageKey = new Map<string, WorkflowRunAssoc>();
+    for (let idx = 0; idx < messages.length; idx++) {
+      const msg = messages[idx];
+      if (!(msg instanceof AIMessage) || !msg.tool_calls) continue;
+      for (const tc of msg.tool_calls) {
+        if (tc.name !== "build_workflow" || !tc.id) continue;
+        const resultContent = toolResultByCallId.get(tc.id);
+        if (!resultContent) continue;
+        let taskId: string | undefined;
+        try {
+          taskId = (JSON.parse(resultContent) as { taskId?: string }).taskId;
+        } catch {
+          continue;
+        }
+        if (!taskId) continue;
+        const task = completedBuildTaskByOriginalId.get(taskId);
+        const pwfId = task && extractPublishedWorkflowId(task.result);
+        if (!task || !pwfId) continue;
+        byMessageKey.set(msg.id ?? String(idx), {
+          publishedWorkflowId: pwfId,
+          workflowName: task.workflowName,
+          dedupeTaskId: task.taskId,
+        });
+        break; // one build_workflow per AI message is the expected case
+      }
+    }
+    return byMessageKey;
+  }, [messages, completedBuildTaskByOriginalId]);
+
+  const inlinedBuildTaskIds = new Set<string>();
 
   const messageList = messages.map((msg, i) => {
     const isHuman = msg._getType() === "human";
@@ -558,7 +736,10 @@ export default function AgentChat({
 
     if (msg instanceof AIMessage && msg.tool_calls) {
       for (const tc of msg.tool_calls) {
-        const w = parseWidgetFromToolCall(tc.name, tc.args as Record<string, unknown>);
+        const w = parseWidgetFromToolCall(
+          tc.name,
+          tc.args as Record<string, unknown>,
+        );
         if (w) widgets.push(w);
       }
     }
@@ -569,6 +750,15 @@ export default function AgentChat({
       const w = parseWidgetFromToolMessage(toolCallId, content, toolName);
       if (w) widgets.push(w);
     }
+
+    // An AI message that issued a build_workflow tool call owns the resulting
+    // workflow run. Pair the two so the card renders alongside the message
+    // content rather than trailing at the bottom of the chat.
+    const workflowRun =
+      msg instanceof AIMessage
+        ? aiMessageWorkflowRun.get(msg.id ?? String(i))
+        : undefined;
+    if (workflowRun) inlinedBuildTaskIds.add(workflowRun.dedupeTaskId);
 
     const spawned = msg.id ? getSubagentsByMessage(msg.id) : [];
     const nonCanvasWidgets = widgets.filter((w) => w.type !== "canvas");
@@ -584,7 +774,11 @@ export default function AgentChat({
       );
     }
 
-    if (widgets.length > 0 && nonCanvasWidgets.length === 0 && content.trimStart().startsWith("{")) {
+    if (
+      widgets.length > 0 &&
+      nonCanvasWidgets.length === 0 &&
+      content.trimStart().startsWith("{")
+    ) {
       return null;
     }
 
@@ -595,7 +789,14 @@ export default function AgentChat({
       }
     }
 
-    if (!content && spawned.length === 0 && !widgets.length && toolCallNames.length === 0) return null;
+    if (
+      !content &&
+      spawned.length === 0 &&
+      !widgets.length &&
+      toolCallNames.length === 0 &&
+      !workflowRun
+    )
+      return null;
     if (!isHuman && (msg as any).tool_call_id) return null;
     if (
       !isHuman &&
@@ -614,8 +815,12 @@ export default function AgentChat({
           content && (
             <UserBubble
               text={content}
-              attachmentCount={msg.additional_kwargs?.attachmentCount as number | undefined}
-              uploadIds={msg.additional_kwargs?.uploadIds as string[] | undefined}
+              attachmentCount={
+                msg.additional_kwargs?.attachmentCount as number | undefined
+              }
+              uploadIds={
+                msg.additional_kwargs?.uploadIds as string[] | undefined
+              }
             />
           )
         ) : isPage ? (
@@ -638,6 +843,14 @@ export default function AgentChat({
             {spawned.map((sa) => (
               <SubagentCard key={sa.id} subagent={sa} />
             ))}
+          </div>
+        )}
+        {workflowRun && (
+          <div className="overflow-hidden rounded-xl border border-green-300/60 bg-green-50/50 shadow-sm dark:border-green-500/30 dark:bg-green-500/5">
+            <WorkflowBuiltCard
+              publishedId={workflowRun.publishedWorkflowId}
+              workflowName={workflowRun.workflowName}
+            />
           </div>
         )}
       </div>
@@ -666,24 +879,7 @@ export default function AgentChat({
     return found;
   }, [messages, toolCallNameMap]);
 
-  const quickPillButtons = (
-    <>
-      <button
-        className="flex h-7 items-center gap-1 rounded-full border border-amber-400/50 bg-amber-50 px-2 text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200"
-        onClick={() => handleSend("What can you help me with?")}
-      >
-        <Icon name="help" variant="round" className="text-sm" />
-        <span className="hidden text-[11px] font-medium sm:inline">Help</span>
-      </button>
-      <button
-        className="flex h-7 items-center gap-1 rounded-full border border-amber-400/50 bg-amber-50 px-2 text-amber-700 transition-colors hover:border-amber-500 hover:bg-amber-100 hover:text-amber-800 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:border-amber-400/60 dark:hover:bg-amber-500/15 dark:hover:text-amber-200"
-        onClick={() => handleSend("Show me examples of Palmos Apps")}
-      >
-        <Icon name="lightbulb" variant="round" className="text-sm" />
-        <span className="hidden text-[11px] font-medium sm:inline">Examples</span>
-      </button>
-    </>
-  );
+  const quickPillButtons = <QuickPillButtons onSend={handleSend} />;
 
   // ── Shared overlays ─────────────────────────────────────────────────────
   const shareModal = (
@@ -694,53 +890,12 @@ export default function AgentChat({
     />
   );
 
-  const historyOverlay = isHistoryOpen && (
-    isPage ? (
-      <div className="absolute inset-0 z-30 flex">
-        <div className="w-full max-w-sm">
-          <SessionHistoryPanel
-            sessions={sessions}
-            activeSessionId={currentSessionIdRef.current}
-            onSwitch={handleSwitchSession}
-            onDelete={handleDeleteSession}
-            onNewChat={() => { handleNewChat(); setIsHistoryOpen(false); }}
-            onClose={() => setIsHistoryOpen(false)}
-            onShare={(id) => setShareSessionId(id)}
-          />
-        </div>
-        <div
-          className="flex-1 bg-black/20 dark:bg-black/40"
-          onClick={() => setIsHistoryOpen(false)}
-        />
-      </div>
-    ) : (
-      <SessionHistoryPanel
-        sessions={sessions}
-        activeSessionId={currentSessionIdRef.current}
-        onSwitch={handleSwitchSession}
-        onDelete={handleDeleteSession}
-        onNewChat={() => { handleNewChat(); setIsHistoryOpen(false); }}
-        onClose={() => setIsHistoryOpen(false)}
-      />
-    )
+  const historyOverlay = (
+    <ChatHistoryPanel isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
   );
 
   const tasksOverlay = isTasksOpen && (
-    isPage ? (
-      <div className="absolute inset-0 z-30 flex">
-        <div className="w-full max-w-sm">
-          <RunningTasksPanel onClose={() => setIsTasksOpen(false)} />
-        </div>
-        <div
-          className="flex-1 bg-black/20 dark:bg-black/40"
-          onClick={() => setIsTasksOpen(false)}
-        />
-      </div>
-    ) : (
-      <div className="absolute inset-0 z-30">
-        <RunningTasksPanel onClose={() => setIsTasksOpen(false)} />
-      </div>
-    )
+    <RunningTasksPanel isPage={isPage} onClose={() => setIsTasksOpen(false)} />
   );
 
   const messageAreaProps = {
@@ -749,7 +904,7 @@ export default function AgentChat({
     isEmptyConversation,
     emptyState,
     messageList,
-    workflowTasks,
+    workflowTasks: workflowTasks.filter((t) => !inlinedBuildTaskIds.has(t.taskId)),
     onTerminateTask: handleTerminateTask,
     terminatingTaskIds,
     activeInterrupt,
@@ -777,194 +932,39 @@ export default function AgentChat({
   } as const;
 
   // ── Gate: paywall for users without agent chat access ────────────────────
+  // Access (including any invite-code bypass) is decided by the backend via
+  // useAgentAccess — agentChatAllowed already reflects an accepted code.
   if (!isLoadingAccess && !agentChatAllowed) {
     return <AgentChatPaywall />;
   }
 
-  // ── Page layout ──────────────────────────────────────────────────────────
+  // ── Layout ────────────────────────────────────────────────────────────────
+
+  const layoutProps = {
+    messageAreaProps,
+    inputBarProps,
+    quickPillButtons,
+    shareModal,
+    historyOverlay,
+    tasksOverlay,
+    sessionCount: sessions.length,
+    canShare: !!currentSessionIdRef.current,
+    onOpenHistory: () => setIsHistoryOpen(true),
+    onOpenTasks: () => setIsTasksOpen(true),
+    onNewChat: handleNewChat,
+    onShare: () => setShareSessionId(currentSessionIdRef.current),
+  };
 
   if (isPage) {
-    return (
-      <div className="relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-gray-50 dark:bg-[#0d0d14]">
-        {/* Top bar */}
-        <div className="flex h-[60px] shrink-0 items-end justify-end px-4 sm:px-8 md:h-[72px] md:px-16 lg:px-[max(4rem,calc(50%-36rem))]">
-          <div className="flex items-center gap-1.5 pb-2">
-            <button
-              onClick={() => setIsHistoryOpen(true)}
-              className="border-default-200 text-default-600 hover:bg-default-100 flex items-center gap-1 rounded-lg border bg-white px-2.5 py-1.5 text-xs transition-colors dark:border-white/10 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
-            >
-              <Icon name="history" variant="round" className="text-sm" />
-              History
-              {sessions.length > 0 && (
-                <span className="bg-default-200 ml-0.5 rounded-full px-1.5 text-[10px] font-medium dark:bg-white/10">
-                  {sessions.length}
-                </span>
-              )}
-            </button>
-            <button
-              onClick={() => setIsTasksOpen(true)}
-              className="border-default-200 text-default-600 hover:bg-default-100 flex items-center gap-1 rounded-lg border bg-white px-2.5 py-1.5 text-xs transition-colors dark:border-white/10 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
-            >
-              <Icon name="task_alt" variant="round" className="text-sm" />
-              Tasks
-            </button>
-            <button
-              onClick={handleNewChat}
-              className="flex items-center gap-1 rounded-lg border border-amber-400/50 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:bg-amber-500/15"
-            >
-              <Icon name="add" variant="round" className="text-sm" />
-              New Chat
-            </button>
-            <button
-              onClick={() => setShareSessionId(currentSessionIdRef.current)}
-              disabled={!currentSessionIdRef.current}
-              className="border-default-200 text-default-600 hover:bg-default-100 flex items-center gap-1 rounded-lg border bg-white px-2.5 py-1.5 text-xs transition-colors disabled:opacity-30 dark:border-white/10 dark:bg-white/5 dark:text-white/60 dark:hover:bg-white/10"
-            >
-              <Icon name="share" variant="round" className="text-sm" />
-              Share
-            </button>
-          </div>
-        </div>
-
-        {shareModal}
-        {historyOverlay}
-        {tasksOverlay}
-
-        <ChatMessageArea {...messageAreaProps} />
-        <ChatInputBar {...inputBarProps} footerExtra={quickPillButtons} />
-      </div>
-    );
+    return <AgentChatPageLayout {...layoutProps} />;
   }
 
-  // ── Panel layout ─────────────────────────────────────────────────────────
-
   return (
-    <div className="relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-gray-50 shadow-lg min-[768px]:rounded-xl dark:bg-[#111118] [&>*]:min-w-0 [&>*]:overflow-hidden">
-      {historyOverlay}
-      {tasksOverlay}
-      {shareModal}
-
-      {/* Header */}
-      <div>
-        <div className="relative">
-          <div className="flex items-center justify-center border-b border-amber-300/40 bg-white px-3 py-3 dark:border-white/8 dark:bg-white/3">
-            <div className="absolute left-0 flex items-center gap-1 px-2">
-              <Tooltip content="Chat History" delay={400} closeDelay={0}>
-                <Button
-                  isIconOnly
-                  variant="light"
-                  size="sm"
-                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                  onPress={() => setIsHistoryOpen(true)}
-                >
-                  <div>
-                    <Icon name="history" variant="round" />
-                  </div>
-                </Button>
-              </Tooltip>
-              <Tooltip content="New Chat" delay={400} closeDelay={0}>
-                <Button
-                  isIconOnly
-                  variant="light"
-                  size="sm"
-                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                  onPress={handleNewChat}
-                >
-                  <div>
-                    <Icon name="add" variant="round" />
-                  </div>
-                </Button>
-              </Tooltip>
-              <Tooltip content="Tasks" delay={400} closeDelay={0}>
-                <Button
-                  isIconOnly
-                  variant="light"
-                  size="sm"
-                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                  onPress={() => setIsTasksOpen(true)}
-                >
-                  <div>
-                    <Icon name="task_alt" variant="round" />
-                  </div>
-                </Button>
-              </Tooltip>
-            </div>
-            <div className="flex items-center gap-2">
-              <motion.span
-                className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-                animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              >
-                <div>
-                  <Icon name="bolt" className="text-lg" />
-                </div>
-              </motion.span>
-              <motion.span
-                className="bg-linear-to-r from-amber-600 via-amber-400 to-amber-600 bg-size-[200%_100%] bg-clip-text text-sm font-bold tracking-wide text-transparent dark:from-amber-500 dark:via-amber-200 dark:to-amber-500"
-                animate={{ backgroundPosition: ["200% 50%", "0% 50%"] }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-              >
-                PALMOS AI
-              </motion.span>
-            </div>
-            <div className="absolute right-0 flex items-center gap-1 px-2">
-              {isLoading && (
-                <Button
-                  isIconOnly
-                  variant="light"
-                  size="sm"
-                  className="text-amber-600 hover:text-amber-500 dark:text-amber-400/80 dark:hover:text-amber-300"
-                  onPress={() => stop()}
-                >
-                  <div>
-                    <Icon name="stop" variant="round" />
-                  </div>
-                </Button>
-              )}
-              {onClose && (
-                <Tooltip content="Close chat" delay={400} closeDelay={0}>
-                  <Button
-                    isIconOnly
-                    variant="light"
-                    size="sm"
-                    className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                    onPress={onClose}
-                  >
-                    <div>
-                      <Icon name="close" variant="round" />
-                    </div>
-                  </Button>
-                </Tooltip>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <ChatMessageArea {...messageAreaProps} />
-
-      <ChatInputBar
-        {...inputBarProps}
-        footerExtra={
-          <>
-            <Tooltip content="Share chat" delay={400} closeDelay={0}>
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                isDisabled={!currentSessionIdRef.current}
-                onPress={() => setShareSessionId(currentSessionIdRef.current)}
-              >
-                <div>
-                  <Icon name="share" variant="round" />
-                </div>
-              </Button>
-            </Tooltip>
-            {quickPillButtons}
-          </>
-        }
-      />
-    </div>
+    <AgentChatPanelLayout
+      {...layoutProps}
+      isLoading={isLoading}
+      onStop={() => stop()}
+      onClose={onClose}
+    />
   );
 }

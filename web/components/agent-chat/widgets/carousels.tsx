@@ -8,12 +8,16 @@ import { AppModeEnum } from "@/lib/enums";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowEnvCheck } from "@/lib/hooks/use-workflow-env-check";
 import type { Automation, TriggerType, Workflow } from "@/lib/types";
+import type {
+  MyAutomationsCarouselProps,
+  MyWorkflowsCarouselProps,
+} from "@/components/agent-chat/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Chip } from "@heroui/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import { type ReactNode, useContext, useState } from "react";
+import { useContext, useState } from "react";
 
-export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllToggle, showProjectName }: { workflows: Workflow[]; onMutate?: () => void; projectId?: string; showAllToggle?: ReactNode; showProjectName?: boolean }) {
+export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllToggle, showProjectName }: MyWorkflowsCarouselProps) {
   const { getTranslations: t } = useTranslations();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);
@@ -198,11 +202,7 @@ export function MyAutomationsCarousel({
   automations,
   onOpenEditor,
   onCreateNew,
-}: {
-  automations: Automation[];
-  onOpenEditor: (automation: Automation) => void;
-  onCreateNew: () => void;
-}) {
+}: MyAutomationsCarouselProps) {
   const { getTranslations: t } = useTranslations();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);

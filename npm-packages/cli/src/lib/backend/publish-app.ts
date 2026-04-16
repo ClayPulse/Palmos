@@ -2,7 +2,7 @@ import {getToken} from '../token.js';
 import {getBackendUrl} from '../backend-url.js';
 import fs from 'fs';
 
-export async function publishApp(isStage: boolean) {
+export async function publishApp(isStage: boolean, stageServer?: string) {
 	// Upload the zip file to the server
 	// Read pulse.config.json for visibility
 	const config = JSON.parse(
@@ -21,7 +21,7 @@ export async function publishApp(isStage: boolean) {
 
 	// Send the file to the server
 	const res = await fetch(
-		`${getBackendUrl(isStage)}/api/app/publish`,
+		`${getBackendUrl(isStage, stageServer)}/api/app/publish`,
 		{
 			method: 'POST',
 			headers: {

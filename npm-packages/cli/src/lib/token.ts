@@ -30,9 +30,7 @@ export function saveToken(token: string | undefined, devMode: boolean) {
 
 export function getToken(devMode: boolean) {
 	// First try to get the token from the environment variable
-	const tokenEnv = devMode
-		? process.env['PE_DEV_ACCESS_TOKEN']
-		: process.env['PALMOS_API_KEY'];
+	const tokenEnv = process.env['PALMOS_API_KEY'];
 	if (tokenEnv) {
 		return tokenEnv;
 	}
@@ -60,20 +58,22 @@ export function getToken(devMode: boolean) {
 	return undefined;
 }
 
-export function isTokenInEnv(devMode: boolean) {
+export function isTokenInEnv(_devMode: boolean) {
 	// Check if the token is set in the environment variable
-	const tokenEnv = devMode
-		? process.env['PE_DEV_ACCESS_TOKEN']
-		: process.env['PALMOS_API_KEY'];
+	const tokenEnv = process.env['PALMOS_API_KEY'];
 	if (tokenEnv) {
 		return true;
 	}
 	return false;
 }
 
-export async function checkToken(token: string, devMode: boolean) {
+export async function checkToken(
+	token: string,
+	devMode: boolean,
+	stageServer?: string,
+) {
 	const res = await fetch(
-		`${getBackendUrl(devMode)}/api/api-keys/check`,
+		`${getBackendUrl(devMode, stageServer)}/api/api-keys/check`,
 		{
 			body: JSON.stringify({token}),
 			headers: {

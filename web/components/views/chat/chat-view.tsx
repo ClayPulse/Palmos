@@ -1,9 +1,9 @@
 "use client";
 
-import AgentChat from "@/components/agent-chat/agent-interface";
+import AgentChat from "@/components/agent-chat/agent-chat";
 import ChatEmbedPanel, {
   EmbedPanelTab,
-} from "@/components/agent-chat/embed-panel";
+} from "@/components/agent-chat/panels/embed-panel";
 import { useState } from "react";
 
 export default function ChatView() {

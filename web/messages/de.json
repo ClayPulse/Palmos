@@ -1254,6 +1254,7 @@
 		"workflowBuilt": "Workflow erfolgreich erstellt!",
 		"openInEditor": "Im Editor öffnen",
 		"runWorkflow": "Workflow ausführen",
+		"setupEnvs": "Variablen einrichten",
 		"usingTool": "Verwendet Tool:",
 		"seeOutput": "Ausgabe anzeigen",
 		"hide": "Ausblenden",

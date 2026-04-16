@@ -35,7 +35,7 @@ export default function App({cli}: {cli: Result<Flags>}) {
 
 	return (
 		<>
-			{cli.flags.stage && (
+			{cli.flags.stage && cli.flags.logLevel === 'normal' && (
 				<Text color={'yellow'}>⚠️  You are in development mode.</Text>
 			)}
 			{command === 'help' ? (

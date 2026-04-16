@@ -1,45 +1,21 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import KnowledgeFiles from "@/components/agent-chat/knowledge-files";
-import ProjectPicker from "@/components/agent-chat/project-picker";
+import KnowledgeFiles from "@/components/agent-chat/widgets/input/knowledge-files";
+import ProjectPicker from "@/components/agent-chat/widgets/input/project-picker";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner, Tooltip } from "@heroui/react";
 import type React from "react";
 import { useRef, useState } from "react";
 
-export interface ChatUpload {
-  id: string;
-  filename: string;
-  sizeBytes: number;
-  status: "uploading" | "processing" | "ready" | "error";
-  error?: string;
-  progress: number;
-  tempKey: string;
-  indexed?: boolean;
-  indexing?: boolean;
-}
+import type { ChatInputBarProps, ChatUpload } from "@/components/agent-chat/types";
+
+export type { ChatUpload } from "@/components/agent-chat/types";
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-interface ChatInputBarProps {
-  variant: "panel" | "page";
-  inputText: string;
-  setInputText: (v: string) => void;
-  isLoading: boolean;
-  uploads: ChatUpload[];
-  uploadsInProgress: boolean;
-  pendingSend: boolean;
-  onSend: () => void;
-  onStop: () => void;
-  onUploadFiles: (files: File[]) => void;
-  onRemoveUpload: (upload: ChatUpload) => void;
-  onIndexUpload: (upload: ChatUpload) => void;
-  footerExtra?: React.ReactNode;
 }
 
 export default function ChatInputBar({

@@ -26,6 +26,9 @@ export const flags = defineFlags({
 		type: 'boolean',
 		default: false,
 	},
+	stageServer: {
+		type: 'string',
+	},
 	name: {
 		type: 'string',
 		shortFlag: 'n',

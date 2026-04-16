@@ -1,7 +1,7 @@
 "use client";
 
-import type { InterruptState } from "@/lib/hooks/use-deep-agent";
 import Icon from "@/components/misc/icon";
+import type { InterruptCardProps } from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useState } from "react";
 
@@ -15,11 +15,7 @@ export default function InterruptCard({
   interrupt,
   onReply,
   isLoading,
-}: {
-  interrupt: InterruptState;
-  onReply: (reply: string) => void;
-  isLoading?: boolean;
-}) {
+}: InterruptCardProps) {
   const { getTranslations: t } = useTranslations();
   const [customInput, setCustomInput] = useState("");
   const [replied, setReplied] = useState(false);

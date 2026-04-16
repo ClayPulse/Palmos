@@ -1,22 +1,17 @@
 "use client";
 
-import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
-import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
+import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
+import type {
+  FilterKey,
+  RunningTasksPanelProps,
+  TaskItem,
+  TasksOverlayProps,
+  WorkflowTaskState,
+} from "@/components/agent-chat/types";
 import Icon from "@/components/misc/icon";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
-
-interface TaskItem {
-  taskId: string;
-  workflowName: string;
-  status: "pending" | "running" | "completed" | "failed";
-  error: string | null;
-  createdAt: number;
-  completedAt: number | null;
-  isManagedAgent: boolean;
-  result?: any;
-}
 
 /**
  * Derive the latest progress string from a task's result log.
@@ -48,9 +43,32 @@ function toWorkflowTaskState(task: TaskItem): WorkflowTaskState {
   };
 }
 
-type FilterKey = "all" | "running" | "completed" | "failed";
+export default function RunningTasksPanel({
+  isPage,
+  onClose,
+}: TasksOverlayProps) {
+  if (isPage) {
+    return (
+      <div className="absolute inset-0 z-30 flex">
+        <div className="w-full max-w-sm">
+          <RunningTasks onClose={onClose} />
+        </div>
+        <div
+          className="flex-1 bg-black/20 dark:bg-black/40"
+          onClick={onClose}
+        />
+      </div>
+    );
+  }
 
-export default function RunningTasksPanel({ onClose }: { onClose?: () => void }) {
+  return (
+    <div className="absolute inset-0 z-30">
+      <RunningTasks onClose={onClose} />
+    </div>
+  );
+}
+
+function RunningTasks({ onClose }: RunningTasksPanelProps) {
   const { getTranslations: t } = useTranslations();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +113,13 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
           setTasks((prev) =>
             prev.map((t) =>
               t.taskId === task.taskId
-                ? { ...t, status: data.status, result: data.result, error: data.error, completedAt: data.completedAt }
+                ? {
+                    ...t,
+                    status: data.status,
+                    result: data.result,
+                    error: data.error,
+                    completedAt: data.completedAt,
+                  }
                 : t,
             ),
           );
@@ -148,7 +172,10 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
 
   const filterButtons: { key: FilterKey; label: string }[] = [
     { key: "all", label: `${t("runningTasksPanel.all")} (${tasks.length})` },
-    { key: "running", label: `${t("runningTasksPanel.running")} (${runningCount})` },
+    {
+      key: "running",
+      label: `${t("runningTasksPanel.running")} (${runningCount})`,
+    },
     { key: "completed", label: t("runningTasksPanel.done") },
     { key: "failed", label: t("runningTasksPanel.failed") },
   ];
@@ -163,7 +190,7 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
             variant="round"
             className="text-base text-amber-500"
           />
-          <span className="text-sm font-semibold text-default-800 dark:text-white/85">
+          <span className="text-default-800 text-sm font-semibold dark:text-white/85">
             {t("runningTasksPanel.tasks")}
           </span>
           {runningCount > 0 && (
@@ -175,14 +202,14 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
         <div className="flex items-center gap-1">
           <button
             onClick={fetchTasks}
-            className="rounded-md p-1 text-default-400 transition-colors hover:text-default-600 dark:text-white/40 dark:hover:text-white/70"
+            className="text-default-400 hover:text-default-600 rounded-md p-1 transition-colors dark:text-white/40 dark:hover:text-white/70"
           >
             <Icon name="refresh" variant="round" className="text-sm" />
           </button>
           {onClose && (
             <button
               onClick={onClose}
-              className="rounded-md p-1 text-default-400 transition-colors hover:text-default-600 dark:text-white/40 dark:hover:text-white/70"
+              className="text-default-400 hover:text-default-600 rounded-md p-1 transition-colors dark:text-white/40 dark:hover:text-white/70"
             >
               <Icon name="close" variant="round" className="text-sm" />
             </button>
@@ -191,7 +218,7 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 border-b border-default-200/60 px-3 py-1.5 dark:border-white/6">
+      <div className="border-default-200/60 flex gap-1 border-b px-3 py-1.5 dark:border-white/6">
         {filterButtons.map((fb) => (
           <button
             key={fb.key}
@@ -214,7 +241,7 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
             <Spinner size="sm" />
           </div>
         ) : filtered.length === 0 ? (
-          <p className="py-8 text-center text-xs text-default-400 dark:text-white/40">
+          <p className="text-default-400 py-8 text-center text-xs dark:text-white/40">
             {filter === "all"
               ? t("runningTasksPanel.noTasks")
               : t("runningTasksPanel.noFilteredTasks", { filter })}

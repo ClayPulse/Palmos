@@ -1285,6 +1285,7 @@
     "workflowBuilt": "Workflow built successfully!",
     "openInEditor": "Open in Editor",
     "runWorkflow": "Run Workflow",
+    "setupEnvs": "Setup Envs",
     "usingTool": "Using tool:",
     "seeOutput": "See output",
     "hide": "Hide",

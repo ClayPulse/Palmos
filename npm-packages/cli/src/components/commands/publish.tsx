@@ -25,6 +25,9 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		undefined,
 	);
 
+	const verboseLevel = (cli.flags.logLevel ?? 'normal') as string;
+	const isMinimal = verboseLevel === 'minimal';
+
 	// Exit with error code when a terminal failure state is reached
 	useEffect(() => {
 		const failed =
@@ -54,7 +57,11 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		async function checkAuth() {
 			const token = getToken(cli.flags.stage);
 			if (token) {
-				const isValid = await checkToken(token, cli.flags.stage);
+				const isValid = await checkToken(
+					token,
+					cli.flags.stage,
+					cli.flags.stageServer,
+				);
 				if (isValid) {
 					setIsAuthenticated(true);
 				}
@@ -124,7 +131,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 			setIsPublishing(true);
 
 			try {
-				const res = await publishApp(cli.flags.stage);
+				const res = await publishApp(cli.flags.stage, cli.flags.stageServer);
 
 				if (res.status === 200) {
 					setIsPublished(true);
@@ -159,10 +166,12 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 					⛔ The current directory does not contain a Pulse Editor project.
 				</Text>
 			) : isCheckingAuth ? (
-				<Box>
-					<Spinner type="dots" />
-					<Text> Checking authentication...</Text>
-				</Box>
+				isMinimal ? null : (
+					<Box>
+						<Spinner type="dots" />
+						<Text> Checking authentication...</Text>
+					</Box>
+				)
 			) : !isAuthenticated ? (
 				<Text>
 					You are not authenticated or your access token is invalid. Publishing
@@ -172,7 +181,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 				</Text>
 			) : (
 				<>
-					{isBuilding && (
+					{isBuilding && !isMinimal && (
 						<Box>
 							<Spinner type="dots" />
 							<Text> Building...</Text>
@@ -186,7 +195,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 							)}
 						</>
 					)}
-					{isZipping && (
+					{isZipping && !isMinimal && (
 						<Box>
 							<Spinner type="dots" />
 							<Text> Compressing build...</Text>
@@ -197,7 +206,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 							❌ Error zipping the build output. {failureMessage}
 						</Text>
 					)}
-					{isPublishing && (
+					{isPublishing && !isMinimal && (
 						<Box>
 							<Spinner type="dots" />
 							<Text> Publishing...</Text>

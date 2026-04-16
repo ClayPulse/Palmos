@@ -98,7 +98,7 @@ export default function Login({ cli }: { cli: Result<Flags> }) {
   useEffect(() => {
     // Only check token validity when it is set
     if (loginMethod === "token" && token.length > 0) {
-      checkToken(token, cli.flags.stage).then((isValid) => {
+      checkToken(token, cli.flags.stage, cli.flags.stageServer).then((isValid) => {
         setIsAuthenticated(isValid);
         setIsCheckingAuth(false);
       });
@@ -115,7 +115,7 @@ export default function Login({ cli }: { cli: Result<Flags> }) {
   useEffect(() => {
     if (loginMethod !== "flow" || !isMethodSelected) return;
 
-    const baseUrl = getBackendUrl(cli.flags.stage);
+    const baseUrl = getBackendUrl(cli.flags.stage, cli.flags.stageServer);
 
     const server = http.createServer((req, res) => {
       const reqUrl = new URL(req.url ?? "/", "http://localhost");

@@ -1281,6 +1281,7 @@
 		"workflowBuilt": "ワークフローが正常に構築されました！",
 		"openInEditor": "エディターで開く",
 		"runWorkflow": "ワークフローを実行",
+		"setupEnvs": "環境変数を設定",
 		"usingTool": "ツールを使用中：",
 		"seeOutput": "出力を見る",
 		"hide": "非表示",

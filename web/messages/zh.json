@@ -1285,6 +1285,7 @@
 		"workflowBuilt": "工作流构建成功！",
 		"openInEditor": "在编辑器中打开",
 		"runWorkflow": "运行工作流",
+		"setupEnvs": "设置环境变量",
 		"usingTool": "使用工具：",
 		"seeOutput": "查看输出",
 		"hide": "隐藏",

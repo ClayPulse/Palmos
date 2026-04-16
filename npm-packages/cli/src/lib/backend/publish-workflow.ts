@@ -11,6 +11,7 @@ export async function publishWorkflow(
 		version?: string;
 	},
 	isStage: boolean,
+	stageServer?: string,
 ) {
 	const raw = fs.readFileSync(filePath, 'utf-8');
 
@@ -24,7 +25,7 @@ export async function publishWorkflow(
 	if (options.version) body['version'] = options.version;
 
 	const res = await fetch(
-		`${getBackendUrl(isStage)}/api/workflow/publish-yaml`,
+		`${getBackendUrl(isStage, stageServer)}/api/workflow/publish-yaml`,
 		{
 			method: 'POST',
 			headers: {

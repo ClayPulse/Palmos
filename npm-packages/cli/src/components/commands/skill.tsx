@@ -101,7 +101,7 @@ function SkillCreate({cli}: {cli: Result<Flags>}) {
 
 		async function authenticate() {
 			const token = getToken(cli.flags.stage);
-			if (token && (await checkToken(token, cli.flags.stage))) {
+			if (token && (await checkToken(token, cli.flags.stage, cli.flags.stageServer))) {
 				setStatus('generating');
 			} else {
 				setErrorMessage(
@@ -120,7 +120,7 @@ function SkillCreate({cli}: {cli: Result<Flags>}) {
 
 		async function generate() {
 			const token = getToken(cli.flags.stage);
-			const backendUrl = getBackendUrl(cli.flags.stage);
+			const backendUrl = getBackendUrl(cli.flags.stage, cli.flags.stageServer);
 
 			try {
 				const res = await fetch(
@@ -251,7 +251,7 @@ function SkillFix({cli}: {cli: Result<Flags>}) {
 
 		async function authenticate() {
 			const token = getToken(cli.flags.stage);
-			if (token && (await checkToken(token, cli.flags.stage))) {
+			if (token && (await checkToken(token, cli.flags.stage, cli.flags.stageServer))) {
 				// Validate file exists before fixing
 				const actionPath = path.join(
 					process.cwd(),
@@ -296,7 +296,7 @@ function SkillFix({cli}: {cli: Result<Flags>}) {
 			const code = fs.readFileSync(actionPath, 'utf-8');
 
 			const token = getToken(cli.flags.stage);
-			const backendUrl = getBackendUrl(cli.flags.stage);
+			const backendUrl = getBackendUrl(cli.flags.stage, cli.flags.stageServer);
 
 			try {
 				const res = await fetch(`${backendUrl}/api/inference/cli/skill/fix`, {

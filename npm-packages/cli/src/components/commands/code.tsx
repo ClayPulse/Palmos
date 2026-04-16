@@ -175,7 +175,11 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
         return;
       }
 
-      const isValid = await checkToken(token, cli.flags.stage);
+      const isValid = await checkToken(
+        token,
+        cli.flags.stage,
+        cli.flags.stageServer,
+      );
       setIsAuthenticated(isValid);
       setIsCheckingAuth(false);
     }
@@ -222,7 +226,7 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
 
       try {
         const response = await fetch(
-          `${getBackendUrl(cli.flags.stage)}/api/server-function/vibe_dev_flow/latest/generate-code/v2/generate`,
+          `${getBackendUrl(cli.flags.stage, cli.flags.stageServer)}/api/server-function/vibe_dev_flow/latest/generate-code/v2/generate`,
           {
             method: "POST",
             headers: {
@@ -365,7 +369,7 @@ export default function Code({ cli }: { cli: Result<Flags> }) {
           setIsDownloading(true);
           try {
             // Step 1: exchange the archive endpoint for a SAS URL
-            const sasEndpoint = `${getBackendUrl(cli.flags.stage)}/api/app/source?app=${encodeURIComponent(_artifact.appId)}`;
+            const sasEndpoint = `${getBackendUrl(cli.flags.stage, cli.flags.stageServer)}/api/app/source?app=${encodeURIComponent(_artifact.appId)}`;
 
             const sasResponse = await fetch(sasEndpoint, {
               headers: {
