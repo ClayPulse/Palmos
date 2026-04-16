@@ -3,11 +3,13 @@
 import KnowledgeFiles from "@/components/agent-chat/knowledge-files";
 import ShareChatModal from "@/components/agent-chat/share-chat-modal";
 import Icon from "@/components/misc/icon";
+import MoveToProjectModal from "@/components/misc/move-to-project-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useScreenSize } from "@/lib/hooks/use-screen-size";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import {
   Dropdown,
   DropdownItem,
@@ -31,6 +33,7 @@ export default function ChatSessionSidebar({
   const [isProjectListOpen, setIsProjectListOpen] = useState(false);
   const [isKnowledgeOpen, setIsKnowledgeOpen] = useState(false);
   const [shareSessionId, setShareSessionId] = useState<string | null>(null);
+  const [moveSessionId, setMoveSessionId] = useState<string | null>(null);
   const { isLandscape } = useScreenSize();
 
   const {
@@ -42,8 +45,28 @@ export default function ChatSessionSidebar({
     handleDeleteSession,
   } = useChatContext();
 
+  async function handleMoveSession(projectId: string | null) {
+    if (!moveSessionId) return;
+    setMoveSessionId(null);
+    try {
+      await fetchAPI(`/api/chat/sessions/${moveSessionId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId }),
+      });
+    } catch {
+      // silent
+    }
+  }
+
   return (
     <>
+    <MoveToProjectModal
+      isOpen={!!moveSessionId}
+      onClose={() => setMoveSessionId(null)}
+      onSelect={handleMoveSession}
+      title="Move Chat to Project"
+    />
     <ShareChatModal
       sessionId={shareSessionId}
       isOpen={!!shareSessionId}
@@ -284,6 +307,7 @@ export default function ChatSessionSidebar({
                         <DropdownMenu
                           onAction={(key) => {
                             if (key === "share") setShareSessionId(s.id);
+                            if (key === "move") setMoveSessionId(s.id);
                             if (key === "delete") handleDeleteSession(s.id);
                           }}
                         >
@@ -292,6 +316,12 @@ export default function ChatSessionSidebar({
                             startContent={<Icon name="share" variant="round" className="text-sm" />}
                           >
                             Share
+                          </DropdownItem>
+                          <DropdownItem
+                            key="move"
+                            startContent={<Icon name="drive_file_move" variant="round" className="text-sm" />}
+                          >
+                            Move to Project
                           </DropdownItem>
                           <DropdownItem
                             key="delete"
@@ -467,6 +497,7 @@ export default function ChatSessionSidebar({
                         <DropdownMenu
                           onAction={(key) => {
                             if (key === "share") setShareSessionId(s.id);
+                            if (key === "move") setMoveSessionId(s.id);
                             if (key === "delete") handleDeleteSession(s.id);
                           }}
                         >
@@ -475,6 +506,12 @@ export default function ChatSessionSidebar({
                             startContent={<Icon name="share" variant="round" className="text-sm" />}
                           >
                             Share
+                          </DropdownItem>
+                          <DropdownItem
+                            key="move"
+                            startContent={<Icon name="drive_file_move" variant="round" className="text-sm" />}
+                          >
+                            Move to Project
                           </DropdownItem>
                           <DropdownItem
                             key="delete"

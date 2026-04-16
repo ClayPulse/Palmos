@@ -491,6 +491,7 @@ export type Workflow = {
   forkedFromId?: string;
   forkedAt?: string;
   createdAt?: string;
+  projectId?: string | null;
 };
 
 export type WorkflowEnvDef = {
