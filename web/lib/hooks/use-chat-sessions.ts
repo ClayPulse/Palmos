@@ -38,10 +38,16 @@ export interface SerializedMessage {
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 export function generateSessionId(): string {
-  const randomBytes = crypto.getRandomValues(new Uint8Array(8));
-  const randomSuffix = Array.from(randomBytes, (b) => b.toString(16).padStart(2, "0"))
-    .join("")
-    .slice(0, 12);
+  const randomSuffix = (() => {
+    const cryptoObj = (typeof globalThis !== "undefined" && (globalThis as any).crypto) || null;
+    if (cryptoObj && typeof cryptoObj.getRandomValues === "function") {
+      const array = new Uint32Array(1);
+      cryptoObj.getRandomValues(array);
+      return array[0].toString(36).slice(0, 6);
+    }
+    // Fallback: not cryptographically secure, but keeps functionality in non‑crypto environments
+    return Math.random().toString(36).slice(2, 8);
+  })();
   return `session-${Date.now()}-${randomSuffix}`;
 }
 
