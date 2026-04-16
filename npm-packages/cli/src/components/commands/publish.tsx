@@ -25,6 +25,9 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		undefined,
 	);
 
+	const verboseLevel = (cli.flags.logLevel ?? 'normal') as string;
+	const isMinimal = verboseLevel === 'minimal';
+
 	// Exit with error code when a terminal failure state is reached
 	useEffect(() => {
 		const failed =
@@ -163,10 +166,12 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 					⛔ The current directory does not contain a Pulse Editor project.
 				</Text>
 			) : isCheckingAuth ? (
-				<Box>
-					<Spinner type="dots" />
-					<Text> Checking authentication...</Text>
-				</Box>
+				isMinimal ? null : (
+					<Box>
+						<Spinner type="dots" />
+						<Text> Checking authentication...</Text>
+					</Box>
+				)
 			) : !isAuthenticated ? (
 				<Text>
 					You are not authenticated or your access token is invalid. Publishing
@@ -176,7 +181,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 				</Text>
 			) : (
 				<>
-					{isBuilding && (
+					{isBuilding && !isMinimal && (
 						<Box>
 							<Spinner type="dots" />
 							<Text> Building...</Text>
@@ -190,7 +195,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 							)}
 						</>
 					)}
-					{isZipping && (
+					{isZipping && !isMinimal && (
 						<Box>
 							<Spinner type="dots" />
 							<Text> Compressing build...</Text>
@@ -201,7 +206,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 							❌ Error zipping the build output. {failureMessage}
 						</Text>
 					)}
-					{isPublishing && (
+					{isPublishing && !isMinimal && (
 						<Box>
 							<Spinner type="dots" />
 							<Text> Publishing...</Text>
