@@ -71,9 +71,13 @@ export function isTokenInEnv(devMode: boolean) {
 	return false;
 }
 
-export async function checkToken(token: string, devMode: boolean) {
+export async function checkToken(
+	token: string,
+	devMode: boolean,
+	stageServer?: string,
+) {
 	const res = await fetch(
-		`${getBackendUrl(devMode)}/api/api-keys/check`,
+		`${getBackendUrl(devMode, stageServer)}/api/api-keys/check`,
 		{
 			body: JSON.stringify({token}),
 			headers: {

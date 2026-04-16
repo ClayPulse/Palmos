@@ -17,6 +17,10 @@ ${Object.entries(commandsManual)
 	.map(([_, description]) => `${description}`)
 	.join('')}
 Global Flags
+  --stage              Point the CLI at a staging backend instead of production.
+  --stage-server <url> Custom staging backend URL (requires --stage).
+                       Defaults to https://localhost:8080 when --stage is set
+                       without --stage-server.
   --log-level <level>  Output level: normal (default), minimal, or silent.
                        normal   — full UI with spinners and progress.
                        minimal  — results and errors only, no progress UI.
@@ -32,6 +36,13 @@ Examples
 		flags: flags,
 	},
 );
+
+if (cli.flags.stageServer && !cli.flags.stage) {
+	process.stderr.write(
+		`\x1b[31mError: --stage-server requires --stage to be set.\x1b[0m\n`,
+	);
+	process.exit(1);
+}
 
 const verboseLevel = (cli.flags.logLevel ?? 'normal') as string;
 

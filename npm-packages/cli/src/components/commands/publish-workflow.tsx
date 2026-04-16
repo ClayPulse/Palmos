@@ -50,7 +50,11 @@ export default function PublishWorkflow({cli}: {cli: Result<Flags>}) {
 		async function checkAuth() {
 			const token = getToken(cli.flags.stage);
 			if (token) {
-				const isValid = await checkToken(token, cli.flags.stage);
+				const isValid = await checkToken(
+					token,
+					cli.flags.stage,
+					cli.flags.stageServer,
+				);
 				if (isValid) {
 					setIsAuthenticated(true);
 				}
@@ -76,6 +80,7 @@ export default function PublishWorkflow({cli}: {cli: Result<Flags>}) {
 						description: cli.flags.description,
 					},
 					cli.flags.stage,
+					cli.flags.stageServer,
 				);
 
 				if (res.status === 200) {

@@ -54,7 +54,11 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 		async function checkAuth() {
 			const token = getToken(cli.flags.stage);
 			if (token) {
-				const isValid = await checkToken(token, cli.flags.stage);
+				const isValid = await checkToken(
+					token,
+					cli.flags.stage,
+					cli.flags.stageServer,
+				);
 				if (isValid) {
 					setIsAuthenticated(true);
 				}
@@ -124,7 +128,7 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 			setIsPublishing(true);
 
 			try {
-				const res = await publishApp(cli.flags.stage);
+				const res = await publishApp(cli.flags.stage, cli.flags.stageServer);
 
 				if (res.status === 200) {
 					setIsPublished(true);

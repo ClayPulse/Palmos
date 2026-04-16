@@ -7,6 +7,7 @@ describe("flags", () => {
     expect(flags.flow).toBeDefined();
     expect(flags.framework).toBeDefined();
     expect(flags.stage).toBeDefined();
+    expect(flags.stageServer).toBeDefined();
     expect(flags.name).toBeDefined();
     expect(flags.visibility).toBeDefined();
     expect(flags.target).toBeDefined();
