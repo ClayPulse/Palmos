@@ -2,6 +2,7 @@
 
 import type { InterruptState } from "@/lib/hooks/use-deep-agent";
 import Icon from "@/components/misc/icon";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useState } from "react";
 
 /**
@@ -19,6 +20,7 @@ export default function InterruptCard({
   onReply: (reply: string) => void;
   isLoading?: boolean;
 }) {
+  const { getTranslations: t } = useTranslations();
   const [customInput, setCustomInput] = useState("");
   const [replied, setReplied] = useState(false);
 
@@ -48,7 +50,7 @@ export default function InterruptCard({
           className="text-base text-blue-600 dark:text-blue-400"
         />
         <span className="text-xs font-semibold text-blue-700 dark:text-blue-300">
-          Input needed
+          {t("interruptCard.inputNeeded")}
         </span>
       </div>
 
@@ -91,7 +93,7 @@ export default function InterruptCard({
               handleReply(customInput.trim());
             }
           }}
-          placeholder="Or type your answer..."
+          placeholder={t("interruptCard.typeAnswer")}
           disabled={isLoading}
           className="min-w-0 flex-1 rounded-lg border border-default-200 bg-default-50 px-3 py-1.5 text-xs text-default-800 placeholder:text-default-400 focus:border-blue-400 focus:outline-none disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:placeholder:text-white/30"
         />
@@ -100,7 +102,7 @@ export default function InterruptCard({
           disabled={isLoading || !customInput.trim()}
           className="shrink-0 rounded-lg bg-blue-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 dark:bg-blue-500 dark:hover:bg-blue-600"
         >
-          Send
+          {t("interruptCard.send")}
         </button>
       </div>
     </div>

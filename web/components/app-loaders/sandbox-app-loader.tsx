@@ -2,6 +2,7 @@ import BaseAppLoader from "@/components/app-loaders/base-app-loader";
 import Loading from "@/components/interface/status-screens/loading";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { IMCContext } from "@/components/providers/imc-provider";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { usePlatformApi } from "@/lib/hooks/use-platform-api";
 import { ExtensionApp } from "@/lib/types";
 import { useDroppable } from "@dnd-kit/core";
@@ -29,6 +30,7 @@ export default function SandboxAppLoader({
 }) {
   const editorContext = useContext(EditorContext);
   const imcContext = useContext(IMCContext);
+  const { getTranslations: t } = useTranslations();
 
   const { resolvedTheme } = useTheme();
   const { platformApi } = usePlatformApi();
@@ -256,9 +258,7 @@ export default function SandboxAppLoader({
       ) : isMissingExtension ? (
         <div className="flex h-full w-full items-center justify-center">
           <p className="text-text1 text-sm">
-            No default view found for this file type. Find a compatible
-            extension in marketplace, and enable it in settings as the default
-            method to open this file.
+            {t("sandboxAppLoader.noDefaultView")}
           </p>
         </div>
       ) : (

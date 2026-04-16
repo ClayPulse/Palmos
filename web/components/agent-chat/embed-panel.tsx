@@ -4,6 +4,7 @@ import Icon from "@/components/misc/icon";
 import A2UIView from "@/components/views/chat/a2ui-view";
 import MCPAppsView from "@/components/views/chat/mcp-apps-view";
 import PulseAppView from "@/components/views/chat/pulse-app-view";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { CanvasViewConfig } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { useMemo } from "react";
@@ -17,11 +18,11 @@ interface ChatEmbedPanelProps {
   onClose: () => void;
 }
 
-const TABS: { id: EmbedPanelTab; label: string; icon: string }[] = [
-  { id: "a2ui", label: "A2UI", icon: "language" },
-  { id: "mcp-apps", label: "MCP Apps", icon: "hub" },
-  { id: "pulse-app", label: "Palmos App", icon: "apps" },
-  { id: "workflow-canvas", label: "Canvas", icon: "account_tree" },
+const TABS: { id: EmbedPanelTab; labelKey: string; icon: string }[] = [
+  { id: "a2ui", labelKey: "embedPanel.a2ui", icon: "language" },
+  { id: "mcp-apps", labelKey: "embedPanel.mcpApps", icon: "hub" },
+  { id: "pulse-app", labelKey: "embedPanel.palmosApp", icon: "apps" },
+  { id: "workflow-canvas", labelKey: "embedPanel.canvas", icon: "account_tree" },
 ];
 
 export default function ChatEmbedPanel({
@@ -29,6 +30,7 @@ export default function ChatEmbedPanel({
   onTabChange,
   onClose,
 }: ChatEmbedPanelProps) {
+  const { getTranslations: t } = useTranslations();
   const canvasViewConfig = useMemo<CanvasViewConfig>(
     () => ({ viewId: createCanvasViewId(), appConfigs: [] }),
     [],
@@ -50,7 +52,7 @@ export default function ChatEmbedPanel({
               }`}
             >
               <Icon name={tab.icon} variant="round" className="text-sm" />
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>

@@ -5,6 +5,7 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useAutomations } from "@/lib/hooks/use-automations";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { Automation } from "@/lib/types";
 import DialTimePicker from "@/components/misc/dial-time-picker";
 import {
@@ -24,10 +25,10 @@ import { useContext, useEffect, useRef, useState } from "react";
 import ModalWrapper from "./wrapper";
 
 const CRON_PRESETS = [
-  { label: "Every 15 min", value: "*/15 * * * *" },
-  { label: "Hourly", value: "0 * * * *" },
-  { label: "Daily 9am", value: "0 9 * * *" },
-  { label: "Weekly Mon", value: "0 9 * * 1" },
+  { labelKey: "automationEditorModal.every15min", value: "*/15 * * * *" },
+  { labelKey: "automationEditorModal.hourly", value: "0 * * * *" },
+  { labelKey: "automationEditorModal.daily9am", value: "0 9 * * *" },
+  { labelKey: "automationEditorModal.weeklyMon", value: "0 9 * * 1" },
 ];
 
 export default function AutomationEditorModal({
@@ -37,6 +38,7 @@ export default function AutomationEditorModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
   const editingAutomation =
     editorContext?.editorStates.modalStates?.automationEditor?.automation;
@@ -157,7 +159,7 @@ export default function AutomationEditorModal({
       }
       onClose();
     } catch (err: any) {
-      setError(err.message ?? "Failed to save");
+      setError(err.message ?? t("automationEditorModal.failedToSave"));
     } finally {
       setIsSaving(false);
     }
@@ -170,7 +172,7 @@ export default function AutomationEditorModal({
       await deleteAutomation(editingAutomation.id);
       onClose();
     } catch (err: any) {
-      setError(err.message ?? "Failed to delete");
+      setError(err.message ?? t("automationEditorModal.failedToDelete"));
     } finally {
       setIsSaving(false);
     }
@@ -182,7 +184,7 @@ export default function AutomationEditorModal({
     try {
       await triggerAutomation(editingAutomation.id, "manual");
     } catch (err: any) {
-      setError(err.message ?? "Failed to trigger");
+      setError(err.message ?? t("automationEditorModal.failedToTrigger"));
     } finally {
       setIsSaving(false);
     }
@@ -232,7 +234,7 @@ export default function AutomationEditorModal({
     <ModalWrapper
       isOpen={isOpen}
       onClose={onClose}
-      title={isEdit ? "Edit Automation" : "Create Automation"}
+      title={isEdit ? t("automationEditorModal.editAutomation") : t("automationEditorModal.createAutomation")}
     >
       <div className="space-y-4 pb-4">
         {error && (
@@ -242,16 +244,16 @@ export default function AutomationEditorModal({
         )}
 
         <Input
-          label="Name"
-          placeholder="My automation"
+          label={t("automationEditorModal.name")}
+          placeholder={t("automationEditorModal.namePlaceholder")}
           value={name}
           onValueChange={setName}
           size="sm"
         />
 
         <Select
-          label="Workflow"
-          placeholder="Select a workflow"
+          label={t("automationEditorModal.workflow")}
+          placeholder={t("automationEditorModal.selectWorkflow")}
           size="sm"
           selectedKeys={workflowName ? [`${workflowName}@${workflowVersion}`] : []}
           onSelectionChange={handleWorkflowSelect}
@@ -267,7 +269,7 @@ export default function AutomationEditorModal({
         {!isEdit && (
           <div>
             <p className="text-default-600 mb-2 text-xs font-medium">
-              Trigger Type
+              {t("automationEditorModal.triggerType")}
             </p>
             <Tabs
               size="sm"
@@ -281,7 +283,7 @@ export default function AutomationEditorModal({
                 title={
                   <div className="flex items-center gap-1">
                     <Icon name="schedule" className="text-sm" />
-                    Schedule
+                    {t("automationEditorModal.schedule")}
                   </div>
                 }
               />
@@ -290,7 +292,7 @@ export default function AutomationEditorModal({
                 title={
                   <div className="flex items-center gap-1">
                     <Icon name="link" className="text-sm" />
-                    Webhook
+                    {t("automationEditorModal.webhook")}
                   </div>
                 }
               />
@@ -302,7 +304,7 @@ export default function AutomationEditorModal({
           <div className="space-y-3">
             <div>
               <p className="text-default-600 mb-2 text-xs font-medium">
-                Presets
+                {t("automationEditorModal.presets")}
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {CRON_PRESETS.map((preset) => (
@@ -319,7 +321,7 @@ export default function AutomationEditorModal({
                       setRecurring(true);
                     }}
                   >
-                    {preset.label}
+                    {t(preset.labelKey)}
                   </Chip>
                 ))}
               </div>
@@ -328,7 +330,7 @@ export default function AutomationEditorModal({
             {!isEdit && (
               <div className="flex gap-2">
                 <DatePicker
-                  label="Start Date"
+                  label={t("automationEditorModal.startDate")}
                   size="sm"
                   value={scheduledDate}
                   onChange={setScheduledDate}
@@ -347,7 +349,7 @@ export default function AutomationEditorModal({
                     className="bg-content2 border-default-200 hover:bg-content3 flex h-full w-full flex-col justify-center rounded-xl border px-3 py-1.5 text-left transition-colors dark:border-white/10"
                   >
                     <span className="text-default-600 text-[10px] font-medium">
-                      Start Time
+                      {t("automationEditorModal.startTime")}
                     </span>
                     <span className="text-sm font-semibold tabular-nums">
                       {String(schedHour).padStart(2, "0")}:
@@ -378,7 +380,7 @@ export default function AutomationEditorModal({
             )}
 
             <p className="text-default-400 text-xs">
-              Minimum granularity: 15 minutes
+              {t("automationEditorModal.minGranularity")}
             </p>
           </div>
         )}
@@ -388,13 +390,13 @@ export default function AutomationEditorModal({
             {webhookUrl && (
               <div>
                 <p className="text-default-600 mb-1 text-xs font-medium">
-                  Webhook URL
+                  {t("automationEditorModal.webhookUrl")}
                 </p>
                 <div className="bg-content2 flex items-center gap-2 rounded-lg p-2">
                   <code className="min-w-0 flex-1 truncate text-xs">
                     {webhookUrl}
                   </code>
-                  <Tooltip content="Copy URL">
+                  <Tooltip content={t("automationEditorModal.copyUrl")}>
                     <Button
                       size="sm"
                       isIconOnly
@@ -410,14 +412,14 @@ export default function AutomationEditorModal({
 
             <div className="flex items-end gap-2">
               <Input
-                label="Webhook Secret (optional)"
-                placeholder="HMAC secret for signature verification"
+                label={t("automationEditorModal.webhookSecret")}
+                placeholder={t("automationEditorModal.webhookSecretPlaceholder")}
                 value={webhookSecret}
                 onValueChange={setWebhookSecret}
                 size="sm"
                 className="flex-1"
               />
-              <Tooltip content="Generate random secret">
+              <Tooltip content={t("automationEditorModal.generateSecret")}>
                 <Button
                   size="sm"
                   isIconOnly
@@ -432,7 +434,7 @@ export default function AutomationEditorModal({
             {webhookUrl && (
               <div>
                 <p className="text-default-600 mb-1 text-xs font-medium">
-                  Example
+                  {t("automationEditorModal.example")}
                 </p>
                 <pre className="bg-content2 overflow-x-auto rounded-lg p-2 text-xs">
                   {`curl -X POST ${webhookUrl} \\
@@ -449,7 +451,7 @@ export default function AutomationEditorModal({
         {inputArgs.length > 0 && (
           <div>
             <p className="text-default-600 mb-2 text-xs font-medium">
-              Workflow Inputs
+              {t("automationEditorModal.workflowInputs")}
             </p>
             <div className="space-y-2">
               {inputArgs.map((arg, i) => (
@@ -480,7 +482,7 @@ export default function AutomationEditorModal({
                 onPress={handleDelete}
                 isLoading={isSaving}
               >
-                Delete
+                {t("common.delete")}
               </Button>
             )}
             {isEdit && (
@@ -491,7 +493,7 @@ export default function AutomationEditorModal({
                 onPress={handleRunNow}
                 isLoading={isSaving}
               >
-                Run Now
+                {t("automationEditorModal.runNow")}
               </Button>
             )}
           </div>
@@ -502,7 +504,7 @@ export default function AutomationEditorModal({
             isLoading={isSaving}
             isDisabled={!name || !workflowName}
           >
-            {isEdit ? "Update" : "Create"}
+            {isEdit ? t("common.update") : t("common.create")}
           </Button>
         </div>
 
@@ -531,6 +533,7 @@ function TimeDialPopup({
   onSave: () => void;
   onClose: () => void;
 }) {
+  const { getTranslations: t } = useTranslations();
   const popupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -556,10 +559,10 @@ function TimeDialPopup({
       />
       <div className="mt-3 flex justify-end gap-2">
         <Button size="sm" variant="flat" onPress={onClose}>
-          Cancel
+          {t("common.cancel")}
         </Button>
         <Button size="sm" color="primary" onPress={onSave}>
-          Save
+          {t("common.save")}
         </Button>
       </div>
     </div>

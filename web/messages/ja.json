@@ -1133,6 +1133,232 @@
 	"draggableItem": {
 		"ariaLabel": "ドラッグして移動"
 	},
+	"chatInputBar": {
+		"askAnything": "Palmos AI に何でも聞いてください...",
+		"askShort": "Palmos AI に聞く...",
+		"dropFiles": "ファイルをドロップして添付",
+		"attachFile": "ファイルを添付",
+		"saveToKnowledge": "ナレッジに保存",
+		"savedToKnowledge": "ナレッジに保存しました",
+		"uploadFailed": "アップロード失敗",
+		"removeAttachment": "添付ファイルを削除"
+	},
+	"starterPrompts": {
+		"automateCRM": "CRMを自動化する",
+		"leadGeneration": "リード獲得を作成する",
+		"makeWebsite": "ウェブサイトを作成する",
+		"businessDashboard": "ビジネスダッシュボードを作成する",
+		"digitalEmployee": "デジタル従業員をカスタマイズする",
+		"inventoryTracker": "在庫トラッカーを構築する"
+	},
+	"projectScreen": {
+		"whatToWorkOn": "何に取り組みたいですか？",
+		"tellAboutProject": "プロジェクトについて教えてください",
+		"helpUnderstand": "プロジェクトを理解させていただければ、最適なオートメーションを提案できます。スキップしてすぐに始めることもできます。",
+		"whatKind": "どのようなプロジェクトですか？",
+		"skip": "スキップ",
+		"describeIdea": "アイデアを説明してください。実現のお手伝いをします。",
+		"allSystemsNominal": "全システム正常",
+		"automationsActive": "{count} 件のオートメーションが稼働中",
+		"automationActive": "{count} 件のオートメーションが稼働中",
+		"workflowsReady": "{count} 件のワークフローが準備完了",
+		"workflowReady": "{count} 件のワークフローが準備完了",
+		"categories": {
+			"marketingGrowth": "マーケティングと成長",
+			"salesCRM": "営業とCRM",
+			"customerSupport": "カスタマーサポート",
+			"internalOperations": "社内オペレーション",
+			"ecommerce": "Eコマース",
+			"contentSocialMedia": "コンテンツとソーシャルメディア",
+			"dataAnalytics": "データと分析"
+		}
+	},
+	"homeScreen": {
+		"whatToBuild": "今日は何を作りたいですか？",
+		"describeIdea": "アイデアを説明してください。実現のお手伝いをします。",
+		"myProjects": "マイプロジェクト",
+		"workflows": "ワークフロー",
+		"members": "メンバー",
+		"workflowCount": "{count} ワークフロー",
+		"memberCount": "{count} メンバー"
+	},
+	"interruptCard": {
+		"inputNeeded": "入力が必要です",
+		"typeAnswer": "または回答を入力...",
+		"send": "送信"
+	},
+	"shareChatModal": {
+		"error": "エラー",
+		"noActiveSession": "共有するアクティブなチャットセッションがありません。",
+		"title": "チャットを共有",
+		"description": "この会話を誰でも閲覧できるリンクを作成します（読み取り専用）。",
+		"shareLink": "このリンクを共有：",
+		"copy": "コピー",
+		"done": "完了",
+		"createLink": "リンクを作成"
+	},
+	"carousels": {
+		"myWorkflows": "マイワークフロー",
+		"myAutomations": "マイオートメーション",
+		"running": "実行中",
+		"new": "新規",
+		"open": "開く",
+		"edit": "編集",
+		"createFirstAutomation": "最初のオートメーションを作成",
+		"scheduleWorkflows": "ワークフローをスケジュールするか、Webhookでトリガーします",
+		"paused": "一時停止"
+	},
+	"chatMessageArea": {
+		"thinking": "Palmos が考えています",
+		"loadingConversation": "会話を読み込み中...",
+		"errorOccurred": "エラーが発生しました。"
+	},
+	"embedPanel": {
+		"a2ui": "A2UI",
+		"mcpApps": "MCP アプリ",
+		"palmosApp": "Palmos アプリ",
+		"canvas": "キャンバス"
+	},
+	"inboxPanel": {
+		"noNotifications": "まだ通知はありません",
+		"tryWorkflow": "ワークフローを試す"
+	},
+	"knowledgeFiles": {
+		"knowledge": "ナレッジ",
+		"filesIndexed": "AIコンテキスト用にインデックスされたファイル",
+		"upload": "アップロード",
+		"noFiles": "まだナレッジファイルはありません",
+		"invalidResponse": "無効なレスポンス",
+		"networkError": "ネットワークエラー",
+		"knowledgeFilesTooltip": "ナレッジファイル"
+	},
+	"messageBubbles": {
+		"user": "ユーザー：",
+		"copied": "コピーしました！",
+		"copy": "コピー",
+		"calledTool": "ツールを呼び出し：",
+		"aiManager": "AIマネージャー：",
+		"aiManagerLabel": "AIマネージャー"
+	},
+	"projectPicker": {
+		"selectProject": "プロジェクトを選択",
+		"project": "プロジェクト",
+		"clearProject": "プロジェクトをクリア",
+		"new": "新規",
+		"noProjects": "まだプロジェクトはありません"
+	},
+	"runningTasksPanel": {
+		"tasks": "タスク",
+		"all": "すべて",
+		"running": "実行中",
+		"done": "完了",
+		"failed": "失敗",
+		"runningCount": "実行中",
+		"noTasks": "まだタスクはありません。ワークフローの実行とマネージドエージェントのタスクがここに表示されます。",
+		"noFilteredTasks": "{filter} タスクはありません。"
+	},
+	"sessionHistory": {
+		"chatHistory": "チャット履歴",
+		"new": "新規",
+		"noChatHistory": "まだチャット履歴はありません",
+		"justNow": "たった今",
+		"mAgo": "{count}分前",
+		"hAgo": "{count}時間前",
+		"dAgo": "{count}日前"
+	},
+	"subagentCard": {
+		"working": "作業中..."
+	},
+	"todoList": {
+		"tasks": "タスク"
+	},
+	"workflowTaskCard": {
+		"running": "実行中... {time}",
+		"completed": "{time} で完了",
+		"failed": "{time} 後に失敗",
+		"terminate": "終了",
+		"terminating": "終了中...",
+		"workflowBuilt": "ワークフローが正常に構築されました！",
+		"openInEditor": "エディターで開く",
+		"runWorkflow": "ワークフローを実行",
+		"usingTool": "ツールを使用中：",
+		"seeOutput": "出力を見る",
+		"hide": "非表示",
+		"download": "ダウンロード",
+		"messages": "メッセージ",
+		"latest": "最新："
+	},
+	"agentChatPaywall": {
+		"upgradeTitle": "AIエージェントを使用するにはアップグレードが必要です",
+		"upgradeDescription": "エージェントチャットには有料プラン（Starter以上）が必要です。有料ユーザーのプロジェクトに招待されることでもアクセスできます。",
+		"viewPlans": "プランを見る",
+		"alreadyMember": "すでに有料プロジェクトのメンバーですか？プロジェクトピッカーから選択してAIエージェントの使用を開始してください。"
+	},
+	"appModeToggle": {
+		"agent": "エージェント",
+		"editor": "エディター"
+	},
+	"createInviteLinkModal": {
+		"noWorkflowsSelected": "ワークフローが選択されていません",
+		"selectAtLeastOne": "共有するワークフローを少なくとも1つ選択してください。",
+		"title": "招待リンクを作成",
+		"linkDescription": "このリンクを持つ人は誰でも、選択したワークフローを受け入れてAIマネージャーで利用できるようになります。",
+		"selectWorkflows": "ワークフローを選択",
+		"noPublishedWorkflows": "公開済みのワークフローが見つかりません。まずワークフローを公開してください。",
+		"copied": "コピーしました",
+		"copiedDescription": "招待リンクをクリップボードにコピーしました。",
+		"done": "完了",
+		"createLink": "リンクを作成",
+		"selected": "{count} 件選択"
+	},
+	"sandboxAppLoader": {
+		"noDefaultView": "このファイルタイプのデフォルトビューが見つかりません。マーケットプレイスで互換性のある拡張機能を見つけ、設定でこのファイルを開くデフォルトの方法として有効にしてください。"
+	},
+	"automationEditorModal": {
+		"editAutomation": "オートメーションを編集",
+		"createAutomation": "オートメーションを作成",
+		"name": "名前",
+		"namePlaceholder": "マイオートメーション",
+		"workflow": "ワークフロー",
+		"selectWorkflow": "ワークフローを選択",
+		"triggerType": "トリガータイプ",
+		"schedule": "スケジュール",
+		"webhook": "Webhook",
+		"presets": "プリセット",
+		"every15min": "15分ごと",
+		"hourly": "毎時",
+		"daily9am": "毎日午前9時",
+		"weeklyMon": "毎週月曜",
+		"startDate": "開始日",
+		"startTime": "開始時間",
+		"minGranularity": "最小粒度：15分",
+		"webhookUrl": "Webhook URL",
+		"copyUrl": "URLをコピー",
+		"webhookSecret": "Webhookシークレット（任意）",
+		"webhookSecretPlaceholder": "署名検証用のHMACシークレット",
+		"generateSecret": "ランダムシークレットを生成",
+		"example": "例",
+		"workflowInputs": "ワークフロー入力",
+		"runNow": "今すぐ実行",
+		"failedToSave": "保存に失敗",
+		"failedToDelete": "削除に失敗",
+		"failedToTrigger": "トリガーに失敗"
+	},
+	"chatSessionSidebar": {
+		"moveToProjectTitle": "チャットをプロジェクトに移動",
+		"project": "プロジェクト",
+		"knowledgeFiles": "ナレッジファイル",
+		"newProject": "新しいプロジェクト",
+		"selectProject": "プロジェクトを選択",
+		"noProjects": "プロジェクトはまだありません",
+		"chatHistory": "チャット履歴",
+		"new": "新規",
+		"noChatHistory": "チャット履歴はまだありません",
+		"share": "共有",
+		"moveToProject": "プロジェクトに移動",
+		"delete": "削除",
+		"menu": "メニュー"
+	},
 	"canvasNode": {
 		"labels": {
 			"entry": "入口",

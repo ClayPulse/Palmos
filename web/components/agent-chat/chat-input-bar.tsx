@@ -3,6 +3,7 @@
 import Icon from "@/components/misc/icon";
 import KnowledgeFiles from "@/components/agent-chat/knowledge-files";
 import ProjectPicker from "@/components/agent-chat/project-picker";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner, Tooltip } from "@heroui/react";
 import type React from "react";
 import { useRef, useState } from "react";
@@ -56,6 +57,7 @@ export default function ChatInputBar({
   onIndexUpload,
   footerExtra,
 }: ChatInputBarProps) {
+  const { getTranslations: t } = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const dragCounterRef = useRef(0);
@@ -104,7 +106,7 @@ export default function ChatInputBar({
   const dropIconSize = isPage ? "text-3xl" : "text-2xl";
   const dropTextSize = isPage ? "text-sm" : "text-xs";
   const dropRounding = isPage ? "rounded-xl" : "rounded-lg";
-  const placeholder = isPage ? "Ask Palmos AI anything..." : "Ask Palmos AI...";
+  const placeholder = isPage ? t("chatInputBar.askAnything") : t("chatInputBar.askShort");
   const pyTextarea = isPage ? "py-3" : "py-2.5";
 
   const attachmentChips =
@@ -151,11 +153,11 @@ export default function ChatInputBar({
                   {u.filename}
                 </span>
                 {u.status === "ready" && !u.indexed && !u.indexing && (
-                  <Tooltip content="Save to knowledge" delay={300} closeDelay={0}>
+                  <Tooltip content={t("chatInputBar.saveToKnowledge")} delay={300} closeDelay={0}>
                     <button
                       className="text-gray-400 hover:text-amber-600 dark:text-white/40 dark:hover:text-amber-400"
                       onClick={() => onIndexUpload(u)}
-                      aria-label="Save to knowledge"
+                      aria-label={t("chatInputBar.saveToKnowledge")}
                     >
                       <Icon name="cloud_upload" variant="round" className="text-xs" />
                     </button>
@@ -163,7 +165,7 @@ export default function ChatInputBar({
                 )}
                 {u.indexing && <Spinner size="sm" />}
                 {u.indexed && (
-                  <Tooltip content="Saved to knowledge" delay={300} closeDelay={0}>
+                  <Tooltip content={t("chatInputBar.savedToKnowledge")} delay={300} closeDelay={0}>
                     <Icon
                       name="check_circle"
                       variant="round"
@@ -189,7 +191,7 @@ export default function ChatInputBar({
                 content={
                   <div className="max-w-xs px-1 py-0.5 text-xs">
                     <p className="mb-0.5 font-semibold text-red-500">
-                      Upload failed
+                      {t("chatInputBar.uploadFailed")}
                     </p>
                     <p className="text-default-700 break-words dark:text-white/80">
                       {u.error ?? "Unknown error"}
@@ -236,7 +238,7 @@ export default function ChatInputBar({
         <div className={`pointer-events-none absolute inset-0 z-10 flex items-center justify-center ${dropRounding} border-2 border-dashed border-amber-500 bg-amber-50/80 dark:border-amber-400 dark:bg-amber-900/30`}>
           <div className="flex flex-col items-center gap-1 text-amber-600 dark:text-amber-400">
             <Icon name="upload_file" variant="round" className={dropIconSize} />
-            <span className={`${dropTextSize} font-medium`}>Drop files to attach</span>
+            <span className={`${dropTextSize} font-medium`}>{t("chatInputBar.dropFiles")}</span>
           </div>
         </div>
       )}
@@ -252,12 +254,12 @@ export default function ChatInputBar({
         ? "flex items-center gap-2 rounded-xl border border-amber-300/60 bg-gray-50 px-3 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_14px_rgba(245,158,11,0.18)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_14px_rgba(251,191,36,0.22)]"
         : "flex items-end gap-2 rounded-lg border border-amber-300/60 bg-gray-50 px-2 shadow-sm transition-shadow focus-within:border-amber-500 focus-within:shadow-[0_0_12px_rgba(245,158,11,0.15)] dark:border-white/15 dark:bg-white/8 dark:focus-within:border-amber-400/70 dark:focus-within:shadow-[0_0_12px_rgba(251,191,36,0.2)]"
       }>
-        <Tooltip content="Attach file" delay={400} closeDelay={0}>
+        <Tooltip content={t("chatInputBar.attachFile")} delay={400} closeDelay={0}>
           <button
             className={`flex ${btnSize} shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-amber-600 disabled:opacity-30 dark:text-white/40 dark:hover:text-amber-400`}
             onClick={() => fileInputRef.current?.click()}
             disabled={isLoading}
-            aria-label="Attach file"
+            aria-label={t("chatInputBar.attachFile")}
           >
             <Icon name="attach_file" variant="round" className="text-base" />
           </button>

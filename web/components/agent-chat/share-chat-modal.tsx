@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import {
   addToast,
@@ -23,14 +24,15 @@ export default function ShareChatModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { getTranslations: t } = useTranslations();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleCreate() {
     if (!sessionId) {
       addToast({
-        title: "Error",
-        description: "No active chat session to share.",
+        title: t("shareChatModal.error"),
+        description: t("shareChatModal.noActiveSession"),
         color: "danger",
       });
       return;
@@ -46,7 +48,7 @@ export default function ShareChatModal({
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error ?? "Failed to create share link");
+        throw new Error(data.error ?? t("shareChatModal.failedToCreate"));
       }
 
       const data = await res.json();
@@ -55,9 +57,9 @@ export default function ShareChatModal({
       setShareUrl(token ? `${window.location.origin}?sharedChat=${token}` : data.url);
     } catch (err) {
       addToast({
-        title: "Error",
+        title: t("shareChatModal.error"),
         description:
-          err instanceof Error ? err.message : "Failed to create share link",
+          err instanceof Error ? err.message : t("shareChatModal.failedToCreate"),
         color: "danger",
       });
     } finally {
@@ -69,8 +71,8 @@ export default function ShareChatModal({
     if (shareUrl) {
       navigator.clipboard.writeText(shareUrl);
       addToast({
-        title: "Copied",
-        description: "Share link copied to clipboard.",
+        title: t("shareChatModal.copied"),
+        description: t("shareChatModal.linkCopied"),
         color: "success",
       });
     }
@@ -84,17 +86,17 @@ export default function ShareChatModal({
   return (
     <Modal isOpen={isOpen} onClose={handleClose}>
       <ModalContent>
-        <ModalHeader>Share Chat</ModalHeader>
+        <ModalHeader>{t("shareChatModal.title")}</ModalHeader>
         <ModalBody>
           <p className="text-sm opacity-60">
-            Create a link that lets anyone view this conversation (read-only).
+            {t("shareChatModal.description")}
           </p>
 
           <Divider />
 
           {shareUrl ? (
             <div className="flex flex-col gap-3">
-              <p className="text-sm font-medium">Share this link:</p>
+              <p className="text-sm font-medium">{t("shareChatModal.shareThisLink")}</p>
               <div className="flex gap-2">
                 <Input
                   value={shareUrl}
@@ -103,7 +105,7 @@ export default function ShareChatModal({
                   classNames={{ input: "text-xs" }}
                 />
                 <Button size="sm" color="primary" onPress={handleCopy}>
-                  Copy
+                  {t("shareChatModal.copy")}
                 </Button>
               </div>
             </div>
@@ -111,18 +113,18 @@ export default function ShareChatModal({
         </ModalBody>
         <ModalFooter>
           {shareUrl ? (
-            <Button onPress={handleClose}>Done</Button>
+            <Button onPress={handleClose}>{t("shareChatModal.done")}</Button>
           ) : (
             <>
               <Button variant="light" onPress={handleClose}>
-                Cancel
+                {t("shareChatModal.cancel")}
               </Button>
               <Button
                 color="primary"
                 isLoading={loading}
                 onPress={handleCreate}
               >
-                Create Link
+                {t("shareChatModal.createLink")}
               </Button>
             </>
           )}

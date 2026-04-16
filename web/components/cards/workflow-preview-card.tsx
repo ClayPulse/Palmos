@@ -1,6 +1,8 @@
 import Icon from "@/components/misc/icon";
+import MoveToProjectModal from "@/components/misc/move-to-project-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
+import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { ContextMenuState, Workflow } from "@/lib/types";
 import {
@@ -23,8 +25,10 @@ export default function WorkflowPreviewCard({
   onPress?: (workflow: Workflow) => void;
 }) {
   const editorContext = useContext(EditorContext);
+  const { assignWorkflowToProject } = useProjectManager();
 
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isMoveOpen, setIsMoveOpen] = useState(false);
 
   const [contextMenuState, setContextMenuState] = useState<ContextMenuState>({
     x: 0,
@@ -162,8 +166,30 @@ export default function WorkflowPreviewCard({
             >
               <p className="w-full text-start">Use</p>
             </Button>
+            <Button
+              className="text-medium h-12 sm:h-8 sm:text-sm"
+              variant="light"
+              onPress={() => {
+                setContextMenuState((prev) => ({ ...prev, isOpen: false }));
+                setIsMoveOpen(true);
+              }}
+            >
+              <p className="w-full text-start">Move to Project</p>
+            </Button>
           </div>
         </ContextMenu>
+        <MoveToProjectModal
+          isOpen={isMoveOpen}
+          onClose={() => setIsMoveOpen(false)}
+          onSelect={async (projectId) => {
+            setIsMoveOpen(false);
+            if (workflow.id && projectId) {
+              await assignWorkflowToProject(projectId, workflow.id);
+            }
+          }}
+          currentProjectId={workflow.projectId}
+          title="Move Workflow to Project"
+        />
         <WorkflowDetailsModal
           workflow={workflow}
           isOpen={isDetailsOpen}

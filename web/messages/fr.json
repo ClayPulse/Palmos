@@ -1133,6 +1133,232 @@
 	"draggableItem": {
 		"ariaLabel": "Faire glisser pour déplacer"
 	},
+	"chatInputBar": {
+		"askAnything": "Demandez n'importe quoi à Palmos AI...",
+		"askShort": "Demandez à Palmos AI...",
+		"dropFiles": "Déposez des fichiers à joindre",
+		"attachFile": "Joindre un fichier",
+		"saveToKnowledge": "Enregistrer dans les connaissances",
+		"savedToKnowledge": "Enregistré dans les connaissances",
+		"uploadFailed": "Échec du téléchargement",
+		"removeAttachment": "Supprimer la pièce jointe"
+	},
+	"starterPrompts": {
+		"automateCRM": "Automatiser mon CRM",
+		"leadGeneration": "Créer une génération de prospects",
+		"makeWebsite": "Créer un site web",
+		"businessDashboard": "Créer un tableau de bord commercial",
+		"digitalEmployee": "Personnaliser un employé numérique",
+		"inventoryTracker": "Créer un suivi d'inventaire"
+	},
+	"projectScreen": {
+		"whatToWorkOn": "Sur quoi aimeriez-vous travailler ?",
+		"tellAboutProject": "Parlez-moi de votre projet",
+		"helpUnderstand": "Aidez-moi à comprendre votre projet afin que je puisse vous suggérer des automatisations adaptées — ou passez cette étape et commencez directement.",
+		"whatKind": "Quel type de projet est-ce ?",
+		"skip": "Passer",
+		"describeIdea": "Décrivez votre idée et je vous aiderai à la concrétiser.",
+		"allSystemsNominal": "Tous les systèmes sont opérationnels",
+		"automationsActive": "{count} automatisations actives",
+		"automationActive": "{count} automatisation active",
+		"workflowsReady": "{count} workflows prêts",
+		"workflowReady": "{count} workflow prêt",
+		"categories": {
+			"marketingGrowth": "Marketing et croissance",
+			"salesCRM": "Ventes et CRM",
+			"customerSupport": "Support client",
+			"internalOperations": "Opérations internes",
+			"ecommerce": "E-commerce",
+			"contentSocialMedia": "Contenu et réseaux sociaux",
+			"dataAnalytics": "Données et analytique"
+		}
+	},
+	"homeScreen": {
+		"whatToBuild": "Que souhaitez-vous créer aujourd'hui ?",
+		"describeIdea": "Décrivez votre idée et je vous aiderai à la concrétiser.",
+		"myProjects": "Mes projets",
+		"workflows": "workflows",
+		"members": "membres",
+		"workflowCount": "{count} workflows",
+		"memberCount": "{count} membres"
+	},
+	"interruptCard": {
+		"inputNeeded": "Saisie requise",
+		"typeAnswer": "Ou tapez votre réponse...",
+		"send": "Envoyer"
+	},
+	"shareChatModal": {
+		"error": "Erreur",
+		"noActiveSession": "Aucune session de chat active à partager.",
+		"title": "Partager la conversation",
+		"description": "Créez un lien permettant à quiconque de consulter cette conversation (lecture seule).",
+		"shareLink": "Partagez ce lien :",
+		"copy": "Copier",
+		"done": "Terminé",
+		"createLink": "Créer un lien"
+	},
+	"carousels": {
+		"myWorkflows": "Mes workflows",
+		"myAutomations": "Mes automatisations",
+		"running": "en cours",
+		"new": "Nouveau",
+		"open": "Ouvrir",
+		"edit": "Modifier",
+		"createFirstAutomation": "Créez votre première automatisation",
+		"scheduleWorkflows": "Planifiez des workflows ou déclenchez-les via des webhooks",
+		"paused": "En pause"
+	},
+	"chatMessageArea": {
+		"thinking": "Palmos réfléchit",
+		"loadingConversation": "Chargement de la conversation...",
+		"errorOccurred": "Une erreur s'est produite."
+	},
+	"embedPanel": {
+		"a2ui": "A2UI",
+		"mcpApps": "Applications MCP",
+		"palmosApp": "Application Palmos",
+		"canvas": "Canevas"
+	},
+	"inboxPanel": {
+		"noNotifications": "Aucune notification pour le moment",
+		"tryWorkflow": "Essayer un workflow"
+	},
+	"knowledgeFiles": {
+		"knowledge": "Connaissances",
+		"filesIndexed": "Fichiers indexés pour le contexte IA",
+		"upload": "Télécharger",
+		"noFiles": "Aucun fichier de connaissances pour le moment",
+		"invalidResponse": "Réponse invalide",
+		"networkError": "Erreur réseau",
+		"knowledgeFilesTooltip": "Fichiers de connaissances"
+	},
+	"messageBubbles": {
+		"user": "Utilisateur :",
+		"copied": "Copié !",
+		"copy": "Copier",
+		"calledTool": "Outil appelé :",
+		"aiManager": "Gestionnaire IA :",
+		"aiManagerLabel": "Gestionnaire IA"
+	},
+	"projectPicker": {
+		"selectProject": "Sélectionner un projet",
+		"project": "Projet",
+		"clearProject": "Effacer le projet",
+		"new": "Nouveau",
+		"noProjects": "Aucun projet pour le moment"
+	},
+	"runningTasksPanel": {
+		"tasks": "Tâches",
+		"all": "Toutes",
+		"running": "En cours",
+		"done": "Terminées",
+		"failed": "Échouées",
+		"runningCount": "en cours",
+		"noTasks": "Aucune tâche pour le moment. Les exécutions de workflows et les tâches d'agents gérés apparaîtront ici.",
+		"noFilteredTasks": "Aucune tâche {filter}."
+	},
+	"sessionHistory": {
+		"chatHistory": "Historique des conversations",
+		"new": "Nouveau",
+		"noChatHistory": "Aucun historique de conversation",
+		"justNow": "À l'instant",
+		"mAgo": "il y a {count} min",
+		"hAgo": "il y a {count} h",
+		"dAgo": "il y a {count} j"
+	},
+	"subagentCard": {
+		"working": "En cours..."
+	},
+	"todoList": {
+		"tasks": "Tâches"
+	},
+	"workflowTaskCard": {
+		"running": "En cours... {time}",
+		"completed": "Terminé en {time}",
+		"failed": "Échoué après {time}",
+		"terminate": "Arrêter",
+		"terminating": "Arrêt en cours...",
+		"workflowBuilt": "Workflow créé avec succès !",
+		"openInEditor": "Ouvrir dans l'éditeur",
+		"runWorkflow": "Exécuter le workflow",
+		"usingTool": "Utilisation de l'outil :",
+		"seeOutput": "Voir le résultat",
+		"hide": "Masquer",
+		"download": "Télécharger",
+		"messages": "messages",
+		"latest": "dernier :"
+	},
+	"agentChatPaywall": {
+		"upgradeTitle": "Passez à un plan supérieur pour utiliser les agents IA",
+		"upgradeDescription": "Le chat avec agent nécessite un plan payant (Starter ou supérieur). Vous pouvez également y accéder en étant invité à un projet appartenant à un utilisateur payant.",
+		"viewPlans": "Voir les plans",
+		"alreadyMember": "Déjà membre d'un projet payant ? Sélectionnez-le dans le sélecteur de projets pour commencer à utiliser les agents IA."
+	},
+	"appModeToggle": {
+		"agent": "Agent",
+		"editor": "Éditeur"
+	},
+	"createInviteLinkModal": {
+		"noWorkflowsSelected": "Aucun workflow sélectionné",
+		"selectAtLeastOne": "Sélectionnez au moins un workflow à partager.",
+		"title": "Créer un lien d'invitation",
+		"linkDescription": "Toute personne disposant de ce lien pourra accepter les workflows sélectionnés et les utiliser dans son gestionnaire IA.",
+		"selectWorkflows": "Sélectionner des workflows",
+		"noPublishedWorkflows": "Aucun workflow publié trouvé. Publiez d'abord un workflow.",
+		"copied": "Copié",
+		"copiedDescription": "Lien d'invitation copié dans le presse-papiers.",
+		"done": "Terminé",
+		"createLink": "Créer un lien",
+		"selected": "{count} sélectionné(s)"
+	},
+	"sandboxAppLoader": {
+		"noDefaultView": "Aucune vue par défaut trouvée pour ce type de fichier. Trouvez une extension compatible sur le marketplace et activez-la dans les paramètres comme méthode par défaut pour ouvrir ce fichier."
+	},
+	"automationEditorModal": {
+		"editAutomation": "Modifier l'automatisation",
+		"createAutomation": "Créer une automatisation",
+		"name": "Nom",
+		"namePlaceholder": "Mon automatisation",
+		"workflow": "Workflow",
+		"selectWorkflow": "Sélectionner un workflow",
+		"triggerType": "Type de déclencheur",
+		"schedule": "Planification",
+		"webhook": "Webhook",
+		"presets": "Préréglages",
+		"every15min": "Toutes les 15 min",
+		"hourly": "Toutes les heures",
+		"daily9am": "Quotidien 9h",
+		"weeklyMon": "Hebdomadaire lun",
+		"startDate": "Date de début",
+		"startTime": "Heure de début",
+		"minGranularity": "Granularité minimale : 15 minutes",
+		"webhookUrl": "URL du webhook",
+		"copyUrl": "Copier l'URL",
+		"webhookSecret": "Secret du webhook (optionnel)",
+		"webhookSecretPlaceholder": "Secret HMAC pour la vérification de signature",
+		"generateSecret": "Générer un secret aléatoire",
+		"example": "Exemple",
+		"workflowInputs": "Entrées du workflow",
+		"runNow": "Exécuter maintenant",
+		"failedToSave": "Échec de l'enregistrement",
+		"failedToDelete": "Échec de la suppression",
+		"failedToTrigger": "Échec du déclenchement"
+	},
+	"chatSessionSidebar": {
+		"moveToProjectTitle": "Déplacer le chat vers un projet",
+		"project": "Projet",
+		"knowledgeFiles": "Fichiers de connaissances",
+		"newProject": "Nouveau projet",
+		"selectProject": "Sélectionner un projet",
+		"noProjects": "Aucun projet pour le moment",
+		"chatHistory": "Historique des conversations",
+		"new": "Nouveau",
+		"noChatHistory": "Aucun historique de conversation",
+		"share": "Partager",
+		"moveToProject": "Déplacer vers un projet",
+		"delete": "Supprimer",
+		"menu": "Menu"
+	},
 	"canvasNode": {
 		"labels": {
 			"entry": "entrée",

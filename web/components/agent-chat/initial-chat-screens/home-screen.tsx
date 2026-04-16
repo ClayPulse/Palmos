@@ -6,6 +6,7 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useAutomations } from "@/lib/hooks/use-automations";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import type { ProjectInfo } from "@/lib/types";
 import { Spinner } from "@heroui/react";
 import { useContext, useState } from "react";
@@ -19,6 +20,7 @@ interface HomeScreenProps {
 }
 
 export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
+  const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
   const { workflows: myWorkflows, isLoading: isLoadingWorkflows } =
     useMarketplaceWorkflows("My Workflows");
@@ -38,10 +40,10 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
           </div>
           <div>
             <h2 className="text-default-800 text-base font-semibold dark:text-white/90">
-              What would you like to build today?
+              {t("homeScreen.whatToBuild")}
             </h2>
             <p className="text-default-500 mt-0.5 text-sm dark:text-white/50">
-              Describe your idea and I'll help you bring it to life.
+              {t("homeScreen.describeIdea")}
             </p>
           </div>
         </div>
@@ -51,7 +53,7 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
       <div className="grid w-full max-w-xl grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
         {STARTER_PROMPTS.map((prompt) => (
           <StarterPromptButton
-            key={prompt.label}
+            key={prompt.labelKey}
             prompt={prompt}
             onSend={onSend}
           />
@@ -107,6 +109,7 @@ function ProjectExplorer({
   projects: ProjectInfo[];
   onOpen: (name: string) => void;
 }) {
+  const { getTranslations: t } = useTranslations();
   const [page, setPage] = useState(0);
   const totalPages = Math.ceil(projects.length / PROJECTS_PER_PAGE);
   const visible = projects.slice(
@@ -118,7 +121,7 @@ function ProjectExplorer({
     <div className="w-full max-w-xl">
       <div className="mb-2.5 flex items-center justify-between">
         <p className="text-default-500 text-xs font-medium tracking-wide uppercase dark:text-white/45">
-          My Projects
+          {t("homeScreen.myProjects")}
         </p>
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
@@ -168,11 +171,11 @@ function ProjectExplorer({
               <div className="mt-1.5 flex items-center gap-3 text-[10px] text-default-400 dark:text-white/35">
                 <span className="flex items-center gap-1">
                   <Icon name="account_tree" variant="round" className="text-[10px]" />
-                  {project.workflowCount ?? 0} workflow{(project.workflowCount ?? 0) !== 1 ? "s" : ""}
+                  {t("homeScreen.workflowCount", { count: project.workflowCount ?? 0 })}
                 </span>
                 <span className="flex items-center gap-1">
                   <Icon name="group" variant="round" className="text-[10px]" />
-                  {project.memberCount ?? 1} member{(project.memberCount ?? 1) !== 1 ? "s" : ""}
+                  {t("homeScreen.memberCount", { count: project.memberCount ?? 1 })}
                 </span>
               </div>
             </div>
