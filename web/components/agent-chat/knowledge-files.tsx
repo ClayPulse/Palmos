@@ -9,29 +9,16 @@ import {
   Spinner,
   Tooltip,
 } from "@heroui/react";
+import type {
+  KnowledgeFile,
+  KnowledgeFilesProps,
+} from "@/components/agent-chat/types";
 import { useCallback, useEffect, useRef, useState } from "react";
-
-interface KnowledgeFile {
-  id: string;
-  filename: string;
-  sizeBytes: number;
-  chunkCount: number;
-  createdAt: string;
-  status?: "uploading" | "processing" | "ready" | "error";
-  progress?: number;
-  error?: string;
-  tempKey?: string;
-}
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-interface KnowledgeFilesProps {
-  /** "popover" opens upward as a popup (for chat input). "panel" renders inline dropdown (for side panel). */
-  variant?: "popover" | "panel" | "inline";
 }
 
 export default function KnowledgeFiles({

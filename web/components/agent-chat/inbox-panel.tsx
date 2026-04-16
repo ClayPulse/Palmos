@@ -3,18 +3,15 @@
 import Icon from "@/components/misc/icon";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import type {
+  InboxMessage,
+  InboxMessageCardProps,
+  InboxPanelProps,
+} from "@/components/agent-chat/types";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-
-interface InboxMessage {
-  id: string;
-  content: string;
-  role: string;
-  additionalKwargs?: Record<string, any>;
-  createdAt: number;
-}
 
 export function useInbox() {
   const [messages, setMessages] = useState<InboxMessage[]>([]);
@@ -82,10 +79,7 @@ export function useInbox() {
 export default function InboxPanel({
   isOpen,
   onClose,
-}: {
-  isOpen: boolean;
-  onClose: () => void;
-}) {
+}: InboxPanelProps) {
   const { getTranslations: t } = useTranslations();
   const { messages, markAllRead, dismiss } = useInbox();
   const [loading, setLoading] = useState(true);
@@ -133,10 +127,7 @@ export default function InboxPanel({
 function InboxMessageCard({
   message,
   onDismiss,
-}: {
-  message: InboxMessage;
-  onDismiss?: (id: string) => void;
-}) {
+}: InboxMessageCardProps) {
   const { getTranslations: t } = useTranslations();
   const kwargs = message.additionalKwargs;
   const isWorkflowBuild = kwargs?.type === "workflow_build_complete";

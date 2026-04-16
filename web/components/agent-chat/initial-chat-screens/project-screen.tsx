@@ -7,7 +7,10 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useAutomations } from "@/lib/hooks/use-automations";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import type { ProjectInfo } from "@/lib/types";
+import type {
+  ProjectScreenProps,
+  StatusLineProps,
+} from "@/components/agent-chat/types";
 import { Spinner } from "@heroui/react";
 import { useContext, useState } from "react";
 
@@ -20,11 +23,6 @@ const PROJECT_CATEGORIES = [
   { labelKey: "projectScreen.categories.contentSocialMedia", icon: "edit_note" },
   { labelKey: "projectScreen.categories.dataAnalytics", icon: "analytics" },
 ] as const;
-
-interface ProjectScreenProps {
-  onSend: (text: string) => void;
-  project: ProjectInfo;
-}
 
 export default function ProjectScreen({ onSend, project }: ProjectScreenProps) {
   const { getTranslations: t } = useTranslations();
@@ -160,10 +158,7 @@ export default function ProjectScreen({ onSend, project }: ProjectScreenProps) {
 function StatusLine({
   activeAutomations,
   workflowCount,
-}: {
-  activeAutomations: number;
-  workflowCount: number;
-}) {
+}: StatusLineProps) {
   const { getTranslations: t } = useTranslations();
 
   if (activeAutomations === 0 && workflowCount === 0) {

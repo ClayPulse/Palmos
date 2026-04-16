@@ -1,32 +1,14 @@
 "use client";
 
-import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import InterruptCard from "@/components/agent-chat/interrupt-card";
-import InlineWidget, { type InlineWidgetData } from "@/components/agent-chat/inline-widget";
+import InlineWidget from "@/components/agent-chat/inline-widget";
 import { TodoList } from "@/components/agent-chat/todo-list";
 import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
+import type { ChatMessageAreaProps } from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";
 import { motion } from "framer-motion";
 import type React from "react";
-
-interface ChatMessageAreaProps {
-  variant: "panel" | "page";
-  isLoadingSession: boolean;
-  isEmptyConversation: boolean;
-  emptyState: React.ReactNode;
-  messageList: React.ReactNode;
-  workflowTasks: WorkflowTaskState[];
-  onTerminateTask?: (taskId: string) => void;
-  terminatingTaskIds?: Set<string>;
-  activeInterrupt: any;
-  resume: (value: string) => void;
-  isLoading: boolean;
-  error: unknown;
-  todos: any[];
-  latestWorkflow: InlineWidgetData | null;
-  scrollContainerRef: React.RefObject<HTMLDivElement | null>;
-}
 
 export default function ChatMessageArea({
   variant,

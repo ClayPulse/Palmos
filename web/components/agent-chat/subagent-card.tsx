@@ -4,11 +4,11 @@ import { getLastAIContent } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import type { SubagentInfo } from "@/lib/types";
+import type { SubagentCardProps } from "@/components/agent-chat/types";
 import { Spinner } from "@heroui/react";
 import { useState } from "react";
 
-export function SubagentCard({ subagent }: { subagent: SubagentInfo }) {
+export function SubagentCard({ subagent }: SubagentCardProps) {
   const { getTranslations: t } = useTranslations();
   const [isExpanded, setIsExpanded] = useState(false);
 

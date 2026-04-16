@@ -1,22 +1,16 @@
 "use client";
 
-import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
 import Icon from "@/components/misc/icon";
+import type {
+  FilterKey,
+  RunningTasksPanelProps,
+  TaskItem,
+  WorkflowTaskState,
+} from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
-
-interface TaskItem {
-  taskId: string;
-  workflowName: string;
-  status: "pending" | "running" | "completed" | "failed";
-  error: string | null;
-  createdAt: number;
-  completedAt: number | null;
-  isManagedAgent: boolean;
-  result?: any;
-}
 
 /**
  * Derive the latest progress string from a task's result log.
@@ -48,9 +42,7 @@ function toWorkflowTaskState(task: TaskItem): WorkflowTaskState {
   };
 }
 
-type FilterKey = "all" | "running" | "completed" | "failed";
-
-export default function RunningTasksPanel({ onClose }: { onClose?: () => void }) {
+export default function RunningTasksPanel({ onClose }: RunningTasksPanelProps) {
   const { getTranslations: t } = useTranslations();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);

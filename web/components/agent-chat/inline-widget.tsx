@@ -6,6 +6,10 @@ import { AppModeEnum } from "@/lib/enums";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { AppViewConfig, CanvasViewConfig, InlineWidgetData } from "@/lib/types";
+import type {
+  A2UIStreamRendererProps,
+  InlineWidgetBaseProps,
+} from "@/components/agent-chat/types";
 import { createAppViewId, createCanvasViewId } from "@/lib/views/view-helpers";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import {
@@ -180,9 +184,7 @@ export function parseWidgetFromToolMessage(
 
 function A2UIInlineWidget({
   data,
-}: {
-  data: InlineWidgetData;
-}) {
+}: InlineWidgetBaseProps) {
   const handleAction = useCallback(
     async (message: A2UIClientEventMessage) => {
       const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -251,7 +253,7 @@ function A2UIInlineWidget({
 }
 
 /** Processes pre-provided A2UI messages and renders the surface. */
-function A2UIStreamRenderer({ messages }: { messages: unknown[] }) {
+function A2UIStreamRenderer({ messages }: A2UIStreamRendererProps) {
   const { processMessages } = useA2UIHook();
 
   // Process messages once on mount
@@ -273,7 +275,7 @@ function A2UIStreamRenderer({ messages }: { messages: unknown[] }) {
   );
 }
 
-function MCPResultWidget({ data }: { data: InlineWidgetData }) {
+function MCPResultWidget({ data }: InlineWidgetBaseProps) {
   const mcp = data.mcp;
   if (!mcp) return null;
 
@@ -305,7 +307,7 @@ function MCPResultWidget({ data }: { data: InlineWidgetData }) {
   );
 }
 
-function PulseAppWidget({ data }: { data: InlineWidgetData }) {
+function PulseAppWidget({ data }: InlineWidgetBaseProps) {
   const editorContext = useContext(EditorContext);
   const appId = data.pulseApp?.appId;
   const { marketplaceExtensions } = useExtensionAppManager("All");
@@ -371,7 +373,7 @@ function PulseAppWidget({ data }: { data: InlineWidgetData }) {
   );
 }
 
-function CanvasWidget({ data }: { data: InlineWidgetData }) {
+function CanvasWidget({ data }: InlineWidgetBaseProps) {
   const editorContext = useContext(EditorContext);
   const { createCanvasTabView } = useTabViewManager();
 
@@ -442,7 +444,7 @@ function CanvasWidget({ data }: { data: InlineWidgetData }) {
 
 // ── Main Component ───────────────────────────────────────────────────────────
 
-export default function InlineWidget({ data }: { data: InlineWidgetData }) {
+export default function InlineWidget({ data }: InlineWidgetBaseProps) {
   switch (data.type) {
     case "a2ui":
       return <A2UIInlineWidget data={data} />;

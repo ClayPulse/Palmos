@@ -1,15 +1,22 @@
 "use client";
 
-import InlineWidget, {
-  type InlineWidgetData,
-} from "@/components/agent-chat/inline-widget";
+import InlineWidget from "@/components/agent-chat/inline-widget";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
+import type {
+  AIResponseCardProps,
+  CopyButtonProps,
+  ResponseCardProps,
+  StatusBadgeProps,
+  StatusIconProps,
+  ToolCallBadgesProps,
+  UserBubbleProps,
+} from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner, Tooltip } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
 
-function CopyButton({ text }: { text: string }) {
+function CopyButton({ text }: CopyButtonProps) {
   const { getTranslations: t } = useTranslations();
   const [copied, setCopied] = useState(false);
 
@@ -40,11 +47,7 @@ export function UserBubble({
   text,
   attachmentCount,
   uploadIds,
-}: {
-  text: string;
-  attachmentCount?: number;
-  uploadIds?: string[];
-}) {
+}: UserBubbleProps) {
   const { getTranslations: t } = useTranslations();
   const [copied, setCopied] = useState(false);
   const [fileNames, setFileNames] = useState<{ id: string; filename: string; mimeType: string }[]>([]);
@@ -121,7 +124,7 @@ export function UserBubble({
   );
 }
 
-function ToolCallBadges({ names }: { names: string[] }) {
+function ToolCallBadges({ names }: ToolCallBadgesProps) {
   const { getTranslations: t } = useTranslations();
   if (names.length === 0) return null;
   return (
@@ -144,12 +147,7 @@ export function AIResponseCard({
   isStreaming,
   widgets = [],
   toolCallNames = [],
-}: {
-  content: string;
-  isStreaming: boolean;
-  widgets?: InlineWidgetData[];
-  toolCallNames?: string[];
-}) {
+}: AIResponseCardProps) {
   const { getTranslations: t } = useTranslations();
   return (
     <div className="flex min-w-0 justify-start">
@@ -195,12 +193,7 @@ export function ResponseCard({
   isStreaming,
   widgets = [],
   toolCallNames = [],
-}: {
-  content: string;
-  isStreaming: boolean;
-  widgets?: InlineWidgetData[];
-  toolCallNames?: string[];
-}) {
+}: ResponseCardProps) {
   const { getTranslations: t } = useTranslations();
   const [expanded, setExpanded] = useState(true);
   const status: "running" | "complete" = isStreaming ? "running" : "complete";
@@ -258,9 +251,7 @@ export function ResponseCard({
 
 export function StatusBadge({
   status,
-}: {
-  status: "pending" | "running" | "complete" | "error";
-}) {
+}: StatusBadgeProps) {
   const styles = {
     pending:
       "bg-default-100 text-default-500 dark:bg-white/10 dark:text-white/50",
@@ -281,9 +272,7 @@ export function StatusBadge({
 
 export function StatusIcon({
   status,
-}: {
-  status: "pending" | "running" | "complete" | "error";
-}) {
+}: StatusIconProps) {
   switch (status) {
     case "pending":
       return (

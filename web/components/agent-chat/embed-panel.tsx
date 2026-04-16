@@ -10,13 +10,12 @@ import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { useMemo } from "react";
 import { MemoizedCanvasView } from "../views/editor/canvas/canvas-view";
 
-export type EmbedPanelTab = "a2ui" | "mcp-apps" | "pulse-app" | "workflow-canvas";
+import type {
+  ChatEmbedPanelProps,
+  EmbedPanelTab,
+} from "@/components/agent-chat/types";
 
-interface ChatEmbedPanelProps {
-  activeTab: EmbedPanelTab;
-  onTabChange: (tab: EmbedPanelTab) => void;
-  onClose: () => void;
-}
+export type { EmbedPanelTab } from "@/components/agent-chat/types";
 
 const TABS: { id: EmbedPanelTab; labelKey: string; icon: string }[] = [
   { id: "a2ui", labelKey: "embedPanel.a2ui", icon: "language" },

@@ -1,15 +1,7 @@
 import type { BaseMessage } from "@langchain/core/messages";
 
-export type WorkflowTaskState = {
-  taskId: string;
-  workflowName: string;
-  startedAt: number;
-  status: "running" | "completed" | "failed";
-  result?: any;
-  error?: string;
-  isManagedAgent?: boolean;
-  latestProgress?: string;
-};
+// Re-exported from types.ts for backward compatibility.
+export type { WorkflowTaskState } from "@/components/agent-chat/types";
 
 export function getLastAIContent(messages: BaseMessage[]): string {
   for (let i = messages.length - 1; i >= 0; i--) {

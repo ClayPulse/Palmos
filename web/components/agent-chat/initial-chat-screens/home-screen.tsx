@@ -7,17 +7,14 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useAutomations } from "@/lib/hooks/use-automations";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import type { ProjectInfo } from "@/lib/types";
+import type {
+  HomeScreenProps,
+  ProjectExplorerProps,
+} from "@/components/agent-chat/types";
 import { Checkbox, Spinner } from "@heroui/react";
 import { useContext, useMemo, useState } from "react";
 
 const PROJECTS_PER_PAGE = 4;
-
-
-interface HomeScreenProps {
-  onSend: (text: string) => void;
-  projects: ProjectInfo[];
-}
 
 export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
   const { getTranslations: t } = useTranslations();
@@ -121,10 +118,7 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
 function ProjectExplorer({
   projects,
   onOpen,
-}: {
-  projects: ProjectInfo[];
-  onOpen: (name: string) => void;
-}) {
+}: ProjectExplorerProps) {
   const { getTranslations: t } = useTranslations();
   const [page, setPage] = useState(0);
   const totalPages = Math.ceil(projects.length / PROJECTS_PER_PAGE);
