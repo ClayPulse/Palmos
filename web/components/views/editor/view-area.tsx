@@ -59,30 +59,12 @@ export default function ViewArea() {
   const isInitialized = useRef(false);
   const hadActiveTabRef = useRef(false);
   const app = params?.get("app");
-  const canvasId = params?.get("canvas");
   const workflowName = params?.get("workflow");
 
   useEffect(() => {
-    // Standalone app / canvas / workflow mode
+    // Standalone app / workflow mode
     const inviteCode = params?.get("inviteCode") || undefined;
     const fileUri = params?.get("fileUri") || undefined;
-
-    async function fetchCanvas(canvasViewId: string) {
-      // Fetch canvas info from backend using canvasViewId
-      // This is a placeholder implementation and should be replaced with actual API call
-      const response = await fetchAPI(`/api/canvas/get?viewId=${canvasViewId}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch canvas info");
-      }
-
-      const canvasInfo = await response.json();
-
-      return {
-        viewId: canvasViewId,
-        appConfigs: canvasInfo.appConfigs,
-        workflowContent: canvasInfo.workflowContent,
-      } as CanvasViewConfig;
-    }
 
     async function fetchWorkflow(workflowName: string) {
       // Fetch workflow info from backend using workflowName
@@ -144,23 +126,6 @@ export default function ViewArea() {
             </div>
           ),
         });
-      } else if (canvasId) {
-        async function openCanvas(canvasId: string) {
-          const canvas: CanvasViewConfig = await fetchCanvas(canvasId);
-
-          await createCanvasTabView(canvas);
-        }
-
-        addToast({
-          promise: openCanvas(canvasId),
-          title: "Opening Canvas",
-          description: `Opening canvas...`,
-          loadingComponent: (
-            <div>
-              <Spinner />
-            </div>
-          ),
-        });
       } else if (workflowName) {
         async function openWorkflow(workflowName: string) {
           // Open workflow in canvas view
@@ -205,7 +170,7 @@ export default function ViewArea() {
       openFromParam();
       isInitialized.current = true;
     }
-  }, [app, canvasId, workflowName, platformApi]);
+  }, [app, workflowName, platformApi]);
 
   useEffect(() => {
     // Hide tabs if only one tab
@@ -228,16 +193,15 @@ export default function ViewArea() {
       hadActiveTabRef.current = true;
       if (latestActiveTabView.type === ViewModeEnum.App) {
         const appConfig = latestActiveTabView.config as AppViewConfig;
-        const { workflow: _w, canvas: _c, ...otherParams } = getQueryParams();
+        const { workflow: _w, ...otherParams } = getQueryParams();
         setQueryParams({ ...otherParams, app: appConfig.app });
       } else if (latestActiveTabView.type === ViewModeEnum.Canvas) {
-        const canvasConfig = latestActiveTabView.config as CanvasViewConfig;
         const { workflow: _w, app: _a, ...otherParams } = getQueryParams();
-        setQueryParams({ ...otherParams, canvas: canvasConfig.viewId });
+        setQueryParams(otherParams);
       }
     } else if (hadActiveTabRef.current) {
       // All tabs closed — clear view params
-      const { workflow: _w, canvas: _c, app: _a, ...rest } = getQueryParams();
+      const { workflow: _w, app: _a, ...rest } = getQueryParams();
       setQueryParams(rest);
     }
   }, [
