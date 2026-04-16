@@ -2,6 +2,7 @@
 
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { AppModeEnum } from "@/lib/enums";
 import type { Transition } from "framer-motion";
 import { motion } from "framer-motion";
@@ -15,6 +16,7 @@ import {
 
 export default function AppModeToggle() {
   const editorContext = useContext(EditorContext);
+  const { getTranslations: t } = useTranslations();
 
   const [appMode, setAppMode] = useState<AppModeEnum | undefined>(undefined);
 
@@ -103,7 +105,7 @@ export default function AppModeToggle() {
           transition={colorTransition}
         >
           <Icon name="bolt" variant="round" className="text-sm" />
-          <span className="hidden sm:inline">Agent</span>
+          <span className="hidden sm:inline">{t("appModeToggle.agent")}</span>
         </motion.span>
       </button>
       <button
@@ -119,7 +121,7 @@ export default function AppModeToggle() {
           transition={colorTransition}
         >
           <Icon name="code" className="text-sm" />
-          <span className="hidden sm:inline">Editor</span>
+          <span className="hidden sm:inline">{t("appModeToggle.editor")}</span>
         </motion.span>
       </button>
     </div>

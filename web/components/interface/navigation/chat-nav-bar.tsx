@@ -166,7 +166,7 @@ export function ChatNavRight() {
                         <div className="min-w-0 flex-1">
                           <p className="text-xs text-default-700 dark:text-white/75">{msg.content}</p>
                           <p className="mt-0.5 text-[10px] text-default-400 dark:text-white/30">
-                            {formatRelativeTime(msg.createdAt)}
+                            {formatRelativeTime(msg.createdAt, t)}
                           </p>
                           {isWorkflowBuild && kwargs?.workflowId && (
                             <button

@@ -1133,6 +1133,232 @@
 	"draggableItem": {
 		"ariaLabel": "拖拽以移动"
 	},
+	"chatInputBar": {
+		"askAnything": "向 Palmos AI 提问任何问题...",
+		"askShort": "问 Palmos AI...",
+		"dropFiles": "拖放文件以附加",
+		"attachFile": "附加文件",
+		"saveToKnowledge": "保存到知识库",
+		"savedToKnowledge": "已保存到知识库",
+		"uploadFailed": "上传失败",
+		"removeAttachment": "移除附件"
+	},
+	"starterPrompts": {
+		"automateCRM": "自动化我的 CRM",
+		"leadGeneration": "创建潜在客户生成",
+		"makeWebsite": "制作网站",
+		"businessDashboard": "创建业务仪表盘",
+		"digitalEmployee": "定制数字员工",
+		"inventoryTracker": "构建库存追踪器"
+	},
+	"projectScreen": {
+		"whatToWorkOn": "您想做什么？",
+		"tellAboutProject": "告诉我您的项目",
+		"helpUnderstand": "帮我了解您的项目，这样我可以推荐定制的自动化方案——或者跳过直接开始。",
+		"whatKind": "这是什么类型的项目？",
+		"skip": "跳过",
+		"describeIdea": "描述您的想法，我将帮助您实现它。",
+		"allSystemsNominal": "所有系统正常",
+		"automationsActive": "{count} 个自动化已激活",
+		"automationActive": "{count} 个自动化已激活",
+		"workflowsReady": "{count} 个工作流已就绪",
+		"workflowReady": "{count} 个工作流已就绪",
+		"categories": {
+			"marketingGrowth": "营销与增长",
+			"salesCRM": "销售与 CRM",
+			"customerSupport": "客户支持",
+			"internalOperations": "内部运营",
+			"ecommerce": "电子商务",
+			"contentSocialMedia": "内容与社交媒体",
+			"dataAnalytics": "数据与分析"
+		}
+	},
+	"homeScreen": {
+		"whatToBuild": "今天您想构建什么？",
+		"describeIdea": "描述您的想法，我将帮助您实现它。",
+		"myProjects": "我的项目",
+		"workflows": "工作流",
+		"members": "成员",
+		"workflowCount": "{count} 个工作流",
+		"memberCount": "{count} 个成员"
+	},
+	"interruptCard": {
+		"inputNeeded": "需要输入",
+		"typeAnswer": "或输入您的回答...",
+		"send": "发送"
+	},
+	"shareChatModal": {
+		"error": "错误",
+		"noActiveSession": "没有可分享的活跃聊天会话。",
+		"title": "分享聊天",
+		"description": "创建一个链接，让任何人都可以查看此对话（只读）。",
+		"shareLink": "分享此链接：",
+		"copy": "复制",
+		"done": "完成",
+		"createLink": "创建链接"
+	},
+	"carousels": {
+		"myWorkflows": "我的工作流",
+		"myAutomations": "我的自动化",
+		"running": "运行中",
+		"new": "新建",
+		"open": "打开",
+		"edit": "编辑",
+		"createFirstAutomation": "创建您的第一个自动化",
+		"scheduleWorkflows": "安排工作流或通过 Webhook 触发",
+		"paused": "已暂停"
+	},
+	"chatMessageArea": {
+		"thinking": "Palmos 正在思考",
+		"loadingConversation": "正在加载对话...",
+		"errorOccurred": "发生了错误。"
+	},
+	"embedPanel": {
+		"a2ui": "A2UI",
+		"mcpApps": "MCP 应用",
+		"palmosApp": "Palmos 应用",
+		"canvas": "画布"
+	},
+	"inboxPanel": {
+		"noNotifications": "暂无通知",
+		"tryWorkflow": "试试工作流"
+	},
+	"knowledgeFiles": {
+		"knowledge": "知识库",
+		"filesIndexed": "已索引的 AI 上下文文件",
+		"upload": "上传",
+		"noFiles": "暂无知识文件",
+		"invalidResponse": "无效响应",
+		"networkError": "网络错误",
+		"knowledgeFilesTooltip": "知识文件"
+	},
+	"messageBubbles": {
+		"user": "用户：",
+		"copied": "已复制！",
+		"copy": "复制",
+		"calledTool": "调用工具：",
+		"aiManager": "AI 管理器：",
+		"aiManagerLabel": "AI 管理器"
+	},
+	"projectPicker": {
+		"selectProject": "选择项目",
+		"project": "项目",
+		"clearProject": "清除项目",
+		"new": "新建",
+		"noProjects": "暂无项目"
+	},
+	"runningTasksPanel": {
+		"tasks": "任务",
+		"all": "全部",
+		"running": "运行中",
+		"done": "已完成",
+		"failed": "失败",
+		"runningCount": "运行中",
+		"noTasks": "暂无任务。工作流运行和托管代理任务将显示在此处。",
+		"noFilteredTasks": "没有{filter}任务。"
+	},
+	"sessionHistory": {
+		"chatHistory": "聊天记录",
+		"new": "新建",
+		"noChatHistory": "暂无聊天记录",
+		"justNow": "刚刚",
+		"mAgo": "{count}分钟前",
+		"hAgo": "{count}小时前",
+		"dAgo": "{count}天前"
+	},
+	"subagentCard": {
+		"working": "工作中..."
+	},
+	"todoList": {
+		"tasks": "任务"
+	},
+	"workflowTaskCard": {
+		"running": "运行中... {time}",
+		"completed": "在 {time} 内完成",
+		"failed": "在 {time} 后失败",
+		"terminate": "终止",
+		"terminating": "正在终止...",
+		"workflowBuilt": "工作流构建成功！",
+		"openInEditor": "在编辑器中打开",
+		"runWorkflow": "运行工作流",
+		"usingTool": "使用工具：",
+		"seeOutput": "查看输出",
+		"hide": "隐藏",
+		"download": "下载",
+		"messages": "消息",
+		"latest": "最新："
+	},
+	"agentChatPaywall": {
+		"upgradeTitle": "升级以使用 AI 代理",
+		"upgradeDescription": "代理聊天需要付费计划（Starter 或更高）。您也可以通过被邀请加入付费用户的项目来获得访问权限。",
+		"viewPlans": "查看计划",
+		"alreadyMember": "已经是付费项目的成员？从项目选择器中选择它以开始使用 AI 代理。"
+	},
+	"appModeToggle": {
+		"agent": "代理",
+		"editor": "编辑器"
+	},
+	"createInviteLinkModal": {
+		"noWorkflowsSelected": "未选择工作流",
+		"selectAtLeastOne": "请至少选择一个要分享的工作流。",
+		"title": "创建邀请链接",
+		"linkDescription": "拥有此链接的任何人都可以接受所选工作流，并在其 AI 管理器中使用。",
+		"selectWorkflows": "选择工作流",
+		"noPublishedWorkflows": "未找到已发布的工作流。请先发布一个工作流。",
+		"copied": "已复制",
+		"copiedDescription": "邀请链接已复制到剪贴板。",
+		"done": "完成",
+		"createLink": "创建链接",
+		"selected": "已选择 {count} 个"
+	},
+	"sandboxAppLoader": {
+		"noDefaultView": "未找到此文件类型的默认视图。请在市场中找到兼容的扩展程序，并在设置中将其启用为打开此文件的默认方式。"
+	},
+	"automationEditorModal": {
+		"editAutomation": "编辑自动化",
+		"createAutomation": "创建自动化",
+		"name": "名称",
+		"namePlaceholder": "我的自动化",
+		"workflow": "工作流",
+		"selectWorkflow": "选择工作流",
+		"triggerType": "触发类型",
+		"schedule": "定时",
+		"webhook": "Webhook",
+		"presets": "预设",
+		"every15min": "每15分钟",
+		"hourly": "每小时",
+		"daily9am": "每天上午9点",
+		"weeklyMon": "每周一",
+		"startDate": "开始日期",
+		"startTime": "开始时间",
+		"minGranularity": "最小粒度：15分钟",
+		"webhookUrl": "Webhook URL",
+		"copyUrl": "复制 URL",
+		"webhookSecret": "Webhook 密钥（可选）",
+		"webhookSecretPlaceholder": "用于签名验证的 HMAC 密钥",
+		"generateSecret": "生成随机密钥",
+		"example": "示例",
+		"workflowInputs": "工作流输入",
+		"runNow": "立即运行",
+		"failedToSave": "保存失败",
+		"failedToDelete": "删除失败",
+		"failedToTrigger": "触发失败"
+	},
+	"chatSessionSidebar": {
+		"moveToProjectTitle": "将聊天移至项目",
+		"project": "项目",
+		"knowledgeFiles": "知识文件",
+		"newProject": "新建项目",
+		"selectProject": "选择项目",
+		"noProjects": "暂无项目",
+		"chatHistory": "聊天记录",
+		"new": "新建",
+		"noChatHistory": "暂无聊天记录",
+		"share": "分享",
+		"moveToProject": "移至项目",
+		"delete": "删除",
+		"menu": "菜单"
+	},
 	"canvasNode": {
 		"labels": {
 			"entry": "入口",

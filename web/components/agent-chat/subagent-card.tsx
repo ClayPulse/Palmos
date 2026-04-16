@@ -3,11 +3,13 @@
 import { getLastAIContent } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import type { SubagentInfo } from "@/lib/types";
 import { Spinner } from "@heroui/react";
 import { useState } from "react";
 
 export function SubagentCard({ subagent }: { subagent: SubagentInfo }) {
+  const { getTranslations: t } = useTranslations();
   const [isExpanded, setIsExpanded] = useState(false);
 
   const description =
@@ -77,7 +79,7 @@ export function SubagentCard({ subagent }: { subagent: SubagentInfo }) {
             <div className="flex items-center gap-1.5 pt-1">
               <Spinner size="sm" />
               <span className="text-amber-500/60 dark:text-amber-300/80">
-                Working...
+                {t("subagentCard.working")}
               </span>
             </div>
           )}

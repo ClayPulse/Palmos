@@ -3,6 +3,7 @@
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
 import Icon from "@/components/misc/icon";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -50,6 +51,7 @@ function toWorkflowTaskState(task: TaskItem): WorkflowTaskState {
 type FilterKey = "all" | "running" | "completed" | "failed";
 
 export default function RunningTasksPanel({ onClose }: { onClose?: () => void }) {
+  const { getTranslations: t } = useTranslations();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterKey>("all");
@@ -145,10 +147,10 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
   ).length;
 
   const filterButtons: { key: FilterKey; label: string }[] = [
-    { key: "all", label: `All (${tasks.length})` },
-    { key: "running", label: `Running (${runningCount})` },
-    { key: "completed", label: `Done` },
-    { key: "failed", label: `Failed` },
+    { key: "all", label: `${t("runningTasksPanel.all")} (${tasks.length})` },
+    { key: "running", label: `${t("runningTasksPanel.running")} (${runningCount})` },
+    { key: "completed", label: t("runningTasksPanel.done") },
+    { key: "failed", label: t("runningTasksPanel.failed") },
   ];
 
   return (
@@ -162,11 +164,11 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
             className="text-base text-amber-500"
           />
           <span className="text-sm font-semibold text-default-800 dark:text-white/85">
-            Tasks
+            {t("runningTasksPanel.tasks")}
           </span>
           {runningCount > 0 && (
             <span className="rounded-full bg-amber-100 px-1.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/15 dark:text-amber-300">
-              {runningCount} running
+              {runningCount} {t("runningTasksPanel.runningCount")}
             </span>
           )}
         </div>
@@ -214,8 +216,8 @@ export default function RunningTasksPanel({ onClose }: { onClose?: () => void })
         ) : filtered.length === 0 ? (
           <p className="py-8 text-center text-xs text-default-400 dark:text-white/40">
             {filter === "all"
-              ? "No tasks yet. Workflow runs and managed agent tasks will appear here."
-              : `No ${filter} tasks.`}
+              ? t("runningTasksPanel.noTasks")
+              : t("runningTasksPanel.noFilteredTasks", { filter })}
           </p>
         ) : (
           <div className="flex flex-col gap-2">

@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import {
   Popover,
   PopoverContent,
@@ -36,6 +37,7 @@ interface KnowledgeFilesProps {
 export default function KnowledgeFiles({
   variant = "popover",
 }: KnowledgeFilesProps) {
+  const { getTranslations: t } = useTranslations();
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [isOpen, setIsOpen] = useState(variant === "inline");
@@ -123,7 +125,7 @@ export default function KnowledgeFiles({
           setFiles((prev) =>
             prev.map((f) =>
               f.tempKey === tempKey
-                ? { ...f, status: "error", error: "Invalid response" }
+                ? { ...f, status: "error", error: t("knowledgeFiles.invalidResponse") }
                 : f,
             ),
           );
@@ -148,7 +150,7 @@ export default function KnowledgeFiles({
       setFiles((prev) =>
         prev.map((f) =>
           f.tempKey === tempKey
-            ? { ...f, status: "error", error: "Network error" }
+            ? { ...f, status: "error", error: t("knowledgeFiles.networkError") }
             : f,
         ),
       );
@@ -205,7 +207,7 @@ export default function KnowledgeFiles({
         className="text-sm text-amber-600 dark:text-amber-400"
       />
       <span className="text-default-800 dark:text-white/85">
-        Knowledge{readyCount > 0 ? ` (${readyCount})` : ""}
+        {t("knowledgeFiles.knowledge")}{readyCount > 0 ? ` (${readyCount})` : ""}
       </span>
     </button>
   );
@@ -214,14 +216,14 @@ export default function KnowledgeFiles({
     <div>
       <div className="mb-1.5 flex items-center justify-between">
         <span className="text-[11px] font-medium text-gray-500 dark:text-white/50">
-          Files indexed for AI context
+          {t("knowledgeFiles.filesIndexed")}
         </span>
         <button
           className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] text-amber-600 transition-colors hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-500/10"
           onClick={() => fileInputRef.current?.click()}
         >
           <Icon name="add" variant="round" className="text-sm" />
-          Upload
+          {t("knowledgeFiles.upload")}
         </button>
       </div>
 
@@ -231,7 +233,7 @@ export default function KnowledgeFiles({
         </div>
       ) : files.length === 0 ? (
         <div className="py-3 text-center text-xs text-gray-400 dark:text-white/30">
-          No knowledge files yet
+          {t("knowledgeFiles.noFiles")}
         </div>
       ) : (
         <div className="flex max-h-48 flex-col gap-1 overflow-y-auto overflow-x-hidden">
@@ -309,7 +311,7 @@ export default function KnowledgeFiles({
           onOpenChange={setIsOpen}
           offset={8}
         >
-          <Tooltip content="Knowledge files" delay={400} closeDelay={0}>
+          <Tooltip content={t("knowledgeFiles.knowledgeFilesTooltip")} delay={400} closeDelay={0}>
             <div>
               <PopoverTrigger>{triggerButton}</PopoverTrigger>
             </div>

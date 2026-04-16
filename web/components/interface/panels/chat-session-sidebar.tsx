@@ -7,6 +7,7 @@ import MoveToProjectModal from "@/components/misc/move-to-project-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
 import { EditorContext } from "@/components/providers/editor-context-provider";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
@@ -35,6 +36,7 @@ export default function ChatSessionSidebar({
   const [shareSessionId, setShareSessionId] = useState<string | null>(null);
   const [moveSessionId, setMoveSessionId] = useState<string | null>(null);
   const { isLandscape } = useScreenSize();
+  const { getTranslations: t } = useTranslations();
 
   const {
     sessions,
@@ -65,7 +67,7 @@ export default function ChatSessionSidebar({
       isOpen={!!moveSessionId}
       onClose={() => setMoveSessionId(null)}
       onSelect={handleMoveSession}
-      title="Move Chat to Project"
+      title={t("chatSessionSidebar.moveToProjectTitle")}
     />
     <ShareChatModal
       sessionId={shareSessionId}
@@ -88,10 +90,10 @@ export default function ChatSessionSidebar({
             <div className="shrink-0 border-b border-default-200 dark:border-white/8">
               <div className="flex items-center justify-between px-3 pt-3 pb-2">
                 <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500 dark:text-default-500">
-                  Project
+                  {t("chatSessionSidebar.project")}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <Tooltip content="Knowledge files" delay={400} closeDelay={0} size="sm">
+                  <Tooltip content={t("chatSessionSidebar.knowledgeFiles")} delay={400} closeDelay={0} size="sm">
                     <button
                       onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
                       className={`flex h-7 w-7 items-center justify-center rounded transition-colors ${
@@ -103,7 +105,7 @@ export default function ChatSessionSidebar({
                       <Icon name="menu_book" variant="round" className="text-sm" />
                     </button>
                   </Tooltip>
-                  <Tooltip content="New project" delay={400} closeDelay={0} size="sm">
+                  <Tooltip content={t("chatSessionSidebar.newProject")} delay={400} closeDelay={0} size="sm">
                     <button
                       onClick={() => {
                         editorContext?.updateModalStates({
@@ -182,7 +184,7 @@ export default function ChatSessionSidebar({
                         className="shrink-0 text-sm text-default-500 dark:text-default-500"
                       />
                       <span className="min-w-0 flex-1 text-xs text-default-500 dark:text-default-500">
-                        Select a project
+                        {t("chatSessionSidebar.selectProject")}
                       </span>
                       <Icon
                         name="unfold_more"
@@ -241,15 +243,15 @@ export default function ChatSessionSidebar({
                 </div>
               ) : (
                 <p className="px-2 py-2 pb-3 text-center text-[10px] text-default-500 dark:text-default-500">
-                  No projects yet
+                  {t("chatSessionSidebar.noProjects")}
                 </p>
               )}
             </div>
 
-            {/* Chat History Header */}
+            {/* {t("chatSessionSidebar.chatHistory")} Header */}
             <div className="flex shrink-0 items-center justify-between px-3 py-3">
               <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500 dark:text-default-500">
-                Chat History
+                {t("chatSessionSidebar.chatHistory")}
               </h3>
               <div className="flex items-center gap-1">
                 <button
@@ -259,7 +261,7 @@ export default function ChatSessionSidebar({
                   className="flex items-center gap-1 rounded-lg border border-amber-400/50 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:bg-amber-500/15"
                 >
                   <Icon name="add" variant="round" className="text-sm" />
-                  New
+                  {t("chatSessionSidebar.new")}
                 </button>
               </div>
             </div>
@@ -268,7 +270,7 @@ export default function ChatSessionSidebar({
             <div className="scrollbar-transparent flex-1 overflow-y-auto px-2 pb-2">
               {sessions.length === 0 ? (
                 <p className="py-12 text-center text-xs text-default-500 dark:text-default-500">
-                  No chat history yet
+                  {t("chatSessionSidebar.noChatHistory")}
                 </p>
               ) : (
                 <div className="flex flex-col gap-0.5">
@@ -292,7 +294,7 @@ export default function ChatSessionSidebar({
                           {s.title}
                         </p>
                         <p className="text-[10px] text-default-500 dark:text-default-500">
-                          {formatRelativeTime(s.createdAt)}
+                          {formatRelativeTime(s.createdAt, t)}
                         </p>
                       </div>
                       <Dropdown placement="bottom-end">
@@ -315,20 +317,20 @@ export default function ChatSessionSidebar({
                             key="share"
                             startContent={<Icon name="share" variant="round" className="text-sm" />}
                           >
-                            Share
+                            {t("chatSessionSidebar.share")}
                           </DropdownItem>
                           <DropdownItem
                             key="move"
                             startContent={<Icon name="drive_file_move" variant="round" className="text-sm" />}
                           >
-                            Move to Project
+                            {t("chatSessionSidebar.moveToProject")}
                           </DropdownItem>
                           <DropdownItem
                             key="delete"
                             className="text-danger"
                             startContent={<Icon name="delete_outline" variant="round" className="text-sm" />}
                           >
-                            Delete
+                            {t("chatSessionSidebar.delete")}
                           </DropdownItem>
                         </DropdownMenu>
                       </Dropdown>
@@ -352,7 +354,7 @@ export default function ChatSessionSidebar({
             {/* Close button for mobile */}
             <div className="flex shrink-0 items-center justify-between border-b border-default-200 px-3 py-2 dark:border-white/8">
               <span className="text-xs font-semibold uppercase tracking-wider text-default-500">
-                Menu
+                {t("chatSessionSidebar.menu")}
               </span>
               <button
                 onClick={onClose}
@@ -366,10 +368,10 @@ export default function ChatSessionSidebar({
             <div className="shrink-0 border-b border-default-200 dark:border-white/8">
               <div className="flex items-center justify-between px-3 pt-3 pb-2">
                 <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500 dark:text-default-500">
-                  Project
+                  {t("chatSessionSidebar.project")}
                 </h3>
                 <div className="flex items-center gap-2">
-                  <Tooltip content="Knowledge files" delay={400} closeDelay={0} size="sm">
+                  <Tooltip content={t("chatSessionSidebar.knowledgeFiles")} delay={400} closeDelay={0} size="sm">
                     <button
                       onClick={() => setIsKnowledgeOpen(!isKnowledgeOpen)}
                       className={`flex h-8 w-8 items-center justify-center rounded transition-colors ${
@@ -381,7 +383,7 @@ export default function ChatSessionSidebar({
                       <Icon name="menu_book" variant="round" className="text-base" />
                     </button>
                   </Tooltip>
-                  <Tooltip content="New project" delay={400} closeDelay={0} size="sm">
+                  <Tooltip content={t("chatSessionSidebar.newProject")} delay={400} closeDelay={0} size="sm">
                     <button
                       onClick={() => {
                         editorContext?.updateModalStates({
@@ -431,15 +433,15 @@ export default function ChatSessionSidebar({
                       variant="round"
                       className="shrink-0 text-sm text-default-500"
                     />
-                    <span className="text-sm text-default-500">Select a project</span>
+                    <span className="text-sm text-default-500">{t("chatSessionSidebar.selectProject")}</span>
                   </div>
                 </div>
               )}
             </div>
-            {/* Chat History */}
+            {/* {t("chatSessionSidebar.chatHistory")} */}
             <div className="flex shrink-0 items-center justify-between px-3 py-3">
               <h3 className="text-[10px] font-semibold uppercase tracking-wider text-default-500">
-                Chat History
+                {t("chatSessionSidebar.chatHistory")}
               </h3>
               <button
                 onClick={() => {
@@ -455,7 +457,7 @@ export default function ChatSessionSidebar({
             <div className="scrollbar-transparent flex-1 overflow-y-auto px-2 pb-2">
               {sessions.length === 0 ? (
                 <p className="py-12 text-center text-sm text-default-500">
-                  No chat history yet
+                  {t("chatSessionSidebar.noChatHistory")}
                 </p>
               ) : (
                 <div className="flex flex-col gap-1">
@@ -482,7 +484,7 @@ export default function ChatSessionSidebar({
                           {s.title}
                         </p>
                         <p className="text-xs text-default-500">
-                          {formatRelativeTime(s.createdAt)}
+                          {formatRelativeTime(s.createdAt, t)}
                         </p>
                       </div>
                       <Dropdown placement="bottom-end">
@@ -505,20 +507,20 @@ export default function ChatSessionSidebar({
                             key="share"
                             startContent={<Icon name="share" variant="round" className="text-sm" />}
                           >
-                            Share
+                            {t("chatSessionSidebar.share")}
                           </DropdownItem>
                           <DropdownItem
                             key="move"
                             startContent={<Icon name="drive_file_move" variant="round" className="text-sm" />}
                           >
-                            Move to Project
+                            {t("chatSessionSidebar.moveToProject")}
                           </DropdownItem>
                           <DropdownItem
                             key="delete"
                             className="text-danger"
                             startContent={<Icon name="delete_outline" variant="round" className="text-sm" />}
                           >
-                            Delete
+                            {t("chatSessionSidebar.delete")}
                           </DropdownItem>
                         </DropdownMenu>
                       </Dropdown>

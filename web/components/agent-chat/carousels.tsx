@@ -9,9 +9,11 @@ import { useWorkflowEnvCheck } from "@/lib/hooks/use-workflow-env-check";
 import type { Automation, TriggerType, Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Chip } from "@heroui/react";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { useContext, useState } from "react";
 
 export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
+  const { getTranslations: t } = useTranslations();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);
   const totalPages = Math.ceil(workflows.length / ITEMS_PER_PAGE);
@@ -54,7 +56,7 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
     <div className="w-full max-w-xl shrink-0 pt-6">
       <div className="mb-3 flex items-center justify-between">
         <p className="text-default-500 text-xs font-medium tracking-wide uppercase">
-          My Workflows
+          {t("carousels.myWorkflows")}
         </p>
         {totalPages > 1 && (
           <div className="flex items-center gap-1">
@@ -111,7 +113,7 @@ export function MyWorkflowsCarousel({ workflows }: { workflows: Workflow[] }) {
                 startContent={<Icon name="open_in_new" className="text-sm" />}
                 onPress={() => openWorkflow(wf)}
               >
-                Open
+                {t("carousels.open")}
               </Button>
             </div>
           </div>
@@ -173,6 +175,7 @@ export function MyAutomationsCarousel({
   onOpenEditor: (automation: Automation) => void;
   onCreateNew: () => void;
 }) {
+  const { getTranslations: t } = useTranslations();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);
   const totalPages = Math.ceil(automations.length / ITEMS_PER_PAGE);
@@ -186,7 +189,7 @@ export function MyAutomationsCarousel({
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <p className="text-default-500 text-xs font-medium tracking-wide uppercase">
-            My Automations
+            {t("carousels.myAutomations")}
           </p>
           {automations.some((a) => a.status === "running") && (
             <Chip
@@ -195,7 +198,7 @@ export function MyAutomationsCarousel({
               variant="dot"
               classNames={{ content: "text-xs" }}
             >
-              {automations.filter((a) => a.status === "running").length} running
+              {automations.filter((a) => a.status === "running").length} {t("carousels.running")}
             </Chip>
           )}
         </div>
@@ -208,7 +211,7 @@ export function MyAutomationsCarousel({
             onPress={onCreateNew}
             className="h-6 min-w-0 px-2 text-xs"
           >
-            New
+            {t("carousels.new")}
           </Button>
           {totalPages > 1 && (
             <div className="flex items-center gap-1">
@@ -252,9 +255,9 @@ export function MyAutomationsCarousel({
             <Icon name="smart_toy" className="text-primary text-sm" />
           </div>
           <div className="text-left">
-            <p className="text-sm font-medium">Create your first automation</p>
+            <p className="text-sm font-medium">{t("carousels.createFirstAutomation")}</p>
             <p className="text-default-500 mt-0.5 text-xs">
-              Schedule workflows or trigger them via webhooks
+              {t("carousels.scheduleWorkflows")}
             </p>
           </div>
           <Icon
@@ -310,7 +313,7 @@ export function MyAutomationsCarousel({
                     color="warning"
                     classNames={{ content: "text-xs" }}
                   >
-                    Paused
+                    {t("carousels.paused")}
                   </Chip>
                 )}
                 <Button
@@ -320,7 +323,7 @@ export function MyAutomationsCarousel({
                   startContent={<Icon name="edit" className="text-sm" />}
                   onPress={() => onOpenEditor(automation)}
                 >
-                  Edit
+                  {t("carousels.edit")}
                 </Button>
               </div>
             </div>

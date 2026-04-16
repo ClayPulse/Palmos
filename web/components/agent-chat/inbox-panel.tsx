@@ -2,6 +2,7 @@
 
 import Icon from "@/components/misc/icon";
 import { formatRelativeTime } from "@/components/agent-chat/session-history";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -85,6 +86,7 @@ export default function InboxPanel({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { getTranslations: t } = useTranslations();
   const { messages, markAllRead, dismiss } = useInbox();
   const [loading, setLoading] = useState(true);
 
@@ -113,7 +115,7 @@ export default function InboxPanel({
               className="mb-2 text-3xl text-default-300 dark:text-white/20"
             />
             <p className="text-xs text-default-500 dark:text-white/40">
-              No notifications yet
+              {t("inboxPanel.noNotifications")}
             </p>
           </div>
         ) : (
@@ -135,6 +137,7 @@ function InboxMessageCard({
   message: InboxMessage;
   onDismiss?: (id: string) => void;
 }) {
+  const { getTranslations: t } = useTranslations();
   const kwargs = message.additionalKwargs;
   const isWorkflowBuild = kwargs?.type === "workflow_build_complete";
 
@@ -163,7 +166,7 @@ function InboxMessageCard({
             {message.content}
           </p>
           <p className="mt-1 text-[10px] text-default-400 dark:text-white/30">
-            {formatRelativeTime(message.createdAt)}
+            {formatRelativeTime(message.createdAt, t)}
           </p>
           {isWorkflowBuild && kwargs?.workflowId && (
             <button
@@ -176,7 +179,7 @@ function InboxMessageCard({
               className="mt-2 flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm transition-colors hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600"
             >
               <Icon name="play_arrow" variant="round" className="text-xs" />
-              Try Workflow
+              {t("inboxPanel.tryWorkflow")}
             </button>
           )}
         </div>

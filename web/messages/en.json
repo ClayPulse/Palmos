@@ -1133,6 +1133,232 @@
   "draggableItem": {
     "ariaLabel": "Drag to move"
   },
+  "chatInputBar": {
+    "askAnything": "Ask Palmos AI anything...",
+    "askShort": "Ask Palmos AI...",
+    "dropFiles": "Drop files to attach",
+    "attachFile": "Attach file",
+    "saveToKnowledge": "Save to knowledge",
+    "savedToKnowledge": "Saved to knowledge",
+    "uploadFailed": "Upload failed",
+    "removeAttachment": "Remove attachment"
+  },
+  "starterPrompts": {
+    "automateCRM": "Automate my CRM",
+    "leadGeneration": "Create lead generation",
+    "makeWebsite": "Make a website",
+    "businessDashboard": "Create a business dashboard",
+    "digitalEmployee": "Customize a digital employee",
+    "inventoryTracker": "Build an inventory tracker"
+  },
+  "projectScreen": {
+    "whatToWorkOn": "What would you like to work on?",
+    "tellAboutProject": "Tell me about your project",
+    "helpUnderstand": "Help me understand your project so I can suggest tailored automations — or skip and jump right in.",
+    "whatKind": "What kind of project is this?",
+    "skip": "Skip",
+    "describeIdea": "Describe your idea and I'll help you bring it to life.",
+    "allSystemsNominal": "All systems nominal",
+    "automationsActive": "{count} automations active",
+    "automationActive": "{count} automation active",
+    "workflowsReady": "{count} workflows ready",
+    "workflowReady": "{count} workflow ready",
+    "categories": {
+      "marketingGrowth": "Marketing & Growth",
+      "salesCRM": "Sales & CRM",
+      "customerSupport": "Customer Support",
+      "internalOperations": "Internal Operations",
+      "ecommerce": "E-commerce",
+      "contentSocialMedia": "Content & Social Media",
+      "dataAnalytics": "Data & Analytics"
+    }
+  },
+  "homeScreen": {
+    "whatToBuild": "What would you like to build today?",
+    "describeIdea": "Describe your idea and I'll help you bring it to life.",
+    "myProjects": "My Projects",
+    "workflows": "workflows",
+    "members": "members",
+    "workflowCount": "{count} workflows",
+    "memberCount": "{count} members"
+  },
+  "interruptCard": {
+    "inputNeeded": "Input needed",
+    "typeAnswer": "Or type your answer...",
+    "send": "Send"
+  },
+  "shareChatModal": {
+    "error": "Error",
+    "noActiveSession": "No active chat session to share.",
+    "title": "Share Chat",
+    "description": "Create a link that lets anyone view this conversation (read-only).",
+    "shareLink": "Share this link:",
+    "copy": "Copy",
+    "done": "Done",
+    "createLink": "Create Link"
+  },
+  "carousels": {
+    "myWorkflows": "My Workflows",
+    "myAutomations": "My Automations",
+    "running": "running",
+    "new": "New",
+    "open": "Open",
+    "edit": "Edit",
+    "createFirstAutomation": "Create your first automation",
+    "scheduleWorkflows": "Schedule workflows or trigger them via webhooks",
+    "paused": "Paused"
+  },
+  "chatMessageArea": {
+    "thinking": "Palmos is thinking",
+    "loadingConversation": "Loading conversation...",
+    "errorOccurred": "An error occurred."
+  },
+  "embedPanel": {
+    "a2ui": "A2UI",
+    "mcpApps": "MCP Apps",
+    "palmosApp": "Palmos App",
+    "canvas": "Canvas"
+  },
+  "inboxPanel": {
+    "noNotifications": "No notifications yet",
+    "tryWorkflow": "Try Workflow"
+  },
+  "knowledgeFiles": {
+    "knowledge": "Knowledge",
+    "filesIndexed": "Files indexed for AI context",
+    "upload": "Upload",
+    "noFiles": "No knowledge files yet",
+    "invalidResponse": "Invalid response",
+    "networkError": "Network error",
+    "knowledgeFilesTooltip": "Knowledge files"
+  },
+  "messageBubbles": {
+    "user": "User:",
+    "copied": "Copied!",
+    "copy": "Copy",
+    "calledTool": "Called tool:",
+    "aiManager": "AI Manager:",
+    "aiManagerLabel": "AI Manager"
+  },
+  "projectPicker": {
+    "selectProject": "Select project",
+    "project": "Project",
+    "clearProject": "Clear project",
+    "new": "New",
+    "noProjects": "No projects yet"
+  },
+  "runningTasksPanel": {
+    "tasks": "Tasks",
+    "all": "All",
+    "running": "Running",
+    "done": "Done",
+    "failed": "Failed",
+    "runningCount": "running",
+    "noTasks": "No tasks yet. Workflow runs and managed agent tasks will appear here.",
+    "noFilteredTasks": "No {filter} tasks."
+  },
+  "sessionHistory": {
+    "chatHistory": "Chat History",
+    "new": "New",
+    "noChatHistory": "No chat history yet",
+    "justNow": "Just now",
+    "mAgo": "{count}m ago",
+    "hAgo": "{count}h ago",
+    "dAgo": "{count}d ago"
+  },
+  "subagentCard": {
+    "working": "Working..."
+  },
+  "todoList": {
+    "tasks": "Tasks"
+  },
+  "workflowTaskCard": {
+    "running": "Running... {time}",
+    "completed": "Completed in {time}",
+    "failed": "Failed after {time}",
+    "terminate": "Terminate",
+    "terminating": "Terminating...",
+    "workflowBuilt": "Workflow built successfully!",
+    "openInEditor": "Open in Editor",
+    "runWorkflow": "Run Workflow",
+    "usingTool": "Using tool:",
+    "seeOutput": "See output",
+    "hide": "Hide",
+    "download": "Download",
+    "messages": "messages",
+    "latest": "latest:"
+  },
+  "agentChatPaywall": {
+    "upgradeTitle": "Upgrade to use AI Agents",
+    "upgradeDescription": "Agent chat requires a paid plan (Starter or above). You can also get access by being invited to a project owned by a paid user.",
+    "viewPlans": "View Plans",
+    "alreadyMember": "Already a member of a paid project? Select it from the project picker to start using AI agents."
+  },
+  "appModeToggle": {
+    "agent": "Agent",
+    "editor": "Editor"
+  },
+  "createInviteLinkModal": {
+    "noWorkflowsSelected": "No workflows selected",
+    "selectAtLeastOne": "Select at least one workflow to share.",
+    "title": "Create Invite Link",
+    "linkDescription": "Anyone with this link can accept the selected workflows and have them available in their AI manager.",
+    "selectWorkflows": "Select workflows",
+    "noPublishedWorkflows": "No published workflows found. Publish a workflow first.",
+    "copied": "Copied",
+    "copiedDescription": "Invite link copied to clipboard.",
+    "done": "Done",
+    "createLink": "Create Link",
+    "selected": "{count} selected"
+  },
+  "sandboxAppLoader": {
+    "noDefaultView": "No default view found for this file type. Find a compatible extension in marketplace, and enable it in settings as the default method to open this file."
+  },
+  "automationEditorModal": {
+    "editAutomation": "Edit Automation",
+    "createAutomation": "Create Automation",
+    "name": "Name",
+    "namePlaceholder": "My automation",
+    "workflow": "Workflow",
+    "selectWorkflow": "Select a workflow",
+    "triggerType": "Trigger Type",
+    "schedule": "Schedule",
+    "webhook": "Webhook",
+    "presets": "Presets",
+    "every15min": "Every 15 min",
+    "hourly": "Hourly",
+    "daily9am": "Daily 9am",
+    "weeklyMon": "Weekly Mon",
+    "startDate": "Start Date",
+    "startTime": "Start Time",
+    "minGranularity": "Minimum granularity: 15 minutes",
+    "webhookUrl": "Webhook URL",
+    "copyUrl": "Copy URL",
+    "webhookSecret": "Webhook Secret (optional)",
+    "webhookSecretPlaceholder": "HMAC secret for signature verification",
+    "generateSecret": "Generate random secret",
+    "example": "Example",
+    "workflowInputs": "Workflow Inputs",
+    "runNow": "Run Now",
+    "failedToSave": "Failed to save",
+    "failedToDelete": "Failed to delete",
+    "failedToTrigger": "Failed to trigger"
+  },
+  "chatSessionSidebar": {
+    "moveToProjectTitle": "Move Chat to Project",
+    "project": "Project",
+    "knowledgeFiles": "Knowledge files",
+    "newProject": "New project",
+    "selectProject": "Select a project",
+    "noProjects": "No projects yet",
+    "chatHistory": "Chat History",
+    "new": "New",
+    "noChatHistory": "No chat history yet",
+    "share": "Share",
+    "moveToProject": "Move to Project",
+    "delete": "Delete",
+    "menu": "Menu"
+  },
   "canvasNode": {
     "labels": {
       "entry": "entry",

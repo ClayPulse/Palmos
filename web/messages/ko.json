@@ -1133,6 +1133,232 @@
   "draggableItem": {
     "ariaLabel": "드래그하여 이동"
   },
+  "chatInputBar": {
+    "askAnything": "Palmos AI에게 무엇이든 물어보세요...",
+    "askShort": "Palmos AI에게 물어보기...",
+    "dropFiles": "파일을 드래그하여 첨부",
+    "attachFile": "파일 첨부",
+    "saveToKnowledge": "지식에 저장",
+    "savedToKnowledge": "지식에 저장됨",
+    "uploadFailed": "업로드 실패",
+    "removeAttachment": "첨부 파일 제거"
+  },
+  "starterPrompts": {
+    "automateCRM": "CRM 자동화",
+    "leadGeneration": "리드 생성 만들기",
+    "makeWebsite": "웹사이트 만들기",
+    "businessDashboard": "비즈니스 대시보드 만들기",
+    "digitalEmployee": "디지털 직원 맞춤 설정",
+    "inventoryTracker": "재고 추적기 만들기"
+  },
+  "projectScreen": {
+    "whatToWorkOn": "무엇을 작업하시겠습니까?",
+    "tellAboutProject": "프로젝트에 대해 알려주세요",
+    "helpUnderstand": "프로젝트를 이해하면 맞춤형 자동화를 제안해 드릴 수 있습니다. 건너뛰고 바로 시작할 수도 있습니다.",
+    "whatKind": "어떤 종류의 프로젝트인가요?",
+    "skip": "건너뛰기",
+    "describeIdea": "아이디어를 설명해 주시면 실현할 수 있도록 도와드리겠습니다.",
+    "allSystemsNominal": "모든 시스템 정상",
+    "automationsActive": "{count}개 자동화 활성",
+    "automationActive": "{count}개 자동화 활성",
+    "workflowsReady": "{count}개 워크플로우 준비 완료",
+    "workflowReady": "{count}개 워크플로우 준비 완료",
+    "categories": {
+      "marketingGrowth": "마케팅 & 성장",
+      "salesCRM": "영업 & CRM",
+      "customerSupport": "고객 지원",
+      "internalOperations": "내부 운영",
+      "ecommerce": "전자상거래",
+      "contentSocialMedia": "콘텐츠 & 소셜 미디어",
+      "dataAnalytics": "데이터 & 분석"
+    }
+  },
+  "homeScreen": {
+    "whatToBuild": "오늘 무엇을 만들고 싶으신가요?",
+    "describeIdea": "아이디어를 설명해 주시면 실현할 수 있도록 도와드리겠습니다.",
+    "myProjects": "내 프로젝트",
+    "workflows": "워크플로우",
+    "members": "멤버",
+    "workflowCount": "{count} 워크플로우",
+    "memberCount": "{count} 멤버"
+  },
+  "interruptCard": {
+    "inputNeeded": "입력 필요",
+    "typeAnswer": "또는 답변을 입력하세요...",
+    "send": "보내기"
+  },
+  "shareChatModal": {
+    "error": "오류",
+    "noActiveSession": "공유할 활성 채팅 세션이 없습니다.",
+    "title": "채팅 공유",
+    "description": "이 대화를 누구나 볼 수 있는 링크를 만듭니다(읽기 전용).",
+    "shareLink": "이 링크를 공유하세요:",
+    "copy": "복사",
+    "done": "완료",
+    "createLink": "링크 생성"
+  },
+  "carousels": {
+    "myWorkflows": "내 워크플로우",
+    "myAutomations": "내 자동화",
+    "running": "실행 중",
+    "new": "새로 만들기",
+    "open": "열기",
+    "edit": "편집",
+    "createFirstAutomation": "첫 번째 자동화를 만들어 보세요",
+    "scheduleWorkflows": "워크플로우를 예약하거나 웹훅으로 트리거하세요",
+    "paused": "일시 정지"
+  },
+  "chatMessageArea": {
+    "thinking": "Palmos가 생각 중입니다",
+    "loadingConversation": "대화를 불러오는 중...",
+    "errorOccurred": "오류가 발생했습니다."
+  },
+  "embedPanel": {
+    "a2ui": "A2UI",
+    "mcpApps": "MCP 앱",
+    "palmosApp": "Palmos 앱",
+    "canvas": "캔버스"
+  },
+  "inboxPanel": {
+    "noNotifications": "아직 알림이 없습니다",
+    "tryWorkflow": "워크플로우 시도"
+  },
+  "knowledgeFiles": {
+    "knowledge": "지식",
+    "filesIndexed": "AI 컨텍스트용 인덱싱된 파일",
+    "upload": "업로드",
+    "noFiles": "아직 지식 파일이 없습니다",
+    "invalidResponse": "잘못된 응답",
+    "networkError": "네트워크 오류",
+    "knowledgeFilesTooltip": "지식 파일"
+  },
+  "messageBubbles": {
+    "user": "사용자:",
+    "copied": "복사됨!",
+    "copy": "복사",
+    "calledTool": "도구 호출:",
+    "aiManager": "AI 매니저:",
+    "aiManagerLabel": "AI 매니저"
+  },
+  "projectPicker": {
+    "selectProject": "프로젝트 선택",
+    "project": "프로젝트",
+    "clearProject": "프로젝트 해제",
+    "new": "새로 만들기",
+    "noProjects": "아직 프로젝트가 없습니다"
+  },
+  "runningTasksPanel": {
+    "tasks": "작업",
+    "all": "전체",
+    "running": "실행 중",
+    "done": "완료",
+    "failed": "실패",
+    "runningCount": "실행 중",
+    "noTasks": "아직 작업이 없습니다. 워크플로우 실행 및 관리형 에이전트 작업이 여기에 표시됩니다.",
+    "noFilteredTasks": "{filter} 작업이 없습니다."
+  },
+  "sessionHistory": {
+    "chatHistory": "채팅 기록",
+    "new": "새로 만들기",
+    "noChatHistory": "아직 채팅 기록이 없습니다",
+    "justNow": "방금",
+    "mAgo": "{count}분 전",
+    "hAgo": "{count}시간 전",
+    "dAgo": "{count}일 전"
+  },
+  "subagentCard": {
+    "working": "작업 중..."
+  },
+  "todoList": {
+    "tasks": "작업"
+  },
+  "workflowTaskCard": {
+    "running": "실행 중... {time}",
+    "completed": "{time} 만에 완료",
+    "failed": "{time} 후 실패",
+    "terminate": "종료",
+    "terminating": "종료 중...",
+    "workflowBuilt": "워크플로우가 성공적으로 빌드되었습니다!",
+    "openInEditor": "편집기에서 열기",
+    "runWorkflow": "워크플로우 실행",
+    "usingTool": "도구 사용 중:",
+    "seeOutput": "출력 보기",
+    "hide": "숨기기",
+    "download": "다운로드",
+    "messages": "메시지",
+    "latest": "최신:"
+  },
+  "agentChatPaywall": {
+    "upgradeTitle": "AI 에이전트를 사용하려면 업그레이드하세요",
+    "upgradeDescription": "에이전트 채팅에는 유료 플랜(스타터 이상)이 필요합니다. 유료 사용자가 소유한 프로젝트에 초대받아 액세스할 수도 있습니다.",
+    "viewPlans": "플랜 보기",
+    "alreadyMember": "이미 유료 프로젝트의 멤버인가요? 프로젝트 선택기에서 선택하여 AI 에이전트를 사용하세요."
+  },
+  "appModeToggle": {
+    "agent": "에이전트",
+    "editor": "편집기"
+  },
+  "createInviteLinkModal": {
+    "noWorkflowsSelected": "선택된 워크플로우 없음",
+    "selectAtLeastOne": "공유할 워크플로우를 하나 이상 선택하세요.",
+    "title": "초대 링크 생성",
+    "linkDescription": "이 링크가 있는 사람은 선택한 워크플로우를 수락하여 자신의 AI 매니저에서 사용할 수 있습니다.",
+    "selectWorkflows": "워크플로우 선택",
+    "noPublishedWorkflows": "게시된 워크플로우가 없습니다. 먼저 워크플로우를 게시하세요.",
+    "copied": "복사됨",
+    "copiedDescription": "초대 링크가 클립보드에 복사되었습니다.",
+    "done": "완료",
+    "createLink": "링크 생성",
+    "selected": "{count}개 선택됨"
+  },
+  "sandboxAppLoader": {
+    "noDefaultView": "이 파일 유형에 대한 기본 뷰가 없습니다. 마켓플레이스에서 호환되는 확장 프로그램을 찾아 설정에서 이 파일을 여는 기본 방법으로 활성화하세요."
+  },
+  "automationEditorModal": {
+    "editAutomation": "자동화 편집",
+    "createAutomation": "자동화 생성",
+    "name": "이름",
+    "namePlaceholder": "내 자동화",
+    "workflow": "워크플로우",
+    "selectWorkflow": "워크플로우 선택",
+    "triggerType": "트리거 유형",
+    "schedule": "예약",
+    "webhook": "웹훅",
+    "presets": "프리셋",
+    "every15min": "15분마다",
+    "hourly": "매시간",
+    "daily9am": "매일 오전 9시",
+    "weeklyMon": "매주 월요일",
+    "startDate": "시작 날짜",
+    "startTime": "시작 시간",
+    "minGranularity": "최소 단위: 15분",
+    "webhookUrl": "웹훅 URL",
+    "copyUrl": "URL 복사",
+    "webhookSecret": "웹훅 시크릿 (선택 사항)",
+    "webhookSecretPlaceholder": "서명 검증용 HMAC 시크릿",
+    "generateSecret": "랜덤 시크릿 생성",
+    "example": "예시",
+    "workflowInputs": "워크플로우 입력",
+    "runNow": "지금 실행",
+    "failedToSave": "저장 실패",
+    "failedToDelete": "삭제 실패",
+    "failedToTrigger": "트리거 실패"
+  },
+  "chatSessionSidebar": {
+    "moveToProjectTitle": "채팅을 프로젝트로 이동",
+    "project": "프로젝트",
+    "knowledgeFiles": "지식 파일",
+    "newProject": "새 프로젝트",
+    "selectProject": "프로젝트 선택",
+    "noProjects": "아직 프로젝트가 없습니다",
+    "chatHistory": "채팅 기록",
+    "new": "새로 만들기",
+    "noChatHistory": "아직 채팅 기록이 없습니다",
+    "share": "공유",
+    "moveToProject": "프로젝트로 이동",
+    "delete": "삭제",
+    "menu": "메뉴"
+  },
   "canvasNode": {
     "labels": {
       "entry": "진입",

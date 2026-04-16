@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { Workflow } from "@/lib/types";
 import {
@@ -25,6 +26,7 @@ export default function CreateInviteLinkModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const { getTranslations: t } = useTranslations();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -32,8 +34,8 @@ export default function CreateInviteLinkModal({
   async function handleCreate() {
     if (selectedIds.length === 0) {
       addToast({
-        title: "No workflows selected",
-        description: "Select at least one workflow to share.",
+        title: t("createInviteLinkModal.noWorkflowsSelected"),
+        description: t("createInviteLinkModal.selectAtLeastOne"),
         color: "warning",
       });
       return;
@@ -58,9 +60,9 @@ export default function CreateInviteLinkModal({
       setInviteUrl(data.url);
     } catch (err) {
       addToast({
-        title: "Error",
+        title: t("createInviteLinkModal.error"),
         description:
-          err instanceof Error ? err.message : "Failed to create invite link",
+          err instanceof Error ? err.message : t("createInviteLinkModal.error"),
         color: "danger",
       });
     } finally {
@@ -72,8 +74,8 @@ export default function CreateInviteLinkModal({
     if (inviteUrl) {
       navigator.clipboard.writeText(inviteUrl);
       addToast({
-        title: "Copied",
-        description: "Invite link copied to clipboard.",
+        title: t("createInviteLinkModal.copied"),
+        description: t("createInviteLinkModal.copiedDescription"),
         color: "success",
       });
     }
@@ -90,13 +92,12 @@ export default function CreateInviteLinkModal({
   return (
     <Modal isOpen={isOpen} onClose={handleClose} size="lg" scrollBehavior="inside">
       <ModalContent>
-        <ModalHeader>Create Invite Link</ModalHeader>
+        <ModalHeader>{t("createInviteLinkModal.title")}</ModalHeader>
         <ModalBody>
           {inviteUrl ? (
             <div className="flex flex-col gap-4">
               <p className="text-sm opacity-60">
-                Anyone with this link can accept the selected workflows and have
-                them available in their AI manager.
+                {t("createInviteLinkModal.linkDescription")}
               </p>
               <div className="flex gap-2">
                 <Input
@@ -106,17 +107,17 @@ export default function CreateInviteLinkModal({
                   classNames={{ input: "text-xs" }}
                 />
                 <Button size="sm" color="primary" onPress={handleCopy}>
-                  Copy
+                  {t("shareChatModal.copy")}
                 </Button>
               </div>
             </div>
           ) : (
             <div className="flex flex-col gap-4">
               <div>
-                <p className="mb-2 text-sm font-medium">Select workflows</p>
+                <p className="mb-2 text-sm font-medium">{t("createInviteLinkModal.selectWorkflows")}</p>
                 {selectableWorkflows.length === 0 ? (
                   <p className="text-sm opacity-50">
-                    No published workflows found. Publish a workflow first.
+                    {t("createInviteLinkModal.noPublishedWorkflows")}
                   </p>
                 ) : (
                   <CheckboxGroup
@@ -140,11 +141,11 @@ export default function CreateInviteLinkModal({
         </ModalBody>
         <ModalFooter>
           {inviteUrl ? (
-            <Button onPress={handleClose}>Done</Button>
+            <Button onPress={handleClose}>{t("createInviteLinkModal.done")}</Button>
           ) : (
             <>
               <Button variant="light" onPress={handleClose}>
-                Cancel
+                {t("common.cancel")}
               </Button>
               <Button
                 color="primary"
@@ -152,7 +153,7 @@ export default function CreateInviteLinkModal({
                 isDisabled={selectedIds.length === 0}
                 onPress={handleCreate}
               >
-                Create Link ({selectedIds.length} selected)
+                {t("createInviteLinkModal.createLink")} ({selectedIds.length} {t("createInviteLinkModal.selected")})
               </Button>
             </>
           )}

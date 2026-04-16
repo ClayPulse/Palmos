@@ -1106,6 +1106,232 @@
 	"draggableItem": {
 		"ariaLabel": "اسحب للتحريك"
 	},
+	"chatInputBar": {
+		"askAnything": "اسأل Palmos AI أي شيء...",
+		"askShort": "اسأل Palmos AI...",
+		"dropFiles": "أفلت الملفات لإرفاقها",
+		"attachFile": "إرفاق ملف",
+		"saveToKnowledge": "حفظ في المعرفة",
+		"savedToKnowledge": "تم الحفظ في المعرفة",
+		"uploadFailed": "فشل الرفع",
+		"removeAttachment": "إزالة المرفق"
+	},
+	"starterPrompts": {
+		"automateCRM": "أتمتة إدارة علاقات العملاء",
+		"leadGeneration": "إنشاء توليد العملاء المحتملين",
+		"makeWebsite": "إنشاء موقع ويب",
+		"businessDashboard": "إنشاء لوحة تحكم أعمال",
+		"digitalEmployee": "تخصيص موظف رقمي",
+		"inventoryTracker": "بناء متتبع مخزون"
+	},
+	"projectScreen": {
+		"whatToWorkOn": "ما الذي تريد العمل عليه؟",
+		"tellAboutProject": "أخبرني عن مشروعك",
+		"helpUnderstand": "ساعدني في فهم مشروعك حتى أتمكن من اقتراح أتمتة مخصصة — أو تخطَّ وابدأ مباشرة.",
+		"whatKind": "ما نوع هذا المشروع؟",
+		"skip": "تخطي",
+		"describeIdea": "صف فكرتك وسأساعدك في تحقيقها.",
+		"allSystemsNominal": "جميع الأنظمة تعمل بشكل طبيعي",
+		"automationsActive": "{count} أتمتة نشطة",
+		"automationActive": "{count} أتمتة نشطة",
+		"workflowsReady": "{count} سير عمل جاهز",
+		"workflowReady": "{count} سير عمل جاهز",
+		"categories": {
+			"marketingGrowth": "التسويق والنمو",
+			"salesCRM": "المبيعات وإدارة العلاقات",
+			"customerSupport": "دعم العملاء",
+			"internalOperations": "العمليات الداخلية",
+			"ecommerce": "التجارة الإلكترونية",
+			"contentSocialMedia": "المحتوى ووسائل التواصل الاجتماعي",
+			"dataAnalytics": "البيانات والتحليلات"
+		}
+	},
+	"homeScreen": {
+		"whatToBuild": "ماذا تريد أن تبني اليوم؟",
+		"describeIdea": "صف فكرتك وسأساعدك في تحقيقها.",
+		"myProjects": "مشاريعي",
+		"workflows": "سير العمل",
+		"members": "الأعضاء",
+		"workflowCount": "{count} سير عمل",
+		"memberCount": "{count} أعضاء"
+	},
+	"interruptCard": {
+		"inputNeeded": "مطلوب إدخال",
+		"typeAnswer": "أو اكتب إجابتك...",
+		"send": "إرسال"
+	},
+	"shareChatModal": {
+		"error": "خطأ",
+		"noActiveSession": "لا توجد جلسة محادثة نشطة للمشاركة.",
+		"title": "مشاركة المحادثة",
+		"description": "أنشئ رابطاً يتيح لأي شخص عرض هذه المحادثة (للقراءة فقط).",
+		"shareLink": "شارك هذا الرابط:",
+		"copy": "نسخ",
+		"done": "تم",
+		"createLink": "إنشاء رابط"
+	},
+	"carousels": {
+		"myWorkflows": "سير العمل الخاص بي",
+		"myAutomations": "الأتمتة الخاصة بي",
+		"running": "قيد التشغيل",
+		"new": "جديد",
+		"open": "فتح",
+		"edit": "تعديل",
+		"createFirstAutomation": "أنشئ أول أتمتة لك",
+		"scheduleWorkflows": "جدولة سير العمل أو تشغيلها عبر webhooks",
+		"paused": "متوقف مؤقتاً"
+	},
+	"chatMessageArea": {
+		"thinking": "Palmos يفكر",
+		"loadingConversation": "جارٍ تحميل المحادثة...",
+		"errorOccurred": "حدث خطأ."
+	},
+	"embedPanel": {
+		"a2ui": "A2UI",
+		"mcpApps": "تطبيقات MCP",
+		"palmosApp": "تطبيق Palmos",
+		"canvas": "اللوحة"
+	},
+	"inboxPanel": {
+		"noNotifications": "لا توجد إشعارات بعد",
+		"tryWorkflow": "جرّب سير العمل"
+	},
+	"knowledgeFiles": {
+		"knowledge": "المعرفة",
+		"filesIndexed": "ملفات مفهرسة لسياق الذكاء الاصطناعي",
+		"upload": "رفع",
+		"noFiles": "لا توجد ملفات معرفة بعد",
+		"invalidResponse": "استجابة غير صالحة",
+		"networkError": "خطأ في الشبكة",
+		"knowledgeFilesTooltip": "ملفات المعرفة"
+	},
+	"messageBubbles": {
+		"user": "المستخدم:",
+		"copied": "تم النسخ!",
+		"copy": "نسخ",
+		"calledTool": "تم استدعاء الأداة:",
+		"aiManager": "مدير الذكاء الاصطناعي:",
+		"aiManagerLabel": "مدير الذكاء الاصطناعي"
+	},
+	"projectPicker": {
+		"selectProject": "اختر مشروعاً",
+		"project": "المشروع",
+		"clearProject": "مسح المشروع",
+		"new": "جديد",
+		"noProjects": "لا توجد مشاريع بعد"
+	},
+	"runningTasksPanel": {
+		"tasks": "المهام",
+		"all": "الكل",
+		"running": "قيد التشغيل",
+		"done": "مكتمل",
+		"failed": "فشل",
+		"runningCount": "قيد التشغيل",
+		"noTasks": "لا توجد مهام بعد. ستظهر هنا عمليات تشغيل سير العمل ومهام الوكيل المُدار.",
+		"noFilteredTasks": "لا توجد مهام {filter}."
+	},
+	"sessionHistory": {
+		"chatHistory": "سجل المحادثات",
+		"new": "جديد",
+		"noChatHistory": "لا يوجد سجل محادثات بعد",
+		"justNow": "الآن",
+		"mAgo": "منذ {count} دقيقة",
+		"hAgo": "منذ {count} ساعة",
+		"dAgo": "منذ {count} يوم"
+	},
+	"subagentCard": {
+		"working": "جارٍ العمل..."
+	},
+	"todoList": {
+		"tasks": "المهام"
+	},
+	"workflowTaskCard": {
+		"running": "قيد التشغيل... {time}",
+		"completed": "اكتمل في {time}",
+		"failed": "فشل بعد {time}",
+		"terminate": "إنهاء",
+		"terminating": "جارٍ الإنهاء...",
+		"workflowBuilt": "تم بناء سير العمل بنجاح!",
+		"openInEditor": "فتح في المحرر",
+		"runWorkflow": "تشغيل سير العمل",
+		"usingTool": "يستخدم أداة:",
+		"seeOutput": "عرض المخرجات",
+		"hide": "إخفاء",
+		"download": "تنزيل",
+		"messages": "الرسائل",
+		"latest": "الأحدث:"
+	},
+	"agentChatPaywall": {
+		"upgradeTitle": "قم بالترقية لاستخدام وكلاء الذكاء الاصطناعي",
+		"upgradeDescription": "تتطلب محادثة الوكيل خطة مدفوعة (Starter أو أعلى). يمكنك أيضاً الحصول على الوصول عبر دعوتك إلى مشروع يملكه مستخدم مدفوع.",
+		"viewPlans": "عرض الخطط",
+		"alreadyMember": "هل أنت بالفعل عضو في مشروع مدفوع؟ اختره من منتقي المشاريع لبدء استخدام وكلاء الذكاء الاصطناعي."
+	},
+	"appModeToggle": {
+		"agent": "الوكيل",
+		"editor": "المحرر"
+	},
+	"createInviteLinkModal": {
+		"noWorkflowsSelected": "لم يتم اختيار سير عمل",
+		"selectAtLeastOne": "اختر سير عمل واحد على الأقل للمشاركة.",
+		"title": "إنشاء رابط دعوة",
+		"linkDescription": "أي شخص لديه هذا الرابط يمكنه قبول سير العمل المحدد وإتاحتها في مدير الذكاء الاصطناعي الخاص به.",
+		"selectWorkflows": "اختر سير العمل",
+		"noPublishedWorkflows": "لم يتم العثور على سير عمل منشور. انشر سير عمل أولاً.",
+		"copied": "تم النسخ",
+		"copiedDescription": "تم نسخ رابط الدعوة إلى الحافظة.",
+		"done": "تم",
+		"createLink": "إنشاء رابط",
+		"selected": "{count} محدد"
+	},
+	"sandboxAppLoader": {
+		"noDefaultView": "لم يتم العثور على عرض افتراضي لهذا النوع من الملفات. ابحث عن إضافة متوافقة في السوق، وفعّلها في الإعدادات كطريقة افتراضية لفتح هذا الملف."
+	},
+	"automationEditorModal": {
+		"editAutomation": "تعديل الأتمتة",
+		"createAutomation": "إنشاء أتمتة",
+		"name": "الاسم",
+		"namePlaceholder": "أتمتتي",
+		"workflow": "سير العمل",
+		"selectWorkflow": "اختر سير عمل",
+		"triggerType": "نوع المشغل",
+		"schedule": "جدول زمني",
+		"webhook": "Webhook",
+		"presets": "إعدادات مسبقة",
+		"every15min": "كل 15 دقيقة",
+		"hourly": "كل ساعة",
+		"daily9am": "يومياً الساعة 9 صباحاً",
+		"weeklyMon": "أسبوعياً الاثنين",
+		"startDate": "تاريخ البدء",
+		"startTime": "وقت البدء",
+		"minGranularity": "أدنى دقة: 15 دقيقة",
+		"webhookUrl": "رابط Webhook",
+		"copyUrl": "نسخ الرابط",
+		"webhookSecret": "مفتاح Webhook السري (اختياري)",
+		"webhookSecretPlaceholder": "مفتاح HMAC السري للتحقق من التوقيع",
+		"generateSecret": "إنشاء مفتاح سري عشوائي",
+		"example": "مثال",
+		"workflowInputs": "مدخلات سير العمل",
+		"runNow": "تشغيل الآن",
+		"failedToSave": "فشل في الحفظ",
+		"failedToDelete": "فشل في الحذف",
+		"failedToTrigger": "فشل في التشغيل"
+	},
+	"chatSessionSidebar": {
+		"moveToProjectTitle": "نقل المحادثة إلى مشروع",
+		"project": "مشروع",
+		"knowledgeFiles": "ملفات المعرفة",
+		"newProject": "مشروع جديد",
+		"selectProject": "اختر مشروعًا",
+		"noProjects": "لا توجد مشاريع بعد",
+		"chatHistory": "سجل المحادثات",
+		"new": "جديد",
+		"noChatHistory": "لا يوجد سجل محادثات بعد",
+		"share": "مشاركة",
+		"moveToProject": "نقل إلى مشروع",
+		"delete": "حذف",
+		"menu": "القائمة"
+	},
 	"canvasNode": {
 		"labels": {
 			"entry": "دخول",

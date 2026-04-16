@@ -1098,6 +1098,232 @@
 	"draggableItem": {
 		"ariaLabel": "Перетащите, чтобы переместить"
 	},
+	"chatInputBar": {
+		"askAnything": "Спросите Palmos AI что угодно...",
+		"askShort": "Спросите Palmos AI...",
+		"dropFiles": "Перетащите файлы для прикрепления",
+		"attachFile": "Прикрепить файл",
+		"saveToKnowledge": "Сохранить в знания",
+		"savedToKnowledge": "Сохранено в знания",
+		"uploadFailed": "Ошибка загрузки",
+		"removeAttachment": "Удалить вложение"
+	},
+	"starterPrompts": {
+		"automateCRM": "Автоматизировать мою CRM",
+		"leadGeneration": "Создать генерацию лидов",
+		"makeWebsite": "Создать сайт",
+		"businessDashboard": "Создать бизнес-панель",
+		"digitalEmployee": "Настроить цифрового сотрудника",
+		"inventoryTracker": "Создать трекер инвентаря"
+	},
+	"projectScreen": {
+		"whatToWorkOn": "Над чем вы хотели бы поработать?",
+		"tellAboutProject": "Расскажите о вашем проекте",
+		"helpUnderstand": "Помогите мне понять ваш проект, чтобы я мог предложить подходящие автоматизации — или пропустите и начните сразу.",
+		"whatKind": "Какой это проект?",
+		"skip": "Пропустить",
+		"describeIdea": "Опишите свою идею, и я помогу вам воплотить её в жизнь.",
+		"allSystemsNominal": "Все системы в норме",
+		"automationsActive": "{count} автоматизаций активно",
+		"automationActive": "{count} автоматизация активна",
+		"workflowsReady": "{count} рабочих процессов готово",
+		"workflowReady": "{count} рабочий процесс готов",
+		"categories": {
+			"marketingGrowth": "Маркетинг и рост",
+			"salesCRM": "Продажи и CRM",
+			"customerSupport": "Поддержка клиентов",
+			"internalOperations": "Внутренние операции",
+			"ecommerce": "Электронная коммерция",
+			"contentSocialMedia": "Контент и социальные сети",
+			"dataAnalytics": "Данные и аналитика"
+		}
+	},
+	"homeScreen": {
+		"whatToBuild": "Что вы хотите создать сегодня?",
+		"describeIdea": "Опишите свою идею, и я помогу вам воплотить её в жизнь.",
+		"myProjects": "Мои проекты",
+		"workflows": "рабочие процессы",
+		"members": "участники",
+		"workflowCount": "{count} рабочих процессов",
+		"memberCount": "{count} участников"
+	},
+	"interruptCard": {
+		"inputNeeded": "Требуется ввод",
+		"typeAnswer": "Или введите ваш ответ...",
+		"send": "Отправить"
+	},
+	"shareChatModal": {
+		"error": "Ошибка",
+		"noActiveSession": "Нет активной сессии чата для публикации.",
+		"title": "Поделиться чатом",
+		"description": "Создайте ссылку, позволяющую любому просматривать эту беседу (только чтение).",
+		"shareLink": "Поделитесь этой ссылкой:",
+		"copy": "Копировать",
+		"done": "Готово",
+		"createLink": "Создать ссылку"
+	},
+	"carousels": {
+		"myWorkflows": "Мои рабочие процессы",
+		"myAutomations": "Мои автоматизации",
+		"running": "выполняется",
+		"new": "Новый",
+		"open": "Открыть",
+		"edit": "Редактировать",
+		"createFirstAutomation": "Создайте свою первую автоматизацию",
+		"scheduleWorkflows": "Планируйте рабочие процессы или запускайте их через вебхуки",
+		"paused": "Приостановлено"
+	},
+	"chatMessageArea": {
+		"thinking": "Palmos думает",
+		"loadingConversation": "Загрузка беседы...",
+		"errorOccurred": "Произошла ошибка."
+	},
+	"embedPanel": {
+		"a2ui": "A2UI",
+		"mcpApps": "Приложения MCP",
+		"palmosApp": "Приложение Palmos",
+		"canvas": "Холст"
+	},
+	"inboxPanel": {
+		"noNotifications": "Уведомлений пока нет",
+		"tryWorkflow": "Попробовать рабочий процесс"
+	},
+	"knowledgeFiles": {
+		"knowledge": "Знания",
+		"filesIndexed": "Файлы, проиндексированные для контекста ИИ",
+		"upload": "Загрузить",
+		"noFiles": "Файлов знаний пока нет",
+		"invalidResponse": "Недопустимый ответ",
+		"networkError": "Ошибка сети",
+		"knowledgeFilesTooltip": "Файлы знаний"
+	},
+	"messageBubbles": {
+		"user": "Пользователь:",
+		"copied": "Скопировано!",
+		"copy": "Копировать",
+		"calledTool": "Вызван инструмент:",
+		"aiManager": "ИИ-менеджер:",
+		"aiManagerLabel": "ИИ-менеджер"
+	},
+	"projectPicker": {
+		"selectProject": "Выбрать проект",
+		"project": "Проект",
+		"clearProject": "Очистить проект",
+		"new": "Новый",
+		"noProjects": "Проектов пока нет"
+	},
+	"runningTasksPanel": {
+		"tasks": "Задачи",
+		"all": "Все",
+		"running": "Выполняются",
+		"done": "Завершены",
+		"failed": "Не удались",
+		"runningCount": "выполняется",
+		"noTasks": "Задач пока нет. Запуски рабочих процессов и задачи управляемых агентов будут отображаться здесь.",
+		"noFilteredTasks": "Нет задач со статусом {filter}."
+	},
+	"sessionHistory": {
+		"chatHistory": "История чата",
+		"new": "Новый",
+		"noChatHistory": "Истории чата пока нет",
+		"justNow": "Только что",
+		"mAgo": "{count} мин назад",
+		"hAgo": "{count} ч назад",
+		"dAgo": "{count} д назад"
+	},
+	"subagentCard": {
+		"working": "Работает..."
+	},
+	"todoList": {
+		"tasks": "Задачи"
+	},
+	"workflowTaskCard": {
+		"running": "Выполняется... {time}",
+		"completed": "Завершено за {time}",
+		"failed": "Ошибка через {time}",
+		"terminate": "Завершить",
+		"terminating": "Завершение...",
+		"workflowBuilt": "Рабочий процесс успешно создан!",
+		"openInEditor": "Открыть в редакторе",
+		"runWorkflow": "Запустить рабочий процесс",
+		"usingTool": "Используется инструмент:",
+		"seeOutput": "Показать результат",
+		"hide": "Скрыть",
+		"download": "Скачать",
+		"messages": "сообщения",
+		"latest": "последнее:"
+	},
+	"agentChatPaywall": {
+		"upgradeTitle": "Обновите план для использования ИИ-агентов",
+		"upgradeDescription": "Чат с агентами требует платного плана (Starter или выше). Вы также можете получить доступ, будучи приглашённым в проект платного пользователя.",
+		"viewPlans": "Посмотреть планы",
+		"alreadyMember": "Уже участник платного проекта? Выберите его в меню проектов, чтобы начать использовать ИИ-агентов."
+	},
+	"appModeToggle": {
+		"agent": "Агент",
+		"editor": "Редактор"
+	},
+	"createInviteLinkModal": {
+		"noWorkflowsSelected": "Рабочие процессы не выбраны",
+		"selectAtLeastOne": "Выберите хотя бы один рабочий процесс для публикации.",
+		"title": "Создать ссылку-приглашение",
+		"linkDescription": "Любой, у кого есть эта ссылка, сможет принять выбранные рабочие процессы и использовать их в своём ИИ-менеджере.",
+		"selectWorkflows": "Выбрать рабочие процессы",
+		"noPublishedWorkflows": "Опубликованные рабочие процессы не найдены. Сначала опубликуйте рабочий процесс.",
+		"copied": "Скопировано",
+		"copiedDescription": "Ссылка-приглашение скопирована в буфер обмена.",
+		"done": "Готово",
+		"createLink": "Создать ссылку",
+		"selected": "{count} выбрано"
+	},
+	"sandboxAppLoader": {
+		"noDefaultView": "Представление по умолчанию для этого типа файла не найдено. Найдите совместимое расширение в маркетплейсе и включите его в настройках как способ открытия этого файла по умолчанию."
+	},
+	"automationEditorModal": {
+		"editAutomation": "Редактировать автоматизацию",
+		"createAutomation": "Создать автоматизацию",
+		"name": "Название",
+		"namePlaceholder": "Моя автоматизация",
+		"workflow": "Рабочий процесс",
+		"selectWorkflow": "Выбрать рабочий процесс",
+		"triggerType": "Тип триггера",
+		"schedule": "Расписание",
+		"webhook": "Вебхук",
+		"presets": "Предустановки",
+		"every15min": "Каждые 15 мин",
+		"hourly": "Каждый час",
+		"daily9am": "Ежедневно в 9:00",
+		"weeklyMon": "Еженедельно пн",
+		"startDate": "Дата начала",
+		"startTime": "Время начала",
+		"minGranularity": "Минимальная гранулярность: 15 минут",
+		"webhookUrl": "URL вебхука",
+		"copyUrl": "Копировать URL",
+		"webhookSecret": "Секрет вебхука (необязательно)",
+		"webhookSecretPlaceholder": "HMAC-секрет для проверки подписи",
+		"generateSecret": "Сгенерировать случайный секрет",
+		"example": "Пример",
+		"workflowInputs": "Входные данные рабочего процесса",
+		"runNow": "Запустить сейчас",
+		"failedToSave": "Не удалось сохранить",
+		"failedToDelete": "Не удалось удалить",
+		"failedToTrigger": "Не удалось запустить"
+	},
+	"chatSessionSidebar": {
+		"moveToProjectTitle": "Переместить чат в проект",
+		"project": "Проект",
+		"knowledgeFiles": "Файлы знаний",
+		"newProject": "Новый проект",
+		"selectProject": "Выберите проект",
+		"noProjects": "Проектов пока нет",
+		"chatHistory": "История чатов",
+		"new": "Новый",
+		"noChatHistory": "История чатов пуста",
+		"share": "Поделиться",
+		"moveToProject": "Переместить в проект",
+		"delete": "Удалить",
+		"menu": "Меню"
+	},
 	"canvasNode": {
 		"labels": {
 			"entry": "вход",

@@ -1,11 +1,13 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { getAPIUrl } from "@/lib/pulse-editor-website/backend";
 import { Button } from "@heroui/react";
 import Image from "next/image";
 
 export default function AgentChatPaywall() {
+  const { getTranslations: t } = useTranslations();
   function handleViewPlans() {
     const url = getAPIUrl("/pricing");
     window.open(url.toString(), "_blank");
@@ -24,11 +26,10 @@ export default function AgentChatPaywall() {
 
       <div className="flex max-w-sm flex-col items-center gap-2 text-center">
         <h2 className="text-lg font-semibold text-default-800 dark:text-white/90">
-          Upgrade to use AI Agents
+          {t("agentChatPaywall.upgradeTitle")}
         </h2>
         <p className="text-sm text-default-500 dark:text-white/50">
-          Agent chat requires a paid plan (Starter or above). You can also get
-          access by being invited to a project owned by a paid user.
+          {t("agentChatPaywall.upgradeDescription")}
         </p>
       </div>
 
@@ -38,12 +39,11 @@ export default function AgentChatPaywall() {
         onPress={handleViewPlans}
         startContent={<Icon name="rocket_launch" variant="round" className="text-base" />}
       >
-        View Plans
+        {t("agentChatPaywall.viewPlans")}
       </Button>
 
       <p className="max-w-xs text-center text-xs text-default-400 dark:text-white/30">
-        Already a member of a paid project? Select it from the project picker to
-        start using AI agents.
+        {t("agentChatPaywall.alreadyMember")}
       </p>
     </div>
   );

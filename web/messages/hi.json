@@ -1133,6 +1133,232 @@
 	"draggableItem": {
 		"ariaLabel": "खिसकाने के लिए ड्रैग करें"
 	},
+	"chatInputBar": {
+		"askAnything": "Palmos AI से कुछ भी पूछें...",
+		"askShort": "Palmos AI से पूछें...",
+		"dropFiles": "फ़ाइलें अटैच करने के लिए ड्रॉप करें",
+		"attachFile": "फ़ाइल अटैच करें",
+		"saveToKnowledge": "ज्ञान में सहेजें",
+		"savedToKnowledge": "ज्ञान में सहेजा गया",
+		"uploadFailed": "अपलोड विफल",
+		"removeAttachment": "अटैचमेंट हटाएं"
+	},
+	"starterPrompts": {
+		"automateCRM": "मेरा CRM स्वचालित करें",
+		"leadGeneration": "लीड जनरेशन बनाएं",
+		"makeWebsite": "एक वेबसाइट बनाएं",
+		"businessDashboard": "एक बिजनेस डैशबोर्ड बनाएं",
+		"digitalEmployee": "एक डिजिटल कर्मचारी कस्टमाइज़ करें",
+		"inventoryTracker": "एक इन्वेंटरी ट्रैकर बनाएं"
+	},
+	"projectScreen": {
+		"whatToWorkOn": "आप किस पर काम करना चाहेंगे?",
+		"tellAboutProject": "मुझे अपने प्रोजेक्ट के बारे में बताएं",
+		"helpUnderstand": "अपने प्रोजेक्ट को समझने में मेरी मदद करें ताकि मैं अनुकूलित ऑटोमेशन सुझा सकूं — या छोड़ें और सीधे शुरू करें।",
+		"whatKind": "यह किस तरह का प्रोजेक्ट है?",
+		"skip": "छोड़ें",
+		"describeIdea": "अपना विचार बताएं और मैं इसे साकार करने में आपकी मदद करूंगा।",
+		"allSystemsNominal": "सभी सिस्टम सामान्य हैं",
+		"automationsActive": "{count} ऑटोमेशन सक्रिय",
+		"automationActive": "{count} ऑटोमेशन सक्रिय",
+		"workflowsReady": "{count} वर्कफ़्लो तैयार",
+		"workflowReady": "{count} वर्कफ़्लो तैयार",
+		"categories": {
+			"marketingGrowth": "मार्केटिंग और विकास",
+			"salesCRM": "बिक्री और CRM",
+			"customerSupport": "ग्राहक सहायता",
+			"internalOperations": "आंतरिक संचालन",
+			"ecommerce": "ई-कॉमर्स",
+			"contentSocialMedia": "सामग्री और सोशल मीडिया",
+			"dataAnalytics": "डेटा और एनालिटिक्स"
+		}
+	},
+	"homeScreen": {
+		"whatToBuild": "आज आप क्या बनाना चाहेंगे?",
+		"describeIdea": "अपना विचार बताएं और मैं इसे साकार करने में आपकी मदद करूंगा।",
+		"myProjects": "मेरे प्रोजेक्ट",
+		"workflows": "वर्कफ़्लो",
+		"members": "सदस्य",
+		"workflowCount": "{count} वर्कफ़्लो",
+		"memberCount": "{count} सदस्य"
+	},
+	"interruptCard": {
+		"inputNeeded": "इनपुट आवश्यक",
+		"typeAnswer": "या अपना उत्तर टाइप करें...",
+		"send": "भेजें"
+	},
+	"shareChatModal": {
+		"error": "त्रुटि",
+		"noActiveSession": "साझा करने के लिए कोई सक्रिय चैट सत्र नहीं है।",
+		"title": "चैट साझा करें",
+		"description": "एक लिंक बनाएं जिससे कोई भी इस बातचीत को देख सके (केवल पढ़ने के लिए)।",
+		"shareLink": "यह लिंक साझा करें:",
+		"copy": "कॉपी करें",
+		"done": "पूर्ण",
+		"createLink": "लिंक बनाएं"
+	},
+	"carousels": {
+		"myWorkflows": "मेरे वर्कफ़्लो",
+		"myAutomations": "मेरे ऑटोमेशन",
+		"running": "चल रहा है",
+		"new": "नया",
+		"open": "खोलें",
+		"edit": "संपादित करें",
+		"createFirstAutomation": "अपना पहला ऑटोमेशन बनाएं",
+		"scheduleWorkflows": "वर्कफ़्लो शेड्यूल करें या वेबहुक के माध्यम से ट्रिगर करें",
+		"paused": "रुका हुआ"
+	},
+	"chatMessageArea": {
+		"thinking": "Palmos सोच रहा है",
+		"loadingConversation": "बातचीत लोड हो रही है...",
+		"errorOccurred": "एक त्रुटि हुई।"
+	},
+	"embedPanel": {
+		"a2ui": "A2UI",
+		"mcpApps": "MCP ऐप्स",
+		"palmosApp": "Palmos ऐप",
+		"canvas": "कैनवास"
+	},
+	"inboxPanel": {
+		"noNotifications": "अभी तक कोई सूचना नहीं",
+		"tryWorkflow": "वर्कफ़्लो आज़माएं"
+	},
+	"knowledgeFiles": {
+		"knowledge": "ज्ञान",
+		"filesIndexed": "AI संदर्भ के लिए अनुक्रमित फ़ाइलें",
+		"upload": "अपलोड करें",
+		"noFiles": "अभी तक कोई ज्ञान फ़ाइल नहीं",
+		"invalidResponse": "अमान्य प्रतिक्रिया",
+		"networkError": "नेटवर्क त्रुटि",
+		"knowledgeFilesTooltip": "ज्ञान फ़ाइलें"
+	},
+	"messageBubbles": {
+		"user": "उपयोगकर्ता:",
+		"copied": "कॉपी किया गया!",
+		"copy": "कॉपी करें",
+		"calledTool": "टूल कॉल किया:",
+		"aiManager": "AI प्रबंधक:",
+		"aiManagerLabel": "AI प्रबंधक"
+	},
+	"projectPicker": {
+		"selectProject": "प्रोजेक्ट चुनें",
+		"project": "प्रोजेक्ट",
+		"clearProject": "प्रोजेक्ट हटाएं",
+		"new": "नया",
+		"noProjects": "अभी तक कोई प्रोजेक्ट नहीं"
+	},
+	"runningTasksPanel": {
+		"tasks": "कार्य",
+		"all": "सभी",
+		"running": "चल रहे",
+		"done": "पूर्ण",
+		"failed": "विफल",
+		"runningCount": "चल रहे",
+		"noTasks": "अभी तक कोई कार्य नहीं। वर्कफ़्लो रन और प्रबंधित एजेंट कार्य यहां दिखाई देंगे।",
+		"noFilteredTasks": "कोई {filter} कार्य नहीं।"
+	},
+	"sessionHistory": {
+		"chatHistory": "चैट इतिहास",
+		"new": "नया",
+		"noChatHistory": "अभी तक कोई चैट इतिहास नहीं",
+		"justNow": "अभी",
+		"mAgo": "{count} मिनट पहले",
+		"hAgo": "{count} घंटे पहले",
+		"dAgo": "{count} दिन पहले"
+	},
+	"subagentCard": {
+		"working": "काम हो रहा है..."
+	},
+	"todoList": {
+		"tasks": "कार्य"
+	},
+	"workflowTaskCard": {
+		"running": "चल रहा है... {time}",
+		"completed": "{time} में पूर्ण",
+		"failed": "{time} के बाद विफल",
+		"terminate": "समाप्त करें",
+		"terminating": "समाप्त हो रहा है...",
+		"workflowBuilt": "वर्कफ़्लो सफलतापूर्वक बनाया गया!",
+		"openInEditor": "एडिटर में खोलें",
+		"runWorkflow": "वर्कफ़्लो चलाएं",
+		"usingTool": "टूल का उपयोग:",
+		"seeOutput": "आउटपुट देखें",
+		"hide": "छुपाएं",
+		"download": "डाउनलोड करें",
+		"messages": "संदेश",
+		"latest": "नवीनतम:"
+	},
+	"agentChatPaywall": {
+		"upgradeTitle": "AI एजेंट उपयोग करने के लिए अपग्रेड करें",
+		"upgradeDescription": "एजेंट चैट के लिए पेड प्लान (Starter या उससे ऊपर) आवश्यक है। आप किसी पेड उपयोगकर्ता के प्रोजेक्ट में आमंत्रित होकर भी एक्सेस प्राप्त कर सकते हैं।",
+		"viewPlans": "प्लान देखें",
+		"alreadyMember": "पहले से किसी पेड प्रोजेक्ट के सदस्य हैं? AI एजेंट उपयोग शुरू करने के लिए प्रोजेक्ट पिकर से इसे चुनें।"
+	},
+	"appModeToggle": {
+		"agent": "एजेंट",
+		"editor": "एडिटर"
+	},
+	"createInviteLinkModal": {
+		"noWorkflowsSelected": "कोई वर्कफ़्लो चयनित नहीं",
+		"selectAtLeastOne": "साझा करने के लिए कम से कम एक वर्कफ़्लो चुनें।",
+		"title": "आमंत्रण लिंक बनाएं",
+		"linkDescription": "इस लिंक वाला कोई भी व्यक्ति चयनित वर्कफ़्लो स्वीकार कर सकता है और उन्हें अपने AI प्रबंधक में उपलब्ध कर सकता है।",
+		"selectWorkflows": "वर्कफ़्लो चुनें",
+		"noPublishedWorkflows": "कोई प्रकाशित वर्कफ़्लो नहीं मिला। पहले एक वर्कफ़्लो प्रकाशित करें।",
+		"copied": "कॉपी किया गया",
+		"copiedDescription": "आमंत्रण लिंक क्लिपबोर्ड पर कॉपी किया गया।",
+		"done": "पूर्ण",
+		"createLink": "लिंक बनाएं",
+		"selected": "{count} चयनित"
+	},
+	"sandboxAppLoader": {
+		"noDefaultView": "इस फ़ाइल प्रकार के लिए कोई डिफ़ॉल्ट व्यू नहीं मिला। मार्केटप्लेस में एक संगत एक्सटेंशन खोजें और इसे सेटिंग्स में इस फ़ाइल को खोलने की डिफ़ॉल्ट विधि के रूप में सक्षम करें।"
+	},
+	"automationEditorModal": {
+		"editAutomation": "ऑटोमेशन संपादित करें",
+		"createAutomation": "ऑटोमेशन बनाएं",
+		"name": "नाम",
+		"namePlaceholder": "मेरा ऑटोमेशन",
+		"workflow": "वर्कफ़्लो",
+		"selectWorkflow": "एक वर्कफ़्लो चुनें",
+		"triggerType": "ट्रिगर प्रकार",
+		"schedule": "शेड्यूल",
+		"webhook": "वेबहुक",
+		"presets": "प्रीसेट",
+		"every15min": "हर 15 मिनट",
+		"hourly": "प्रति घंटा",
+		"daily9am": "दैनिक सुबह 9 बजे",
+		"weeklyMon": "साप्ताहिक सोम",
+		"startDate": "प्रारंभ तिथि",
+		"startTime": "प्रारंभ समय",
+		"minGranularity": "न्यूनतम ग्रैन्युलैरिटी: 15 मिनट",
+		"webhookUrl": "वेबहुक URL",
+		"copyUrl": "URL कॉपी करें",
+		"webhookSecret": "वेबहुक सीक्रेट (वैकल्पिक)",
+		"webhookSecretPlaceholder": "हस्ताक्षर सत्यापन के लिए HMAC सीक्रेट",
+		"generateSecret": "रैंडम सीक्रेट जनरेट करें",
+		"example": "उदाहरण",
+		"workflowInputs": "वर्कफ़्लो इनपुट",
+		"runNow": "अभी चलाएं",
+		"failedToSave": "सहेजने में विफल",
+		"failedToDelete": "हटाने में विफल",
+		"failedToTrigger": "ट्रिगर करने में विफल"
+	},
+	"chatSessionSidebar": {
+		"moveToProjectTitle": "चैट को प्रोजेक्ट में ले जाएं",
+		"project": "प्रोजेक्ट",
+		"knowledgeFiles": "ज्ञान फ़ाइलें",
+		"newProject": "नया प्रोजेक्ट",
+		"selectProject": "एक प्रोजेक्ट चुनें",
+		"noProjects": "अभी तक कोई प्रोजेक्ट नहीं",
+		"chatHistory": "चैट इतिहास",
+		"new": "नया",
+		"noChatHistory": "अभी तक कोई चैट इतिहास नहीं",
+		"share": "साझा करें",
+		"moveToProject": "प्रोजेक्ट में ले जाएं",
+		"delete": "हटाएं",
+		"menu": "मेनू"
+	},
 	"canvasNode": {
 		"labels": {
 			"entry": "प्रवेश",

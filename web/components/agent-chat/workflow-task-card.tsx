@@ -6,6 +6,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import type { Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Spinner } from "@heroui/react";
@@ -20,6 +21,7 @@ export function WorkflowTaskCard({
   onTerminate?: (taskId: string) => void;
   isTerminating?: boolean;
 }) {
+  const { getTranslations: t } = useTranslations();
   const [elapsed, setElapsed] = useState(0);
   const [finalElapsed, setFinalElapsed] = useState<number | null>(null);
 
@@ -78,10 +80,10 @@ export function WorkflowTaskCard({
           </p>
           <p className="text-default-500 text-xs dark:text-white/50">
             {isRunning
-              ? `Running... ${timeStr}`
+              ? t("workflowTaskCard.running", { time: timeStr })
               : isCompleted
-                ? `Completed in ${timeStr}`
-                : `Failed after ${timeStr}`}
+                ? t("workflowTaskCard.completed", { time: timeStr })
+                : t("workflowTaskCard.failed", { time: timeStr })}
           </p>
           {isRunning && task.latestProgress && (
             <p className="text-default-500 mt-0.5 truncate text-xs italic dark:text-white/40">
@@ -98,10 +100,10 @@ export function WorkflowTaskCard({
             {isTerminating ? (
               <span className="flex items-center gap-1.5">
                 <Spinner size="sm" classNames={{ wrapper: "h-3 w-3" }} />
-                Terminating...
+                {t("workflowTaskCard.terminating")}
               </span>
             ) : (
-              "Terminate"
+              t("workflowTaskCard.terminate")
             )}
           </button>
         )}
@@ -137,6 +139,7 @@ function AgentProgressLog({
 }: {
   log: { type: string; text?: string; tool?: string; output?: string }[];
 }) {
+  const { getTranslations: t } = useTranslations();
   const [expanded, setExpanded] = useState(false);
 
   if (!log || log.length === 0) return null;
@@ -156,8 +159,8 @@ function AgentProgressLog({
           className="text-xs"
         />
         <span>
-          {log.length} message{log.length !== 1 ? "s" : ""}
-          {!expanded && " — latest:"}
+          {log.length} {t("workflowTaskCard.messages", { count: log.length })}
+          {!expanded && ` — ${t("workflowTaskCard.latest")}`}
         </span>
       </button>
 
@@ -209,6 +212,7 @@ function LogEntry({
   entry: { type: string; text?: string; tool?: string; output?: string };
   toolOutput?: string;
 }) {
+  const { getTranslations: t } = useTranslations();
   const [showOutput, setShowOutput] = useState(false);
 
   if (entry.type === "tool_use") {
@@ -221,7 +225,7 @@ function LogEntry({
             className="shrink-0 text-xs text-amber-500 dark:text-amber-400"
           />
           <span className="text-default-600 min-w-0 flex-1 break-words dark:text-white/60">
-            Using tool:{" "}
+            {t("workflowTaskCard.usingTool")}{" "}
             <span className="font-medium text-amber-700 dark:text-amber-300">
               {entry.tool}
             </span>
@@ -231,7 +235,7 @@ function LogEntry({
               onClick={() => setShowOutput((p) => !p)}
               className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium text-green-600 transition-colors hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-500/10"
             >
-              {showOutput ? "Hide" : "See output"}
+              {showOutput ? t("workflowTaskCard.hide") : t("workflowTaskCard.seeOutput")}
             </button>
           )}
         </div>
@@ -364,6 +368,7 @@ function BlobResultBody({
   blobResult: BlobResult;
   workflowName: string;
 }) {
+  const { getTranslations: t } = useTranslations();
   const suffix = mimeToSuffix(blobResult.mime);
   const isImage = /^image\//.test(blobResult.mime);
   const fileName = `${workflowName.replace(/[^a-zA-Z0-9_-]/g, "_")}.${suffix}`;
@@ -431,14 +436,14 @@ function BlobResultBody({
           className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
         >
           <Icon name="open_in_new" variant="round" className="text-xs" />
-          Open
+          {t("common.open")}
         </button>
         <button
           onClick={handleDownload}
           className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
         >
           <Icon name="download" variant="round" className="text-xs" />
-          Download
+          {t("workflowTaskCard.download")}
         </button>
       </div>
     </div>
@@ -484,6 +489,7 @@ function WorkflowBuiltCard({
   publishedId: string;
   workflowName: string;
 }) {
+  const { getTranslations: t } = useTranslations();
   const { createCanvasTabView } = useTabViewManager();
   const editorContext = useContext(EditorContext);
   const [isOpening, setIsOpening] = useState(false);
@@ -523,7 +529,7 @@ function WorkflowBuiltCard({
         />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-default-800 dark:text-white/85">
-            Workflow built successfully!
+            {t("workflowTaskCard.workflowBuilt")}
           </p>
           <p className="text-xs text-default-500 dark:text-white/50">
             {workflowName}
@@ -541,7 +547,7 @@ function WorkflowBuiltCard({
           ) : (
             <Icon name="edit" variant="round" className="text-sm" />
           )}
-          Open in Editor
+          {t("workflowTaskCard.openInEditor")}
         </button>
         <button
           onClick={() => {
@@ -553,7 +559,7 @@ function WorkflowBuiltCard({
           className="flex items-center gap-1.5 rounded-lg border border-green-300/60 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
         >
           <Icon name="play_arrow" variant="round" className="text-sm" />
-          Run Workflow
+          {t("workflowTaskCard.runWorkflow")}
         </button>
       </div>
     </div>
@@ -567,6 +573,7 @@ export function WorkflowResultBody({
   result: unknown;
   workflowName: string;
 }) {
+  const { getTranslations: t } = useTranslations();
   // Check for publishedWorkflowId — workflow build complete
   const publishedId = findPublishedWorkflowId(result);
   if (publishedId) {
@@ -653,14 +660,14 @@ export function WorkflowResultBody({
             className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
           >
             <Icon name="open_in_new" variant="round" className="text-xs" />
-            Open
+            {t("common.open")}
           </button>
           <button
             onClick={handleDownload}
             className="flex items-center gap-1 rounded-md border border-green-300/60 bg-green-50 px-2 py-1 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
           >
             <Icon name="download" variant="round" className="text-xs" />
-            Download
+            {t("workflowTaskCard.download")}
           </button>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { motion } from "framer-motion";
 
 export function SessionHistoryPanel({
@@ -20,6 +21,8 @@ export function SessionHistoryPanel({
   onClose: () => void;
   onShare?: (id: string) => void;
 }) {
+  const { getTranslations: t } = useTranslations();
+
   return (
     <motion.div
       initial={{ opacity: 0, x: -20 }}
@@ -29,7 +32,7 @@ export function SessionHistoryPanel({
     >
       <div className="flex items-center justify-between border-b border-amber-200/40 px-4 py-3 dark:border-white/8">
         <h3 className="text-default-800 text-sm font-semibold dark:text-white/90">
-          Chat History
+          {t("sessionHistory.chatHistory")}
         </h3>
         <div className="flex items-center gap-1">
           <button
@@ -37,7 +40,7 @@ export function SessionHistoryPanel({
             className="flex items-center gap-1 rounded-lg border border-amber-400/50 bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-500/35 dark:bg-amber-500/8 dark:text-amber-300 dark:hover:bg-amber-500/15"
           >
             <Icon name="add" variant="round" className="text-sm" />
-            New
+            {t("sessionHistory.new")}
           </button>
           <button
             onClick={onClose}
@@ -50,7 +53,7 @@ export function SessionHistoryPanel({
       <div className="flex-1 overflow-y-auto p-2">
         {sessions.length === 0 ? (
           <p className="text-default-400 py-8 text-center text-xs dark:text-white/40">
-            No chat history yet
+            {t("sessionHistory.noChatHistory")}
           </p>
         ) : (
           <div className="flex flex-col gap-1">
@@ -77,7 +80,7 @@ export function SessionHistoryPanel({
                     {s.title}
                   </p>
                   <p className="text-default-400 text-[10px] dark:text-white/35">
-                    {formatRelativeTime(s.updatedAt)}
+                    {formatRelativeTime(s.updatedAt, t)}
                   </p>
                 </div>
                 <div className="flex shrink-0 items-center gap-0.5">
@@ -119,14 +122,14 @@ export function SessionHistoryPanel({
   );
 }
 
-export function formatRelativeTime(ts: number): string {
+export function formatRelativeTime(ts: number, t?: (key: string, vars?: Record<string, any>) => string): string {
   const diff = Date.now() - ts;
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return "Just now";
-  if (minutes < 60) return `${minutes}m ago`;
+  if (minutes < 1) return t ? t("sessionHistory.justNow") : "Just now";
+  if (minutes < 60) return t ? t("sessionHistory.mAgo", { count: minutes }) : `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}h ago`;
+  if (hours < 24) return t ? t("sessionHistory.hAgo", { count: hours }) : `${hours}h ago`;
   const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}d ago`;
+  if (days < 7) return t ? t("sessionHistory.dAgo", { count: days }) : `${days}d ago`;
   return new Date(ts).toLocaleDateString();
 }

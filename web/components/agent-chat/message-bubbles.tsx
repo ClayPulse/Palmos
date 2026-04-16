@@ -5,10 +5,12 @@ import InlineWidget, {
 } from "@/components/agent-chat/inline-widget";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner, Tooltip } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
 
 function CopyButton({ text }: { text: string }) {
+  const { getTranslations: t } = useTranslations();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -19,7 +21,7 @@ function CopyButton({ text }: { text: string }) {
   }, [text]);
 
   return (
-    <Tooltip content={copied ? "Copied!" : "Copy"} size="sm">
+    <Tooltip content={copied ? t("messageBubbles.copied") : t("messageBubbles.copy")} size="sm">
       <button
         onClick={handleCopy}
         className="text-default-300 hover:text-default-500 dark:text-white/20 dark:hover:text-white/60 transition-colors"
@@ -43,6 +45,7 @@ export function UserBubble({
   attachmentCount?: number;
   uploadIds?: string[];
 }) {
+  const { getTranslations: t } = useTranslations();
   const [copied, setCopied] = useState(false);
   const [fileNames, setFileNames] = useState<{ id: string; filename: string; mimeType: string }[]>([]);
 
@@ -70,7 +73,7 @@ export function UserBubble({
   return (
     <div className="group flex min-w-0 justify-end">
       <div className="min-w-0 max-w-[95%] rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
-        <p className="text-xs font-semibold text-white/80">User:</p>
+        <p className="text-xs font-semibold text-white/80">{t("messageBubbles.user")}</p>
         <p className="mt-0.5 whitespace-pre-wrap break-words text-white">{text}</p>
         {fileNames.length > 0 && (
           <div className="mt-1.5 flex flex-wrap gap-1">
@@ -99,7 +102,7 @@ export function UserBubble({
             </div>
           )}
           <div className="ml-auto pl-4">
-            <Tooltip content={copied ? "Copied!" : "Copy"} size="sm">
+            <Tooltip content={copied ? t("messageBubbles.copied") : t("messageBubbles.copy")} size="sm">
               <button
                 onClick={handleCopy}
                 className="flex h-8 w-8 items-center justify-center text-white/70 transition-colors hover:text-white"
@@ -119,6 +122,7 @@ export function UserBubble({
 }
 
 function ToolCallBadges({ names }: { names: string[] }) {
+  const { getTranslations: t } = useTranslations();
   if (names.length === 0) return null;
   return (
     <div className="mb-1.5 flex flex-wrap gap-1">
@@ -128,7 +132,7 @@ function ToolCallBadges({ names }: { names: string[] }) {
           className="inline-flex items-center gap-1 rounded-md bg-amber-100/80 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300"
         >
           <Icon name="build" variant="round" className="text-[10px]" />
-          Called tool: {name}
+          {t("messageBubbles.calledTool") + " "}{name}
         </span>
       ))}
     </div>
@@ -146,6 +150,7 @@ export function AIResponseCard({
   widgets?: InlineWidgetData[];
   toolCallNames?: string[];
 }) {
+  const { getTranslations: t } = useTranslations();
   return (
     <div className="flex min-w-0 justify-start">
       <div className="flex min-w-0 w-full gap-2.5">
@@ -159,7 +164,7 @@ export function AIResponseCard({
         <div className="min-w-0 flex-1">
           <div className="mb-1">
             <p className="text-default-400 text-[10px] font-semibold tracking-wide uppercase dark:text-white/40">
-              AI Manager:
+              {t("messageBubbles.aiManager")}
             </p>
           </div>
           <ToolCallBadges names={toolCallNames} />
@@ -196,6 +201,7 @@ export function ResponseCard({
   widgets?: InlineWidgetData[];
   toolCallNames?: string[];
 }) {
+  const { getTranslations: t } = useTranslations();
   const [expanded, setExpanded] = useState(true);
   const status: "running" | "complete" = isStreaming ? "running" : "complete";
 
@@ -208,7 +214,7 @@ export function ResponseCard({
         <div className="flex items-center gap-2">
           <StatusIcon status={status} />
           <span className="text-default-700 text-xs font-semibold dark:text-white/90">
-            AI Manager
+            {t("messageBubbles.aiManagerLabel")}
           </span>
         </div>
         <div className="flex items-center gap-2">

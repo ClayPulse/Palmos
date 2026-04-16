@@ -5,6 +5,7 @@ import InterruptCard from "@/components/agent-chat/interrupt-card";
 import InlineWidget, { type InlineWidgetData } from "@/components/agent-chat/inline-widget";
 import { TodoList } from "@/components/agent-chat/todo-list";
 import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
+import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";
 import { motion } from "framer-motion";
 import type React from "react";
@@ -44,6 +45,7 @@ export default function ChatMessageArea({
   latestWorkflow,
   scrollContainerRef,
 }: ChatMessageAreaProps) {
+  const { getTranslations: t } = useTranslations();
   const isPage = variant === "page";
 
   const loadingIndicator = isLoading && (
@@ -70,7 +72,7 @@ export default function ChatMessageArea({
             animate={{ opacity: [0.6, 1, 0.6] }}
             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
           >
-            Palmos is thinking
+            {t("chatMessageArea.thinking")}
           </motion.p>
         </div>
       </div>
@@ -85,14 +87,14 @@ export default function ChatMessageArea({
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
       >
-        Loading conversation...
+        {t("chatMessageArea.loadingConversation")}
       </motion.p>
     </div>
   );
 
   const errorBanner = !!error && (
     <div className="rounded-lg border border-red-300/40 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
-      {error instanceof Error ? error.message : "An error occurred."}
+      {error instanceof Error ? error.message : t("chatMessageArea.errorOccurred")}
     </div>
   );
 
