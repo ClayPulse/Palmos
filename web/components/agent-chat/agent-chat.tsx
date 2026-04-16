@@ -932,6 +932,8 @@ export default function AgentChat({
   } as const;
 
   // ── Gate: paywall for users without agent chat access ────────────────────
+  // Access (including any invite-code bypass) is decided by the backend via
+  // useAgentAccess — agentChatAllowed already reflects an accepted code.
   if (!isLoadingAccess && !agentChatAllowed) {
     return <AgentChatPaywall />;
   }
