@@ -39,7 +39,8 @@ export default function WorkflowGallery() {
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [myContentOnly, setMyContentOnly] = useState(false);
   const effectiveLabel = myContentOnly ? "My Workflows" : label;
-  const { isLoading, workflows } = useMarketplaceWorkflows(effectiveLabel);
+  const { isLoading, workflows, mutate } = useMarketplaceWorkflows(effectiveLabel);
+  const isOwnerView = effectiveLabel === "My Workflows" || effectiveLabel === "Published by Me";
   const { createCanvasTabView } = useTabViewManager();
   const { envSetup, checkMissingEnvs, openEnvSetup, closeEnvSetup } =
     useWorkflowEnvCheck();
@@ -99,7 +100,12 @@ export default function WorkflowGallery() {
 
     return entries.map((workflow, index) => (
       <div key={index} className="h-fit w-full">
-        <WorkflowPreviewCard workflow={workflow} onPress={openWorkflow} />
+        <WorkflowPreviewCard
+          workflow={workflow}
+          onPress={openWorkflow}
+          isOwner={isOwnerView}
+          onDelete={() => mutate()}
+        />
       </div>
     ));
   }, [workflows, searchQuery, sortValue]);

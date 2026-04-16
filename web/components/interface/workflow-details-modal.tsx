@@ -62,10 +62,14 @@ export default function WorkflowDetailsModal({
   workflow,
   isOpen,
   onClose,
+  isOwner,
+  onDelete,
 }: {
   workflow: Workflow;
   isOpen: boolean;
   onClose: () => void;
+  isOwner?: boolean;
+  onDelete?: () => void;
 }) {
   const apiBaseUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "https://palmos.ai";
   const apiEndpoint = workflow.id
@@ -164,10 +168,93 @@ export default function WorkflowDetailsModal({
           )}
         </ModalBody>
         <ModalFooter>
+          {isOwner && (
+            <DeleteWorkflowButton
+              workflowId={workflow.id}
+              onDeleted={() => {
+                onClose();
+                onDelete?.();
+              }}
+            />
+          )}
           <Button onPress={onClose}>Close</Button>
         </ModalFooter>
       </ModalContent>
     </Modal>
+  );
+}
+
+function DeleteWorkflowButton({
+  workflowId,
+  onDeleted,
+}: {
+  workflowId?: string;
+  onDeleted: () => void;
+}) {
+  const [confirming, setConfirming] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    if (!workflowId) return;
+    setDeleting(true);
+    try {
+      const res = await fetchAPI("/api/user-workflows/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ workflowId }),
+      });
+      if (!res.ok) throw new Error(await res.text());
+      addToast({
+        title: "Workflow deleted",
+        color: "success",
+      });
+      onDeleted();
+    } catch {
+      addToast({
+        title: "Failed to delete workflow",
+        color: "danger",
+      });
+    } finally {
+      setDeleting(false);
+      setConfirming(false);
+    }
+  }
+
+  if (!workflowId) return null;
+
+  if (confirming) {
+    return (
+      <div className="mr-auto flex items-center gap-x-2">
+        <span className="text-danger text-xs">Are you sure?</span>
+        <Button
+          size="sm"
+          color="danger"
+          onPress={handleDelete}
+          isLoading={deleting}
+        >
+          Delete
+        </Button>
+        <Button
+          size="sm"
+          variant="flat"
+          onPress={() => setConfirming(false)}
+        >
+          Cancel
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      className="mr-auto"
+      color="danger"
+      variant="light"
+      onPress={() => setConfirming(true)}
+      startContent={<Icon name="delete" />}
+    >
+      Delete Workflow
+    </Button>
   );
 }
 

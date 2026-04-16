@@ -23,7 +23,7 @@ export function useMarketplaceWorkflows(
     }
   }
 
-  const { data: marketplaceWorkflows, isLoading } = useSWR<Workflow[]>(
+  const { data: marketplaceWorkflows, isLoading, mutate } = useSWR<Workflow[]>(
     getUrl(),
     async (url: string) => {
       const res = await fetchAPI(url);
@@ -44,5 +44,6 @@ export function useMarketplaceWorkflows(
   return {
     workflows: deduped,
     isLoading,
+    mutate,
   };
 }
