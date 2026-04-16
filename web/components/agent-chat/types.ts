@@ -39,6 +39,10 @@ export interface AgentChatPanelLayoutProps extends AgentChatLayoutProps {
 
 export type WorkflowTaskState = {
   taskId: string;
+  /** The task ID originally reported in the tool message. Preserved after
+   * `taskId` is rewritten to the published workflow ID on completion, so we
+   * can still correlate the task back to its originating tool message. */
+  originalTaskId?: string;
   workflowName: string;
   startedAt: number;
   status: "loading" | "running" | "completed" | "failed";

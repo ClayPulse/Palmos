@@ -617,7 +617,7 @@ function findPublishedWorkflowId(obj: unknown): string | null {
   return null;
 }
 
-function WorkflowBuiltCard({
+export function WorkflowBuiltCard({
   publishedId,
   workflowName,
 }: WorkflowBuiltCardProps) {
@@ -631,33 +631,49 @@ function WorkflowBuiltCard({
   const [missingEnvs, setMissingEnvs] = useState<Record<string, string> | null>(
     null,
   );
+  const [workflow, setWorkflow] = useState<Workflow | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const missing = await checkMissingEnvs(publishedId);
-      if (!cancelled) setMissingEnvs(missing);
+      const [missing, res] = await Promise.all([
+        checkMissingEnvs(publishedId),
+        fetchAPI(
+          `/api/workflow/get?name=${encodeURIComponent(workflowName)}&latest=true`,
+        ),
+      ]);
+      if (cancelled) return;
+      setMissingEnvs(missing);
+      if (res.ok) {
+        const wf: Workflow = await res.json();
+        if (!cancelled) setWorkflow(wf);
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [publishedId, checkMissingEnvs]);
+  }, [publishedId, workflowName, checkMissingEnvs]);
 
   async function openInEditor() {
     setIsOpening(true);
     try {
-      const res = await fetchAPI(
-        `/api/workflow/get?name=${encodeURIComponent(workflowName)}&latest=true`,
-      );
-      if (!res.ok) return;
-      const workflow: Workflow = await res.json();
+      let wf = workflow;
+      if (!wf) {
+        const res = await fetchAPI(
+          `/api/workflow/get?name=${encodeURIComponent(workflowName)}&latest=true`,
+        );
+        if (!res.ok) return;
+        wf = await res.json();
+        setWorkflow(wf);
+      }
+      if (!wf) return;
       await createCanvasTabView(
         {
           viewId: createCanvasViewId(),
-          appConfigs: workflow.content.nodes.map((n) => n.data.config),
-          initialWorkflowContent: workflow.content,
+          appConfigs: wf.content.nodes.map((n) => n.data.config),
+          initialWorkflowContent: wf.content,
         },
-        workflow,
+        wf,
       );
       editorContext?.setEditorStates((prev) => ({
         ...prev,
@@ -680,8 +696,13 @@ function WorkflowBuiltCard({
           <p className="text-sm font-medium text-default-800 dark:text-white/85">
             {t("workflowTaskCard.workflowBuilt")}
           </p>
-          <p className="text-xs text-default-500 dark:text-white/50">
-            {workflowName}
+          <p className="flex items-center gap-1.5 text-xs text-default-500 dark:text-white/50">
+            <span className="truncate">{workflowName}</span>
+            {workflow?.version && (
+              <span className="shrink-0 rounded-md bg-green-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-green-700 dark:bg-green-500/15 dark:text-green-300">
+                v{workflow.version}
+              </span>
+            )}
           </p>
         </div>
       </div>
