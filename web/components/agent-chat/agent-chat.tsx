@@ -1,29 +1,28 @@
 "use client";
 
-import {
-  AgentChatPageLayout,
-  AgentChatPanelLayout,
-} from "@/components/agent-chat/agent-chat-layouts";
-import AgentChatPaywall from "@/components/agent-chat/agent-chat-paywall";
-import { type ChatUpload } from "@/components/agent-chat/chat-input-bar";
+import { SubagentCard } from "@/components/agent-chat/cards/subagent-card";
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import HistoryOverlay from "@/components/agent-chat/history-overlay";
 import HomeScreen from "@/components/agent-chat/initial-chat-screens/home-screen";
 import ProjectScreen from "@/components/agent-chat/initial-chat-screens/project-screen";
+import {
+  AgentChatPageLayout,
+  AgentChatPanelLayout,
+} from "@/components/agent-chat/layouts/agent-chat-layouts";
+import AgentChatPaywall from "@/components/agent-chat/screens/agent-chat-paywall";
 import InlineWidget, {
   type InlineWidgetData,
   parseWidgetFromToolCall,
   parseWidgetFromToolMessage,
-} from "@/components/agent-chat/inline-widget";
+} from "@/components/agent-chat/widgets/inline-widget";
+import { type ChatUpload } from "@/components/agent-chat/widgets/input/chat-input-bar";
 import {
   AIResponseCard,
   ResponseCard,
   UserBubble,
-} from "@/components/agent-chat/message-bubbles";
-import QuickPillButtons from "@/components/agent-chat/quick-pill-buttons";
-import ShareChatModal from "@/components/agent-chat/share-chat-modal";
-import { SubagentCard } from "@/components/agent-chat/subagent-card";
-import TasksOverlay from "@/components/agent-chat/tasks-overlay";
+} from "@/components/agent-chat/widgets/message/message-bubbles";
+import QuickPillButtons from "@/components/agent-chat/widgets/quick-pill-buttons";
+import ShareChatModal from "@/components/modals/share-chat-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
@@ -32,6 +31,7 @@ import type { WorkflowInput } from "@/lib/types";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import RunningTasksPanel from "./panels/running-tasks-panel";
 
 /** Walk an object recursively to find a publishedWorkflowId */
 function extractPublishedWorkflowId(obj: unknown): string | null {
@@ -817,7 +817,7 @@ export default function AgentChat({
   );
 
   const tasksOverlay = isTasksOpen && (
-    <TasksOverlay isPage={isPage} onClose={() => setIsTasksOpen(false)} />
+    <RunningTasksPanel isPage={isPage} onClose={() => setIsTasksOpen(false)} />
   );
 
   const messageAreaProps = {

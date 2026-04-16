@@ -8,7 +8,7 @@ import { useTranslations } from "@/lib/hooks/use-translations";
 import { CanvasViewConfig } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { useMemo } from "react";
-import { MemoizedCanvasView } from "../views/editor/canvas/canvas-view";
+import { MemoizedCanvasView } from "../../views/editor/canvas/canvas-view";
 
 import type {
   ChatEmbedPanelProps,

@@ -1,7 +1,7 @@
 "use client";
 "use client";
 
-import AgentChat from "@/components/agent-chat/agent-interface";
+import AgentChat from "@/components/agent-chat/agent-chat";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useContext } from "react";
 import BaseSidePanel from "./base-side-panel";

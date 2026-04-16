@@ -1,7 +1,7 @@
 import type { ComponentProps, ReactNode, RefObject } from "react";
 import type React from "react";
-import type ChatMessageArea from "@/components/agent-chat/chat-message-area";
-import type ChatInputBar from "@/components/agent-chat/chat-input-bar";
+import type ChatMessageArea from "@/components/agent-chat/widgets/message/chat-message-area";
+import type ChatInputBar from "@/components/agent-chat/widgets/input/chat-input-bar";
 import type { InlineWidgetData } from "@/lib/types";
 import type {
   Automation,

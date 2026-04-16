@@ -1,7 +1,7 @@
 "use client";
 
-import ChatInputBar from "@/components/agent-chat/chat-input-bar";
-import ChatMessageArea from "@/components/agent-chat/chat-message-area";
+import ChatInputBar from "@/components/agent-chat/widgets/input/chat-input-bar";
+import ChatMessageArea from "@/components/agent-chat/widgets/message/chat-message-area";
 import Icon from "@/components/misc/icon";
 import { Button, Tooltip } from "@heroui/react";
 import { motion } from "framer-motion";

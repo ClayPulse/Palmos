@@ -1,9 +1,9 @@
 "use client";
 
-import InterruptCard from "@/components/agent-chat/interrupt-card";
-import InlineWidget from "@/components/agent-chat/inline-widget";
-import { TodoList } from "@/components/agent-chat/todo-list";
-import { WorkflowTaskCard } from "@/components/agent-chat/workflow-task-card";
+import InterruptCard from "@/components/agent-chat/cards/interrupt-card";
+import InlineWidget from "@/components/agent-chat/widgets/inline-widget";
+import { TodoList } from "@/components/agent-chat/widgets/todo-list";
+import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
 import type { ChatMessageAreaProps } from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";

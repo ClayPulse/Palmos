@@ -1,7 +1,7 @@
 "use client";
 
-import KnowledgeFiles from "@/components/agent-chat/knowledge-files";
-import ShareChatModal from "@/components/agent-chat/share-chat-modal";
+import KnowledgeFiles from "@/components/agent-chat/widgets/input/knowledge-files";
+import ShareChatModal from "@/components/modals/share-chat-modal";
 import Icon from "@/components/misc/icon";
 import MoveToProjectModal from "@/components/misc/move-to-project-modal";
 import { useChatContext } from "@/components/providers/chat-provider";

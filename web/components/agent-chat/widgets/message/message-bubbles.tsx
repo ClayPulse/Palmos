@@ -1,6 +1,6 @@
 "use client";
 
-import InlineWidget from "@/components/agent-chat/inline-widget";
+import InlineWidget from "@/components/agent-chat/widgets/inline-widget";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
 import type {
