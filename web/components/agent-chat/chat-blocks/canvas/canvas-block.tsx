@@ -4,12 +4,12 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { CanvasViewConfig } from "@/lib/types";
-import type { ChatBlockBaseProps } from "@/components/agent-chat/types";
+import type { ChatBlockProps } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useMemo } from "react";
 
-export function CanvasBlock({ data }: ChatBlockBaseProps) {
+export function CanvasBlock({ data }: ChatBlockProps) {
   const editorContext = useContext(EditorContext);
   const { createCanvasTabView } = useTabViewManager();
 

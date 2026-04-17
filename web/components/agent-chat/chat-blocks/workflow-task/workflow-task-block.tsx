@@ -1,24 +1,23 @@
 "use client";
 
-import Icon from "@/components/misc/icon";
 import type {
   AgentProgressLogProps,
   BlobResult,
   BlobResultBodyProps,
   LogEntryProps,
-  WorkflowBuiltCardProps,
+  WorkflowBuiltBlockProps,
   WorkflowResultBodyProps,
   WorkflowTaskBlockProps,
-  WorkflowTaskState,
 } from "@/components/agent-chat/types";
+import Icon from "@/components/misc/icon";
 import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useWorkflowEnvCheck } from "@/lib/hooks/use-workflow-env-check";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import type { Workflow } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Spinner } from "@heroui/react";
@@ -108,7 +107,7 @@ export function WorkflowTaskBlock({
           <button
             onClick={() => onTerminate(task.taskId)}
             disabled={isTerminating}
-            className="shrink-0 rounded-md border border-red-300/60 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:opacity-50 disabled:cursor-not-allowed dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
+            className="shrink-0 rounded-md border border-red-300/60 bg-red-50 px-2 py-1 text-xs font-medium text-red-600 transition-colors hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-red-500/30 dark:bg-red-500/10 dark:text-red-400 dark:hover:bg-red-500/20"
           >
             {isTerminating ? (
               <span className="flex items-center gap-1.5">
@@ -283,9 +282,7 @@ function parseWorkflowName(text: string): string | null {
 
 // ── Agent progress log ──────────────────────────────────────────────────────
 
-function AgentProgressLog({
-  log,
-}: AgentProgressLogProps) {
+function AgentProgressLog({ log }: AgentProgressLogProps) {
   const { getTranslations: t } = useTranslations();
   const [expanded, setExpanded] = useState(false);
 
@@ -298,7 +295,7 @@ function AgentProgressLog({
       {/* Header: count + expand toggle */}
       <button
         onClick={() => setExpanded((p) => !p)}
-        className="mb-1 flex w-full items-center gap-1.5 text-[10px] text-default-400 transition-colors hover:text-default-600 dark:text-white/40 dark:hover:text-white/60"
+        className="text-default-400 hover:text-default-600 mb-1 flex w-full items-center gap-1.5 text-[10px] transition-colors dark:text-white/40 dark:hover:text-white/60"
       >
         <Icon
           name={expanded ? "expand_less" : "expand_more"}
@@ -332,7 +329,9 @@ function AgentProgressLog({
             if (entry.type === "tool_result") {
               // If preceded by a tool_use, show tool_use with output
               if (i > 0 && log[i - 1].type === "tool_use") {
-                return <LogEntry entry={log[i - 1]} toolOutput={entry.output} />;
+                return (
+                  <LogEntry entry={log[i - 1]} toolOutput={entry.output} />
+                );
               }
               continue;
             }
@@ -352,10 +351,7 @@ function AgentProgressLog({
   );
 }
 
-function LogEntry({
-  entry,
-  toolOutput,
-}: LogEntryProps) {
+function LogEntry({ entry, toolOutput }: LogEntryProps) {
   const { getTranslations: t } = useTranslations();
   const [showOutput, setShowOutput] = useState(false);
 
@@ -379,12 +375,14 @@ function LogEntry({
               onClick={() => setShowOutput((p) => !p)}
               className="shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium text-green-600 transition-colors hover:bg-green-50 dark:text-green-400 dark:hover:bg-green-500/10"
             >
-              {showOutput ? t("workflowTaskCard.hide") : t("workflowTaskCard.seeOutput")}
+              {showOutput
+                ? t("workflowTaskCard.hide")
+                : t("workflowTaskCard.seeOutput")}
             </button>
           )}
         </div>
         {showOutput && toolOutput && (
-          <div className="ml-5 mt-1 rounded border border-green-200/60 bg-green-50/50 px-2.5 py-1.5 dark:border-green-500/15 dark:bg-green-500/5">
+          <div className="mt-1 ml-5 rounded border border-green-200/60 bg-green-50/50 px-2.5 py-1.5 dark:border-green-500/15 dark:bg-green-500/5">
             <pre className="text-default-600 max-h-32 overflow-auto text-[11px] break-words whitespace-pre-wrap dark:text-white/60">
               {toolOutput}
             </pre>
@@ -499,10 +497,7 @@ async function getSignedBlobUrl(blobUrl: string): Promise<string> {
   return signedUrl;
 }
 
-function BlobResultBody({
-  blobResult,
-  workflowName,
-}: BlobResultBodyProps) {
+function BlobResultBody({ blobResult, workflowName }: BlobResultBodyProps) {
   const { getTranslations: t } = useTranslations();
   const suffix = mimeToSuffix(blobResult.mime);
   const isImage = /^image\//.test(blobResult.mime);
@@ -513,7 +508,9 @@ function BlobResultBody({
   // Eagerly fetch a signed URL for image preview
   useEffect(() => {
     if (isImage) {
-      getSignedBlobUrl(blobResult.__blobUrl).then(setSignedUrl).catch(() => {});
+      getSignedBlobUrl(blobResult.__blobUrl)
+        .then(setSignedUrl)
+        .catch(() => {});
     }
   }, [blobResult.__blobUrl, isImage]);
 
@@ -620,7 +617,7 @@ function findPublishedWorkflowId(obj: unknown): string | null {
 export function WorkflowBuiltCard({
   publishedId,
   workflowName,
-}: WorkflowBuiltCardProps) {
+}: WorkflowBuiltBlockProps) {
   const { getTranslations: t } = useTranslations();
   const { createCanvasTabView } = useTabViewManager();
   const { submit } = useChatContext();
@@ -693,10 +690,10 @@ export function WorkflowBuiltCard({
           className="text-xl text-green-600 dark:text-green-400"
         />
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium text-default-800 dark:text-white/85">
+          <p className="text-default-800 text-sm font-medium dark:text-white/85">
             {t("workflowTaskCard.workflowBuilt")}
           </p>
-          <p className="flex items-center gap-1.5 text-xs text-default-500 dark:text-white/50">
+          <p className="text-default-500 flex items-center gap-1.5 text-xs dark:text-white/50">
             <span className="truncate">{workflowName}</span>
             {workflow?.version && (
               <span className="shrink-0 rounded-md bg-green-100 px-1.5 py-0.5 font-mono text-[10px] font-medium text-green-700 dark:bg-green-500/15 dark:text-green-300">
@@ -755,4 +752,3 @@ export function WorkflowBuiltCard({
     </div>
   );
 }
-

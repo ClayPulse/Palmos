@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChatBlockBaseProps } from "@/components/agent-chat/types";
+import type { ChatBlockBaseProps } from "@/lib/types";
 import { A2UIBlock } from "./a2ui/a2ui-block";
 import { CanvasBlock } from "./canvas/canvas-block";
 import { DiagramBlock } from "./diagram/diagram-block";
@@ -10,9 +10,6 @@ import { PulseAppBlock } from "./pulse-app/pulse-app-block";
 import { SubagentBlock } from "./subagent/subagent-block";
 import { TodoListBlock } from "./todo-list/todo-list-block";
 import { WorkflowTaskBlock } from "./workflow-task/workflow-task-block";
-
-export type { ChatBlockData } from "@/components/agent-chat/types";
-export { parseWidgetFromToolCall, parseWidgetFromToolMessage } from "./utils";
 
 export default function ChatBlock({ data }: ChatBlockBaseProps) {
   switch (data.type) {

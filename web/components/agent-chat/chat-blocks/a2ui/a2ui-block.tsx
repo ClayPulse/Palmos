@@ -1,10 +1,8 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type {
-  A2UIStreamRendererProps,
-  ChatBlockBaseProps,
-} from "@/components/agent-chat/types";
+import type { A2UIStreamRendererProps } from "@/components/agent-chat/types";
+import type { ChatBlockProps } from "@/lib/types";
 import {
   A2UIProvider,
   A2UIRenderer,
@@ -41,7 +39,7 @@ function A2UIStreamRenderer({ messages }: A2UIStreamRendererProps) {
   );
 }
 
-export function A2UIBlock({ data }: ChatBlockBaseProps) {
+export function A2UIBlock({ data }: ChatBlockProps) {
   const handleAction = useCallback(
     async (message: A2UIClientEventMessage) => {
       const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL;

@@ -1,9 +1,9 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type { ChatBlockBaseProps } from "@/components/agent-chat/types";
+import type { ChatBlockProps } from "@/lib/types";
 
-export function MCPResultBlock({ data }: ChatBlockBaseProps) {
+export function MCPResultBlock({ data }: ChatBlockProps) {
   const mcp = data.mcp;
   if (!mcp) return null;
 

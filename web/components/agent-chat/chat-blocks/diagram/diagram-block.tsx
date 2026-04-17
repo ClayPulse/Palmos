@@ -1,10 +1,10 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type { ChatBlockBaseProps } from "@/components/agent-chat/types";
+import type { ChatBlockProps } from "@/lib/types";
 import { useEffect, useId, useRef, useState } from "react";
 
-export function DiagramBlock({ data }: ChatBlockBaseProps) {
+export function DiagramBlock({ data }: ChatBlockProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const uniqueId = useId();
   const [error, setError] = useState<string | null>(null);

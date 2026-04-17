@@ -729,6 +729,26 @@ export interface SubagentInfo {
   completedAt: Date | null;
 }
 
+// ── Chat block types ────────────────────────────────────────────────────────
+
+export interface InterruptState {
+  threadId: string;
+  question: string;
+  context?: string;
+}
+
+export type WorkflowTaskState = {
+  taskId: string;
+  originalTaskId?: string;
+  workflowName: string;
+  startedAt: number;
+  status: "loading" | "running" | "completed" | "failed";
+  result?: any;
+  error?: string;
+  isManagedAgent?: boolean;
+  latestProgress?: string;
+};
+
 /** Parsed widget descriptor extracted from a tool call or tool result. */
 export interface WidgetBlockData {
   type: "a2ui" | "mcp-result" | "pulse-app" | "canvas" | "diagram";
@@ -762,6 +782,21 @@ export interface WidgetBlockData {
     title?: string;
     diagramType?: string;
   };
+}
+
+export type ChatBlockData =
+  | WidgetBlockData
+  | { type: "interrupt"; interrupt: InterruptState; onReply: (reply: string) => void; isLoading?: boolean }
+  | { type: "workflow-task"; task: WorkflowTaskState; onTerminate?: (taskId: string) => void; isTerminating?: boolean }
+  | { type: "subagent"; subagent: SubagentInfo }
+  | { type: "todo-list"; todos: Todo[] };
+
+export interface ChatBlockBaseProps {
+  data: ChatBlockData;
+}
+
+export interface ChatBlockProps {
+  data: WidgetBlockData;
 }
 
 // #endregion

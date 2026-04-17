@@ -1,29 +1,17 @@
 import type ChatMessageArea from "@/components/agent-chat/chat-blocks/text/text-block";
 import type ChatInputBar from "@/components/agent-chat/input/chat-input-bar";
-import type { InterruptState } from "@/lib/hooks/use-deep-agent";
 import type {
   Automation,
-  WidgetBlockData,
+  ChatBlockData,
+  InterruptState,
   ProjectInfo,
   SubagentInfo,
   Todo,
   Workflow,
+  WorkflowTaskState,
 } from "@/lib/types";
 import type React from "react";
 import type { ComponentProps, ReactNode, RefObject } from "react";
-
-// ── Chat block data (discriminated union for all block types) ───────────────
-
-export type ChatBlockData =
-  | WidgetBlockData
-  | { type: "interrupt"; interrupt: InterruptState; onReply: (reply: string) => void; isLoading?: boolean }
-  | { type: "workflow-task"; task: WorkflowTaskState; onTerminate?: (taskId: string) => void; isTerminating?: boolean }
-  | { type: "subagent"; subagent: SubagentInfo }
-  | { type: "todo-list"; todos: Todo[] };
-
-export interface ChatBlockBaseProps {
-  data: ChatBlockData;
-}
 
 // ── Agent chat layouts ──────────────────────────────────────────────────────
 
@@ -47,23 +35,6 @@ export interface AgentChatPanelLayoutProps extends AgentChatLayoutProps {
   onStop: () => void;
   onClose?: () => void;
 }
-
-// ── Workflow task state ─────────────────────────────────────────────────────
-
-export type WorkflowTaskState = {
-  taskId: string;
-  /** The task ID originally reported in the tool message. Preserved after
-   * `taskId` is rewritten to the published workflow ID on completion, so we
-   * can still correlate the task back to its originating tool message. */
-  originalTaskId?: string;
-  workflowName: string;
-  startedAt: number;
-  status: "loading" | "running" | "completed" | "failed";
-  result?: any;
-  error?: string;
-  isManagedAgent?: boolean;
-  latestProgress?: string;
-};
 
 // ── Chat message area ───────────────────────────────────────────────────────
 
@@ -177,7 +148,7 @@ export interface A2UIStreamRendererProps {
 
 // ── Interrupt card ──────────────────────────────────────────────────────────
 
-export interface InterruptCardProps {
+export interface InterruptBlockProps {
   interrupt: InterruptState;
   onReply: (reply: string) => void;
   isLoading?: boolean;
@@ -277,7 +248,7 @@ export interface ShareChatModalProps {
 
 // ── Subagent card ───────────────────────────────────────────────────────────
 
-export interface SubagentCardProps {
+export interface SubagentBlockProps {
   subagent: SubagentInfo;
 }
 
@@ -296,7 +267,7 @@ export interface TodoListProps {
 
 // ── Workflow task card ──────────────────────────────────────────────────────
 
-export interface WorkflowTaskCardProps {
+export interface WorkflowTaskBlockProps {
   task: WorkflowTaskState;
   onTerminate?: (taskId: string) => void;
   isTerminating?: boolean;
@@ -317,7 +288,7 @@ export interface BlobResultBodyProps {
   workflowName: string;
 }
 
-export interface WorkflowBuiltCardProps {
+export interface WorkflowBuiltBlockProps {
   publishedId: string;
   workflowName: string;
 }

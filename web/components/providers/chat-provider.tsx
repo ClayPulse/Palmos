@@ -1,6 +1,7 @@
 "use client";
 
-import useDeepAgent, { type InterruptState } from "@/lib/hooks/use-deep-agent";
+import useDeepAgent from "@/lib/hooks/use-deep-agent";
+import type { InterruptState } from "@/lib/types";
 import {
   useChatSessions,
   generateSessionId,

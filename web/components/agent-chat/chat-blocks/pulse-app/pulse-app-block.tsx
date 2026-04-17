@@ -5,12 +5,12 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { AppViewConfig } from "@/lib/types";
-import type { ChatBlockBaseProps } from "@/components/agent-chat/types";
+import type { ChatBlockProps } from "@/lib/types";
 import { createAppViewId } from "@/lib/views/view-helpers";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useMemo } from "react";
 
-export function PulseAppBlock({ data }: ChatBlockBaseProps) {
+export function PulseAppBlock({ data }: ChatBlockProps) {
   const editorContext = useContext(EditorContext);
   const appId = data.pulseApp?.appId;
   const { marketplaceExtensions } = useExtensionAppManager("All");

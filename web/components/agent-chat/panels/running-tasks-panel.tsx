@@ -6,8 +6,8 @@ import type {
   RunningTasksPanelProps,
   TaskItem,
   TasksOverlayProps,
-  WorkflowTaskState,
 } from "@/components/agent-chat/types";
+import type { WorkflowTaskState } from "@/lib/types";
 import Icon from "@/components/misc/icon";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
