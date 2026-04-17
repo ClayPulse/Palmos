@@ -1,7 +1,8 @@
 "use client";
 
-import { MyAutomationsCarousel, MyWorkflowsCarousel } from "@/components/agent-chat/widgets/carousels";
-import { STARTER_PROMPTS, StarterPromptButton } from "@/components/agent-chat/widgets/input/starter-prompts";
+import { MyWorkflowsCarousel } from "@/components/agent-chat/chat-screens/carousels/my-workflows-carousel";
+import { MyAutomationsCarousel } from "@/components/agent-chat/chat-screens/carousels/my-automations-carousel";
+import { STARTER_PROMPTS, StarterPromptButton } from "@/components/agent-chat/input/starter-prompts";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";

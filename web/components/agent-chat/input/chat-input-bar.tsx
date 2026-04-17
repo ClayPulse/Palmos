@@ -1,8 +1,8 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import KnowledgeFiles from "@/components/agent-chat/widgets/input/knowledge-files";
-import ProjectPicker from "@/components/agent-chat/widgets/input/project-picker";
+import KnowledgeFiles from "@/components/agent-chat/input/knowledge-files";
+import ProjectPicker from "@/components/agent-chat/input/project-picker";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner, Tooltip } from "@heroui/react";
 import type React from "react";

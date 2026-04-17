@@ -729,9 +729,29 @@ export interface SubagentInfo {
   completedAt: Date | null;
 }
 
+// ── Chat block types ────────────────────────────────────────────────────────
+
+export interface InterruptState {
+  threadId: string;
+  question: string;
+  context?: string;
+}
+
+export type WorkflowTaskState = {
+  taskId: string;
+  originalTaskId?: string;
+  workflowName: string;
+  startedAt: number;
+  status: "loading" | "running" | "completed" | "failed";
+  result?: any;
+  error?: string;
+  isManagedAgent?: boolean;
+  latestProgress?: string;
+};
+
 /** Parsed widget descriptor extracted from a tool call or tool result. */
-export interface InlineWidgetData {
-  type: "a2ui" | "mcp-result" | "pulse-app" | "canvas";
+export interface WidgetBlockData {
+  type: "a2ui" | "mcp-result" | "pulse-app" | "canvas" | "diagram";
   /** A2UI: component definitions for A2UIViewer */
   a2ui?: {
     root: string;
@@ -756,6 +776,27 @@ export interface InlineWidgetData {
     nodes?: unknown[];
     edges?: unknown[];
   };
+  /** Diagram: Mermaid diagram code to render */
+  diagram?: {
+    code: string;
+    title?: string;
+    diagramType?: string;
+  };
+}
+
+export type ChatBlockData =
+  | WidgetBlockData
+  | { type: "interrupt"; interrupt: InterruptState; onReply: (reply: string) => void; isLoading?: boolean }
+  | { type: "workflow-task"; task: WorkflowTaskState; onTerminate?: (taskId: string) => void; isTerminating?: boolean }
+  | { type: "subagent"; subagent: SubagentInfo }
+  | { type: "todo-list"; todos: Todo[] };
+
+export interface ChatBlockBaseProps {
+  data: ChatBlockData;
+}
+
+export interface ChatBlockProps {
+  data: WidgetBlockData;
 }
 
 // #endregion

@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import MoveToProjectModal from "@/components/misc/move-to-project-modal";
+import MoveToProjectModal from "@/components/modals/move-to-project-modal";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
 import { useWorkflowRuns } from "@/lib/hooks/use-workflow-runs";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";

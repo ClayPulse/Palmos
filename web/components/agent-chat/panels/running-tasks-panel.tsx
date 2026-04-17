@@ -1,17 +1,17 @@
 "use client";
 
-import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
+import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
 import type {
   FilterKey,
   RunningTasksPanelProps,
   TaskItem,
   TasksOverlayProps,
-  WorkflowTaskState,
 } from "@/components/agent-chat/types";
+import type { WorkflowTaskState } from "@/lib/types";
 import Icon from "@/components/misc/icon";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -235,15 +235,17 @@ function RunningTasks({ onClose }: RunningTasksPanelProps) {
         ) : (
           <div className="flex flex-col gap-2">
             {filtered.map((task) => (
-              <WorkflowTaskCard
+              <ChatBlock
                 key={task.taskId}
-                task={toWorkflowTaskState(task)}
-                isTerminating={terminatingIds.has(task.taskId)}
-                onTerminate={
-                  task.status === "running" || task.status === "pending"
-                    ? handleTerminate
-                    : undefined
-                }
+                data={{
+                  type: "workflow-task",
+                  task: toWorkflowTaskState(task),
+                  isTerminating: terminatingIds.has(task.taskId),
+                  onTerminate:
+                    task.status === "running" || task.status === "pending"
+                      ? handleTerminate
+                      : undefined,
+                }}
               />
             ))}
           </div>

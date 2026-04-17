@@ -1,38 +1,39 @@
 "use client";
 
-import { SubagentCard } from "@/components/agent-chat/cards/subagent-card";
-import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
-import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
-import ChatHistoryPanel from "@/components/interface/panels/chat-history-panel";
-import HomeScreen from "@/components/agent-chat/initial-chat-screens/home-screen";
-import ProjectScreen from "@/components/agent-chat/initial-chat-screens/project-screen";
-import {
-  AgentChatPageLayout,
-  AgentChatPanelLayout,
-} from "@/components/agent-chat/layouts/agent-chat-layouts";
-import AgentChatPaywall from "@/components/agent-chat/screens/agent-chat-paywall";
-import InlineWidget, {
-  type InlineWidgetData,
-  parseWidgetFromToolCall,
-  parseWidgetFromToolMessage,
-} from "@/components/agent-chat/widgets/inline-widget";
-import { type ChatUpload } from "@/components/agent-chat/widgets/input/chat-input-bar";
+import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
 import {
   AIResponseCard,
   ResponseCard,
   UserBubble,
-} from "@/components/agent-chat/widgets/message/message-bubbles";
-import QuickPillButtons from "@/components/agent-chat/widgets/quick-pill-buttons";
+} from "@/components/agent-chat/chat-blocks/text/message-bubbles";
+import {
+  parseWidgetFromToolCall,
+  parseWidgetFromToolMessage,
+} from "@/components/agent-chat/chat-blocks/utils";
+import AgentChatPaywall from "@/components/agent-chat/chat-screens/agent-chat-paywall";
+import HomeScreen from "@/components/agent-chat/chat-screens/home-screen";
+import ProjectScreen from "@/components/agent-chat/chat-screens/project-screen";
+import { type ChatUpload } from "@/components/agent-chat/input/chat-input-bar";
+import QuickPillButtons from "@/components/agent-chat/input/quick-pill-buttons";
+import {
+  AgentChatPageLayout,
+  AgentChatPanelLayout,
+} from "@/components/agent-chat/layouts/agent-chat-layouts";
+import ChatHistoryPanel from "@/components/interface/panels/chat-history-panel";
 import ShareChatModal from "@/components/modals/share-chat-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useAgentAccess } from "@/lib/hooks/use-agent-access";
-import type { WorkflowInput } from "@/lib/types";
+import type {
+  ChatBlockData,
+  WorkflowInput,
+  WorkflowTaskState,
+} from "@/lib/types";
+import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import RunningTasksPanel from "./panels/running-tasks-panel";
 
 /** Walk an object recursively to find a publishedWorkflowId */
@@ -501,7 +502,10 @@ export default function AgentChat({
           return;
         }
         applyStatus(result.data);
-        if (result.data.status !== "completed" && result.data.status !== "failed") {
+        if (
+          result.data.status !== "completed" &&
+          result.data.status !== "failed"
+        ) {
           startPoll();
         }
       })();
@@ -511,7 +515,10 @@ export default function AgentChat({
           const result = await fetchWorkflowRunStatus(taskId);
           if (!result.ok) return;
           applyStatus(result.data);
-          if (result.data.status === "completed" || result.data.status === "failed") {
+          if (
+            result.data.status === "completed" ||
+            result.data.status === "failed"
+          ) {
             clearInterval(poll);
           }
         }, 2000);
@@ -694,7 +701,7 @@ export default function AgentChat({
               .join("")
           : "";
 
-    const widgets: InlineWidgetData[] = [];
+    const widgets: ChatBlockData[] = [];
 
     if (msg instanceof AIMessage && msg.tool_calls) {
       for (const tc of msg.tool_calls) {
@@ -727,7 +734,7 @@ export default function AgentChat({
       return (
         <div key={msg.id ?? i} className="flex flex-col gap-2.5">
           {nonCanvasWidgets.map((w, wi) => (
-            <InlineWidget key={wi} data={w} />
+            <ChatBlock key={wi} data={w} />
           ))}
         </div>
       );
@@ -800,15 +807,21 @@ export default function AgentChat({
         {spawned.length > 0 && (
           <div className="ml-4 flex flex-col gap-1.5 border-l-2 border-amber-400/30 pl-3 dark:border-amber-500/30">
             {spawned.map((sa) => (
-              <SubagentCard key={sa.id} subagent={sa} />
+              <ChatBlock
+                key={sa.id}
+                data={{ type: "subagent", subagent: sa }}
+              />
             ))}
           </div>
         )}
         {workflowTask && (
-          <WorkflowTaskCard
-            task={workflowTask}
-            onTerminate={handleTerminateTask}
-            isTerminating={terminatingTaskIds?.has(workflowTask.taskId)}
+          <ChatBlock
+            data={{
+              type: "workflow-task",
+              task: workflowTask,
+              onTerminate: handleTerminateTask,
+              isTerminating: terminatingTaskIds?.has(workflowTask.taskId),
+            }}
           />
         )}
       </div>
@@ -824,7 +837,7 @@ export default function AgentChat({
         break;
       }
     }
-    let found: InlineWidgetData | null = null;
+    let found: ChatBlockData | null = null;
     for (let i = lastHumanIdx + 1; i < messages.length; i++) {
       const msg = messages[i];
       const content = typeof msg.content === "string" ? msg.content : "";
@@ -849,7 +862,10 @@ export default function AgentChat({
   );
 
   const historyOverlay = (
-    <ChatHistoryPanel isOpen={isHistoryOpen} onClose={() => setIsHistoryOpen(false)} />
+    <ChatHistoryPanel
+      isOpen={isHistoryOpen}
+      onClose={() => setIsHistoryOpen(false)}
+    />
   );
 
   const tasksOverlay = isTasksOpen && (

@@ -6,15 +6,7 @@ import {
   ToolMessage,
 } from "@langchain/core/messages";
 import { useCallback, useRef, useState } from "react";
-import { SubagentInfo, Todo, WorkflowInput } from "../types";
-
-export type { SubagentInfo, Todo, WorkflowInput };
-
-export interface InterruptState {
-  threadId: string;
-  question: string;
-  context?: string;
-}
+import type { InterruptState, SubagentInfo, Todo, WorkflowInput } from "../types";
 
 export default function useDeepAgent(
   apiUrl: string,
