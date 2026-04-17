@@ -22,6 +22,7 @@ import { useSWRConfig } from "swr";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import ModalWrapper from "./wrapper";
 import ProjectMembers from "../explorer/project/project-members";
+import ProjectEnvs from "../explorer/project/project-envs";
 
 export default function ProjectSettingsModal({
   isOpen,
@@ -139,6 +140,14 @@ export default function ProjectSettingsModal({
           <Tab key="members" title="Members">
             <div className="p-4">
               <ProjectMembers
+                projectId={projectInfo.id}
+                isOwner={isOwner}
+              />
+            </div>
+          </Tab>
+          <Tab key="environment" title="Environment">
+            <div className="p-4">
+              <ProjectEnvs
                 projectId={projectInfo.id}
                 isOwner={isOwner}
               />
