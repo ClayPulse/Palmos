@@ -1,7 +1,7 @@
 "use client";
 
-import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useChatContext } from "@/components/providers/chat-provider";
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import ChatView from "@/components/views/chat/chat-view";
 import EditorView from "@/components/views/editor/editor-view";
 import { AppModeEnum } from "@/lib/enums";
@@ -55,7 +55,9 @@ export default function HomePage() {
     });
   }, [searchParams]);
 
-  const [editorMounted, setEditorMounted] = useState(appMode === AppModeEnum.Editor);
+  const [editorMounted, setEditorMounted] = useState(
+    appMode === AppModeEnum.Editor,
+  );
 
   useEffect(() => {
     if (appMode === AppModeEnum.Editor) setEditorMounted(true);
@@ -63,11 +65,17 @@ export default function HomePage() {
 
   return (
     <>
-      <div className={appMode === AppModeEnum.Agent ? "h-full w-full" : "hidden"}>
+      <div
+        className={appMode === AppModeEnum.Agent ? "h-full w-full" : "hidden"}
+      >
         <ChatView />
       </div>
       {editorMounted && (
-        <div className={appMode === AppModeEnum.Editor ? "h-full w-full" : "hidden"}>
+        <div
+          className={
+            appMode === AppModeEnum.Editor ? "h-full w-full" : "hidden"
+          }
+        >
           <EditorView />
         </div>
       )}

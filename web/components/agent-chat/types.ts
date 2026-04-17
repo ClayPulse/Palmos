@@ -39,13 +39,6 @@ export interface ChatUpload {
   indexing?: boolean;
 }
 
-// ── Embed panel ─────────────────────────────────────────────────────────────
-
-export type EmbedPanelTab =
-  | "a2ui"
-  | "mcp-apps"
-  | "pulse-app"
-  | "workflow-canvas";
 
 // ── History overlay ─────────────────────────────────────────────────────────
 
