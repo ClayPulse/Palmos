@@ -1168,7 +1168,12 @@
 		"shareLink": "Comparte este enlace:",
 		"copy": "Copiar",
 		"done": "Listo",
-		"createLink": "Crear enlace"
+		"cancel": "Cancelar",
+		"createLink": "Crear enlace",
+		"failedToCreate": "No se pudo crear el enlace para compartir.",
+		"copied": "¡Copiado!",
+		"linkCopied": "Enlace para compartir copiado al portapapeles.",
+		"shareThisLink": "Comparte este enlace:"
 	},
 	"carousels": {
 		"myWorkflows": "Mis flujos de trabajo",

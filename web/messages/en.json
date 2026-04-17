@@ -1199,7 +1199,12 @@
     "shareLink": "Share this link:",
     "copy": "Copy",
     "done": "Done",
-    "createLink": "Create Link"
+    "cancel": "Cancel",
+    "createLink": "Create Link",
+    "failedToCreate": "Failed to create share link.",
+    "copied": "Copied!",
+    "linkCopied": "Share link copied to clipboard.",
+    "shareThisLink": "Share this link:"
   },
   "carousels": {
     "myWorkflows": "My Workflows",

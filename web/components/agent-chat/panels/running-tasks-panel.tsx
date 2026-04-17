@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
 import type {
   FilterKey,
@@ -75,14 +77,9 @@ function RunningTasks({ onClose }: RunningTasksPanelProps) {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [terminatingIds, setTerminatingIds] = useState<Set<string>>(new Set());
 
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
-
   const fetchTasks = useCallback(async () => {
-    if (!backendUrl) return;
     try {
-      const res = await fetch(`${backendUrl}/api/workflow/run/list-tasks`, {
-        credentials: "include",
-      });
+      const res = await fetchAPI("/api/workflow/run/list-tasks");
       if (!res.ok) return;
       const data = await res.json();
       setTasks(data.tasks);
@@ -91,11 +88,10 @@ function RunningTasks({ onClose }: RunningTasksPanelProps) {
     } finally {
       setLoading(false);
     }
-  }, [backendUrl]);
+  }, []);
 
   // Poll running tasks for latest status/progress
   useEffect(() => {
-    if (!backendUrl) return;
     const runningTasks = tasks.filter(
       (t) => t.status === "running" || t.status === "pending",
     );
@@ -103,33 +99,25 @@ function RunningTasks({ onClose }: RunningTasksPanelProps) {
 
     const interval = setInterval(async () => {
       for (const task of runningTasks) {
-        try {
-          const res = await fetch(
-            `${backendUrl}/api/workflow/run/status?taskId=${task.taskId}`,
-            { credentials: "include" },
-          );
-          if (!res.ok) continue;
-          const data = await res.json();
-          setTasks((prev) =>
-            prev.map((t) =>
-              t.taskId === task.taskId
-                ? {
-                    ...t,
-                    status: data.status,
-                    result: data.result,
-                    error: data.error,
-                    completedAt: data.completedAt,
-                  }
-                : t,
-            ),
-          );
-        } catch {
-          // silent
-        }
+        const result = await fetchWorkflowRunStatus(task.taskId);
+        if (!result.ok) continue;
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.taskId === task.taskId
+              ? {
+                  ...t,
+                  status: result.data.status,
+                  result: result.data.result,
+                  error: result.data.error,
+                  completedAt: result.data.completedAt,
+                }
+              : t,
+          ),
+        );
       }
     }, 5_000);
     return () => clearInterval(interval);
-  }, [backendUrl, tasks]);
+  }, [tasks]);
 
   useEffect(() => {
     fetchTasks();
@@ -138,12 +126,10 @@ function RunningTasks({ onClose }: RunningTasksPanelProps) {
   }, [fetchTasks]);
 
   const handleTerminate = async (taskId: string) => {
-    if (!backendUrl) return;
     setTerminatingIds((prev) => new Set(prev).add(taskId));
     try {
-      const res = await fetch(`${backendUrl}/api/workflow/run/terminate`, {
+      const res = await fetchAPI("/api/workflow/run/terminate", {
         method: "POST",
-        credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ taskId }),
       });

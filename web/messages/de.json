@@ -1168,7 +1168,12 @@
 		"shareLink": "Diesen Link teilen:",
 		"copy": "Kopieren",
 		"done": "Fertig",
-		"createLink": "Link erstellen"
+		"cancel": "Abbrechen",
+		"createLink": "Link erstellen",
+		"failedToCreate": "Freigabelink konnte nicht erstellt werden.",
+		"copied": "Kopiert!",
+		"linkCopied": "Freigabelink in die Zwischenablage kopiert.",
+		"shareThisLink": "Diesen Link teilen:"
 	},
 	"carousels": {
 		"myWorkflows": "Meine Workflows",

@@ -32,6 +32,7 @@ import type { WorkflowInput } from "@/lib/types";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import RunningTasksPanel from "./panels/running-tasks-panel";
 
 /** Walk an object recursively to find a publishedWorkflowId */
@@ -488,51 +489,30 @@ export default function AgentChat({
 
       // One-shot DB check on load: decide between final state vs. still running.
       (async () => {
-        try {
-          const res = await fetch(
-            `${backendUrl}/api/workflow/run/status?taskId=${taskId}`,
-            { credentials: "include" },
-          );
-          if (!res.ok) {
-            // Can't determine — fall back to running so we start polling.
-            setWorkflowTasks((prev) =>
-              prev.map((t) =>
-                t.taskId === taskId ? { ...t, status: "running" } : t,
-              ),
-            );
-            startPoll();
-            return;
-          }
-          const data = await res.json();
-          applyStatus(data);
-          if (data.status !== "completed" && data.status !== "failed") {
-            startPoll();
-          }
-        } catch {
+        const result = await fetchWorkflowRunStatus(taskId);
+        if (!result.ok) {
+          // Can't determine — fall back to running so we start polling.
           setWorkflowTasks((prev) =>
             prev.map((t) =>
               t.taskId === taskId ? { ...t, status: "running" } : t,
             ),
           );
           startPoll();
+          return;
+        }
+        applyStatus(result.data);
+        if (result.data.status !== "completed" && result.data.status !== "failed") {
+          startPoll();
         }
       })();
 
       function startPoll() {
         const poll = setInterval(async () => {
-          try {
-            const res = await fetch(
-              `${backendUrl}/api/workflow/run/status?taskId=${taskId}`,
-              { credentials: "include" },
-            );
-            if (!res.ok) return;
-            const data = await res.json();
-            applyStatus(data);
-            if (data.status === "completed" || data.status === "failed") {
-              clearInterval(poll);
-            }
-          } catch {
-            // Network error — keep polling
+          const result = await fetchWorkflowRunStatus(taskId);
+          if (!result.ok) return;
+          applyStatus(result.data);
+          if (result.data.status === "completed" || result.data.status === "failed") {
+            clearInterval(poll);
           }
         }, 2000);
 
