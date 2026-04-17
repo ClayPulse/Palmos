@@ -1,16 +1,16 @@
-import type { ComponentProps, ReactNode, RefObject } from "react";
-import type React from "react";
-import type ChatMessageArea from "@/components/agent-chat/widgets/message/chat-message-area";
-import type ChatInputBar from "@/components/agent-chat/widgets/input/chat-input-bar";
-import type { InlineWidgetData } from "@/lib/types";
+import type ChatMessageArea from "@/components/agent-chat/blocks/text/text-block";
+import type ChatInputBar from "@/components/agent-chat/input/chat-input-bar";
+import type { InterruptState } from "@/lib/hooks/use-deep-agent";
 import type {
   Automation,
+  ChatBlockData,
   ProjectInfo,
   SubagentInfo,
   Todo,
   Workflow,
 } from "@/lib/types";
-import type { InterruptState } from "@/lib/hooks/use-deep-agent";
+import type React from "react";
+import type { ComponentProps, ReactNode, RefObject } from "react";
 
 // ── Agent chat layouts ──────────────────────────────────────────────────────
 
@@ -68,7 +68,7 @@ export interface ChatMessageAreaProps {
   isLoading: boolean;
   error: unknown;
   todos: any[];
-  latestWorkflow: InlineWidgetData | null;
+  latestWorkflow: ChatBlockData | null;
   scrollContainerRef: RefObject<HTMLDivElement | null>;
 }
 
@@ -120,7 +120,11 @@ export interface MyAutomationsCarouselProps {
 
 // ── Embed panel ─────────────────────────────────────────────────────────────
 
-export type EmbedPanelTab = "a2ui" | "mcp-apps" | "pulse-app" | "workflow-canvas";
+export type EmbedPanelTab =
+  | "a2ui"
+  | "mcp-apps"
+  | "pulse-app"
+  | "workflow-canvas";
 
 export interface ChatEmbedPanelProps {
   activeTab: EmbedPanelTab;
@@ -154,8 +158,8 @@ export interface InboxMessageCardProps {
 
 // ── Inline widget ───────────────────────────────────────────────────────────
 
-export interface InlineWidgetBaseProps {
-  data: InlineWidgetData;
+export interface ChatBlockBaseProps {
+  data: ChatBlockData;
 }
 
 export interface A2UIStreamRendererProps {
@@ -208,14 +212,14 @@ export interface ToolCallBadgesProps {
 export interface AIResponseCardProps {
   content: string;
   isStreaming: boolean;
-  widgets?: InlineWidgetData[];
+  widgets?: ChatBlockData[];
   toolCallNames?: string[];
 }
 
 export interface ResponseCardProps {
   content: string;
   isStreaming: boolean;
-  widgets?: InlineWidgetData[];
+  widgets?: ChatBlockData[];
   toolCallNames?: string[];
 }
 

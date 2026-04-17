@@ -1,7 +1,7 @@
 "use client";
 
-import { SubagentCard } from "@/components/agent-chat/cards/subagent-card";
-import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
+import { SubagentCard } from "@/components/agent-chat/blocks/subagent/subagent-block";
+import { WorkflowTaskCard } from "@/components/agent-chat/blocks/workflow-task/workflow-task-block";
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import ChatHistoryPanel from "@/components/interface/panels/chat-history-panel";
 import HomeScreen from "@/components/agent-chat/initial-chat-screens/home-screen";
@@ -10,19 +10,19 @@ import {
   AgentChatPageLayout,
   AgentChatPanelLayout,
 } from "@/components/agent-chat/layouts/agent-chat-layouts";
-import AgentChatPaywall from "@/components/agent-chat/screens/agent-chat-paywall";
-import InlineWidget, {
-  type InlineWidgetData,
+import AgentChatPaywall from "@/components/agent-chat/initial-chat-screens/agent-chat-paywall";
+import Block, {
+  type ChatBlockData,
   parseWidgetFromToolCall,
   parseWidgetFromToolMessage,
-} from "@/components/agent-chat/widgets/inline-widget";
-import { type ChatUpload } from "@/components/agent-chat/widgets/input/chat-input-bar";
+} from "@/components/agent-chat/blocks/block";
+import { type ChatUpload } from "@/components/agent-chat/input/chat-input-bar";
 import {
   AIResponseCard,
   ResponseCard,
   UserBubble,
-} from "@/components/agent-chat/widgets/message/message-bubbles";
-import QuickPillButtons from "@/components/agent-chat/widgets/quick-pill-buttons";
+} from "@/components/agent-chat/blocks/text/message-bubbles";
+import QuickPillButtons from "@/components/agent-chat/input/quick-pill-buttons";
 import ShareChatModal from "@/components/modals/share-chat-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
@@ -694,7 +694,7 @@ export default function AgentChat({
               .join("")
           : "";
 
-    const widgets: InlineWidgetData[] = [];
+    const widgets: ChatBlockData[] = [];
 
     if (msg instanceof AIMessage && msg.tool_calls) {
       for (const tc of msg.tool_calls) {
@@ -727,7 +727,7 @@ export default function AgentChat({
       return (
         <div key={msg.id ?? i} className="flex flex-col gap-2.5">
           {nonCanvasWidgets.map((w, wi) => (
-            <InlineWidget key={wi} data={w} />
+            <Block key={wi} data={w} />
           ))}
         </div>
       );
@@ -824,7 +824,7 @@ export default function AgentChat({
         break;
       }
     }
-    let found: InlineWidgetData | null = null;
+    let found: ChatBlockData | null = null;
     for (let i = lastHumanIdx + 1; i < messages.length; i++) {
       const msg = messages[i];
       const content = typeof msg.content === "string" ? msg.content : "";

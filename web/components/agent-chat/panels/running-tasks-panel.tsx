@@ -1,8 +1,6 @@
 "use client";
 
-import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
+import { WorkflowTaskCard } from "@/components/agent-chat/blocks/workflow-task/workflow-task-block";
 import type {
   FilterKey,
   RunningTasksPanelProps,
@@ -12,6 +10,8 @@ import type {
 } from "@/components/agent-chat/types";
 import Icon from "@/components/misc/icon";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useState } from "react";
 

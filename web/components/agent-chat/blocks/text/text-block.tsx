@@ -1,14 +1,13 @@
 "use client";
 
-import InterruptCard from "@/components/agent-chat/cards/interrupt-card";
-import InlineWidget from "@/components/agent-chat/widgets/inline-widget";
-import { TodoList } from "@/components/agent-chat/widgets/todo-list";
-import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
+import Block from "@/components/agent-chat/blocks/block";
+import { TodoListBlock } from "@/components/agent-chat/blocks/todo-list/todo-list-block";
+import InterruptCard from "@/components/agent-chat/blocks/interrupt/interrupt-block";
+import { WorkflowTaskCard } from "@/components/agent-chat/blocks/workflow-task/workflow-task-block";
 import type { ChatMessageAreaProps } from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";
 import { motion } from "framer-motion";
-import type React from "react";
 
 export default function ChatMessageArea({
   variant,
@@ -45,7 +44,12 @@ export default function ChatMessageArea({
                 key={i}
                 className="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400"
                 animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
-                transition={{ duration: 1, repeat: Infinity, delay: i * 0.2, ease: "easeInOut" }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                  ease: "easeInOut",
+                }}
               />
             ))}
           </div>
@@ -76,7 +80,9 @@ export default function ChatMessageArea({
 
   const errorBanner = !!error && (
     <div className="rounded-lg border border-red-300/40 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
-      {error instanceof Error ? error.message : t("chatMessageArea.errorOccurred")}
+      {error instanceof Error
+        ? error.message
+        : t("chatMessageArea.errorOccurred")}
     </div>
   );
 
@@ -95,7 +101,11 @@ export default function ChatMessageArea({
         />
       ))}
       {activeInterrupt && (
-        <InterruptCard interrupt={activeInterrupt} onReply={resume} isLoading={isLoading} />
+        <InterruptCard
+          interrupt={activeInterrupt}
+          onReply={resume}
+          isLoading={isLoading}
+        />
       )}
       {loadingIndicator}
       {errorBanner}
@@ -118,20 +128,26 @@ export default function ChatMessageArea({
       </div>
 
       {/* Todos */}
-      {!isLoadingSession && todos.length > 0 && (
-        isPage ? (
+      {!isLoadingSession &&
+        todos.length > 0 &&
+        (isPage ? (
           <div className="border-t border-amber-200/40 px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8">
-            <TodoList todos={todos} />
+            <TodoListBlock todos={todos} />
           </div>
         ) : (
-          <TodoList todos={todos} />
-        )
-      )}
+          <TodoListBlock todos={todos} />
+        ))}
 
       {/* Workflow card */}
       {!isLoadingSession && latestWorkflow && (
-        <div className={isPage ? "px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]" : "px-3 py-2"}>
-          <InlineWidget data={latestWorkflow} />
+        <div
+          className={
+            isPage
+              ? "px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]"
+              : "px-3 py-2"
+          }
+        >
+          <Block data={latestWorkflow} />
         </div>
       )}
     </>

@@ -730,8 +730,8 @@ export interface SubagentInfo {
 }
 
 /** Parsed widget descriptor extracted from a tool call or tool result. */
-export interface InlineWidgetData {
-  type: "a2ui" | "mcp-result" | "pulse-app" | "canvas";
+export interface ChatBlockData {
+  type: "a2ui" | "mcp-result" | "pulse-app" | "canvas" | "diagram";
   /** A2UI: component definitions for A2UIViewer */
   a2ui?: {
     root: string;
@@ -755,6 +755,12 @@ export interface InlineWidgetData {
     name?: string;
     nodes?: unknown[];
     edges?: unknown[];
+  };
+  /** Diagram: Mermaid diagram code to render */
+  diagram?: {
+    code: string;
+    title?: string;
+    diagramType?: string;
   };
 }
 

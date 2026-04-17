@@ -1,9 +1,9 @@
 "use client";
 
-import KnowledgeFiles from "@/components/agent-chat/widgets/input/knowledge-files";
+import KnowledgeFiles from "@/components/agent-chat/input/knowledge-files";
 import ShareChatModal from "@/components/modals/share-chat-modal";
 import Icon from "@/components/misc/icon";
-import MoveToProjectModal from "@/components/misc/move-to-project-modal";
+import MoveToProjectModal from "@/components/modals/move-to-project-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useTranslations } from "@/lib/hooks/use-translations";

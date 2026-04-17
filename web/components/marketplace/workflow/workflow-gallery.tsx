@@ -1,5 +1,5 @@
 import WorkflowPreviewCard from "@/components/cards/workflow-preview-card";
-import CreateInviteLinkModal from "@/components/interface/create-invite-link-modal";
+import CreateInviteLinkModal from "@/components/modals/create-invite-link-modal";
 import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";

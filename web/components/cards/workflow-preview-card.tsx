@@ -1,5 +1,5 @@
 import Icon from "@/components/misc/icon";
-import MoveToProjectModal from "@/components/misc/move-to-project-modal";
+import MoveToProjectModal from "@/components/modals/move-to-project-modal";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { PlatformEnum } from "@/lib/enums";
 import { useProjectManager } from "@/lib/hooks/use-project-manager";
@@ -15,7 +15,7 @@ import {
 } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 import ContextMenu from "../interface/context-menu";
-import WorkflowDetailsModal from "../interface/workflow-details-modal";
+import WorkflowDetailsModal from "../modals/workflow-details-modal";
 
 export default function WorkflowPreviewCard({
   workflow,
