@@ -489,7 +489,7 @@ export default function AgentChat({
 
       // One-shot DB check on load: decide between final state vs. still running.
       (async () => {
-        const result = await fetchWorkflowRunStatus(backendUrl, taskId);
+        const result = await fetchWorkflowRunStatus(taskId);
         if (!result.ok) {
           // Can't determine — fall back to running so we start polling.
           setWorkflowTasks((prev) =>
@@ -508,7 +508,7 @@ export default function AgentChat({
 
       function startPoll() {
         const poll = setInterval(async () => {
-          const result = await fetchWorkflowRunStatus(backendUrl, taskId);
+          const result = await fetchWorkflowRunStatus(taskId);
           if (!result.ok) return;
           applyStatus(result.data);
           if (result.data.status === "completed" || result.data.status === "failed") {

@@ -1,3 +1,5 @@
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+
 const inflightRequests = new Map<string, Promise<any>>();
 
 /**
@@ -7,21 +9,17 @@ const inflightRequests = new Map<string, Promise<any>>();
  * another request.
  */
 export async function fetchWorkflowRunStatus(
-  backendUrl: string,
   taskId: string,
 ): Promise<{ ok: true; data: any } | { ok: false }> {
-  const key = `${backendUrl}::${taskId}`;
-
-  const existing = inflightRequests.get(key);
+  const existing = inflightRequests.get(taskId);
   if (existing) {
     return existing;
   }
 
   const request = (async () => {
     try {
-      const res = await fetch(
-        `${backendUrl}/api/workflow/run/status?taskId=${taskId}`,
-        { credentials: "include" },
+      const res = await fetchAPI(
+        `/api/workflow/run/status?taskId=${taskId}`,
       );
       if (!res.ok) return { ok: false as const };
       const data = await res.json();
@@ -29,10 +27,10 @@ export async function fetchWorkflowRunStatus(
     } catch {
       return { ok: false as const };
     } finally {
-      inflightRequests.delete(key);
+      inflightRequests.delete(taskId);
     }
   })();
 
-  inflightRequests.set(key, request);
+  inflightRequests.set(taskId, request);
   return request;
 }
