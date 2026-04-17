@@ -7,7 +7,7 @@ export default function ChatView() {
     <div className="relative flex h-full w-full min-w-0 overflow-hidden">
       {/* Chat column — hidden on small screens when a panel is open */}
       <div
-        className={`flex h-full min-w-0 flex-col ${"hidden md:flex md:w-1/2 lg:w-2/5"}`}
+        className="flex h-full min-w-0 flex-1 flex-col"
       >
         <AgentChat variant="page" />
       </div>
