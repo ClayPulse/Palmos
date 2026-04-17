@@ -1,3 +1,5 @@
+import { type ComponentInstance } from "@a2ui/react";
+import { BaseMessage } from "@langchain/core/messages";
 import {
   Action,
   Agent,
@@ -11,9 +13,7 @@ import {
   ViewModeEnum,
   ViewModel,
 } from "@pulse-editor/shared-utils";
-import { type ComponentInstance } from "@a2ui/react";
 import { Edge as ReactFlowEdge, Node as ReactFlowNode } from "@xyflow/react";
-import { BaseMessage } from "@langchain/core/messages";
 import { Dispatch, RefObject, SetStateAction } from "react";
 import { AppModeEnum, SideMenuTabEnum } from "./enums";
 import { BaseLLM } from "./modalities/llm/base-llm";
@@ -376,7 +376,6 @@ export type CopiedCanvasSelection = {
   nodes: ReactFlowNode<AppNodeData>[];
   edges: ReactFlowEdge[];
 };
-
 
 // #endregion
 
@@ -749,54 +748,74 @@ export type WorkflowTaskState = {
   latestProgress?: string;
 };
 
-/** Parsed widget descriptor extracted from a tool call or tool result. */
-export interface WidgetBlockData {
-  type: "a2ui" | "mcp-result" | "pulse-app" | "canvas" | "diagram";
-  /** A2UI: component definitions for A2UIViewer */
-  a2ui?: {
-    root: string;
-    components: ComponentInstance[];
-    data?: Record<string, unknown>;
-  };
-  /** A2UI: raw server-to-client messages for streaming surfaces */
-  a2uiMessages?: unknown[];
-  /** MCP: tool call result */
-  mcp?: {
-    toolName: string;
-    serverName?: string;
-    result: unknown;
-  };
-  /** Pulse App: app ID to embed */
-  pulseApp?: {
-    appId: string;
-  };
-  /** Canvas: node/edge data to render */
-  canvas?: {
-    name?: string;
-    nodes?: unknown[];
-    edges?: unknown[];
-  };
-  /** Diagram: Mermaid diagram code to render */
-  diagram?: {
-    code: string;
-    title?: string;
-    diagramType?: string;
-  };
-}
-
 export type ChatBlockData =
-  | WidgetBlockData
-  | { type: "interrupt"; interrupt: InterruptState; onReply: (reply: string) => void; isLoading?: boolean }
-  | { type: "workflow-task"; task: WorkflowTaskState; onTerminate?: (taskId: string) => void; isTerminating?: boolean }
+  | {
+      type: "a2ui";
+      root: string;
+      components: ComponentInstance[];
+      data?: Record<string, unknown>;
+    }
+  | {
+      type: "a2ui-stream";
+      messages: unknown[];
+    }
+  | {
+      type: "mcp-result";
+      toolName: string;
+      serverName?: string;
+      result: unknown;
+    }
+  | {
+      type: "pulse-app";
+      appId: string;
+    }
+  | {
+      type: "canvas";
+      name?: string;
+      nodes?: unknown[];
+      edges?: unknown[];
+    }
+  | {
+      type: "diagram";
+      code: string;
+      title?: string;
+      diagramType?: string;
+    }
+  | {
+      type: "interrupt";
+      interrupt: InterruptState;
+      onReply: (reply: string) => void;
+      isLoading?: boolean;
+    }
+  | {
+      type: "workflow-task";
+      task: WorkflowTaskState;
+      onTerminate?: (taskId: string) => void;
+      isTerminating?: boolean;
+    }
   | { type: "subagent"; subagent: SubagentInfo }
-  | { type: "todo-list"; todos: Todo[] };
+  | { type: "todo-list"; todos: Todo[] }
+  | { type: "tool-call"; toolCallNames: string[] }
+  | {
+      type: "user-message";
+      text: string;
+      attachmentCount?: number;
+      uploadIds?: string[];
+    }
+  | {
+      type: "ai-message";
+      variant: "page" | "panel";
+      content: string;
+      isStreaming: boolean;
+      widgets: ChatBlockData[];
+      subagents: SubagentInfo[];
+      workflowTask?: WorkflowTaskState;
+      onTerminateTask?: (taskId: string) => void;
+      isTerminatingTask?: boolean;
+    };
 
 export interface ChatBlockBaseProps {
   data: ChatBlockData;
-}
-
-export interface ChatBlockProps {
-  data: WidgetBlockData;
 }
 
 // #endregion

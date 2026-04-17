@@ -1,5 +1,6 @@
 "use client";
 
+import type { KnowledgeFile } from "@/components/agent-chat/types";
 import Icon from "@/components/misc/icon";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import {
@@ -9,10 +10,6 @@ import {
   Spinner,
   Tooltip,
 } from "@heroui/react";
-import type {
-  KnowledgeFile,
-  KnowledgeFilesProps,
-} from "@/components/agent-chat/types";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 function formatFileSize(bytes: number): string {
@@ -23,7 +20,10 @@ function formatFileSize(bytes: number): string {
 
 export default function KnowledgeFiles({
   variant = "popover",
-}: KnowledgeFilesProps) {
+}: {
+  /** "popover" opens upward as a popup (for chat input). "panel" renders inline dropdown (for side panel). */
+  variant?: "popover" | "panel" | "inline";
+}) {
   const { getTranslations: t } = useTranslations();
   const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
@@ -112,7 +112,11 @@ export default function KnowledgeFiles({
           setFiles((prev) =>
             prev.map((f) =>
               f.tempKey === tempKey
-                ? { ...f, status: "error", error: t("knowledgeFiles.invalidResponse") }
+                ? {
+                    ...f,
+                    status: "error",
+                    error: t("knowledgeFiles.invalidResponse"),
+                  }
                 : f,
             ),
           );
@@ -194,7 +198,8 @@ export default function KnowledgeFiles({
         className="text-sm text-amber-600 dark:text-amber-400"
       />
       <span className="text-default-800 dark:text-white/85">
-        {t("knowledgeFiles.knowledge")}{readyCount > 0 ? ` (${readyCount})` : ""}
+        {t("knowledgeFiles.knowledge")}
+        {readyCount > 0 ? ` (${readyCount})` : ""}
       </span>
     </button>
   );
@@ -223,7 +228,7 @@ export default function KnowledgeFiles({
           {t("knowledgeFiles.noFiles")}
         </div>
       ) : (
-        <div className="flex max-h-48 flex-col gap-1 overflow-y-auto overflow-x-hidden">
+        <div className="flex max-h-48 flex-col gap-1 overflow-x-hidden overflow-y-auto">
           {files.map((f) => (
             <div
               key={f.tempKey ?? f.id}
@@ -241,7 +246,7 @@ export default function KnowledgeFiles({
                       style={{ width: `${f.progress ?? 0}%` }}
                     />
                   </div>
-                  <span className="text-[10px] tabular-nums text-amber-600 dark:text-amber-400">
+                  <span className="text-[10px] text-amber-600 tabular-nums dark:text-amber-400">
                     {f.progress ?? 0}%
                   </span>
                 </div>
@@ -266,7 +271,7 @@ export default function KnowledgeFiles({
                   className="shrink-0 text-sm text-amber-600 dark:text-amber-400"
                 />
               )}
-              <span className="flex-1 truncate text-default-800 dark:text-white/85">
+              <span className="text-default-800 flex-1 truncate dark:text-white/85">
                 {f.filename}
               </span>
               <span className="shrink-0 text-[10px] text-gray-400 dark:text-white/30">
@@ -298,7 +303,11 @@ export default function KnowledgeFiles({
           onOpenChange={setIsOpen}
           offset={8}
         >
-          <Tooltip content={t("knowledgeFiles.knowledgeFilesTooltip")} delay={400} closeDelay={0}>
+          <Tooltip
+            content={t("knowledgeFiles.knowledgeFilesTooltip")}
+            delay={400}
+            closeDelay={0}
+          >
             <div>
               <PopoverTrigger>{triggerButton}</PopoverTrigger>
             </div>

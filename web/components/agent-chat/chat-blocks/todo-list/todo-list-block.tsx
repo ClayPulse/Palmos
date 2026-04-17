@@ -2,10 +2,10 @@
 
 import Icon from "@/components/misc/icon";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import type { TodoListProps } from "@/components/agent-chat/types";
+import type { Todo } from "@/lib/types";
 import { Spinner } from "@heroui/react";
 
-export function TodoListBlock({ todos }: TodoListProps) {
+export function TodoListBlock({ todos }: { todos: Todo[] }) {
   const { getTranslations: t } = useTranslations();
   const completed = todos.filter((t) => t.status === "completed").length;
   const progress = todos.length > 0 ? (completed / todos.length) * 100 : 0;

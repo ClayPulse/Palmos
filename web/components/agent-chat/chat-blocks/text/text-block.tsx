@@ -1,158 +1,227 @@
-"use client";
-
-import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
-import type { ChatMessageAreaProps } from "@/components/agent-chat/types";
+import Icon from "@/components/misc/icon";
+import MarkdownRender from "@/components/misc/markdown-render";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import { Spinner } from "@heroui/react";
-import { motion } from "framer-motion";
+import { Tooltip } from "@heroui/react";
+import { useCallback, useEffect, useState } from "react";
+import { CopyButton, StatusBadge, StatusIcon } from "./shared";
 
-export default function ChatMessageArea({
-  variant,
-  isLoadingSession,
-  isEmptyConversation,
-  emptyState,
-  messageList,
-  workflowTasks,
-  onTerminateTask,
-  terminatingTaskIds,
-  activeInterrupt,
-  resume,
-  isLoading,
-  error,
-  todos,
-  latestWorkflow,
-  scrollContainerRef,
-}: ChatMessageAreaProps) {
+type UserMessageProps = {
+  text: string;
+  attachmentCount?: number;
+  uploadIds?: string[];
+};
+
+type AITextBlockProps = {
+  content: string;
+  isStreaming: boolean;
+  toolCallName?: string;
+  isCollapsable?: boolean;
+};
+
+type TextBlockProps =
+  | ({ type: "ai" } & AITextBlockProps)
+  | ({ type: "user" } & UserMessageProps);
+
+export function TextBlock(props: TextBlockProps) {
+  if (props.type === "user") {
+    return <UserBlock {...props} />;
+  }
+  return <AIBlock {...props} />;
+}
+
+function UserBlock({ text, attachmentCount, uploadIds }: UserMessageProps) {
   const { getTranslations: t } = useTranslations();
-  const isPage = variant === "page";
+  const [copied, setCopied] = useState(false);
+  const [fileNames, setFileNames] = useState<
+    { id: string; filename: string; mimeType: string }[]
+  >([]);
 
-  const loadingIndicator = isLoading && (
-    <div className="py-2">
-      <div className="relative overflow-hidden rounded-xl border border-amber-300/40 bg-gradient-to-r from-amber-50/80 via-orange-50/50 to-amber-50/80 shadow-sm dark:border-amber-500/15 dark:from-amber-500/5 dark:via-orange-500/8 dark:to-amber-500/5">
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/20 to-transparent dark:via-amber-400/10"
-          animate={{ x: ["-100%", "100%"] }}
-          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <div className="relative flex items-center justify-center gap-2.5 py-2.5">
-          <div className="flex items-center gap-1">
-            {[0, 1, 2].map((i) => (
-              <motion.div
-                key={i}
-                className="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400"
-                animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
-                transition={{
-                  duration: 1,
-                  repeat: Infinity,
-                  delay: i * 0.2,
-                  ease: "easeInOut",
-                }}
-              />
-            ))}
-          </div>
-          <motion.p
-            className="text-xs font-medium text-amber-600/80 dark:text-amber-300/70"
-            animate={{ opacity: [0.6, 1, 0.6] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          >
-            {t("chatMessageArea.thinking")}
-          </motion.p>
-        </div>
-      </div>
-    </div>
-  );
+  useEffect(() => {
+    if (!uploadIds || uploadIds.length === 0) return;
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+    if (!backendUrl) return;
+    fetch(`${backendUrl}/api/chat/uploads?ids=${uploadIds.join(",")}`, {
+      credentials: "include",
+    })
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setFileNames(data))
+      .catch(() => {});
+  }, [uploadIds]);
 
-  const sessionLoadingIndicator = (
-    <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12">
-      <Spinner size="lg" />
-      <motion.p
-        className="text-sm font-medium text-amber-600/80 dark:text-amber-300/70"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-      >
-        {t("chatMessageArea.loadingConversation")}
-      </motion.p>
-    </div>
-  );
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }, [text]);
 
-  const errorBanner = !!error && (
-    <div className="rounded-lg border border-red-300/40 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
-      {error instanceof Error
-        ? error.message
-        : t("chatMessageArea.errorOccurred")}
-    </div>
-  );
-
-  const messageContent = isLoadingSession ? (
-    sessionLoadingIndicator
-  ) : (
-    <>
-      {isEmptyConversation && emptyState}
-      {messageList}
-      {workflowTasks.map((task) => (
-        <ChatBlock
-          key={task.taskId}
-          data={{
-            type: "workflow-task",
-            task,
-            onTerminate: onTerminateTask,
-            isTerminating: terminatingTaskIds?.has(task.taskId),
-          }}
-        />
-      ))}
-      {activeInterrupt && (
-        <ChatBlock
-          data={{
-            type: "interrupt",
-            interrupt: activeInterrupt,
-            onReply: resume,
-            isLoading,
-          }}
-        />
-      )}
-      {loadingIndicator}
-      {errorBanner}
-    </>
-  );
+  const hasFiles =
+    fileNames.length > 0 || (attachmentCount != null && attachmentCount > 0);
 
   return (
-    <>
-      {/* Scrollable message area */}
-      <div
-        ref={scrollContainerRef}
-        className={
-          isPage
-            ? "flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-5 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]"
-            : "flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto p-3"
-        }
-      >
-        {messageContent}
-        {isPage && <div className="h-2" />}
-      </div>
-
-      {/* Todos */}
-      {!isLoadingSession &&
-        todos.length > 0 &&
-        (isPage ? (
-          <div className="border-t border-amber-200/40 px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8">
-            <ChatBlock data={{ type: "todo-list", todos }} />
+    <div className="group flex min-w-0 justify-end">
+      <div className="max-w-[95%] min-w-0 rounded-2xl rounded-tr-sm bg-linear-to-r from-amber-500 to-orange-500 px-4 py-2.5 text-sm text-white shadow-sm">
+        <p className="text-xs font-semibold text-white/80">
+          {t("messageBubbles.user")}
+        </p>
+        <p className="mt-0.5 break-words whitespace-pre-wrap text-white">
+          {text}
+        </p>
+        {fileNames.length > 0 && (
+          <div className="mt-1.5 flex flex-wrap gap-1">
+            {fileNames.map((f) => (
+              <span
+                key={f.id}
+                className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-xs text-white/90"
+              >
+                <Icon
+                  name={
+                    f.mimeType.startsWith("image/") ? "image" : "description"
+                  }
+                  variant="round"
+                  className="text-xs"
+                />
+                {f.filename}
+              </span>
+            ))}
           </div>
-        ) : (
-          <ChatBlock data={{ type: "todo-list", todos }} />
-        ))}
-
-      {/* Workflow card */}
-      {!isLoadingSession && latestWorkflow && (
-        <div
-          className={
-            isPage
-              ? "px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]"
-              : "px-3 py-2"
-          }
-        >
-          <ChatBlock data={latestWorkflow} />
+        )}
+        <div className="mt-1.5 flex items-center border-t border-white/20 pt-1.5">
+          {hasFiles &&
+            fileNames.length === 0 &&
+            attachmentCount != null &&
+            attachmentCount > 0 && (
+              <div className="flex items-center gap-0.5 text-[10px] text-white/60">
+                <Icon
+                  name="attach_file"
+                  variant="round"
+                  className="text-[10px]"
+                />
+                <span>
+                  {attachmentCount} file{attachmentCount > 1 ? "s" : ""}
+                </span>
+              </div>
+            )}
+          <div className="ml-auto pl-4">
+            <Tooltip
+              content={
+                copied ? t("messageBubbles.copied") : t("messageBubbles.copy")
+              }
+              size="sm"
+            >
+              <button
+                onClick={handleCopy}
+                className="flex h-8 w-8 items-center justify-center text-white/70 transition-colors hover:text-white"
+              >
+                <Icon
+                  name={copied ? "check" : "content_copy"}
+                  variant="round"
+                  className="text-xs"
+                />
+              </button>
+            </Tooltip>
+          </div>
         </div>
-      )}
-    </>
+      </div>
+    </div>
+  );
+}
+
+function AIBlock({
+  content,
+  isStreaming,
+  toolCallName,
+  isCollapsable = false,
+}: AITextBlockProps) {
+  const { getTranslations: t } = useTranslations();
+
+  const [expanded, setExpanded] = useState(true);
+  const status: "running" | "complete" = isStreaming ? "running" : "complete";
+  if (isCollapsable) {
+    return (
+      <div className="min-w-0 overflow-hidden rounded-lg border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="flex w-full items-center justify-between px-3 py-2"
+        >
+          <div className="flex items-center gap-2">
+            <StatusIcon status={status} />
+            <span className="text-default-700 text-xs font-semibold dark:text-white/90">
+              {t("messageBubbles.aiManagerLabel")}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {!isStreaming && content && <CopyButton text={content} />}
+            <StatusBadge status={status} />
+            <Icon
+              name={expanded ? "expand_less" : "expand_more"}
+              variant="round"
+              className="text-default-400 text-sm dark:text-white/50"
+            />
+          </div>
+        </button>
+
+        {expanded && (
+          <div className="border-t border-amber-200/60 dark:border-white/8">
+            {content && (
+              <div className="px-3 py-2.5">
+                <MarkdownRender content={content} />
+                {isStreaming && (
+                  <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="flex min-w-0 justify-start">
+      <div className="flex w-full min-w-0 gap-2.5">
+        <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-100 p-1 dark:bg-amber-500/15">
+          <img
+            src="/assets/pulse-logo.svg"
+            alt="Palmos"
+            className="h-full w-full"
+          />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="mb-1">
+            <p className="text-default-400 text-[10px] font-semibold tracking-wide uppercase dark:text-white/40">
+              {t("messageBubbles.aiManager")}
+            </p>
+          </div>
+          {toolCallName && <ToolCallBadges name={toolCallName} />}
+          {content && (
+            <div className="text-default-800 overflow-hidden rounded-2xl rounded-tl-sm border border-amber-200/60 bg-white px-4 py-2.5 text-sm shadow-sm dark:border-white/10 dark:bg-white/6 dark:text-white/85">
+              <MarkdownRender content={content} />
+              {isStreaming && (
+                <span className="ml-0.5 inline-block h-4 w-1 animate-pulse rounded-sm bg-amber-500 align-text-bottom" />
+              )}
+              {!isStreaming && (
+                <div className="mt-2 flex justify-end border-t border-amber-200/40 pt-1.5 dark:border-white/8">
+                  <CopyButton text={content} />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ToolCallBadges({ name }: { name: string }) {
+  const { getTranslations: t } = useTranslations();
+  if (!name) return null;
+  return (
+    <div className="mb-1.5 flex flex-wrap gap-1">
+      <span className="inline-flex items-center gap-1 rounded-md bg-amber-100/80 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+        <Icon name="build" variant="round" className="text-[10px]" />
+        {t("messageBubbles.calledTool") + " "}
+        {name}
+      </span>
+    </div>
   );
 }

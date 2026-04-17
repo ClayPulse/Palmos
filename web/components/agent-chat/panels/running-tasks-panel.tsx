@@ -3,9 +3,7 @@
 import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
 import type {
   FilterKey,
-  RunningTasksPanelProps,
   TaskItem,
-  TasksOverlayProps,
 } from "@/components/agent-chat/types";
 import type { WorkflowTaskState } from "@/lib/types";
 import Icon from "@/components/misc/icon";
@@ -48,7 +46,7 @@ function toWorkflowTaskState(task: TaskItem): WorkflowTaskState {
 export default function RunningTasksPanel({
   isPage,
   onClose,
-}: TasksOverlayProps) {
+}: { isPage: boolean; onClose: () => void }) {
   if (isPage) {
     return (
       <div className="absolute inset-0 z-30 flex">
@@ -70,7 +68,7 @@ export default function RunningTasksPanel({
   );
 }
 
-function RunningTasks({ onClose }: RunningTasksPanelProps) {
+function RunningTasks({ onClose }: { onClose?: () => void }) {
   const { getTranslations: t } = useTranslations();
   const [tasks, setTasks] = useState<TaskItem[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,14 +1,5 @@
 "use client";
 
-import type {
-  AgentProgressLogProps,
-  BlobResult,
-  BlobResultBodyProps,
-  LogEntryProps,
-  WorkflowBuiltBlockProps,
-  WorkflowResultBodyProps,
-  WorkflowTaskBlockProps,
-} from "@/components/agent-chat/types";
 import Icon from "@/components/misc/icon";
 import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
@@ -18,16 +9,32 @@ import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useWorkflowEnvCheck } from "@/lib/hooks/use-workflow-env-check";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import type { Workflow } from "@/lib/types";
+import type { Workflow, WorkflowTaskState } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Spinner } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
+
+interface BlobResult {
+  __blobUrl: string;
+  mime: string;
+}
+
+interface AgentProgressLogEntry {
+  type: string;
+  text?: string;
+  tool?: string;
+  output?: string;
+}
 
 export function WorkflowTaskBlock({
   task,
   onTerminate,
   isTerminating,
-}: WorkflowTaskBlockProps) {
+}: {
+  task: WorkflowTaskState;
+  onTerminate?: (taskId: string) => void;
+  isTerminating?: boolean;
+}) {
   const { getTranslations: t } = useTranslations();
   const [elapsed, setElapsed] = useState(0);
   const [finalElapsed, setFinalElapsed] = useState<number | null>(null);
@@ -141,7 +148,10 @@ export function WorkflowTaskBlock({
 export function WorkflowResultBody({
   result,
   workflowName,
-}: WorkflowResultBodyProps) {
+}: {
+  result: any;
+  workflowName: string;
+}) {
   const { getTranslations: t } = useTranslations();
   // Check for publishedWorkflowId — workflow build complete
   const publishedId = findPublishedWorkflowId(result);
@@ -282,7 +292,7 @@ function parseWorkflowName(text: string): string | null {
 
 // ── Agent progress log ──────────────────────────────────────────────────────
 
-function AgentProgressLog({ log }: AgentProgressLogProps) {
+function AgentProgressLog({ log }: { log: AgentProgressLogEntry[] }) {
   const { getTranslations: t } = useTranslations();
   const [expanded, setExpanded] = useState(false);
 
@@ -351,7 +361,13 @@ function AgentProgressLog({ log }: AgentProgressLogProps) {
   );
 }
 
-function LogEntry({ entry, toolOutput }: LogEntryProps) {
+function LogEntry({
+  entry,
+  toolOutput,
+}: {
+  entry: AgentProgressLogEntry;
+  toolOutput?: string;
+}) {
   const { getTranslations: t } = useTranslations();
   const [showOutput, setShowOutput] = useState(false);
 
@@ -412,7 +428,7 @@ function LogEntry({ entry, toolOutput }: LogEntryProps) {
 const DATA_URI_RE = /^data:([^;]+);base64,(.+)$/;
 
 /** Walk an object recursively and find the first blob-upload marker */
-function findBlobResult(obj: unknown): BlobResult | null {
+function findBlobResult(obj: any): BlobResult | null {
   if (obj && typeof obj === "object" && !Array.isArray(obj)) {
     const rec = obj as Record<string, unknown>;
     if (typeof rec.__blobUrl === "string" && typeof rec.mime === "string") {
@@ -458,7 +474,7 @@ function mimeToSuffix(mime: string): string {
  * Returns { mime, base64, dataUri } or null.
  */
 function findDataUri(
-  obj: unknown,
+  obj: any,
 ): { mime: string; base64: string; dataUri: string } | null {
   if (typeof obj === "string") {
     const m = obj.match(DATA_URI_RE);
@@ -474,7 +490,7 @@ function findDataUri(
 }
 
 /** Check if the result (or any nested value) contains an error field */
-function findError(obj: unknown): string | null {
+function findError(obj: any): string | null {
   if (obj && typeof obj === "object" && !Array.isArray(obj)) {
     const rec = obj as Record<string, unknown>;
     if (typeof rec.error === "string" && rec.error) return rec.error;
@@ -497,7 +513,13 @@ async function getSignedBlobUrl(blobUrl: string): Promise<string> {
   return signedUrl;
 }
 
-function BlobResultBody({ blobResult, workflowName }: BlobResultBodyProps) {
+function BlobResultBody({
+  blobResult,
+  workflowName,
+}: {
+  blobResult: BlobResult;
+  workflowName: string;
+}) {
   const { getTranslations: t } = useTranslations();
   const suffix = mimeToSuffix(blobResult.mime);
   const isImage = /^image\//.test(blobResult.mime);
@@ -583,7 +605,7 @@ function BlobResultBody({ blobResult, workflowName }: BlobResultBodyProps) {
 }
 
 /** Walk an object/string to find a publishedWorkflowId from managed agent output */
-function findPublishedWorkflowId(obj: unknown): string | null {
+function findPublishedWorkflowId(obj: any): string | null {
   if (typeof obj === "string") {
     // Try JSON parse from agent final message
     try {
@@ -617,7 +639,10 @@ function findPublishedWorkflowId(obj: unknown): string | null {
 export function WorkflowBuiltCard({
   publishedId,
   workflowName,
-}: WorkflowBuiltBlockProps) {
+}: {
+  publishedId: string;
+  workflowName: string;
+}) {
   const { getTranslations: t } = useTranslations();
   const { createCanvasTabView } = useTabViewManager();
   const { submit } = useChatContext();

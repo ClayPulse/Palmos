@@ -8,13 +8,19 @@ import { AppModeEnum } from "@/lib/enums";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useWorkflowEnvCheck } from "@/lib/hooks/use-workflow-env-check";
 import type { Workflow } from "@/lib/types";
-import type { MyWorkflowsCarouselProps } from "@/components/agent-chat/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Button, Chip } from "@heroui/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
+import type { ReactNode } from "react";
 import { useContext, useState } from "react";
 
-export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllToggle, showProjectName }: MyWorkflowsCarouselProps) {
+export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllToggle, showProjectName }: {
+  workflows: Workflow[];
+  onMutate?: () => void;
+  projectId?: string;
+  showAllToggle?: ReactNode;
+  showProjectName?: boolean;
+}) {
   const { getTranslations: t } = useTranslations();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);

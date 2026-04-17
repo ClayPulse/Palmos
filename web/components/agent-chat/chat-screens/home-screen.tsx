@@ -1,27 +1,36 @@
 "use client";
 
-import { MyWorkflowsCarousel } from "@/components/agent-chat/chat-screens/carousels/my-workflows-carousel";
 import { MyAutomationsCarousel } from "@/components/agent-chat/chat-screens/carousels/my-automations-carousel";
-import { STARTER_PROMPTS, StarterPromptButton } from "@/components/agent-chat/input/starter-prompts";
+import { MyWorkflowsCarousel } from "@/components/agent-chat/chat-screens/carousels/my-workflows-carousel";
+import {
+  STARTER_PROMPTS,
+  StarterPromptButton,
+} from "@/components/agent-chat/input/starter-prompts";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
 import { useAutomations } from "@/lib/hooks/use-automations";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import type {
-  HomeScreenProps,
-  ProjectExplorerProps,
-} from "@/components/agent-chat/types";
+import type { ProjectInfo } from "@/lib/types";
 import { Checkbox, Spinner } from "@heroui/react";
 import { useContext, useMemo, useState } from "react";
 
 const PROJECTS_PER_PAGE = 4;
 
-export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
+export default function HomeScreen({
+  onSend,
+  projects,
+}: {
+  onSend: (text: string) => void;
+  projects: ProjectInfo[];
+}) {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
-  const { workflows: allWorkflows, isLoading: isLoadingWorkflows, mutate: mutateWorkflows } =
-    useMarketplaceWorkflows("My Workflows");
+  const {
+    workflows: allWorkflows,
+    isLoading: isLoadingWorkflows,
+    mutate: mutateWorkflows,
+  } = useMarketplaceWorkflows("My Workflows");
   const { automations, isLoading: isLoadingAutomations } = useAutomations();
   const [showAll, setShowAll] = useState(false);
 
@@ -41,7 +50,11 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
       <div className="w-full max-w-xl rounded-2xl border border-amber-200/60 bg-gradient-to-br from-amber-50 to-orange-50/50 p-5 shadow-sm dark:border-amber-500/15 dark:from-amber-500/5 dark:to-orange-500/5">
         <div className="flex items-start gap-4">
           <div className="animate-pulse-glow flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-100 p-2 dark:bg-amber-500/15">
-            <img src="/assets/pulse-logo.svg" alt="Palmos" className="h-full w-full" />
+            <img
+              src="/assets/pulse-logo.svg"
+              alt="Palmos"
+              className="h-full w-full"
+            />
           </div>
           <div>
             <h2 className="text-default-800 text-base font-semibold dark:text-white/90">
@@ -104,7 +117,11 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
             workflows={myWorkflows}
             onMutate={() => mutateWorkflows()}
             showAllToggle={
-              <Checkbox size="sm" isSelected={showAll} onValueChange={setShowAll}>
+              <Checkbox
+                size="sm"
+                isSelected={showAll}
+                onValueChange={setShowAll}
+              >
                 <span className="text-default-400 text-xs">Show all</span>
               </Checkbox>
             }
@@ -119,7 +136,10 @@ export default function HomeScreen({ onSend, projects }: HomeScreenProps) {
 function ProjectExplorer({
   projects,
   onOpen,
-}: ProjectExplorerProps) {
+}: {
+  projects: ProjectInfo[];
+  onOpen: (name: string) => void;
+}) {
   const { getTranslations: t } = useTranslations();
   const [page, setPage] = useState(0);
   const totalPages = Math.ceil(projects.length / PROJECTS_PER_PAGE);
@@ -139,17 +159,17 @@ function ProjectExplorer({
             <button
               disabled={page === 0}
               onClick={() => setPage((p) => p - 1)}
-              className="flex h-6 w-6 items-center justify-center rounded-md text-default-400 transition-colors hover:text-default-700 disabled:opacity-30 dark:text-white/40 dark:hover:text-white/70"
+              className="text-default-400 hover:text-default-700 flex h-6 w-6 items-center justify-center rounded-md transition-colors disabled:opacity-30 dark:text-white/40 dark:hover:text-white/70"
             >
               <Icon name="chevron_left" variant="round" className="text-sm" />
             </button>
-            <span className="text-[10px] text-default-400 tabular-nums dark:text-white/40">
+            <span className="text-default-400 text-[10px] tabular-nums dark:text-white/40">
               {page + 1}/{totalPages}
             </span>
             <button
               disabled={page === totalPages - 1}
               onClick={() => setPage((p) => p + 1)}
-              className="flex h-6 w-6 items-center justify-center rounded-md text-default-400 transition-colors hover:text-default-700 disabled:opacity-30 dark:text-white/40 dark:hover:text-white/70"
+              className="text-default-400 hover:text-default-700 flex h-6 w-6 items-center justify-center rounded-md transition-colors disabled:opacity-30 dark:text-white/40 dark:hover:text-white/70"
             >
               <Icon name="chevron_right" variant="round" className="text-sm" />
             </button>
@@ -161,7 +181,7 @@ function ProjectExplorer({
           <button
             key={project.id ?? project.name}
             onClick={() => onOpen(project.name)}
-            className="flex items-start gap-3 rounded-xl border border-default-200/60 bg-white px-3.5 py-3 text-left transition-all hover:border-amber-300/60 hover:bg-amber-50/50 hover:shadow-sm dark:border-white/8 dark:bg-white/3 dark:hover:border-amber-500/25 dark:hover:bg-amber-500/5"
+            className="border-default-200/60 flex items-start gap-3 rounded-xl border bg-white px-3.5 py-3 text-left transition-all hover:border-amber-300/60 hover:bg-amber-50/50 hover:shadow-sm dark:border-white/8 dark:bg-white/3 dark:hover:border-amber-500/25 dark:hover:bg-amber-500/5"
           >
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-amber-100/70 dark:bg-amber-500/10">
               <Icon
@@ -171,22 +191,30 @@ function ProjectExplorer({
               />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-default-800 dark:text-white/85">
+              <p className="text-default-800 text-sm font-medium dark:text-white/85">
                 {project.name}
               </p>
               {project.description && (
-                <p className="mt-0.5 truncate text-[11px] text-default-400 dark:text-white/40">
+                <p className="text-default-400 mt-0.5 truncate text-[11px] dark:text-white/40">
                   {project.description}
                 </p>
               )}
-              <div className="mt-1.5 flex items-center gap-3 text-[10px] text-default-400 dark:text-white/35">
+              <div className="text-default-400 mt-1.5 flex items-center gap-3 text-[10px] dark:text-white/35">
                 <span className="flex items-center gap-1">
-                  <Icon name="account_tree" variant="round" className="text-[10px]" />
-                  {t("homeScreen.workflowCount", { count: project.workflowCount ?? 0 })}
+                  <Icon
+                    name="account_tree"
+                    variant="round"
+                    className="text-[10px]"
+                  />
+                  {t("homeScreen.workflowCount", {
+                    count: project.workflowCount ?? 0,
+                  })}
                 </span>
                 <span className="flex items-center gap-1">
                   <Icon name="group" variant="round" className="text-[10px]" />
-                  {t("homeScreen.memberCount", { count: project.memberCount ?? 1 })}
+                  {t("homeScreen.memberCount", {
+                    count: project.memberCount ?? 1,
+                  })}
                 </span>
               </div>
             </div>

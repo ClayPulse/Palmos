@@ -8,7 +8,7 @@ import { Spinner, Tooltip } from "@heroui/react";
 import type React from "react";
 import { useRef, useState } from "react";
 
-import type { ChatInputBarProps, ChatUpload } from "@/components/agent-chat/types";
+import type { ChatUpload } from "@/components/agent-chat/types";
 
 export type { ChatUpload } from "@/components/agent-chat/types";
 
@@ -32,7 +32,21 @@ export default function ChatInputBar({
   onRemoveUpload,
   onIndexUpload,
   footerExtra,
-}: ChatInputBarProps) {
+}: {
+  variant: "panel" | "page";
+  inputText: string;
+  setInputText: (v: string) => void;
+  isLoading: boolean;
+  uploads: ChatUpload[];
+  uploadsInProgress: boolean;
+  pendingSend: boolean;
+  onSend: () => void;
+  onStop: () => void;
+  onUploadFiles: (files: File[]) => void;
+  onRemoveUpload: (upload: ChatUpload) => void;
+  onIndexUpload: (upload: ChatUpload) => void;
+  footerExtra?: React.ReactNode;
+}) {
   const { getTranslations: t } = useTranslations();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);

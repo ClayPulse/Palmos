@@ -1,16 +1,15 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type { ChatBlockProps } from "@/lib/types";
+import type { ChatBlockData } from "@/lib/types";
 
-export function MCPResultBlock({ data }: ChatBlockProps) {
-  const mcp = data.mcp;
-  if (!mcp) return null;
-
+export function MCPResultBlock({
+  data,
+}: { data: Extract<ChatBlockData, { type: "mcp-result" }> }) {
   const resultStr =
-    typeof mcp.result === "string"
-      ? mcp.result
-      : JSON.stringify(mcp.result, null, 2);
+    typeof data.result === "string"
+      ? data.result
+      : JSON.stringify(data.result, null, 2);
 
   return (
     <div className="my-2 overflow-hidden rounded-xl border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
@@ -22,10 +21,10 @@ export function MCPResultBlock({ data }: ChatBlockProps) {
         />
         <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300">
           MCP
-          {mcp.serverName ? ` · ${mcp.serverName}` : ""}
+          {data.serverName ? ` · ${data.serverName}` : ""}
         </span>
         <span className="ml-auto rounded-md bg-amber-100 px-1.5 py-0.5 text-[9px] font-mono text-amber-800 dark:bg-amber-500/15 dark:text-amber-300">
-          {mcp.toolName}
+          {data.toolName}
         </span>
       </div>
       <pre className="max-h-64 overflow-auto p-3 text-[11px] leading-relaxed text-gray-700 dark:text-white/70">

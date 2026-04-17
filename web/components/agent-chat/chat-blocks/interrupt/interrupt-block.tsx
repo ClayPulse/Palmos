@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type { InterruptBlockProps } from "@/components/agent-chat/types";
+import type { InterruptState } from "@/lib/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useState } from "react";
 
@@ -15,7 +15,11 @@ export default function InterruptBlock({
   interrupt,
   onReply,
   isLoading,
-}: InterruptBlockProps) {
+}: {
+  interrupt: InterruptState;
+  onReply: (reply: string) => void;
+  isLoading?: boolean;
+}) {
   const { getTranslations: t } = useTranslations();
   const [customInput, setCustomInput] = useState("");
   const [replied, setReplied] = useState(false);

@@ -5,14 +5,16 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import { useExtensionAppManager } from "@/lib/hooks/use-extension-app-manager";
 import { AppViewConfig } from "@/lib/types";
-import type { ChatBlockProps } from "@/lib/types";
+import type { ChatBlockData } from "@/lib/types";
 import { createAppViewId } from "@/lib/views/view-helpers";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useMemo } from "react";
 
-export function PulseAppBlock({ data }: ChatBlockProps) {
+export function PulseAppBlock({
+  data,
+}: { data: Extract<ChatBlockData, { type: "pulse-app" }> }) {
   const editorContext = useContext(EditorContext);
-  const appId = data.pulseApp?.appId;
+  const appId = data.appId;
   const { marketplaceExtensions } = useExtensionAppManager("All");
 
   const ext = useMemo(
