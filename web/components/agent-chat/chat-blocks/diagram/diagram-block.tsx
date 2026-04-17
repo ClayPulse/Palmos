@@ -2,12 +2,26 @@
 
 import Icon from "@/components/misc/icon";
 import type { ChatBlockProps } from "@/lib/types";
-import { useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 export function DiagramBlock({ data }: ChatBlockProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const uniqueId = useId();
   const [error, setError] = useState<string | null>(null);
+  const [rendered, setRendered] = useState(false);
+
+  const handleDownload = useCallback(() => {
+    const svg = containerRef.current?.querySelector("svg");
+    if (!svg) return;
+    const svgData = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([svgData], { type: "image/svg+xml" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${data.diagram?.title || "diagram"}.svg`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [data.diagram?.title]);
 
   useEffect(() => {
     if (!containerRef.current || !data.diagram?.code) return;
@@ -27,6 +41,7 @@ export function DiagramBlock({ data }: ChatBlockProps) {
         );
         if (!cancelled && containerRef.current) {
           containerRef.current.innerHTML = svg;
+          setRendered(true);
         }
       } catch (err) {
         if (!cancelled) {
@@ -51,10 +66,17 @@ export function DiagramBlock({ data }: ChatBlockProps) {
         <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300">
           Diagram
         </span>
-        {data.diagram?.title && (
-          <span className="ml-auto truncate text-[9px] text-amber-600/70 dark:text-amber-300/60">
-            {data.diagram.title}
-          </span>
+        <span className="ml-auto truncate text-[9px] text-amber-600/70 dark:text-amber-300/60">
+          {data.diagram?.title}
+        </span>
+        {rendered && (
+          <button
+            onClick={handleDownload}
+            className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] text-amber-600 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-500/10"
+          >
+            <Icon name="download" variant="round" className="text-xs" />
+            SVG
+          </button>
         )}
       </div>
       <div className="overflow-auto p-3" ref={containerRef}>
