@@ -97,7 +97,7 @@ export function useChatSessions() {
   // Load sessions on mount from backend. No client-side persistence — if the
   // backend is unavailable the list is simply empty.
   useEffect(() => {
-    apiFetch("/api/chat/sessions")
+    apiFetch("/api/chat/sessions/list")
       .then(async (res) => {
         if (!res.ok) throw new Error("Backend unavailable");
         const data: Array<{
@@ -136,12 +136,12 @@ export function useChatSessions() {
 
       try {
         if (existsOnBackend) {
-          await apiFetch(`/api/chat/sessions/${sessionId}`, {
+          await apiFetch(`/api/chat/sessions/${sessionId}/update`, {
             method: "PUT",
             body: JSON.stringify({ title, projectId, messages: backendMessages }),
           });
-          setSessions((prev) => {
-            const next = prev.map((s) =>
+          setSessions((prev) =>
+            prev.map((s) =>
               s.id === sessionId
                 ? {
                     ...s,
@@ -150,15 +150,13 @@ export function useChatSessions() {
                     ...(projectId !== undefined ? { projectId } : {}),
                   }
                 : s,
-            );
-            next.sort((a, b) => b.updatedAt - a.updatedAt);
-            return next;
-          });
+            ),
+          );
           return sessionId;
         }
 
         // New session — POST and let the backend assign the canonical id.
-        const res = await apiFetch("/api/chat/sessions", {
+        const res = await apiFetch("/api/chat/sessions/create", {
           method: "POST",
           body: JSON.stringify({ title, projectId, messages: backendMessages }),
         });
@@ -205,7 +203,7 @@ export function useChatSessions() {
       projectId?: string | null;
     }> => {
       try {
-        const res = await apiFetch(`/api/chat/sessions/${sessionId}`);
+        const res = await apiFetch(`/api/chat/sessions/${sessionId}/get`);
         if (res.ok) {
           const data = await res.json();
           return {
@@ -227,7 +225,7 @@ export function useChatSessions() {
   const saveWorkflowBuild = useCallback(
     async (sessionId: string, publishedWorkflowId: string) => {
       try {
-        await apiFetch(`/api/chat/sessions/${sessionId}`, {
+        await apiFetch(`/api/chat/sessions/${sessionId}/link-workflow`, {
           method: "PATCH",
           body: JSON.stringify({ publishedWorkflowId }),
         });
@@ -253,7 +251,7 @@ export function useChatSessions() {
     knownSessionIdsRef.current.delete(sessionId);
     setActiveSessionId((current) => (current === sessionId ? null : current));
     try {
-      await apiFetch(`/api/chat/sessions/${sessionId}`, { method: "DELETE" });
+      await apiFetch(`/api/chat/sessions/${sessionId}/delete`, { method: "DELETE" });
     } catch {
       // Ignore backend errors
     }

@@ -51,7 +51,7 @@ export default function ChatSessionSidebar({
     if (!moveSessionId) return;
     setMoveSessionId(null);
     try {
-      await fetchAPI(`/api/chat/sessions/${moveSessionId}`, {
+      await fetchAPI(`/api/chat/sessions/${moveSessionId}/update`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ projectId }),
