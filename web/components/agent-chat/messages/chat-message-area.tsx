@@ -102,6 +102,17 @@ export function ChatMessageArea({
       {messageList.map((block, i) => (
         <ChatBlock key={i} data={block} />
       ))}
+      {workflowTasks.map((task) => (
+        <ChatBlock
+          key={task.taskId}
+          data={{
+            type: "workflow-task",
+            task,
+            onTerminate: onTerminateTask,
+            isTerminating: terminatingTaskIds?.has(task.taskId),
+          }}
+        />
+      ))}
       {loadingIndicator}
       {errorBanner}
     </>

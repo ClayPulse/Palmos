@@ -59,7 +59,15 @@ export default function ChatBlock({ data }: ChatBlockBaseProps) {
       );
     case "ai-message":
       return (
-        <AIMessage content={data.content} isStreaming={data.isStreaming} />
+        <AIMessage
+          content={data.content}
+          isStreaming={data.isStreaming}
+          widgets={data.widgets}
+          subagents={data.subagents}
+          workflowTask={data.workflowTask}
+          onTerminateTask={data.onTerminateTask}
+          isTerminatingTask={data.isTerminatingTask}
+        />
       );
     default:
       return null;
