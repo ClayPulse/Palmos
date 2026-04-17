@@ -52,12 +52,14 @@ export default function RemoteModuleProvider({
   /* Add service worker to allow offline access to extensions */
   // useEffect(() => {
   //   if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) {
+  //     // Clear old caches so stale assets don't persist across deploys
+  //     caches.keys().then((names) => {
+  //       names.forEach((name) => caches.delete(name));
+  //     });
+
   //     console.log("Registering service worker.");
   //     const wb = new Workbox("/service-worker.js");
-  //
-  //     // When a new service worker has installed and is waiting to activate,
-  //     // tell it to skip waiting (activate immediately), then reload so the
-  //     // client loads assets that match the new precache manifest.
+
   //     wb.addEventListener("waiting", () => {
   //       console.log("New service worker waiting. Activating and reloading...");
   //       wb.addEventListener("controlling", () => {
@@ -65,8 +67,8 @@ export default function RemoteModuleProvider({
   //       });
   //       wb.messageSkipWaiting();
   //     });
-  //
-  //     wb.register();
+
+  //     wb.register({ immediate: true });
   //   }
   // }, []);
 

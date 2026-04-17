@@ -1,11 +1,11 @@
 // import path from "path";
 // import { generateSW } from "workbox-build";
-//
+
 // /* Generate Service Worker */
-//
+
 // console.log("Generating service worker...");
 // const buildDir = path.resolve("../build/next");
-//
+
 // generateSW({
 //   swDest: `${buildDir}/service-worker.js`,
 //   globDirectory: buildDir,
@@ -16,6 +16,8 @@
 //   ],
 //   globIgnores: ["**/service-worker.js"],
 //   clientsClaim: true,
+//   skipWaiting: true,
+//   cleanupOutdatedCaches: true,
 //   maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB
 //   // Fallback to / for SPA routing
 //   navigateFallback: "/",
@@ -50,5 +52,3 @@
 //   .catch((err) => {
 //     console.error("Service worker generation failed:", err);
 //   });
-
-console.log("Service worker generation skipped (temporarily disabled).");
