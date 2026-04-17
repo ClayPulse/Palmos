@@ -1168,7 +1168,12 @@
 		"shareLink": "شارك هذا الرابط:",
 		"copy": "نسخ",
 		"done": "تم",
-		"createLink": "إنشاء رابط"
+		"cancel": "إلغاء",
+		"createLink": "إنشاء رابط",
+		"failedToCreate": "فشل في إنشاء رابط المشاركة.",
+		"copied": "تم النسخ!",
+		"linkCopied": "تم نسخ رابط المشاركة إلى الحافظة.",
+		"shareThisLink": "شارك هذا الرابط:"
 	},
 	"carousels": {
 		"myWorkflows": "سير العمل الخاص بي",

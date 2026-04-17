@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import { WorkflowTaskCard } from "@/components/agent-chat/cards/workflow-task-card";
 import type {
   FilterKey,
@@ -103,29 +104,21 @@ function RunningTasks({ onClose }: RunningTasksPanelProps) {
 
     const interval = setInterval(async () => {
       for (const task of runningTasks) {
-        try {
-          const res = await fetch(
-            `${backendUrl}/api/workflow/run/status?taskId=${task.taskId}`,
-            { credentials: "include" },
-          );
-          if (!res.ok) continue;
-          const data = await res.json();
-          setTasks((prev) =>
-            prev.map((t) =>
-              t.taskId === task.taskId
-                ? {
-                    ...t,
-                    status: data.status,
-                    result: data.result,
-                    error: data.error,
-                    completedAt: data.completedAt,
-                  }
-                : t,
-            ),
-          );
-        } catch {
-          // silent
-        }
+        const result = await fetchWorkflowRunStatus(backendUrl, task.taskId);
+        if (!result.ok) continue;
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.taskId === task.taskId
+              ? {
+                  ...t,
+                  status: result.data.status,
+                  result: result.data.result,
+                  error: result.data.error,
+                  completedAt: result.data.completedAt,
+                }
+              : t,
+          ),
+        );
       }
     }, 5_000);
     return () => clearInterval(interval);

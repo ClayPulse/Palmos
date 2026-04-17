@@ -1195,7 +1195,12 @@
 		"shareLink": "यह लिंक साझा करें:",
 		"copy": "कॉपी करें",
 		"done": "पूर्ण",
-		"createLink": "लिंक बनाएं"
+		"cancel": "रद्द करें",
+		"createLink": "लिंक बनाएं",
+		"failedToCreate": "शेयर लिंक बनाने में विफल।",
+		"copied": "कॉपी हो गया!",
+		"linkCopied": "शेयर लिंक क्लिपबोर्ड पर कॉपी किया गया।",
+		"shareThisLink": "यह लिंक साझा करें:"
 	},
 	"carousels": {
 		"myWorkflows": "मेरे वर्कफ़्लो",

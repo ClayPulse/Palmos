@@ -1195,7 +1195,12 @@
     "shareLink": "이 링크를 공유하세요:",
     "copy": "복사",
     "done": "완료",
-    "createLink": "링크 생성"
+    "cancel": "취소",
+    "createLink": "링크 생성",
+    "failedToCreate": "공유 링크를 만들지 못했습니다.",
+    "copied": "복사됨!",
+    "linkCopied": "공유 링크가 클립보드에 복사되었습니다.",
+    "shareThisLink": "이 링크를 공유하세요:"
   },
   "carousels": {
     "myWorkflows": "내 워크플로우",

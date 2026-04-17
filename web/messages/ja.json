@@ -1195,7 +1195,12 @@
 		"shareLink": "このリンクを共有：",
 		"copy": "コピー",
 		"done": "完了",
-		"createLink": "リンクを作成"
+		"cancel": "キャンセル",
+		"createLink": "リンクを作成",
+		"failedToCreate": "共有リンクの作成に失敗しました。",
+		"copied": "コピーしました！",
+		"linkCopied": "共有リンクがクリップボードにコピーされました。",
+		"shareThisLink": "このリンクを共有："
 	},
 	"carousels": {
 		"myWorkflows": "マイワークフロー",
