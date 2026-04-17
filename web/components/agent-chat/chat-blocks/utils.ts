@@ -1,4 +1,4 @@
-import type { WidgetBlockData } from "@/lib/types";
+import type { ChatBlockData } from "@/lib/types";
 import type { ComponentInstance } from "@a2ui/react";
 
 /**
@@ -11,10 +11,10 @@ import type { ComponentInstance } from "@a2ui/react";
  *  - `render_canvas` → workflow canvas snippet
  *  - `draft_diagram` → mermaid diagram
  */
-export function parseWidgetFromToolCall(
+export function parseBlockFromToolCall(
   toolName: string,
   args: Record<string, unknown>,
-): WidgetBlockData | null {
+): ChatBlockData | null {
   switch (toolName) {
     case "render_a2ui":
     case "a2ui_render":
@@ -22,17 +22,15 @@ export function parseWidgetFromToolCall(
       if (args.components && args.root) {
         return {
           type: "a2ui",
-          a2ui: {
-            root: args.root as string,
-            components: args.components as ComponentInstance[],
-            data: (args.data as Record<string, unknown>) ?? undefined,
-          },
+          root: args.root as string,
+          components: args.components as ComponentInstance[],
+          data: (args.data as Record<string, unknown>) ?? undefined,
         };
       }
       if (args.messages) {
         return {
-          type: "a2ui",
-          a2uiMessages: args.messages as unknown[],
+          type: "a2ui-stream",
+          messages: args.messages as unknown[],
         };
       }
       return null;
@@ -43,11 +41,9 @@ export function parseWidgetFromToolCall(
     case "call_mcp_tool": {
       return {
         type: "mcp-result",
-        mcp: {
-          toolName: (args.tool_name as string) ?? toolName,
-          serverName: args.server_name as string | undefined,
-          result: args.result ?? args.output ?? args,
-        },
+        toolName: (args.tool_name as string) ?? toolName,
+        serverName: args.server_name as string | undefined,
+        result: args.result ?? args.output ?? args,
       };
     }
 
@@ -58,7 +54,7 @@ export function parseWidgetFromToolCall(
       if (!appId) return null;
       return {
         type: "pulse-app",
-        pulseApp: { appId },
+        appId,
       };
     }
 
@@ -70,13 +66,11 @@ export function parseWidgetFromToolCall(
       if (!code) return null;
       return {
         type: "diagram",
-        diagram: {
-          code,
-          title: args.title as string | undefined,
-          diagramType: (args.diagramType ?? args.diagram_type) as
-            | string
-            | undefined,
-        },
+        code,
+        title: args.title as string | undefined,
+        diagramType: (args.diagramType ?? args.diagram_type) as
+          | string
+          | undefined,
       };
     }
 
@@ -85,10 +79,8 @@ export function parseWidgetFromToolCall(
     case "show_workflow": {
       return {
         type: "canvas",
-        canvas: {
-          nodes: args.nodes as unknown[] | undefined,
-          edges: args.edges as unknown[] | undefined,
-        },
+        nodes: args.nodes as unknown[] | undefined,
+        edges: args.edges as unknown[] | undefined,
       };
     }
 
@@ -100,16 +92,16 @@ export function parseWidgetFromToolCall(
 /**
  * Try to parse widget data from a ToolMessage's content (JSON string).
  */
-export function parseWidgetFromToolMessage(
+export function parseBlockFromToolMessage(
   toolCallId: string,
   content: string,
   toolName?: string,
-): WidgetBlockData | null {
+): ChatBlockData | null {
   // If we know the tool name, try parsing args from the content
   if (toolName) {
     try {
       const parsed = JSON.parse(content);
-      const w = parseWidgetFromToolCall(toolName, parsed);
+      const w = parseBlockFromToolCall(toolName, parsed);
       if (w) return w;
     } catch {
       // Not JSON — treat as MCP result text
@@ -119,7 +111,8 @@ export function parseWidgetFromToolMessage(
       ) {
         return {
           type: "mcp-result",
-          mcp: { toolName, result: content },
+          toolName,
+          result: content,
         };
       }
     }
@@ -130,7 +123,7 @@ export function parseWidgetFromToolMessage(
     const parsed = JSON.parse(content);
     if (parsed && typeof parsed === "object") {
       if (parsed._widget_type) {
-        return parseWidgetFromToolCall(
+        return parseBlockFromToolCall(
           parsed._widget_type,
           parsed,
         );
@@ -139,11 +132,9 @@ export function parseWidgetFromToolMessage(
       if (parsed.components && parsed.root) {
         return {
           type: "a2ui",
-          a2ui: {
-            root: parsed.root,
-            components: parsed.components,
-            data: parsed.data,
-          },
+          root: parsed.root,
+          components: parsed.components,
+          data: parsed.data,
         };
       }
       // Workflow: { name, content } where content is stringified { nodes, edges }
@@ -153,11 +144,9 @@ export function parseWidgetFromToolMessage(
           if (workflow && (workflow.nodes || workflow.edges)) {
             return {
               type: "canvas",
-              canvas: {
-                name: parsed.name,
-                nodes: workflow.nodes,
-                edges: workflow.edges,
-              },
+              name: parsed.name,
+              nodes: workflow.nodes,
+              edges: workflow.edges,
             };
           }
         } catch {

@@ -1,0 +1,122 @@
+"use client";
+
+import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
+import { useTranslations } from "@/lib/hooks/use-translations";
+import type { ChatBlockData, WorkflowTaskState } from "@/lib/types";
+import { Spinner } from "@heroui/react";
+import { motion } from "framer-motion";
+import type { RefObject } from "react";
+
+export function ChatMessageArea({
+  isLoadingSession,
+  isEmptyConversation,
+  emptyState,
+  messageList,
+  workflowTasks,
+  onTerminateTask,
+  terminatingTaskIds,
+  activeInterrupt,
+  resume,
+  isLoading,
+  error,
+  scrollContainerRef,
+}: {
+  variant: "panel" | "page";
+  isLoadingSession: boolean;
+  isEmptyConversation: boolean;
+  emptyState: React.ReactNode;
+  messageList: ChatBlockData[];
+  workflowTasks: WorkflowTaskState[];
+  onTerminateTask?: (taskId: string) => void;
+  terminatingTaskIds?: Set<string>;
+  activeInterrupt: any;
+  resume: (value: string) => void;
+  isLoading: boolean;
+  error: any;
+  scrollContainerRef: RefObject<HTMLDivElement | null>;
+}) {
+  const { getTranslations: t } = useTranslations();
+
+  const loadingIndicator = isLoading && (
+    <div className="py-2">
+      <div className="relative overflow-hidden rounded-xl border border-amber-300/40 bg-gradient-to-r from-amber-50/80 via-orange-50/50 to-amber-50/80 shadow-sm dark:border-amber-500/15 dark:from-amber-500/5 dark:via-orange-500/8 dark:to-amber-500/5">
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/20 to-transparent dark:via-amber-400/10"
+          animate={{ x: ["-100%", "100%"] }}
+          transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <div className="relative flex items-center justify-center gap-2.5 py-2.5">
+          <div className="flex items-center gap-1">
+            {[0, 1, 2].map((i) => (
+              <motion.div
+                key={i}
+                className="h-1.5 w-1.5 rounded-full bg-amber-500 dark:bg-amber-400"
+                animate={{ scale: [1, 1.4, 1], opacity: [0.4, 1, 0.4] }}
+                transition={{
+                  duration: 1,
+                  repeat: Infinity,
+                  delay: i * 0.2,
+                  ease: "easeInOut",
+                }}
+              />
+            ))}
+          </div>
+          <motion.p
+            className="text-xs font-medium text-amber-600/80 dark:text-amber-300/70"
+            animate={{ opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            {t("chatMessageArea.thinking")}
+          </motion.p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const sessionLoadingIndicator = (
+    <div className="flex flex-1 flex-col items-center justify-center gap-3 py-12">
+      <Spinner size="lg" />
+      <motion.p
+        className="text-sm font-medium text-amber-600/80 dark:text-amber-300/70"
+        animate={{ opacity: [0.5, 1, 0.5] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+      >
+        {t("chatMessageArea.loadingConversation")}
+      </motion.p>
+    </div>
+  );
+
+  const errorBanner = !!error && (
+    <div className="rounded-lg border border-red-300/40 bg-red-50 px-3 py-2 text-xs text-red-600 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-400">
+      {error instanceof Error
+        ? error.message
+        : t("chatMessageArea.errorOccurred")}
+    </div>
+  );
+
+  const messageContent = isLoadingSession ? (
+    sessionLoadingIndicator
+  ) : (
+    <>
+      {isEmptyConversation && emptyState}
+      {messageList.map((block, i) => (
+        <ChatBlock key={i} data={block} />
+      ))}
+      {loadingIndicator}
+      {errorBanner}
+    </>
+  );
+
+  return (
+    <>
+      <div
+        ref={scrollContainerRef}
+        className={
+          "flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-5 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))]"
+        }
+      >
+        {messageContent}
+      </div>
+    </>
+  );
+}

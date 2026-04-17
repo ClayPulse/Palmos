@@ -4,21 +4,23 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { CanvasViewConfig } from "@/lib/types";
-import type { ChatBlockProps } from "@/lib/types";
+import type { ChatBlockData } from "@/lib/types";
 import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useMemo } from "react";
 
-export function CanvasBlock({ data }: ChatBlockProps) {
+export function CanvasBlock({
+  data,
+}: { data: Extract<ChatBlockData, { type: "canvas" }> }) {
   const editorContext = useContext(EditorContext);
   const { createCanvasTabView } = useTabViewManager();
 
   const workflowContent = useMemo(
     () => ({
-      nodes: (data.canvas?.nodes ?? []) as any[],
-      edges: (data.canvas?.edges ?? []) as any[],
+      nodes: (data.nodes ?? []) as any[],
+      edges: (data.edges ?? []) as any[],
     }),
-    [data.canvas],
+    [data.nodes, data.edges],
   );
 
   function openInNewTab() {
@@ -54,9 +56,9 @@ export function CanvasBlock({ data }: ChatBlockProps) {
         <p className="text-xs font-medium text-default-700 dark:text-white/85">
           Your workflow is ready.
         </p>
-        {data.canvas?.name && (
+        {data.name && (
           <p className="text-[10px] text-default-400 dark:text-white/50">
-            {data.canvas.name}
+            {data.name}
           </p>
         )}
       </div>

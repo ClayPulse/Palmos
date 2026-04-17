@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type { ChatBlockProps } from "@/lib/types";
+import type { ChatBlockData } from "@/lib/types";
 import {
   useCallback,
   useEffect,
@@ -11,7 +11,11 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 
-export function DiagramBlock({ data }: ChatBlockProps) {
+export function DiagramBlock({
+  data,
+}: {
+  data: Extract<ChatBlockData, { type: "diagram" }>;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const uniqueId = useId();
@@ -77,8 +81,8 @@ export function DiagramBlock({ data }: ChatBlockProps) {
       const vh = viewport.clientHeight - 24;
       const sw = svgEl.getBoundingClientRect().width / transform.scale;
       const sh = svgEl.getBoundingClientRect().height / transform.scale;
-      if (sw > 0 && sh > 0) {
-        const fitScale = Math.min(vw / sw, vh / sh);
+      if (sw > 0 && sh > 0 && vw > 0 && vh > 0) {
+        const fitScale = Math.max(0.1, Math.min(vw / sw, vh / sh));
         setTransform({ x: 0, y: 0, scale: fitScale });
         return;
       }
@@ -94,13 +98,13 @@ export function DiagramBlock({ data }: ChatBlockProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${data.diagram?.title || "diagram"}.svg`;
+    a.download = `${data.title || "diagram"}.svg`;
     a.click();
     URL.revokeObjectURL(url);
-  }, [data.diagram?.title]);
+  }, [data.title]);
 
   useEffect(() => {
-    const diagramCode = data.diagram?.code;
+    const diagramCode = data.code;
 
     if (!containerRef.current || !diagramCode) return;
     let cancelled = false;
@@ -169,26 +173,13 @@ export function DiagramBlock({ data }: ChatBlockProps) {
 
           containerRef.current.innerHTML = svg;
 
-          // Fix text clipping + fit diagram into viewport
-          const viewport = viewportRef.current;
           const svgEl = containerRef.current.querySelector("svg");
-          if (viewport && svgEl) {
-            // Let the browser lay out the SVG first
-            requestAnimationFrame(() => {
-              if (cancelled) return;
-              const vw = viewport.clientWidth - 24; // account for p-3 padding
-              const vh = viewport.clientHeight - 24;
-              const sw = svgEl.getBoundingClientRect().width;
-              const sh = svgEl.getBoundingClientRect().height;
-              if (sw > 0 && sh > 0) {
-                const fitScale = Math.min(vw / sw, vh / sh);
-                setTransform({ x: 0, y: 0, scale: fitScale });
-              }
-              setRendered(true);
-            });
-          } else {
-            setRendered(true);
+          if (svgEl) {
+            svgEl.removeAttribute("height");
+            svgEl.style.maxWidth = "100%";
+            svgEl.style.height = "auto";
           }
+          setRendered(true);
         }
       } catch (err) {
         if (!cancelled) {
@@ -202,75 +193,77 @@ export function DiagramBlock({ data }: ChatBlockProps) {
     return () => {
       cancelled = true;
     };
-  }, [data.diagram?.code, uniqueId]);
+  }, [data.code, uniqueId]);
 
   return (
-    <div className="my-2 overflow-hidden rounded-xl border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
-      <div className="flex items-center gap-2 border-b border-amber-200/40 bg-amber-50/50 px-3 py-1.5 dark:border-white/6 dark:bg-amber-500/5">
-        <Icon
-          name="schema"
-          variant="round"
-          className="text-xs text-amber-600 dark:text-amber-300"
-        />
-        <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300">
-          {diagramType ?? "Diagram"}
-        </span>
-        <span className="ml-auto truncate text-[9px] text-amber-600/70 dark:text-amber-300/60">
-          {data.diagram?.title}
-        </span>
-        {rendered && (
-          <>
-            <button
-              onClick={handleResetView}
-              className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] text-amber-600 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-500/10"
-              title="Reset zoom"
-            >
-              <Icon
-                name="center_focus_strong"
-                variant="round"
-                className="text-xs"
-              />
-              {Math.round(transform.scale * 100)}%
-            </button>
-            <button
-              onClick={handleDownload}
-              className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] text-amber-600 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-500/10"
-            >
-              <Icon name="download" variant="round" className="text-xs" />
-              SVG
-            </button>
-          </>
-        )}
-      </div>
-      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-      <div
-        ref={viewportRef}
-        className="flex items-center justify-center overflow-hidden p-3"
-        style={{
-          cursor: isPanning ? "grabbing" : rendered ? "grab" : "default",
-          height: "min(70vh, 500px)",
-          minWidth: 300,
-        }}
-        onPointerDown={handlePointerDown}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerCancel={handlePointerUp}
-      >
+    <div>
+      <div className="my-2 overflow-hidden rounded-xl border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
+        <div className="flex items-center gap-2 border-b border-amber-200/40 bg-amber-50/50 px-3 py-1.5 dark:border-white/6 dark:bg-amber-500/5">
+          <Icon
+            name="schema"
+            variant="round"
+            className="text-xs text-amber-600 dark:text-amber-300"
+          />
+          <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-300">
+            {diagramType ?? "Diagram"}
+          </span>
+          <span className="ml-auto truncate text-[9px] text-amber-600/70 dark:text-amber-300/60">
+            {data.title}
+          </span>
+          {rendered && (
+            <>
+              <button
+                onClick={handleResetView}
+                className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] text-amber-600 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-500/10"
+                title="Reset zoom"
+              >
+                <Icon
+                  name="center_focus_strong"
+                  variant="round"
+                  className="text-xs"
+                />
+                {Math.round(transform.scale * 100)}%
+              </button>
+              <button
+                onClick={handleDownload}
+                className="flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] text-amber-600 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-500/10"
+              >
+                <Icon name="download" variant="round" className="text-xs" />
+                SVG
+              </button>
+            </>
+          )}
+        </div>
+        {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
         <div
-          ref={containerRef}
+          ref={viewportRef}
+          className="relative overflow-hidden bg-white p-3 text-black dark:text-black"
           style={{
-            transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
-            transformOrigin: "center center",
-            transition: isPanning ? "none" : "transform 0.1s ease-out",
+            cursor: isPanning ? "grabbing" : rendered ? "grab" : "default",
+            height: 400,
+            minWidth: 300,
           }}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
         >
           {error ? (
             <pre className="text-[11px] text-red-500">{error}</pre>
-          ) : (
+          ) : !rendered ? (
             <p className="text-xs text-gray-400 dark:text-white/40">
               Rendering diagram...
             </p>
-          )}
+          ) : null}
+          <div
+            ref={containerRef}
+            style={{
+              display: rendered && !error ? "block" : "none",
+              transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
+              transformOrigin: "center center",
+              transition: isPanning ? "none" : "transform 0.1s ease-out",
+            }}
+          />
         </div>
       </div>
     </div>

@@ -1,6 +1,5 @@
 "use client";
 
-import type { ShareChatModalProps } from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import {
@@ -20,7 +19,11 @@ export default function ShareChatModal({
   sessionId,
   isOpen,
   onClose,
-}: ShareChatModalProps) {
+}: {
+  sessionId: string | null;
+  isOpen: boolean;
+  onClose: () => void;
+}) {
   const { getTranslations: t } = useTranslations();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);

@@ -1,8 +1,8 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type { A2UIStreamRendererProps } from "@/components/agent-chat/types";
-import type { ChatBlockProps } from "@/lib/types";
+
+import type { ChatBlockData } from "@/lib/types";
 import {
   A2UIProvider,
   A2UIRenderer,
@@ -17,7 +17,7 @@ import { useCallback, useMemo } from "react";
 initializeDefaultCatalog();
 
 /** Processes pre-provided A2UI messages and renders the surface. */
-function A2UIStreamRenderer({ messages }: A2UIStreamRendererProps) {
+function A2UIStreamRenderer({ messages }: { messages: any[] }) {
   const { processMessages } = useA2UIHook();
 
   // Process messages once on mount
@@ -39,7 +39,9 @@ function A2UIStreamRenderer({ messages }: A2UIStreamRendererProps) {
   );
 }
 
-export function A2UIBlock({ data }: ChatBlockProps) {
+export function A2UIBlock({
+  data,
+}: { data: Extract<ChatBlockData, { type: "a2ui" | "a2ui-stream" }> }) {
   const handleAction = useCallback(
     async (message: A2UIClientEventMessage) => {
       const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -57,7 +59,7 @@ export function A2UIBlock({ data }: ChatBlockProps) {
     [],
   );
 
-  if (data.a2ui) {
+  if (data.type === "a2ui") {
     return (
       <div className="my-2 overflow-hidden rounded-xl border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
         <div className="flex items-center gap-2 border-b border-amber-200/40 bg-amber-50/50 px-3 py-1.5 dark:border-white/6 dark:bg-amber-500/5">
@@ -72,9 +74,9 @@ export function A2UIBlock({ data }: ChatBlockProps) {
         </div>
         <div className="p-3">
           <A2UIViewer
-            root={data.a2ui.root}
-            components={data.a2ui.components}
-            data={data.a2ui.data}
+            root={data.root}
+            components={data.components}
+            data={data.data}
             onAction={(action) => console.log("A2UI action:", action)}
           />
         </div>
@@ -82,7 +84,7 @@ export function A2UIBlock({ data }: ChatBlockProps) {
     );
   }
 
-  if (data.a2uiMessages) {
+  if (data.type === "a2ui-stream") {
     return (
       <div className="my-2 overflow-hidden rounded-xl border border-amber-200/60 bg-white shadow-sm dark:border-white/10 dark:bg-white/6">
         <div className="flex items-center gap-2 border-b border-amber-200/40 bg-amber-50/50 px-3 py-1.5 dark:border-white/6 dark:bg-amber-500/5">
@@ -97,7 +99,7 @@ export function A2UIBlock({ data }: ChatBlockProps) {
         </div>
         <div className="p-3">
           <A2UIProvider onAction={handleAction}>
-            <A2UIStreamRenderer messages={data.a2uiMessages} />
+            <A2UIStreamRenderer messages={data.messages} />
           </A2UIProvider>
         </div>
       </div>

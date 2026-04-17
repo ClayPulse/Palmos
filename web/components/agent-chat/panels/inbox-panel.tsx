@@ -3,11 +3,7 @@
 import Icon from "@/components/misc/icon";
 import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import { useTranslations } from "@/lib/hooks/use-translations";
-import type {
-  InboxMessage,
-  InboxMessageCardProps,
-  InboxPanelProps,
-} from "@/components/agent-chat/types";
+import type { InboxMessage } from "@/components/agent-chat/types";
 import { Spinner } from "@heroui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -79,7 +75,7 @@ export function useInbox() {
 export default function InboxPanel({
   isOpen,
   onClose,
-}: InboxPanelProps) {
+}: { isOpen: boolean; onClose: () => void }) {
   const { getTranslations: t } = useTranslations();
   const { messages, markAllRead, dismiss } = useInbox();
   const [loading, setLoading] = useState(true);
@@ -127,7 +123,7 @@ export default function InboxPanel({
 function InboxMessageCard({
   message,
   onDismiss,
-}: InboxMessageCardProps) {
+}: { message: InboxMessage; onDismiss?: (id: string) => void }) {
   const { getTranslations: t } = useTranslations();
   const kwargs = message.additionalKwargs;
   const isWorkflowBuild = kwargs?.type === "workflow_build_complete";

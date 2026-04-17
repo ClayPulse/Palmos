@@ -1,11 +1,9 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type { QuickPillButtonsProps } from "@/components/agent-chat/types";
-
 export default function QuickPillButtons({
   onSend,
-}: QuickPillButtonsProps) {
+}: { onSend: (text: string) => void }) {
   return (
     <>
       <button

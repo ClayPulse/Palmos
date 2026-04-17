@@ -1,24 +1,14 @@
 "use client";
 
-import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
 import {
-  AIResponseCard,
-  ResponseCard,
-  UserBubble,
-} from "@/components/agent-chat/chat-blocks/text/message-bubbles";
-import {
-  parseWidgetFromToolCall,
-  parseWidgetFromToolMessage,
+  parseBlockFromToolCall,
+  parseBlockFromToolMessage,
 } from "@/components/agent-chat/chat-blocks/utils";
-import AgentChatPaywall from "@/components/agent-chat/chat-screens/agent-chat-paywall";
 import HomeScreen from "@/components/agent-chat/chat-screens/home-screen";
 import ProjectScreen from "@/components/agent-chat/chat-screens/project-screen";
 import { type ChatUpload } from "@/components/agent-chat/input/chat-input-bar";
 import QuickPillButtons from "@/components/agent-chat/input/quick-pill-buttons";
-import {
-  AgentChatPageLayout,
-  AgentChatPanelLayout,
-} from "@/components/agent-chat/layouts/agent-chat-layouts";
+import { AgentChatLayout } from "@/components/agent-chat/layouts/agent-chat-layouts";
 import ChatHistoryPanel from "@/components/interface/panels/chat-history-panel";
 import ShareChatModal from "@/components/modals/share-chat-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
@@ -34,10 +24,11 @@ import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { AgentChatPanelLayout } from "./layouts/agent-chat-panel-layout";
 import RunningTasksPanel from "./panels/running-tasks-panel";
 
 /** Walk an object recursively to find a publishedWorkflowId */
-function extractPublishedWorkflowId(obj: unknown): string | null {
+function extractPublishedWorkflowId(obj: any): string | null {
   if (typeof obj === "string") {
     try {
       const parsed = JSON.parse(obj);
@@ -428,10 +419,10 @@ export default function AgentChat({
 
       const applyStatus = (data: {
         status?: string;
-        result?: unknown;
+        result?: any;
         error?: string | null;
       }) => {
-        const log = (data.result as { log?: unknown })?.log as
+        const log = (data.result as { log?: any })?.log as
           | { type: string; text?: string; tool?: string }[]
           | undefined;
         let latestProgress: string | undefined;
@@ -683,7 +674,9 @@ export default function AgentChat({
 
   const inlinedTaskIds = new Set<string>();
 
-  const messageList = messages.map((msg, i) => {
+  const messageList: ChatBlockData[] = [];
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
     const isHuman = msg._getType() === "human";
     const content =
       typeof msg.content === "string"
@@ -705,7 +698,7 @@ export default function AgentChat({
 
     if (msg instanceof AIMessage && msg.tool_calls) {
       for (const tc of msg.tool_calls) {
-        const w = parseWidgetFromToolCall(
+        const w = parseBlockFromToolCall(
           tc.name,
           tc.args as Record<string, unknown>,
         );
@@ -716,7 +709,7 @@ export default function AgentChat({
     if (!isHuman) {
       const toolCallId = (msg as any).tool_call_id ?? "";
       const toolName = toolCallNameMap.get(toolCallId) ?? undefined;
-      const w = parseWidgetFromToolMessage(toolCallId, content, toolName);
+      const w = parseBlockFromToolMessage(toolCallId, content, toolName);
       if (w) widgets.push(w);
     }
 
@@ -730,22 +723,19 @@ export default function AgentChat({
     const nonCanvasWidgets = widgets.filter((w) => w.type !== "canvas");
     const hasNonCanvasWidgets = nonCanvasWidgets.length > 0;
 
+    // AI message whose content is raw JSON but produced widget(s) — show widgets only
     if (hasNonCanvasWidgets && content.trimStart().startsWith("{")) {
-      return (
-        <div key={msg.id ?? i} className="flex flex-col gap-2.5">
-          {nonCanvasWidgets.map((w, wi) => (
-            <ChatBlock key={wi} data={w} />
-          ))}
-        </div>
-      );
+      for (const w of nonCanvasWidgets) messageList.push(w);
+      continue;
     }
 
+    // Canvas-only widget with JSON content — skip entirely
     if (
       widgets.length > 0 &&
       nonCanvasWidgets.length === 0 &&
       content.trimStart().startsWith("{")
     ) {
-      return null;
+      continue;
     }
 
     const toolCallNames: string[] = [];
@@ -755,15 +745,16 @@ export default function AgentChat({
       }
     }
 
-    if (
-      !content &&
-      spawned.length === 0 &&
-      !widgets.length &&
-      toolCallNames.length === 0 &&
-      !workflowTask
-    )
-      return null;
-    if (!isHuman && (msg as any).tool_call_id) return null;
+    if (toolCallNames.length > 0) {
+      widgets.push({ type: "tool-call", toolCallNames });
+    }
+
+    // Nothing to show
+    if (!content && spawned.length === 0 && !widgets.length && !workflowTask)
+      continue;
+    // Skip ToolMessages (result is already parsed into widgets above)
+    if (!isHuman && (msg as any).tool_call_id) continue;
+    // AI message with only raw JSON content and no widgets/subagents
     if (
       !isHuman &&
       !hasNonCanvasWidgets &&
@@ -772,83 +763,36 @@ export default function AgentChat({
       content.trimStart().startsWith("{") &&
       content.trimStart().endsWith("}")
     ) {
-      return null;
+      continue;
     }
 
-    return (
-      <div key={msg.id ?? i} className="flex flex-col gap-2.5">
-        {isHuman ? (
-          content && (
-            <UserBubble
-              text={content}
-              attachmentCount={
-                msg.additional_kwargs?.attachmentCount as number | undefined
-              }
-              uploadIds={
-                msg.additional_kwargs?.uploadIds as string[] | undefined
-              }
-            />
-          )
-        ) : isPage ? (
-          <AIResponseCard
-            content={content}
-            isStreaming={isLoading && i === messages.length - 1}
-            widgets={widgets}
-            toolCallNames={toolCallNames}
-          />
-        ) : (
-          <ResponseCard
-            content={content}
-            isStreaming={isLoading && i === messages.length - 1}
-            widgets={widgets}
-            toolCallNames={toolCallNames}
-          />
-        )}
-        {spawned.length > 0 && (
-          <div className="ml-4 flex flex-col gap-1.5 border-l-2 border-amber-400/30 pl-3 dark:border-amber-500/30">
-            {spawned.map((sa) => (
-              <ChatBlock
-                key={sa.id}
-                data={{ type: "subagent", subagent: sa }}
-              />
-            ))}
-          </div>
-        )}
-        {workflowTask && (
-          <ChatBlock
-            data={{
-              type: "workflow-task",
-              task: workflowTask,
-              onTerminate: handleTerminateTask,
-              isTerminating: terminatingTaskIds?.has(workflowTask.taskId),
-            }}
-          />
-        )}
-      </div>
-    );
-  });
-
-  // Find the latest workflow widget from messages after the last user message
-  const latestWorkflow = useMemo(() => {
-    let lastHumanIdx = -1;
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i]._getType() === "human") {
-        lastHumanIdx = i;
-        break;
+    if (isHuman) {
+      if (content) {
+        messageList.push({
+          type: "user-message",
+          text: content,
+          attachmentCount: msg.additional_kwargs?.attachmentCount as
+            | number
+            | undefined,
+          uploadIds: msg.additional_kwargs?.uploadIds as string[] | undefined,
+        });
       }
+    } else {
+      messageList.push({
+        type: "ai-message",
+        variant: isPage ? "page" : "panel",
+        content,
+        isStreaming: isLoading && i === messages.length - 1,
+        widgets,
+        subagents: spawned,
+        workflowTask,
+        onTerminateTask: handleTerminateTask,
+        isTerminatingTask: workflowTask
+          ? terminatingTaskIds?.has(workflowTask.taskId)
+          : undefined,
+      });
     }
-    let found: ChatBlockData | null = null;
-    for (let i = lastHumanIdx + 1; i < messages.length; i++) {
-      const msg = messages[i];
-      const content = typeof msg.content === "string" ? msg.content : "";
-      if (!content) continue;
-      const toolCallId = (msg as any).tool_call_id ?? "";
-      const toolName = toolCallNameMap.get(toolCallId) ?? undefined;
-      const w = parseWidgetFromToolMessage(toolCallId, content, toolName);
-      if (w?.type === "canvas") found = w;
-    }
-    return found;
-  }, [messages, toolCallNameMap]);
+  }
 
   const quickPillButtons = <QuickPillButtons onSend={handleSend} />;
 
@@ -886,7 +830,6 @@ export default function AgentChat({
     isLoading,
     error,
     todos,
-    latestWorkflow,
     scrollContainerRef,
   } as const;
 
@@ -930,7 +873,7 @@ export default function AgentChat({
   };
 
   if (isPage) {
-    return <AgentChatPageLayout {...layoutProps} />;
+    return <AgentChatLayout {...layoutProps} />;
   }
 
   return (

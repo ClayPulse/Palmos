@@ -2,7 +2,7 @@
 
 import Icon from "@/components/misc/icon";
 import type { TriggerType } from "@/lib/types";
-import type { MyAutomationsCarouselProps } from "@/components/agent-chat/types";
+import type { Automation } from "@/lib/types";
 import { Button, Chip } from "@heroui/react";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useState } from "react";
@@ -34,7 +34,11 @@ export function MyAutomationsCarousel({
   automations,
   onOpenEditor,
   onCreateNew,
-}: MyAutomationsCarouselProps) {
+}: {
+  automations: Automation[];
+  onOpenEditor: (automation: Automation) => void;
+  onCreateNew: () => void;
+}) {
   const { getTranslations: t } = useTranslations();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);
