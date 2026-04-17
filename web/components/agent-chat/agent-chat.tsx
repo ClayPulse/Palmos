@@ -1,27 +1,25 @@
 "use client";
 
-import { SubagentCard } from "@/components/agent-chat/blocks/subagent/subagent-block";
-import { WorkflowTaskCard } from "@/components/agent-chat/blocks/workflow-task/workflow-task-block";
 import type { WorkflowTaskState } from "@/components/agent-chat/helpers";
 import ChatHistoryPanel from "@/components/interface/panels/chat-history-panel";
-import HomeScreen from "@/components/agent-chat/initial-chat-screens/home-screen";
-import ProjectScreen from "@/components/agent-chat/initial-chat-screens/project-screen";
+import HomeScreen from "@/components/agent-chat/chat-screens/home-screen";
+import ProjectScreen from "@/components/agent-chat/chat-screens/project-screen";
 import {
   AgentChatPageLayout,
   AgentChatPanelLayout,
 } from "@/components/agent-chat/layouts/agent-chat-layouts";
-import AgentChatPaywall from "@/components/agent-chat/initial-chat-screens/agent-chat-paywall";
-import Block, {
+import AgentChatPaywall from "@/components/agent-chat/chat-screens/agent-chat-paywall";
+import ChatBlock, {
   type ChatBlockData,
   parseWidgetFromToolCall,
   parseWidgetFromToolMessage,
-} from "@/components/agent-chat/blocks/block";
+} from "@/components/agent-chat/chat-blocks/chat-block";
 import { type ChatUpload } from "@/components/agent-chat/input/chat-input-bar";
 import {
   AIResponseCard,
   ResponseCard,
   UserBubble,
-} from "@/components/agent-chat/blocks/text/message-bubbles";
+} from "@/components/agent-chat/chat-blocks/text/message-bubbles";
 import QuickPillButtons from "@/components/agent-chat/input/quick-pill-buttons";
 import ShareChatModal from "@/components/modals/share-chat-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
@@ -727,7 +725,7 @@ export default function AgentChat({
       return (
         <div key={msg.id ?? i} className="flex flex-col gap-2.5">
           {nonCanvasWidgets.map((w, wi) => (
-            <Block key={wi} data={w} />
+            <ChatBlock key={wi} data={w} />
           ))}
         </div>
       );
@@ -800,15 +798,18 @@ export default function AgentChat({
         {spawned.length > 0 && (
           <div className="ml-4 flex flex-col gap-1.5 border-l-2 border-amber-400/30 pl-3 dark:border-amber-500/30">
             {spawned.map((sa) => (
-              <SubagentCard key={sa.id} subagent={sa} />
+              <ChatBlock key={sa.id} data={{ type: "subagent", subagent: sa }} />
             ))}
           </div>
         )}
         {workflowTask && (
-          <WorkflowTaskCard
-            task={workflowTask}
-            onTerminate={handleTerminateTask}
-            isTerminating={terminatingTaskIds?.has(workflowTask.taskId)}
+          <ChatBlock
+            data={{
+              type: "workflow-task",
+              task: workflowTask,
+              onTerminate: handleTerminateTask,
+              isTerminating: terminatingTaskIds?.has(workflowTask.taskId),
+            }}
           />
         )}
       </div>

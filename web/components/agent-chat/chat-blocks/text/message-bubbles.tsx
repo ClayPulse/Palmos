@@ -1,6 +1,6 @@
 "use client";
 
-import Block from "@/components/agent-chat/blocks/block";
+import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
 import type {
@@ -180,7 +180,7 @@ export function AIResponseCard({
             </div>
           )}
           {widgets.map((w, wi) => (
-            <Block key={wi} data={w} />
+            <ChatBlock key={wi} data={w} />
           ))}
         </div>
       </div>
@@ -239,7 +239,7 @@ export function ResponseCard({
           {widgets.length > 0 && (
             <div className="px-3 pb-3">
               {widgets.map((w, wi) => (
-                <Block key={wi} data={w} />
+                <ChatBlock key={wi} data={w} />
               ))}
             </div>
           )}

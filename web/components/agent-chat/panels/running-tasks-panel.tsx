@@ -1,6 +1,6 @@
 "use client";
 
-import { WorkflowTaskCard } from "@/components/agent-chat/blocks/workflow-task/workflow-task-block";
+import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
 import type {
   FilterKey,
   RunningTasksPanelProps,
@@ -235,15 +235,17 @@ function RunningTasks({ onClose }: RunningTasksPanelProps) {
         ) : (
           <div className="flex flex-col gap-2">
             {filtered.map((task) => (
-              <WorkflowTaskCard
+              <ChatBlock
                 key={task.taskId}
-                task={toWorkflowTaskState(task)}
-                isTerminating={terminatingIds.has(task.taskId)}
-                onTerminate={
-                  task.status === "running" || task.status === "pending"
-                    ? handleTerminate
-                    : undefined
-                }
+                data={{
+                  type: "workflow-task",
+                  task: toWorkflowTaskState(task),
+                  isTerminating: terminatingIds.has(task.taskId),
+                  onTerminate:
+                    task.status === "running" || task.status === "pending"
+                      ? handleTerminate
+                      : undefined,
+                }}
               />
             ))}
           </div>

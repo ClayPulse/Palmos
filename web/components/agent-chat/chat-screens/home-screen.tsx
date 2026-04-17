@@ -1,7 +1,7 @@
 "use client";
 
-import { MyWorkflowsCarousel } from "@/components/agent-chat/carousels/my-workflows-carousel";
-import { MyAutomationsCarousel } from "@/components/agent-chat/carousels/my-automations-carousel";
+import { MyWorkflowsCarousel } from "@/components/agent-chat/chat-screens/carousels/my-workflows-carousel";
+import { MyAutomationsCarousel } from "@/components/agent-chat/chat-screens/carousels/my-automations-carousel";
 import { STARTER_PROMPTS, StarterPromptButton } from "@/components/agent-chat/input/starter-prompts";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";

@@ -1,4 +1,4 @@
-import type { ChatBlockData } from "@/lib/types";
+import type { WidgetBlockData } from "@/lib/types";
 import type { ComponentInstance } from "@a2ui/react";
 
 /**
@@ -14,7 +14,7 @@ import type { ComponentInstance } from "@a2ui/react";
 export function parseWidgetFromToolCall(
   toolName: string,
   args: Record<string, unknown>,
-): ChatBlockData | null {
+): WidgetBlockData | null {
   switch (toolName) {
     case "render_a2ui":
     case "a2ui_render":
@@ -104,7 +104,7 @@ export function parseWidgetFromToolMessage(
   toolCallId: string,
   content: string,
   toolName?: string,
-): ChatBlockData | null {
+): WidgetBlockData | null {
   // If we know the tool name, try parsing args from the content
   if (toolName) {
     try {

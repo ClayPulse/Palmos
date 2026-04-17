@@ -1,7 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import type { InterruptCardProps } from "@/components/agent-chat/types";
+import type { InterruptBlockProps } from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { useState } from "react";
 
@@ -11,11 +11,11 @@ import { useState } from "react";
  * agent lists options separated by commas or newlines, they are rendered as
  * clickable buttons. A free-text input is always available as fallback.
  */
-export default function InterruptCard({
+export default function InterruptBlock({
   interrupt,
   onReply,
   isLoading,
-}: InterruptCardProps) {
+}: InterruptBlockProps) {
   const { getTranslations: t } = useTranslations();
   const [customInput, setCustomInput] = useState("");
   const [replied, setReplied] = useState(false);

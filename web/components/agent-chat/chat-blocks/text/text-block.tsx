@@ -1,9 +1,6 @@
 "use client";
 
-import Block from "@/components/agent-chat/blocks/block";
-import { TodoListBlock } from "@/components/agent-chat/blocks/todo-list/todo-list-block";
-import InterruptCard from "@/components/agent-chat/blocks/interrupt/interrupt-block";
-import { WorkflowTaskCard } from "@/components/agent-chat/blocks/workflow-task/workflow-task-block";
+import ChatBlock from "@/components/agent-chat/chat-blocks/chat-block";
 import type { ChatMessageAreaProps } from "@/components/agent-chat/types";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import { Spinner } from "@heroui/react";
@@ -93,18 +90,24 @@ export default function ChatMessageArea({
       {isEmptyConversation && emptyState}
       {messageList}
       {workflowTasks.map((task) => (
-        <WorkflowTaskCard
+        <ChatBlock
           key={task.taskId}
-          task={task}
-          onTerminate={onTerminateTask}
-          isTerminating={terminatingTaskIds?.has(task.taskId)}
+          data={{
+            type: "workflow-task",
+            task,
+            onTerminate: onTerminateTask,
+            isTerminating: terminatingTaskIds?.has(task.taskId),
+          }}
         />
       ))}
       {activeInterrupt && (
-        <InterruptCard
-          interrupt={activeInterrupt}
-          onReply={resume}
-          isLoading={isLoading}
+        <ChatBlock
+          data={{
+            type: "interrupt",
+            interrupt: activeInterrupt,
+            onReply: resume,
+            isLoading,
+          }}
         />
       )}
       {loadingIndicator}
@@ -132,10 +135,10 @@ export default function ChatMessageArea({
         todos.length > 0 &&
         (isPage ? (
           <div className="border-t border-amber-200/40 px-4 py-2 sm:px-8 md:px-16 lg:px-[max(4rem,calc(50%-36rem))] dark:border-white/8">
-            <TodoListBlock todos={todos} />
+            <ChatBlock data={{ type: "todo-list", todos }} />
           </div>
         ) : (
-          <TodoListBlock todos={todos} />
+          <ChatBlock data={{ type: "todo-list", todos }} />
         ))}
 
       {/* Workflow card */}
@@ -147,7 +150,7 @@ export default function ChatMessageArea({
               : "px-3 py-2"
           }
         >
-          <Block data={latestWorkflow} />
+          <ChatBlock data={latestWorkflow} />
         </div>
       )}
     </>

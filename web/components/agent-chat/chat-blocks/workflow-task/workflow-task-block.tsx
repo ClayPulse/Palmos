@@ -8,7 +8,7 @@ import type {
   LogEntryProps,
   WorkflowBuiltCardProps,
   WorkflowResultBodyProps,
-  WorkflowTaskCardProps,
+  WorkflowTaskBlockProps,
   WorkflowTaskState,
 } from "@/components/agent-chat/types";
 import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
@@ -24,11 +24,11 @@ import { createCanvasViewId } from "@/lib/views/view-helpers";
 import { Spinner } from "@heroui/react";
 import { useContext, useEffect, useState } from "react";
 
-export function WorkflowTaskCard({
+export function WorkflowTaskBlock({
   task,
   onTerminate,
   isTerminating,
-}: WorkflowTaskCardProps) {
+}: WorkflowTaskBlockProps) {
   const { getTranslations: t } = useTranslations();
   const [elapsed, setElapsed] = useState(0);
   const [finalElapsed, setFinalElapsed] = useState<number | null>(null);

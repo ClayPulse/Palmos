@@ -730,7 +730,7 @@ export interface SubagentInfo {
 }
 
 /** Parsed widget descriptor extracted from a tool call or tool result. */
-export interface ChatBlockData {
+export interface WidgetBlockData {
   type: "a2ui" | "mcp-result" | "pulse-app" | "canvas" | "diagram";
   /** A2UI: component definitions for A2UIViewer */
   a2ui?: {

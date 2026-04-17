@@ -1,9 +1,9 @@
-import type ChatMessageArea from "@/components/agent-chat/blocks/text/text-block";
+import type ChatMessageArea from "@/components/agent-chat/chat-blocks/text/text-block";
 import type ChatInputBar from "@/components/agent-chat/input/chat-input-bar";
 import type { InterruptState } from "@/lib/hooks/use-deep-agent";
 import type {
   Automation,
-  ChatBlockData,
+  WidgetBlockData,
   ProjectInfo,
   SubagentInfo,
   Todo,
@@ -11,6 +11,19 @@ import type {
 } from "@/lib/types";
 import type React from "react";
 import type { ComponentProps, ReactNode, RefObject } from "react";
+
+// ── Chat block data (discriminated union for all block types) ───────────────
+
+export type ChatBlockData =
+  | WidgetBlockData
+  | { type: "interrupt"; interrupt: InterruptState; onReply: (reply: string) => void; isLoading?: boolean }
+  | { type: "workflow-task"; task: WorkflowTaskState; onTerminate?: (taskId: string) => void; isTerminating?: boolean }
+  | { type: "subagent"; subagent: SubagentInfo }
+  | { type: "todo-list"; todos: Todo[] };
+
+export interface ChatBlockBaseProps {
+  data: ChatBlockData;
+}
 
 // ── Agent chat layouts ──────────────────────────────────────────────────────
 
@@ -157,10 +170,6 @@ export interface InboxMessageCardProps {
 }
 
 // ── Inline widget ───────────────────────────────────────────────────────────
-
-export interface ChatBlockBaseProps {
-  data: ChatBlockData;
-}
 
 export interface A2UIStreamRendererProps {
   messages: unknown[];
