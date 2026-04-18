@@ -77,6 +77,7 @@ export default function ChatBlock({ data }: ChatBlockBaseProps) {
           onTerminateTask={data.onTerminateTask}
           isTerminatingTask={data.isTerminatingTask}
           onSuggestionClick={data.onSuggestionClick}
+          chosenSuggestion={data.chosenSuggestion}
         />
       );
     default:

@@ -677,6 +677,7 @@ export default function AgentChat({
   const inlinedTaskIds = new Set<string>();
 
   const messageList: ChatBlockData[] = [];
+  const messageSourceMap = new Map<number, typeof messages[number]>();
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
     const isHuman = msg._getType() === "human";
@@ -792,7 +793,11 @@ export default function AgentChat({
         isTerminatingTask: workflowTask
           ? terminatingTaskIds?.has(workflowTask.taskId)
           : undefined,
+        chosenSuggestion: msg.additional_kwargs?.chosenSuggestion as
+          | string
+          | undefined,
       });
+      messageSourceMap.set(messageList.length - 1, msg);
     }
   }
 
@@ -818,7 +823,17 @@ export default function AgentChat({
   if (!isLoading && !activeInterrupt && !activeQAForm) {
     for (let i = messageList.length - 1; i >= 0; i--) {
       if (messageList[i].type === "ai-message") {
-        (messageList[i] as any).onSuggestionClick = handleSend;
+        const sourceMsg = messageSourceMap.get(i);
+        (messageList[i] as any).onSuggestionClick = (text: string) => {
+          // Persist chosen suggestion into the AI message's additional_kwargs
+          if (sourceMsg) {
+            sourceMsg.additional_kwargs = {
+              ...sourceMsg.additional_kwargs,
+              chosenSuggestion: text,
+            };
+          }
+          handleSend(text);
+        };
         break;
       }
     }

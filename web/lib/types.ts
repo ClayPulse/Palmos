@@ -836,6 +836,7 @@ export type ChatBlockData =
       onTerminateTask?: (taskId: string) => void;
       isTerminatingTask?: boolean;
       onSuggestionClick?: (text: string) => void;
+      chosenSuggestion?: string;
     };
 
 export interface ChatBlockBaseProps {
