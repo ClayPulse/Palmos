@@ -495,79 +495,15 @@ function OnboardingViewInner({
 
           {/* Alternative communication options */}
           {!isStreaming && streamedText && (
-            <div className="mt-4 rounded-xl border border-default-200 bg-default-50 p-4 dark:border-white/10 dark:bg-white/5">
-              <p className="text-default-700 text-sm font-semibold dark:text-white/80 mb-1">
-                Prefer to talk to an AI manager?
-              </p>
-              <p className="text-default-400 text-xs dark:text-white/40 mb-3">
-                Get a phone call, or communicate via 14+ IM channels or apps.
-              </p>
-              <div className="flex flex-col gap-2.5">
-                <div className="flex gap-2 items-end">
-                  <PhoneInput
-                    defaultCountry="us"
-                    value={phone}
-                    onChange={setPhone}
-                    inputClassName="!flex-1"
-                    className="flex-1 [&_.react-international-phone-input-container]:!w-full [&_.react-international-phone-input-container]:!border-default-200 [&_.react-international-phone-input-container]:!rounded-lg [&_.react-international-phone-input]:!w-full [&_.react-international-phone-input]:!bg-white [&_.react-international-phone-input]:!text-sm dark:[&_.react-international-phone-input-container]:!border-white/10 dark:[&_.react-international-phone-input]:!bg-white/5 dark:[&_.react-international-phone-input]:!text-white/70 dark:[&_.react-international-phone-country-selector-button]:!bg-white/5 dark:[&_.react-international-phone-country-selector-button]:!border-white/10"
-                  />
-                  <Button
-                    size="sm"
-                    className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white shrink-0 h-[36px]"
-                    isDisabled={phone.replace(/\D/g, "").length < 7}
-                    isLoading={callingInProgress}
-                    onPress={handleGetCall}
-                    startContent={
-                      <Icon name="call" variant="round" className="text-sm" />
-                    }
-                  >
-                    Get a call
-                  </Button>
-                </div>
-                <Button
-                  size="sm"
-                  variant="flat"
-                  className="w-full"
-                  onPress={startVoiceCall}
-                  isLoading={conversation.status === "connecting"}
-                  startContent={
-                    <Icon name="mic" variant="round" className="text-sm" />
-                  }
-                >
-                  Talk to AI Manager
-                </Button>
-                <div className="flex gap-2">
-                  <Button
-                    as="a"
-                    href="https://im.palmos.ai"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    size="sm"
-                    variant="flat"
-                    className="flex-1"
-                    startContent={
-                      <Icon name="chat" variant="round" className="text-sm" />
-                    }
-                  >
-                    IM Channels
-                  </Button>
-                  <Button
-                    as="a"
-                    href="https://palmos.ai/?forced=true"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    size="sm"
-                    variant="flat"
-                    className="flex-1"
-                    startContent={
-                      <Icon name="apps" variant="round" className="text-sm" />
-                    }
-                  >
-                    Apps
-                  </Button>
-                </div>
-              </div>
-            </div>
+            <ContactOptions
+              phone={phone}
+              onPhoneChange={setPhone}
+              onGetCall={handleGetCall}
+              callingInProgress={callingInProgress}
+              onStartVoiceCall={startVoiceCall}
+              voiceConnecting={conversation.status === "connecting"}
+              id="analysis"
+            />
           )}
 
           {searchSources.length > 0 && (
@@ -788,24 +724,25 @@ function OnboardingViewInner({
 
   // ── Default: onboarding form ──────────────────────────────────────────────
   return (
-    <div className="flex flex-col items-center gap-6 py-8">
+    <div className="flex h-[100vh] flex-col items-center justify-center gap-4 py-4">
       <div className="w-full max-w-xl">
         {/* Hero */}
-        <div className="mb-6 text-center">
-          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-500/15">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/25">
             <img
               src="/assets/pulse-logo.svg"
               alt="Palmos"
-              className="h-8 w-8"
+              className="h-5 w-5 brightness-0 invert"
             />
           </div>
-          <h2 className="text-default-800 text-lg font-semibold dark:text-white/90">
-            {t("homeScreen.whatToBuild")}
-          </h2>
-          <p className="text-default-500 mt-1 text-sm dark:text-white/50">
-            Tell us about your business and we&apos;ll suggest automations to
-            save you time
-          </p>
+          <div>
+            <h2 className="text-default-900 text-base font-bold dark:text-white leading-tight">
+              {t("homeScreen.whatToBuild")}
+            </h2>
+            <p className="text-default-400 text-xs dark:text-white/40">
+              Describe your business and we&apos;ll suggest automations
+            </p>
+          </div>
         </div>
 
         {/* Main textarea */}
@@ -814,7 +751,7 @@ function OnboardingViewInner({
           value={description}
           onValueChange={setDescription}
           minRows={5}
-          maxRows={12}
+          maxRows={8}
           classNames={{
             inputWrapper:
               "border-default-300 bg-white shadow-sm dark:border-white/10 dark:bg-white/5",
@@ -822,7 +759,7 @@ function OnboardingViewInner({
         />
 
         {/* Secondary options */}
-        <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row">
           <Input
             placeholder="Website URL (optional)"
             value={websiteUrl}
@@ -853,11 +790,11 @@ function OnboardingViewInner({
           </div>
         </div>
 
-        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+        {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 
         <Button
-          className="mt-5 w-full bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 transition-shadow"
-          size="lg"
+          className="mt-3 w-full bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 transition-all"
+          size="md"
           isDisabled={!description.trim()}
           onPress={handleSubmit}
         >
@@ -865,79 +802,15 @@ function OnboardingViewInner({
         </Button>
 
         {/* Alternative communication options */}
-        <div className="mt-4 rounded-xl border border-default-200/60 bg-white p-4 dark:border-white/8 dark:bg-white/3">
-          <p className="text-default-700 text-sm font-semibold dark:text-white/80 mb-1">
-            Prefer to talk to an AI manager?
-          </p>
-          <p className="text-default-400 text-xs dark:text-white/40 mb-3">
-            Get a phone call, or communicate via 14+ IM channels or apps.
-          </p>
-          <div className="flex flex-col gap-2.5">
-            <div className="flex gap-2 items-end">
-              <PhoneInput
-                defaultCountry="us"
-                value={phone}
-                onChange={setPhone}
-                inputClassName="!flex-1"
-                className="flex-1 [&_.react-international-phone-input-container]:!w-full [&_.react-international-phone-input-container]:!border-default-300 [&_.react-international-phone-input-container]:!rounded-lg [&_.react-international-phone-input-container]:!shadow-sm [&_.react-international-phone-input]:!w-full [&_.react-international-phone-input]:!bg-white [&_.react-international-phone-input]:!text-sm dark:[&_.react-international-phone-input-container]:!border-white/10 dark:[&_.react-international-phone-input]:!bg-white/5 dark:[&_.react-international-phone-input]:!text-white/70 dark:[&_.react-international-phone-country-selector-button]:!bg-white/5 dark:[&_.react-international-phone-country-selector-button]:!border-white/10"
-              />
-              <Button
-                size="sm"
-                className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white shrink-0 h-[36px]"
-                isDisabled={phone.replace(/\D/g, "").length < 7}
-                isLoading={callingInProgress}
-                onPress={handleGetCall}
-                startContent={
-                  <Icon name="call" variant="round" className="text-sm" />
-                }
-              >
-                Get a call
-              </Button>
-            </div>
-            <Button
-              size="sm"
-              variant="flat"
-              className="w-full"
-              onPress={startVoiceCall}
-              isLoading={conversation.status === "connecting"}
-              startContent={
-                <Icon name="mic" variant="round" className="text-sm" />
-              }
-            >
-              Talk to AI Manager
-            </Button>
-            <div className="flex gap-2">
-              <Button
-                as="a"
-                href="https://im.palmos.ai"
-                target="_blank"
-                rel="noopener noreferrer"
-                size="sm"
-                variant="flat"
-                className="flex-1"
-                startContent={
-                  <Icon name="chat" variant="round" className="text-sm" />
-                }
-              >
-                IM Channels
-              </Button>
-              <Button
-                as="a"
-                href="https://palmos.ai/?forced=true"
-                target="_blank"
-                rel="noopener noreferrer"
-                size="sm"
-                variant="flat"
-                className="flex-1"
-                startContent={
-                  <Icon name="apps" variant="round" className="text-sm" />
-                }
-              >
-                Apps
-              </Button>
-            </div>
-          </div>
-        </div>
+        <ContactOptions
+          phone={phone}
+          onPhoneChange={setPhone}
+          onGetCall={handleGetCall}
+          callingInProgress={callingInProgress}
+          onStartVoiceCall={startVoiceCall}
+          voiceConnecting={conversation.status === "connecting"}
+          id="onboarding"
+        />
       </div>
 
 
@@ -1171,6 +1044,119 @@ function ProjectView({
 }
 
 // ── Shared components ───────────────────────────────────────────────────────
+
+function ContactOptions({
+  phone,
+  onPhoneChange,
+  onGetCall,
+  callingInProgress,
+  onStartVoiceCall,
+  voiceConnecting,
+}: {
+  phone: string;
+  onPhoneChange: (v: string) => void;
+  onGetCall: () => void;
+  callingInProgress: boolean;
+  onStartVoiceCall: () => void;
+  voiceConnecting: boolean;
+  id?: string;
+}) {
+  return (
+    <div className="mt-5 space-y-3">
+      {/* Section label */}
+      <div className="relative flex items-center">
+        <div className="flex-1 border-t border-default-200 dark:border-white/10" />
+        <span className="px-3 text-[11px] font-medium uppercase tracking-widest text-default-400 dark:text-white/30">
+          or connect another way
+        </span>
+        <div className="flex-1 border-t border-default-200 dark:border-white/10" />
+      </div>
+
+      {/* Talk to AI Manager */}
+      <div className="rounded-2xl border border-default-200 bg-gradient-to-br from-default-50 to-default-100/50 p-4 shadow-md dark:border-white/10 dark:from-white/5 dark:to-white/[0.03]">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-default-100 dark:bg-white/10">
+            <Icon name="support_agent" variant="round" className="text-xl text-default-700 dark:text-white/80" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-default-800 leading-tight dark:text-white/90">Talk to AI Manager</p>
+            <p className="text-[11px] text-default-400 dark:text-white/40">Choose how you&apos;d like to connect</p>
+          </div>
+        </div>
+
+        {/* Web Call */}
+        <div className="mb-3">
+          <Button
+            className="w-full font-semibold"
+            color="primary"
+            onPress={onStartVoiceCall}
+            isDisabled={voiceConnecting}
+            startContent={<Icon name="mic" variant="round" className="text-base" />}
+          >
+            {voiceConnecting ? "Connecting..." : "Start Web Call"}
+          </Button>
+        </div>
+
+        <div className="border-t border-default-200 dark:border-white/8 my-3" />
+
+        {/* Phone Call */}
+        <div>
+          <p className="text-xs font-medium text-default-600 mb-2 dark:text-white/60">
+            Or we&apos;ll call your phone
+          </p>
+          <div className="flex gap-2 items-end">
+            <PhoneInput
+              defaultCountry="us"
+              value={phone}
+              onChange={onPhoneChange}
+              inputClassName="!flex-1"
+              className="flex-1 [&_.react-international-phone-input-container]:!w-full [&_.react-international-phone-input-container]:!border-default-300 [&_.react-international-phone-input-container]:!rounded-lg [&_.react-international-phone-input]:!w-full [&_.react-international-phone-input]:!bg-white [&_.react-international-phone-input]:!text-sm dark:[&_.react-international-phone-input-container]:!border-white/10 dark:[&_.react-international-phone-input]:!bg-white/5 dark:[&_.react-international-phone-input]:!text-white/70 dark:[&_.react-international-phone-country-selector-button]:!bg-white/5 dark:[&_.react-international-phone-country-selector-button]:!border-white/10"
+            />
+            <Button
+              color="primary"
+              size="sm"
+              className="font-semibold shrink-0 h-[36px]"
+              isDisabled={phone.replace(/\D/g, "").length < 7}
+              isLoading={callingInProgress}
+              onPress={onGetCall}
+              startContent={<Icon name="call" variant="round" className="text-sm" />}
+            >
+              Call me
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* IM channels & Apps */}
+      <div className="flex gap-2.5">
+        <Button
+          as="a"
+          href="https://im.palmos.ai"
+          target="_blank"
+          rel="noopener noreferrer"
+          size="sm"
+          variant="bordered"
+          className="flex-1 text-default-600 dark:text-white/60"
+          startContent={<Icon name="chat" variant="round" className="text-sm text-amber-500 dark:text-amber-400" />}
+        >
+          WhatsApp, Slack &amp; more
+        </Button>
+        <Button
+          as="a"
+          href="https://palmos.ai/?forced=true"
+          target="_blank"
+          rel="noopener noreferrer"
+          size="sm"
+          variant="bordered"
+          className="flex-1 text-default-600 dark:text-white/60"
+          startContent={<Icon name="apps" variant="round" className="text-sm text-amber-500 dark:text-amber-400" />}
+        >
+          Get the App
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function InsightCard({
   suggestion,
