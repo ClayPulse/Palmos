@@ -139,6 +139,7 @@ export default function EditorContextProvider({
             role: proj.role,
             memberCount: proj.memberCount,
             workflowCount: proj.workflowCount,
+            projectAnalysis: proj.projectAnalysis ?? null,
           }));
           setEditorStates((prev) => ({ ...prev, projectsInfo }));
         })

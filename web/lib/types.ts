@@ -655,6 +655,21 @@ export type ProjectInfo = {
   memberCount?: number;
   workflowCount?: number;
   agentChatAllowed?: boolean;
+  projectAnalysis?: ProjectAnalysisInfo | null;
+};
+
+export type ProjectAnalysisInfo = {
+  id: string;
+  summary?: string | null;
+  insights: OnboardingSuggestion[] | null;
+  completedAt: string;
+};
+
+export type OnboardingSuggestion = {
+  title: string;
+  description: string;
+  category: string;
+  impact: "high" | "medium" | "low";
 };
 
 export type ProjectMemberInfo = {

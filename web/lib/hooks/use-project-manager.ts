@@ -40,6 +40,7 @@ export function useProjectManager() {
         role: proj.role,
         memberCount: proj.memberCount,
         workflowCount: proj.workflowCount,
+        projectAnalysis: proj.projectAnalysis ?? null,
       }));
       editorContext?.setEditorStates((prev) => ({
         ...prev,

@@ -5,7 +5,6 @@ import {
   parseBlockFromToolMessage,
 } from "@/components/agent-chat/chat-blocks/utils";
 import HomeScreen from "@/components/agent-chat/chat-screens/home-screen";
-import ProjectScreen from "@/components/agent-chat/chat-screens/project-screen";
 import { type ChatUpload } from "@/components/agent-chat/input/chat-input-bar";
 import QuickPillButtons from "@/components/agent-chat/input/quick-pill-buttons";
 import { AgentChatLayout } from "@/components/agent-chat/layouts/agent-chat-layouts";
@@ -23,7 +22,7 @@ import type {
 import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AgentChatPanelLayout } from "./layouts/agent-chat-panel-layout";
 import RunningTasksPanel from "./panels/running-tasks-panel";
 
@@ -613,10 +612,27 @@ export default function AgentChat({
   const isEmptyConversation =
     messages.length === 0 && !isLoading && !isLoadingSession;
 
-  const emptyState = activeProject ? (
-    <ProjectScreen onSend={handleSend} project={activeProject} />
-  ) : (
-    <HomeScreen onSend={handleSend} projects={projects ?? []} />
+  const handleOnboardingComplete = useCallback(
+    (analysis: import("@/lib/types").ProjectAnalysisInfo) => {
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        projectsInfo: prev.projectsInfo?.map((p) =>
+          p.id === activeProject?.id
+            ? { ...p, projectAnalysis: analysis }
+            : p,
+        ),
+      }));
+    },
+    [editorContext, activeProject?.id],
+  );
+
+  const emptyState = (
+    <HomeScreen
+      onSend={handleSend}
+      projects={projects ?? []}
+      activeProject={activeProject}
+      onOnboardingComplete={handleOnboardingComplete}
+    />
   );
 
   // Build a map of tool_call_id -> tool name from AIMessages
