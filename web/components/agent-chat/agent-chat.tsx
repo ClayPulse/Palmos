@@ -5,7 +5,6 @@ import {
   parseBlockFromToolMessage,
 } from "@/components/agent-chat/chat-blocks/utils";
 import HomeScreen from "@/components/agent-chat/chat-screens/home-screen";
-import ProjectScreen from "@/components/agent-chat/chat-screens/project-screen";
 import { type ChatUpload } from "@/components/agent-chat/input/chat-input-bar";
 import QuickPillButtons from "@/components/agent-chat/input/quick-pill-buttons";
 import { AgentChatLayout } from "@/components/agent-chat/layouts/agent-chat-layouts";
@@ -23,7 +22,7 @@ import type {
 import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { AgentChatPanelLayout } from "./layouts/agent-chat-panel-layout";
 import RunningTasksPanel from "./panels/running-tasks-panel";
 
@@ -83,7 +82,9 @@ export default function AgentChat({
     workflowBuilds,
     saveWorkflowBuild,
     activeInterrupt,
+    activeQAForm,
     resume,
+    resumeQAForm,
   } = useChatContext();
 
   const { allowed: agentChatAllowed, isLoading: isLoadingAccess } =
@@ -611,10 +612,31 @@ export default function AgentChat({
   const isEmptyConversation =
     messages.length === 0 && !isLoading && !isLoadingSession;
 
-  const emptyState = activeProject ? (
-    <ProjectScreen onSend={handleSend} project={activeProject} />
-  ) : (
-    <HomeScreen onSend={handleSend} projects={projects ?? []} />
+  const [isOnboardingAnalyzing, setIsOnboardingAnalyzing] = useState(false);
+
+  const handleOnboardingComplete = useCallback(
+    (analysis: import("@/lib/types").ProjectAnalysisInfo) => {
+      setIsOnboardingAnalyzing(false);
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        projectsInfo: prev.projectsInfo?.map((p) =>
+          p.id === activeProject?.id
+            ? { ...p, projectAnalysis: analysis }
+            : p,
+        ),
+      }));
+    },
+    [editorContext, activeProject?.id],
+  );
+
+  const emptyState = (
+    <HomeScreen
+      onSend={handleSend}
+      projects={projects ?? []}
+      activeProject={activeProject}
+      onOnboardingComplete={handleOnboardingComplete}
+      onAnalyzingChange={setIsOnboardingAnalyzing}
+    />
   );
 
   // Build a map of tool_call_id -> tool name from AIMessages
@@ -675,6 +697,7 @@ export default function AgentChat({
   const inlinedTaskIds = new Set<string>();
 
   const messageList: ChatBlockData[] = [];
+  const messageSourceMap = new Map<number, typeof messages[number]>();
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
     const isHuman = msg._getType() === "human";
@@ -790,7 +813,49 @@ export default function AgentChat({
         isTerminatingTask: workflowTask
           ? terminatingTaskIds?.has(workflowTask.taskId)
           : undefined,
+        chosenSuggestion: msg.additional_kwargs?.chosenSuggestion as
+          | string
+          | undefined,
       });
+      messageSourceMap.set(messageList.length - 1, msg);
+    }
+  }
+
+  // Append active interrupt / QA form blocks so they render at the bottom
+  if (activeInterrupt) {
+    messageList.push({
+      type: "interrupt",
+      interrupt: activeInterrupt,
+      onReply: resume,
+      isLoading,
+    });
+  }
+  if (activeQAForm) {
+    messageList.push({
+      type: "qa-form",
+      form: activeQAForm,
+      onSubmit: resumeQAForm,
+      isLoading,
+    });
+  }
+
+  // Attach suggestion click handler to the last AI message only
+  if (!isLoading && !activeInterrupt && !activeQAForm) {
+    for (let i = messageList.length - 1; i >= 0; i--) {
+      if (messageList[i].type === "ai-message") {
+        const sourceMsg = messageSourceMap.get(i);
+        (messageList[i] as any).onSuggestionClick = (text: string) => {
+          // Persist chosen suggestion into the AI message's additional_kwargs
+          if (sourceMsg) {
+            sourceMsg.additional_kwargs = {
+              ...sourceMsg.additional_kwargs,
+              chosenSuggestion: text,
+            };
+          }
+          handleSend(text);
+        };
+        break;
+      }
     }
   }
 
@@ -870,6 +935,7 @@ export default function AgentChat({
     onOpenTasks: () => setIsTasksOpen(true),
     onNewChat: handleNewChat,
     onShare: () => setShareSessionId(currentSessionIdRef.current),
+    hideInput: isEmptyConversation && isOnboardingAnalyzing,
   };
 
   if (isPage) {

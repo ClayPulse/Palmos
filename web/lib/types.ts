@@ -655,6 +655,21 @@ export type ProjectInfo = {
   memberCount?: number;
   workflowCount?: number;
   agentChatAllowed?: boolean;
+  projectAnalysis?: ProjectAnalysisInfo | null;
+};
+
+export type ProjectAnalysisInfo = {
+  id: string;
+  summary?: string | null;
+  insights: OnboardingSuggestion[] | null;
+  completedAt: string;
+};
+
+export type OnboardingSuggestion = {
+  title: string;
+  description: string;
+  category: string;
+  impact: "high" | "medium" | "low";
 };
 
 export type ProjectMemberInfo = {
@@ -735,6 +750,24 @@ export interface InterruptState {
   context?: string;
 }
 
+export interface QAFormField {
+  id: string;
+  type: "text" | "textarea" | "select" | "multi-select" | "checkbox" | "radio" | "number" | "date";
+  label: string;
+  description?: string;
+  required?: boolean;
+  options?: { label: string; value: string }[];
+  defaultValue?: any;
+  placeholder?: string;
+}
+
+export interface QAFormInterruptState {
+  threadId: string;
+  title: string;
+  description?: string;
+  fields: QAFormField[];
+}
+
 export type WorkflowTaskState = {
   taskId: string;
   originalTaskId?: string;
@@ -787,6 +820,12 @@ export type ChatBlockData =
       isLoading?: boolean;
     }
   | {
+      type: "qa-form";
+      form: QAFormInterruptState;
+      onSubmit: (data: Record<string, any>) => void;
+      isLoading?: boolean;
+    }
+  | {
       type: "workflow-task";
       task: WorkflowTaskState;
       onTerminate?: (taskId: string) => void;
@@ -811,6 +850,8 @@ export type ChatBlockData =
       workflowTask?: WorkflowTaskState;
       onTerminateTask?: (taskId: string) => void;
       isTerminatingTask?: boolean;
+      onSuggestionClick?: (text: string) => void;
+      chosenSuggestion?: string;
     };
 
 export interface ChatBlockBaseProps {

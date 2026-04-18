@@ -25,6 +25,7 @@ export function AgentChatLayout({
   onOpenTasks,
   onNewChat,
   onShare,
+  hideInput,
 }: AgentChatLayoutProps) {
   return (
     <div className="relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-gray-50 dark:bg-[#0d0d14]">
@@ -73,7 +74,9 @@ export function AgentChatLayout({
       {tasksOverlay}
 
       <ChatMessageArea {...messageAreaProps} />
-      <ChatInputBar {...inputBarProps} footerExtra={quickPillButtons} />
+      {!hideInput && (
+        <ChatInputBar {...inputBarProps} footerExtra={quickPillButtons} />
+      )}
     </div>
   );
 }

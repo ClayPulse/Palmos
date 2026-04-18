@@ -6,7 +6,7 @@ import {
   ToolMessage,
 } from "@langchain/core/messages";
 import { useCallback, useRef, useState } from "react";
-import type { InterruptState, SubagentInfo, Todo, WorkflowInput } from "../types";
+import type { InterruptState, QAFormInterruptState, SubagentInfo, Todo, WorkflowInput } from "../types";
 
 export default function useDeepAgent(
   apiUrl: string,
@@ -17,6 +17,7 @@ export default function useDeepAgent(
   const [error, setError] = useState<Error | null>(null);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [activeInterrupt, setActiveInterrupt] = useState<InterruptState | null>(null);
+  const [activeQAForm, setActiveQAForm] = useState<QAFormInterruptState | null>(null);
 
   const messageMapRef = useRef<Map<string, BaseMessage>>(new Map());
   const abortRef = useRef<AbortController | null>(null);
@@ -181,14 +182,23 @@ export default function useDeepAgent(
               setError(new Error(errData?.message ?? "Unknown agent error"));
             },
             onInterrupt: (data: unknown) => {
-              const d = data as { threadId?: string; interrupts?: Array<{ value?: { question?: string; context?: string } }> } | null;
+              const d = data as { threadId?: string; interrupts?: Array<{ value?: { kind?: string; question?: string; context?: string; title?: string; description?: string; fields?: any[] } }> } | null;
               if (d?.threadId && d.interrupts?.[0]?.value) {
                 const val = d.interrupts[0].value;
-                setActiveInterrupt({
-                  threadId: d.threadId,
-                  question: val.question ?? "",
-                  context: val.context,
-                });
+                if (val.kind === "qa_form" && val.fields) {
+                  setActiveQAForm({
+                    threadId: d.threadId,
+                    title: val.title ?? "",
+                    description: val.description ?? undefined,
+                    fields: val.fields,
+                  });
+                } else {
+                  setActiveInterrupt({
+                    threadId: d.threadId,
+                    question: val.question ?? "",
+                    context: val.context,
+                  });
+                }
               }
             },
           });
@@ -207,9 +217,10 @@ export default function useDeepAgent(
 
   const resume = useCallback(
     (reply: string) => {
-      if (!activeInterrupt) return;
-      const { threadId } = activeInterrupt;
+      const threadId = activeInterrupt?.threadId ?? activeQAForm?.threadId;
+      if (!threadId) return;
       setActiveInterrupt(null);
+      setActiveQAForm(null);
       setIsLoading(true);
       setError(null);
 
@@ -269,10 +280,19 @@ export default function useDeepAgent(
               setError(new Error(errData?.message ?? "Unknown agent error"));
             },
             onInterrupt: (data: unknown) => {
-              const d = data as { threadId?: string; interrupts?: Array<{ value?: { question?: string; context?: string } }> } | null;
+              const d = data as { threadId?: string; interrupts?: Array<{ value?: { kind?: string; question?: string; context?: string; title?: string; description?: string; fields?: any[] } }> } | null;
               if (d?.threadId && d.interrupts?.[0]?.value) {
                 const val = d.interrupts[0].value;
-                setActiveInterrupt({ threadId: d.threadId, question: val.question ?? "", context: val.context });
+                if (val.kind === "qa_form" && val.fields) {
+                  setActiveQAForm({
+                    threadId: d.threadId,
+                    title: val.title ?? "",
+                    description: val.description ?? undefined,
+                    fields: val.fields,
+                  });
+                } else {
+                  setActiveInterrupt({ threadId: d.threadId, question: val.question ?? "", context: val.context });
+                }
               }
             },
           });
@@ -286,7 +306,7 @@ export default function useDeepAgent(
           setIsLoading(false);
         });
     },
-    [apiUrl, syncDisplay, activeInterrupt],
+    [apiUrl, syncDisplay, activeInterrupt, activeQAForm],
   );
 
   const stop = useCallback(() => {
@@ -304,7 +324,16 @@ export default function useDeepAgent(
     setError(null);
     setTodos([]);
     setActiveInterrupt(null);
+    setActiveQAForm(null);
   }, []);
+
+  const resumeQAForm = useCallback(
+    (formData: Record<string, any>) => {
+      if (!activeQAForm) return;
+      resume(JSON.stringify(formData));
+    },
+    [activeQAForm, resume],
+  );
 
   const loadMessages = useCallback(
     (msgs: BaseMessage[]) => {
@@ -333,8 +362,10 @@ export default function useDeepAgent(
     todos,
     subagents: [] as SubagentInfo[],
     activeInterrupt,
+    activeQAForm,
     submit,
     resume,
+    resumeQAForm,
     stop,
     clear,
     loadMessages,
