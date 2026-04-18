@@ -10,6 +10,75 @@ import {
   useState,
   type PointerEvent as ReactPointerEvent,
 } from "react";
+import { useTheme } from "next-themes";
+
+// Theme-aware colors applied after render via DOM mutation.
+// Nodes use :::input, :::logic, :::output classes.
+// Subgraphs use IDs: input_group, logic_group, output_group.
+const NODE_COLORS = {
+  dark: {
+    input:  { fill: "#1e3a5f", stroke: "#3b82f6", text: "#93c5fd" },
+    logic:  { fill: "#78350f", stroke: "#f59e0b", text: "#fcd34d" },
+    output: { fill: "#064e3b", stroke: "#10b981", text: "#6ee7b7" },
+  },
+  light: {
+    input:  { fill: "#dbeafe", stroke: "#3b82f6", text: "#1e40af" },
+    logic:  { fill: "#fef3c7", stroke: "#f59e0b", text: "#92400e" },
+    output: { fill: "#d1fae5", stroke: "#10b981", text: "#065f46" },
+  },
+} as const;
+
+const SUBGRAPH_COLORS = {
+  dark: {
+    input_group:  { fill: "#0c1929", stroke: "#1e3a5f" },
+    logic_group:  { fill: "#1c1207", stroke: "#78350f" },
+    output_group: { fill: "#071f0e", stroke: "#064e3b" },
+  },
+  light: {
+    input_group:  { fill: "#eff6ff", stroke: "#bfdbfe" },
+    logic_group:  { fill: "#fffbeb", stroke: "#fde68a" },
+    output_group: { fill: "#ecfdf5", stroke: "#a7f3d0" },
+  },
+} as const;
+
+function applyNodeColors(svgEl: SVGElement, isDark: boolean) {
+  const palette = isDark ? NODE_COLORS.dark : NODE_COLORS.light;
+
+  for (const [cls, colors] of Object.entries(palette)) {
+    svgEl.querySelectorAll(`.${cls}`).forEach((group) => {
+      group.querySelectorAll("rect, polygon, circle, path, ellipse").forEach((shape) => {
+        (shape as SVGElement).setAttribute("fill", colors.fill);
+        (shape as SVGElement).setAttribute("stroke", colors.stroke);
+        (shape as HTMLElement).style.fill = colors.fill;
+        (shape as HTMLElement).style.stroke = colors.stroke;
+      });
+      group.querySelectorAll(".nodeLabel, .label, text, span").forEach((label) => {
+        (label as HTMLElement).style.color = colors.text;
+        label.setAttribute("fill", colors.text);
+      });
+    });
+  }
+}
+
+function applySubgraphColors(svgEl: SVGElement, isDark: boolean) {
+  const palette = isDark ? SUBGRAPH_COLORS.dark : SUBGRAPH_COLORS.light;
+
+  for (const [id, colors] of Object.entries(palette)) {
+    // Mermaid may use id, data-id, or include the id in the generated ID
+    const cluster =
+      svgEl.querySelector(`[id*="${id}"]`) ??
+      svgEl.querySelector(`[data-id*="${id}"]`);
+    if (!cluster) continue;
+    cluster.querySelectorAll("rect, path, polygon").forEach((shape) => {
+      // Only color direct cluster background shapes, not nested node shapes
+      if (shape.closest(".node, .rough-node, .label, .nodeLabel, .edgeLabel")) return;
+      (shape as SVGElement).setAttribute("fill", colors.fill);
+      (shape as SVGElement).setAttribute("stroke", colors.stroke);
+      (shape as HTMLElement).style.fill = colors.fill;
+      (shape as HTMLElement).style.stroke = colors.stroke;
+    });
+  }
+}
 
 export function DiagramBlock({
   data,
@@ -24,6 +93,8 @@ export function DiagramBlock({
   const [transform, setTransform] = useState({ x: 0, y: 0, scale: 1 });
   const [isPanning, setIsPanning] = useState(false);
   const [diagramType, setDiagramType] = useState<string | null>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const panStart = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
 
   useEffect(() => {
@@ -114,7 +185,7 @@ export function DiagramBlock({
         const mermaid = (await import("mermaid")).default;
         mermaid.initialize({
           startOnLoad: false,
-          theme: "default",
+          theme: isDark ? "dark" : "default",
           look: "handDrawn",
           securityLevel: "strict",
           flowchart: {
@@ -125,10 +196,9 @@ export function DiagramBlock({
           },
         });
 
-        const { svg } = await mermaid.render(
-          `mermaid-${uniqueId.replace(/:/g, "")}`,
-          diagramCode,
-        );
+        const renderId = `mermaid-${uniqueId.replace(/:/g, "")}-${isDark ? "dark" : "light"}`;
+        document.getElementById(renderId)?.remove();
+        const { svg } = await mermaid.render(renderId, diagramCode);
         if (!cancelled && containerRef.current) {
           // Detect diagram type from first line
           const firstLine = diagramCode
@@ -178,6 +248,9 @@ export function DiagramBlock({
             svgEl.removeAttribute("height");
             svgEl.style.maxWidth = "100%";
             svgEl.style.height = "auto";
+
+            applyNodeColors(svgEl as unknown as SVGElement, isDark);
+            applySubgraphColors(svgEl as unknown as SVGElement, isDark);
           }
           setRendered(true);
         }
@@ -193,7 +266,7 @@ export function DiagramBlock({
     return () => {
       cancelled = true;
     };
-  }, [data.code, uniqueId]);
+  }, [data.code, uniqueId, isDark]);
 
   return (
     <div>
@@ -237,7 +310,7 @@ export function DiagramBlock({
         {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
         <div
           ref={viewportRef}
-          className="relative overflow-hidden bg-white p-3 text-black dark:text-black"
+          className="relative overflow-hidden bg-white p-3 dark:bg-[#1a1a2e]"
           style={{
             cursor: isPanning ? "grabbing" : rendered ? "grab" : "default",
             height: 400,
