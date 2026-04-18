@@ -1,7 +1,7 @@
 "use client";
 
 import useDeepAgent from "@/lib/hooks/use-deep-agent";
-import type { InterruptState } from "@/lib/types";
+import type { InterruptState, QAFormInterruptState } from "@/lib/types";
 import {
   useChatSessions,
   generateSessionId,
@@ -27,6 +27,8 @@ export interface ChatContextValue {
   stop: () => void;
   clear: () => void;
   activeInterrupt: InterruptState | null;
+  activeQAForm: QAFormInterruptState | null;
+  resumeQAForm: (data: Record<string, any>) => void;
   loadMessages: (msgs: BaseMessage[]) => void;
   getSubagentsByMessage: (messageId: string) => SubagentInfo[];
   // Session state
@@ -63,8 +65,10 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     error,
     todos,
     activeInterrupt,
+    activeQAForm,
     submit,
     resume,
+    resumeQAForm,
     stop,
     clear,
     loadMessages,
@@ -322,6 +326,8 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         stop,
         clear,
         activeInterrupt,
+        activeQAForm,
+        resumeQAForm,
         loadMessages,
         getSubagentsByMessage,
         sessions,

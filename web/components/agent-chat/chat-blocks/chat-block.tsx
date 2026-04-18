@@ -7,6 +7,7 @@ import { A2UIBlock } from "./a2ui/a2ui-block";
 import { CanvasBlock } from "./canvas/canvas-block";
 import { DiagramBlock } from "./diagram/diagram-block";
 import InterruptBlock from "./interrupt/interrupt-block";
+import QAFormBlock from "./qa-form/qa-form-block";
 import { MCPResultBlock } from "./mcp-result/mcp-result-block";
 import { PulseAppBlock } from "./pulse-app/pulse-app-block";
 import { SubagentBlock } from "./subagent/subagent-block";
@@ -32,6 +33,14 @@ export default function ChatBlock({ data }: ChatBlockBaseProps) {
         <InterruptBlock
           interrupt={data.interrupt}
           onReply={data.onReply}
+          isLoading={data.isLoading}
+        />
+      );
+    case "qa-form":
+      return (
+        <QAFormBlock
+          form={data.form}
+          onSubmit={data.onSubmit}
           isLoading={data.isLoading}
         />
       );
@@ -67,6 +76,7 @@ export default function ChatBlock({ data }: ChatBlockBaseProps) {
           workflowTask={data.workflowTask}
           onTerminateTask={data.onTerminateTask}
           isTerminatingTask={data.isTerminatingTask}
+          onSuggestionClick={data.onSuggestionClick}
         />
       );
     default:

@@ -83,7 +83,9 @@ export default function AgentChat({
     workflowBuilds,
     saveWorkflowBuild,
     activeInterrupt,
+    activeQAForm,
     resume,
+    resumeQAForm,
   } = useChatContext();
 
   const { allowed: agentChatAllowed, isLoading: isLoadingAccess } =
@@ -791,6 +793,34 @@ export default function AgentChat({
           ? terminatingTaskIds?.has(workflowTask.taskId)
           : undefined,
       });
+    }
+  }
+
+  // Append active interrupt / QA form blocks so they render at the bottom
+  if (activeInterrupt) {
+    messageList.push({
+      type: "interrupt",
+      interrupt: activeInterrupt,
+      onReply: resume,
+      isLoading,
+    });
+  }
+  if (activeQAForm) {
+    messageList.push({
+      type: "qa-form",
+      form: activeQAForm,
+      onSubmit: resumeQAForm,
+      isLoading,
+    });
+  }
+
+  // Attach suggestion click handler to the last AI message only
+  if (!isLoading && !activeInterrupt && !activeQAForm) {
+    for (let i = messageList.length - 1; i >= 0; i--) {
+      if (messageList[i].type === "ai-message") {
+        (messageList[i] as any).onSuggestionClick = handleSend;
+        break;
+      }
     }
   }
 

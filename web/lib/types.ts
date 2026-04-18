@@ -735,6 +735,24 @@ export interface InterruptState {
   context?: string;
 }
 
+export interface QAFormField {
+  id: string;
+  type: "text" | "textarea" | "select" | "multi-select" | "checkbox" | "radio" | "number" | "date";
+  label: string;
+  description?: string;
+  required?: boolean;
+  options?: { label: string; value: string }[];
+  defaultValue?: any;
+  placeholder?: string;
+}
+
+export interface QAFormInterruptState {
+  threadId: string;
+  title: string;
+  description?: string;
+  fields: QAFormField[];
+}
+
 export type WorkflowTaskState = {
   taskId: string;
   originalTaskId?: string;
@@ -787,6 +805,12 @@ export type ChatBlockData =
       isLoading?: boolean;
     }
   | {
+      type: "qa-form";
+      form: QAFormInterruptState;
+      onSubmit: (data: Record<string, any>) => void;
+      isLoading?: boolean;
+    }
+  | {
       type: "workflow-task";
       task: WorkflowTaskState;
       onTerminate?: (taskId: string) => void;
@@ -811,6 +835,7 @@ export type ChatBlockData =
       workflowTask?: WorkflowTaskState;
       onTerminateTask?: (taskId: string) => void;
       isTerminatingTask?: boolean;
+      onSuggestionClick?: (text: string) => void;
     };
 
 export interface ChatBlockBaseProps {
