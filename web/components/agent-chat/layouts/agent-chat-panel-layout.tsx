@@ -29,6 +29,7 @@ export function AgentChatPanelLayout({
   isLoading,
   onStop,
   onClose,
+  hideInput,
 }: AgentChatPanelLayoutProps) {
   return (
     <div className="relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-gray-50 shadow-lg min-[768px]:rounded-xl dark:bg-[#111118] [&>*]:min-w-0 [&>*]:overflow-hidden">
@@ -135,28 +136,30 @@ export function AgentChatPanelLayout({
 
       <ChatMessageArea {...messageAreaProps} />
 
-      <ChatInputBar
-        {...inputBarProps}
-        footerExtra={
-          <>
-            <Tooltip content="Share chat" delay={400} closeDelay={0}>
-              <Button
-                isIconOnly
-                variant="light"
-                size="sm"
-                className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
-                isDisabled={!canShare}
-                onPress={onShare}
-              >
-                <div>
-                  <Icon name="share" variant="round" />
-                </div>
-              </Button>
-            </Tooltip>
-            {quickPillButtons}
-          </>
-        }
-      />
+      {!hideInput && (
+        <ChatInputBar
+          {...inputBarProps}
+          footerExtra={
+            <>
+              <Tooltip content="Share chat" delay={400} closeDelay={0}>
+                <Button
+                  isIconOnly
+                  variant="light"
+                  size="sm"
+                  className="text-default-400 hover:text-default-600 dark:text-white/50 dark:hover:text-white/80"
+                  isDisabled={!canShare}
+                  onPress={onShare}
+                >
+                  <div>
+                    <Icon name="share" variant="round" />
+                  </div>
+                </Button>
+              </Tooltip>
+              {quickPillButtons}
+            </>
+          }
+        />
+      )}
     </div>
   );
 }

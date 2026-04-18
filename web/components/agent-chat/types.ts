@@ -17,6 +17,7 @@ export interface AgentChatLayoutProps {
   onOpenTasks: () => void;
   onNewChat: () => void;
   onShare: () => void;
+  hideInput?: boolean;
 }
 
 export interface AgentChatPanelLayoutProps extends AgentChatLayoutProps {

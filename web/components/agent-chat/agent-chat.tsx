@@ -612,8 +612,11 @@ export default function AgentChat({
   const isEmptyConversation =
     messages.length === 0 && !isLoading && !isLoadingSession;
 
+  const [isOnboardingAnalyzing, setIsOnboardingAnalyzing] = useState(false);
+
   const handleOnboardingComplete = useCallback(
     (analysis: import("@/lib/types").ProjectAnalysisInfo) => {
+      setIsOnboardingAnalyzing(false);
       editorContext?.setEditorStates((prev) => ({
         ...prev,
         projectsInfo: prev.projectsInfo?.map((p) =>
@@ -632,6 +635,7 @@ export default function AgentChat({
       projects={projects ?? []}
       activeProject={activeProject}
       onOnboardingComplete={handleOnboardingComplete}
+      onAnalyzingChange={setIsOnboardingAnalyzing}
     />
   );
 
@@ -931,6 +935,7 @@ export default function AgentChat({
     onOpenTasks: () => setIsTasksOpen(true),
     onNewChat: handleNewChat,
     onShare: () => setShareSessionId(currentSessionIdRef.current),
+    hideInput: isEmptyConversation && isOnboardingAnalyzing,
   };
 
   if (isPage) {

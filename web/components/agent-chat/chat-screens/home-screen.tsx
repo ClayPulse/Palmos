@@ -18,6 +18,7 @@ import type {
   ProjectInfo,
 } from "@/lib/types";
 import {
+  addToast,
   Button,
   Checkbox,
   Input,
@@ -25,7 +26,7 @@ import {
   Textarea,
 } from "@heroui/react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useCallback, useContext, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 
 const PROJECTS_PER_PAGE = 4;
 
@@ -60,11 +61,13 @@ export default function HomeScreen({
   projects,
   activeProject,
   onOnboardingComplete,
+  onAnalyzingChange,
 }: {
   onSend: (text: string) => void;
   projects: ProjectInfo[];
   activeProject?: ProjectInfo;
   onOnboardingComplete?: (analysis: ProjectAnalysisInfo) => void;
+  onAnalyzingChange?: (isAnalyzing: boolean) => void;
 }) {
   const [rerunning, setRerunning] = useState(false);
   const editorContext = useContext(EditorContext);
@@ -82,11 +85,19 @@ export default function HomeScreen({
     [onOnboardingComplete],
   );
 
+  // Ensure input bar is shown when in project view (not onboarding)
+  const isInProjectView = !!activeProject?.projectAnalysis && !rerunning;
+  useEffect(() => {
+    if (isInProjectView) {
+      onAnalyzingChange?.(false);
+    }
+  }, [isInProjectView, onAnalyzingChange]);
+
   // If we have an active project with analysis done (and not re-running), show the project view
-  if (activeProject?.projectAnalysis && !rerunning) {
+  if (isInProjectView) {
     return (
       <ProjectView
-        project={activeProject}
+        project={activeProject!}
         onSend={onSend}
         onRerunAnalysis={handleRerunAnalysis}
       />
@@ -99,6 +110,7 @@ export default function HomeScreen({
       projects={projects}
       activeProject={activeProject}
       onOnboardingComplete={rerunning ? handleRerunComplete : onOnboardingComplete}
+      onAnalyzingChange={onAnalyzingChange}
     />
   );
 }
@@ -109,10 +121,12 @@ function OnboardingView({
   projects,
   activeProject,
   onOnboardingComplete,
+  onAnalyzingChange,
 }: {
   projects: ProjectInfo[];
   activeProject?: ProjectInfo;
   onOnboardingComplete?: (analysis: ProjectAnalysisInfo) => void;
+  onAnalyzingChange?: (isAnalyzing: boolean) => void;
 }) {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
@@ -122,6 +136,7 @@ function OnboardingView({
   const [files, setFiles] = useState<File[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedText, setStreamedText] = useState("");
+  const streamEndRef = useRef<HTMLDivElement>(null);
   const [suggestions, setSuggestions] = useState<OnboardingSuggestion[]>([]);
   const [analysisResult, setAnalysisResult] =
     useState<ProjectAnalysisInfo | null>(null);
@@ -129,7 +144,25 @@ function OnboardingView({
   const [searchSources, setSearchSources] = useState<
     { url: string; title: string }[]
   >([]);
+  const [projectName, setProjectName] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Signal parent to hide input bar when in analysis/results view
+  const isInAnalysisView = isStreaming || !!streamedText || suggestions.length > 0 || !!error;
+  useEffect(() => {
+    onAnalyzingChange?.(isInAnalysisView);
+  }, [isInAnalysisView, onAnalyzingChange]);
+
+  // Scroll to bottom when streaming finishes (buttons appear)
+  const prevIsStreaming = useRef(isStreaming);
+  useEffect(() => {
+    if (prevIsStreaming.current && !isStreaming) {
+      setTimeout(() => {
+        streamEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+    prevIsStreaming.current = isStreaming;
+  }, [isStreaming]);
 
   const handleFileChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,31 +187,13 @@ function OnboardingView({
     setSearchSources([]);
 
     try {
-      // If no active project, create one first
-      let projectId = activeProject?.id;
-      if (!projectId) {
-        // Generate a project name from the description
-        const projectName =
-          description.trim().slice(0, 50) +
-          (description.trim().length > 50 ? "..." : "");
-        const createRes = await fetchAPI("/api/project/create", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: projectName }),
-        });
-        if (!createRes.ok) {
-          const data = await createRes.json().catch(() => null);
-          throw new Error(data?.error || "Failed to create project");
-        }
-        const { id } = await createRes.json();
-        projectId = id;
-      }
+      const projectId = activeProject?.id;
 
       const res = await fetchAPI("/api/agent/onboarding/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          projectId,
+          projectId: projectId || undefined,
           message: description,
           websiteUrl: websiteUrl.trim() || undefined,
         }),
@@ -256,14 +271,23 @@ function OnboardingView({
               if (jsonMatch) {
                 const jsonStr = jsonMatch[1].trim();
 
-                // Extract "text" field for display
-                const textMatch = jsonStr.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+                // Extract "text" field for display (complete or partial)
+                const textMatch = jsonStr.match(/"text"\s*:\s*"((?:[^"\\]|\\.)*)(?:"|$)/);
                 if (textMatch) {
                   try {
+                    // Try to parse as complete JSON string
                     setStreamedText(JSON.parse('"' + textMatch[1] + '"'));
                   } catch {
-                    setStreamedText(textMatch[1]);
+                    // Partial — unescape what we can
+                    setStreamedText(
+                      textMatch[1]
+                        .replace(/\\n/g, "\n")
+                        .replace(/\\"/g, '"')
+                        .replace(/\\\\/g, "\\"),
+                    );
                   }
+                  // Auto-scroll
+                  streamEndRef.current?.scrollIntoView({ behavior: "smooth" });
                 }
 
                 // Extract citations
@@ -302,6 +326,10 @@ function OnboardingView({
                     }
                     if (parsedSuggestions.length > 0) {
                       setSuggestions(parsedSuggestions);
+                      // Auto-scroll when new card appears
+                      setTimeout(() => {
+                        streamEndRef.current?.scrollIntoView({ behavior: "smooth" });
+                      }, 50);
                     }
                   }
                 }
@@ -478,20 +506,118 @@ function OnboardingView({
             </div>
           )}
 
-          {/* Show Continue button when streaming is done and we have results */}
+          {/* Post-analysis action */}
           {!isStreaming && suggestions.length > 0 && (
-            <Button
-              className="mt-6 w-full"
-              color="primary"
-              size="lg"
-              isDisabled={!analysisResult}
-              onPress={() =>
-                analysisResult && onOnboardingComplete?.(analysisResult)
-              }
-            >
-              Continue to Project
-            </Button>
+            !activeProject ? (
+              // No project was selected — ask user to name their project
+              <div className="mt-6 mb-32 rounded-xl border border-amber-200/60 bg-gradient-to-br from-amber-50 to-orange-50/50 p-5 dark:border-amber-500/15 dark:from-amber-500/5 dark:to-orange-500/5">
+                <h3 className="text-default-800 text-sm font-semibold dark:text-white/90">
+                  Create your AI automation project
+                </h3>
+                <p className="text-default-500 mt-1 text-xs dark:text-white/50">
+                  Give your project a name to save these suggestions and start building
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <Input
+                    placeholder="e.g. My Business Automations"
+                    value={projectName}
+                    onValueChange={setProjectName}
+                    size="sm"
+                    classNames={{
+                      inputWrapper:
+                        "border-default-200 dark:border-white/10 bg-white dark:bg-white/5",
+                    }}
+                    className="flex-1"
+                  />
+                  <Button
+                    className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+                    size="sm"
+                    isDisabled={!projectName.trim() || !analysisResult}
+                    onPress={async () => {
+                      try {
+                        addToast({ title: "Creating project...", color: "default" });
+
+                        // Create the project
+                        const createRes = await fetchAPI("/api/project/create", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ name: projectName.trim() }),
+                        });
+                        if (!createRes.ok) {
+                          const data = await createRes.json().catch(() => null);
+                          throw new Error(data?.error || "Failed to create project");
+                        }
+                        const { id: newProjectId } = await createRes.json();
+
+                        // Store the analysis on the new project
+                        if (analysisResult) {
+                          await fetchAPI("/api/agent/onboarding/save", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                              projectId: newProjectId,
+                              summary: analysisResult.summary,
+                              insights: analysisResult.insights,
+                              description: description,
+                            }),
+                          });
+                        }
+
+                        // Add the new project to the list and open it
+                        const newProject: ProjectInfo = {
+                          id: newProjectId,
+                          name: projectName.trim(),
+                          description: description,
+                          role: "owner",
+                          memberCount: 1,
+                          workflowCount: 0,
+                          projectAnalysis: analysisResult ?? null,
+                        };
+                        editorContext?.setEditorStates((prev) => ({
+                          ...prev,
+                          project: projectName.trim(),
+                          projectsInfo: [
+                            ...(prev.projectsInfo ?? []),
+                            newProject,
+                          ],
+                        }));
+
+                        // Clear analysis view so it transitions to project view
+                        setStreamedText("");
+                        setSuggestions([]);
+                        setSearchSources([]);
+
+                        addToast({ title: "Project created!", color: "success" });
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : "Failed to create project");
+                        addToast({ title: "Failed to create project", color: "danger" });
+                      }
+                    }}
+                  >
+                    Create Project
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              // Project already exists — just continue
+              <Button
+                className="mt-6 w-full"
+                color="primary"
+                size="lg"
+                isDisabled={!analysisResult}
+                onPress={() => {
+                  if (!analysisResult) return;
+                  setStreamedText("");
+                  setSuggestions([]);
+                  setSearchSources([]);
+                  onOnboardingComplete?.(analysisResult);
+                }}
+              >
+                Continue to Project
+              </Button>
+            )
           )}
+          <div ref={streamEndRef} />
         </div>
       </div>
     );
