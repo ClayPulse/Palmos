@@ -145,7 +145,7 @@ function OnboardingViewInner({
   const [callProcessing, setCallProcessing] = useState(false);
   const [activeCallRecordId, setActiveCallRecordId] = useState<string | null>(null);
   const [pendingCalls, setPendingCalls] = useState<
-    { id: string; type: string; status: string; summary: string | null; createdAt: string }[]
+    { id: string; type: string; status: string; summary: string | null; transcript: string | null; createdAt: string }[]
   >([]);
 
   // Fetch pending call records on mount
@@ -172,7 +172,7 @@ function OnboardingViewInner({
         const convoId = webCallConvoId.current;
         webCallConvoId.current = null;
         setCallProcessing(true);
-        // Give ElevenLabs time to finalize transcript
+        // Give ElevenLabs time to finalize transcript (~5s)
         setTimeout(async () => {
           try {
             const res = await fetchAPI("/api/agent/call-complete", {
@@ -191,6 +191,7 @@ function OnboardingViewInner({
                 phoneNumber: null,
                 status: data.status,
                 summary: data.summary,
+                transcript: data.transcript,
                 createdAt: new Date().toISOString(),
               },
               ...prev,
@@ -198,7 +199,7 @@ function OnboardingViewInner({
           } catch {
             setCallProcessing(false);
           }
-        }, 3000);
+        }, 5000);
       }
     },
     onError: (error) => console.error("[VoiceAgent] Error:", error),
@@ -741,6 +742,8 @@ function OnboardingViewInner({
                         if (activeCallRecordId) {
                           fetchAPI(`/api/agent/call-records/${activeCallRecordId}`, {
                             method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ projectId: newProjectId }),
                           }).catch(() => {});
                           setActiveCallRecordId(null);
                         }
@@ -772,6 +775,8 @@ function OnboardingViewInner({
                   if (activeCallRecordId) {
                     fetchAPI(`/api/agent/call-records/${activeCallRecordId}`, {
                       method: "PATCH",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ projectId: activeProject?.id }),
                     }).catch(() => {});
                     setActiveCallRecordId(null);
                   }
@@ -843,11 +848,15 @@ function OnboardingViewInner({
                     color="primary"
                     className="shrink-0 font-semibold"
                     onPress={() => {
-                      const summary = call.summary || "Analyze my business from the call transcript";
+                      const transcript = call.transcript || "";
+                      const summary = call.summary || "";
+                      const message = transcript
+                        ? `I just had a phone call describing my business. Below is the full conversation. Please analyze my business based on this and suggest automations.\n\n${summary ? `Summary: ${summary}\n\n` : ""}Transcript:\n${transcript}`
+                        : summary || "Analyze my business";
                       setActiveCallRecordId(call.id);
-                      setDescription(summary);
+                      setDescription(summary || message.slice(0, 500));
                       setPendingCalls((prev) => prev.filter((c) => c.id !== call.id));
-                      handleSubmit(summary);
+                      handleSubmit(message);
                     }}
                   >
                     View Analysis
