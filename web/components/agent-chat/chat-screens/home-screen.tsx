@@ -142,12 +142,64 @@ function OnboardingViewInner({
   const [phone, setPhone] = useState("");
   const [showCallModal, setShowCallModal] = useState(false);
   const [showVoiceModal, setShowVoiceModal] = useState(false);
+  const [callProcessing, setCallProcessing] = useState(false);
+  const [activeCallRecordId, setActiveCallRecordId] = useState<string | null>(null);
+  const [pendingCalls, setPendingCalls] = useState<
+    { id: string; type: string; status: string; summary: string | null; createdAt: string }[]
+  >([]);
+
+  // Fetch pending call records on mount
+  useEffect(() => {
+    fetchAPI("/api/agent/call-records")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setPendingCalls(data);
+      })
+      .catch(() => {});
+  }, []);
+
+  const webCallConvoId = useRef<string | null>(null);
 
   const conversation = useConversation({
-    onConnect: () => console.log("[VoiceAgent] Connected"),
+    onConnect: ({ conversationId }) => {
+      console.log("[VoiceAgent] Connected:", conversationId);
+      webCallConvoId.current = conversationId;
+    },
     onDisconnect: () => {
       console.log("[VoiceAgent] Disconnected");
       setShowVoiceModal(false);
+      if (webCallConvoId.current) {
+        const convoId = webCallConvoId.current;
+        webCallConvoId.current = null;
+        setCallProcessing(true);
+        // Give ElevenLabs time to finalize transcript
+        setTimeout(async () => {
+          try {
+            const res = await fetchAPI("/api/agent/call-complete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ conversationId: convoId, type: "web" }),
+            });
+            const data = await res.json();
+            setCallProcessing(false);
+            // Add to pending analysis list
+            setPendingCalls((prev) => [
+              {
+                id: data.id,
+                conversationId: convoId,
+                type: "web",
+                phoneNumber: null,
+                status: data.status,
+                summary: data.summary,
+                createdAt: new Date().toISOString(),
+              },
+              ...prev,
+            ]);
+          } catch {
+            setCallProcessing(false);
+          }
+        }, 3000);
+      }
     },
     onError: (error) => console.error("[VoiceAgent] Error:", error),
   });
@@ -193,6 +245,18 @@ function OnboardingViewInner({
       const data = await res.json();
       if (data?.success) {
         setCallStatus("success");
+        // Save the phone call record for later analysis
+        if (data?.conversationId) {
+          fetchAPI("/api/agent/call-complete", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              conversationId: data.conversationId,
+              type: "phone",
+              phoneNumber: phone,
+            }),
+          }).catch(() => {});
+        }
       } else {
         setCallStatus("failed");
         const errMsg = typeof data?.error === "string"
@@ -247,8 +311,9 @@ function OnboardingViewInner({
     editorContext?.setEditorStates((prev) => ({ ...prev, project: name }));
   }
 
-  const handleSubmit = useCallback(async () => {
-    if (!description.trim()) return;
+  const handleSubmit = useCallback(async (overrideDescription?: string) => {
+    const msg = overrideDescription || description;
+    if (!msg.trim()) return;
 
     setIsStreaming(true);
     setError(null);
@@ -264,7 +329,7 @@ function OnboardingViewInner({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           projectId: projectId || undefined,
-          message: description,
+          message: msg,
           websiteUrl: websiteUrl.trim() || undefined,
         }),
       });
@@ -493,8 +558,8 @@ function OnboardingViewInner({
             </div>
           )}
 
-          {/* Alternative communication options */}
-          {!isStreaming && streamedText && (
+          {/* Alternative communication options — hidden during analysis */}
+          {false && !isStreaming && streamedText && (
             <ContactOptions
               phone={phone}
               onPhoneChange={setPhone}
@@ -670,6 +735,15 @@ function OnboardingViewInner({
                         setStreamedText("");
                         setSuggestions([]);
                         setSearchSources([]);
+                        setPendingCalls([]);
+
+                        // Mark call record as analyzed in backend
+                        if (activeCallRecordId) {
+                          fetchAPI(`/api/agent/call-records/${activeCallRecordId}`, {
+                            method: "PATCH",
+                          }).catch(() => {});
+                          setActiveCallRecordId(null);
+                        }
 
                         addToast({ title: "Project created!", color: "success" });
                       } catch (err) {
@@ -694,6 +768,13 @@ function OnboardingViewInner({
                   setStreamedText("");
                   setSuggestions([]);
                   setSearchSources([]);
+                  setPendingCalls([]);
+                  if (activeCallRecordId) {
+                    fetchAPI(`/api/agent/call-records/${activeCallRecordId}`, {
+                      method: "PATCH",
+                    }).catch(() => {});
+                    setActiveCallRecordId(null);
+                  }
                   onOnboardingComplete?.(analysisResult);
                 }}
               >
@@ -724,8 +805,77 @@ function OnboardingViewInner({
 
   // ── Default: onboarding form ──────────────────────────────────────────────
   return (
-    <div className="flex h-[100vh] flex-col items-center justify-center gap-4 py-4">
+    <div className="flex flex-col items-center gap-4 py-6">
+      {/* Pending calls todo list */}
+      {pendingCalls.length > 0 && !isStreaming && !streamedText && (
+        <div className="w-full max-w-xl">
+          <div className="flex items-center gap-1.5 mb-2">
+            <span className="material-icons-round text-sm text-default-500 dark:text-white/45">pending_actions</span>
+            <span className="text-default-500 text-xs font-medium tracking-wide uppercase dark:text-white/45">Pending Analysis</span>
+          </div>
+          <div className="space-y-1">
+            {pendingCalls.map((call) => (
+              <div
+                key={call.id}
+                className="flex items-center gap-3 rounded-xl border border-default-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-white/3"
+              >
+                {call.status === "pending" ? (
+                  <Spinner size="sm" className="shrink-0" />
+                ) : (
+                  <span className="material-icons-round text-lg text-amber-500 shrink-0">call</span>
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-default-700 dark:text-white/80 truncate">
+                    {call.status === "pending"
+                      ? "Processing call transcript..."
+                      : call.summary
+                        ? call.summary.slice(0, 80) + (call.summary.length > 80 ? "..." : "")
+                        : "Call ready for analysis"}
+                  </p>
+                  <p className="text-[11px] text-default-400 dark:text-white/30 mt-0.5">
+                    {call.type === "web" ? "Web call" : "Phone call"} · {new Date(call.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                {call.status === "completed" && (
+                  <Button
+                    size="sm"
+                    variant="flat"
+                    color="primary"
+                    className="shrink-0 font-semibold"
+                    onPress={() => {
+                      const summary = call.summary || "Analyze my business from the call transcript";
+                      setActiveCallRecordId(call.id);
+                      setDescription(summary);
+                      setPendingCalls((prev) => prev.filter((c) => c.id !== call.id));
+                      handleSubmit(summary);
+                    }}
+                  >
+                    View Analysis
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="w-full max-w-xl">
+
+        {/* Call processing indicator */}
+        {callProcessing && (
+          <div className="mb-4 flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-500/15 dark:bg-blue-500/5">
+            <Spinner size="sm" />
+            <div>
+              <p className="text-sm font-semibold text-blue-800 dark:text-blue-300">
+                Processing your call...
+              </p>
+              <p className="text-[11px] text-blue-600/60 dark:text-blue-400/50">
+                Generating summary from your conversation. This may take a few seconds.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Hero */}
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/25">
@@ -793,10 +943,11 @@ function OnboardingViewInner({
         {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
 
         <Button
+          id="analyze-btn"
           className="mt-3 w-full bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white shadow-md shadow-amber-500/20 hover:shadow-lg hover:shadow-amber-500/30 transition-all"
           size="md"
           isDisabled={!description.trim()}
-          onPress={handleSubmit}
+          onPress={() => handleSubmit()}
         >
           Analyze &amp; Optimize
         </Button>
