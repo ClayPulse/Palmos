@@ -12,6 +12,8 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
+  Tab,
+  Tabs,
 } from "@heroui/react";
 import { useState } from "react";
 
@@ -27,6 +29,7 @@ export default function ShareChatModal({
   const { getTranslations: t } = useTranslations();
   const [shareUrl, setShareUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [permission, setPermission] = useState<"read" | "edit">("read");
 
   async function handleCreate() {
     if (!sessionId) {
@@ -43,7 +46,7 @@ export default function ShareChatModal({
       const res = await fetchAPI("/api/chat/share/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionId }),
+        body: JSON.stringify({ sessionId, permission }),
       });
 
       if (!res.ok) {
@@ -52,7 +55,7 @@ export default function ShareChatModal({
       }
 
       const data = await res.json();
-      // Build the share URL on the current app origin using a search param
+      // Build share URL pointing to the editor with the share token
       const token = data.token ?? data.url?.split("/").pop();
       setShareUrl(token ? `${window.location.origin}?sharedChat=${token}` : data.url);
     } catch (err) {
@@ -80,6 +83,7 @@ export default function ShareChatModal({
 
   function handleClose() {
     setShareUrl(null);
+    setPermission("read");
     onClose();
   }
 
@@ -108,8 +112,32 @@ export default function ShareChatModal({
                   {t("shareChatModal.copy")}
                 </Button>
               </div>
+              <p className="text-xs opacity-50">
+                {permission === "edit"
+                  ? "Anyone with this link can view and continue this conversation."
+                  : "Anyone with this link can view this conversation (read-only)."}
+              </p>
             </div>
-          ) : null}
+          ) : (
+            <div className="flex flex-col gap-3">
+              <p className="text-sm font-medium">Permission</p>
+              <Tabs
+                selectedKey={permission}
+                onSelectionChange={(key) => setPermission(key as "read" | "edit")}
+                size="sm"
+                variant="bordered"
+                fullWidth
+              >
+                <Tab key="read" title="Read-only" />
+                <Tab key="edit" title="Can edit" />
+              </Tabs>
+              <p className="text-xs opacity-50">
+                {permission === "edit"
+                  ? "Recipients can view the chat history and continue the conversation."
+                  : "Recipients can only view the chat history."}
+              </p>
+            </div>
+          )}
         </ModalBody>
         <ModalFooter>
           {shareUrl ? (

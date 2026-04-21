@@ -6,6 +6,7 @@ import ChatView from "@/components/views/chat/chat-view";
 import EditorView from "@/components/views/editor/editor-view";
 import { AppModeEnum } from "@/lib/enums";
 import useRouter from "@/lib/hooks/use-router";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useSearchParams } from "next/navigation";
 import { useContext, useEffect, useRef, useState } from "react";
 
@@ -14,7 +15,7 @@ export default function HomePage() {
   const appMode = editorContext?.editorStates.appMode ?? AppModeEnum.Agent;
   const searchParams = useSearchParams();
   const { replace } = useRouter();
-  const { importSharedChat } = useChatContext();
+  const { handleSwitchSession } = useChatContext();
   const importedRef = useRef(false);
 
   useEffect(() => {
@@ -33,7 +34,7 @@ export default function HomePage() {
     }
   }, []);
 
-  // Import shared chat when ?sharedChat=TOKEN is present
+  // Load shared chat session when ?sharedChat=TOKEN is present
   useEffect(() => {
     const token = searchParams.get("sharedChat");
     if (!token || importedRef.current) return;
@@ -45,14 +46,25 @@ export default function HomePage() {
       appMode: AppModeEnum.Agent,
     }));
 
-    importSharedChat(token).finally(() => {
-      // Remove the param from the URL
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("sharedChat");
-      const newUrl =
-        params.size > 0 ? `?${params.toString()}` : window.location.pathname;
-      replace(newUrl);
-    });
+    // Resolve token → sessionId + permission, then switch to that session
+    (async () => {
+      try {
+        const res = await fetchAPI(`/api/chat/share/${token}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.error || data.expired || !data.sessionId) return;
+        await handleSwitchSession(data.sessionId, {
+          shareToken: token,
+          permission: data.permission ?? "read",
+        });
+      } finally {
+        const params = new URLSearchParams(searchParams.toString());
+        params.delete("sharedChat");
+        const newUrl =
+          params.size > 0 ? `?${params.toString()}` : window.location.pathname;
+        replace(newUrl);
+      }
+    })();
   }, [searchParams]);
 
   const [editorMounted, setEditorMounted] = useState(

@@ -128,15 +128,17 @@ export function useChatSessions() {
       sessionId: string,
       messages: SerializedMessage[],
       projectId?: string | null,
+      shareToken?: string | null,
     ) => {
       const title = deriveTitle(messages);
       const now = Date.now();
       const backendMessages = messages.map(toBackendMessage);
       const existsOnBackend = knownSessionIdsRef.current.has(sessionId);
+      const qs = shareToken ? `?shareToken=${encodeURIComponent(shareToken)}` : "";
 
       try {
         if (existsOnBackend) {
-          await apiFetch(`/api/chat/sessions/${sessionId}/update`, {
+          await apiFetch(`/api/chat/sessions/${sessionId}/update${qs}`, {
             method: "PUT",
             body: JSON.stringify({ title, projectId, messages: backendMessages }),
           });
@@ -197,13 +199,15 @@ export function useChatSessions() {
   const fetchSessionMessages = useCallback(
     async (
       sessionId: string,
+      shareToken?: string | null,
     ): Promise<{
       messages: SerializedMessage[];
       workflowBuilds?: WorkflowBuild[];
       projectId?: string | null;
     }> => {
       try {
-        const res = await apiFetch(`/api/chat/sessions/${sessionId}/get`);
+        const qs = shareToken ? `?shareToken=${encodeURIComponent(shareToken)}` : "";
+        const res = await apiFetch(`/api/chat/sessions/${sessionId}/get${qs}`);
         if (res.ok) {
           const data = await res.json();
           return {
@@ -257,6 +261,10 @@ export function useChatSessions() {
     }
   }, []);
 
+  const markSessionKnown = useCallback((sessionId: string) => {
+    knownSessionIdsRef.current.add(sessionId);
+  }, []);
+
   return {
     sessions,
     activeSessionId,
@@ -266,5 +274,6 @@ export function useChatSessions() {
     deleteSession,
     fetchSessionMessages,
     saveWorkflowBuild,
+    markSessionKnown,
   };
 }

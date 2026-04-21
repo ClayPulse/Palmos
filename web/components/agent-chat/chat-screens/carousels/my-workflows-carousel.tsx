@@ -3,6 +3,7 @@
 import Icon from "@/components/misc/icon";
 import WorkflowDetailsModal from "@/components/modals/workflow-details-modal";
 import WorkflowEnvSetupModal from "@/components/modals/workflow-env-setup-modal";
+import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
@@ -22,6 +23,7 @@ export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllTog
   showProjectName?: boolean;
 }) {
   const { getTranslations: t } = useTranslations();
+  const { submit } = useChatContext();
   const ITEMS_PER_PAGE = 3;
   const [page, setPage] = useState(0);
   const totalPages = Math.ceil(workflows.length / ITEMS_PER_PAGE);
@@ -49,6 +51,10 @@ export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllTog
       ...prev,
       appMode: AppModeEnum.Editor,
     }));
+  }
+
+  function runWorkflow(workflow: Workflow) {
+    submit(`Run my workflow "${workflow.name}"`);
   }
 
   async function openWorkflow(workflow: Workflow) {
@@ -128,19 +134,28 @@ export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllTog
               <Button
                 size="sm"
                 variant="flat"
-                onPress={() => setDetailsWorkflow(wf)}
-                startContent={<Icon name="info" className="text-sm" />}
+                color="success"
+                startContent={<Icon name="play_arrow" className="text-sm" />}
+                onPress={() => runWorkflow(wf)}
               >
-                Details
+                Run
               </Button>
               <Button
                 size="sm"
-                variant="flat"
+                variant="light"
+                isIconOnly
+                onPress={() => setDetailsWorkflow(wf)}
+              >
+                <Icon name="info" className="text-sm" />
+              </Button>
+              <Button
+                size="sm"
+                variant="light"
                 color="primary"
-                startContent={<Icon name="open_in_new" className="text-sm" />}
+                isIconOnly
                 onPress={() => openWorkflow(wf)}
               >
-                {t("carousels.open")}
+                <Icon name="open_in_new" className="text-sm" />
               </Button>
             </div>
           </div>

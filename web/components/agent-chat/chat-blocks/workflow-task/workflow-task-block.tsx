@@ -503,9 +503,11 @@ function findError(obj: any): string | null {
 }
 
 /** Fetches a signed URL from the backend, then opens or downloads via that URL. */
-async function getSignedBlobUrl(blobUrl: string): Promise<string> {
+async function getSignedBlobUrl(blobUrl: string, shareToken?: string | null): Promise<string> {
+  const params = new URLSearchParams({ url: blobUrl });
+  if (shareToken) params.set("shareToken", shareToken);
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workflow/result-file?url=${encodeURIComponent(blobUrl)}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/workflow/result-file?${params}`,
     { credentials: "include" },
   );
   if (!res.ok) throw new Error("Failed to get signed URL");
@@ -521,6 +523,7 @@ function BlobResultBody({
   workflowName: string;
 }) {
   const { getTranslations: t } = useTranslations();
+  const { shareTokenRef } = useChatContext();
   const suffix = mimeToSuffix(blobResult.mime);
   const isImage = /^image\//.test(blobResult.mime);
   const fileName = `${workflowName.replace(/[^a-zA-Z0-9_-]/g, "_")}.${suffix}`;
@@ -530,7 +533,7 @@ function BlobResultBody({
   // Eagerly fetch a signed URL for image preview
   useEffect(() => {
     if (isImage) {
-      getSignedBlobUrl(blobResult.__blobUrl)
+      getSignedBlobUrl(blobResult.__blobUrl, shareTokenRef.current)
         .then(setSignedUrl)
         .catch(() => {});
     }
@@ -538,17 +541,17 @@ function BlobResultBody({
 
   const handleOpen = async () => {
     try {
-      const url = signedUrl ?? (await getSignedBlobUrl(blobResult.__blobUrl));
+      // Always fetch a fresh signed URL — cached ones expire after 5 minutes
+      const url = await getSignedBlobUrl(blobResult.__blobUrl, shareTokenRef.current);
       window.open(url, "_blank");
     } catch {
-      // fallback
       window.open(blobResult.__blobUrl, "_blank");
     }
   };
 
   const handleDownload = async () => {
     try {
-      const url = signedUrl ?? (await getSignedBlobUrl(blobResult.__blobUrl));
+      const url = await getSignedBlobUrl(blobResult.__blobUrl, shareTokenRef.current);
       // Fetch the file and create a local blob URL so the download attribute works
       // (cross-origin URLs ignore the download attribute and open in a new tab)
       const res = await fetch(url);
@@ -560,7 +563,6 @@ function BlobResultBody({
       a.click();
       URL.revokeObjectURL(objectUrl);
     } catch {
-      // fallback
       window.open(blobResult.__blobUrl, "_blank");
     }
   };
@@ -742,11 +744,11 @@ export function WorkflowBuiltCard({
           {t("workflowTaskCard.openInEditor")}
         </button>
         <button
-          onClick={() =>
+          onClick={() => {
             submit(
-              `I'd like to run the workflow "${workflowName}" (id: ${publishedId}). How would you like to run it?`,
-            )
-          }
+              `Run my workflow "${workflowName}"`,
+            );
+          }}
           className="flex items-center gap-1.5 rounded-lg border border-green-300/60 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
         >
           <Icon name="play_arrow" variant="round" className="text-sm" />
