@@ -1054,6 +1054,7 @@ function ProjectViewWithOnboarding({
         <OnboardingView
           projects={projects}
           activeProject={project}
+          onSend={onSend}
           onOnboardingComplete={(analysis) => {
             setShowOnboarding(false);
             onOnboardingComplete?.(analysis);
