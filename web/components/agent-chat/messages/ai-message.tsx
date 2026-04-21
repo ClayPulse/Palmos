@@ -27,13 +27,19 @@ export function AIMessage({
   chosenSuggestion?: string;
 }) {
   const { text: displayContent, suggestions } = parseSuggestions(content);
+
+  // Strip any mermaid code fences that may be embedded in the text
+  const cleanedContent = displayContent
+    .replace(/```mermaid\b[\s\S]*?(?:```|$)/g, "")
+    .trim();
+
   const hasSuggestions = !isStreaming && suggestions.length > 0;
   const isAnswered = !!chosenSuggestion;
   const showSuggestions = hasSuggestions && (onSuggestionClick || isAnswered);
 
   return (
     <div className="flex flex-col gap-2.5">
-      <TextBlock type="ai" content={displayContent} isStreaming={isStreaming} />
+      <TextBlock type="ai" content={cleanedContent} isStreaming={isStreaming} />
       {widgets?.map((w, i) => <ChatBlock key={`widget-${i}`} data={w} />)}
       {subagents?.map((s) => (
         <ChatBlock key={s.id} data={{ type: "subagent", subagent: s }} />

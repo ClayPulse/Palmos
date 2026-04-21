@@ -796,6 +796,18 @@ export default function AgentChat({
     ) {
       continue;
     }
+    // AI message whose content is raw mermaid diagram syntax — skip it,
+    // the rendered diagram will appear via a separate tool_call widget.
+    if (
+      !isHuman &&
+      !hasNonCanvasWidgets &&
+      spawned.length === 0 &&
+      /^\s*(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram|erDiagram|journey|gantt|pie|quadrantChart|requirementDiagram|gitgraph|c4Context|mindmap|timeline|zenuml|sankey-beta|xychart-beta|block-beta)\b/i.test(
+        content,
+      )
+    ) {
+      continue;
+    }
 
     if (isHuman) {
       if (content) {
