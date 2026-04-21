@@ -43,9 +43,9 @@
 		"generalSettings": "Configuración general",
 		"aiSettings": "Configuración de IA",
 		"securitySettings": "Configuración de seguridad",
-		"projectHomePath": "Ruta principal de proyectos",
-		"projectHomeDescription": "Todos tus proyectos se guardarán en esta carpeta.",
-		"selectProjectHomePath": "Seleccionar ruta principal de proyectos",
+		"projectHomePath": "Ruta principal de organizaciones",
+		"projectHomeDescription": "Todas tus organizaciones se guardarán en esta carpeta.",
+		"selectProjectHomePath": "Seleccionar ruta principal de organizaciones",
 		"environmentVariables": "Variables de entorno (frontend):",
 		"backendEnvVariablesWarning": "Para configurar variables de entorno del backend, hazlo en la configuración de la aplicación de la extensión.",
 		"addNewVariable": "Agregar nueva variable",
@@ -119,10 +119,10 @@
 			"notSupported": "La selección de archivos no es compatible en esta plataforma"
 		},
 		"fetchProjects": {
-			"failed": "No se pudo listar los proyectos"
+			"failed": "No se pudo listar las organizaciones"
 		},
 		"listProjects": {
-			"notSignedIn": "No se pueden listar proyectos. ¿Has iniciado sesión?"
+			"notSignedIn": "No se pueden listar organizaciones. ¿Has iniciado sesión?"
 		},
 		"listPath": {
 			"failed": "No se pudo listar la ruta",
@@ -197,8 +197,8 @@
 			"button": "Iniciar sesión"
 		},
 		"myProjects": {
-			"tab": "Mis proyectos",
-			"title": "Mis proyectos"
+			"tab": "Mis organizaciones",
+			"title": "Mis organizaciones"
 		},
 		"myApps": {
 			"tab": "Mis aplicaciones",
@@ -213,25 +213,25 @@
 			"title": "Aplicaciones destacadas"
 		},
 		"learnMore": "Más información",
-		"myAppsAndProjects": "Mis aplicaciones y proyectos",
+		"myAppsAndProjects": "Mis aplicaciones y organizaciones",
 		"yourResources": "Tus recursos",
 		"cloudWorkspaces": "Espacios de trabajo en la nube"
 	},
 	"openInProjectModal": {
-		"title": "Abrir en proyecto",
+		"title": "Abrir en organización",
 		"openExisting": "Abrir existente",
-		"newProject": "Nuevo proyecto",
-		"projectName": "Nombre del proyecto",
-		"projectNamePlaceholder": "Introduce el nombre del proyecto",
-		"projectLocation": "Ubicación del proyecto",
-		"projectLocationPlaceholder": "Selecciona la ubicación del proyecto",
+		"newProject": "Nueva organización",
+		"projectName": "Nombre de la organización",
+		"projectNamePlaceholder": "Introduce el nombre de la organización",
+		"projectLocation": "Ubicación de la organización",
+		"projectLocationPlaceholder": "Selecciona la ubicación de la organización",
 		"selectLocation": "Seleccionar ubicación",
 		"createInside": "Crear dentro de",
 		"moreOptionsComingSoon": "Más opciones próximamente...",
 		"create": "Crear",
 		"open": "Abrir",
-		"selectProjectFolder": "Seleccionar carpeta del proyecto",
-		"selectProjectFile": "Seleccionar archivo del proyecto",
+		"selectProjectFolder": "Seleccionar carpeta de la organización",
+		"selectProjectFile": "Seleccionar archivo de la organización",
 		"workspaceRequired": "Esta aplicación/flujo de trabajo requiere que se abra un espacio de trabajo para funcionar correctamente.",
 		"selectWorkspace": "Seleccionar espacio de trabajo",
 		"localComputer": "Ordenador local",
@@ -247,7 +247,7 @@
 			},
 			"failedToOpen": {
 				"title": "No se pudo abrir",
-				"description": "Ningún proyecto seleccionado."
+				"description": "Ninguna organización seleccionada."
 			},
 			"appOpened": {
 				"title": "Aplicación abierta",
@@ -276,14 +276,14 @@
 			}
 		},
 		"errors": {
-			"noName": "Introduce un nombre de proyecto",
-			"noLocation": "Selecciona una ubicación de proyecto"
+			"noName": "Introduce un nombre de organización",
+			"noLocation": "Selecciona una ubicación de organización"
 		}
 	},
 	"quickVibeCodeSetupModal": {
 		"title": "Configuración rápida de Vibe Code",
-		"vibeCodeProject": "Proyecto Vibe Code",
-		"projectName": "Nombre del proyecto",
+		"vibeCodeProject": "Organización Vibe Code",
+		"projectName": "Nombre de la organización",
 		"gettingReady": "Preparando todo para ti...",
 		"appOpened": {
 			"title": "Aplicación abierta",
@@ -314,7 +314,7 @@
 		"pulseEditorCore": "Núcleo de Palmos",
 		"officialApps": "Aplicaciones oficiales",
 		"opensource": "Código abierto",
-		"cloudServices": "Mientras tanto, ofrecemos servicios en la nube y un marketplace para que puedas gestionar fácilmente tus proyectos y compartir tu trabajo con la comunidad sin preocuparte por la infraestructura ni el backend.",
+		"cloudServices": "Mientras tanto, ofrecemos servicios en la nube y un marketplace para que puedas gestionar fácilmente tus organizaciones y compartir tu trabajo con la comunidad sin preocuparte por la infraestructura ni el backend.",
 		"loveWhatWeDo": "¿Te gusta lo que hacemos? Apóyanos dando una estrella en GitHub o descargando nuestra aplicación móvil en Google Play.",
 		"giveUsAStar": "Danos una estrella",
 		"googlePlay": "Google Play"
@@ -332,10 +332,10 @@
 	},
 	"projectIndicator": {
 		"closeProject": {
-			"menuItem": "Cerrar proyecto"
+			"menuItem": "Cerrar organización"
 		},
 		"projectSettings": {
-			"menuItem": "Configuración del proyecto"
+			"menuItem": "Configuración de la organización"
 		}
 	},
 	"editorToolbar": {
@@ -388,22 +388,22 @@
 		}
 	},
 	"projectSettingsModal": {
-		"title": "Configuración del proyecto",
-		"projectName": "Nombre del proyecto",
-		"projectPath": "Ruta del proyecto",
+		"title": "Configuración de la organización",
+		"projectName": "Nombre de la organización",
+		"projectPath": "Ruta de la organización",
 		"update": "Actualizar",
 		"create": "Crear",
 		"delete": "Eliminar",
 		"toast": {
-			"noProjectSelected": "Ningún proyecto seleccionado."
+			"noProjectSelected": "Ninguna organización seleccionada."
 		}
 	},
 	"editorSettingsModal": {
 		"title": "Configuración del editor",
 		"projectsFolder": {
-			"description": "Todos tus proyectos se guardarán en esta carpeta.",
+			"description": "Todas tus organizaciones se guardarán en esta carpeta.",
 			"selectFolder": "Seleccionar carpeta",
-			"selectProjectHomePath": "Seleccionar ruta principal de proyectos"
+			"selectProjectHomePath": "Seleccionar ruta principal de organizaciones"
 		},
 		"environmentVariables": {
 			"frontend": "Variables de entorno (frontend):",
@@ -681,18 +681,18 @@
 			"icon": "home"
 		},
 		"projectHome": {
-			"label": "Inicio de proyectos",
+			"label": "Inicio de organizaciones",
 			"icon": "folder",
-			"notSet": "Aún no has configurado una ruta principal de proyectos. Hazlo en la configuración.",
+			"notSet": "Aún no has configurado una ruta principal de organizaciones. Hazlo en la configuración.",
 			"select": {
-				"button": "Seleccionar inicio de proyectos"
+				"button": "Seleccionar inicio de organizaciones"
 			}
 		}
 	},
 	"fileMenu": {
 		"title": "Archivo",
-		"newProject": "Nuevo proyecto",
-		"openProject": "Abrir proyecto",
+		"newProject": "Nueva organización",
+		"openProject": "Abrir organización",
 		"newWorkflow": {
 			"name": "Nuevo flujo de trabajo",
 			"description": "Crear un nuevo flujo de trabajo"
@@ -756,18 +756,18 @@
 		"noWorkspaceSelected": "Ningún espacio de trabajo seleccionado"
 	},
 	"projectExplorer": {
-		"title": "Proyectos",
+		"title": "Organizaciones",
 		"newProject": {
-			"button": "Nuevo proyecto"
+			"button": "Nueva organización"
 		},
-		"signInMessage": "Inicia sesión para ver tus proyectos, o abre un proyecto local con el cliente de escritorio."
+		"signInMessage": "Inicia sesión para ver tus organizaciones, o abre una organización local con el cliente de escritorio."
 	},
 	"viewArea": {
 		"unknownViewType": "Tipo de vista desconocido",
 		"noViewSelected": "Ninguna vista seleccionada"
 	},
 	"projectView": {
-		"title": "Proyecto",
+		"title": "Organización",
 		"createWorkflow": {
 			"button": "Crear flujo de trabajo"
 		},
@@ -912,7 +912,7 @@
 	"statusScreens": {
 		"welcome": {
 			"title": "Bienvenido a Palmos",
-			"subtitle": "Empieza creando un nuevo proyecto o abriendo uno existente",
+			"subtitle": "Empieza creando una nueva organización o abriendo una existente",
 			"taglineLine1": "Tu próximo sistema operativo de IA impulsado por",
 			"taglineLine2": "Aplicaciones y flujos de trabajo Vibe Coded"
 		},
@@ -943,7 +943,7 @@
 		"noOutput": "Sin salida todavía"
 	},
 	"tabViewManager": {
-		"openProject": "Abrir proyecto",
+		"openProject": "Abrir organización",
 		"untitled": "Sin título",
 		"newTab": "Nueva pestaña"
 	},
@@ -963,7 +963,7 @@
 		"readMoreOpenSource": "Leer más sobre nuestro compromiso con el código abierto"
 	},
 	"projectItem": {
-		"projectSettings": "Configuración del proyecto",
+		"projectSettings": "Configuración de la organización",
 		"selectMultiple": "Seleccionar varios",
 		"created": "Creado: "
 	},
@@ -987,12 +987,12 @@
 		}
 	},
 	"workspaceExplorer": {
-		"workspacePaused": "El espacio de trabajo está actualmente en pausa. Reanúdalo para acceder a los archivos del proyecto.",
+		"workspacePaused": "El espacio de trabajo está actualmente en pausa. Reanúdalo para acceder a los archivos de la organización.",
 		"startWorkspace": "Iniciar espacio de trabajo",
 		"workspaceSettings": "Configuración del espacio de trabajo",
 		"osFeatures": "Para interactuar con funciones del sistema operativo, abre en el cliente de escritorio o configura un espacio de trabajo remoto.",
 		"workspaceStarting": "El espacio de trabajo se está iniciando...",
-		"viewProjectContent": "Para ver el contenido del proyecto en el espacio de trabajo, selecciona primero un proyecto.",
+		"viewProjectContent": "Para ver el contenido de la organización en el espacio de trabajo, selecciona primero una organización.",
 		"toast": {
 			"noWorkspace": "No hay espacio de trabajo para iniciar.",
 			"startingWorkspace": "Iniciando espacio de trabajo...",
@@ -1126,9 +1126,9 @@
 	},
 	"projectScreen": {
 		"whatToWorkOn": "¿En qué te gustaría trabajar?",
-		"tellAboutProject": "Cuéntame sobre tu proyecto",
-		"helpUnderstand": "Ayúdame a entender tu proyecto para que pueda sugerir automatizaciones personalizadas — o salta y empieza directamente.",
-		"whatKind": "¿Qué tipo de proyecto es este?",
+		"tellAboutProject": "Cuéntame sobre tu organización",
+		"helpUnderstand": "Ayúdame a entender tu organización para que pueda sugerir automatizaciones personalizadas — o salta y empieza directamente.",
+		"whatKind": "¿Qué tipo de organización es este?",
 		"skip": "Saltar",
 		"describeIdea": "Describe tu idea y te ayudaré a hacerla realidad.",
 		"allSystemsNominal": "Todos los sistemas funcionando normalmente",
@@ -1149,7 +1149,7 @@
 	"homeScreen": {
 		"whatToBuild": "¿Qué te gustaría construir hoy?",
 		"describeIdea": "Describe tu idea y te ayudaré a hacerla realidad.",
-		"myProjects": "Mis proyectos",
+		"myProjects": "Mis organizaciones",
 		"workflows": "flujos de trabajo",
 		"members": "miembros",
 		"workflowCount": "{count} flujos de trabajo",
@@ -1219,11 +1219,11 @@
 		"aiManagerLabel": "Gestor de IA"
 	},
 	"projectPicker": {
-		"selectProject": "Seleccionar proyecto",
-		"project": "Proyecto",
-		"clearProject": "Limpiar proyecto",
+		"selectProject": "Seleccionar organización",
+		"project": "Organización",
+		"clearProject": "Limpiar organización",
 		"new": "Nuevo",
-		"noProjects": "Aún no hay proyectos"
+		"noProjects": "Aún no hay organizaciones"
 	},
 	"runningTasksPanel": {
 		"tasks": "Tareas",
@@ -1269,9 +1269,9 @@
 	},
 	"agentChatPaywall": {
 		"upgradeTitle": "Actualiza para usar agentes de IA",
-		"upgradeDescription": "El chat con agentes requiere un plan de pago (Starter o superior). También puedes obtener acceso siendo invitado a un proyecto de un usuario de pago.",
+		"upgradeDescription": "El chat con agentes requiere un plan de pago (Starter o superior). También puedes obtener acceso siendo invitado a una organización de un usuario de pago.",
 		"viewPlans": "Ver planes",
-		"alreadyMember": "¿Ya eres miembro de un proyecto de pago? Selecciónalo en el selector de proyectos para empezar a usar agentes de IA."
+		"alreadyMember": "¿Ya eres miembro de una organización de pago? Selecciónalo en el selector de organizaciones para empezar a usar agentes de IA."
 	},
 	"appModeToggle": {
 		"agent": "Agente",
@@ -1324,17 +1324,17 @@
 		"failedToTrigger": "Error al activar"
 	},
 	"chatSessionSidebar": {
-		"moveToProjectTitle": "Mover chat a proyecto",
-		"project": "Proyecto",
+		"moveToProjectTitle": "Mover chat a organización",
+		"project": "Organización",
 		"knowledgeFiles": "Archivos de conocimiento",
-		"newProject": "Nuevo proyecto",
-		"selectProject": "Seleccionar un proyecto",
-		"noProjects": "Aún no hay proyectos",
+		"newProject": "Nueva organización",
+		"selectProject": "Seleccionar una organización",
+		"noProjects": "Aún no hay organizaciones",
 		"chatHistory": "Historial de chat",
 		"new": "Nuevo",
 		"noChatHistory": "Aún no hay historial de chat",
 		"share": "Compartir",
-		"moveToProject": "Mover a proyecto",
+		"moveToProject": "Mover a organización",
 		"delete": "Eliminar",
 		"menu": "Menú"
 	},

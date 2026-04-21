@@ -753,14 +753,14 @@ function OnboardingViewInner({
                           setActiveCallRecordId(null);
                         }
 
-                        addToast({ title: "Project created!", color: "success" });
+                        addToast({ title: "Organization created!", color: "success" });
                       } catch (err) {
-                        setError(err instanceof Error ? err.message : "Failed to create project");
-                        addToast({ title: "Failed to create project", color: "danger" });
+                        setError(err instanceof Error ? err.message : "Failed to create organization");
+                        addToast({ title: "Failed to create organization", color: "danger" });
                       }
                     }}
                   >
-                    Create Project
+                    Create Organization
                   </Button>
                 </div>
               </div>
@@ -788,7 +788,7 @@ function OnboardingViewInner({
                   onOnboardingComplete?.(analysisResult);
                 }}
               >
-                Continue to Project
+                Continue to Organization
               </Button>
             )
           )}

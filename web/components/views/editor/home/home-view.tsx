@@ -467,7 +467,7 @@ function MyAppsAndProjects({ session }: { session?: Session }) {
     },
     {
       name: t("homeView.myProjects.tab"),
-      description: "Projects created by me",
+      description: "Organizations created by me",
       icon: "folder",
     },
   ];

@@ -16,7 +16,7 @@ export default function MoveToProjectModal({
   onClose,
   onSelect,
   currentProjectId,
-  title = "Move to Project",
+  title = "Move to Organization",
 }: {
   isOpen: boolean;
   onClose: () => void;
@@ -47,7 +47,7 @@ export default function MoveToProjectModal({
                 className="shrink-0 text-sm text-default-500"
               />
               <span className="text-sm text-default-700 dark:text-white/80">
-                No Project
+                No Organization
               </span>
               {!currentProjectId && (
                 <Icon
