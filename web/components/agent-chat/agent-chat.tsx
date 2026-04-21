@@ -82,7 +82,7 @@ export default function AgentChat({
     workflowBuilds,
     saveWorkflowBuild,
     isViewingShared,
-    sharedWorkflowRuns,
+    shareTokenRef,
     activeInterrupt,
     activeQAForm,
     resume,
@@ -363,14 +363,12 @@ export default function AgentChat({
           .filter((id): id is string => !!id),
       );
       const newTasks = workflowBuilds
-        .filter(
-          (r) =>
-            r.workflowId &&
-            !existingIds.has(r.workflowId) &&
-            !existingPublishedIds.has(r.workflowId),
-        )
+        .filter((r) => {
+          const id = r.workflowId ?? r.taskId;
+          return id && !existingIds.has(id) && !existingPublishedIds.has(id);
+        })
         .map((r) => ({
-          taskId: r.workflowId!,
+          taskId: r.workflowId ?? r.taskId!,
           // Preserve the originating build_workflow tool-call taskId so the
           // card can be rendered inline under its AI message on reload.
           originalTaskId: r.taskId ?? undefined,
@@ -378,8 +376,12 @@ export default function AgentChat({
           startedAt: r.completedAt
             ? new Date(r.completedAt).getTime()
             : Date.now(),
-          status: "completed" as const,
-          result: { publishedWorkflowId: r.workflowId },
+          status: (r.status === "completed" || r.status === "failed"
+            ? r.status
+            : "running") as "completed" | "failed" | "running",
+          result: r.workflowId
+            ? { publishedWorkflowId: r.workflowId }
+            : undefined,
         }));
       return newTasks.length > 0 ? [...prev, ...newTasks] : prev;
     });
@@ -406,24 +408,7 @@ export default function AgentChat({
       polledTaskIdsRef.current.add(parsed.taskId);
       const taskId = parsed.taskId;
       const workflowName = parsed.workflowName ?? "Workflow";
-
-      // In shared chat view, use pre-fetched run data — we can't poll (not the owner).
-      if (isViewingShared) {
-        const run = sharedWorkflowRuns.get(taskId);
-        setWorkflowTasks((prev) => [
-          ...prev,
-          {
-            taskId,
-            originalTaskId: taskId,
-            workflowName: run?.workflow?.name ?? workflowName,
-            startedAt: Date.now(),
-            status: (run?.status as "completed" | "failed") ?? "completed",
-            result: run?.result ?? undefined,
-            error: run?.error ?? undefined,
-          },
-        ]);
-        continue;
-      }
+      const shareToken = shareTokenRef.current;
 
       // Seed as "loading" — we'll check the DB before deciding whether this
       // task is actually still running.
@@ -502,7 +487,7 @@ export default function AgentChat({
 
       // One-shot DB check on load: decide between final state vs. still running.
       (async () => {
-        const result = await fetchWorkflowRunStatus(taskId);
+        const result = await fetchWorkflowRunStatus(taskId, shareToken);
         if (!result.ok) {
           // Can't determine — fall back to running so we start polling.
           setWorkflowTasks((prev) =>
@@ -524,7 +509,7 @@ export default function AgentChat({
 
       function startPoll() {
         const poll = setInterval(async () => {
-          const result = await fetchWorkflowRunStatus(taskId);
+          const result = await fetchWorkflowRunStatus(taskId, shareToken);
           if (!result.ok) return;
           applyStatus(result.data);
           if (
@@ -550,7 +535,7 @@ export default function AgentChat({
         );
       }
     }
-  }, [messages, isViewingShared]);
+  }, [messages]);
 
   const pendingSendRef = useRef<string | null>(null);
 

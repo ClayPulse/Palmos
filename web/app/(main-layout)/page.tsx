@@ -56,7 +56,6 @@ export default function HomePage() {
         await handleSwitchSession(data.sessionId, {
           shareToken: token,
           permission: data.permission ?? "read",
-          workflowRuns: data.workflowRuns,
         });
       } finally {
         const params = new URLSearchParams(searchParams.toString());

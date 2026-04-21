@@ -1,18 +1,30 @@
 "use client";
 
-import useDeepAgent from "@/lib/hooks/use-deep-agent";
-import type { InterruptState, QAFormInterruptState } from "@/lib/types";
+import { EditorContext } from "@/components/providers/editor-context-provider";
 import {
-  useChatSessions,
   generateSessionId,
+  useChatSessions,
   type ChatSession,
   type SerializedMessage,
   type WorkflowBuild,
 } from "@/lib/hooks/use-chat-sessions";
+import useDeepAgent from "@/lib/hooks/use-deep-agent";
+import type {
+  InterruptState,
+  QAFormInterruptState,
+  SubagentInfo,
+  Todo,
+  WorkflowInput,
+} from "@/lib/types";
 import type { BaseMessage } from "@langchain/core/messages";
-import type { SubagentInfo, Todo, WorkflowInput } from "@/lib/types";
-import { EditorContext } from "@/components/providers/editor-context-provider";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 const agentUrl = process.env.NEXT_PUBLIC_BACKEND_URL + "/api/agent";
 
@@ -22,7 +34,12 @@ export interface ChatContextValue {
   isLoading: boolean;
   error: Error | null;
   todos: Todo[];
-  submit: (text: string, workflows?: WorkflowInput[], uploadIds?: string[], projectId?: string) => void;
+  submit: (
+    text: string,
+    workflows?: WorkflowInput[],
+    uploadIds?: string[],
+    projectId?: string,
+  ) => void;
   resume: (reply: string) => void;
   stop: () => void;
   clear: () => void;
@@ -36,7 +53,13 @@ export interface ChatContextValue {
   activeSessionId: string | null;
   currentSessionIdRef: React.RefObject<string>;
   handleNewChat: () => void;
-  handleSwitchSession: (sessionId: string, opts?: { shareToken?: string; permission?: "read" | "edit"; workflowRuns?: any[] }) => void;
+  handleSwitchSession: (
+    sessionId: string,
+    opts?: {
+      shareToken?: string;
+      permission?: "read" | "edit";
+    },
+  ) => void;
   handleDeleteSession: (sessionId: string) => void;
   saveCurrentSession: () => void;
   isLoadingSession: boolean;
@@ -48,8 +71,8 @@ export interface ChatContextValue {
   deserializeMessage: (msg: SerializedMessage) => BaseMessage | null;
   /** Whether the user is currently viewing a read-only shared chat. */
   isViewingShared: boolean;
-  /** Pre-fetched workflow run results keyed by taskId (shared chat only). */
-  sharedWorkflowRuns: Map<string, any>;
+  /** The active share token (if accessing via a share link). */
+  shareTokenRef: React.RefObject<string | null>;
 }
 
 export const ChatContext = createContext<ChatContextValue | null>(null);
@@ -60,7 +83,11 @@ export function useChatContext() {
   return ctx;
 }
 
-export default function ChatProvider({ children }: { children: React.ReactNode }) {
+export default function ChatProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const {
     messages,
     isLoading,
@@ -93,12 +120,13 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
   const [workflowBuilds, setWorkflowBuilds] = useState<WorkflowBuild[]>([]);
 
-  const currentSessionIdRef = useRef<string>(activeSessionId ?? generateSessionId());
+  const currentSessionIdRef = useRef<string>(
+    activeSessionId ?? generateSessionId(),
+  );
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   /** When true, the current view is a read-only shared chat — skip auto-save. */
   const isViewingSharedRef = useRef(false);
   const [isViewingShared, setIsViewingShared] = useState(false);
-  const [sharedWorkflowRuns, setSharedWorkflowRuns] = useState<Map<string, any>>(new Map());
   /** The share token for the current session (if accessed via a share link). */
   const shareTokenRef = useRef<string | null>(null);
 
@@ -109,7 +137,9 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
       fetchSessionMessages(activeSessionId).then((data) => {
         if (data.messages.length > 0) {
           loadMessages(
-            data.messages.map(deserializeMessage).filter(Boolean) as BaseMessage[],
+            data.messages
+              .map(deserializeMessage)
+              .filter(Boolean) as BaseMessage[],
           );
         }
         setWorkflowBuilds(data.workflowBuilds ?? []);
@@ -123,7 +153,9 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
   }, []);
 
   // Auto-save when messages change (debounced)
-  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   useEffect(() => {
     if (messages.length === 0 || isViewingSharedRef.current) return;
     clearTimeout(saveTimeoutRef.current);
@@ -133,9 +165,10 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     // currentSessionIdRef.current inside the timer would let a stale save
     // clobber a different session's history.
     const sessionIdAtEnqueue = currentSessionIdRef.current;
-    const projectIdAtEnqueue = editorContext?.editorStates.projectsInfo?.find(
-      (p) => p.name === editorContext?.editorStates.project,
-    )?.id ?? null;
+    const projectIdAtEnqueue =
+      editorContext?.editorStates.projectsInfo?.find(
+        (p) => p.name === editorContext?.editorStates.project,
+      )?.id ?? null;
     const messagesAtEnqueue = messages.map(serializeMessage);
     const shareTokenAtEnqueue = shareTokenRef.current;
     saveTimeoutRef.current = setTimeout(() => {
@@ -175,7 +208,16 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     (publishedWorkflowId: string) => {
       setWorkflowBuilds((prev) => {
         if (prev.some((r) => r.workflowId === publishedWorkflowId)) return prev;
-        return [...prev, { id: "", workflowId: publishedWorkflowId, status: "completed", completedAt: new Date().toISOString(), workflow: null }];
+        return [
+          ...prev,
+          {
+            id: "",
+            workflowId: publishedWorkflowId,
+            status: "completed",
+            completedAt: new Date().toISOString(),
+            workflow: null,
+          },
+        ];
       });
       saveWorkflowBuildAPI(currentSessionIdRef.current, publishedWorkflowId);
     },
@@ -184,13 +226,21 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
   const isSwitchingRef = useRef(false);
   const handleSwitchSession = useCallback(
-    async (sessionId: string, opts?: { shareToken?: string; permission?: "read" | "edit"; workflowRuns?: any[] }) => {
+    async (
+      sessionId: string,
+      opts?: {
+        shareToken?: string;
+        permission?: "read" | "edit";
+        workflowRuns?: any[];
+      },
+    ) => {
       // Guard against re-entrant switches (rapid clicks): only one switch
       // may be in flight at a time, otherwise concurrent invocations can
       // interleave their state updates and load messages under the wrong
       // session.
       if (isSwitchingRef.current) return;
-      if (sessionId === currentSessionIdRef.current && !opts?.shareToken) return;
+      if (sessionId === currentSessionIdRef.current && !opts?.shareToken)
+        return;
       isSwitchingRef.current = true;
       // Cancel any pending debounced auto-save before we mutate state — the
       // enqueued save would otherwise write stale messages under whatever
@@ -237,21 +287,12 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         if (currentSessionIdRef.current !== sessionId) return;
         if (data.messages.length > 0) {
           loadMessages(
-            data.messages.map(deserializeMessage).filter(Boolean) as BaseMessage[],
+            data.messages
+              .map(deserializeMessage)
+              .filter(Boolean) as BaseMessage[],
           );
         }
         setWorkflowBuilds(data.workflowBuilds ?? []);
-
-        // Populate pre-fetched workflow run results for shared sessions
-        if (opts?.workflowRuns) {
-          const runsMap = new Map<string, any>();
-          for (const run of opts.workflowRuns) {
-            if (run.taskId) runsMap.set(run.taskId, run);
-          }
-          setSharedWorkflowRuns(runsMap);
-        } else {
-          setSharedWorkflowRuns(new Map());
-        }
 
         // Restore or clear the project context based on the session
         const sessionProjectId = data.projectId ?? null;
@@ -278,7 +319,16 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         isSwitchingRef.current = false;
       }
     },
-    [messages, clear, switchSession, saveSession, loadMessages, fetchSessionMessages, markSessionKnown, editorContext],
+    [
+      messages,
+      clear,
+      switchSession,
+      saveSession,
+      loadMessages,
+      fetchSessionMessages,
+      markSessionKnown,
+      editorContext,
+    ],
   );
 
   const handleDeleteSession = useCallback(
@@ -326,7 +376,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         serializeMessage,
         deserializeMessage,
         isViewingShared,
-        sharedWorkflowRuns,
+        shareTokenRef,
       }}
     >
       {children}
@@ -344,13 +394,15 @@ import {
   SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 
 function serializeMessage(msg: BaseMessage): SerializedMessage {
   const type = msg._getType() as SerializedMessage["type"];
   return {
     type,
-    content: typeof msg.content === "string" ? msg.content : JSON.stringify(msg.content),
+    content:
+      typeof msg.content === "string"
+        ? msg.content
+        : JSON.stringify(msg.content),
     id: msg.id ?? undefined,
     tool_call_id: (msg as any).tool_call_id ?? undefined,
     additional_kwargs: (msg as any).additional_kwargs,

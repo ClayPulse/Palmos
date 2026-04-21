@@ -10,27 +10,30 @@ const inflightRequests = new Map<string, Promise<any>>();
  */
 export async function fetchWorkflowRunStatus(
   taskId: string,
+  shareToken?: string | null,
 ): Promise<{ ok: true; data: any } | { ok: false }> {
-  const existing = inflightRequests.get(taskId);
+  const cacheKey = `${taskId}:${shareToken ?? ""}`;
+  const existing = inflightRequests.get(cacheKey);
   if (existing) {
     return existing;
   }
 
   const request = (async () => {
     try {
-      const res = await fetchAPI(
-        `/api/workflow/run/status?taskId=${taskId}`,
-      );
+      const qs = shareToken
+        ? `?taskId=${taskId}&shareToken=${encodeURIComponent(shareToken)}`
+        : `?taskId=${taskId}`;
+      const res = await fetchAPI(`/api/workflow/run/status${qs}`);
       if (!res.ok) return { ok: false as const };
       const data = await res.json();
       return { ok: true as const, data };
     } catch {
       return { ok: false as const };
     } finally {
-      inflightRequests.delete(taskId);
+      inflightRequests.delete(cacheKey);
     }
   })();
 
-  inflightRequests.set(taskId, request);
+  inflightRequests.set(cacheKey, request);
   return request;
 }
