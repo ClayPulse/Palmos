@@ -6,6 +6,7 @@ import {
   STARTER_PROMPTS,
   StarterPromptButton,
 } from "@/components/agent-chat/input/starter-prompts";
+import { TemplateLibrary } from "@/components/agent-chat/chat-screens/template-library";
 import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
@@ -94,6 +95,7 @@ export default function HomeScreen({
     <OnboardingView
       projects={projects}
       activeProject={activeProject}
+      onSend={onSend}
       onOnboardingComplete={rerunning ? handleRerunComplete : onOnboardingComplete}
       onAnalyzingChange={onAnalyzingChange}
     />
@@ -105,6 +107,7 @@ export default function HomeScreen({
 function OnboardingView(props: {
   projects: ProjectInfo[];
   activeProject?: ProjectInfo;
+  onSend: (text: string) => void;
   onOnboardingComplete?: (analysis: ProjectAnalysisInfo) => void;
   onAnalyzingChange?: (isAnalyzing: boolean) => void;
 }) {
@@ -118,11 +121,13 @@ function OnboardingView(props: {
 function OnboardingViewInner({
   projects,
   activeProject,
+  onSend,
   onOnboardingComplete,
   onAnalyzingChange,
 }: {
   projects: ProjectInfo[];
   activeProject?: ProjectInfo;
+  onSend: (text: string) => void;
   onOnboardingComplete?: (analysis: ProjectAnalysisInfo) => void;
   onAnalyzingChange?: (isAnalyzing: boolean) => void;
 }) {
@@ -979,6 +984,14 @@ function OnboardingViewInner({
       </div>
 
 
+      {/* Automations */}
+      <OnboardingAutomations />
+
+      {/* Template library — show when not analyzing */}
+      {!isStreaming && !analysisResult && (
+        <TemplateLibrary onSend={onSend} />
+      )}
+
       {/* All workflows */}
       <AllWorkflows projectId={activeProject?.id} />
 
@@ -1041,6 +1054,7 @@ function ProjectViewWithOnboarding({
         <OnboardingView
           projects={projects}
           activeProject={project}
+          onSend={onSend}
           onOnboardingComplete={(analysis) => {
             setShowOnboarding(false);
             onOnboardingComplete?.(analysis);
@@ -1081,7 +1095,9 @@ function ProjectView({
     isLoading: isLoadingWorkflows,
     mutate: mutateWorkflows,
   } = useMarketplaceWorkflows("My Workflows", project.id);
-  const { automations, isLoading: isLoadingAutomations } = useAutomations();
+  const { automations, isLoading: isLoadingAutomations } = useAutomations({
+    projectId: project.id,
+  });
   const [showAnalysis, setShowAnalysis] = useState(false);
 
   const activeAutomations = automations.filter((a) => a.enabled);
@@ -1223,17 +1239,9 @@ function ProjectView({
         </div>
       )}
 
-      {/* Starter prompts — hide when project has tailored insights */}
+      {/* Template library — hide when project has tailored insights */}
       {!(insights && insights.length > 0) && (
-        <div className="grid w-full max-w-xl grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-3">
-          {STARTER_PROMPTS.map((prompt) => (
-            <StarterPromptButton
-              key={prompt.labelKey}
-              prompt={prompt}
-              onSend={onSend}
-            />
-          ))}
-        </div>
+        <TemplateLibrary onSend={onSend} />
       )}
 
       {/* Automations */}
@@ -1457,6 +1465,37 @@ function AllWorkflows({ projectId }: { projectId?: string }) {
       <MyWorkflowsCarousel
         workflows={workflows}
         onMutate={() => mutate()}
+      />
+    </div>
+  );
+}
+
+function OnboardingAutomations() {
+  const editorContext = useContext(EditorContext);
+  const { automations, isLoading } = useAutomations({ projectId: "none" });
+
+  if (isLoading) {
+    return (
+      <div className="flex w-full max-w-xl items-center justify-center py-3">
+        <Spinner size="sm" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-xl">
+      <MyAutomationsCarousel
+        automations={automations}
+        onOpenEditor={(automation) => {
+          editorContext?.updateModalStates({
+            automationEditor: { isOpen: true, automation },
+          });
+        }}
+        onCreateNew={() => {
+          editorContext?.updateModalStates({
+            automationEditor: { isOpen: true },
+          });
+        }}
       />
     </div>
   );
