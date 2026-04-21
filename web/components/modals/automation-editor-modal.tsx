@@ -71,6 +71,8 @@ export default function AutomationEditorModal({
   const [tempHour, setTempHour] = useState(9);
   const [tempMinute, setTempMinute] = useState(0);
   const [tempPeriod, setTempPeriod] = useState<"AM" | "PM">("AM");
+  const [notifyInbox, setNotifyInbox] = useState(true);
+  const [notifyEmail, setNotifyEmail] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -84,6 +86,8 @@ export default function AutomationEditorModal({
       setCronExpression(editingAutomation.cronExpression ?? "*/15 * * * *");
       setRecurring(!!editingAutomation.cronExpression);
       setWebhookSecret(editingAutomation.webhookSecret ?? "");
+      setNotifyInbox(editingAutomation.notifyInbox ?? true);
+      setNotifyEmail(editingAutomation.notifyEmail ?? true);
       const args = editingAutomation.inputArgs ?? {};
       setInputArgs(
         Object.entries(args).map(([key, value]) => ({
@@ -109,6 +113,8 @@ export default function AutomationEditorModal({
     setRecurring(true);
     setWebhookSecret("");
     setInputArgs([]);
+    setNotifyInbox(true);
+    setNotifyEmail(true);
     setError(null);
   }
 
@@ -135,6 +141,8 @@ export default function AutomationEditorModal({
           recurring: triggerType === "schedule" ? recurring : undefined,
           webhookSecret: triggerType === "webhook" ? webhookSecret : undefined,
           inputArgs: Object.keys(args).length > 0 ? args : undefined,
+          notifyInbox,
+          notifyEmail,
         } as Partial<Automation>);
       } else {
         const schedDateObj = scheduledDate
@@ -155,6 +163,8 @@ export default function AutomationEditorModal({
           recurring: triggerType === "schedule" ? recurring : undefined,
           webhookSecret: triggerType === "webhook" ? webhookSecret : undefined,
           inputArgs: Object.keys(args).length > 0 ? args : undefined,
+          notifyInbox,
+          notifyEmail,
         } as any);
       }
       onClose();
@@ -471,6 +481,31 @@ export default function AutomationEditorModal({
             </div>
           </div>
         )}
+
+        {/* Notification preferences */}
+        <div>
+          <p className="text-default-600 mb-2 text-xs font-medium">
+            Notify me when automation completes
+          </p>
+          <div className="flex flex-col gap-1.5">
+            <Checkbox
+              size="sm"
+              isSelected={notifyInbox}
+              onValueChange={setNotifyInbox}
+              classNames={{ label: "text-xs text-default-600" }}
+            >
+              Inbox notifications
+            </Checkbox>
+            <Checkbox
+              size="sm"
+              isSelected={notifyEmail}
+              onValueChange={setNotifyEmail}
+              classNames={{ label: "text-xs text-default-600" }}
+            >
+              Email notifications
+            </Checkbox>
+          </div>
+        </div>
 
         <div className="flex items-center justify-between pt-2">
           <div className="flex gap-2">

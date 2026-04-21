@@ -867,6 +867,9 @@ export type TriggerType = "schedule" | "webhook" | "manual" | "agentic";
 export type Automation = {
   id: string;
   userId: string;
+  projectId?: string | null;
+  notifyInbox: boolean;
+  notifyEmail: boolean;
   name: string;
   workflowName: string;
   workflowVersion: string;

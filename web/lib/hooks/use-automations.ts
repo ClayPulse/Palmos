@@ -5,12 +5,15 @@ import useSWR from "swr";
 export function useAutomations(options?: {
   status?: string;
   triggerType?: string;
+  /** Filter by project ID. Pass "none" for automations without a project. */
+  projectId?: string;
   /** Auto-refresh interval in ms. Set to 0 to disable. Default: 0 */
   refreshInterval?: number;
 }) {
   const params = new URLSearchParams();
   if (options?.status) params.set("status", options.status);
   if (options?.triggerType) params.set("triggerType", options.triggerType);
+  if (options?.projectId) params.set("projectId", options.projectId);
   const query = params.toString();
   const url = `/api/automation${query ? `?${query}` : ""}`;
 
