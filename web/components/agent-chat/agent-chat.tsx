@@ -343,12 +343,15 @@ export default function AgentChat({
   const [workflowTasks, setWorkflowTasks] = useState<WorkflowTaskState[]>([]);
   const polledTaskIdsRef = useRef<Set<string>>(new Set());
 
-  // Clear workflow tasks and uploads when a new chat session starts
+  // Clear workflow tasks and uploads when a new chat session starts,
+  // and scroll to top so the home screen is visible from the top.
   useEffect(() => {
     if (messages.length === 0) {
       setWorkflowTasks([]);
       polledTaskIdsRef.current.clear();
       setUploads([]);
+      const el = scrollContainerRef.current;
+      if (el) el.scrollTop = 0;
     }
   }, [messages.length]);
 
