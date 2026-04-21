@@ -36,7 +36,7 @@ export interface ChatContextValue {
   activeSessionId: string | null;
   currentSessionIdRef: React.RefObject<string>;
   handleNewChat: () => void;
-  handleSwitchSession: (sessionId: string) => void;
+  handleSwitchSession: (sessionId: string, opts?: { shareToken?: string; permission?: "read" | "edit"; workflowRuns?: any[] }) => void;
   handleDeleteSession: (sessionId: string) => void;
   saveCurrentSession: () => void;
   isLoadingSession: boolean;
@@ -46,8 +46,10 @@ export interface ChatContextValue {
   // Serialization helpers exposed for external use
   serializeMessage: (msg: BaseMessage) => SerializedMessage;
   deserializeMessage: (msg: SerializedMessage) => BaseMessage | null;
-  /** Import a shared chat by token into the user's history and display it. */
-  importSharedChat: (token: string) => Promise<void>;
+  /** Whether the user is currently viewing a read-only shared chat. */
+  isViewingShared: boolean;
+  /** Pre-fetched workflow run results keyed by taskId (shared chat only). */
+  sharedWorkflowRuns: Map<string, any>;
 }
 
 export const ChatContext = createContext<ChatContextValue | null>(null);
@@ -84,6 +86,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
     deleteSession,
     fetchSessionMessages,
     saveWorkflowBuild: saveWorkflowBuildAPI,
+    markSessionKnown,
   } = useChatSessions();
 
   const editorContext = useContext(EditorContext);
@@ -94,6 +97,10 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   /** When true, the current view is a read-only shared chat — skip auto-save. */
   const isViewingSharedRef = useRef(false);
+  const [isViewingShared, setIsViewingShared] = useState(false);
+  const [sharedWorkflowRuns, setSharedWorkflowRuns] = useState<Map<string, any>>(new Map());
+  /** The share token for the current session (if accessed via a share link). */
+  const shareTokenRef = useRef<string | null>(null);
 
   // Initialize session on mount — restore the active session's messages
   useEffect(() => {
@@ -130,11 +137,13 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
       (p) => p.name === editorContext?.editorStates.project,
     )?.id ?? null;
     const messagesAtEnqueue = messages.map(serializeMessage);
+    const shareTokenAtEnqueue = shareTokenRef.current;
     saveTimeoutRef.current = setTimeout(() => {
       saveSession(
         sessionIdAtEnqueue,
         messagesAtEnqueue,
         projectIdAtEnqueue,
+        shareTokenAtEnqueue,
       ).then((resolvedId) => {
         // If backend assigned a new ID, update our ref — but only if the ref
         // is still pointing at the session we just saved. Otherwise the user
@@ -154,6 +163,8 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
   const handleNewChat = useCallback(() => {
     isViewingSharedRef.current = false;
+    setIsViewingShared(false);
+    shareTokenRef.current = null;
     clear();
     setWorkflowBuilds([]);
     const id = startNewSession();
@@ -173,13 +184,13 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
   const isSwitchingRef = useRef(false);
   const handleSwitchSession = useCallback(
-    async (sessionId: string) => {
+    async (sessionId: string, opts?: { shareToken?: string; permission?: "read" | "edit"; workflowRuns?: any[] }) => {
       // Guard against re-entrant switches (rapid clicks): only one switch
       // may be in flight at a time, otherwise concurrent invocations can
       // interleave their state updates and load messages under the wrong
       // session.
       if (isSwitchingRef.current) return;
-      if (sessionId === currentSessionIdRef.current) return;
+      if (sessionId === currentSessionIdRef.current && !opts?.shareToken) return;
       isSwitchingRef.current = true;
       // Cancel any pending debounced auto-save before we mutate state — the
       // enqueued save would otherwise write stale messages under whatever
@@ -193,10 +204,17 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
       // Abort any in-flight stream FIRST so late SSE chunks can't leak
       // messages into the next session's messageMapRef.
       clear();
-      isViewingSharedRef.current = false;
+
+      const isShared = !!opts?.shareToken;
+      const isReadOnly = isShared && opts?.permission !== "edit";
+      isViewingSharedRef.current = isReadOnly;
+      setIsViewingShared(isReadOnly);
+      shareTokenRef.current = opts?.shareToken ?? null;
+
       setIsLoadingSession(true);
       switchSession(sessionId);
       currentSessionIdRef.current = sessionId;
+      if (isShared) markSessionKnown(sessionId);
 
       // Flush the outgoing session's messages (skip if it was a read-only
       // shared chat view).
@@ -213,7 +231,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
       // Fetch messages from backend/localStorage
       try {
-        const data = await fetchSessionMessages(sessionId);
+        const data = await fetchSessionMessages(sessionId, opts?.shareToken);
         // Guard: if the user switched again while we were fetching, don't
         // load these results into the currently-active session.
         if (currentSessionIdRef.current !== sessionId) return;
@@ -223,6 +241,17 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
           );
         }
         setWorkflowBuilds(data.workflowBuilds ?? []);
+
+        // Populate pre-fetched workflow run results for shared sessions
+        if (opts?.workflowRuns) {
+          const runsMap = new Map<string, any>();
+          for (const run of opts.workflowRuns) {
+            if (run.taskId) runsMap.set(run.taskId, run);
+          }
+          setSharedWorkflowRuns(runsMap);
+        } else {
+          setSharedWorkflowRuns(new Map());
+        }
 
         // Restore or clear the project context based on the session
         const sessionProjectId = data.projectId ?? null;
@@ -249,7 +278,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         isSwitchingRef.current = false;
       }
     },
-    [messages, clear, switchSession, saveSession, loadMessages, fetchSessionMessages, editorContext],
+    [messages, clear, switchSession, saveSession, loadMessages, fetchSessionMessages, markSessionKnown, editorContext],
   );
 
   const handleDeleteSession = useCallback(
@@ -267,52 +296,6 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
       saveSession(currentSessionIdRef.current, messages.map(serializeMessage));
     }
   }, [messages, saveSession]);
-
-  const importSharedChat = useCallback(
-    async (token: string) => {
-      setIsLoadingSession(true);
-      try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/chat/share/${token}`,
-          { credentials: "include" },
-        );
-        if (!res.ok) throw new Error("Failed to load shared chat");
-        const data = await res.json();
-        if (data.error || data.expired || !data.session) {
-          throw new Error(data.error ?? "This shared chat is no longer available.");
-        }
-
-        // Convert backend messages to SerializedMessage format
-        const serializedMsgs: SerializedMessage[] = (data.session.messages ?? [])
-          .filter((m: any) => ["human", "ai", "tool"].includes(m.role))
-          .map((m: any) => ({
-            type: m.role as SerializedMessage["type"],
-            content: m.content,
-            id: m.id,
-            tool_call_id: m.toolCallId,
-            additional_kwargs: m.additionalKwargs,
-            tool_calls: m.toolCalls,
-          }));
-
-        // Save current session first
-        if (messages.length > 0 && !isViewingSharedRef.current) {
-          await saveSession(currentSessionIdRef.current, messages.map(serializeMessage));
-        }
-
-        // Load shared messages into the UI without saving to history
-        clear();
-        isViewingSharedRef.current = true;
-        const deserialized = serializedMsgs
-          .map(deserializeMessage)
-          .filter(Boolean) as BaseMessage[];
-        loadMessages(deserialized);
-        setWorkflowBuilds(data.session.workflowBuilds ?? []);
-      } finally {
-        setIsLoadingSession(false);
-      }
-    },
-    [messages, clear, saveSession, loadMessages],
-  );
 
   return (
     <ChatContext.Provider
@@ -342,7 +325,8 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
         saveWorkflowBuild,
         serializeMessage,
         deserializeMessage,
-        importSharedChat,
+        isViewingShared,
+        sharedWorkflowRuns,
       }}
     >
       {children}
@@ -360,6 +344,7 @@ import {
   SystemMessage,
   ToolMessage,
 } from "@langchain/core/messages";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 
 function serializeMessage(msg: BaseMessage): SerializedMessage {
   const type = msg._getType() as SerializedMessage["type"];

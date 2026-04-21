@@ -31,6 +31,7 @@ export default function ChatInputBar({
   onUploadFiles,
   onRemoveUpload,
   onIndexUpload,
+  isDisabled,
   footerExtra,
 }: {
   variant: "panel" | "page";
@@ -45,6 +46,7 @@ export default function ChatInputBar({
   onUploadFiles: (files: File[]) => void;
   onRemoveUpload: (upload: ChatUpload) => void;
   onIndexUpload: (upload: ChatUpload) => void;
+  isDisabled?: boolean;
   footerExtra?: React.ReactNode;
 }) {
   const { getTranslations: t } = useTranslations();
@@ -96,7 +98,9 @@ export default function ChatInputBar({
   const dropIconSize = isPage ? "text-3xl" : "text-2xl";
   const dropTextSize = isPage ? "text-sm" : "text-xs";
   const dropRounding = isPage ? "rounded-xl" : "rounded-lg";
-  const placeholder = isPage ? t("chatInputBar.askAnything") : t("chatInputBar.askShort");
+  const placeholder = isDisabled
+    ? "This is a read-only shared conversation"
+    : isPage ? t("chatInputBar.askAnything") : t("chatInputBar.askShort");
   const pyTextarea = isPage ? "py-3" : "py-2.5";
 
   const attachmentChips =
@@ -248,7 +252,7 @@ export default function ChatInputBar({
           <button
             className={`flex ${btnSize} shrink-0 items-center justify-center rounded-full text-gray-400 transition-colors hover:text-amber-600 disabled:opacity-30 dark:text-white/40 dark:hover:text-amber-400`}
             onClick={() => fileInputRef.current?.click()}
-            disabled={isLoading}
+            disabled={isLoading || isDisabled}
             aria-label={t("chatInputBar.attachFile")}
           >
             <Icon name="attach_file" variant="round" className="text-base" />
@@ -283,8 +287,8 @@ export default function ChatInputBar({
               onUploadFiles(files);
             }
           }}
-          disabled={isLoading}
-          autoFocus={isPage}
+          disabled={isLoading || isDisabled}
+          autoFocus={isPage && !isDisabled}
           rows={1}
         />
         {inputText && !isLoading && (
@@ -308,7 +312,7 @@ export default function ChatInputBar({
               inputText.trim() && !isLoading && !uploadsInProgress ? "animate-pulse-send-glow" : ""
             }`}
             onClick={onSend}
-            disabled={!inputText.trim() || (!isPage && isLoading)}
+            disabled={!inputText.trim() || (!isPage && isLoading) || isDisabled}
           >
             {uploadsInProgress && pendingSend ? (
               <Spinner size="sm" classNames={{ wrapper: "h-4 w-4" }} />

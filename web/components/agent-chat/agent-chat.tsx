@@ -81,6 +81,8 @@ export default function AgentChat({
     isLoadingSession,
     workflowBuilds,
     saveWorkflowBuild,
+    isViewingShared,
+    sharedWorkflowRuns,
     activeInterrupt,
     activeQAForm,
     resume,
@@ -405,6 +407,24 @@ export default function AgentChat({
       const taskId = parsed.taskId;
       const workflowName = parsed.workflowName ?? "Workflow";
 
+      // In shared chat view, use pre-fetched run data — we can't poll (not the owner).
+      if (isViewingShared) {
+        const run = sharedWorkflowRuns.get(taskId);
+        setWorkflowTasks((prev) => [
+          ...prev,
+          {
+            taskId,
+            originalTaskId: taskId,
+            workflowName: run?.workflow?.name ?? workflowName,
+            startedAt: Date.now(),
+            status: (run?.status as "completed" | "failed") ?? "completed",
+            result: run?.result ?? undefined,
+            error: run?.error ?? undefined,
+          },
+        ]);
+        continue;
+      }
+
       // Seed as "loading" — we'll check the DB before deciding whether this
       // task is actually still running.
       setWorkflowTasks((prev) => [
@@ -530,7 +550,7 @@ export default function AgentChat({
         );
       }
     }
-  }, [messages]);
+  }, [messages, isViewingShared]);
 
   const pendingSendRef = useRef<string | null>(null);
 
@@ -911,6 +931,7 @@ export default function AgentChat({
     onUploadFiles: uploadFiles,
     onRemoveUpload: handleRemoveUpload,
     onIndexUpload: handleIndexUpload,
+    isDisabled: isViewingShared,
   } as const;
 
   // ── Gate: paywall for users without agent chat access ────────────────────
