@@ -343,12 +343,15 @@ export default function AgentChat({
   const [workflowTasks, setWorkflowTasks] = useState<WorkflowTaskState[]>([]);
   const polledTaskIdsRef = useRef<Set<string>>(new Set());
 
-  // Clear workflow tasks and uploads when a new chat session starts
+  // Clear workflow tasks and uploads when a new chat session starts,
+  // and scroll to top so the home screen is visible from the top.
   useEffect(() => {
     if (messages.length === 0) {
       setWorkflowTasks([]);
       polledTaskIdsRef.current.clear();
       setUploads([]);
+      const el = scrollContainerRef.current;
+      if (el) el.scrollTop = 0;
     }
   }, [messages.length]);
 
@@ -790,6 +793,18 @@ export default function AgentChat({
       toolCallNames.length === 0 &&
       content.trimStart().startsWith("{") &&
       content.trimStart().endsWith("}")
+    ) {
+      continue;
+    }
+    // AI message whose content is raw mermaid diagram syntax — skip it,
+    // the rendered diagram will appear via a separate tool_call widget.
+    if (
+      !isHuman &&
+      !hasNonCanvasWidgets &&
+      spawned.length === 0 &&
+      /^\s*(?:flowchart|graph|sequenceDiagram|classDiagram|stateDiagram|erDiagram|journey|gantt|pie|quadrantChart|requirementDiagram|gitgraph|c4Context|mindmap|timeline|zenuml|sankey-beta|xychart-beta|block-beta)\b/i.test(
+        content,
+      )
     ) {
       continue;
     }
