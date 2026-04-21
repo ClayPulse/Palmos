@@ -3,10 +3,10 @@
 import ChatPanel from "@/components/interface/panels/chat-panel";
 import ChatSessionSidebar from "@/components/interface/panels/chat-session-sidebar";
 import { AppModeEnum, PlatformEnum } from "@/lib/enums";
+import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { getPlatform } from "@/lib/platform-api/platform-checker";
 import { useTheme } from "next-themes";
 import { useContext, useEffect, useState } from "react";
-import { useScreenSize } from "@/lib/hooks/use-screen-size";
 import { EditorContext } from "../../providers/editor-context-provider";
 import SideNavPanel from "../panels/side-nav-panel";
 import AppNavBar from "./app-nav-bar";
@@ -101,7 +101,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
           <RebrandBanner />
           <ViewAsBanner />
           <div
-            className={`relative min-h-0 flex-1 w-full overflow-hidden ${
+            className={`relative min-h-0 w-full flex-1 overflow-hidden ${
               editorMounted && appMode === AppModeEnum.Editor
                 ? "flex flex-col md:grid md:grid-cols-[max-content_1fr_max-content] md:grid-rows-1"
                 : "flex"
@@ -130,40 +130,49 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                 />
               )}
               <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-              {isShowNavbar && (
-                <AppNavBar
-                  style={{
-                    paddingTop:
-                      getPlatform() === PlatformEnum.Capacitor ? 0 : undefined,
-                  }}
-                  left={
-                    appMode === AppModeEnum.Agent ? (
-                      <ChatNavLeft onToggleSidebar={() => setIsChatSidebarOpen((v) => !v)} isSidebarOpen={isChatSidebarOpen} />
-                    ) : (
-                      <EditorNavLeft
-                        isMenuOpen={isMenuOpen}
-                        setIsMenuOpen={setIsMenuOpen}
-                      />
-                    )
-                  }
-                  right={
-                    appMode === AppModeEnum.Agent ? (
-                      <ChatNavRight />
-                    ) : (
-                      <EditorNavRight
-                        setIsSharingOpen={() =>
-                          editorContext?.updateModalStates({
-                            sharing: { isOpen: true },
-                          })
-                        }
-                      />
-                    )
-                  }
-                />
-              )}
-              <div className="relative min-h-0 flex-1 overflow-hidden">
-                <div className="h-full w-full overflow-hidden">{children}</div>
-              </div>
+                {isShowNavbar && (
+                  <AppNavBar
+                    style={{
+                      paddingTop:
+                        getPlatform() === PlatformEnum.Capacitor
+                          ? 0
+                          : undefined,
+                    }}
+                    left={
+                      appMode === AppModeEnum.Agent ? (
+                        <ChatNavLeft
+                          onToggleSidebar={() =>
+                            setIsChatSidebarOpen((v) => !v)
+                          }
+                          isSidebarOpen={isChatSidebarOpen}
+                        />
+                      ) : (
+                        <EditorNavLeft
+                          isMenuOpen={isMenuOpen}
+                          setIsMenuOpen={setIsMenuOpen}
+                        />
+                      )
+                    }
+                    right={
+                      appMode === AppModeEnum.Agent ? (
+                        <ChatNavRight />
+                      ) : (
+                        <EditorNavRight
+                          setIsSharingOpen={() =>
+                            editorContext?.updateModalStates({
+                              sharing: { isOpen: true },
+                            })
+                          }
+                        />
+                      )
+                    }
+                  />
+                )}
+                <div className="relative min-h-0 flex-1 overflow-hidden">
+                  <div className="h-full w-full overflow-hidden">
+                    {children}
+                  </div>
+                </div>
               </div>
             </div>
             {/* Right chat panel — only rendered after editor is first activated */}

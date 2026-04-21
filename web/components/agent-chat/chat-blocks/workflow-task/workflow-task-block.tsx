@@ -742,11 +742,11 @@ export function WorkflowBuiltCard({
           {t("workflowTaskCard.openInEditor")}
         </button>
         <button
-          onClick={() =>
+          onClick={() => {
             submit(
-              `I'd like to run the workflow "${workflowName}" (id: ${publishedId}). How would you like to run it?`,
-            )
-          }
+              `Run my workflow "${workflowName}"`,
+            );
+          }}
           className="flex items-center gap-1.5 rounded-lg border border-green-300/60 bg-green-50 px-3 py-2 text-xs font-medium text-green-700 transition-colors hover:bg-green-100 dark:border-green-500/30 dark:bg-green-500/10 dark:text-green-300 dark:hover:bg-green-500/20"
         >
           <Icon name="play_arrow" variant="round" className="text-sm" />

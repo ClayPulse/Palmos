@@ -10,6 +10,7 @@ import Icon from "@/components/misc/icon";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
+import { useTabViewManager } from "@/lib/hooks/use-tab-view-manager";
 import { useAutomations } from "@/lib/hooks/use-automations";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import type {
@@ -73,18 +74,22 @@ export default function HomeScreen({
     }
   }, [isInProjectView, onAnalyzingChange]);
 
-  // If we have an active project with analysis done (and not re-running), show the project view
+  // If we have an active project with analysis done (and not re-running), show project view
+  // with a collapsed onboarding section
   if (isInProjectView) {
     return (
-      <ProjectView
+      <ProjectViewWithOnboarding
         project={activeProject!}
+        projects={projects}
         onSend={onSend}
         onRerunAnalysis={handleRerunAnalysis}
+        onOnboardingComplete={onOnboardingComplete}
+        onAnalyzingChange={onAnalyzingChange}
       />
     );
   }
 
-  // Otherwise show the onboarding / home view
+  // Otherwise show the full onboarding / home view
   return (
     <OnboardingView
       projects={projects}
@@ -974,6 +979,9 @@ function OnboardingViewInner({
       </div>
 
 
+      {/* All workflows */}
+      <AllWorkflows />
+
       {/* Project list */}
       {projects.length > 0 && (
         <ProjectExplorer projects={projects} onOpen={openProject} />
@@ -998,16 +1006,73 @@ function OnboardingViewInner({
   );
 }
 
+// ── Project view with collapsed onboarding ──────────────────────────────────
+
+function ProjectViewWithOnboarding({
+  project,
+  projects,
+  onSend,
+  onRerunAnalysis,
+  onOnboardingComplete,
+  onAnalyzingChange,
+}: {
+  project: ProjectInfo;
+  projects: ProjectInfo[];
+  onSend: (text: string) => void;
+  onRerunAnalysis?: () => void;
+  onOnboardingComplete?: (analysis: ProjectAnalysisInfo) => void;
+  onAnalyzingChange?: (isAnalyzing: boolean) => void;
+}) {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  if (showOnboarding) {
+    return (
+      <div className="flex flex-col items-center gap-4 py-4">
+        <div className="w-full max-w-xl">
+          <button
+            type="button"
+            onClick={() => setShowOnboarding(false)}
+            className="flex items-center gap-1 text-xs font-medium text-default-400 hover:text-default-600 dark:text-white/40 dark:hover:text-white/60 mb-3 transition-colors"
+          >
+            <span className="material-icons-round text-sm">arrow_back</span>
+            Back to {project.name}
+          </button>
+        </div>
+        <OnboardingView
+          projects={projects}
+          activeProject={project}
+          onOnboardingComplete={(analysis) => {
+            setShowOnboarding(false);
+            onOnboardingComplete?.(analysis);
+          }}
+          onAnalyzingChange={onAnalyzingChange}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <ProjectView
+      project={project}
+      onSend={onSend}
+      onRerunAnalysis={onRerunAnalysis}
+      onNewAnalysis={() => setShowOnboarding(true)}
+    />
+  );
+}
+
 // ── Project view (after onboarding) ─────────────────────────────────────────
 
 function ProjectView({
   project,
   onSend,
   onRerunAnalysis,
+  onNewAnalysis,
 }: {
   project: ProjectInfo;
   onSend: (text: string) => void;
   onRerunAnalysis?: () => void;
+  onNewAnalysis?: () => void;
 }) {
   const { getTranslations: t } = useTranslations();
   const editorContext = useContext(EditorContext);
@@ -1084,6 +1149,15 @@ function ProjectView({
                 >
                   Re-run analysis
                 </button>
+                {onNewAnalysis && (
+                  <button
+                    type="button"
+                    className="text-xs font-medium text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300"
+                    onClick={onNewAnalysis}
+                  >
+                    New analysis
+                  </button>
+                )}
               </div>
             )}
           </div>
@@ -1356,6 +1430,35 @@ function InsightCard({
         {suggestion.description}
       </p>
     </button>
+  );
+}
+
+function AllWorkflows() {
+  const {
+    workflows,
+    isLoading,
+    mutate,
+  } = useMarketplaceWorkflows("My Workflows");
+  const editorContext = useContext(EditorContext);
+  const { createCanvasTabView } = useTabViewManager();
+
+  if (isLoading) {
+    return (
+      <div className="w-full max-w-xl flex justify-center py-3">
+        <Spinner size="sm" />
+      </div>
+    );
+  }
+
+  if (!workflows || workflows.length === 0) return null;
+
+  return (
+    <div className="w-full max-w-xl">
+      <MyWorkflowsCarousel
+        workflows={workflows}
+        onMutate={() => mutate()}
+      />
+    </div>
   );
 }
 
