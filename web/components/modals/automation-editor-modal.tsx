@@ -10,6 +10,7 @@ import { Automation } from "@/lib/types";
 import DialTimePicker from "@/components/misc/dial-time-picker";
 import {
   Button,
+  Checkbox,
   Chip,
   DatePicker,
   Input,
