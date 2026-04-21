@@ -27,11 +27,12 @@ export async function setWorkflowSetting(
   key: string,
   value: string,
   isSecret: boolean,
+  useManagedKey?: boolean,
 ): Promise<void> {
   const response = await fetchAPI("/api/workflow/user-settings/set", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ workflowId, key, value, isSecret }),
+    body: JSON.stringify({ workflowId, key, value, isSecret, useManagedKey }),
   });
   if (!response.ok) {
     throw new Error(`Failed to save setting: ${response.status}`);

@@ -61,10 +61,10 @@ export default function WorkflowGallery() {
   }
 
   async function openWorkflow(workflow: Workflow) {
-    const missing = await checkMissingEnvs(workflow.id);
-    if (missing && workflow.id) {
+    const result = await checkMissingEnvs(workflow.id);
+    if (result && workflow.id) {
       setPendingWorkflow(workflow);
-      openEnvSetup(workflow.id, missing);
+      openEnvSetup(workflow.id, result.missing, result.managedAvailable);
     } else {
       await proceedToCanvas(workflow);
     }
@@ -165,6 +165,7 @@ export default function WorkflowGallery() {
           isOpen={envSetup.isOpen}
           workflowId={envSetup.workflowId}
           envEntries={envSetup.env}
+          managedAvailable={envSetup.managedAvailable}
           onClose={() => {
             closeEnvSetup();
             setPendingWorkflow(null);

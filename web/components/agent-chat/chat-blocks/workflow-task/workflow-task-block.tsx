@@ -655,19 +655,23 @@ export function WorkflowBuiltCard({
   const [missingEnvs, setMissingEnvs] = useState<Record<string, string> | null>(
     null,
   );
+  const [managedAvailable, setManagedAvailable] = useState<Record<string, any>>(
+    {},
+  );
   const [workflow, setWorkflow] = useState<Workflow | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [missing, res] = await Promise.all([
+      const [envResult, res] = await Promise.all([
         checkMissingEnvs(publishedId),
         fetchAPI(
           `/api/workflow/get?name=${encodeURIComponent(workflowName)}&latest=true`,
         ),
       ]);
       if (cancelled) return;
-      setMissingEnvs(missing);
+      setMissingEnvs(envResult?.missing ?? null);
+      setManagedAvailable(envResult?.managedAvailable ?? {});
       if (res.ok) {
         const wf: Workflow = await res.json();
         if (!cancelled) setWorkflow(wf);
@@ -756,7 +760,7 @@ export function WorkflowBuiltCard({
         </button>
         {missingEnvs && Object.keys(missingEnvs).length > 0 && (
           <button
-            onClick={() => openEnvSetup(publishedId, missingEnvs)}
+            onClick={() => openEnvSetup(publishedId, missingEnvs, managedAvailable)}
             className="flex items-center gap-1.5 rounded-lg border border-amber-300/60 bg-amber-50 px-3 py-2 text-xs font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/20"
           >
             <Icon name="key" variant="round" className="text-sm" />
@@ -774,6 +778,7 @@ export function WorkflowBuiltCard({
           }}
           workflowId={envSetup.workflowId}
           envEntries={envSetup.env}
+          managedAvailable={envSetup.managedAvailable}
         />
       )}
     </div>

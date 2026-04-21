@@ -3,10 +3,17 @@
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useCallback, useState } from "react";
 
+export type ManagedKeyInfo = {
+  provider: string;
+  basePriceDescription: string;
+  markupPercent: number;
+};
+
 type EnvSetup = {
   isOpen: boolean;
   workflowId: string;
   env: Record<string, string>;
+  managedAvailable: Record<string, ManagedKeyInfo>;
 };
 
 /**
@@ -24,16 +31,19 @@ export function useWorkflowEnvCheck() {
   const checkMissingEnvs = useCallback(
     async (
       workflowId: string | undefined,
-    ): Promise<Record<string, string> | null> => {
+    ): Promise<{
+      missing: Record<string, string>;
+      managedAvailable: Record<string, ManagedKeyInfo>;
+    } | null> => {
       if (!workflowId) return null;
       try {
         const res = await fetchAPI(
           `/api/workflow/user-settings/check-missing?workflowId=${encodeURIComponent(workflowId)}`,
         );
         if (res.ok) {
-          const { missing } = await res.json();
+          const { missing, managedAvailable } = await res.json();
           if (missing && Object.keys(missing).length > 0) {
-            return missing;
+            return { missing, managedAvailable: managedAvailable ?? {} };
           }
         }
       } catch {
@@ -46,8 +56,17 @@ export function useWorkflowEnvCheck() {
 
   /** Open the env-setup modal manually (e.g. before opening the canvas). */
   const openEnvSetup = useCallback(
-    (workflowId: string, env: Record<string, string>) => {
-      setEnvSetup({ isOpen: true, workflowId, env });
+    (
+      workflowId: string,
+      env: Record<string, string>,
+      managedAvailable?: Record<string, ManagedKeyInfo>,
+    ) => {
+      setEnvSetup({
+        isOpen: true,
+        workflowId,
+        env,
+        managedAvailable: managedAvailable ?? {},
+      });
     },
     [],
   );
