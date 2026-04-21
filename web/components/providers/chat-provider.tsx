@@ -284,7 +284,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
 
         // Convert backend messages to SerializedMessage format
         const serializedMsgs: SerializedMessage[] = (data.session.messages ?? [])
-          .filter((m: any) => m.role === "human" || m.role === "ai")
+          .filter((m: any) => ["human", "ai", "tool"].includes(m.role))
           .map((m: any) => ({
             type: m.role as SerializedMessage["type"],
             content: m.content,
@@ -306,7 +306,7 @@ export default function ChatProvider({ children }: { children: React.ReactNode }
           .map(deserializeMessage)
           .filter(Boolean) as BaseMessage[];
         loadMessages(deserialized);
-        setWorkflowBuilds([]);
+        setWorkflowBuilds(data.session.workflowBuilds ?? []);
       } finally {
         setIsLoadingSession(false);
       }
