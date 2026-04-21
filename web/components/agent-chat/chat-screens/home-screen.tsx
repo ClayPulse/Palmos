@@ -980,7 +980,7 @@ function OnboardingViewInner({
 
 
       {/* All workflows */}
-      <AllWorkflows />
+      <AllWorkflows projectId={activeProject?.id} />
 
       {/* Project list */}
       {projects.length > 0 && (
@@ -1433,12 +1433,12 @@ function InsightCard({
   );
 }
 
-function AllWorkflows() {
+function AllWorkflows({ projectId }: { projectId?: string }) {
   const {
     workflows,
     isLoading,
     mutate,
-  } = useMarketplaceWorkflows("My Workflows");
+  } = useMarketplaceWorkflows("My Workflows", projectId);
   const editorContext = useContext(EditorContext);
   const { createCanvasTabView } = useTabViewManager();
 
