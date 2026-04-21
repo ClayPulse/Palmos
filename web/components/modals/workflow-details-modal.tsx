@@ -185,7 +185,7 @@ export default function WorkflowDetailsModal({
               onPress={() => setIsMoveOpen(true)}
               startContent={<Icon name="drive_file_move" />}
             >
-              Move to Project
+              Move to Organization
             </Button>
           )}
           <Button onPress={onClose}>Close</Button>
@@ -208,7 +208,7 @@ export default function WorkflowDetailsModal({
             });
           }
           addToast({
-            title: projectId ? "Moved to project" : "Removed from project",
+            title: projectId ? "Moved to organization" : "Removed from organization",
             color: "success",
           });
           onDelete?.();
@@ -216,7 +216,7 @@ export default function WorkflowDetailsModal({
         }
       }}
       currentProjectId={workflow.projectId}
-      title="Move Workflow to Project"
+      title="Move Workflow to Organization"
     />
     </>
   );

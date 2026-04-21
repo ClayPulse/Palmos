@@ -42,9 +42,9 @@
 		"generalSettings": "一般設定",
 		"aiSettings": "AI 設定",
 		"securitySettings": "セキュリティ設定",
-		"projectHomePath": "プロジェクトホームパス",
-		"projectHomeDescription": "すべてのプロジェクトはこのフォルダーに保存されます。",
-		"selectProjectHomePath": "プロジェクトホームパスを選択",
+		"projectHomePath": "組織ホームパス",
+		"projectHomeDescription": "すべての組織はこのフォルダーに保存されます。",
+		"selectProjectHomePath": "組織ホームパスを選択",
 		"environmentVariables": "環境変数（フロントエンド）：",
 		"backendEnvVariablesWarning": "バックエンドの環境変数を設定するには、拡張アプリの設定から行ってください。",
 		"addNewVariable": "新しい変数を追加",
@@ -118,10 +118,10 @@
 			"notSupported": "このプラットフォームではファイル選択はサポートされていません"
 		},
 		"fetchProjects": {
-			"failed": "プロジェクト一覧の取得に失敗しました"
+			"failed": "組織一覧の取得に失敗しました"
 		},
 		"listProjects": {
-			"notSignedIn": "プロジェクトを一覧表示できません。サインインしていますか？"
+			"notSignedIn": "組織を一覧表示できません。サインインしていますか？"
 		},
 		"listPath": {
 			"failed": "パスの一覧取得に失敗しました",
@@ -196,8 +196,8 @@
 			"button": "サインイン"
 		},
 		"myProjects": {
-			"tab": "自分のプロジェクト",
-			"title": "自分のプロジェクト"
+			"tab": "自分の組織",
+			"title": "自分の組織"
 		},
 		"myApps": {
 			"tab": "自分のアプリ",
@@ -212,7 +212,7 @@
 			"title": "注目のアプリ"
 		},
 		"learnMore": "詳細を見る",
-		"myAppsAndProjects": "自分のアプリとプロジェクト",
+		"myAppsAndProjects": "自分のアプリと組織",
 		"yourResources": "あなたのリソース",
 		"cloudWorkspaces": "クラウドワークスペース"
 	},
@@ -236,20 +236,20 @@
 		"viewAll": "すべて表示"
 	},
 	"openInProjectModal": {
-		"title": "プロジェクトで開く",
+		"title": "組織で開く",
 		"openExisting": "既存を開く",
-		"newProject": "新規プロジェクト",
-		"projectName": "プロジェクト名",
-		"projectNamePlaceholder": "プロジェクト名を入力",
-		"projectLocation": "プロジェクトの場所",
-		"projectLocationPlaceholder": "プロジェクトの場所を選択",
+		"newProject": "新規組織",
+		"projectName": "組織名",
+		"projectNamePlaceholder": "組織名を入力",
+		"projectLocation": "組織の場所",
+		"projectLocationPlaceholder": "組織の場所を選択",
 		"selectLocation": "場所を選択",
 		"createInside": "この中に作成",
 		"moreOptionsComingSoon": "その他のオプションは近日追加予定...",
 		"create": "作成",
 		"open": "開く",
-		"selectProjectFolder": "プロジェクトフォルダーを選択",
-		"selectProjectFile": "プロジェクトファイルを選択",
+		"selectProjectFolder": "組織フォルダーを選択",
+		"selectProjectFile": "組織ファイルを選択",
 		"workspaceRequired": "このアプリ / ワークフローを正しく動作させるには、ワークスペースを開いておく必要があります。",
 		"selectWorkspace": "ワークスペースを選択",
 		"localComputer": "ローカルコンピューター",
@@ -265,7 +265,7 @@
 			},
 			"failedToOpen": {
 				"title": "開くことに失敗しました。",
-				"description": "プロジェクトが選択されていません。"
+				"description": "組織が選択されていません。"
 			},
 			"appOpened": {
 				"title": "アプリを開きました",
@@ -294,14 +294,14 @@
 			}
 		},
 		"errors": {
-			"noName": "プロジェクト名を入力してください",
-			"noLocation": "プロジェクトの場所を選択してください"
+			"noName": "組織名を入力してください",
+			"noLocation": "組織の場所を選択してください"
 		}
 	},
 	"quickVibeCodeSetupModal": {
 		"title": "クイック Vibe Code セットアップ",
-		"vibeCodeProject": "Vibe Code プロジェクト",
-		"projectName": "プロジェクト名",
+		"vibeCodeProject": "Vibe Code 組織",
+		"projectName": "組織名",
 		"gettingReady": "セットアップを準備しています...",
 		"appOpened": {
 			"title": "アプリを開きました",
@@ -332,7 +332,7 @@
 		"pulseEditorCore": "Palmos コア",
 		"officialApps": "公式アプリ",
 		"opensource": "オープンソース",
-		"cloudServices": "同時に、クラウドホスティングされたサービスやマーケットプレイスも提供しており、インフラやバックエンドを気にすることなく、プロジェクトを簡単に管理し、コミュニティと共有することができます。",
+		"cloudServices": "同時に、クラウドホスティングされたサービスやマーケットプレイスも提供しており、インフラやバックエンドを気にすることなく、組織を簡単に管理し、コミュニティと共有することができます。",
 		"loveWhatWeDo": "私たちの取り組みが気に入ったら、GitHub でスターを付けるか、Google Play からモバイルアプリをダウンロードして応援してください！",
 		"giveUsAStar": "スターを付ける",
 		"googlePlay": "Google Play"
@@ -350,10 +350,10 @@
 	},
 	"projectIndicator": {
 		"closeProject": {
-			"menuItem": "プロジェクトを閉じる"
+			"menuItem": "組織を閉じる"
 		},
 		"projectSettings": {
-			"menuItem": "プロジェクト設定"
+			"menuItem": "組織設定"
 		}
 	},
 	"editorToolbar": {
@@ -406,22 +406,22 @@
 		}
 	},
 	"projectSettingsModal": {
-		"title": "プロジェクト設定",
-		"projectName": "プロジェクト名",
-		"projectPath": "プロジェクトパス",
+		"title": "組織設定",
+		"projectName": "組織名",
+		"projectPath": "組織パス",
 		"update": "更新",
 		"create": "作成",
 		"delete": "削除",
 		"toast": {
-			"noProjectSelected": "プロジェクトが選択されていません。"
+			"noProjectSelected": "組織が選択されていません。"
 		}
 	},
 	"editorSettingsModal": {
 		"title": "エディター設定",
 		"projectsFolder": {
-			"description": "すべてのプロジェクトはこのフォルダーに保存されます。",
+			"description": "すべての組織はこのフォルダーに保存されます。",
 			"selectFolder": "フォルダーを選択",
-			"selectProjectHomePath": "プロジェクトホームパスを選択"
+			"selectProjectHomePath": "組織ホームパスを選択"
 		},
 		"environmentVariables": {
 			"frontend": "環境変数（フロントエンド）：",
@@ -699,18 +699,18 @@
 			"icon": "home"
 		},
 		"projectHome": {
-			"label": "プロジェクトホーム",
+			"label": "組織ホーム",
 			"icon": "folder",
-			"notSet": "まだプロジェクトホームパスが設定されていません。設定画面から指定してください。",
+			"notSet": "まだ組織ホームパスが設定されていません。設定画面から指定してください。",
 			"select": {
-				"button": "プロジェクトホームを選択"
+				"button": "組織ホームを選択"
 			}
 		}
 	},
 	"fileMenu": {
 		"title": "ファイル",
-		"newProject": "新規プロジェクト",
-		"openProject": "プロジェクトを開く",
+		"newProject": "新規組織",
+		"openProject": "組織を開く",
 		"newWorkflow": {
 			"name": "新規ワークフロー",
 			"description": "新しいワークフローを作成"
@@ -771,18 +771,18 @@
 		"emptyContent": "内容が空です。新しいファイルを作成して開始してください。"
 	},
 	"projectExplorer": {
-		"title": "プロジェクト",
+		"title": "組織",
 		"newProject": {
-			"button": "新規プロジェクト"
+			"button": "新規組織"
 		},
-		"signInMessage": "プロジェクトを表示するにはサインインするか、デスクトップクライアントでローカルプロジェクトを開いてください。"
+		"signInMessage": "組織を表示するにはサインインするか、デスクトップクライアントでローカル組織を開いてください。"
 	},
 	"viewArea": {
 		"unknownViewType": "不明なビュータイプです",
 		"noViewSelected": "ビューが選択されていません"
 	},
 	"projectView": {
-		"title": "プロジェクト",
+		"title": "組織",
 		"createWorkflow": {
 			"button": "ワークフローを作成"
 		},
@@ -927,7 +927,7 @@
 	"statusScreens": {
 		"welcome": {
 			"title": "Palmos へようこそ",
-			"subtitle": "新しいプロジェクトを作成するか、既存のプロジェクトを開いて開始しましょう",
+			"subtitle": "新しい組織を作成するか、既存の組織を開いて開始しましょう",
 			"taglineLine1": "次世代の AI OS、駆動源は",
 			"taglineLine2": "Vibe Coded アプリとワークフロー"
 		},
@@ -958,7 +958,7 @@
 		"noOutput": "まだ出力はありません"
 	},
 	"tabViewManager": {
-		"openProject": "プロジェクトを開く",
+		"openProject": "組織を開く",
 		"untitled": "無題",
 		"newTab": "新しいタブ"
 	},
@@ -978,7 +978,7 @@
 		"readMoreOpenSource": "オープンソースへの取り組みについて詳しく見る"
 	},
 	"projectItem": {
-		"projectSettings": "プロジェクト設定",
+		"projectSettings": "組織設定",
 		"selectMultiple": "複数選択",
 		"created": "作成日："
 	},
@@ -1014,12 +1014,12 @@
 		}
 	},
 	"workspaceExplorer": {
-		"workspacePaused": "ワークスペースは現在一時停止中です。プロジェクトファイルにアクセスするにはワークスペースを再開してください。",
+		"workspacePaused": "ワークスペースは現在一時停止中です。組織ファイルにアクセスするにはワークスペースを再開してください。",
 		"startWorkspace": "ワークスペースを開始",
 		"workspaceSettings": "ワークスペース設定",
 		"osFeatures": "OS 機能と連携するには、デスクトップクライアントで開くか、リモートワークスペースを設定してください。",
 		"workspaceStarting": "ワークスペースを起動しています...",
-		"viewProjectContent": "ワークスペースでプロジェクト内容を表示するには、まずプロジェクトを選択してください。",
+		"viewProjectContent": "ワークスペースで組織内容を表示するには、まず組織を選択してください。",
 		"toast": {
 			"noWorkspace": "開始できるワークスペースがありません。",
 			"startingWorkspace": "ワークスペースを起動しています...",
@@ -1153,9 +1153,9 @@
 	},
 	"projectScreen": {
 		"whatToWorkOn": "何に取り組みたいですか？",
-		"tellAboutProject": "プロジェクトについて教えてください",
-		"helpUnderstand": "プロジェクトを理解させていただければ、最適なオートメーションを提案できます。スキップしてすぐに始めることもできます。",
-		"whatKind": "どのようなプロジェクトですか？",
+		"tellAboutProject": "組織について教えてください",
+		"helpUnderstand": "組織を理解させていただければ、最適なオートメーションを提案できます。スキップしてすぐに始めることもできます。",
+		"whatKind": "どのような組織ですか？",
 		"skip": "スキップ",
 		"describeIdea": "アイデアを説明してください。実現のお手伝いをします。",
 		"allSystemsNominal": "全システム正常",
@@ -1176,7 +1176,7 @@
 	"homeScreen": {
 		"whatToBuild": "今日は何を作りたいですか？",
 		"describeIdea": "アイデアを説明してください。実現のお手伝いをします。",
-		"myProjects": "マイプロジェクト",
+		"myProjects": "マイ組織",
 		"workflows": "ワークフロー",
 		"members": "メンバー",
 		"workflowCount": "{count} ワークフロー",
@@ -1246,11 +1246,11 @@
 		"aiManagerLabel": "AIマネージャー"
 	},
 	"projectPicker": {
-		"selectProject": "プロジェクトを選択",
-		"project": "プロジェクト",
-		"clearProject": "プロジェクトをクリア",
+		"selectProject": "組織を選択",
+		"project": "組織",
+		"clearProject": "組織をクリア",
 		"new": "新規",
-		"noProjects": "まだプロジェクトはありません"
+		"noProjects": "まだ組織はありません"
 	},
 	"runningTasksPanel": {
 		"tasks": "タスク",
@@ -1296,9 +1296,9 @@
 	},
 	"agentChatPaywall": {
 		"upgradeTitle": "AIエージェントを使用するにはアップグレードが必要です",
-		"upgradeDescription": "エージェントチャットには有料プラン（Starter以上）が必要です。有料ユーザーのプロジェクトに招待されることでもアクセスできます。",
+		"upgradeDescription": "エージェントチャットには有料プラン（Starter以上）が必要です。有料ユーザーの組織に招待されることでもアクセスできます。",
 		"viewPlans": "プランを見る",
-		"alreadyMember": "すでに有料プロジェクトのメンバーですか？プロジェクトピッカーから選択してAIエージェントの使用を開始してください。"
+		"alreadyMember": "すでに有料組織のメンバーですか？組織ピッカーから選択してAIエージェントの使用を開始してください。"
 	},
 	"appModeToggle": {
 		"agent": "エージェント",
@@ -1351,17 +1351,17 @@
 		"failedToTrigger": "トリガーに失敗"
 	},
 	"chatSessionSidebar": {
-		"moveToProjectTitle": "チャットをプロジェクトに移動",
-		"project": "プロジェクト",
+		"moveToProjectTitle": "チャットを組織に移動",
+		"project": "組織",
 		"knowledgeFiles": "ナレッジファイル",
-		"newProject": "新しいプロジェクト",
-		"selectProject": "プロジェクトを選択",
-		"noProjects": "プロジェクトはまだありません",
+		"newProject": "新しい組織",
+		"selectProject": "組織を選択",
+		"noProjects": "組織はまだありません",
 		"chatHistory": "チャット履歴",
 		"new": "新規",
 		"noChatHistory": "チャット履歴はまだありません",
 		"share": "共有",
-		"moveToProject": "プロジェクトに移動",
+		"moveToProject": "組織に移動",
 		"delete": "削除",
 		"menu": "メニュー"
 	},

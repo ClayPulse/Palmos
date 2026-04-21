@@ -42,9 +42,9 @@
 		"generalSettings": "जनरल सेटिंग्स",
 		"aiSettings": "AI सेटिंग्स",
 		"securitySettings": "सुरक्षा सेटिंग्स",
-		"projectHomePath": "प्रोजेक्ट होम पाथ",
-		"projectHomeDescription": "आपके सभी प्रोजेक्ट इस फ़ोल्डर में सहेजे जाएँगे।",
-		"selectProjectHomePath": "प्रोजेक्ट होम पाथ चुनें",
+		"projectHomePath": "संगठन होम पाथ",
+		"projectHomeDescription": "आपके सभी संगठन इस फ़ोल्डर में सहेजे जाएँगे।",
+		"selectProjectHomePath": "संगठन होम पाथ चुनें",
 		"environmentVariables": "एनवायरनमेंट वेरिएबल (फ्रंटएंड):",
 		"backendEnvVariablesWarning": "बैकएंड एनवायरनमेंट वेरिएबल सेट करने के लिए कृपया एक्सटेंशन ऐप की सेटिंग्स इस्तेमाल करें।",
 		"addNewVariable": "नया वेरिएबल जोड़ें",
@@ -118,10 +118,10 @@
 			"notSupported": "इस प्लेटफ़ॉर्म पर फाइल चयन समर्थित नहीं है"
 		},
 		"fetchProjects": {
-			"failed": "प्रोजेक्ट्स की सूची प्राप्त करने में विफल"
+			"failed": "संगठन्स की सूची प्राप्त करने में विफल"
 		},
 		"listProjects": {
-			"notSignedIn": "प्रोजेक्ट्स की सूची नहीं दिखा सकते। क्या आप साइन इन हैं?"
+			"notSignedIn": "संगठन्स की सूची नहीं दिखा सकते। क्या आप साइन इन हैं?"
 		},
 		"listPath": {
 			"failed": "पाथ की सूची बनाने में विफल",
@@ -196,8 +196,8 @@
 			"button": "साइन इन"
 		},
 		"myProjects": {
-			"tab": "मेरे प्रोजेक्ट",
-			"title": "मेरे प्रोजेक्ट"
+			"tab": "मेरे संगठन",
+			"title": "मेरे संगठन"
 		},
 		"myApps": {
 			"tab": "मेरे ऐप्स",
@@ -212,7 +212,7 @@
 			"title": "फ़ीचर्ड ऐप्स"
 		},
 		"learnMore": "और जानें",
-		"myAppsAndProjects": "मेरे ऐप्स और प्रोजेक्ट",
+		"myAppsAndProjects": "मेरे ऐप्स और संगठन",
 		"yourResources": "आपके संसाधन",
 		"cloudWorkspaces": "क्लाउड वर्कस्पेस"
 	},
@@ -236,20 +236,20 @@
 		"viewAll": "सभी देखें"
 	},
 	"openInProjectModal": {
-		"title": "प्रोजेक्ट में खोलें",
-		"openExisting": "मौजूदा प्रोजेक्ट खोलें",
-		"newProject": "नया प्रोजेक्ट",
-		"projectName": "प्रोजेक्ट का नाम",
-		"projectNamePlaceholder": "प्रोजेक्ट का नाम दर्ज करें",
-		"projectLocation": "प्रोजेक्ट स्थान",
-		"projectLocationPlaceholder": "प्रोजेक्ट स्थान चुनें",
+		"title": "संगठन में खोलें",
+		"openExisting": "मौजूदा संगठन खोलें",
+		"newProject": "नया संगठन",
+		"projectName": "संगठन का नाम",
+		"projectNamePlaceholder": "संगठन का नाम दर्ज करें",
+		"projectLocation": "संगठन स्थान",
+		"projectLocationPlaceholder": "संगठन स्थान चुनें",
 		"selectLocation": "स्थान चुनें",
 		"createInside": "इसके अंदर बनाएँ",
 		"moreOptionsComingSoon": "जल्द ही और विकल्प आ रहे हैं...",
 		"create": "बनाएँ",
 		"open": "खोलें",
-		"selectProjectFolder": "प्रोजेक्ट फ़ोल्डर चुनें",
-		"selectProjectFile": "प्रोजेक्ट फाइल चुनें",
+		"selectProjectFolder": "संगठन फ़ोल्डर चुनें",
+		"selectProjectFile": "संगठन फाइल चुनें",
 		"workspaceRequired": "इस ऐप/वर्कफ़्लो को सही तरह से काम करने के लिए वर्कस्पेस की आवश्यकता होती है।",
 		"selectWorkspace": "वर्कस्पेस चुनें",
 		"localComputer": "लोकल कंप्यूटर",
@@ -265,7 +265,7 @@
 			},
 			"failedToOpen": {
 				"title": "खोलने में विफल",
-				"description": "कोई प्रोजेक्ट चयनित नहीं है।"
+				"description": "कोई संगठन चयनित नहीं है।"
 			},
 			"appOpened": {
 				"title": "ऐप खुल गया",
@@ -294,14 +294,14 @@
 			}
 		},
 		"errors": {
-			"noName": "कृपया प्रोजेक्ट का नाम दर्ज करें",
-			"noLocation": "कृपया प्रोजेक्ट स्थान चुनें"
+			"noName": "कृपया संगठन का नाम दर्ज करें",
+			"noLocation": "कृपया संगठन स्थान चुनें"
 		}
 	},
 	"quickVibeCodeSetupModal": {
 		"title": "क्विक Vibe Code सेटअप",
-		"vibeCodeProject": "Vibe Code प्रोजेक्ट",
-		"projectName": "प्रोजेक्ट का नाम",
+		"vibeCodeProject": "Vibe Code संगठन",
+		"projectName": "संगठन का नाम",
 		"gettingReady": "हम आपके लिए सब कुछ तैयार कर रहे हैं...",
 		"appOpened": {
 			"title": "ऐप खुल गया",
@@ -332,7 +332,7 @@
 		"pulseEditorCore": "Palmos कोर",
 		"officialApps": "आधिकारिक ऐप्स",
 		"opensource": "ओपन सोर्स",
-		"cloudServices": "साथ ही, हम क्लाउड-होस्टेड सेवाएँ और मार्केटप्लेस भी प्रदान करते हैं ताकि आप इन्फ्रास्ट्रक्चर या बैकएंड की चिंता किए बिना आसानी से अपने प्रोजेक्ट मैनेज कर सकें और अपना काम कम्युनिटी के साथ साझा कर सकें।",
+		"cloudServices": "साथ ही, हम क्लाउड-होस्टेड सेवाएँ और मार्केटप्लेस भी प्रदान करते हैं ताकि आप इन्फ्रास्ट्रक्चर या बैकएंड की चिंता किए बिना आसानी से अपने संगठन मैनेज कर सकें और अपना काम कम्युनिटी के साथ साझा कर सकें।",
 		"loveWhatWeDo": "जो हम कर रहे हैं वह पसंद है? हमें GitHub पर स्टार दें या हमारी मोबाइल ऐप Google Play से डाउनलोड करें!",
 		"giveUsAStar": "हमें स्टार दें",
 		"googlePlay": "Google Play"
@@ -350,10 +350,10 @@
 	},
 	"projectIndicator": {
 		"closeProject": {
-			"menuItem": "प्रोजेक्ट बंद करें"
+			"menuItem": "संगठन बंद करें"
 		},
 		"projectSettings": {
-			"menuItem": "प्रोजेक्ट सेटिंग्स"
+			"menuItem": "संगठन सेटिंग्स"
 		}
 	},
 	"editorToolbar": {
@@ -406,22 +406,22 @@
 		}
 	},
 	"projectSettingsModal": {
-		"title": "प्रोजेक्ट सेटिंग्स",
-		"projectName": "प्रोजेक्ट का नाम",
-		"projectPath": "प्रोजेक्ट पाथ",
+		"title": "संगठन सेटिंग्स",
+		"projectName": "संगठन का नाम",
+		"projectPath": "संगठन पाथ",
 		"update": "अपडेट करें",
 		"create": "बनाएँ",
 		"delete": "हटाएँ",
 		"toast": {
-			"noProjectSelected": "कोई प्रोजेक्ट चयनित नहीं है।"
+			"noProjectSelected": "कोई संगठन चयनित नहीं है।"
 		}
 	},
 	"editorSettingsModal": {
 		"title": "एडिटर सेटिंग्स",
 		"projectsFolder": {
-			"description": "आपके सभी प्रोजेक्ट इस फ़ोल्डर में सहेजे जाएँगे।",
+			"description": "आपके सभी संगठन इस फ़ोल्डर में सहेजे जाएँगे।",
 			"selectFolder": "फ़ोल्डर चुनें",
-			"selectProjectHomePath": "प्रोजेक्ट होम पाथ चुनें"
+			"selectProjectHomePath": "संगठन होम पाथ चुनें"
 		},
 		"environmentVariables": {
 			"frontend": "एनवायरनमेंट वेरिएबल (फ्रंटएंड):",
@@ -699,18 +699,18 @@
 			"icon": "home"
 		},
 		"projectHome": {
-			"label": "प्रोजेक्ट होम",
+			"label": "संगठन होम",
 			"icon": "folder",
-			"notSet": "आपने अभी तक प्रोजेक्ट होम पाथ सेट नहीं किया है। कृपया सेटिंग्स में इसे सेट करें।",
+			"notSet": "आपने अभी तक संगठन होम पाथ सेट नहीं किया है। कृपया सेटिंग्स में इसे सेट करें।",
 			"select": {
-				"button": "प्रोजेक्ट होम चुनें"
+				"button": "संगठन होम चुनें"
 			}
 		}
 	},
 	"fileMenu": {
 		"title": "फ़ाइल",
-		"newProject": "नया प्रोजेक्ट",
-		"openProject": "प्रोजेक्ट खोलें",
+		"newProject": "नया संगठन",
+		"openProject": "संगठन खोलें",
 		"newWorkflow": {
 			"name": "नया वर्कफ़्लो",
 			"description": "एक नया वर्कफ़्लो बनाएं"
@@ -771,18 +771,18 @@
 		"emptyContent": "कोई सामग्री नहीं। शुरू करने के लिए नई फाइल बनाएँ।"
 	},
 	"projectExplorer": {
-		"title": "प्रोजेक्ट्स",
+		"title": "संगठन्स",
 		"newProject": {
-			"button": "नया प्रोजेक्ट"
+			"button": "नया संगठन"
 		},
-		"signInMessage": "अपने प्रोजेक्ट देखने के लिए साइन इन करें, या डेस्कटॉप क्लाइंट से लोकल प्रोजेक्ट खोलें।"
+		"signInMessage": "अपने संगठन देखने के लिए साइन इन करें, या डेस्कटॉप क्लाइंट से लोकल संगठन खोलें।"
 	},
 	"viewArea": {
 		"unknownViewType": "अज्ञात व्यू प्रकार",
 		"noViewSelected": "कोई व्यू चयनित नहीं है"
 	},
 	"projectView": {
-		"title": "प्रोजेक्ट",
+		"title": "संगठन",
 		"createWorkflow": {
 			"button": "वर्कफ़्लो बनाएँ"
 		},
@@ -927,7 +927,7 @@
 	"statusScreens": {
 		"welcome": {
 			"title": "Palmos में आपका स्वागत है",
-			"subtitle": "नया प्रोजेक्ट बनाकर या मौजूदा खोलकर शुरू करें",
+			"subtitle": "नया संगठन बनाकर या मौजूदा खोलकर शुरू करें",
 			"taglineLine1": "आपका अगला AI-OS, संचालित द्वारा",
 			"taglineLine2": "Vibe Coded ऐप्स और वर्कफ़्लोज़"
 		},
@@ -958,7 +958,7 @@
 		"noOutput": "अभी तक कोई आउटपुट नहीं"
 	},
 	"tabViewManager": {
-		"openProject": "प्रोजेक्ट खोलें",
+		"openProject": "संगठन खोलें",
 		"untitled": "अनटाइटल्ड",
 		"newTab": "नया टैब"
 	},
@@ -978,7 +978,7 @@
 		"readMoreOpenSource": "हमारी ओपन सोर्स प्रतिबद्धता के बारे में और पढ़ें"
 	},
 	"projectItem": {
-		"projectSettings": "प्रोजेक्ट सेटिंग्स",
+		"projectSettings": "संगठन सेटिंग्स",
 		"selectMultiple": "मल्टीपल चुनें",
 		"created": "बनाया गया: "
 	},
@@ -1014,12 +1014,12 @@
 		}
 	},
 	"workspaceExplorer": {
-		"workspacePaused": "वर्कस्पेस फिलहाल पॉज़्ड है। प्रोजेक्ट फाइल्स तक पहुँचने के लिए कृपया वर्कस्पेस फिर से शुरू करें।",
+		"workspacePaused": "वर्कस्पेस फिलहाल पॉज़्ड है। संगठन फाइल्स तक पहुँचने के लिए कृपया वर्कस्पेस फिर से शुरू करें।",
 		"startWorkspace": "वर्कस्पेस शुरू करें",
 		"workspaceSettings": "वर्कस्पेस सेटिंग्स",
 		"osFeatures": "OS फीचर्स के साथ इंटरेक्ट करने के लिए कृपया डेस्कटॉप क्लाइंट में खोलें या रिमोट वर्कस्पेस कॉन्फ़िगर करें।",
 		"workspaceStarting": "वर्कस्पेस शुरू हो रहा है...",
-		"viewProjectContent": "वर्कस्पेस में प्रोजेक्ट कंटेंट देखने के लिए पहले कोई प्रोजेक्ट चुनें।",
+		"viewProjectContent": "वर्कस्पेस में संगठन कंटेंट देखने के लिए पहले कोई संगठन चुनें।",
 		"toast": {
 			"noWorkspace": "शुरू करने के लिए कोई वर्कस्पेस नहीं है।",
 			"startingWorkspace": "वर्कस्पेस शुरू किया जा रहा है...",
@@ -1153,9 +1153,9 @@
 	},
 	"projectScreen": {
 		"whatToWorkOn": "आप किस पर काम करना चाहेंगे?",
-		"tellAboutProject": "मुझे अपने प्रोजेक्ट के बारे में बताएं",
-		"helpUnderstand": "अपने प्रोजेक्ट को समझने में मेरी मदद करें ताकि मैं अनुकूलित ऑटोमेशन सुझा सकूं — या छोड़ें और सीधे शुरू करें।",
-		"whatKind": "यह किस तरह का प्रोजेक्ट है?",
+		"tellAboutProject": "मुझे अपने संगठन के बारे में बताएं",
+		"helpUnderstand": "अपने संगठन को समझने में मेरी मदद करें ताकि मैं अनुकूलित ऑटोमेशन सुझा सकूं — या छोड़ें और सीधे शुरू करें।",
+		"whatKind": "यह किस तरह का संगठन है?",
 		"skip": "छोड़ें",
 		"describeIdea": "अपना विचार बताएं और मैं इसे साकार करने में आपकी मदद करूंगा।",
 		"allSystemsNominal": "सभी सिस्टम सामान्य हैं",
@@ -1176,7 +1176,7 @@
 	"homeScreen": {
 		"whatToBuild": "आज आप क्या बनाना चाहेंगे?",
 		"describeIdea": "अपना विचार बताएं और मैं इसे साकार करने में आपकी मदद करूंगा।",
-		"myProjects": "मेरे प्रोजेक्ट",
+		"myProjects": "मेरे संगठन",
 		"workflows": "वर्कफ़्लो",
 		"members": "सदस्य",
 		"workflowCount": "{count} वर्कफ़्लो",
@@ -1246,11 +1246,11 @@
 		"aiManagerLabel": "AI प्रबंधक"
 	},
 	"projectPicker": {
-		"selectProject": "प्रोजेक्ट चुनें",
-		"project": "प्रोजेक्ट",
-		"clearProject": "प्रोजेक्ट हटाएं",
+		"selectProject": "संगठन चुनें",
+		"project": "संगठन",
+		"clearProject": "संगठन हटाएं",
 		"new": "नया",
-		"noProjects": "अभी तक कोई प्रोजेक्ट नहीं"
+		"noProjects": "अभी तक कोई संगठन नहीं"
 	},
 	"runningTasksPanel": {
 		"tasks": "कार्य",
@@ -1296,9 +1296,9 @@
 	},
 	"agentChatPaywall": {
 		"upgradeTitle": "AI एजेंट उपयोग करने के लिए अपग्रेड करें",
-		"upgradeDescription": "एजेंट चैट के लिए पेड प्लान (Starter या उससे ऊपर) आवश्यक है। आप किसी पेड उपयोगकर्ता के प्रोजेक्ट में आमंत्रित होकर भी एक्सेस प्राप्त कर सकते हैं।",
+		"upgradeDescription": "एजेंट चैट के लिए पेड प्लान (Starter या उससे ऊपर) आवश्यक है। आप किसी पेड उपयोगकर्ता के संगठन में आमंत्रित होकर भी एक्सेस प्राप्त कर सकते हैं।",
 		"viewPlans": "प्लान देखें",
-		"alreadyMember": "पहले से किसी पेड प्रोजेक्ट के सदस्य हैं? AI एजेंट उपयोग शुरू करने के लिए प्रोजेक्ट पिकर से इसे चुनें।"
+		"alreadyMember": "पहले से किसी पेड संगठन के सदस्य हैं? AI एजेंट उपयोग शुरू करने के लिए संगठन पिकर से इसे चुनें।"
 	},
 	"appModeToggle": {
 		"agent": "एजेंट",
@@ -1351,17 +1351,17 @@
 		"failedToTrigger": "ट्रिगर करने में विफल"
 	},
 	"chatSessionSidebar": {
-		"moveToProjectTitle": "चैट को प्रोजेक्ट में ले जाएं",
-		"project": "प्रोजेक्ट",
+		"moveToProjectTitle": "चैट को संगठन में ले जाएं",
+		"project": "संगठन",
 		"knowledgeFiles": "ज्ञान फ़ाइलें",
-		"newProject": "नया प्रोजेक्ट",
-		"selectProject": "एक प्रोजेक्ट चुनें",
-		"noProjects": "अभी तक कोई प्रोजेक्ट नहीं",
+		"newProject": "नया संगठन",
+		"selectProject": "एक संगठन चुनें",
+		"noProjects": "अभी तक कोई संगठन नहीं",
 		"chatHistory": "चैट इतिहास",
 		"new": "नया",
 		"noChatHistory": "अभी तक कोई चैट इतिहास नहीं",
 		"share": "साझा करें",
-		"moveToProject": "प्रोजेक्ट में ले जाएं",
+		"moveToProject": "संगठन में ले जाएं",
 		"delete": "हटाएं",
 		"menu": "मेनू"
 	},

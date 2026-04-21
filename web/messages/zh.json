@@ -42,9 +42,9 @@
 		"generalSettings": "常规设置",
 		"aiSettings": "AI 设置",
 		"securitySettings": "安全设置",
-		"projectHomePath": "项目主目录",
-		"projectHomeDescription": "所有项目都会保存在此文件夹中。",
-		"selectProjectHomePath": "选择项目主目录",
+		"projectHomePath": "组织主目录",
+		"projectHomeDescription": "所有组织都会保存在此文件夹中。",
+		"selectProjectHomePath": "选择组织主目录",
 		"environmentVariables": "环境变量（前端）：",
 		"backendEnvVariablesWarning": "要设置后端环境变量，请在扩展应用的设置中进行配置。",
 		"addNewVariable": "添加新变量",
@@ -118,10 +118,10 @@
 			"notSupported": "当前平台不支持选择文件"
 		},
 		"fetchProjects": {
-			"failed": "获取项目列表失败"
+			"failed": "获取组织列表失败"
 		},
 		"listProjects": {
-			"notSignedIn": "无法列出项目。请确认你已登录？"
+			"notSignedIn": "无法列出组织。请确认你已登录？"
 		},
 		"listPath": {
 			"failed": "列出路径失败",
@@ -196,8 +196,8 @@
 			"button": "登录"
 		},
 		"myProjects": {
-			"tab": "我的项目",
-			"title": "我的项目"
+			"tab": "我的组织",
+			"title": "我的组织"
 		},
 		"myApps": {
 			"tab": "我的应用",
@@ -212,7 +212,7 @@
 			"title": "精选应用"
 		},
 		"learnMore": "了解更多",
-		"myAppsAndProjects": "我的应用和项目",
+		"myAppsAndProjects": "我的应用和组织",
 		"yourResources": "你的资源",
 		"cloudWorkspaces": "云工作区"
 	},
@@ -236,20 +236,20 @@
 		"viewAll": "查看全部"
 	},
 	"openInProjectModal": {
-		"title": "在项目中打开",
-		"openExisting": "打开现有项目",
-		"newProject": "新建项目",
-		"projectName": "项目名称",
-		"projectNamePlaceholder": "输入项目名称",
-		"projectLocation": "项目位置",
-		"projectLocationPlaceholder": "选择项目位置",
+		"title": "在组织中打开",
+		"openExisting": "打开现有组织",
+		"newProject": "新建组织",
+		"projectName": "组织名称",
+		"projectNamePlaceholder": "输入组织名称",
+		"projectLocation": "组织位置",
+		"projectLocationPlaceholder": "选择组织位置",
 		"selectLocation": "选择位置",
 		"createInside": "创建到此目录内",
 		"moreOptionsComingSoon": "更多选项即将推出...",
 		"create": "创建",
 		"open": "打开",
-		"selectProjectFolder": "选择项目文件夹",
-		"selectProjectFile": "选择项目文件",
+		"selectProjectFolder": "选择组织文件夹",
+		"selectProjectFile": "选择组织文件",
 		"workspaceRequired": "此应用 / 工作流需要打开一个工作区才能正常运行。",
 		"selectWorkspace": "选择工作区",
 		"localComputer": "本地计算机",
@@ -265,7 +265,7 @@
 			},
 			"failedToOpen": {
 				"title": "打开失败",
-				"description": "未选择任何项目。"
+				"description": "未选择任何组织。"
 			},
 			"appOpened": {
 				"title": "应用已打开",
@@ -294,14 +294,14 @@
 			}
 		},
 		"errors": {
-			"noName": "请输入项目名称",
-			"noLocation": "请选择项目位置"
+			"noName": "请输入组织名称",
+			"noLocation": "请选择组织位置"
 		}
 	},
 	"quickVibeCodeSetupModal": {
 		"title": "快速 Vibe Code 设置",
-		"vibeCodeProject": "Vibe Code 项目",
-		"projectName": "项目名称",
+		"vibeCodeProject": "Vibe Code 组织",
+		"projectName": "组织名称",
 		"gettingReady": "正在为你准备一切...",
 		"appOpened": {
 			"title": "应用已打开",
@@ -332,7 +332,7 @@
 		"pulseEditorCore": "Palmos 核心",
 		"officialApps": "官方应用",
 		"opensource": "开源",
-		"cloudServices": "同时，我们也提供云托管服务与应用市场，让你无需操心基础设施和后端，就能轻松管理项目并与社区分享你的作品。",
+		"cloudServices": "同时，我们也提供云托管服务与应用市场，让你无需操心基础设施和后端，就能轻松管理组织并与社区分享你的作品。",
 		"loveWhatWeDo": "喜欢我们正在做的事吗？欢迎在 GitHub 上为我们加星，或在 Google Play 下载我们的移动应用！",
 		"giveUsAStar": "给我们加星",
 		"googlePlay": "Google Play"
@@ -350,10 +350,10 @@
 	},
 	"projectIndicator": {
 		"closeProject": {
-			"menuItem": "关闭项目"
+			"menuItem": "关闭组织"
 		},
 		"projectSettings": {
-			"menuItem": "项目设置"
+			"menuItem": "组织设置"
 		}
 	},
 	"editorToolbar": {
@@ -406,22 +406,22 @@
 		}
 	},
 	"projectSettingsModal": {
-		"title": "项目设置",
-		"projectName": "项目名称",
-		"projectPath": "项目路径",
+		"title": "组织设置",
+		"projectName": "组织名称",
+		"projectPath": "组织路径",
 		"update": "更新",
 		"create": "创建",
 		"delete": "删除",
 		"toast": {
-			"noProjectSelected": "未选择任何项目。"
+			"noProjectSelected": "未选择任何组织。"
 		}
 	},
 	"editorSettingsModal": {
 		"title": "编辑器设置",
 		"projectsFolder": {
-			"description": "所有项目都会保存在此文件夹中。",
+			"description": "所有组织都会保存在此文件夹中。",
 			"selectFolder": "选择文件夹",
-			"selectProjectHomePath": "选择项目主目录"
+			"selectProjectHomePath": "选择组织主目录"
 		},
 		"environmentVariables": {
 			"frontend": "环境变量（前端）：",
@@ -699,18 +699,18 @@
 			"icon": "home"
 		},
 		"projectHome": {
-			"label": "项目主目录",
+			"label": "组织主目录",
 			"icon": "folder",
-			"notSet": "你尚未设置项目主目录。请前往设置中进行配置。",
+			"notSet": "你尚未设置组织主目录。请前往设置中进行配置。",
 			"select": {
-				"button": "选择项目主目录"
+				"button": "选择组织主目录"
 			}
 		}
 	},
 	"fileMenu": {
 		"title": "文件",
-		"newProject": "新建项目",
-		"openProject": "打开项目",
+		"newProject": "新建组织",
+		"openProject": "打开组织",
 		"newWorkflow": {
 			"name": "新建工作流",
 			"description": "创建一个新的工作流"
@@ -775,18 +775,18 @@
 		"emptyContent": "内容为空。新建一个文件以开始。"
 	},
 	"projectExplorer": {
-		"title": "项目",
+		"title": "组织",
 		"newProject": {
-			"button": "新建项目"
+			"button": "新建组织"
 		},
-		"signInMessage": "登录以查看你的项目，或使用桌面客户端打开本地项目。"
+		"signInMessage": "登录以查看你的组织，或使用桌面客户端打开本地组织。"
 	},
 	"viewArea": {
 		"unknownViewType": "未知视图类型",
 		"noViewSelected": "尚未选择视图"
 	},
 	"projectView": {
-		"title": "项目",
+		"title": "组织",
 		"createWorkflow": {
 			"button": "创建工作流"
 		},
@@ -931,7 +931,7 @@
 	"statusScreens": {
 		"welcome": {
 			"title": "欢迎使用 Palmos",
-			"subtitle": "从创建新项目或打开现有项目开始",
+			"subtitle": "从创建新组织或打开现有组织开始",
 			"taglineLine1": "你的下一代 AI 操作系统，由",
 			"taglineLine2": "Vibe Coded 应用和工作流驱动"
 		},
@@ -962,7 +962,7 @@
 		"noOutput": "暂无输出"
 	},
 	"tabViewManager": {
-		"openProject": "打开项目",
+		"openProject": "打开组织",
 		"untitled": "未命名",
 		"newTab": "新建标签页"
 	},
@@ -982,7 +982,7 @@
 		"readMoreOpenSource": "了解更多我们的开源承诺"
 	},
 	"projectItem": {
-		"projectSettings": "项目设置",
+		"projectSettings": "组织设置",
 		"selectMultiple": "多选",
 		"created": "创建时间："
 	},
@@ -1018,12 +1018,12 @@
 		}
 	},
 	"workspaceExplorer": {
-		"workspacePaused": "工作区当前已暂停。请重新启动工作区以访问项目文件。",
+		"workspacePaused": "工作区当前已暂停。请重新启动工作区以访问组织文件。",
 		"startWorkspace": "启动工作区",
 		"workspaceSettings": "工作区设置",
 		"osFeatures": "如需与操作系统功能交互，请在桌面客户端中打开，或配置远程工作区。",
 		"workspaceStarting": "工作区正在启动...",
-		"viewProjectContent": "要在工作区中查看项目内容，请先选择一个项目。",
+		"viewProjectContent": "要在工作区中查看组织内容，请先选择一个组织。",
 		"toast": {
 			"noWorkspace": "没有可启动的工作区。",
 			"startingWorkspace": "正在启动工作区...",
@@ -1157,9 +1157,9 @@
 	},
 	"projectScreen": {
 		"whatToWorkOn": "您想做什么？",
-		"tellAboutProject": "告诉我您的项目",
-		"helpUnderstand": "帮我了解您的项目，这样我可以推荐定制的自动化方案——或者跳过直接开始。",
-		"whatKind": "这是什么类型的项目？",
+		"tellAboutProject": "告诉我您的组织",
+		"helpUnderstand": "帮我了解您的组织，这样我可以推荐定制的自动化方案——或者跳过直接开始。",
+		"whatKind": "这是什么类型的组织？",
 		"skip": "跳过",
 		"describeIdea": "描述您的想法，我将帮助您实现它。",
 		"allSystemsNominal": "所有系统正常",
@@ -1180,7 +1180,7 @@
 	"homeScreen": {
 		"whatToBuild": "今天您想构建什么？",
 		"describeIdea": "描述您的想法，我将帮助您实现它。",
-		"myProjects": "我的项目",
+		"myProjects": "我的组织",
 		"workflows": "工作流",
 		"members": "成员",
 		"workflowCount": "{count} 个工作流",
@@ -1250,11 +1250,11 @@
 		"aiManagerLabel": "AI 管理器"
 	},
 	"projectPicker": {
-		"selectProject": "选择项目",
-		"project": "项目",
-		"clearProject": "清除项目",
+		"selectProject": "选择组织",
+		"project": "组织",
+		"clearProject": "清除组织",
 		"new": "新建",
-		"noProjects": "暂无项目"
+		"noProjects": "暂无组织"
 	},
 	"runningTasksPanel": {
 		"tasks": "任务",
@@ -1300,9 +1300,9 @@
 	},
 	"agentChatPaywall": {
 		"upgradeTitle": "升级以使用 AI 智能体",
-		"upgradeDescription": "智能体聊天需要付费计划（Starter 或更高）。您也可以通过被邀请加入付费用户的项目来获得访问权限。",
+		"upgradeDescription": "智能体聊天需要付费计划（Starter 或更高）。您也可以通过被邀请加入付费用户的组织来获得访问权限。",
 		"viewPlans": "查看计划",
-		"alreadyMember": "已经是付费项目的成员？从项目选择器中选择它以开始使用 AI 智能体。"
+		"alreadyMember": "已经是付费组织的成员？从组织选择器中选择它以开始使用 AI 智能体。"
 	},
 	"appModeToggle": {
 		"agent": "智能体",
@@ -1355,17 +1355,17 @@
 		"failedToTrigger": "触发失败"
 	},
 	"chatSessionSidebar": {
-		"moveToProjectTitle": "将聊天移至项目",
-		"project": "项目",
+		"moveToProjectTitle": "将聊天移至组织",
+		"project": "组织",
 		"knowledgeFiles": "知识文件",
-		"newProject": "新建项目",
-		"selectProject": "选择项目",
-		"noProjects": "暂无项目",
+		"newProject": "新建组织",
+		"selectProject": "选择组织",
+		"noProjects": "暂无组织",
 		"chatHistory": "聊天记录",
 		"new": "新建",
 		"noChatHistory": "暂无聊天记录",
 		"share": "分享",
-		"moveToProject": "移至项目",
+		"moveToProject": "移至组织",
 		"delete": "删除",
 		"menu": "菜单"
 	},

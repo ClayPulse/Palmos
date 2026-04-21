@@ -42,9 +42,9 @@
     "generalSettings": "General Settings",
     "aiSettings": "AI Settings",
     "securitySettings": "Security Settings",
-    "projectHomePath": "Project Home Path",
-    "projectHomeDescription": "All your projects will be saved in this folder.",
-    "selectProjectHomePath": "Select Project Home Path",
+    "projectHomePath": "Organization Home Path",
+    "projectHomeDescription": "All your organizations will be saved in this folder.",
+    "selectProjectHomePath": "Select Organization Home Path",
     "environmentVariables": "Environment Variables (frontend):",
     "backendEnvVariablesWarning": "To set backend environment variables, please set it in extension app's settings.",
     "addNewVariable": "Add New Variable",
@@ -118,10 +118,10 @@
       "notSupported": "File selection not supported on this platform"
     },
     "fetchProjects": {
-      "failed": "Failed to list projects"
+      "failed": "Failed to list organizations"
     },
     "listProjects": {
-      "notSignedIn": "Cannot list projects. Are you signed in?"
+      "notSignedIn": "Cannot list organizations. Are you signed in?"
     },
     "listPath": {
       "failed": "Failed to list path",
@@ -196,8 +196,8 @@
       "button": "Sign In"
     },
     "myProjects": {
-      "tab": "My Projects",
-      "title": "My Projects"
+      "tab": "My Organizations",
+      "title": "My Organizations"
     },
     "myApps": {
       "tab": "My Apps",
@@ -212,7 +212,7 @@
       "title": "Featured Apps"
     },
     "learnMore": "Learn More",
-    "myAppsAndProjects": "My Apps and Projects",
+    "myAppsAndProjects": "My Apps and Organizations",
     "yourResources": "Your Resources",
     "cloudWorkspaces": "Cloud Workspaces"
   },
@@ -236,20 +236,20 @@
     "viewAll": "View All"
   },
   "openInProjectModal": {
-    "title": "Open In Project",
+    "title": "Open In Organization",
     "openExisting": "Open Existing",
-    "newProject": "New Project",
-    "projectName": "Project Name",
-    "projectNamePlaceholder": "Enter project name",
-    "projectLocation": "Project Location",
-    "projectLocationPlaceholder": "Select project location",
+    "newProject": "New Organization",
+    "projectName": "Organization Name",
+    "projectNamePlaceholder": "Enter organization name",
+    "projectLocation": "Organization Location",
+    "projectLocationPlaceholder": "Select organization location",
     "selectLocation": "Select Location",
     "createInside": "Create inside",
     "moreOptionsComingSoon": "More options coming soon...",
     "create": "Create",
     "open": "Open",
-    "selectProjectFolder": "Select Project Folder",
-    "selectProjectFile": "Select Project File",
+    "selectProjectFolder": "Select Organization Folder",
+    "selectProjectFile": "Select Organization File",
     "workspaceRequired": "This app/workflow requires a workspace to be opened in order to function properly.",
     "selectWorkspace": "Select Workspace",
     "localComputer": "Local Computer",
@@ -265,7 +265,7 @@
       },
       "failedToOpen": {
         "title": "Failed to open.",
-        "description": "No project selected."
+        "description": "No organization selected."
       },
       "appOpened": {
         "title": "App opened",
@@ -294,14 +294,14 @@
       }
     },
     "errors": {
-      "noName": "Please enter a project name",
-      "noLocation": "Please select a project location"
+      "noName": "Please enter an organization name",
+      "noLocation": "Please select an organization location"
     }
   },
   "quickVibeCodeSetupModal": {
     "title": "Quick Vibe Code Setup",
-    "vibeCodeProject": "Vibe Code Project",
-    "projectName": "Project Name",
+    "vibeCodeProject": "Vibe Code Organization",
+    "projectName": "Organization Name",
     "gettingReady": "Getting things ready for you...",
     "appOpened": {
       "title": "App opened",
@@ -332,7 +332,7 @@
     "pulseEditorCore": "Palmos Core",
     "officialApps": "Official Apps",
     "opensource": "Opensource",
-    "cloudServices": "Meanwhile, we offer cloud hosted services and marketplace so you can easily manage your projects and share your work with the community without worrying about the infrastructure and backend.",
+    "cloudServices": "Meanwhile, we offer cloud hosted services and marketplace so you can easily manage your organizations and share your work with the community without worrying about the infrastructure and backend.",
     "loveWhatWeDo": "Love what we are doing? Support us by giving a star on GitHub or downloading our mobile app on Google Play!",
     "giveUsAStar": "Give us a star",
     "googlePlay": "Google Play"
@@ -350,10 +350,10 @@
   },
   "projectIndicator": {
     "closeProject": {
-      "menuItem": "Close Project"
+      "menuItem": "Close Organization"
     },
     "projectSettings": {
-      "menuItem": "Project Settings"
+      "menuItem": "Organization Settings"
     }
   },
   "editorToolbar": {
@@ -406,22 +406,22 @@
     }
   },
   "projectSettingsModal": {
-    "title": "Project Settings",
-    "projectName": "Project Name",
-    "projectPath": "Project Path",
+    "title": "Organization Settings",
+    "projectName": "Organization Name",
+    "projectPath": "Organization Path",
     "update": "Update",
     "create": "Create",
     "delete": "Delete",
     "toast": {
-      "noProjectSelected": "No project selected."
+      "noProjectSelected": "No organization selected."
     }
   },
   "editorSettingsModal": {
     "title": "Editor Settings",
     "projectsFolder": {
-      "description": "All your projects will be saved in this folder.",
+      "description": "All your organizations will be saved in this folder.",
       "selectFolder": "Select Folder",
-      "selectProjectHomePath": "Select Project Home Path"
+      "selectProjectHomePath": "Select Organization Home Path"
     },
     "environmentVariables": {
       "frontend": "Environment Variables (frontend):",
@@ -699,18 +699,18 @@
       "icon": "home"
     },
     "projectHome": {
-      "label": "Project Home",
+      "label": "Organization Home",
       "icon": "folder",
-      "notSet": "You have not set a project home path yet. Please set it in the settings.",
+      "notSet": "You have not set an organization home path yet. Please set it in the settings.",
       "select": {
-        "button": "Select Project Home"
+        "button": "Select Organization Home"
       }
     }
   },
   "fileMenu": {
     "title": "File",
-    "newProject": "New Project",
-    "openProject": "Open Project",
+    "newProject": "New Organization",
+    "openProject": "Open Organization",
     "newWorkflow": {
       "name": "New Workflow",
       "description": "Create a new Workflow"
@@ -775,18 +775,18 @@
     "emptyContent": "Empty content. Create a new file to get started."
   },
   "projectExplorer": {
-    "title": "Projects",
+    "title": "Organizations",
     "newProject": {
-      "button": "New Project"
+      "button": "New Organization"
     },
-    "signInMessage": "Sign in to view your projects, or open a local project with desktop client."
+    "signInMessage": "Sign in to view your organizations, or open a local organization with desktop client."
   },
   "viewArea": {
     "unknownViewType": "Unknown view type",
     "noViewSelected": "No view selected"
   },
   "projectView": {
-    "title": "Project",
+    "title": "Organization",
     "createWorkflow": {
       "button": "Create Workflow"
     },
@@ -931,7 +931,7 @@
   "statusScreens": {
     "welcome": {
       "title": "Welcome to Palmos",
-      "subtitle": "Start by creating a new project or opening an existing one",
+      "subtitle": "Start by creating a new organization or opening an existing one",
       "taglineLine1": "Your Next AI-OS Powered by",
       "taglineLine2": "Vibe Coded Apps & Workflows"
     },
@@ -962,7 +962,7 @@
     "noOutput": "No output yet"
   },
   "tabViewManager": {
-    "openProject": "Open Project",
+    "openProject": "Open Organization",
     "untitled": "Untitled",
     "newTab": "New Tab"
   },
@@ -982,7 +982,7 @@
     "readMoreOpenSource": "Read more about our open source commitment"
   },
   "projectItem": {
-    "projectSettings": "Project Settings",
+    "projectSettings": "Organization Settings",
     "selectMultiple": "Select Multiple",
     "created": "Created: "
   },
@@ -1018,12 +1018,12 @@
     }
   },
   "workspaceExplorer": {
-    "workspacePaused": "The workspace is currently paused. Please resume the workspace to access project files.",
+    "workspacePaused": "The workspace is currently paused. Please resume the workspace to access organization files.",
     "startWorkspace": "Start Workspace",
     "workspaceSettings": "Workspace Settings",
     "osFeatures": "To interact with OS features, please open in desktop client or configure a remote workspace.",
     "workspaceStarting": "Workspace is starting...",
-    "viewProjectContent": "To view project content in workspace, please select a project first.",
+    "viewProjectContent": "To view organization content in workspace, please select an organization first.",
     "toast": {
       "noWorkspace": "No workspace to start.",
       "startingWorkspace": "Starting workspace...",
@@ -1157,9 +1157,9 @@
   },
   "projectScreen": {
     "whatToWorkOn": "What would you like to work on?",
-    "tellAboutProject": "Tell me about your project",
-    "helpUnderstand": "Help me understand your project so I can suggest tailored automations — or skip and jump right in.",
-    "whatKind": "What kind of project is this?",
+    "tellAboutProject": "Tell me about your organization",
+    "helpUnderstand": "Help me understand your organization so I can suggest tailored automations — or skip and jump right in.",
+    "whatKind": "What kind of organization is this?",
     "skip": "Skip",
     "describeIdea": "Describe your idea and I'll help you bring it to life.",
     "allSystemsNominal": "All systems nominal",
@@ -1180,7 +1180,7 @@
   "homeScreen": {
     "whatToBuild": "What would you like to build today?",
     "describeIdea": "Describe your idea and I'll help you bring it to life.",
-    "myProjects": "My Projects",
+    "myProjects": "My Organizations",
     "workflows": "workflows",
     "members": "members",
     "workflowCount": "{count} workflows",
@@ -1250,11 +1250,11 @@
     "aiManagerLabel": "AI Manager"
   },
   "projectPicker": {
-    "selectProject": "Select project",
-    "project": "Project",
-    "clearProject": "Clear project",
+    "selectProject": "Select organization",
+    "project": "Organization",
+    "clearProject": "Clear organization",
     "new": "New",
-    "noProjects": "No projects yet"
+    "noProjects": "No organizations yet"
   },
   "runningTasksPanel": {
     "tasks": "Tasks",
@@ -1300,9 +1300,9 @@
   },
   "agentChatPaywall": {
     "upgradeTitle": "Upgrade to use AI Agents",
-    "upgradeDescription": "Agent chat requires a paid plan (Starter or above). You can also get access by being invited to a project owned by a paid user.",
+    "upgradeDescription": "Agent chat requires a paid plan (Starter or above). You can also get access by being invited to an organization owned by a paid user.",
     "viewPlans": "View Plans",
-    "alreadyMember": "Already a member of a paid project? Select it from the project picker to start using AI agents."
+    "alreadyMember": "Already a member of a paid organization? Select it from the organization picker to start using AI agents."
   },
   "appModeToggle": {
     "agent": "Agent",
@@ -1355,17 +1355,17 @@
     "failedToTrigger": "Failed to trigger"
   },
   "chatSessionSidebar": {
-    "moveToProjectTitle": "Move Chat to Project",
-    "project": "Project",
+    "moveToProjectTitle": "Move Chat to Organization",
+    "project": "Organization",
     "knowledgeFiles": "Knowledge files",
-    "newProject": "New project",
-    "selectProject": "Select a project",
-    "noProjects": "No projects yet",
+    "newProject": "New organization",
+    "selectProject": "Select an organization",
+    "noProjects": "No organizations yet",
     "chatHistory": "Chat History",
     "new": "New",
     "noChatHistory": "No chat history yet",
     "share": "Share",
-    "moveToProject": "Move to Project",
+    "moveToProject": "Move to Organization",
     "delete": "Delete",
     "menu": "Menu"
   },

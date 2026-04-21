@@ -43,9 +43,9 @@
 		"generalSettings": "الإعدادات العامة",
 		"aiSettings": "إعدادات الذكاء الاصطناعي",
 		"securitySettings": "إعدادات الأمان",
-		"projectHomePath": "مسار مجلد المشاريع الرئيسي",
-		"projectHomeDescription": "سيتم حفظ جميع مشاريعك في هذا المجلد.",
-		"selectProjectHomePath": "اختيار مسار مجلد المشاريع الرئيسي",
+		"projectHomePath": "مسار مجلد المنظمات الرئيسي",
+		"projectHomeDescription": "سيتم حفظ جميع منظماتك في هذا المجلد.",
+		"selectProjectHomePath": "اختيار مسار مجلد المنظمات الرئيسي",
 		"environmentVariables": "متغيرات البيئة (الواجهة الأمامية):",
 		"backendEnvVariablesWarning": "لإعداد متغيرات بيئة الخلفية، قم بضبطها في إعدادات تطبيق الامتداد.",
 		"addNewVariable": "إضافة متغير جديد",
@@ -119,10 +119,10 @@
 			"notSupported": "اختيار الملفات غير مدعوم على هذا النظام"
 		},
 		"fetchProjects": {
-			"failed": "فشل في عرض قائمة المشاريع"
+			"failed": "فشل في عرض قائمة المنظمات"
 		},
 		"listProjects": {
-			"notSignedIn": "لا يمكن عرض قائمة المشاريع. هل قمت بتسجيل الدخول؟"
+			"notSignedIn": "لا يمكن عرض قائمة المنظمات. هل قمت بتسجيل الدخول؟"
 		},
 		"listPath": {
 			"failed": "فشل في عرض مسار الملفات",
@@ -197,8 +197,8 @@
 			"button": "تسجيل الدخول"
 		},
 		"myProjects": {
-			"tab": "مشاريعي",
-			"title": "مشاريعي"
+			"tab": "منظماتي",
+			"title": "منظماتي"
 		},
 		"myApps": {
 			"tab": "تطبيقاتي",
@@ -213,25 +213,25 @@
 			"title": "تطبيقات مميزة"
 		},
 		"learnMore": "معرفة المزيد",
-		"myAppsAndProjects": "تطبيقاتي ومشاريعي",
+		"myAppsAndProjects": "تطبيقاتي ومنظماتي",
 		"yourResources": "مواردك",
 		"cloudWorkspaces": "مساحات عمل سحابية"
 	},
 	"openInProjectModal": {
-		"title": "فتح في مشروع",
-		"openExisting": "فتح مشروع موجود",
-		"newProject": "مشروع جديد",
-		"projectName": "اسم المشروع",
-		"projectNamePlaceholder": "أدخل اسم المشروع",
-		"projectLocation": "موقع المشروع",
-		"projectLocationPlaceholder": "اختر موقع المشروع",
+		"title": "فتح في منظمة",
+		"openExisting": "فتح منظمة موجودة",
+		"newProject": "منظمة جديدة",
+		"projectName": "اسم المنظمة",
+		"projectNamePlaceholder": "أدخل اسم المنظمة",
+		"projectLocation": "موقع المنظمة",
+		"projectLocationPlaceholder": "اختر موقع المنظمة",
 		"selectLocation": "اختيار الموقع",
 		"createInside": "إنشاء داخل",
 		"moreOptionsComingSoon": "المزيد من الخيارات قريبًا...",
 		"create": "إنشاء",
 		"open": "فتح",
-		"selectProjectFolder": "اختيار مجلد المشروع",
-		"selectProjectFile": "اختيار ملف المشروع",
+		"selectProjectFolder": "اختيار مجلد المنظمة",
+		"selectProjectFile": "اختيار ملف المنظمة",
 		"workspaceRequired": "يتطلب هذا التطبيق/سير العمل فتح مساحة عمل ليعمل بشكل صحيح.",
 		"selectWorkspace": "اختيار مساحة عمل",
 		"localComputer": "الكمبيوتر المحلي",
@@ -247,7 +247,7 @@
 			},
 			"failedToOpen": {
 				"title": "فشل في الفتح",
-				"description": "لم يتم اختيار أي مشروع."
+				"description": "لم يتم اختيار أي منظمة."
 			},
 			"appOpened": {
 				"title": "تم فتح التطبيق",
@@ -276,14 +276,14 @@
 			}
 		},
 		"errors": {
-			"noName": "يرجى إدخال اسم المشروع",
-			"noLocation": "يرجى اختيار موقع المشروع"
+			"noName": "يرجى إدخال اسم المنظمة",
+			"noLocation": "يرجى اختيار موقع المنظمة"
 		}
 	},
 	"quickVibeCodeSetupModal": {
 		"title": "إعداد سريع لـ Vibe Code",
-		"vibeCodeProject": "مشروع Vibe Code",
-		"projectName": "اسم المشروع",
+		"vibeCodeProject": "منظمة Vibe Code",
+		"projectName": "اسم المنظمة",
 		"gettingReady": "جارٍ التحضير لك...",
 		"appOpened": {
 			"title": "تم فتح التطبيق",
@@ -314,7 +314,7 @@
 		"pulseEditorCore": "نواة Palmos",
 		"officialApps": "تطبيقات رسمية",
 		"opensource": "مفتوح المصدر",
-		"cloudServices": "في الوقت نفسه، نقدم خدمات سحابية ومتجرًا يمكنك من خلاله إدارة مشاريعك بسهولة ومشاركة عملك مع المجتمع بدون القلق بشأن البنية التحتية أو الخلفية.",
+		"cloudServices": "في الوقت نفسه، نقدم خدمات سحابية ومتجرًا يمكنك من خلاله إدارة منظماتك بسهولة ومشاركة عملك مع المجتمع بدون القلق بشأن البنية التحتية أو الخلفية.",
 		"loveWhatWeDo": "هل تحب ما نقوم به؟ ادعمنا بإعطائنا نجمة على GitHub أو بتنزيل تطبيقنا على Google Play!",
 		"giveUsAStar": "أعطنا نجمة",
 		"googlePlay": "Google Play"
@@ -332,10 +332,10 @@
 	},
 	"projectIndicator": {
 		"closeProject": {
-			"menuItem": "إغلاق المشروع"
+			"menuItem": "إغلاق المنظمة"
 		},
 		"projectSettings": {
-			"menuItem": "إعدادات المشروع"
+			"menuItem": "إعدادات المنظمة"
 		}
 	},
 	"editorToolbar": {
@@ -388,22 +388,22 @@
 		}
 	},
 	"projectSettingsModal": {
-		"title": "إعدادات المشروع",
-		"projectName": "اسم المشروع",
-		"projectPath": "مسار المشروع",
+		"title": "إعدادات المنظمة",
+		"projectName": "اسم المنظمة",
+		"projectPath": "مسار المنظمة",
 		"update": "تحديث",
 		"create": "إنشاء",
 		"delete": "حذف",
 		"toast": {
-			"noProjectSelected": "لم يتم اختيار أي مشروع."
+			"noProjectSelected": "لم يتم اختيار أي منظمة."
 		}
 	},
 	"editorSettingsModal": {
 		"title": "إعدادات المحرر",
 		"projectsFolder": {
-			"description": "سيتم حفظ جميع مشاريعك في هذا المجلد.",
+			"description": "سيتم حفظ جميع منظماتك في هذا المجلد.",
 			"selectFolder": "اختيار مجلد",
-			"selectProjectHomePath": "اختيار مسار مجلد المشاريع الرئيسي"
+			"selectProjectHomePath": "اختيار مسار مجلد المنظمات الرئيسي"
 		},
 		"environmentVariables": {
 			"frontend": "متغيرات البيئة (الواجهة الأمامية):",
@@ -681,18 +681,18 @@
 			"icon": "home"
 		},
 		"projectHome": {
-			"label": "مجلد المشاريع الرئيسي",
+			"label": "مجلد المنظمات الرئيسي",
 			"icon": "folder",
-			"notSet": "لم تقم بعد بتعيين مسار مجلد المشاريع الرئيسي. يرجى تعيينه من الإعدادات.",
+			"notSet": "لم تقم بعد بتعيين مسار مجلد المنظمات الرئيسي. يرجى تعيينه من الإعدادات.",
 			"select": {
-				"button": "اختيار مجلد المشاريع الرئيسي"
+				"button": "اختيار مجلد المنظمات الرئيسي"
 			}
 		}
 	},
 	"fileMenu": {
 		"title": "ملف",
-		"newProject": "مشروع جديد",
-		"openProject": "فتح مشروع",
+		"newProject": "منظمة جديدة",
+		"openProject": "فتح منظمة",
 		"newWorkflow": {
 			"name": "سير عمل جديد",
 			"description": "إنشاء سير عمل جديد"
@@ -756,18 +756,18 @@
 		"noWorkspaceSelected": "لم يتم اختيار مساحة عمل"
 	},
 	"projectExplorer": {
-		"title": "المشاريع",
+		"title": "المنظمات",
 		"newProject": {
-			"button": "مشروع جديد"
+			"button": "منظمة جديدة"
 		},
-		"signInMessage": "سجّل الدخول لعرض مشاريعك، أو افتح مشروعًا محليًا باستخدام عميل سطح المكتب."
+		"signInMessage": "سجّل الدخول لعرض منظماتك، أو افتح منظمة محلية باستخدام عميل سطح المكتب."
 	},
 	"viewArea": {
 		"unknownViewType": "نوع عرض غير معروف",
 		"noViewSelected": "لم يتم اختيار أي عرض"
 	},
 	"projectView": {
-		"title": "المشروع",
+		"title": "المنظمة",
 		"createWorkflow": {
 			"button": "إنشاء سير عمل"
 		},
@@ -912,7 +912,7 @@
 	"statusScreens": {
 		"welcome": {
 			"title": "مرحبًا بك في Palmos",
-			"subtitle": "ابدأ بإنشاء مشروع جديد أو فتح مشروع موجود",
+			"subtitle": "ابدأ بإنشاء منظمة جديدة أو فتح منظمة موجودة",
 			"taglineLine1": "نظام التشغيل التالي بالذكاء الاصطناعي، مدعوم بـ",
 			"taglineLine2": "تطبيقات وتدفقات عمل Vibe Coded"
 		},
@@ -943,7 +943,7 @@
 		"noOutput": "لا توجد مخرجات بعد"
 	},
 	"tabViewManager": {
-		"openProject": "فتح مشروع",
+		"openProject": "فتح منظمة",
 		"untitled": "بدون عنوان",
 		"newTab": "لسان جديد"
 	},
@@ -963,7 +963,7 @@
 		"readMoreOpenSource": "قراءة المزيد عن التزامنا بالمصدر المفتوح"
 	},
 	"projectItem": {
-		"projectSettings": "إعدادات المشروع",
+		"projectSettings": "إعدادات المنظمة",
 		"selectMultiple": "تحديد متعدّد",
 		"created": "تم الإنشاء: "
 	},
@@ -987,12 +987,12 @@
 		}
 	},
 	"workspaceExplorer": {
-		"workspacePaused": "مساحة العمل متوقفة حاليًا. يرجى استئنافها للوصول إلى ملفات المشروع.",
+		"workspacePaused": "مساحة العمل متوقفة حاليًا. يرجى استئنافها للوصول إلى ملفات المنظمة.",
 		"startWorkspace": "بدء مساحة العمل",
 		"workspaceSettings": "إعدادات مساحة العمل",
 		"osFeatures": "للتفاعل مع ميزات نظام التشغيل، افتح في عميل سطح المكتب أو قم بإعداد مساحة عمل بعيدة.",
 		"workspaceStarting": "جارٍ بدء مساحة العمل...",
-		"viewProjectContent": "لعرض محتوى المشروع في مساحة العمل، يرجى اختيار مشروع أولاً.",
+		"viewProjectContent": "لعرض محتوى المنظمة في مساحة العمل، يرجى اختيار منظمة أولاً.",
 		"toast": {
 			"noWorkspace": "لا توجد مساحة عمل لبدء تشغيلها.",
 			"startingWorkspace": "جارٍ بدء مساحة العمل...",
@@ -1126,9 +1126,9 @@
 	},
 	"projectScreen": {
 		"whatToWorkOn": "ما الذي تريد العمل عليه؟",
-		"tellAboutProject": "أخبرني عن مشروعك",
-		"helpUnderstand": "ساعدني في فهم مشروعك حتى أتمكن من اقتراح أتمتة مخصصة — أو تخطَّ وابدأ مباشرة.",
-		"whatKind": "ما نوع هذا المشروع؟",
+		"tellAboutProject": "أخبرني عن منظمتك",
+		"helpUnderstand": "ساعدني في فهم منظمتك حتى أتمكن من اقتراح أتمتة مخصصة — أو تخطَّ وابدأ مباشرة.",
+		"whatKind": "ما نوع هذه المنظمة؟",
 		"skip": "تخطي",
 		"describeIdea": "صف فكرتك وسأساعدك في تحقيقها.",
 		"allSystemsNominal": "جميع الأنظمة تعمل بشكل طبيعي",
@@ -1149,7 +1149,7 @@
 	"homeScreen": {
 		"whatToBuild": "ماذا تريد أن تبني اليوم؟",
 		"describeIdea": "صف فكرتك وسأساعدك في تحقيقها.",
-		"myProjects": "مشاريعي",
+		"myProjects": "منظماتي",
 		"workflows": "سير العمل",
 		"members": "الأعضاء",
 		"workflowCount": "{count} سير عمل",
@@ -1219,11 +1219,11 @@
 		"aiManagerLabel": "مدير الذكاء الاصطناعي"
 	},
 	"projectPicker": {
-		"selectProject": "اختر مشروعاً",
-		"project": "المشروع",
-		"clearProject": "مسح المشروع",
+		"selectProject": "اختر منظمة",
+		"project": "المنظمة",
+		"clearProject": "مسح المنظمة",
 		"new": "جديد",
-		"noProjects": "لا توجد مشاريع بعد"
+		"noProjects": "لا توجد منظمات بعد"
 	},
 	"runningTasksPanel": {
 		"tasks": "المهام",
@@ -1269,9 +1269,9 @@
 	},
 	"agentChatPaywall": {
 		"upgradeTitle": "قم بالترقية لاستخدام وكلاء الذكاء الاصطناعي",
-		"upgradeDescription": "تتطلب محادثة الوكيل خطة مدفوعة (Starter أو أعلى). يمكنك أيضاً الحصول على الوصول عبر دعوتك إلى مشروع يملكه مستخدم مدفوع.",
+		"upgradeDescription": "تتطلب محادثة الوكيل خطة مدفوعة (Starter أو أعلى). يمكنك أيضاً الحصول على الوصول عبر دعوتك إلى منظمة يملكها مستخدم مدفوع.",
 		"viewPlans": "عرض الخطط",
-		"alreadyMember": "هل أنت بالفعل عضو في مشروع مدفوع؟ اختره من منتقي المشاريع لبدء استخدام وكلاء الذكاء الاصطناعي."
+		"alreadyMember": "هل أنت بالفعل عضو في منظمة مدفوعة؟ اخترها من منتقي المنظمات لبدء استخدام وكلاء الذكاء الاصطناعي."
 	},
 	"appModeToggle": {
 		"agent": "الوكيل",
@@ -1324,17 +1324,17 @@
 		"failedToTrigger": "فشل في التشغيل"
 	},
 	"chatSessionSidebar": {
-		"moveToProjectTitle": "نقل المحادثة إلى مشروع",
-		"project": "مشروع",
+		"moveToProjectTitle": "نقل المحادثة إلى منظمة",
+		"project": "منظمة",
 		"knowledgeFiles": "ملفات المعرفة",
-		"newProject": "مشروع جديد",
-		"selectProject": "اختر مشروعًا",
-		"noProjects": "لا توجد مشاريع بعد",
+		"newProject": "منظمة جديدة",
+		"selectProject": "اختر منظمة",
+		"noProjects": "لا توجد منظمات بعد",
 		"chatHistory": "سجل المحادثات",
 		"new": "جديد",
 		"noChatHistory": "لا يوجد سجل محادثات بعد",
 		"share": "مشاركة",
-		"moveToProject": "نقل إلى مشروع",
+		"moveToProject": "نقل إلى منظمة",
 		"delete": "حذف",
 		"menu": "القائمة"
 	},

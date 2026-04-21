@@ -176,7 +176,7 @@ export default function WorkflowPreviewCard({
                 setIsMoveOpen(true);
               }}
             >
-              <p className="w-full text-start">Move to Project</p>
+              <p className="w-full text-start">Move to Organization</p>
             </Button>
           </div>
         </ContextMenu>
@@ -190,7 +190,7 @@ export default function WorkflowPreviewCard({
             }
           }}
           currentProjectId={workflow.projectId}
-          title="Move Workflow to Project"
+          title="Move Workflow to Organization"
         />
         <WorkflowDetailsModal
           workflow={workflow}

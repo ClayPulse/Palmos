@@ -39,7 +39,7 @@ export default function ProjectView() {
   return (
     <div className="text-default-foreground flex h-full w-full flex-col items-center justify-center gap-y-1 pb-12">
       <h1 className="pb-8 text-center text-4xl font-semibold">
-        Project Overview
+        Organization Overview
       </h1>
       <div className="flex h-22 flex-col items-center gap-y-1">
         {!editorContext?.editorStates.isCommandViewerOpen && (

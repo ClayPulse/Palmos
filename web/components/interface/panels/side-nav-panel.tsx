@@ -78,7 +78,7 @@ function PanelContent() {
         },
         {
           name: SideMenuTabEnum.Workspace,
-          description: "Project workspace",
+          description: "Organization workspace",
           icon: "folder",
         },
         {
@@ -133,7 +133,7 @@ function PanelContent() {
             selectAndSetProjectHome();
           }}
         >
-          Select Project Home Path
+          Select Organization Home Path
         </Button>
       </div>
     );
