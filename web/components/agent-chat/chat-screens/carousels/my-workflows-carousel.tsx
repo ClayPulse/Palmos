@@ -58,10 +58,10 @@ export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllTog
   }
 
   async function openWorkflow(workflow: Workflow) {
-    const missing = await checkMissingEnvs(workflow.id);
-    if (missing && workflow.id) {
+    const result = await checkMissingEnvs(workflow.id);
+    if (result && workflow.id) {
       setPendingWorkflow(workflow);
-      openEnvSetup(workflow.id, missing);
+      openEnvSetup(workflow.id, result.missing, result.managedAvailable);
     } else {
       await proceedToCanvas(workflow);
     }
@@ -177,6 +177,7 @@ export function MyWorkflowsCarousel({ workflows, onMutate, projectId, showAllTog
           }}
           workflowId={envSetup.workflowId}
           envEntries={envSetup.env}
+          managedAvailable={envSetup.managedAvailable}
         />
       )}
       {detailsWorkflow && (

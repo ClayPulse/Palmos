@@ -46,6 +46,9 @@ const publish = `\
                   Flags:
                     --noBuild
                       Skip the build step before publishing.
+                    --upload-source
+                      Upload project source code alongside the build.
+                      Enables pulling the source later via \`pulse app pull\`.
 
 `;
 
@@ -136,6 +139,41 @@ const skill = `\
 
 `;
 
+const app = `\
+  app <subcommand> Manage apps on the Pulse Editor Platform.
+
+                  Subcommands:
+                    list
+                      List your published apps.
+
+                    pull <app-name> [--path ./dest] [--version 1.0.0]
+                      Pull an app's source code.
+                      Flags:
+                        --path, -p [path]
+                          The destination path. Defaults to ./<app-name>.
+                        --version [version]
+                          The app version to pull. Defaults to the latest version.
+
+`;
+
+const workflow = `\
+  workflow <subcommand>
+                  Manage workflows on the Pulse Editor Platform.
+
+                  Subcommands:
+                    list
+                      List your published workflows.
+
+                    pull <workflow-name> [--path ./dest]
+                      Pull a workflow and its apps' source code.
+                      Flags:
+                        --path, -p [path]
+                          The destination path. Defaults to ./<workflow-name>.
+                          Workflow config is saved as workflow.json.
+                          App sources are saved under apps/<app-id>/.
+
+`;
+
 export const commandsManual: Record<string, string> = {
 	help,
 	chat,
@@ -143,6 +181,8 @@ export const commandsManual: Record<string, string> = {
 	login,
 	logout,
 	publish,
+	app,
+	workflow,
 	'publish-workflow': publishWorkflow,
 	create,
 	preview,

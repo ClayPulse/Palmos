@@ -89,17 +89,43 @@ export default function AutomationEditorModal({
       setWebhookSecret(editingAutomation.webhookSecret ?? "");
       setNotifyInbox(editingAutomation.notifyInbox ?? true);
       setNotifyEmail(editingAutomation.notifyEmail ?? true);
-      const args = editingAutomation.inputArgs ?? {};
-      setInputArgs(
-        Object.entries(args).map(([key, value]) => ({
-          key,
-          value: String(value),
-        })),
+
+      // Look up workflow to get parameter descriptions
+      const wf = workflows?.find(
+        (w) =>
+          w.name === editingAutomation.workflowName &&
+          w.version === editingAutomation.workflowVersion,
       );
+      const entryNode = wf?.content?.nodes?.find(
+        (node: any) => node.data?.isDefaultEntry,
+      );
+      const params = entryNode?.data?.selectedAction?.parameters;
+
+      const savedArgs = editingAutomation.inputArgs ?? {};
+      const savedEntries = Object.entries(savedArgs).map(([key, value]) => ({
+        key,
+        value: String(value),
+        description: (params as any)?.[key]?.description ?? "",
+      }));
+
+      // Surface any workflow params missing from saved inputArgs
+      if (params && typeof params === "object") {
+        for (const [key, param] of Object.entries(params)) {
+          if (!savedArgs.hasOwnProperty(key)) {
+            savedEntries.push({
+              key,
+              value: "",
+              description: (param as any)?.description ?? "",
+            });
+          }
+        }
+      }
+
+      setInputArgs(savedEntries);
     } else {
       resetForm();
     }
-  }, [editingAutomation]);
+  }, [editingAutomation, workflows]);
 
   function resetForm() {
     setName("");

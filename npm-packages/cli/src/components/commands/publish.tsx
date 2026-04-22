@@ -7,6 +7,7 @@ import Spinner from 'ink-spinner';
 import fs from 'fs';
 import {$} from 'execa';
 import {publishApp} from '../../lib/backend/publish-app.js';
+import {uploadSource} from '../../lib/backend/upload-source.js';
 import {buildProd} from '../../lib/build-prod.js';
 
 export default function Publish({cli}: {cli: Result<Flags>}) {
@@ -19,6 +20,8 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 	const [isZippingError, setIsZippingError] = useState(false);
 	const [isPublishing, setIsPublishing] = useState(false);
 	const [isPublishingError, setIsPublishingError] = useState(false);
+	const [isUploadingSource, setIsUploadingSource] = useState(false);
+	const [sourceUploaded, setSourceUploaded] = useState(false);
 	const [isPublished, setIsPublished] = useState(false);
 
 	const [failureMessage, setFailureMessage] = useState<string | undefined>(
@@ -134,6 +137,17 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 				const res = await publishApp(cli.flags.stage, cli.flags.stageServer);
 
 				if (res.status === 200) {
+					if (cli.flags.uploadSource) {
+						setIsUploadingSource(true);
+						try {
+							await uploadSource(cli.flags.stage, cli.flags.stageServer);
+							setSourceUploaded(true);
+						} catch (sourceErr: any) {
+							console.error('Source upload failed:', sourceErr?.message || sourceErr);
+						} finally {
+							setIsUploadingSource(false);
+						}
+					}
 					setIsPublished(true);
 					setTimeout(() => process.exit(0), 0);
 				} else {
@@ -219,6 +233,17 @@ export default function Publish({cli}: {cli: Result<Flags>}) {
 								<Text color={'redBright'}>Error: {failureMessage}</Text>
 							)}
 						</>
+					)}
+					{isUploadingSource && !isMinimal && (
+						<Box>
+							<Spinner type="dots" />
+							<Text> Uploading source code...</Text>
+						</Box>
+					)}
+					{sourceUploaded && (
+						<Text color={'greenBright'}>
+							✅ Source code uploaded.
+						</Text>
 					)}
 					{isPublished && (
 						<Text color={'greenBright'}>

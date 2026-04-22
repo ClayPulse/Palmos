@@ -192,6 +192,7 @@ export default function ViewMenuDropDown() {
           isOpen={envSetup.isOpen}
           workflowId={undefined}
           envEntries={envSetup.env}
+          managedAvailable={{}}
           onClose={() => {
             setEnvSetup(null);
             pendingWorkflowContent.current = null;

@@ -1,6 +1,6 @@
 {
 	"name": "@pulse-editor/cli",
-	"version": "0.1.32",
+	"version": "0.1.35",
 	"license": "MIT",
 	"bin": {
 		"pulse": "dist/cli.js"
@@ -39,6 +39,7 @@
 		"ink-select-input": "^6.2.0",
 		"ink-spinner": "^5.0.0",
 		"ink-text-input": "^6.0.0",
+		"js-yaml": "^4.1.1",
 		"jszip": "^3.10.1",
 		"livereload": "^0.10.3",
 		"meow": "^14.1.0",
@@ -55,6 +56,7 @@
 		"@types/connect-livereload": "^0.6.3",
 		"@types/cors": "^2.8.19",
 		"@types/express": "^5.0.6",
+		"@types/js-yaml": "^4.0.9",
 		"@types/jszip": "^3.4.1",
 		"@types/livereload": "^0.9.5",
 		"@types/react": "^19.2.14",
