@@ -18,6 +18,10 @@ import Upgrade from './components/commands/upgrade.js';
 import Skill from './components/commands/skill.js';
 import Code from './components/commands/code.js';
 import PublishWorkflow from './components/commands/publish-workflow.js';
+import Pull from './components/commands/pull.js';
+import PullWorkflow from './components/commands/pull-workflow.js';
+import AppList from './components/commands/app-list.js';
+import WorkflowList from './components/commands/workflow-list.js';
 
 export default function App({cli}: {cli: Result<Flags>}) {
 	const [command, setCommand] = useState<string | undefined>(undefined);
@@ -66,6 +70,26 @@ export default function App({cli}: {cli: Result<Flags>}) {
 				<Skill cli={cli} />
 			) : command === 'publish-workflow' ? (
 				<PublishWorkflow cli={cli} />
+			) : command === 'app' ? (
+				cli.input[1] === 'pull' ? (
+					<Pull cli={cli} />
+				) : cli.input[1] === 'list' ? (
+					<AppList cli={cli} />
+				) : (
+					<Text color={'redBright'}>
+						Unknown app subcommand: {cli.input[1]}. Available: pull, list
+					</Text>
+				)
+			) : command === 'workflow' ? (
+				cli.input[1] === 'pull' ? (
+					<PullWorkflow cli={cli} />
+				) : cli.input[1] === 'list' ? (
+					<WorkflowList cli={cli} />
+				) : (
+					<Text color={'redBright'}>
+						Unknown workflow subcommand: {cli.input[1]}. Available: pull, list
+					</Text>
+				)
 			) : command === 'code' ? (
 				<Code cli={cli} />
 			) : (
