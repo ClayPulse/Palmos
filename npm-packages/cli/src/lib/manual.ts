@@ -46,6 +46,9 @@ const publish = `\
                   Flags:
                     --noBuild
                       Skip the build step before publishing.
+                    --upload-source
+                      Upload project source code alongside the build.
+                      Enables pulling the source later via \`pulse app pull\`.
 
 `;
 

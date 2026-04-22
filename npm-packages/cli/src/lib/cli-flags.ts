@@ -66,6 +66,10 @@ export const flags = defineFlags({
 	version: {
 		type: 'string',
 	},
+	uploadSource: {
+		type: 'boolean',
+		default: false,
+	},
 	logLevel: {
 		type: 'string',
 		default: 'normal',
