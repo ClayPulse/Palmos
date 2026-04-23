@@ -98,7 +98,50 @@ export default function useDeepAgent(
 
               // Extract from LangChain serialized format
               const kwargs = chunk.kwargs ?? chunk;
-              const content = kwargs.content ?? "";
+              const rawContent = kwargs.content ?? "";
+              // Normalize content: if it's an array of content blocks (e.g. from web search),
+              // extract text from text blocks to avoid [object Object] when concatenating.
+              // Also collect URL citations from annotations to display as sources.
+              let content: string;
+              if (Array.isArray(rawContent)) {
+                const textParts: string[] = [];
+                const citations: { url: string; title: string }[] = [];
+                for (const b of rawContent) {
+                  if (typeof b === "string") {
+                    textParts.push(b);
+                  } else if (typeof b === "object" && b !== null) {
+                    if (b.type === "text") textParts.push(b.text ?? "");
+                    // Extract URL citations from annotations (OpenAI web search format)
+                    if (Array.isArray(b.annotations)) {
+                      for (const ann of b.annotations) {
+                        if (
+                          ann &&
+                          (ann.type === "url_citation" ||
+                            ann.source === "url_citation") &&
+                          typeof ann.url === "string"
+                        ) {
+                          if (!citations.some((c) => c.url === ann.url)) {
+                            citations.push({
+                              url: ann.url,
+                              title: ann.title || ann.url,
+                            });
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                content = textParts.join("");
+                if (citations.length > 0) {
+                  content +=
+                    "\n\n**Sources:**\n" +
+                    citations
+                      .map((c, i) => `${i + 1}. [${c.title}](${c.url})`)
+                      .join("\n");
+                }
+              } else {
+                content = rawContent;
+              }
               const msgId = kwargs.id ?? chunk.id ?? generateId();
 
               // Determine message type from serialized id path
