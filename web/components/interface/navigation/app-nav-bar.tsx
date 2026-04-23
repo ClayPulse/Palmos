@@ -7,10 +7,12 @@ import type { CSSProperties, ReactNode } from "react";
 export default function AppNavBar({
   left,
   right,
+  center,
   style,
 }: {
   left?: ReactNode;
   right?: ReactNode;
+  center?: ReactNode;
   style?: CSSProperties;
 }) {
   return (
@@ -18,8 +20,12 @@ export default function AppNavBar({
       <div className="text-default-foreground bg-content1 grid h-12 w-full grid-cols-[1fr_auto_1fr] items-center rounded-xl px-2 shadow-md md:h-14 md:px-3">
         <div className="flex min-w-0 items-center">{left}</div>
         <div className="relative flex shrink-0 flex-col items-center justify-center">
-          <AppModeToggle />
-          <VoiceIndicator />
+          {center ?? (
+            <>
+              <AppModeToggle />
+              <VoiceIndicator />
+            </>
+          )}
         </div>
         <div className="flex min-w-0 items-center justify-end">{right}</div>
       </div>

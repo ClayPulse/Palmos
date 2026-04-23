@@ -1,8 +1,25 @@
 "use client";
 
+import { useInbox } from "@/components/agent-chat/panels/inbox-panel";
+import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
-import { Button } from "@heroui/react";
-import { useState, useMemo, useCallback } from "react";
+import { EditorContext } from "@/components/providers/editor-context-provider";
+import { AppModeEnum } from "@/lib/enums";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { useTranslations } from "@/lib/hooks/use-translations";
+import {
+  Button,
+  Dropdown,
+  DropdownItem,
+  DropdownMenu,
+  DropdownSection,
+  DropdownTrigger,
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@heroui/react";
+import Image from "next/image";
+import { useState, useMemo, useCallback, useContext } from "react";
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
@@ -317,9 +334,199 @@ export default function HomeView({
     [searchQuery, onBuildCustom],
   );
 
+  const editorContext = useContext(EditorContext);
+  const { session, signOut, subscription, usage } = useAuth();
+  const { getTranslations: t } = useTranslations();
+  const { messages: inboxMessages, unreadCount, markAllRead, dismiss: dismissInbox } = useInbox();
+
   return (
-    <div className="flex h-full w-full flex-col bg-white pt-14 dark:bg-[#0d0d14]">
-      {/* ── Tab bar (sticky below nav) ── */}
+    <div className="flex h-full w-full flex-col bg-white dark:bg-[#0d0d14]">
+      {/* ── Nav bar ── */}
+      <div className="shrink-0 flex items-center gap-5 border-b border-default-200 bg-white px-7 py-3 dark:border-white/8 dark:bg-[#0d0d14]">
+        {/* Left — logo */}
+        <a href="/" className="flex shrink-0 items-center gap-2 no-underline">
+          <Image src="/assets/pulse-logo.svg" alt="Palmos" width={24} height={24} />
+          <span className="hidden text-base font-bold tracking-wide bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 bg-clip-text text-transparent sm:inline dark:from-amber-500 dark:via-amber-200 dark:to-amber-500">
+            PALMOS AI
+          </span>
+        </a>
+        {/* Center — search */}
+        <div className="hidden flex-1 max-w-[640px] sm:block">
+          <form
+            onSubmit={handleSearch}
+            className="flex items-center gap-2 rounded-full border border-default-200 bg-default-50 px-3.5 py-2 transition-colors focus-within:border-amber-300 focus-within:bg-white focus-within:shadow-sm dark:border-white/10 dark:bg-white/5 dark:focus-within:border-amber-500/30 dark:focus-within:bg-white/8"
+          >
+            <Icon name="search" variant="round" className="text-lg text-default-400 dark:text-white/40" />
+            <input
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search for an AI agent or task…"
+              className="min-w-0 flex-1 bg-transparent text-sm text-default-800 outline-none placeholder:text-default-400 dark:text-white/85 dark:placeholder:text-white/35"
+            />
+            <span className="hidden rounded-md border border-default-200 bg-white px-1.5 py-0.5 text-[11px] font-semibold text-default-400 md:inline dark:border-white/10 dark:bg-white/5 dark:text-white/35">
+              ⌘K
+            </span>
+          </form>
+        </div>
+        {/* Right — actions */}
+        <div className="ml-auto flex items-center gap-2">
+          <button
+            type="button"
+            className="hidden rounded-lg px-3 py-1.5 text-[13px] font-medium text-default-600 transition-colors hover:bg-default-100 sm:block dark:text-white/60 dark:hover:bg-white/8"
+          >
+            My hires
+          </button>
+          <Button
+            size="sm"
+            className="hidden bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white sm:flex"
+            onPress={() => {
+              editorContext?.setEditorStates((prev) => ({
+                ...prev,
+                appMode: AppModeEnum.Agent,
+              }));
+            }}
+          >
+            Build custom
+          </Button>
+
+          {/* Inbox */}
+          {session && (
+            <Popover placement="bottom-end" onOpenChange={(open) => { if (open) markAllRead(); }}>
+              <PopoverTrigger>
+                <button
+                  type="button"
+                  className="relative flex h-8 w-8 items-center justify-center rounded-lg text-default-500 transition-colors hover:bg-default-100 dark:text-white/60 dark:hover:bg-white/10"
+                >
+                  <Icon name="chat_bubble" variant="round" className="text-xl" />
+                  {unreadCount > 0 && (
+                    <>
+                      <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                        {unreadCount > 9 ? "9+" : unreadCount}
+                      </span>
+                      <span className="absolute -top-0.5 -right-0.5 h-4 w-4 animate-ping rounded-full bg-red-400 opacity-75" />
+                    </>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 p-0">
+                <div className="flex items-center gap-2 border-b border-default-200 px-3 py-2.5 dark:border-white/8">
+                  <Icon name="chat_bubble" variant="round" className="text-base text-amber-500 dark:text-amber-400" />
+                  <span className="text-sm font-semibold text-default-700 dark:text-white/80">Inbox</span>
+                </div>
+                <div className="max-h-80 overflow-y-auto">
+                  {inboxMessages.length === 0 ? (
+                    <div className="flex flex-col items-center py-8 text-center">
+                      <Icon name="chat_bubble_outline" variant="round" className="mb-1.5 text-2xl text-default-300 dark:text-white/20" />
+                      <p className="text-xs text-default-500 dark:text-white/40">No messages yet</p>
+                    </div>
+                  ) : (
+                    [...inboxMessages].reverse().map((msg) => {
+                      const kwargs = msg.additionalKwargs;
+                      const isWorkflowBuild = kwargs?.type === "workflow_build_complete";
+                      return (
+                        <div key={msg.id} className="group border-b border-default-100 px-3 py-2.5 last:border-b-0 dark:border-white/5">
+                          <div className="flex items-start gap-2">
+                            <div className={`mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${isWorkflowBuild ? "bg-green-100 dark:bg-green-500/15" : "bg-amber-100 dark:bg-amber-500/15"}`}>
+                              <Icon
+                                name={isWorkflowBuild ? "rocket_launch" : "chat_bubble"}
+                                variant="round"
+                                className={`text-xs ${isWorkflowBuild ? "text-green-600 dark:text-green-400" : "text-amber-600 dark:text-amber-400"}`}
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-xs text-default-700 dark:text-white/75">{msg.content}</p>
+                              <p className="mt-0.5 text-[10px] text-default-400 dark:text-white/30">
+                                {formatRelativeTime(msg.createdAt, t)}
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => dismissInbox(msg.id)}
+                              className="shrink-0 text-default-300 opacity-0 transition-opacity group-hover:opacity-100 hover:text-default-500 dark:text-white/20 dark:hover:text-white/50"
+                            >
+                              <Icon name="close" variant="round" className="text-sm" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )}
+
+          {/* Login / Profile */}
+          {!session ? (
+            <Button
+              size="sm"
+              variant="bordered"
+              onPress={() =>
+                editorContext?.setEditorStates((prev) => ({
+                  ...prev,
+                  isSigningIn: true,
+                }))
+              }
+            >
+              {t("common.signIn")}
+            </Button>
+          ) : (
+            <Dropdown>
+              <DropdownTrigger>
+                <button
+                  type="button"
+                  className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-sm font-bold text-white transition-shadow hover:shadow-md"
+                >
+                  {session.user.image ? (
+                    <img src={session.user.image} alt={session.user.name} className="h-full w-full object-cover" />
+                  ) : (
+                    session.user.name?.[0]?.toUpperCase() ?? "U"
+                  )}
+                </button>
+              </DropdownTrigger>
+              <DropdownMenu
+                topContent={
+                  <div className="px-3 py-2 text-center">
+                    <p className="text-sm font-semibold text-default-800 dark:text-white/90">
+                      {session.user.name}
+                    </p>
+                    {session.user.email && (
+                      <p className="text-xs text-default-400 dark:text-white/40">
+                        {session.user.email}
+                      </p>
+                    )}
+                  </div>
+                }
+              >
+                <DropdownSection showDivider title={t("subscription.title")}>
+                  <DropdownItem key="plan" isReadOnly variant="faded">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs text-default-500 dark:text-white/50">{t("subscription.plan")}</span>
+                      <span className="text-xs font-semibold">{subscription?.name}</span>
+                    </div>
+                    <div className="mt-1 flex items-center justify-between">
+                      <span className="text-xs text-default-500 dark:text-white/50">{t("subscription.creditsRemaining")}</span>
+                      <span className="text-xs font-semibold">{usage?.remainingCredit}</span>
+                    </div>
+                  </DropdownItem>
+                </DropdownSection>
+                <DropdownSection>
+                  <DropdownItem
+                    key="sign-out"
+                    onPress={() => signOut()}
+                    className="text-danger"
+                    startContent={<Icon name="logout" variant="round" className="text-sm" />}
+                  >
+                    {t("common.signOut")}
+                  </DropdownItem>
+                </DropdownSection>
+              </DropdownMenu>
+            </Dropdown>
+          )}
+        </div>
+      </div>
+
+      {/* ── Tab bar ── */}
       <div className="shrink-0 border-b border-default-200 bg-white dark:border-white/8 dark:bg-[#0d0d14]">
         <div className="flex items-center gap-1.5 overflow-x-auto px-7 py-2.5 [&::-webkit-scrollbar]:hidden">
           <button

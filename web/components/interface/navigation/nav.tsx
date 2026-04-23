@@ -131,7 +131,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                 />
               )}
               <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden">
-                {isShowNavbar && (
+                {isShowNavbar && appMode !== AppModeEnum.Home && (
                   <AppNavBar
                     style={{
                       paddingTop:
@@ -154,8 +154,6 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                             }))
                           }
                         />
-                      ) : appMode === AppModeEnum.Home ? (
-                        <ChatNavLeft />
                       ) : (
                         <EditorNavLeft
                           isMenuOpen={isMenuOpen}
@@ -164,7 +162,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                       )
                     }
                     right={
-                      appMode === AppModeEnum.Agent || appMode === AppModeEnum.Home ? (
+                      appMode === AppModeEnum.Agent ? (
                         <ChatNavRight />
                       ) : (
                         <EditorNavRight

@@ -70,12 +70,19 @@ export function ChatNavLeft({
           </button>
         </Tooltip>
       )}
-      <a
-        href="/"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center gap-2 no-underline"
-      >
+      <PalmosWordmark />
+    </div>
+  );
+}
+
+export function PalmosWordmark() {
+  return (
+    <a
+      href="/"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center gap-2 no-underline"
+    >
       <Image
         src="/assets/pulse-logo.svg"
         alt="Palmos"
@@ -91,6 +98,55 @@ export function ChatNavLeft({
         PALMOS AI
       </motion.span>
     </a>
+  );
+}
+
+export function HomeNavLeft() {
+  return (
+    <div className="flex items-center gap-2">
+      <PalmosWordmark />
+    </div>
+  );
+}
+
+export function HomeNavCenter() {
+  return (
+    <div className="hidden w-full max-w-[640px] sm:block">
+      <div className="flex items-center gap-2 rounded-full border border-default-200 bg-default-50 px-3.5 py-2 transition-colors focus-within:border-amber-300 focus-within:bg-white focus-within:shadow-sm dark:border-white/10 dark:bg-white/5 dark:focus-within:border-amber-500/30 dark:focus-within:bg-white/8">
+        <Icon name="search" variant="round" className="text-lg text-default-400 dark:text-white/40" />
+        <input
+          placeholder="Search for an AI agent or task…"
+          className="min-w-0 flex-1 bg-transparent text-sm text-default-800 outline-none placeholder:text-default-400 dark:text-white/85 dark:placeholder:text-white/35"
+        />
+        <span className="hidden rounded-md border border-default-200 bg-white px-1.5 py-0.5 text-[11px] font-semibold text-default-400 md:inline dark:border-white/10 dark:bg-white/5 dark:text-white/35">
+          ⌘K
+        </span>
+      </div>
+    </div>
+  );
+}
+
+export function HomeNavRight({
+  onBuildCustom,
+}: {
+  onBuildCustom: () => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Button
+        size="sm"
+        variant="light"
+        className="hidden font-medium text-default-600 sm:flex dark:text-white/60"
+      >
+        My hires
+      </Button>
+      <Button
+        size="sm"
+        className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+        onPress={onBuildCustom}
+      >
+        Build custom
+      </Button>
     </div>
   );
 }
@@ -375,10 +431,14 @@ export function ChatNavRight() {
           <DropdownTrigger>
             <Button
               isIconOnly
-              className="text-md-on-secondary-container bg-md-secondary-container rounded-full"
+              className="text-md-on-secondary-container bg-md-secondary-container overflow-hidden rounded-full"
               variant="light"
             >
-              <Icon name="account_circle" variant="round" />
+              {session.user.image ? (
+                <img src={session.user.image} alt={session.user.name} className="h-full w-full rounded-full object-cover" />
+              ) : (
+                <Icon name="account_circle" variant="round" />
+              )}
             </Button>
           </DropdownTrigger>
           <DropdownMenu
