@@ -12,42 +12,27 @@ export default function HomeView({
   onBuildCustom: () => void;
 }) {
   return (
-    <div className="flex h-full w-full flex-col bg-gray-50 pt-16 dark:bg-[#0d0d14]">
-      <div className="flex flex-col overflow-y-auto">
-        <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col items-center gap-6 px-4 py-10 sm:px-8">
-          {/* Template gallery */}
-          <TemplateLibrary onSend={onSelectTemplate} variant="hero" />
+    <div className="flex h-full w-full flex-col bg-gray-50 pt-12 dark:bg-[#0d0d14]">
+      {/* Template gallery fills the space with its own scroll */}
+      <TemplateLibrary onSend={onSelectTemplate} variant="hero" />
 
-          {/* Custom workflow CTA */}
-          <div className="w-full max-w-3xl">
-            <div className="border-default-300 from-default-50 to-default-100/50 rounded-2xl border border-dashed bg-gradient-to-br p-6 text-center dark:border-white/10 dark:from-white/3 dark:to-white/[0.02]">
-              <div className="mb-3 flex justify-center">
-                <div className="bg-default-100 flex h-11 w-11 items-center justify-center rounded-full dark:bg-white/10">
-                  <Icon
-                    name="auto_fix_high"
-                    variant="round"
-                    className="text-default-600 text-2xl dark:text-white/70"
-                  />
-                </div>
-              </div>
-              <h3 className="text-default-800 text-base font-semibold dark:text-white/90">
-                Can&apos;t find what you need?
-              </h3>
-              <p className="text-default-500 mx-auto mt-1.5 max-w-md text-sm dark:text-white/50">
-                Build a custom workflow in ~15 minutes with our AI assistant
-              </p>
-              <Button
-                className="mt-4 bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white shadow-md shadow-amber-500/20 transition-all hover:shadow-lg hover:shadow-amber-500/30"
-                size="md"
-                onPress={onBuildCustom}
-                startContent={
-                  <Icon name="build" variant="round" className="text-base" />
-                }
-              >
-                Build Custom Workflow
-              </Button>
-            </div>
+      {/* Fixed bottom CTA bar */}
+      <div className="shrink-0 border-t border-default-200 bg-white/80 px-4 py-3 backdrop-blur-sm dark:border-white/8 dark:bg-[#0d0d14]/80">
+        <div className="mx-auto flex max-w-4xl items-center justify-between gap-4">
+          <div className="flex items-center gap-2 min-w-0">
+            <Icon name="auto_fix_high" variant="round" className="text-lg text-default-500 shrink-0 dark:text-white/50" />
+            <p className="text-default-600 text-sm truncate dark:text-white/60">
+              Can&apos;t find what you need? Build a custom workflow in ~15 min
+            </p>
           </div>
+          <Button
+            className="shrink-0 bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white shadow-md shadow-amber-500/20"
+            size="sm"
+            onPress={onBuildCustom}
+            startContent={<Icon name="build" variant="round" className="text-sm" />}
+          >
+            Build Custom
+          </Button>
         </div>
       </div>
     </div>

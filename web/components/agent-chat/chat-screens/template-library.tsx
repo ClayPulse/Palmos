@@ -3,7 +3,7 @@
 import Icon from "@/components/misc/icon";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -23,6 +23,48 @@ type Category = {
   darkColor: string;
   templates: Template[];
 };
+
+// ── Gradient helpers ─────────────────────────────────────────────────────────
+
+const GRADIENT_PAIRS = [
+  ["from-blue-400 to-indigo-500", "dark:from-blue-600 dark:to-indigo-700"],
+  ["from-purple-400 to-pink-500", "dark:from-purple-600 dark:to-pink-700"],
+  ["from-amber-400 to-orange-500", "dark:from-amber-600 dark:to-orange-700"],
+  ["from-emerald-400 to-teal-500", "dark:from-emerald-600 dark:to-teal-700"],
+  ["from-rose-400 to-red-500", "dark:from-rose-600 dark:to-red-700"],
+  ["from-cyan-400 to-blue-500", "dark:from-cyan-600 dark:to-blue-700"],
+  ["from-violet-400 to-purple-500", "dark:from-violet-600 dark:to-purple-700"],
+  ["from-pink-400 to-rose-500", "dark:from-pink-600 dark:to-rose-700"],
+  ["from-teal-400 to-cyan-500", "dark:from-teal-600 dark:to-cyan-700"],
+  ["from-orange-400 to-amber-500", "dark:from-orange-600 dark:to-amber-700"],
+  ["from-indigo-400 to-violet-500", "dark:from-indigo-600 dark:to-violet-700"],
+  ["from-lime-400 to-green-500", "dark:from-lime-600 dark:to-green-700"],
+];
+
+// Deterministic gradient from title string
+function getGradient(title: string): string {
+  let hash = 0;
+  for (let i = 0; i < title.length; i++) {
+    hash = ((hash << 5) - hash + title.charCodeAt(i)) | 0;
+  }
+  const idx = Math.abs(hash) % GRADIENT_PAIRS.length;
+  return `bg-gradient-to-br ${GRADIENT_PAIRS[idx][0]} ${GRADIENT_PAIRS[idx][1]}`;
+}
+
+// Varying flex-grow values to create organic widths like ribbi
+const FLEX_PATTERNS = [
+  [3, 1, 1, 2],
+  [1, 2, 1, 3],
+  [2, 1, 3, 1],
+  [1, 3, 2, 1],
+  [2, 2, 1, 2],
+  [3, 1, 2, 1],
+];
+
+function getFlexGrow(catIndex: number, itemIndex: number): number {
+  const pattern = FLEX_PATTERNS[catIndex % FLEX_PATTERNS.length];
+  return pattern[itemIndex % pattern.length];
+}
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -53,7 +95,7 @@ export function TemplateLibrary({
 
   if (loading) {
     return (
-      <div className={`flex ${variant === "hero" ? "w-full max-w-3xl" : "w-full max-w-xl"} items-center justify-center py-6`}>
+      <div className={`flex ${variant === "hero" ? "w-full" : "w-full max-w-xl"} items-center justify-center py-6`}>
         <div className="h-5 w-5 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />
       </div>
     );
@@ -62,7 +104,7 @@ export function TemplateLibrary({
   if (categories.length === 0) return null;
 
   if (variant === "hero") {
-    return <HeroTemplateGallery categories={categories} active={active} activeCategory={activeCategory} onCategoryChange={(id) => { setActiveCategory(id); }} onSend={onSend} />;
+    return <HeroTemplateGallery categories={categories} onSend={onSend} />;
   }
 
   return (
@@ -129,7 +171,6 @@ export function TemplateLibrary({
                       : "border-default-200/60 bg-white hover:border-amber-300/60 hover:shadow-sm dark:border-white/8 dark:bg-white/3 dark:hover:border-amber-500/25"
                   }`}
                 >
-                  {/* Card header — always visible */}
                   <button
                     type="button"
                     className="flex w-full items-start gap-3 px-3.5 py-3 text-left"
@@ -140,11 +181,7 @@ export function TemplateLibrary({
                     <div
                       className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg ${active.color} ${active.darkColor}`}
                     >
-                      <Icon
-                        name={tpl.icon}
-                        variant="round"
-                        className="text-sm"
-                      />
+                      <Icon name={tpl.icon} variant="round" className="text-sm" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <h4 className="text-default-800 text-sm font-medium leading-snug dark:text-white/90">
@@ -163,7 +200,6 @@ export function TemplateLibrary({
                     </span>
                   </button>
 
-                  {/* Expanded detail */}
                   <AnimatePresence>
                     {isExpanded && (
                       <motion.div
@@ -174,7 +210,6 @@ export function TemplateLibrary({
                         className="overflow-hidden"
                       >
                         <div className="border-t border-default-200/40 px-3.5 pb-3.5 pt-3 dark:border-white/6">
-                          {/* Tool chips */}
                           <div className="mb-3 flex flex-wrap gap-1.5">
                             {tpl.tools.map((tool) => (
                               <span
@@ -182,18 +217,12 @@ export function TemplateLibrary({
                                 className="inline-flex items-center gap-1 rounded-md border border-default-200/60 bg-default-50 px-2 py-0.5 text-[10px] font-medium text-default-600 dark:border-white/10 dark:bg-white/5 dark:text-white/60"
                               >
                                 <span className="flex h-3 w-3 shrink-0 items-center justify-center overflow-hidden">
-                                  <Icon
-                                    name="extension"
-                                    variant="round"
-                                    className="text-[10px]"
-                                  />
+                                  <Icon name="extension" variant="round" className="text-[10px]" />
                                 </span>
                                 {tool}
                               </span>
                             ))}
                           </div>
-
-                          {/* Prompt preview */}
                           <div className="mb-3 rounded-lg bg-default-50 p-2.5 dark:bg-white/3">
                             <p className="text-default-500 mb-1 text-[10px] font-semibold uppercase tracking-wider dark:text-white/40">
                               What this will build
@@ -202,19 +231,13 @@ export function TemplateLibrary({
                               {tpl.prompt}
                             </p>
                           </div>
-
-                          {/* Use button */}
                           <button
                             type="button"
                             onClick={() => onSend(tpl.prompt)}
                             className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md hover:shadow-amber-500/20 active:scale-[0.98]"
                           >
                             <span className="flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden">
-                              <Icon
-                                name="bolt"
-                                variant="round"
-                                className="text-base"
-                              />
+                              <Icon name="bolt" variant="round" className="text-base" />
                             </span>
                             Use This Template
                           </button>
@@ -232,139 +255,208 @@ export function TemplateLibrary({
   );
 }
 
-// ── Hero variant ─────────────────────────────────────────────────────────────
+// ── Hero variant — Ribbi-style gallery + Replicate-style collections ────────
 
 function HeroTemplateGallery({
   categories,
-  active,
-  activeCategory,
-  onCategoryChange,
   onSend,
 }: {
   categories: Category[];
-  active: Category | undefined;
-  activeCategory: string | null;
-  onCategoryChange: (id: string) => void;
   onSend: (text: string) => void;
 }) {
+  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const query = search.trim().toLowerCase();
+
+  const filteredCategories = useMemo(() => {
+    let cats = activeFilter ? categories.filter((c) => c.id === activeFilter) : categories;
+    if (query) {
+      cats = cats
+        .map((c) => ({
+          ...c,
+          templates: c.templates.filter(
+            (t) =>
+              t.title.toLowerCase().includes(query) ||
+              t.description.toLowerCase().includes(query) ||
+              t.tools.some((tool) => tool.toLowerCase().includes(query)),
+          ),
+        }))
+        .filter((c) => c.templates.length > 0);
+    }
+    return cats;
+  }, [activeFilter, categories, query]);
+
   return (
-    <div className="w-full max-w-3xl">
-      {/* Hero header */}
-      <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-md shadow-amber-500/25">
-          <img
-            src="/assets/pulse-logo.svg"
-            alt="Palmos"
-            className="h-5 w-5 brightness-0 invert"
+    <div className="flex h-full w-full flex-col overflow-hidden">
+      {/* Search bar */}
+      <div className="shrink-0 px-4 pt-8 pb-1">
+        <div className="relative mx-auto max-w-2xl">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+            <Icon name="search" variant="round" className="text-xl text-default-400 dark:text-white/40" />
+          </div>
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search workflows, tools, and automations..."
+            className="w-full rounded-full border border-default-200 bg-white py-3 pl-12 pr-4 text-sm text-default-800 placeholder:text-default-400 outline-none transition-all focus:border-amber-400 focus:ring-2 focus:ring-amber-400/20 dark:border-white/10 dark:bg-white/5 dark:text-white dark:placeholder:text-white/35 dark:focus:border-amber-500/50 dark:focus:ring-amber-500/10"
           />
-        </div>
-        <div>
-          <h2 className="text-default-900 text-lg font-bold dark:text-white leading-tight">
-            Start with a proven workflow
-          </h2>
-          <p className="text-default-400 text-sm dark:text-white/40">
-            Pick a template and get running in seconds
-          </p>
-        </div>
-      </div>
-
-      {/* Category pills */}
-      <div className="scrollbar-hide -mx-1 mb-4 flex gap-2 overflow-x-auto px-1 pb-1">
-        {categories.map((cat) => {
-          const isActive = cat.id === activeCategory;
-          return (
+          {search && (
             <button
-              key={cat.id}
-              onClick={() => onCategoryChange(cat.id)}
-              className={`flex shrink-0 items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition-all ${
-                isActive
-                  ? "border-amber-400/60 bg-amber-50 text-amber-700 shadow-sm dark:border-amber-500/40 dark:bg-amber-500/15 dark:text-amber-300"
-                  : "border-default-200/60 bg-white text-default-500 hover:border-amber-300/60 hover:bg-amber-50/50 dark:border-white/8 dark:bg-white/3 dark:text-white/50 dark:hover:border-amber-500/25 dark:hover:bg-white/5"
-              }`}
+              type="button"
+              onClick={() => setSearch("")}
+              className="absolute inset-y-0 right-0 flex items-center pr-4 text-default-400 hover:text-default-600 dark:text-white/40 dark:hover:text-white/60"
             >
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden">
-                <Icon name={cat.icon} variant="round" className="text-sm" />
-              </span>
-              {cat.label}
+              <Icon name="close" variant="round" className="text-lg" />
             </button>
-          );
-        })}
+          )}
+        </div>
       </div>
 
-      {/* Template grid */}
-      {active && (
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeCategory}
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.2 }}
-            className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-          >
-            {active.templates.map((tpl) => (
-              <div
-                key={tpl.title}
-                className="group flex flex-col overflow-hidden rounded-xl border border-default-200/60 bg-white transition-all hover:border-amber-300/60 hover:shadow-md dark:border-white/8 dark:bg-white/3 dark:hover:border-amber-500/25"
+      {/* Category filter bar */}
+      <div className="flex shrink-0 items-center gap-2 px-4 py-3">
+        <div className="scrollbar-hide flex-1 overflow-x-auto">
+          <div className="flex items-center gap-1.5 min-w-max">
+            <div className="flex items-center">
+              <button
+                onClick={() => setActiveFilter(null)}
+                className={`mr-1.5 h-9 rounded-full px-3 text-xs font-extrabold transition-colors whitespace-nowrap sm:px-5 sm:text-sm ${
+                  !activeFilter
+                    ? "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200"
+                    : "text-default-700 hover:bg-amber-100/50 dark:text-white/70 dark:hover:bg-amber-500/10"
+                }`}
               >
-                <div className="flex flex-1 flex-col p-4">
-                  {/* Icon + title */}
-                  <div className="mb-2 flex items-start gap-3">
-                    <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${active.color} ${active.darkColor}`}
-                    >
-                      <Icon name={tpl.icon} variant="round" className="text-base" />
-                    </div>
-                    <h4 className="text-default-800 text-sm font-semibold leading-snug dark:text-white/90 pt-0.5">
-                      {tpl.title}
-                    </h4>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-default-500 mb-3 line-clamp-3 text-xs leading-relaxed dark:text-white/50">
-                    {tpl.description}
-                  </p>
-
-                  {/* Tool chips */}
-                  <div className="mb-4 flex flex-wrap gap-1.5">
-                    {tpl.tools.slice(0, 4).map((tool) => (
-                      <span
-                        key={tool}
-                        className="inline-flex items-center gap-1 rounded-md border border-default-200/60 bg-default-50 px-2 py-0.5 text-[10px] font-medium text-default-600 dark:border-white/10 dark:bg-white/5 dark:text-white/60"
-                      >
-                        <span className="flex h-3 w-3 shrink-0 items-center justify-center overflow-hidden">
-                          <Icon name="extension" variant="round" className="text-[10px]" />
-                        </span>
-                        {tool}
-                      </span>
-                    ))}
-                    {tpl.tools.length > 4 && (
-                      <span className="text-[10px] font-medium text-default-400 dark:text-white/30 px-1 py-0.5">
-                        +{tpl.tools.length - 4} more
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Spacer */}
-                  <div className="flex-1" />
-
-                  {/* Use button */}
-                  <button
-                    type="button"
-                    onClick={() => onSend(tpl.prompt)}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all hover:shadow-md hover:shadow-amber-500/20 active:scale-[0.98]"
-                  >
-                    <span className="flex h-4 w-4 shrink-0 items-center justify-center overflow-hidden">
-                      <Icon name="bolt" variant="round" className="text-base" />
-                    </span>
-                    Use Template
-                  </button>
-                </div>
+                Top Picks
+              </button>
+              <div className="hidden h-[10.5px] w-[2px] rounded-full bg-black/10 sm:block dark:bg-white/10 mx-2" />
+            </div>
+            {categories.map((cat) => (
+              <div key={cat.id} className="flex items-center">
+                <button
+                  onClick={() => setActiveFilter(activeFilter === cat.id ? null : cat.id)}
+                  className={`mr-1.5 h-9 rounded-full px-3 text-xs font-extrabold transition-colors whitespace-nowrap sm:px-5 sm:text-sm ${
+                    activeFilter === cat.id
+                      ? "bg-amber-100 text-amber-900 dark:bg-amber-500/20 dark:text-amber-200"
+                      : "text-default-700 hover:bg-amber-100/50 dark:text-white/70 dark:hover:bg-amber-500/10"
+                  }`}
+                >
+                  {cat.label}
+                </button>
               </div>
             ))}
-          </motion.div>
-        </AnimatePresence>
-      )}
+          </div>
+        </div>
+      </div>
+
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-4 pt-4 pb-14">
+        <div className="space-y-8">
+          {/* Visual gallery rows — one per category */}
+          {filteredCategories.map((cat, catIdx) => (
+            <div key={cat.id} className="space-y-3 mb-6">
+              <h2 className="text-2xl font-bold text-default-800 dark:text-white">
+                {cat.label}
+              </h2>
+              <div className="flex gap-2" style={{ height: 240 + (catIdx % 3) * 30 }}>
+                {cat.templates.map((tpl, tplIdx) => (
+                  <button
+                    key={tpl.title}
+                    type="button"
+                    onClick={() => onSend(tpl.prompt)}
+                    className="group relative flex-shrink-0 overflow-hidden rounded-xl cursor-pointer"
+                    style={{ flexGrow: getFlexGrow(catIdx, tplIdx), flexBasis: 0, minWidth: 0 }}
+                  >
+                    {/* Gradient background */}
+                    <div className={`absolute inset-0 ${getGradient(tpl.title)} transition-transform duration-300 group-hover:scale-105`} />
+
+                    {/* Icon watermark */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-15">
+                      <Icon name={tpl.icon} variant="round" className="text-[80px] text-white" />
+                    </div>
+
+                    {/* Hover overlay */}
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-[8px] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <span className="line-clamp-5 break-words overflow-hidden p-6 text-center text-xl/7 font-semibold text-white transition-all duration-300 translate-y-1 scale-95 group-hover:translate-y-0 group-hover:scale-100 opacity-0 group-hover:opacity-100">
+                        {tpl.title}
+                      </span>
+                    </div>
+
+                    {/* Bottom title */}
+                    <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/40 to-transparent px-3 pb-3 pt-8">
+                      <span className="text-sm font-bold text-white truncate block drop-shadow-sm">
+                        {tpl.title}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* "I want to..." text-based collections section */}
+          <div className="mt-16">
+            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <h2 className="text-2xl font-bold text-default-800 dark:text-white">
+                I want to...
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {categories.map((cat) => (
+                <div key={cat.id}>
+                  <h4 className="mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveFilter(cat.id)}
+                      className="text-xl font-bold text-default-800 underline-offset-4 hover:underline dark:text-white"
+                    >
+                      {cat.label === "Sales & CRM"
+                        ? "Automate my sales"
+                        : cat.label === "Marketing & Growth"
+                          ? "Grow my marketing"
+                          : cat.label === "Customer Support"
+                            ? "Improve support"
+                            : cat.label === "Internal Operations"
+                              ? "Streamline operations"
+                              : cat.label === "E-commerce"
+                                ? "Scale my store"
+                                : "Analyze my data"}
+                    </button>
+                  </h4>
+                  <p className="text-default-600 mb-4 text-sm dark:text-white/60">
+                    {cat.templates.length} workflow{cat.templates.length !== 1 ? "s" : ""} to get started
+                  </p>
+                  <ul className="mt-4 mb-1 space-y-1 text-sm">
+                    {cat.templates.slice(0, 3).map((tpl) => (
+                      <li key={tpl.title} className="mb-1">
+                        <button
+                          type="button"
+                          onClick={() => onSend(tpl.prompt)}
+                          className="text-amber-700 underline-offset-2 hover:underline dark:text-amber-400 text-left"
+                        >
+                          {tpl.title}
+                        </button>
+                      </li>
+                    ))}
+                    {cat.templates.length > 3 && (
+                      <li className="text-default-400 dark:text-white/40">
+                        and{" "}
+                        <button
+                          type="button"
+                          onClick={() => setActiveFilter(cat.id)}
+                          className="text-amber-700 underline-offset-2 hover:underline dark:text-amber-400"
+                        >
+                          {cat.templates.length - 3} more...
+                        </button>
+                      </li>
+                    )}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
