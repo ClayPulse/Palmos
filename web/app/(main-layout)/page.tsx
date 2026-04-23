@@ -111,7 +111,12 @@ export default function HomePage() {
         <div className="h-full w-full">
           <HomeView
             onSelectTemplate={handleSelectTemplate}
-            onBuildCustom={switchToAgent}
+            onBuildCustom={(text?: string) => {
+              switchToAgent();
+              if (text) {
+                setTimeout(() => submit(text), 100);
+              }
+            }}
           />
         </div>
       )}
