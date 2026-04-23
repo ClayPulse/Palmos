@@ -412,3 +412,7 @@ Make sure to change back if using published versions.
 - Thanks to the developers and community of [Module Federation](https://module-federation.io/) for their groundbreaking work on micro-frontends.
 - Thanks to the developers and community of [Hero UI](https://www.heroui.com/) for their fantastic component library.
 - Thanks to the developers and community of [React Flow](https://reactflow.dev/) for their amazing node-based graph library.
+
+## Download History
+
+[![Download History](https://skill-history.com/chart/shellishack/pulse-editor.svg)](https://skill-history.com/shellishack/pulse-editor)
