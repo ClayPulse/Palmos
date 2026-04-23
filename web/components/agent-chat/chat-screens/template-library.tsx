@@ -1,8 +1,9 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import { fetchAPI } from "@/lib/pulse-editor-website/backend";
+import { fetchAPI, getAPIUrl } from "@/lib/pulse-editor-website/backend";
 import { AnimatePresence, motion } from "framer-motion";
+import { useTheme } from "next-themes";
 import { useEffect, useMemo, useState } from "react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -65,6 +66,69 @@ function getFlexGrow(catIndex: number, itemIndex: number): number {
   const pattern = FLEX_PATTERNS[catIndex % FLEX_PATTERNS.length];
   return pattern[itemIndex % pattern.length];
 }
+
+// Map tool display names to icon paths under /assets/icons/
+// string = same icon for both themes
+// { light, dark } = theme-specific icons
+const ICON_MAP: Record<string, string | { light: string; dark: string }> = {
+  // svgl icons
+  "Slack": "svgl/slack.svg",
+  "Calendly": "svgl/calendly.svg",
+  "Salesforce": "svgl/salesforce.svg",
+  "Google Sheets": "svgl/google-sheets.svg",
+  "Apollo.io": "svgl/apollo-io.svg",
+  "Resend": { light: "svgl/resend-icon-black.svg", dark: "svgl/resend-icon-white.svg" },
+  "WordPress": "svgl/wordpress.svg",
+  "Notion": "svgl/notion.svg",
+  "Ahrefs": "svgl/ahrefs.svg",
+  "Facebook Ads": "svgl/facebook-icon.svg",
+  "Gmail": "svgl/gmail.svg",
+  "Zoom": "svgl/zoom.svg",
+  "Linear": "svgl/linear.svg",
+  "Twilio": "svgl/twilio.svg",
+  "Google Workspace": "svgl/google.svg",
+  "GitHub": { light: "svgl/github_light.svg", dark: "svgl/github_dark.svg" },
+  "Shopify": "svgl/shopify.svg",
+  "Trustpilot": "svgl/trustpilot.svg",
+  "Stripe": "svgl/stripe.svg",
+  "PayPal": "svgl/paypal.svg",
+  "Google Calendar": "svgl/google-calendar.svg",
+  "Meta": "svgl/meta.svg",
+  // SimpleIcons
+  "HubSpot": "simple/hubspot.svg",
+  "Mailchimp": "simple/mailchimp.svg",
+  "Zendesk": "simple/zendesk.svg",
+  "Intercom": "simple/intercom.svg",
+  "Airtable": "simple/airtable.svg",
+  "PagerDuty": "simple/pagerduty.svg",
+  "Buffer": "simple/buffer.svg",
+  "QuickBooks": "simple/quickbooks.svg",
+  "Deepgram": "simple/deepgram.svg",
+  "BambooHR": "simple/bamboohr.svg",
+  "Google Ads": "simple/googleads.svg",
+  "Google Docs": "simple/googledocs.svg",
+};
+
+function getIconUrl(name: string, isDark: boolean): string {
+  const entry = ICON_MAP[name];
+  if (!entry) return "";
+  const path = typeof entry === "string" ? entry : isDark ? entry.dark : entry.light;
+  try {
+    return getAPIUrl(`/assets/icons/${path}`).toString();
+  } catch {
+    return "";
+  }
+}
+
+// Map category IDs to undraw illustration URLs
+const PERSONA_IMAGES: Record<string, string> = {
+  "sales-crm": "https://cdn.undraw.co/illustration/pitching_y6kw.svg",
+  "marketing": "https://cdn.undraw.co/illustration/marketing-analysis_2u5r.svg",
+  "customer-support": "https://cdn.undraw.co/illustration/contact-us_s4jn.svg",
+  "operations": "https://cdn.undraw.co/illustration/spreadsheets_bh6n.svg",
+  "ecommerce": "https://cdn.undraw.co/illustration/online-shopping_po8w.svg",
+  "data-analytics": "https://cdn.undraw.co/illustration/predictive-analytics_6gsu.svg",
+};
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -264,6 +328,8 @@ function HeroTemplateGallery({
   categories: Category[];
   onSend: (text: string) => void;
 }) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -352,43 +418,26 @@ function HeroTemplateGallery({
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-4 pt-4 pb-14">
         <div className="space-y-8">
-          {/* Visual gallery rows — one per category */}
-          {filteredCategories.map((cat, catIdx) => (
+          {/* Workflow cards — one section per category */}
+          {filteredCategories.map((cat) => (
             <div key={cat.id} className="space-y-3 mb-6">
-              <h2 className="text-2xl font-bold text-default-800 dark:text-white">
-                {cat.label}
-              </h2>
-              <div className="flex gap-2" style={{ height: 240 + (catIdx % 3) * 30 }}>
-                {cat.templates.map((tpl, tplIdx) => (
-                  <button
-                    key={tpl.title}
-                    type="button"
-                    onClick={() => onSend(tpl.prompt)}
-                    className="group relative flex-shrink-0 overflow-hidden rounded-xl cursor-pointer"
-                    style={{ flexGrow: getFlexGrow(catIdx, tplIdx), flexBasis: 0, minWidth: 0 }}
-                  >
-                    {/* Gradient background */}
-                    <div className={`absolute inset-0 ${getGradient(tpl.title)} transition-transform duration-300 group-hover:scale-105`} />
-
-                    {/* Icon watermark */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-15">
-                      <Icon name={tpl.icon} variant="round" className="text-[80px] text-white" />
-                    </div>
-
-                    {/* Hover overlay */}
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/50 backdrop-blur-[8px] opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-                      <span className="line-clamp-5 break-words overflow-hidden p-6 text-center text-xl/7 font-semibold text-white transition-all duration-300 translate-y-1 scale-95 group-hover:translate-y-0 group-hover:scale-100 opacity-0 group-hover:opacity-100">
-                        {tpl.title}
-                      </span>
-                    </div>
-
-                    {/* Bottom title */}
-                    <div className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/40 to-transparent px-3 pb-3 pt-8">
-                      <span className="text-sm font-bold text-white truncate block drop-shadow-sm">
-                        {tpl.title}
-                      </span>
-                    </div>
-                  </button>
+              <div className="flex items-center gap-3 mb-1">
+                {PERSONA_IMAGES[cat.id] && (
+                  <img
+                    src={PERSONA_IMAGES[cat.id]}
+                    alt=""
+                    className="h-8 w-8 object-contain"
+                    loading="lazy"
+                    draggable={false}
+                  />
+                )}
+                <h2 className="text-2xl font-bold text-default-800 dark:text-white">
+                  {cat.label}
+                </h2>
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {cat.templates.map((tpl) => (
+                  <WorkflowCard key={tpl.title} template={tpl} onSend={onSend} isDark={isDark} />
                 ))}
               </div>
             </div>
@@ -458,5 +507,78 @@ function HeroTemplateGallery({
         </div>
       </div>
     </div>
+  );
+}
+
+// ── n8n-style workflow card ──────────────────────────────────────────────────
+
+function WorkflowCard({
+  template,
+  onSend,
+  isDark,
+}: {
+  template: Template;
+  onSend: (text: string) => void;
+  isDark: boolean;
+}) {
+  const MAX_ICONS = 4;
+  const visibleTools = template.tools.slice(0, MAX_ICONS);
+  const extraCount = template.tools.length - MAX_ICONS;
+
+  return (
+    <button
+      type="button"
+      onClick={() => onSend(template.prompt)}
+      className="group flex min-h-[160px] flex-col justify-between gap-6 rounded-xl border border-default-200 bg-white p-5 text-left transition-all hover:border-amber-300/60 hover:shadow-lg dark:border-white/8 dark:bg-[#1a1a24] dark:hover:border-amber-500/30"
+    >
+      {/* Title + description */}
+      <div>
+        <h3 className="text-base font-semibold text-default-800 mb-1.5 line-clamp-2 leading-snug dark:text-white">
+          {template.title}
+        </h3>
+        <p className="text-xs text-default-500 line-clamp-2 leading-relaxed dark:text-white/45">
+          {template.description}
+        </p>
+      </div>
+
+      {/* Bottom row: tool icons */}
+      <div className="flex w-full shrink-0 items-center justify-between gap-4">
+        <ul className="flex flex-wrap items-center gap-1.5">
+          {visibleTools.map((tool) => {
+            const iconUrl = getIconUrl(tool, isDark);
+            return (
+              <li
+                key={tool}
+                className="flex h-8 shrink-0 items-center gap-1.5 rounded-md bg-default-100 px-2 dark:bg-white/[0.07]"
+              >
+                {iconUrl ? (
+                  <img
+                    src={iconUrl}
+                    alt=""
+                    className="h-4 w-4 object-contain"
+                    loading="lazy"
+                    draggable={false}
+                  />
+                ) : (
+                  <span className="flex h-4 w-4 shrink-0 items-center justify-center rounded bg-default-300 text-[9px] font-bold text-white dark:bg-white/20">
+                    {tool.charAt(0)}
+                  </span>
+                )}
+                <span className="text-[11px] font-medium text-default-600 dark:text-white/60">
+                  {tool}
+                </span>
+              </li>
+            );
+          })}
+          {extraCount > 0 && (
+            <li className="flex h-8 shrink-0 items-center justify-center rounded-md bg-default-100 px-2.5 dark:bg-white/[0.07]">
+              <span className="text-xs font-medium text-default-500 dark:text-white/50">
+                +{extraCount}
+              </span>
+            </li>
+          )}
+        </ul>
+      </div>
+    </button>
   );
 }
