@@ -35,7 +35,7 @@ const defaultEditorStates: EditorStates = {
   isInlineChatEnabled: false,
   isConsolePanelOpen: false,
   isChatPanelOpen: false,
-  appMode: AppModeEnum.Agent,
+  appMode: AppModeEnum.Home,
   isLoadingRecorder: false,
   isRecording: false,
   isListening: false,

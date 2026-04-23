@@ -38,9 +38,13 @@ import { useContext, useState } from "react";
 export function ChatNavLeft({
   onToggleSidebar,
   isSidebarOpen,
+  showHome,
+  onHome,
 }: {
   onToggleSidebar?: () => void;
   isSidebarOpen?: boolean;
+  showHome?: boolean;
+  onHome?: () => void;
 }) {
   return (
     <div className="flex items-center gap-2">
@@ -55,6 +59,16 @@ export function ChatNavLeft({
             className="text-xl"
           />
         </button>
+      )}
+      {showHome && onHome && (
+        <Tooltip content="Home" delay={400} closeDelay={0}>
+          <button
+            onClick={onHome}
+            className="flex h-8 w-8 items-center justify-center rounded-lg text-default-500 transition-colors hover:bg-default-100 dark:text-white/60 dark:hover:bg-white/10"
+          >
+            <Icon name="home" variant="round" className="text-xl" />
+          </button>
+        </Tooltip>
       )}
       <a
         href="/"

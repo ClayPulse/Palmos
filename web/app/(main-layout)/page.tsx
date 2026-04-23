@@ -4,28 +4,43 @@ import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import ChatView from "@/components/views/chat/chat-view";
 import EditorView from "@/components/views/editor/editor-view";
+import HomeView from "@/components/views/home/home-view";
 import { AppModeEnum } from "@/lib/enums";
 import useRouter from "@/lib/hooks/use-router";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useSearchParams } from "next/navigation";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 
 export default function HomePage() {
   const editorContext = useContext(EditorContext);
-  const appMode = editorContext?.editorStates.appMode ?? AppModeEnum.Agent;
+  const appMode = editorContext?.editorStates.appMode ?? AppModeEnum.Home;
   const searchParams = useSearchParams();
   const { replace } = useRouter();
-  const { handleSwitchSession } = useChatContext();
+  const { messages, handleSwitchSession, submit } = useChatContext();
   const importedRef = useRef(false);
+
+  // If there are existing messages, auto-switch to agent mode
+  useEffect(() => {
+    if (messages.length > 0 && appMode === AppModeEnum.Home) {
+      editorContext?.setEditorStates((prev) => ({
+        ...prev,
+        appMode: AppModeEnum.Agent,
+      }));
+    }
+  }, [messages.length, appMode, editorContext]);
 
   useEffect(() => {
     const mode = searchParams.get("mode");
-    if (mode === "agent" || mode === "editor") {
+    if (mode === "home" || mode === "agent" || mode === "editor") {
       editorContext?.setEditorStates((prev) => ({
         ...prev,
-        appMode: mode === "agent" ? AppModeEnum.Agent : AppModeEnum.Editor,
+        appMode:
+          mode === "editor"
+            ? AppModeEnum.Editor
+            : mode === "agent"
+              ? AppModeEnum.Agent
+              : AppModeEnum.Home,
       }));
-      // Remove the param from the URL without adding a history entry
       const params = new URLSearchParams(searchParams.toString());
       params.delete("mode");
       const newUrl =
@@ -40,13 +55,11 @@ export default function HomePage() {
     if (!token || importedRef.current) return;
     importedRef.current = true;
 
-    // Switch to agent mode so the chat is visible
     editorContext?.setEditorStates((prev) => ({
       ...prev,
       appMode: AppModeEnum.Agent,
     }));
 
-    // Resolve token → sessionId + permission, then switch to that session
     (async () => {
       try {
         const res = await fetchAPI(`/api/chat/share/${token}`);
@@ -75,13 +88,40 @@ export default function HomePage() {
     if (appMode === AppModeEnum.Editor) setEditorMounted(true);
   }, [appMode]);
 
+  const switchToAgent = useCallback(() => {
+    editorContext?.setEditorStates((prev) => ({
+      ...prev,
+      appMode: AppModeEnum.Agent,
+    }));
+  }, [editorContext]);
+
+  const handleSelectTemplate = useCallback(
+    (prompt: string) => {
+      switchToAgent();
+      setTimeout(() => {
+        submit(prompt);
+      }, 100);
+    },
+    [switchToAgent, submit],
+  );
+
   return (
     <>
+      {appMode === AppModeEnum.Home && (
+        <div className="h-full w-full">
+          <HomeView
+            onSelectTemplate={handleSelectTemplate}
+            onBuildCustom={switchToAgent}
+          />
+        </div>
+      )}
+
       <div
         className={appMode === AppModeEnum.Agent ? "h-full w-full" : "hidden"}
       >
         <ChatView />
       </div>
+
       {editorMounted && (
         <div
           className={

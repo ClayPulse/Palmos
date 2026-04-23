@@ -20,34 +20,38 @@ export default function AppModeToggle() {
 
   const [appMode, setAppMode] = useState<AppModeEnum | undefined>(undefined);
 
+  const homeRef = useRef<HTMLButtonElement>(null);
   const agentRef = useRef<HTMLButtonElement>(null);
   const editorRef = useRef<HTMLButtonElement>(null);
   const [pillDims, setPillDims] = useState<{ width: number; x: number } | null>(null);
 
   useLayoutEffect(() => {
+    const homeBtn = homeRef.current;
     const agentBtn = agentRef.current;
     const editorBtn = editorRef.current;
-    if (!agentBtn || !editorBtn || !appMode) return;
+    if (!homeBtn || !agentBtn || !editorBtn || !appMode) return;
 
     const measure = () => {
-      if (appMode === AppModeEnum.Agent) {
-        setPillDims({ width: agentBtn.offsetWidth, x: 0 });
+      if (appMode === AppModeEnum.Home) {
+        setPillDims({ width: homeBtn.offsetWidth, x: 0 });
+      } else if (appMode === AppModeEnum.Agent) {
+        setPillDims({ width: agentBtn.offsetWidth, x: homeBtn.offsetWidth });
       } else {
-        setPillDims({ width: editorBtn.offsetWidth, x: agentBtn.offsetWidth });
+        setPillDims({ width: editorBtn.offsetWidth, x: homeBtn.offsetWidth + agentBtn.offsetWidth });
       }
     };
 
     measure();
 
-    // Re-measure if buttons resize after icon fonts load
     const ro = new ResizeObserver(measure);
+    ro.observe(homeBtn);
     ro.observe(agentBtn);
     ro.observe(editorBtn);
     return () => ro.disconnect();
   }, [appMode]);
 
   useLayoutEffect(() => {
-    setAppMode(editorContext?.editorStates.appMode ?? AppModeEnum.Agent);
+    setAppMode(editorContext?.editorStates.appMode ?? AppModeEnum.Home);
   }, [editorContext?.editorStates.appMode]);
 
   const setMode = (mode: AppModeEnum) => {
@@ -66,6 +70,8 @@ export default function AppModeToggle() {
   const inactiveColor = isDark ? "#9ca3af" : "#6b7280";
   const editorActiveColor = isDark ? "#f3f4f6" : "#1f2937";
 
+  const isAmberPill = appMode === AppModeEnum.Home || appMode === AppModeEnum.Agent;
+
   const colorTransition: Transition = { duration: 0.25, ease: "easeInOut" };
   const springTransition: Transition = {
     type: "spring",
@@ -75,7 +81,6 @@ export default function AppModeToggle() {
 
   return (
     <div className="border-default-200 bg-default-100 relative flex items-center rounded-full border p-0.5 dark:border-white/10 dark:bg-white/6">
-      {/* Single always-rendered pill – slides, resizes, and crossfades color */}
       {pillDims && (
       <motion.div
         className="bg-content1 absolute top-0.5 bottom-0.5 left-0.5 overflow-hidden rounded-full shadow-sm dark:bg-white/15"
@@ -83,15 +88,33 @@ export default function AppModeToggle() {
         animate={{ width: pillDims.width, x: pillDims.x }}
         transition={springTransition}
       >
-        {/* Gradient overlay fades in for chat, out for editor */}
         <motion.div
           className="absolute inset-0 bg-linear-to-r from-amber-500 to-orange-500"
-          animate={{ opacity: appMode === AppModeEnum.Agent ? 1 : 0 }}
+          animate={{ opacity: isAmberPill ? 1 : 0 }}
           transition={colorTransition}
         />
       </motion.div>
       )}
 
+      {/* Home */}
+      <button
+        ref={homeRef}
+        onClick={() => setMode(AppModeEnum.Home)}
+        className="relative z-10 flex items-center justify-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium md:gap-1.5 md:px-3 md:py-1.5 md:text-xs"
+      >
+        <motion.span
+          className="flex items-center gap-0.5"
+          animate={{
+            color: appMode === AppModeEnum.Home ? "#ffffff" : inactiveColor,
+          }}
+          transition={colorTransition}
+        >
+          <Icon name="home" variant="round" className="text-sm" />
+          <span className="hidden sm:inline">Home</span>
+        </motion.span>
+      </button>
+
+      {/* Agent */}
       <button
         ref={agentRef}
         onClick={() => setMode(AppModeEnum.Agent)}
@@ -108,6 +131,8 @@ export default function AppModeToggle() {
           <span className="hidden sm:inline">{t("appModeToggle.agent")}</span>
         </motion.span>
       </button>
+
+      {/* Editor */}
       <button
         ref={editorRef}
         onClick={() => setMode(AppModeEnum.Editor)}

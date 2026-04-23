@@ -32,6 +32,7 @@ export enum ModelCapabilityEnum {
 }
 
 export enum AppModeEnum {
+  Home = "home",
   Agent = "agent",
   Editor = "editor",
 }

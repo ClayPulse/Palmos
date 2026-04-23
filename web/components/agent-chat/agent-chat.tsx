@@ -13,7 +13,6 @@ import ShareChatModal from "@/components/modals/share-chat-modal";
 import { useChatContext } from "@/components/providers/chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { useMarketplaceWorkflows } from "@/lib/hooks/marketplace/use-marketplace-workflows";
-import { useAgentAccess } from "@/lib/hooks/use-agent-access";
 import type {
   ChatBlockData,
   WorkflowInput,
@@ -22,7 +21,14 @@ import type {
 import { fetchWorkflowRunStatus } from "@/lib/workflow/fetch-workflow-run-status";
 import { AIMessage } from "@langchain/core/messages";
 import { ViewModeEnum } from "@pulse-editor/shared-utils";
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { AgentChatPanelLayout } from "./layouts/agent-chat-panel-layout";
 import RunningTasksPanel from "./panels/running-tasks-panel";
 
@@ -75,8 +81,6 @@ export default function AgentChat({
     sessions,
     currentSessionIdRef,
     handleNewChat,
-    handleSwitchSession,
-    handleDeleteSession,
     getSubagentsByMessage,
     isLoadingSession,
     workflowBuilds,
@@ -88,9 +92,6 @@ export default function AgentChat({
     resume,
     resumeQAForm,
   } = useChatContext();
-
-  const { allowed: agentChatAllowed, isLoading: isLoadingAccess } =
-    useAgentAccess();
 
   const editorContext = useContext(EditorContext);
   const projects = editorContext?.editorStates.projectsInfo;
@@ -628,9 +629,7 @@ export default function AgentChat({
       editorContext?.setEditorStates((prev) => ({
         ...prev,
         projectsInfo: prev.projectsInfo?.map((p) =>
-          p.id === activeProject?.id
-            ? { ...p, projectAnalysis: analysis }
-            : p,
+          p.id === activeProject?.id ? { ...p, projectAnalysis: analysis } : p,
         ),
       }));
     },
@@ -705,7 +704,7 @@ export default function AgentChat({
   const inlinedTaskIds = new Set<string>();
 
   const messageList: ChatBlockData[] = [];
-  const messageSourceMap = new Map<number, typeof messages[number]>();
+  const messageSourceMap = new Map<number, (typeof messages)[number]>();
   for (let i = 0; i < messages.length; i++) {
     const msg = messages[i];
     const isHuman = msg._getType() === "human";

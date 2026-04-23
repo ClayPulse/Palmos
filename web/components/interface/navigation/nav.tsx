@@ -22,7 +22,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
 
   const editorContext = useContext(EditorContext);
   const isMenuOpen = editorContext?.editorStates.isSideMenuOpen ?? false;
-  const appMode = editorContext?.editorStates.appMode ?? AppModeEnum.Agent;
+  const appMode = editorContext?.editorStates.appMode ?? AppModeEnum.Home;
   const [editorMounted, setEditorMounted] = useState(
     appMode === AppModeEnum.Editor,
   );
@@ -46,6 +46,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
   // useEffect in page.tsx has applied the param to context).
   const isChatMode =
     appMode === AppModeEnum.Agent ||
+    appMode === AppModeEnum.Home ||
     (typeof window !== "undefined" &&
       new URLSearchParams(window.location.search).get("mode") ===
         AppModeEnum.Agent);
@@ -145,7 +146,16 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                             setIsChatSidebarOpen((v) => !v)
                           }
                           isSidebarOpen={isChatSidebarOpen}
+                          showHome
+                          onHome={() =>
+                            editorContext?.setEditorStates((prev) => ({
+                              ...prev,
+                              appMode: AppModeEnum.Home,
+                            }))
+                          }
                         />
+                      ) : appMode === AppModeEnum.Home ? (
+                        <ChatNavLeft />
                       ) : (
                         <EditorNavLeft
                           isMenuOpen={isMenuOpen}
@@ -154,7 +164,7 @@ export default function Nav({ children }: { children: React.ReactNode }) {
                       )
                     }
                     right={
-                      appMode === AppModeEnum.Agent ? (
+                      appMode === AppModeEnum.Agent || appMode === AppModeEnum.Home ? (
                         <ChatNavRight />
                       ) : (
                         <EditorNavRight
