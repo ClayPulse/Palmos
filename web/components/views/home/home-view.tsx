@@ -8,6 +8,7 @@ import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
 import { Spinner } from "@heroui/react";
 import { useAuth } from "@/lib/hooks/use-auth";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useTranslations } from "@/lib/hooks/use-translations";
 import {
   Button,
@@ -25,6 +26,8 @@ import { useState, useMemo, useCallback, useContext, useEffect, useRef, lazy, Su
 
 const InboxView = lazy(() => import("@/components/views/home/inbox-view"));
 
+import { FALLBACK_AGENTS, type Agent } from "@/components/views/home/fallback-agents";
+
 // ── Data ────────────────────────────────────────────────────────────────────
 
 const CATEGORIES = [
@@ -40,73 +43,42 @@ const CATEGORIES = [
   { slug: "design", name: "Design", icon: "palette", count: 421 },
 ] as const;
 
-type Agent = {
-  id: string;
-  name: string;
-  role: string;
-  cat: string;
-  rating: number;
-  reviews: number;
-  price: number;
-  turnaround: string;
-  used: string;
-  tools: string[];
-  tagline: string;
-  hue: number;
-  avatar: string;
-};
+function mapListingToAgent(listing: any): Agent {
+  return {
+    id: listing.slug,
+    name: listing.name,
+    role: listing.role,
+    cat: listing.category,
+    rating: listing.rating,
+    reviews: listing.reviews,
+    price: listing.price,
+    turnaround: listing.turnaround,
+    used: listing.used,
+    tools: listing.tools,
+    tagline: listing.tagline,
+    hue: listing.hue,
+    avatar: listing.avatar,
+  };
+}
 
-const AGENTS: Agent[] = [
-  { id: "a1", name: "Iris", role: "Email triage specialist", cat: "automation", rating: 4.9, reviews: 1247, price: 9, turnaround: "~3 min", used: "4.2k teams", tools: ["Gmail", "Slack", "Notion"], tagline: "Classifies inbox, drafts replies, escalates urgent.", hue: 240, avatar: "https://mockmind-api.uifaces.co/content/human/49.jpg" },
-  { id: "a2", name: "Kai", role: "Invoice & AR agent", cat: "automation", rating: 4.8, reviews: 843, price: 19, turnaround: "~12 min", used: "1.8k teams", tools: ["Stripe", "QuickBooks", "Gmail"], tagline: "Chases overdue invoices and reconciles payments.", hue: 30, avatar: "https://mockmind-api.uifaces.co/content/human/103.jpg" },
-  { id: "a3", name: "Nova", role: "Brand image generator", cat: "aigc", rating: 4.7, reviews: 2104, price: 15, turnaround: "~2 min", used: "6.1k teams", tools: ["Figma", "S3", "Webflow"], tagline: "On-brand hero images, product shots, social cards.", hue: 310, avatar: "https://mockmind-api.uifaces.co/content/human/68.jpg" },
-  { id: "a4", name: "Lyra", role: "Long-form writer", cat: "content", rating: 4.9, reviews: 3281, price: 12, turnaround: "~8 min", used: "9.4k teams", tools: ["Docs", "WordPress", "Ghost"], tagline: "Blog posts, landing copy, technical deep-dives.", hue: 160, avatar: "https://mockmind-api.uifaces.co/content/human/181.jpg" },
-  { id: "a5", name: "Ember", role: "Ad campaign manager", cat: "marketing", rating: 4.6, reviews: 612, price: 29, turnaround: "~15 min", used: "740 teams", tools: ["Meta Ads", "GA4", "Sheets"], tagline: "Spins up, tests, and rotates ad creative daily.", hue: 0, avatar: "https://mockmind-api.uifaces.co/content/human/156.jpg" },
-  { id: "a6", name: "Atlas", role: "Deep researcher", cat: "research", rating: 4.8, reviews: 987, price: 22, turnaround: "~20 min", used: "1.1k teams", tools: ["Web", "PDF", "Notion"], tagline: "Multi-source briefs with citations and ranking.", hue: 210, avatar: "https://mockmind-api.uifaces.co/content/human/87.jpg" },
-  { id: "a7", name: "Orbit", role: "Dashboard builder", cat: "data", rating: 4.7, reviews: 445, price: 18, turnaround: "~10 min", used: "520 teams", tools: ["Snowflake", "Metabase", "GA4"], tagline: "Ships live dashboards from plain-English questions.", hue: 190, avatar: "https://mockmind-api.uifaces.co/content/human/200.jpg" },
-  { id: "a8", name: "Reed", role: "Tier-1 support agent", cat: "support", rating: 4.9, reviews: 1892, price: 14, turnaround: "~1 min", used: "3.6k teams", tools: ["Intercom", "Zendesk", "Slack"], tagline: "Answers 80% of tickets; routes the rest.", hue: 130, avatar: "https://mockmind-api.uifaces.co/content/human/134.jpg" },
-  { id: "a9", name: "Vale", role: "Outbound SDR", cat: "sales", rating: 4.5, reviews: 318, price: 24, turnaround: "~6 min", used: "410 teams", tools: ["HubSpot", "Apollo", "Gmail"], tagline: "Researches leads and sends personalized first touches.", hue: 290, avatar: "https://mockmind-api.uifaces.co/content/human/42.jpg" },
-  { id: "a10", name: "Axon", role: "Full-stack coder", cat: "coding", rating: 4.8, reviews: 2712, price: 25, turnaround: "~18 min", used: "5.2k teams", tools: ["GitHub", "Vercel", "Supabase"], tagline: "Ships features PR-ready, with tests and preview.", hue: 260, avatar: "https://mockmind-api.uifaces.co/content/human/217.jpg" },
-  { id: "a11", name: "Mira", role: "UI & brand designer", cat: "design", rating: 4.7, reviews: 604, price: 20, turnaround: "~14 min", used: "680 teams", tools: ["Figma", "Webflow", "S3"], tagline: "Produces on-brand screens, components, and systems.", hue: 340, avatar: "https://mockmind-api.uifaces.co/content/human/29.jpg" },
-  { id: "a12", name: "Koa", role: "Short-form video editor", cat: "aigc", rating: 4.6, reviews: 1130, price: 17, turnaround: "~9 min", used: "2.3k teams", tools: ["Descript", "YouTube", "Drive"], tagline: "Cuts raw footage into TikToks, Reels, Shorts.", hue: 50, avatar: "https://mockmind-api.uifaces.co/content/human/192.jpg" },
-  // ── Automation ──
-  { id: "a13", name: "Zara", role: "Slack workflow bot", cat: "automation", rating: 4.7, reviews: 931, price: 11, turnaround: "~2 min", used: "2.9k teams", tools: ["Slack", "Jira", "Linear"], tagline: "Routes standup updates, nudges blockers, syncs status.", hue: 220, avatar: "https://mockmind-api.uifaces.co/content/human/55.jpg" },
-  { id: "a14", name: "Theo", role: "Calendar optimizer", cat: "automation", rating: 4.6, reviews: 487, price: 8, turnaround: "~1 min", used: "1.3k teams", tools: ["Google Calendar", "Zoom", "Slack"], tagline: "Defragments your week and auto-declines low-value meetings.", hue: 175, avatar: "https://mockmind-api.uifaces.co/content/human/120.jpg" },
-  { id: "a15", name: "Pax", role: "Data entry automator", cat: "automation", rating: 4.8, reviews: 672, price: 7, turnaround: "~4 min", used: "980 teams", tools: ["Sheets", "Airtable", "Zapier"], tagline: "Reads PDFs, receipts, and forms — fills your spreadsheets.", hue: 95, avatar: "https://mockmind-api.uifaces.co/content/human/78.jpg" },
-  // ── AIGC ──
-  { id: "a16", name: "Lux", role: "Voice-over artist", cat: "aigc", rating: 4.5, reviews: 814, price: 13, turnaround: "~5 min", used: "1.7k teams", tools: ["ElevenLabs", "Drive", "Notion"], tagline: "Studio-quality narration from a script in any language.", hue: 280, avatar: "https://mockmind-api.uifaces.co/content/human/61.jpg" },
-  { id: "a17", name: "Pixel", role: "Product mockup creator", cat: "aigc", rating: 4.7, reviews: 1456, price: 16, turnaround: "~3 min", used: "3.8k teams", tools: ["Midjourney", "Figma", "S3"], tagline: "Photorealistic product mockups from a text brief.", hue: 350, avatar: "https://mockmind-api.uifaces.co/content/human/145.jpg" },
-  // ── Content ──
-  { id: "a18", name: "Sage", role: "SEO content strategist", cat: "content", rating: 4.8, reviews: 2034, price: 18, turnaround: "~12 min", used: "4.6k teams", tools: ["Ahrefs", "WordPress", "Docs"], tagline: "Keyword clusters, briefs, and fully optimized articles.", hue: 145, avatar: "https://mockmind-api.uifaces.co/content/human/38.jpg" },
-  { id: "a19", name: "Quinn", role: "Social media writer", cat: "content", rating: 4.6, reviews: 1780, price: 8, turnaround: "~3 min", used: "5.1k teams", tools: ["Buffer", "Canva", "Notion"], tagline: "Platform-native posts, threads, and carousel copy.", hue: 25, avatar: "https://mockmind-api.uifaces.co/content/human/170.jpg" },
-  { id: "a20", name: "Juno", role: "Newsletter editor", cat: "content", rating: 4.7, reviews: 923, price: 14, turnaround: "~10 min", used: "1.4k teams", tools: ["Mailchimp", "Substack", "Docs"], tagline: "Weekly roundups and drip sequences that actually get opened.", hue: 200, avatar: "https://mockmind-api.uifaces.co/content/human/210.jpg" },
-  // ── Marketing ──
-  { id: "a21", name: "Blaze", role: "SEO audit specialist", cat: "marketing", rating: 4.7, reviews: 534, price: 22, turnaround: "~18 min", used: "620 teams", tools: ["Ahrefs", "Screaming Frog", "Sheets"], tagline: "Technical audits with prioritized fix-it lists.", hue: 15, avatar: "https://mockmind-api.uifaces.co/content/human/99.jpg" },
-  { id: "a22", name: "Neon", role: "Influencer outreach agent", cat: "marketing", rating: 4.5, reviews: 389, price: 20, turnaround: "~14 min", used: "310 teams", tools: ["Instagram", "Gmail", "Sheets"], tagline: "Finds, vets, and pitches micro-influencers at scale.", hue: 330, avatar: "https://mockmind-api.uifaces.co/content/human/18.jpg" },
-  { id: "a23", name: "Flux", role: "Email marketing optimizer", cat: "marketing", rating: 4.8, reviews: 721, price: 15, turnaround: "~8 min", used: "890 teams", tools: ["Mailchimp", "Klaviyo", "GA4"], tagline: "A/B tests subjects, optimizes sends, cleans lists.", hue: 60, avatar: "https://mockmind-api.uifaces.co/content/human/205.jpg" },
-  // ── Research ──
-  { id: "a24", name: "Scout", role: "Competitive intel analyst", cat: "research", rating: 4.7, reviews: 643, price: 26, turnaround: "~25 min", used: "780 teams", tools: ["Web", "Crunchbase", "Notion"], tagline: "Tracks competitor moves, pricing changes, and launches.", hue: 185, avatar: "https://mockmind-api.uifaces.co/content/human/130.jpg" },
-  { id: "a25", name: "Delphi", role: "Market research agent", cat: "research", rating: 4.6, reviews: 412, price: 30, turnaround: "~30 min", used: "390 teams", tools: ["Statista", "PDF", "Sheets"], tagline: "TAM/SAM/SOM sizing with sourced data tables.", hue: 250, avatar: "https://mockmind-api.uifaces.co/content/human/72.jpg" },
-  // ── Data & analytics ──
-  { id: "a26", name: "Sigma", role: "SQL query generator", cat: "data", rating: 4.8, reviews: 1102, price: 12, turnaround: "~4 min", used: "2.1k teams", tools: ["PostgreSQL", "BigQuery", "Sheets"], tagline: "Plain-English to production SQL with explanations.", hue: 215, avatar: "https://mockmind-api.uifaces.co/content/human/108.jpg" },
-  { id: "a27", name: "Prism", role: "Data pipeline builder", cat: "data", rating: 4.6, reviews: 367, price: 28, turnaround: "~22 min", used: "430 teams", tools: ["Airflow", "dbt", "Snowflake"], tagline: "ETL pipelines from scratch, tested and documented.", hue: 170, avatar: "https://mockmind-api.uifaces.co/content/human/88.jpg" },
-  // ── Customer support ──
-  { id: "a28", name: "Cleo", role: "Knowledge base builder", cat: "support", rating: 4.7, reviews: 589, price: 16, turnaround: "~15 min", used: "710 teams", tools: ["Notion", "Zendesk", "Confluence"], tagline: "Turns support tickets into searchable help articles.", hue: 110, avatar: "https://mockmind-api.uifaces.co/content/human/25.jpg" },
-  { id: "a29", name: "Dash", role: "Escalation triage bot", cat: "support", rating: 4.8, reviews: 1204, price: 10, turnaround: "~2 min", used: "2.4k teams", tools: ["Intercom", "Slack", "PagerDuty"], tagline: "Classifies severity, routes to the right team, pages on-call.", hue: 40, avatar: "https://mockmind-api.uifaces.co/content/human/160.jpg" },
-  // ── Sales ──
-  { id: "a30", name: "Raven", role: "CRM hygiene agent", cat: "sales", rating: 4.6, reviews: 478, price: 15, turnaround: "~8 min", used: "560 teams", tools: ["Salesforce", "HubSpot", "Clearbit"], tagline: "Dedupes contacts, enriches fields, flags stale deals.", hue: 300, avatar: "https://mockmind-api.uifaces.co/content/human/115.jpg" },
-  { id: "a31", name: "Slate", role: "Proposal writer", cat: "sales", rating: 4.7, reviews: 356, price: 22, turnaround: "~16 min", used: "420 teams", tools: ["Docs", "PandaDoc", "HubSpot"], tagline: "Custom proposals with ROI calcs from deal context.", hue: 230, avatar: "https://mockmind-api.uifaces.co/content/human/52.jpg" },
-  { id: "a32", name: "Finn", role: "Demo prep assistant", cat: "sales", rating: 4.5, reviews: 287, price: 18, turnaround: "~10 min", used: "340 teams", tools: ["LinkedIn", "Notion", "Slack"], tagline: "Pre-call briefs with prospect research and talking points.", hue: 80, avatar: "https://mockmind-api.uifaces.co/content/human/185.jpg" },
-  // ── Coding ──
-  { id: "a33", name: "Forge", role: "API integration builder", cat: "coding", rating: 4.8, reviews: 1891, price: 28, turnaround: "~20 min", used: "3.1k teams", tools: ["GitHub", "Postman", "Vercel"], tagline: "Connects any two APIs with auth, retries, and tests.", hue: 270, avatar: "https://mockmind-api.uifaces.co/content/human/95.jpg" },
-  { id: "a34", name: "Bug", role: "Automated QA tester", cat: "coding", rating: 4.7, reviews: 1456, price: 20, turnaround: "~12 min", used: "2.6k teams", tools: ["Playwright", "GitHub", "Slack"], tagline: "Writes E2E tests, runs them in CI, reports failures.", hue: 5, avatar: "https://mockmind-api.uifaces.co/content/human/140.jpg" },
-  { id: "a35", name: "Hex", role: "DevOps & infra agent", cat: "coding", rating: 4.6, reviews: 823, price: 30, turnaround: "~25 min", used: "1.2k teams", tools: ["Terraform", "AWS", "GitHub Actions"], tagline: "Provisions infra, writes IaC, fixes deploy failures.", hue: 150, avatar: "https://mockmind-api.uifaces.co/content/human/63.jpg" },
-  { id: "a36", name: "Rust", role: "Code reviewer", cat: "coding", rating: 4.9, reviews: 2341, price: 15, turnaround: "~7 min", used: "4.8k teams", tools: ["GitHub", "SonarQube", "Slack"], tagline: "Line-by-line PR reviews with security and perf callouts.", hue: 120, avatar: "https://mockmind-api.uifaces.co/content/human/175.jpg" },
-  // ── Design ──
-  { id: "a37", name: "Halo", role: "Presentation designer", cat: "design", rating: 4.7, reviews: 892, price: 18, turnaround: "~12 min", used: "1.5k teams", tools: ["Figma", "Google Slides", "Canva"], tagline: "Investor decks, sales decks, and internal presentations.", hue: 320, avatar: "https://mockmind-api.uifaces.co/content/human/35.jpg" },
-  { id: "a38", name: "Tint", role: "Icon & illustration artist", cat: "design", rating: 4.6, reviews: 534, price: 14, turnaround: "~8 min", used: "620 teams", tools: ["Figma", "Illustrator", "S3"], tagline: "Custom icon sets and spot illustrations in your brand style.", hue: 45, avatar: "https://mockmind-api.uifaces.co/content/human/150.jpg" },
-  { id: "a39", name: "Frame", role: "Landing page designer", cat: "design", rating: 4.8, reviews: 1123, price: 24, turnaround: "~16 min", used: "1.9k teams", tools: ["Figma", "Webflow", "Framer"], tagline: "High-converting landing pages from a product brief.", hue: 195, avatar: "https://mockmind-api.uifaces.co/content/human/220.jpg" },
-];
+function useAgentListings() {
+  const [agents, setAgents] = useState<Agent[]>(FALLBACK_AGENTS);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAPI("/api/agent/listings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setAgents(data.map(mapListingToAgent));
+        }
+      })
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  return { agents, isLoading };
+}
 
 const TRENDING = [
   "Cyber-week ad rotation",
@@ -323,6 +295,7 @@ export default function HomeView({
   onSelectTemplate: (prompt: string) => void;
   onBuildCustom: (text?: string) => void;
 }) {
+  const { agents: allAgents, isLoading: isLoadingAgents } = useAgentListings();
   const [homeView, setHomeView] = useState<"explore" | "inbox">("explore");
   const [cat, setCat] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -331,7 +304,7 @@ export default function HomeView({
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
 
   const visible = useMemo(() => {
-    let list = cat === "all" ? AGENTS : AGENTS.filter((a) => a.cat === cat);
+    let list = cat === "all" ? allAgents : allAgents.filter((a) => a.cat === cat);
     if (maxPrice < 50) list = list.filter((a) => a.price <= maxPrice);
     if (turnaround !== "any") {
       const mins = turnaround === "5" ? 5 : turnaround === "15" ? 15 : 60;
@@ -346,9 +319,9 @@ export default function HomeView({
       );
     }
     return list;
-  }, [cat, maxPrice, turnaround, selectedTools]);
+  }, [cat, maxPrice, turnaround, selectedTools, allAgents]);
 
-  const featured = AGENTS.slice(0, 3);
+  const featured = allAgents.slice(0, 3);
 
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
 
@@ -650,7 +623,7 @@ export default function HomeView({
             <div className="flex flex-col gap-2.5">
               <span className="inline-flex w-fit items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                39 agents online now
+                {allAgents.length} agents online now
               </span>
               <h1 className="text-[28px] font-bold leading-[1.15] tracking-[-0.015em] text-default-900 sm:text-[32px] dark:text-white">
                 Your <em className="not-italic text-amber-600 dark:text-amber-400">AI team</em>, ready to hire.
@@ -680,7 +653,7 @@ export default function HomeView({
             </div>
             {/* Avatar mosaic */}
             <div className="hidden grid-cols-4 gap-2 sm:grid">
-              {AGENTS.slice(0, 8).map((a) => (
+              {allAgents.slice(0, 8).map((a) => (
                 <div
                   key={a.id}
                   className="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-[14px] shadow-sm"
@@ -754,7 +727,7 @@ export default function HomeView({
                 action="Tune recommendations →"
               />
               <div className="grid grid-cols-3 gap-3 rounded-2xl border border-default-200 bg-default-50 p-4 sm:grid-cols-6 dark:border-white/8 dark:bg-white/[0.03]">
-                {AGENTS.slice(0, 6).map((a) => (
+                {allAgents.slice(0, 6).map((a) => (
                   <button
                     key={a.id}
                     type="button"
@@ -795,7 +768,7 @@ export default function HomeView({
                   </div>
                   <div className="flex flex-col gap-1.5">
                     <CategoryTile
-                      cat={{ slug: "all", name: "All agents", icon: "apps", count: AGENTS.length * 100 }}
+                      cat={{ slug: "all", name: "All agents", icon: "apps", count: allAgents.length * 100 }}
                       active={cat === "all"}
                       onClick={() => setCat("all")}
                     />
@@ -1292,7 +1265,7 @@ function DetailChatPanel({ agent }: { agent: Agent }) {
       if (!content.trim()) continue;
       if (type === "human") {
         // Strip the agent context prefix for display
-        const cleaned = content.replace(/^\[Agent:.*?\]\n.*?\n.*?\n\nUser request: /s, "");
+        const cleaned = content.replace(/^\[Agent:[\s\S]*?\nUser request: /, "");
         msgs.push({ role: "you", text: cleaned });
       } else if (type === "ai") {
         msgs.push({ role: "agent", text: content });

@@ -1,79 +1,120 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { Button } from "@heroui/react";
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from "react";
+import {
+  FALLBACK_INBOX_AGENTS,
+  FALLBACK_TEAMS,
+  FALLBACK_THREADS,
+  type InboxAgent,
+  type Team,
+  type Thread,
+} from "@/components/views/home/fallback-inbox";
 
-// ── Agent pool (lightweight, matches explore agents) ────────────────────────
+// ── Hooks to fetch from API with fallback ───────────────────────────────────
 
-type InboxAgent = { id: string; name: string; role: string; hue: number; avatar: string };
+function useInboxAgents() {
+  const [agents, setAgents] = useState<InboxAgent[]>(FALLBACK_INBOX_AGENTS);
 
-const IA: InboxAgent[] = [
-  { id: "iris", name: "Iris", role: "Email triage", hue: 240, avatar: "https://mockmind-api.uifaces.co/content/human/49.jpg" },
-  { id: "kai", name: "Kai", role: "Invoice & AR", hue: 30, avatar: "https://mockmind-api.uifaces.co/content/human/103.jpg" },
-  { id: "nova", name: "Nova", role: "Brand imagery", hue: 310, avatar: "https://mockmind-api.uifaces.co/content/human/68.jpg" },
-  { id: "lyra", name: "Lyra", role: "Long-form writer", hue: 160, avatar: "https://mockmind-api.uifaces.co/content/human/181.jpg" },
-  { id: "ember", name: "Ember", role: "Ad campaigns", hue: 0, avatar: "https://mockmind-api.uifaces.co/content/human/156.jpg" },
-  { id: "atlas", name: "Atlas", role: "Deep researcher", hue: 210, avatar: "https://mockmind-api.uifaces.co/content/human/87.jpg" },
-  { id: "orbit", name: "Orbit", role: "Dashboard builder", hue: 190, avatar: "https://mockmind-api.uifaces.co/content/human/200.jpg" },
-  { id: "reed", name: "Reed", role: "Tier-1 support", hue: 130, avatar: "https://mockmind-api.uifaces.co/content/human/134.jpg" },
-  { id: "vale", name: "Vale", role: "Outbound SDR", hue: 290, avatar: "https://mockmind-api.uifaces.co/content/human/42.jpg" },
-  { id: "axon", name: "Axon", role: "Full-stack coder", hue: 260, avatar: "https://mockmind-api.uifaces.co/content/human/217.jpg" },
-  { id: "mira", name: "Mira", role: "UI/brand design", hue: 340, avatar: "https://mockmind-api.uifaces.co/content/human/29.jpg" },
-];
+  useEffect(() => {
+    fetchAPI("/api/agent/listings")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setAgents(data.map((a: any) => ({
+            id: a.slug,
+            name: a.name,
+            role: a.role,
+            hue: a.hue,
+            avatar: a.avatar,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
-function agentById(id: string) {
-  return IA.find((a) => a.id === id);
+  return agents;
 }
 
-// ── Teams ───────────────────────────────────────────────────────────────────
+function useInboxTeams() {
+  const [teams, setTeams] = useState<Team[]>(FALLBACK_TEAMS);
 
-export type Team = {
-  id: string;
-  name: string;
-  icon: string;
-  hue: number;
-  goal: string;
-  lead: string;
-  agents: string[];
-  created: string;
-  runs: number;
-  success: number;
-};
+  useEffect(() => {
+    fetchAPI("/api/agent/teams")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setTeams(data.map((t: any) => ({
+            id: t.id,
+            name: t.name,
+            icon: t.icon,
+            hue: t.hue,
+            goal: t.goal ?? "",
+            lead: t.leadAgent ?? t.members?.find((m: any) => m.role === "lead")?.agentSlug ?? "",
+            agents: t.members?.map((m: any) => m.agentSlug) ?? [],
+            created: new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            runs: t.totalRuns ?? 0,
+            success: t.successRate ?? 0,
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
-export const TEAMS: Team[] = [
-  { id: "growth", name: "Growth Ops", icon: "trending_up", hue: 30, goal: "Drive more qualified pipeline from web → demo.", lead: "vale", agents: ["vale", "ember", "atlas", "lyra"], created: "Apr 12", runs: 1247, success: 0.94 },
-  { id: "revops", name: "Revenue & billing", icon: "receipt_long", hue: 190, goal: "Close the loop on invoicing and cash collection.", lead: "kai", agents: ["kai", "orbit"], created: "Mar 03", runs: 612, success: 0.98 },
-  { id: "support", name: "Customer support", icon: "support_agent", hue: 130, goal: "Keep tier-1 inbox at <5 min response.", lead: "reed", agents: ["reed", "iris", "atlas"], created: "Feb 18", runs: 3892, success: 0.96 },
-  { id: "brand", name: "Brand studio", icon: "palette", hue: 310, goal: "Weekly content drops across social + blog.", lead: "mira", agents: ["mira", "nova", "lyra"], created: "Apr 21", runs: 284, success: 0.91 },
-];
+  return teams;
+}
 
-// ── Threads ─────────────────────────────────────────────────────────────────
+function useInboxThreads() {
+  const [threads, setThreads] = useState<Thread[]>(FALLBACK_THREADS);
 
-type Thread = {
-  id: string;
-  kind: "dm" | "team" | "notif";
-  teamId?: string;
-  agentId?: string;
-  title: string;
-  preview: string;
-  unread: number;
-  pinned: boolean;
-  updated: string;
-  status: "active" | "needs-approval" | "review" | "done";
-};
+  useEffect(() => {
+    fetchAPI("/api/agent/inbox/threads")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setThreads(data.map((t: any) => ({
+            id: t.id,
+            kind: t.kind,
+            teamId: t.teamId ?? undefined,
+            agentId: t.agentSlug ?? undefined,
+            title: t.title,
+            preview: t.preview ?? "",
+            unread: t.unread ?? 0,
+            pinned: t.pinned ?? false,
+            updated: new Date(t.updatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+            status: t.status ?? "active",
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
-const THREADS: Thread[] = [
-  { id: "t1", kind: "team", teamId: "growth", title: "Q2 outbound push", preview: "Vale → Ember: handing off 14 warm leads for retargeting ads…", unread: 3, pinned: true, updated: "12:41", status: "active" },
-  { id: "t2", kind: "dm", agentId: "iris", title: "Iris", preview: "Triaged 47 emails overnight — 2 need your approval before reply.", unread: 2, pinned: true, updated: "12:18", status: "needs-approval" },
-  { id: "t3", kind: "team", teamId: "support", title: "Weekend ticket backlog", preview: "Reed closed 38/42 tickets. 4 escalated to Iris for VIP routing.", unread: 0, pinned: false, updated: "11:02", status: "active" },
-  { id: "t4", kind: "dm", agentId: "kai", title: "Kai", preview: "3 invoices paid this morning. Cortex Labs still 17 days overdue.", unread: 0, pinned: false, updated: "10:47", status: "active" },
-  { id: "t5", kind: "notif", title: "Weekly digest", preview: "Your agents completed 284 tasks this week — up 12% from last.", unread: 0, pinned: false, updated: "9:00", status: "done" },
-  { id: "t6", kind: "team", teamId: "revops", title: "March close-out", preview: "Kai → Orbit: dashboard ready for your review.", unread: 0, pinned: false, updated: "Mon", status: "done" },
-  { id: "t7", kind: "dm", agentId: "nova", title: "Nova", preview: "Generated 6 hero variants for the Spring launch. Pick your favorite →", unread: 1, pinned: false, updated: "Mon", status: "review" },
-  { id: "t8", kind: "team", teamId: "brand", title: "Spring launch content", preview: "Mira → Nova → Lyra: blog post + social kit ready for review.", unread: 0, pinned: false, updated: "Sun", status: "review" },
-  { id: "t9", kind: "dm", agentId: "atlas", title: "Atlas", preview: "Research brief done — 23 sources, competitive matrix attached.", unread: 0, pinned: false, updated: "Fri", status: "done" },
-];
+  return threads;
+}
+
+// ── Inbox context — provides agents/teams lookup to all subcomponents ───────
+
+const InboxDataCtx = createContext<{
+  agents: InboxAgent[];
+  teams: Team[];
+  threads: Thread[];
+  agentById: (id: string) => InboxAgent | undefined;
+}>({
+  agents: FALLBACK_INBOX_AGENTS,
+  teams: FALLBACK_TEAMS,
+  threads: FALLBACK_THREADS,
+  agentById: (id: string) => FALLBACK_INBOX_AGENTS.find((a) => a.id === id),
+});
+
+function useInboxData() {
+  return useContext(InboxDataCtx);
+}
+
+function agentById(id: string): InboxAgent | undefined {
+  return FALLBACK_INBOX_AGENTS.find((a) => a.id === id);
+}
 
 // ── Messages ────────────────────────────────────────────────────────────────
 
@@ -147,7 +188,7 @@ const MSG_DIGEST: Msg[] = [
 
 const MESSAGES_BY_THREAD: Record<string, Msg[]> = { t1: MSG_GROWTH, t2: MSG_IRIS, t5: MSG_DIGEST };
 
-function genMessages(thread: Thread): Msg[] {
+function genMessages(thread: Thread, teams: Team[]): Msg[] {
   if (MESSAGES_BY_THREAD[thread.id]) return MESSAGES_BY_THREAD[thread.id];
   if (thread.kind === "dm") {
     const a = agentById(thread.agentId!);
@@ -157,7 +198,7 @@ function genMessages(thread: Thread): Msg[] {
     ];
   }
   if (thread.kind === "team") {
-    const team = TEAMS.find((t) => t.id === thread.teamId);
+    const team = teams.find((t) => t.id === thread.teamId);
     const lead = agentById(team?.lead ?? "");
     return [
       { id: "g1", role: "system", at: thread.updated, text: `Team thread — ${team?.name}.` },
@@ -207,6 +248,7 @@ function InAvStack({ agents, size = 28, max = 4 }: { agents: InboxAgent[]; size?
 // ── Message renderer ────────────────────────────────────────────────────────
 
 function Message({ m }: { m: Msg }) {
+  const { agentById } = useInboxData();
   if (m.role === "system") {
     return (
       <div className="self-center rounded-full bg-default-100 px-3.5 py-1.5 text-center text-[11.5px] font-medium text-default-400 dark:bg-white/8 dark:text-white/40">
@@ -360,16 +402,17 @@ function Message({ m }: { m: Msg }) {
 // ── Thread list item ────────────────────────────────────────────────────────
 
 function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: boolean; onPick: (t: Thread) => void }) {
+  const { teams, agentById: lookupAgent } = useInboxData();
   const kindIcon = { dm: "person", team: "groups", notif: "notifications" }[thread.kind];
   let av: React.ReactNode;
   let kindLabel: string;
 
   if (thread.kind === "dm") {
-    const a = agentById(thread.agentId!);
+    const a = lookupAgent(thread.agentId!);
     av = a ? <InAvatar agent={a} size={38} /> : null;
     kindLabel = "DM";
   } else if (thread.kind === "team") {
-    const team = TEAMS.find((t) => t.id === thread.teamId);
+    const team = teams.find((t) => t.id === thread.teamId);
     const agents = (team?.agents ?? []).map(agentById).filter(Boolean) as InboxAgent[];
     av = <InAvStack agents={agents} size={22} max={3} />;
     kindLabel = `TEAM · ${team?.name}`;
@@ -401,7 +444,7 @@ function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: bo
       <div className="self-start pt-0.5">{av}</div>
       <div className="flex min-w-0 flex-col gap-1">
         <div className="flex items-center justify-between gap-1.5">
-          <span className="tli-title truncate text-[13.5px] font-semibold text-default-600 dark:text-white/70">{thread.kind === "dm" ? agentById(thread.agentId!)?.name : thread.title}</span>
+          <span className="tli-title truncate text-[13.5px] font-semibold text-default-600 dark:text-white/70">{thread.kind === "dm" ? lookupAgent(thread.agentId!)?.name : thread.title}</span>
           <span className="shrink-0 text-[11px] font-medium text-default-400 dark:text-white/35">{thread.updated}</span>
         </div>
         <div className="inline-flex items-center gap-1 text-[10.5px] font-medium uppercase tracking-[0.08em] text-default-400 dark:text-white/35">
@@ -423,7 +466,8 @@ function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: bo
 // ── Thread view ─────────────────────────────────────────────────────────────
 
 function ThreadView({ thread }: { thread: Thread }) {
-  const messages = genMessages(thread);
+  const { teams, agentById: lookupAgent } = useInboxData();
+  const messages = genMessages(thread, teams);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -435,7 +479,7 @@ function ThreadView({ thread }: { thread: Thread }) {
   let placeholder = "Message…";
 
   if (thread.kind === "dm") {
-    const a = agentById(thread.agentId!);
+    const a = lookupAgent(thread.agentId!);
     placeholder = `Message ${a?.name}…`;
     header = (
       <div className="flex shrink-0 items-center gap-3 border-b border-default-200 bg-white px-6 py-3.5 dark:border-white/8 dark:bg-white/[0.03]">
@@ -451,16 +495,16 @@ function ThreadView({ thread }: { thread: Thread }) {
       </div>
     );
   } else if (thread.kind === "team") {
-    const team = TEAMS.find((t) => t.id === thread.teamId);
-    const agents = (team?.agents ?? []).map(agentById).filter(Boolean) as InboxAgent[];
-    const lead = agentById(team?.lead ?? "");
+    const team = teams.find((t) => t.id === thread.teamId);
+    const agents = (team?.agents ?? []).map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
+    const lead = lookupAgent(team?.lead ?? "");
     placeholder = "Message the team… use @ to address someone";
     header = (
       <div className="flex shrink-0 items-center gap-3 border-b border-default-200 bg-white px-6 py-3.5 dark:border-white/8 dark:bg-white/[0.03]">
         <InAvStack agents={agents} size={30} max={4} />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 text-[15px] font-semibold text-default-800 dark:text-white/90">
-            <Icon name={team?.icon ?? "groups"} variant="round" className="text-lg" style={{ color: `hsl(${team?.hue ?? 0} 70% 45%)` }} />
+            <span style={{ color: `hsl(${team?.hue ?? 0} 70% 45%)` }}><Icon name={team?.icon ?? "groups"} variant="round" className="text-lg" /></span>
             {thread.title}
             <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[10px] font-medium text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">
               <span className="h-1 w-1 rounded-full bg-emerald-500" /> Active
@@ -525,7 +569,8 @@ function ThreadView({ thread }: { thread: Thread }) {
 // ── Context pane ────────────────────────────────────────────────────────────
 
 function TeamContextPane({ team }: { team: Team }) {
-  const agents = team.agents.map(agentById).filter(Boolean) as InboxAgent[];
+  const { agentById: lookupAgent } = useInboxData();
+  const agents = team.agents.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
   return (
     <aside className="flex flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
       <div className="border-b border-default-200 p-4 dark:border-white/8">
@@ -580,7 +625,8 @@ function TeamContextPane({ team }: { team: Team }) {
 // ── DM Context pane ─────────────────────────────────────────────────────────
 
 function DMContextPane({ thread }: { thread: Thread }) {
-  const a = agentById(thread.agentId!);
+  const { agentById: lookupAgent } = useInboxData();
+  const a = lookupAgent(thread.agentId!);
   if (!a) return null;
   return (
     <aside className="flex flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
@@ -604,6 +650,7 @@ function DMContextPane({ thread }: { thread: Thread }) {
 // ── Teams grid ──────────────────────────────────────────────────────────────
 
 export function TeamsGrid({ onNew, onOpen }: { onNew: () => void; onOpen: (team: Team) => void }) {
+  const { teams: allTeams, agentById: lookupAgent } = useInboxData();
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-7 py-6">
@@ -617,9 +664,9 @@ export function TeamsGrid({ onNew, onOpen }: { onNew: () => void; onOpen: (team:
           </Button>
         </div>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-          {TEAMS.map((team) => {
-            const agents = team.agents.map(agentById).filter(Boolean) as InboxAgent[];
-            const lead = agentById(team.lead);
+          {allTeams.map((team) => {
+            const agents = team.agents.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
+            const lead = lookupAgent(team.lead);
             return (
               <button key={team.id} type="button" onClick={() => onOpen(team)} className="flex flex-col gap-3.5 rounded-2xl border border-default-200 bg-white p-4.5 text-left transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-amber-500/30">
                 <div className="flex items-center gap-3">
@@ -665,16 +712,17 @@ const ICON_OPTIONS = ["trending_up", "receipt_long", "support_agent", "palette",
 const HUE_OPTIONS = [30, 0, 310, 260, 210, 190, 160, 130];
 
 export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
+  const { agents: allAgents, agentById: lookupAgent } = useInboxData();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
   const [icon, setIcon] = useState("trending_up");
   const [hue, setHue] = useState(30);
-  const [selected, setSelected] = useState<string[]>(["vale", "atlas"]);
-  const [lead, setLead] = useState("vale");
+  const [selected, setSelected] = useState<string[]>([]);
+  const [lead, setLead] = useState("");
 
   const toggle = (id: string) => setSelected((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
-  const agents = selected.map(agentById).filter(Boolean) as InboxAgent[];
+  const agents = selected.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
   const steps = ["Basics", "Roster", "Lead", "Review"];
 
   return (
@@ -741,7 +789,7 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
               <p className="mt-1.5 text-sm text-default-400 dark:text-white/45">Add 2–6 agents. Mix specialties so they can hand off to each other.</p>
             </div>
             <div className="flex flex-col gap-1.5">
-              {IA.map((a) => {
+              {allAgents.map((a) => {
                 const on = selected.includes(a.id);
                 return (
                   <button key={a.id} type="button" onClick={() => toggle(a.id)} className={`grid grid-cols-[auto_1fr_auto_auto] items-center gap-3 rounded-xl border-[1.5px] bg-white px-3 py-2.5 text-left transition-colors ${on ? "border-amber-400 bg-amber-50 dark:border-amber-500/25 dark:bg-amber-500/8" : "border-default-200 hover:border-amber-200 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-amber-500/15"}`}>
@@ -811,7 +859,7 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
               <div className="flex items-center gap-2.5">
                 <InAvStack agents={agents} size={30} max={6} />
                 <span className="text-[13px] font-medium text-default-500 dark:text-white/55">
-                  Led by <strong className="text-default-800 dark:text-white/90">{agentById(lead)?.name}</strong> · {agents.length} agents
+                  Led by <strong className="text-default-800 dark:text-white/90">{lookupAgent(lead)?.name}</strong> · {agents.length} agents
                 </span>
               </div>
             </div>
@@ -841,9 +889,34 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
 // ── Main inbox view (Linear-style 3-pane) ───────────────────────────────────
 
 export default function InboxView() {
+  const inboxAgents = useInboxAgents();
+  const inboxTeams = useInboxTeams();
+  const inboxThreads = useInboxThreads();
+
+  const ctxValue = useMemo(() => ({
+    agents: inboxAgents,
+    teams: inboxTeams,
+    threads: inboxThreads,
+    agentById: (id: string) => inboxAgents.find((a) => a.id === id),
+  }), [inboxAgents, inboxTeams, inboxThreads]);
+
+  return (
+    <InboxDataCtx.Provider value={ctxValue}>
+      <InboxViewInner />
+    </InboxDataCtx.Provider>
+  );
+}
+
+function InboxViewInner() {
+  const { teams: TEAMS, threads: THREADS } = useInboxData();
   const [tab, setTab] = useState<"inbox" | "teams" | "create">("inbox");
-  const [active, setActive] = useState<Thread>(THREADS[0]);
+  const [active, setActive] = useState<Thread | null>(null);
   const [filter, setFilter] = useState("all");
+
+  // Set initial active thread once threads load
+  useEffect(() => {
+    if (!active && THREADS.length > 0) setActive(THREADS[0]);
+  }, [THREADS, active]);
 
   const unread = THREADS.reduce((n, t) => n + (t.unread || 0), 0);
   const filtered = THREADS.filter((t) =>
