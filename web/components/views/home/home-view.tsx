@@ -28,10 +28,11 @@ const InboxView = lazy(() => import("@/components/views/home/inbox-view"));
 
 import { FALLBACK_AGENTS, type Agent } from "@/components/views/home/fallback-agents";
 import { PreviousWork } from "@/components/views/home/previous-work";
+import { BuildCustomModal } from "@/components/views/home/build-custom-modal";
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
-const CATEGORIES = [
+export const CATEGORIES = [
   { slug: "automation", name: "Automation", icon: "bolt", count: 1248 },
   { slug: "aigc", name: "AIGC", icon: "auto_awesome", count: 892, sub: "Image · Video · Audio" },
   { slug: "content", name: "Content writing", icon: "edit_note", count: 2103 },
@@ -291,10 +292,8 @@ function SectionHeader({
 
 export default function HomeView({
   onSelectTemplate,
-  onBuildCustom,
 }: {
   onSelectTemplate: (prompt: string) => void;
-  onBuildCustom: (text?: string) => void;
 }) {
   const { agents: allAgents, isLoading: isLoadingAgents } = useAgentListings();
   const [homeView, setHomeView] = useState<"explore" | "inbox">("explore");
@@ -325,6 +324,7 @@ export default function HomeView({
   const featured = allAgents.slice(0, 3);
 
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
+  const [buildCustom, setBuildCustom] = useState<{ seedTagline?: string } | null>(null);
 
   const toggleTool = useCallback((tool: string) => {
     setSelectedTools((prev) =>
@@ -347,10 +347,10 @@ export default function HomeView({
       e.preventDefault();
       const q = searchQuery.trim();
       if (!q) return;
-      onBuildCustom(q);
+      setBuildCustom({ seedTagline: q });
       setSearchQuery("");
     },
-    [searchQuery, onBuildCustom],
+    [searchQuery],
   );
 
   const editorContext = useContext(EditorContext);
@@ -408,12 +408,7 @@ export default function HomeView({
           <Button
             size="sm"
             className="hidden bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white sm:flex"
-            onPress={() => {
-              editorContext?.setEditorStates((prev) => ({
-                ...prev,
-                appMode: AppModeEnum.Agent,
-              }));
-            }}
+            onPress={() => setBuildCustom({})}
           >
             Build custom
           </Button>
@@ -933,7 +928,7 @@ export default function HomeView({
           <Button
             className="shrink-0 bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white shadow-md shadow-amber-500/20"
             size="sm"
-            onPress={() => onBuildCustom()}
+            onPress={() => setBuildCustom({})}
             startContent={<Icon name="build" variant="round" className="text-sm" />}
           >
             Build Custom
@@ -947,6 +942,24 @@ export default function HomeView({
           agent={selectedAgent}
           onClose={() => setSelectedAgent(null)}
           onHire={handleHire}
+        />
+      )}
+
+      {/* Build Custom modal */}
+      {buildCustom && (
+        <BuildCustomModal
+          seedTagline={buildCustom.seedTagline}
+          onClose={() => setBuildCustom(null)}
+          onSaveDraft={(draft) => {
+            // TODO: POST /api/custom-agents with status="draft"
+            console.log("save draft", draft);
+            setBuildCustom(null);
+          }}
+          onPublish={(draft) => {
+            // TODO: POST /api/custom-agents with status="published"
+            console.log("publish", draft);
+            setBuildCustom(null);
+          }}
         />
       )}
     </div>
@@ -1228,7 +1241,7 @@ function AgentDetailModal({
 
 // ── Chat panel (try before you hire) — hooked to real agent chat ─────────
 
-function DetailChatPanel({ agent }: { agent: Agent }) {
+export function DetailChatPanel({ agent }: { agent: Agent }) {
   const { messages: chatMessages, isLoading, submit } = useChatContext();
   const [draft, setDraft] = useState("");
   const [hasSent, setHasSent] = useState(false);

@@ -109,15 +109,7 @@ export default function HomePage() {
     <>
       {appMode === AppModeEnum.Home && (
         <div className="h-full w-full">
-          <HomeView
-            onSelectTemplate={handleSelectTemplate}
-            onBuildCustom={(text?: string) => {
-              switchToAgent();
-              if (text) {
-                setTimeout(() => submit(text), 100);
-              }
-            }}
-          />
+          <HomeView onSelectTemplate={handleSelectTemplate} />
         </div>
       )}
 
