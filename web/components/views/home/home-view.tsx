@@ -27,6 +27,7 @@ import { useState, useMemo, useCallback, useContext, useEffect, useRef, lazy, Su
 const InboxView = lazy(() => import("@/components/views/home/inbox-view"));
 
 import { FALLBACK_AGENTS, type Agent } from "@/components/views/home/fallback-agents";
+import { PreviousWork } from "@/components/views/home/previous-work";
 
 // ── Data ────────────────────────────────────────────────────────────────────
 
@@ -1144,6 +1145,9 @@ function AgentDetailModal({
                 ))}
               </div>
             </section>
+
+            {/* Previous work */}
+            <PreviousWork agent={agent} />
 
             {/* Tools */}
             <section className="border-t border-default-200 py-5 dark:border-white/8">
