@@ -83,14 +83,3 @@ export const FALLBACK_DELIVERIES: Delivery[] = [
   },
 ];
 
-export const FALLBACK_THREADS: Thread[] = [
-  { id: "t1", kind: "team", teamId: "growth", title: "Q2 outbound push", preview: "Vale → Ember: handing off 14 warm leads for retargeting ads…", unread: 3, pinned: true, updated: "12:41", status: "active" },
-  { id: "t2", kind: "dm", agentId: "iris", title: "Iris", preview: "Triaged 47 emails overnight — 2 need your approval before reply.", unread: 2, pinned: true, updated: "12:18", status: "needs-approval" },
-  { id: "t3", kind: "team", teamId: "support", title: "Weekend ticket backlog", preview: "Reed closed 38/42 tickets. 4 escalated to Iris for VIP routing.", unread: 0, pinned: false, updated: "11:02", status: "active" },
-  { id: "t4", kind: "dm", agentId: "kai", title: "Kai", preview: "3 invoices paid this morning. Cortex Labs still 17 days overdue.", unread: 0, pinned: false, updated: "10:47", status: "active" },
-  { id: "t5", kind: "notif", title: "Weekly digest", preview: "Your agents completed 284 tasks this week — up 12% from last.", unread: 0, pinned: false, updated: "9:00", status: "done" },
-  { id: "t6", kind: "team", teamId: "revops", title: "March close-out", preview: "Kai → Orbit: dashboard ready for your review.", unread: 0, pinned: false, updated: "Mon", status: "done" },
-  { id: "t7", kind: "dm", agentId: "nova", title: "Nova", preview: "Generated 6 hero variants for the Spring launch. Pick your favorite →", unread: 1, pinned: false, updated: "Mon", status: "review" },
-  { id: "t8", kind: "team", teamId: "brand", title: "Spring launch content", preview: "Mira → Nova → Lyra: blog post + social kit ready for review.", unread: 0, pinned: false, updated: "Sun", status: "review" },
-  { id: "t9", kind: "dm", agentId: "atlas", title: "Atlas", preview: "Research brief done — 23 sources, competitive matrix attached.", unread: 0, pinned: false, updated: "Fri", status: "done" },
-];

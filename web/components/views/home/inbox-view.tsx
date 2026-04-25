@@ -8,7 +8,6 @@ import {
   FALLBACK_DELIVERIES,
   FALLBACK_INBOX_AGENTS,
   FALLBACK_TEAMS,
-  FALLBACK_THREADS,
   type Delivery,
   type InboxAgent,
   type Team,
@@ -86,15 +85,17 @@ function useInboxTeams(): { teams: Team[]; refetch: () => Promise<void> } {
   return { teams, refetch };
 }
 
-function useInboxThreads() {
-  const [threads, setThreads] = useState<Thread[]>(FALLBACK_THREADS);
+function useInboxThreads(): { threads: Thread[]; refetch: () => Promise<void> } {
+  const [threads, setThreads] = useState<Thread[]>([]);
 
-  useEffect(() => {
-    fetchAPI("/api/agent/inbox/threads")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setThreads(data.map((t: any) => ({
+  const refetch = useCallback(async () => {
+    try {
+      const res = await fetchAPI("/api/agent/inbox/threads");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setThreads(
+          data.map((t: any) => ({
             id: t.id,
             kind: t.kind,
             teamId: t.teamId ?? undefined,
@@ -106,13 +107,19 @@ function useInboxThreads() {
             pinned: t.pinned ?? false,
             updated: new Date(t.updatedAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
             status: t.status ?? "active",
-          })));
-        }
-      })
-      .catch(() => {});
+          })),
+        );
+      }
+    } catch {
+      // ignore — leave previous threads intact
+    }
   }, []);
 
-  return threads;
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
+
+  return { threads, refetch };
 }
 
 // ── Inbox context — provides agents/teams lookup to all subcomponents ───────
@@ -123,112 +130,18 @@ const InboxDataCtx = createContext<{
   threads: Thread[];
   agentById: (id: string) => InboxAgent | undefined;
   refetchTeams: () => Promise<void>;
+  refetchThreads: () => Promise<void>;
 }>({
   agents: FALLBACK_INBOX_AGENTS,
   teams: FALLBACK_TEAMS,
-  threads: FALLBACK_THREADS,
+  threads: [],
   agentById: (id: string) => FALLBACK_INBOX_AGENTS.find((a) => a.id === id),
   refetchTeams: async () => {},
+  refetchThreads: async () => {},
 });
 
 function useInboxData() {
   return useContext(InboxDataCtx);
-}
-
-function agentById(id: string): InboxAgent | undefined {
-  return FALLBACK_INBOX_AGENTS.find((a) => a.id === id);
-}
-
-// ── Messages ────────────────────────────────────────────────────────────────
-
-type PlanItem = { who: string; task: string; eta: string };
-type ToolRef = { name: string; icon: string };
-type Approval = { from: string; subject: string; draft: string; confidence: number };
-type Preview = { subject: string; snippet: string };
-type DigestStat = { k: string; v: string; delta: string };
-type DigestHighlight = { agent: string; text: string };
-
-type Msg = {
-  id: string;
-  role: "system" | "you" | "agent" | "handoff" | "digest";
-  agentId?: string;
-  at: string;
-  text?: string;
-  lead?: boolean;
-  plan?: PlanItem[];
-  footer?: string;
-  tools?: ToolRef[];
-  approval?: Approval;
-  preview?: Preview;
-  from?: string;
-  to?: string;
-  note?: string;
-  stats?: DigestStat[];
-  highlights?: DigestHighlight[];
-};
-
-const MSG_GROWTH: Msg[] = [
-  { id: "m1", role: "system", at: "Yesterday", text: 'Team "Growth Ops" started a new goal: Q2 outbound push.' },
-  { id: "m2", role: "you", at: "Yesterday 4:12 PM", text: "We want to hit 50 warm demos from outbound this quarter. Can you take it from here?" },
-  { id: "m3", role: "agent", agentId: "vale", at: "Yesterday 4:13 PM", lead: true, text: "On it. I'll coordinate. Here's how I'm splitting the work:", plan: [
-    { who: "vale", task: "Pull 500 ICP-matched leads from Apollo, score and rank.", eta: "1 hr" },
-    { who: "atlas", task: "Research top 50 accounts — pain points, recent news.", eta: "2 hr" },
-    { who: "lyra", task: "Draft 3 sequence templates tuned to each persona.", eta: "45 min" },
-    { who: "ember", task: "Spin up LinkedIn retargeting ads for anyone who clicks.", eta: "on trigger" },
-  ], footer: "I'll hold until you approve the plan." },
-  { id: "m4", role: "you", at: "Yesterday 4:20 PM", text: "Approved. One constraint — no more than 40 sends/day per mailbox." },
-  { id: "m5", role: "agent", agentId: "vale", at: "Yesterday 4:21 PM", lead: true, text: "Noted. Baking a 40/day throttle into the sequence. Kicking off now." },
-  { id: "m6", role: "handoff", from: "vale", to: "atlas", at: "Yesterday 4:22 PM", note: "Ranked list of 50 accounts with scores attached." },
-  { id: "m7", role: "agent", agentId: "atlas", at: "Yesterday 6:48 PM", text: "Research done for 50/50 accounts. Found 14 with recent funding events — flagging as hot.", tools: [{ name: "Web", icon: "language" }, { name: "Crunchbase", icon: "business" }] },
-  { id: "m8", role: "handoff", from: "atlas", to: "lyra", at: "Yesterday 6:49 PM", note: "Briefs + angles delivered. Lyra's turn." },
-  { id: "m9", role: "agent", agentId: "lyra", at: "Today 8:02 AM", text: 'Three sequence templates ready — "funding playbook", "competitive switch", "bottoms-up signal". Preview the first touch below.', preview: { subject: "Saw the Series B, Dana — quick thought", snippet: "Congrats on the raise. Teams at your stage usually hit a choke point around sales ops right after…" } },
-  { id: "m10", role: "you", at: "Today 12:38 PM", text: "Love the funding one. Send it." },
-  { id: "m11", role: "agent", agentId: "vale", at: "Today 12:39 PM", lead: true, text: "Sending now. First batch of 14 goes out over the next 3 hours. I'll hand warm replies to you directly; cold ones → Ember for retargeting.", tools: [{ name: "Apollo", icon: "cable" }, { name: "Gmail", icon: "mail" }] },
-  { id: "m12", role: "agent", agentId: "vale", at: "Today 12:41 PM", lead: true, text: "Quick heads up: 2 leads bounced (role changed at Acme + Lincoln). Re-routing budget to the next 2 on the list — fine?" },
-];
-
-const MSG_IRIS: Msg[] = [
-  { id: "i1", role: "system", at: "Today 7:00 AM", text: "Iris handled 47 emails overnight." },
-  { id: "i2", role: "agent", agentId: "iris", at: "7:00 AM", text: "Good morning. Your inbox is clean except for 2 messages I want you to see before I reply.", tools: [{ name: "Gmail", icon: "mail" }] },
-  { id: "i3", role: "agent", agentId: "iris", at: "7:00 AM", approval: { from: "Priya Shah, Hillview Roasters", subject: "Pricing for wholesale — urgent before Monday", draft: "Hi Priya — thanks for reaching out! Our wholesale tiers start at 20 lb/mo. I've attached our current rack…", confidence: 0.82 }, text: "Drafted a reply — needs your approval:" },
-  { id: "i4", role: "you", at: "12:16 PM", text: "Approve. Also add our new Ethiopia lot to the attachment." },
-  { id: "i5", role: "agent", agentId: "iris", at: "12:17 PM", text: "Done — updated the PDF and sent. I'll hold on the second one (Mercato partnership) until you've had coffee ☕", tools: [{ name: "Gmail", icon: "mail" }, { name: "Drive", icon: "folder" }] },
-  { id: "i6", role: "agent", agentId: "iris", at: "12:18 PM", text: "One more thing — 3 threads have been quiet for 5+ days. Want me to draft follow-ups?" },
-];
-
-const MSG_DIGEST: Msg[] = [
-  { id: "d1", role: "system", at: "Today 9:00 AM", text: "Weekly digest from Palmos." },
-  { id: "d2", role: "digest", at: "9:00 AM", stats: [
-    { k: "Tasks completed", v: "284", delta: "+12%" },
-    { k: "Hours saved", v: "47", delta: "+6%" },
-    { k: "Approvals queued", v: "3", delta: "same" },
-  ], highlights: [
-    { agent: "iris", text: "Triaged 412 emails; drafted 88 replies." },
-    { agent: "vale", text: "Booked 11 demos from the funding playbook." },
-    { agent: "nova", text: "Delivered 24 brand assets across 3 campaigns." },
-  ] },
-];
-
-const MESSAGES_BY_THREAD: Record<string, Msg[]> = { t1: MSG_GROWTH, t2: MSG_IRIS, t5: MSG_DIGEST };
-
-function genMessages(thread: Thread, teams: Team[]): Msg[] {
-  if (MESSAGES_BY_THREAD[thread.id]) return MESSAGES_BY_THREAD[thread.id];
-  if (thread.kind === "dm") {
-    const a = agentById(thread.agentId!);
-    return [
-      { id: "g1", role: "system", at: thread.updated, text: `Conversation with ${a?.name}.` },
-      { id: "g2", role: "agent", agentId: a?.id, at: thread.updated, text: thread.preview },
-    ];
-  }
-  if (thread.kind === "team") {
-    const team = teams.find((t) => t.id === thread.teamId);
-    const lead = agentById(team?.lead ?? "");
-    return [
-      { id: "g1", role: "system", at: thread.updated, text: `Team thread — ${team?.name}.` },
-      { id: "g2", role: "agent", agentId: lead?.id, at: thread.updated, lead: true, text: thread.preview },
-    ];
-  }
-  return [{ id: "g1", role: "system", at: thread.updated, text: thread.preview }];
 }
 
 // ── Avatar components ───────────────────────────────────────────────────────
@@ -268,160 +181,6 @@ function InAvStack({ agents, size = 28, max = 4 }: { agents: InboxAgent[]; size?
   );
 }
 
-// ── Message renderer ────────────────────────────────────────────────────────
-
-function Message({ m }: { m: Msg }) {
-  const { agentById } = useInboxData();
-  if (m.role === "system") {
-    return (
-      <div className="self-center rounded-full bg-default-100 px-3.5 py-1.5 text-center text-[11.5px] font-medium text-default-400 dark:bg-white/8 dark:text-white/40">
-        {m.text}
-      </div>
-    );
-  }
-
-  if (m.role === "handoff") {
-    const from = agentById(m.from!);
-    const to = agentById(m.to!);
-    if (!from || !to) return null;
-    return (
-      <div className="self-center inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1.5 text-[11.5px] font-medium text-amber-700 dark:border-amber-500/15 dark:bg-amber-500/10 dark:text-amber-300">
-        <InAvatar agent={from} size={18} online={false} />
-        <strong className="text-default-800 dark:text-white/90">{from.name}</strong>
-        <Icon name="arrow_forward" variant="round" className="text-sm" />
-        <InAvatar agent={to} size={18} online={false} />
-        <strong className="text-default-800 dark:text-white/90">{to.name}</strong>
-        <span>· {m.note}</span>
-      </div>
-    );
-  }
-
-  if (m.role === "digest") {
-    return (
-      <div className="w-full rounded-[14px] border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/50 p-4 dark:border-amber-500/15 dark:from-amber-500/5 dark:to-orange-500/3">
-        <div className="mb-3 grid grid-cols-3 gap-3">
-          {m.stats?.map((s) => (
-            <div key={s.k} className="rounded-xl border border-default-200 bg-white p-2.5 dark:border-white/8 dark:bg-white/[0.03]">
-              <div className="text-xl font-bold tracking-tight text-default-800 dark:text-white/90">{s.v}</div>
-              <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-default-400 dark:text-white/40">{s.k}</div>
-              <div className="mt-0.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">{s.delta}</div>
-            </div>
-          ))}
-        </div>
-        <div className="mb-2 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">Highlights</div>
-        <div className="flex flex-col gap-2">
-          {m.highlights?.map((h, i) => {
-            const a = agentById(h.agent);
-            if (!a) return null;
-            return (
-              <div key={i} className="flex items-center gap-2.5 rounded-lg bg-white p-2 text-[13px] text-default-600 dark:bg-white/[0.03] dark:text-white/65">
-                <InAvatar agent={a} size={22} online={false} />
-                <span><strong className="font-bold text-default-800 dark:text-white/90">{a.name}</strong> {h.text}</span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  if (m.role === "you") {
-    return (
-      <div className="flex justify-end gap-2.5">
-        <div className="max-w-[78%]">
-          <div className="rounded-[14px] rounded-tr-sm bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-2.5 text-[13.5px] leading-relaxed text-white">
-            {m.text}
-          </div>
-          <div className="mt-1 text-right text-[11px] text-default-400 dark:text-white/35">{m.at}</div>
-        </div>
-      </div>
-    );
-  }
-
-  // agent
-  const a = agentById(m.agentId!);
-  if (!a) return null;
-  return (
-    <div className="flex gap-2.5">
-      <InAvatar agent={a} size={32} />
-      <div className="max-w-[78%] min-w-0">
-        <div className="mb-1 flex items-baseline gap-2">
-          <span className="text-[13px] font-semibold text-default-800 dark:text-white/90">
-            {a.name}
-            {m.lead && (
-              <span className="ml-1.5 rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
-                Lead
-              </span>
-            )}
-          </span>
-          <span className="text-[11px] text-default-400 dark:text-white/35">· {m.at}</span>
-        </div>
-        <div className="rounded-[14px] rounded-tl-sm border border-default-200 bg-white px-3.5 py-2.5 text-[13.5px] leading-relaxed text-default-600 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/65">
-          {m.text}
-          {m.plan && (
-            <div className="mt-2.5 rounded-xl border border-default-200 bg-default-50 p-3 dark:border-white/8 dark:bg-white/[0.02]">
-              <div className="mb-2 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">Proposed plan</div>
-              {m.plan.map((p, i) => {
-                const pa = agentById(p.who);
-                if (!pa) return null;
-                return (
-                  <div key={i} className="grid grid-cols-[auto_1fr_auto] items-center gap-2.5 border-b border-dashed border-default-200 py-1.5 last:border-b-0 dark:border-white/8">
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-default-800 dark:text-white/90">
-                      <InAvatar agent={pa} size={18} online={false} /> {pa.name}
-                    </span>
-                    <span className="text-[13px] text-default-600 dark:text-white/65">{p.task}</span>
-                    <span className="text-[11.5px] text-default-400 dark:text-white/40">{p.eta}</span>
-                  </div>
-                );
-              })}
-              {m.footer && <div className="mt-2 text-xs font-medium text-default-400 dark:text-white/45">{m.footer}</div>}
-            </div>
-          )}
-          {m.approval && (
-            <div className="mt-2.5 overflow-hidden rounded-xl border border-default-200 dark:border-white/8">
-              <div className="flex items-center justify-between border-b border-default-200 bg-default-50 px-3.5 py-2 text-[11.5px] font-medium text-default-400 dark:border-white/8 dark:bg-white/[0.02] dark:text-white/40">
-                <span>To: <strong className="text-default-800 dark:text-white/90">{m.approval.from}</strong></span>
-                <span>Draft</span>
-              </div>
-              <div className="px-3.5 py-3 text-[13px] leading-relaxed text-default-600 dark:text-white/65">
-                <em className="mb-1 block font-semibold not-italic text-default-800 dark:text-white/90">{m.approval.subject}</em>
-                {m.approval.draft}…
-              </div>
-              <div className="flex items-center justify-end gap-2 border-t border-default-200 bg-default-50 px-3.5 py-2 dark:border-white/8 dark:bg-white/[0.02]">
-                <span className="mr-auto inline-flex items-center gap-1.5 text-[11.5px] font-medium text-default-400 dark:text-white/40">
-                  Confidence {Math.round(m.approval.confidence * 100)}%
-                  <span className="inline-block h-1 w-[60px] overflow-hidden rounded-full bg-default-200 dark:bg-white/15">
-                    <span className="block h-full rounded-full bg-gradient-to-r from-amber-500 to-orange-500" style={{ width: `${m.approval.confidence * 100}%` }} />
-                  </span>
-                </span>
-                <Button size="sm" variant="flat">Edit</Button>
-                <Button size="sm" className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white" startContent={<Icon name="check" variant="round" className="text-sm" />}>
-                  Approve &amp; send
-                </Button>
-              </div>
-            </div>
-          )}
-          {m.preview && (
-            <div className="mt-2.5 rounded-r-xl border border-l-[3px] border-default-200 border-l-amber-500 bg-white p-3 dark:border-white/8 dark:border-l-amber-500 dark:bg-white/[0.02]">
-              <div className="text-[13px] font-semibold text-default-800 dark:text-white/90">Re: {m.preview.subject}</div>
-              <div className="mt-1 text-xs leading-relaxed text-default-500 dark:text-white/50">{m.preview.snippet}</div>
-            </div>
-          )}
-          {m.tools && (
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {m.tools.map((t) => (
-                <span key={t.name} className="inline-flex items-center gap-1 rounded-full bg-default-100 px-2 py-0.5 text-[11px] font-medium text-default-500 dark:bg-white/8 dark:text-white/50">
-                  <Icon name={t.icon} variant="round" className="text-[13px]" />{t.name}
-                </span>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ── Thread list item ────────────────────────────────────────────────────────
 
 function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: boolean; onPick: (t: Thread) => void }) {
@@ -436,7 +195,7 @@ function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: bo
     kindLabel = "DM";
   } else if (thread.kind === "team") {
     const team = teams.find((t) => t.id === thread.teamId);
-    const agents = (team?.agents ?? []).map(agentById).filter(Boolean) as InboxAgent[];
+    const agents = (team?.agents ?? []).map(lookupAgent).filter(Boolean) as InboxAgent[];
     av = <InAvStack agents={agents} size={22} max={3} />;
     kindLabel = `TEAM · ${team?.name}`;
   } else {
@@ -490,6 +249,33 @@ function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: bo
 
 type ChatMsg = { id: string; role: "human" | "ai" | "system"; content: string; ts: string };
 
+// Stored AI messages may have content serialized as a JSON array of LangChain
+// content blocks (tool_use, text, etc.) when Claude makes tool calls. Extract
+// just the human-visible text — empty result means "no text, drop the bubble".
+function extractTextContent(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  if (trimmed.startsWith("[") || trimmed.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((b: any) => {
+            if (typeof b === "string") return b;
+            if (b && typeof b === "object" && b.type === "text") return b.text ?? "";
+            return "";
+          })
+          .join("")
+          .trim();
+      }
+    } catch {
+      // Not JSON — treat as literal text below.
+    }
+  }
+  return trimmed;
+}
+
 function useInboxChat(thread: Thread) {
   const { teams } = useInboxData();
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
@@ -521,12 +307,17 @@ function useInboxChat(thread: Thread) {
         if (data.sessionId) sessionIdRef.current = data.sessionId;
         const msgs: any[] = data.session?.messages ?? [];
         if (msgs.length > 0) {
-          setMsgs(msgs.map((m: any) => ({
-            id: m.id,
-            role: m.role === "human" ? "human" : m.role === "ai" ? "ai" : "system",
-            content: typeof m.content === "string" ? m.content : "",
-            ts: new Date(m.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
-          })));
+          setMsgs(
+            msgs
+              .filter((m: any) => m.role === "human" || m.role === "ai")
+              .map((m: any) => ({
+                id: m.id,
+                role: m.role as "human" | "ai",
+                content: extractTextContent(m.content),
+                ts: new Date(m.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+              }))
+              .filter((m) => m.content !== ""),
+          );
         }
       })
       .catch(() => {});
@@ -600,10 +391,17 @@ function useInboxChat(thread: Thread) {
           if (!chunk) continue;
 
           const kwargs = chunk.kwargs ?? chunk;
+          // Skip non-AI message chunks (tool calls/results, system) — only the
+          // assistant's text should land in the visible chat bubble.
+          const lcId = Array.isArray(chunk.id) ? chunk.id : [];
+          const typeName = lcId[lcId.length - 1] ?? "";
+          const kind = kwargs.type ?? kwargs.role ?? typeName ?? "";
+          if (kind && !/^ai/i.test(kind) && !/AIMessage/.test(kind)) continue;
+
           const rawContent = kwargs.content ?? "";
           const chunkText =
             Array.isArray(rawContent)
-              ? rawContent.map((b: any) => (typeof b === "string" ? b : (b.text ?? ""))).join("")
+              ? rawContent.map((b: any) => (typeof b === "string" ? b : (b.type === "text" ? (b.text ?? "") : ""))).join("")
               : typeof rawContent === "string" ? rawContent : "";
           if (!chunkText) continue;
 
@@ -623,6 +421,22 @@ function useInboxChat(thread: Thread) {
       if (err?.name !== "AbortError") console.warn("[inbox-chat] stream error:", err);
     } finally {
       setIsLoading(false);
+      // Persist messages so history survives reload — runs whether the stream
+      // succeeded or errored, so the user's message is at least preserved.
+      const sid = sessionIdRef.current;
+      if (sid && chatMsgsRef.current.length > 0) {
+        fetchAPI(`/api/chat/sessions/${sid}/update`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            messages: chatMsgsRef.current
+              .filter((m) => m.role !== "system" && m.content.trim() !== "")
+              .map((m) => ({ role: m.role, content: m.content })),
+          }),
+        }).catch((err) => console.warn("[inbox-chat] persist failed:", err));
+      } else if (!sid) {
+        console.warn("[inbox-chat] no sessionId — messages not persisted");
+      }
     }
   }, [text, agentSlug, isLoading, setMsgs]);
 
@@ -631,7 +445,7 @@ function useInboxChat(thread: Thread) {
 
 // ── Simple chat message renderer (real API messages) ─────────────────────────
 
-function SimpleChatMessage({ m, thread, onSuggestionClick }: { m: ChatMsg; thread: Thread; onSuggestionClick?: (s: string) => void }) {
+function SimpleChatMessage({ m, thread, isStreaming, onSuggestionClick }: { m: ChatMsg; thread: Thread; isStreaming?: boolean; onSuggestionClick?: (s: string) => void }) {
   const { teams, agentById: lookupAgent } = useInboxData();
   if (m.role === "system") {
     return (
@@ -660,6 +474,11 @@ function SimpleChatMessage({ m, thread, onSuggestionClick }: { m: ChatMsg; threa
   const a = agentSlug ? lookupAgent(agentSlug) : undefined;
   const isLead = thread.kind === "team";
   const { text: displayContent, suggestions } = parseSuggestions(m.content);
+  // If there's nothing to show and we're not still streaming, skip the bubble
+  // entirely — better than rendering a perpetual "Thinking…" placeholder.
+  if (!displayContent && suggestions.length === 0 && !isStreaming) {
+    return null;
+  }
   return (
     <div className="flex gap-2.5">
       {a && <InAvatar agent={a} size={32} />}
@@ -677,9 +496,11 @@ function SimpleChatMessage({ m, thread, onSuggestionClick }: { m: ChatMsg; threa
             <span className="text-[11px] text-default-400 dark:text-white/35">· {m.ts}</span>
           </div>
         )}
-        <div className="rounded-[14px] rounded-tl-sm border border-default-200 bg-white px-3.5 py-2.5 text-[13.5px] leading-relaxed text-default-600 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/65 whitespace-pre-wrap">
-          {displayContent || <span className="text-default-300 dark:text-white/20 italic text-sm">Thinking…</span>}
-        </div>
+        {(displayContent || isStreaming) && (
+          <div className="rounded-[14px] rounded-tl-sm border border-default-200 bg-white px-3.5 py-2.5 text-[13.5px] leading-relaxed text-default-600 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/65 whitespace-pre-wrap">
+            {displayContent || <span className="text-default-300 dark:text-white/20 italic text-sm">Thinking…</span>}
+          </div>
+        )}
         {suggestions.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {suggestions.map((s) => (
@@ -703,7 +524,6 @@ function SimpleChatMessage({ m, thread, onSuggestionClick }: { m: ChatMsg; threa
 
 function ThreadView({ thread }: { thread: Thread }) {
   const { teams, agentById: lookupAgent } = useInboxData();
-  const fallbackMessages = genMessages(thread, teams);
   const { chatMsgs, isLoading, text, setText, submit } = useInboxChat(thread);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -781,20 +601,28 @@ function ThreadView({ thread }: { thread: Thread }) {
       {header}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-[900px] flex-col gap-4 px-8 py-6">
-          {chatMsgs.length > 0
-            ? chatMsgs.map((m, i) => (
-                <SimpleChatMessage
-                  key={m.id}
-                  m={m}
-                  thread={thread}
-                  onSuggestionClick={
-                    !isLoading && i === chatMsgs.length - 1 && m.role === "ai"
-                      ? (s) => { setText(s); void submit(); }
-                      : undefined
-                  }
-                />
-              ))
-            : fallbackMessages.map((m) => <Message key={m.id} m={m} />)}
+          {chatMsgs.length === 0 && !isLoading && (
+            <div className="flex flex-col items-center gap-2 py-12 text-center text-[13px] text-default-400 dark:text-white/40">
+              <Icon name="chat" variant="round" className="text-3xl" />
+              <span>No messages yet — say hi to get started.</span>
+            </div>
+          )}
+          {chatMsgs.map((m, i) => {
+            const isLast = i === chatMsgs.length - 1;
+            return (
+              <SimpleChatMessage
+                key={m.id}
+                m={m}
+                thread={thread}
+                isStreaming={isLoading && isLast && m.role === "ai"}
+                onSuggestionClick={
+                  !isLoading && isLast && m.role === "ai"
+                    ? (s) => { setText(s); void submit(); }
+                    : undefined
+                }
+              />
+            );
+          })}
           {isLoading && chatMsgs[chatMsgs.length - 1]?.role !== "ai" && (
             <div className="flex gap-2.5">
               <div className="flex items-center gap-1 rounded-2xl border border-default-200 bg-white px-3.5 py-3 dark:border-white/8 dark:bg-white/[0.03]">
@@ -1472,7 +1300,7 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
 export default function InboxView() {
   const inboxAgents = useInboxAgents();
   const { teams: inboxTeams, refetch: refetchTeams } = useInboxTeams();
-  const inboxThreads = useInboxThreads();
+  const { threads: inboxThreads, refetch: refetchThreads } = useInboxThreads();
 
   const ctxValue = useMemo(() => ({
     agents: inboxAgents,
@@ -1480,7 +1308,8 @@ export default function InboxView() {
     threads: inboxThreads,
     agentById: (id: string) => inboxAgents.find((a) => a.id === id),
     refetchTeams,
-  }), [inboxAgents, inboxTeams, inboxThreads, refetchTeams]);
+    refetchThreads,
+  }), [inboxAgents, inboxTeams, inboxThreads, refetchTeams, refetchThreads]);
 
   return (
     <InboxDataCtx.Provider value={ctxValue}>
@@ -1489,12 +1318,52 @@ export default function InboxView() {
   );
 }
 
+async function ensureRealThread(thread: Thread): Promise<Thread | null> {
+  if (thread.sessionId) return thread;
+  const res = await fetchAPI("/api/agent/inbox/threads", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      kind: thread.kind,
+      title: thread.title,
+      agentSlug: thread.agentId,
+      teamId: thread.teamId,
+    }),
+  });
+  if (!res.ok) return null;
+  const created = await res.json();
+  return {
+    ...thread,
+    id: created.id,
+    sessionId: created.sessionId ?? undefined,
+  };
+}
+
 function InboxViewInner() {
-  const { teams: TEAMS, threads: THREADS, refetchTeams } = useInboxData();
+  const { teams: TEAMS, threads: THREADS, refetchTeams, refetchThreads } = useInboxData();
   const [tab, setTab] = useState<"inbox" | "teams" | "create">("inbox");
   const [active, setActive] = useState<Thread | null>(null);
   const [filter, setFilter] = useState("all");
   const [busyTemplateSlug, setBusyTemplateSlug] = useState<string | null>(null);
+
+  // Ensures the thread has a real DB sessionId (lazy-creating one if it's a
+  // fallback thread), then activates it. Without this, fallback threads fail
+  // to persist chat history.
+  const openThread = useCallback(async (thread: Thread) => {
+    if (thread.sessionId) {
+      setActive(thread);
+      return;
+    }
+    const real = await ensureRealThread(thread);
+    if (real?.sessionId) {
+      setActive(real);
+      void refetchThreads();
+    } else {
+      // Could not create a real thread — open the placeholder anyway so the
+      // user sees the UI; persistence will be skipped with a console warning.
+      setActive(thread);
+    }
+  }, [refetchThreads]);
 
   const createTeamFromTemplate = useCallback(
     async (template: TeamTemplate) => {
@@ -1532,9 +1401,13 @@ function InboxViewInner() {
     [busyTemplateSlug, refetchTeams],
   );
 
-  // Set initial active thread once threads load
+  // Set initial active thread once threads load — but only auto-pick threads
+  // that already have a real DB sessionId, so we don't spam-create empty
+  // threads on every mount.
   useEffect(() => {
-    if (!active && THREADS.length > 0) setActive(THREADS[0]);
+    if (active) return;
+    const realThread = THREADS.find((t) => t.sessionId);
+    if (realThread) setActive(realThread);
   }, [THREADS, active]);
 
   const unread = THREADS.reduce((n, t) => n + (t.unread || 0), 0);
@@ -1592,7 +1465,7 @@ function InboxViewInner() {
             </div>
             <div className="flex-1 overflow-y-auto p-2">
               {filtered.map((t) => (
-                <ThreadListItem key={t.id} thread={t} active={active?.id === t.id} onPick={setActive} />
+                <ThreadListItem key={t.id} thread={t} active={active?.id === t.id} onPick={openThread} />
               ))}
             </div>
           </aside>
@@ -1621,29 +1494,22 @@ function InboxViewInner() {
         <TeamsGrid
           onNew={() => setTab("create")}
           onOpen={async (t) => {
-            let thread = THREADS.find((x) => x.teamId === t.id);
-            if (!thread) {
-              const res = await fetchAPI("/api/agent/inbox/threads", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ kind: "team", title: t.name, teamId: t.id }),
-              });
-              if (res.ok) {
-                const created = await res.json();
-                thread = {
-                  id: created.id,
-                  kind: "team",
-                  teamId: t.id,
-                  title: t.name,
-                  preview: "",
-                  unread: 0,
-                  pinned: false,
-                  updated: "now",
-                  status: "active",
-                };
-              }
-            }
-            if (thread) { setFilter("all"); setActive(thread); setTab("inbox"); }
+            // Prefer an existing real thread for this team; otherwise build a
+            // placeholder and let openThread lazy-create the DB row.
+            const placeholder: Thread = THREADS.find((x) => x.teamId === t.id && x.sessionId) ?? {
+              id: `pending-${t.id}`,
+              kind: "team",
+              teamId: t.id,
+              title: t.name,
+              preview: "",
+              unread: 0,
+              pinned: false,
+              updated: "now",
+              status: "active",
+            };
+            setFilter("all");
+            setTab("inbox");
+            await openThread(placeholder);
           }}
           busyTemplateSlug={busyTemplateSlug}
           onCreateFromTemplate={createTeamFromTemplate}
