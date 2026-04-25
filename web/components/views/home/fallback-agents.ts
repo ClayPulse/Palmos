@@ -2,6 +2,11 @@
 // This is the same data as lib/agents/agent-listings.ts in the backend,
 // mapped to the frontend Agent type.
 
+export type SkillRef = {
+  source: "anthropic" | "clawhub";
+  id: string;
+};
+
 export type Agent = {
   id: string;
   name: string;
@@ -16,6 +21,14 @@ export type Agent = {
   tagline: string;
   hue: number;
   avatar: string;
+  // Persona-focused system prompt for the worker agent backend. Optional on
+  // the frontend type — the actual content lives in the backend's
+  // AgentListing.systemPrompt, which the worker stream route reads. This
+  // field exists here only so API responses can be passed through cleanly
+  // when the listings API includes it.
+  systemPrompt?: string;
+  defaultSkills?: SkillRef[];
+  defaultWorkflowSlugs?: string[];
 };
 
 export const FALLBACK_AGENTS: Agent[] = [

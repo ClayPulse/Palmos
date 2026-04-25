@@ -572,7 +572,7 @@ function TeamContextPane({ team }: { team: Team }) {
   const { agentById: lookupAgent } = useInboxData();
   const agents = team.agents.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
   return (
-    <aside className="flex flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
+    <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
       <div className="border-b border-default-200 p-4 dark:border-white/8">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">Goal</div>
         <p className="text-[13px] leading-relaxed text-default-600 dark:text-white/65">{team.goal}</p>
@@ -629,7 +629,7 @@ function DMContextPane({ thread }: { thread: Thread }) {
   const a = lookupAgent(thread.agentId!);
   if (!a) return null;
   return (
-    <aside className="flex flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
+    <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
       <div className="p-4">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">About this thread</div>
         <div className="flex items-center gap-3">
@@ -652,7 +652,10 @@ function DMContextPane({ thread }: { thread: Thread }) {
 export function TeamsGrid({ onNew, onOpen }: { onNew: () => void; onOpen: (team: Team) => void }) {
   const { teams: allTeams, agentById: lookupAgent } = useInboxData();
   return (
-    <div className="flex-1 overflow-y-auto">
+    // min-h-0 is required so this flex-1 child can actually shrink and let
+    // overflow-y-auto take effect — otherwise the flex column treats it as
+    // min-content height and the page scrolls the whole layout instead.
+    <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-7 py-6">
         <div className="flex items-end justify-between">
           <div>
@@ -726,7 +729,8 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
   const steps = ["Basics", "Roster", "Lead", "Review"];
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    // min-h-0 lets this flex-1 child shrink so overflow-y-auto activates.
+    <div className="min-h-0 flex-1 overflow-y-auto">
       <div className="mx-auto flex max-w-[720px] flex-col gap-5 px-8 py-7">
         {/* Step indicator */}
         <div className="flex items-center gap-2">
@@ -925,7 +929,11 @@ function InboxViewInner() {
   const team = active?.kind === "team" ? TEAMS.find((t) => t.id === active.teamId) : null;
 
   return (
-    <div className="flex h-full w-full flex-col bg-white dark:bg-[#0d0d14]">
+    // We are a flex child of HomeView (a flex-col h-full container). Using
+    // `h-full` here misbehaves once siblings (the page nav) take their own
+    // space — the column distributes by flex grow + min-h-0, not by 100%
+    // height. Hence flex-1 + min-h-0 instead of h-full.
+    <div className="flex min-h-0 w-full flex-1 flex-col bg-white dark:bg-[#0d0d14]">
       {/* Nav */}
       <div className="flex shrink-0 items-center gap-5 border-b border-default-200 bg-white px-6 py-3 dark:border-white/8 dark:bg-[#0d0d14]">
         <div className="flex items-center gap-1">
@@ -952,8 +960,10 @@ function InboxViewInner() {
       {/* Content */}
       {tab === "inbox" && (
         <div className="grid min-h-0 flex-1 grid-cols-[360px_1fr_320px]">
-          {/* Thread list */}
-          <aside className="flex flex-col overflow-hidden border-r border-default-200 dark:border-white/8">
+          {/* Thread list — min-h-0 + min-w-0 are required because grid items
+              otherwise default to min-content size and the inner flex-1
+              overflow-y-auto can never shrink to clip. */}
+          <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-r border-default-200 dark:border-white/8">
             <div className="flex shrink-0 items-center justify-between border-b border-default-200 px-4 py-3 dark:border-white/8">
               <h2 className="text-base font-bold text-default-800 dark:text-white/90">Inbox</h2>
               <Button isIconOnly size="sm" variant="light"><Icon name="filter_list" variant="round" /></Button>
@@ -972,8 +982,9 @@ function InboxViewInner() {
             </div>
           </aside>
 
-          {/* Thread view */}
-          <main className="flex min-w-0 flex-col">
+          {/* Thread view — min-h-0 lets the inner messages list scroll and
+              the composer stays anchored to the bottom. */}
+          <main className="flex min-h-0 min-w-0 flex-col">
             {active && <ThreadView thread={active} />}
           </main>
 
@@ -983,7 +994,7 @@ function InboxViewInner() {
           ) : active?.kind === "dm" ? (
             <DMContextPane thread={active} />
           ) : (
-            <aside className="flex flex-col border-l border-default-200 bg-default-50 p-4 dark:border-white/8 dark:bg-white/[0.02]">
+            <aside className="flex min-h-0 min-w-0 flex-col border-l border-default-200 bg-default-50 p-4 dark:border-white/8 dark:bg-white/[0.02]">
               <div className="text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">About this thread</div>
               <p className="mt-2 text-[13px] text-default-400 dark:text-white/45">System-generated digest. Delivered every Monday at 9 AM.</p>
             </aside>

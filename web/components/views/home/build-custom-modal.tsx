@@ -1,17 +1,22 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
-import { Button } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
+import JSZip from "jszip";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CATEGORIES, DetailChatPanel } from "@/components/views/home/home-view";
+import {
+  AgentSkillsSection,
+  AgentWorkflowsSection,
+  CATEGORIES,
+  type AgentSkill,
+  type AgentWorkflow,
+} from "@/components/views/home/home-view";
 import { type Agent } from "@/components/views/home/fallback-agents";
 
 // ── Draft shape (mirrors CustomAgent in Prisma, minus the DB/lifecycle fields) ──
 
 type Capability = { icon: string; label: string; desc: string };
 type ToolItem = { name: string; icon: string; perm: string; scope: string };
-type SkillRef = { appSlug: string; skillName: string; label: string };
-type WorkflowRef = { workflowId: string; label: string };
 
 type Draft = {
   name: string;
@@ -26,8 +31,13 @@ type Draft = {
   turnaround: string;
   capabilities: Capability[];
   tools: ToolItem[];
-  skills: SkillRef[];
-  workflows: WorkflowRef[];
+  // Skills + workflows use the same shape as the existing-agent flow.
+  // Skills uploaded in draft mode carry their parsed instructions inline
+  // (in `description`'s sibling fields not present here — we cache the
+  // parsed body in `draftSkillBundles` keyed by externalId so publish can
+  // persist them).
+  skills: AgentSkill[];
+  workflows: AgentWorkflow[];
 };
 
 function emptyDraft(seed?: Partial<Draft>): Draft {
@@ -233,32 +243,68 @@ export function BuildCustomModal({
     setDraft((d) => ({ ...d, tools: d.tools.filter((_, idx) => idx !== i) }));
 
   // ── Skills ───────────────────────────────────────────────────────────────
-  const addSkill = () =>
+  // Draft skills come from two sources:
+  //   - Anthropic / ClawHub registry — staged by ref. Publish resolves and
+  //     persists each through the registry adapter.
+  //   - Upload — parsed client-side. The parsed SKILL.md body is stored
+  //     inline on the skill (`instructions`) so publish can persist it
+  //     without re-parsing.
+  const addSkill = (skill: AgentSkill) => {
+    setDraft((d) =>
+      d.skills.some(
+        (s) => s.source === skill.source && s.externalId === skill.externalId,
+      )
+        ? d
+        : { ...d, skills: [...d.skills, skill] },
+    );
+  };
+
+  const removeSkill = (skill: AgentSkill) => {
     setDraft((d) => ({
       ...d,
-      skills: [...d.skills, { appSlug: "", skillName: "", label: "" }],
+      skills: d.skills.filter(
+        (s) =>
+          !(s.source === skill.source && s.externalId === skill.externalId),
+      ),
     }));
-  const updateSkill = (i: number, patch: Partial<SkillRef>) =>
-    setDraft((d) => ({
-      ...d,
-      skills: d.skills.map((s, idx) => (idx === i ? { ...s, ...patch } : s)),
-    }));
-  const removeSkill = (i: number) =>
-    setDraft((d) => ({ ...d, skills: d.skills.filter((_, idx) => idx !== i) }));
+  };
+
+  const uploadSkill = useCallback(async (file: File) => {
+    try {
+      const parsed = await parseSkillFile(file);
+      addSkill({
+        source: "upload",
+        externalId: `upload-${crypto.randomUUID()}`,
+        name: parsed.name,
+        description: parsed.description,
+        instructions: parsed.instructions,
+      });
+      addToast({ title: "Skill added", color: "success" });
+    } catch (err) {
+      addToast({
+        title: "Couldn't parse skill",
+        description: err instanceof Error ? err.message : "Unknown error",
+        color: "danger",
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // ── Workflows ────────────────────────────────────────────────────────────
-  const addWorkflow = () =>
+  const addWorkflow = (w: AgentWorkflow) => {
+    setDraft((d) =>
+      d.workflows.some((x) => x.id === w.id)
+        ? d
+        : { ...d, workflows: [...d.workflows, w] },
+    );
+  };
+
+  const removeWorkflow = (workflowId: string) => {
     setDraft((d) => ({
       ...d,
-      workflows: [...d.workflows, { workflowId: "", label: "" }],
+      workflows: d.workflows.filter((w) => w.id !== workflowId),
     }));
-  const updateWorkflow = (i: number, patch: Partial<WorkflowRef>) =>
-    setDraft((d) => ({
-      ...d,
-      workflows: d.workflows.map((w, idx) => (idx === i ? { ...w, ...patch } : w)),
-    }));
-  const removeWorkflow = (i: number) =>
-    setDraft((d) => ({ ...d, workflows: d.workflows.filter((_, idx) => idx !== i) }));
+  };
 
   const initial = (draft.name[0] || "?").toUpperCase();
   const chatAgent = useMemo(() => draftToAgent(draft), [draft]);
@@ -471,91 +517,29 @@ export function BuildCustomModal({
               )}
             </section>
 
-            {/* Skills */}
-            <section className="border-t border-default-200 py-5 dark:border-white/8">
-              <SectionHeading
-                title="Skills"
-                count={draft.skills.length}
-                sub="Pulse App skills — file-based, callable actions bundled with an app package."
-                onAdd={addSkill}
-                addLabel="Add skill"
-              />
-              {draft.skills.length === 0 ? (
-                <EmptyRow text="No skills attached. Reference a Pulse App skill by its app slug + skill name." />
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {draft.skills.map((s, i) => (
-                    <div
-                      key={i}
-                      className="grid grid-cols-[auto_1fr_1fr_1fr_auto] items-center gap-2 rounded-xl border border-default-200 bg-white px-3 py-2 dark:border-white/8 dark:bg-white/[0.03]"
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
-                        <Icon name="extension" variant="round" className="text-base" />
-                      </div>
-                      <InlineText
-                        value={s.appSlug}
-                        onChange={(v) => updateSkill(i, { appSlug: v })}
-                        placeholder="App slug"
-                        className="font-mono text-[12.5px] text-default-700 dark:text-white/80"
-                      />
-                      <InlineText
-                        value={s.skillName}
-                        onChange={(v) => updateSkill(i, { skillName: v })}
-                        placeholder="skill-name"
-                        className="font-mono text-[12.5px] text-default-700 dark:text-white/80"
-                      />
-                      <InlineText
-                        value={s.label}
-                        onChange={(v) => updateSkill(i, { label: v })}
-                        placeholder="Display label"
-                        className="text-[12.5px] text-default-600 dark:text-white/70"
-                      />
-                      <IconButton name="close" onClick={() => removeSkill(i)} title="Remove" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+            {/* Skills — same component as the existing-agent detail card,
+                running in "draft" mode (edits are local until publish). */}
+            <AgentSkillsSection
+              agent={chatAgent}
+              mode="draft"
+              skills={draft.skills}
+              onAdd={addSkill}
+              onRemove={removeSkill}
+              onUpload={uploadSkill}
+            />
 
-            {/* Workflows */}
-            <section className="border-t border-default-200 py-5 dark:border-white/8">
-              <SectionHeading
-                title="Workflows"
-                count={draft.workflows.length}
-                sub="DB-stored workflows the agent can invoke. Paste a workflow ID or pick from yours."
-                onAdd={addWorkflow}
-                addLabel="Attach workflow"
-              />
-              {draft.workflows.length === 0 ? (
-                <EmptyRow text="No workflows attached yet." />
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {draft.workflows.map((w, i) => (
-                    <div
-                      key={i}
-                      className="grid grid-cols-[auto_1fr_1fr_auto] items-center gap-2 rounded-xl border border-default-200 bg-white px-3 py-2 dark:border-white/8 dark:bg-white/[0.03]"
-                    >
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
-                        <Icon name="account_tree" variant="round" className="text-base" />
-                      </div>
-                      <InlineText
-                        value={w.workflowId}
-                        onChange={(v) => updateWorkflow(i, { workflowId: v })}
-                        placeholder="Workflow ID"
-                        className="font-mono text-[12.5px] text-default-700 dark:text-white/80"
-                      />
-                      <InlineText
-                        value={w.label}
-                        onChange={(v) => updateWorkflow(i, { label: v })}
-                        placeholder="Display label"
-                        className="text-[12.5px] text-default-600 dark:text-white/70"
-                      />
-                      <IconButton name="close" onClick={() => removeWorkflow(i)} title="Remove" />
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
+            {/* Workflows — Build new is disabled in draft mode (see comment
+                in AgentWorkflowsSection: builds need a persisted agent slug). */}
+            <AgentWorkflowsSection
+              agent={chatAgent}
+              mode="draft"
+              workflows={draft.workflows}
+              onAttach={addWorkflow}
+              onDetach={removeWorkflow}
+              onBuildAttached={() => {
+                /* unreachable in draft mode */
+              }}
+            />
 
             {/* Tools */}
             <section className="border-t border-default-200 py-5 dark:border-white/8">
@@ -613,10 +597,84 @@ export function BuildCustomModal({
           </div>
         </div>
 
-        {/* ── Right: live chat preview ── */}
-        <DetailChatPanel agent={chatAgent} />
+        {/* ── Right: chat preview (static — chat goes live after publish) ── */}
+        <DraftChatPreview agent={chatAgent} />
       </div>
     </div>
+  );
+}
+
+function DraftChatPreview({ agent }: { agent: Agent }) {
+  return (
+    <aside className="flex min-h-0 flex-col bg-default-50 dark:bg-white/[0.02]">
+      <div className="flex shrink-0 items-center justify-between border-b border-default-200 bg-white px-4 py-3.5 dark:border-white/8 dark:bg-white/[0.03]">
+        <div className="flex items-center gap-2.5">
+          <div
+            className="flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold text-white"
+            style={{ background: `hsl(${agent.hue} 60% 55%)` }}
+          >
+            {(agent.name || "?").slice(0, 1).toUpperCase()}
+          </div>
+          <div>
+            <div className="text-sm font-semibold text-default-800 dark:text-white/90">
+              {agent.name || "New agent"}
+            </div>
+            <div className="text-[11.5px] font-medium text-default-400 dark:text-white/45">
+              Preview · publish to chat
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
+        <div className="rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-indigo-50/60 p-3 dark:border-violet-500/15 dark:from-violet-500/5 dark:to-indigo-500/3">
+          <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-violet-700 dark:text-violet-400">
+            Preview
+          </span>
+          <span className="text-xs leading-relaxed text-default-600 dark:text-white/60">
+            This is how {agent.name || "your agent"}&apos;s chat will look. The
+            chat goes live after you publish — they&apos;ll then have their own
+            memory, history, and skills.
+          </span>
+        </div>
+
+        <div className="rounded-xl border border-default-200 bg-white p-3 text-[13px] leading-relaxed text-default-600 dark:border-white/8 dark:bg-white/[0.05] dark:text-white/65">
+          <div className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-default-400 dark:text-white/40">
+            Tagline
+          </div>
+          {agent.tagline || "What should this agent do?"}
+        </div>
+
+        {agent.tools.length > 0 && (
+          <div className="rounded-xl border border-default-200 bg-white p-3 dark:border-white/8 dark:bg-white/[0.05]">
+            <div className="mb-1.5 text-[11px] font-semibold uppercase tracking-wide text-default-400 dark:text-white/40">
+              Tools
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {agent.tools.map((t) => (
+                <span
+                  key={t}
+                  className="rounded-full border border-default-200 bg-default-50 px-2 py-0.5 text-[11.5px] font-medium text-default-600 dark:border-white/10 dark:bg-white/5 dark:text-white/65"
+                >
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="shrink-0 border-t border-default-200 bg-white px-3 py-2.5 dark:border-white/8 dark:bg-white/[0.03]">
+        <div className="flex items-end gap-1.5 rounded-[14px] border border-default-200 bg-default-50 px-2.5 py-2 opacity-60 dark:border-white/10 dark:bg-white/5">
+          <Icon name="lock" variant="round" className="text-base text-default-400" />
+          <input
+            disabled
+            placeholder="Publish to start chatting"
+            className="min-w-0 flex-1 cursor-not-allowed bg-transparent py-1 text-[13.5px] text-default-400 outline-none placeholder:text-default-400 dark:text-white/40 dark:placeholder:text-white/35"
+          />
+        </div>
+      </div>
+    </aside>
   );
 }
 
@@ -626,4 +684,74 @@ function EmptyRow({ text }: { text: string }) {
       {text}
     </div>
   );
+}
+
+// Client-side parse for draft uploads. Mirrors the server's upload route
+// (lib/agent/skill-registry/adapters/anthropic + skills/upload route) but
+// runs in the browser so the user can stage uploaded skills before the
+// custom agent has a stable backend identity.
+const SKILL_UPLOAD_MAX_BYTES = 2 * 1024 * 1024;
+
+function parseSkillFrontmatter(md: string): {
+  name: string;
+  description: string;
+  body: string;
+} {
+  const match = md.match(/^---\s*\n([\s\S]*?)\n---\s*\n([\s\S]*)$/);
+  if (!match) return { name: "", description: "", body: md };
+  const yaml = match[1];
+  const body = match[2];
+  const get = (key: string): string => {
+    const re = new RegExp(
+      `^${key}\\s*:\\s*(?:>|\\|)?\\s*\\n?([\\s\\S]*?)(?=\\n[a-zA-Z_]+\\s*:|$)`,
+      "m",
+    );
+    const m = yaml.match(re);
+    if (!m) return "";
+    return m[1].trim().replace(/^["']|["']$/g, "");
+  };
+  return { name: get("name"), description: get("description"), body };
+}
+
+async function parseSkillFile(file: File): Promise<{
+  name: string;
+  description: string;
+  instructions: string;
+}> {
+  if (file.size > SKILL_UPLOAD_MAX_BYTES) {
+    throw new Error(`File too large (max ${SKILL_UPLOAD_MAX_BYTES} bytes)`);
+  }
+  const lower = file.name.toLowerCase();
+
+  if (lower.endsWith(".md") || lower.endsWith(".markdown")) {
+    const text = await file.text();
+    const { name, description, body } = parseSkillFrontmatter(text);
+    if (!body.trim()) throw new Error("SKILL.md is empty");
+    return {
+      name: name || file.name.replace(/\.(md|markdown)$/i, ""),
+      description,
+      instructions: body.trim(),
+    };
+  }
+
+  if (lower.endsWith(".zip")) {
+    const buf = await file.arrayBuffer();
+    const zip = await JSZip.loadAsync(buf);
+    const entry = Object.values(zip.files).find((f) => {
+      if (f.dir) return false;
+      const base = f.name.split("/").pop() ?? "";
+      return base.toLowerCase() === "skill.md";
+    });
+    if (!entry) throw new Error("No SKILL.md found in the ZIP");
+    const text = await entry.async("string");
+    const { name, description, body } = parseSkillFrontmatter(text);
+    if (!body.trim()) throw new Error("SKILL.md is empty");
+    return {
+      name: name || file.name.replace(/\.zip$/i, ""),
+      description,
+      instructions: body.trim(),
+    };
+  }
+
+  throw new Error("Unsupported file type — upload a .md or .zip");
 }

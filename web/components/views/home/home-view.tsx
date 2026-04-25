@@ -3,10 +3,12 @@
 import { useInbox } from "@/components/agent-chat/panels/inbox-panel";
 import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
-import { useChatContext } from "@/components/providers/chat-provider";
+import WorkerChatProvider, {
+  useWorkerChatContext,
+} from "@/components/providers/worker-chat-provider";
 import { EditorContext } from "@/components/providers/editor-context-provider";
 import { AppModeEnum } from "@/lib/enums";
-import { Spinner } from "@heroui/react";
+import { addToast, Spinner } from "@heroui/react";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { useTranslations } from "@/lib/hooks/use-translations";
@@ -333,13 +335,62 @@ export default function HomeView({
   }, []);
 
   const handleHire = useCallback(
-    (agent: Agent) => {
-      onSelectTemplate(
-        `Hire agent: ${agent.name} — ${agent.role}. ${agent.tagline} (Tools: ${agent.tools.join(", ")})`,
-      );
-      setSelectedAgent(null);
+    async (
+      agent: Agent,
+      teamId: string | null,
+      snapshot?: {
+        skills: { source: "anthropic" | "clawhub"; externalId: string }[];
+        workflowIds: string[];
+        pendingUploads?: { externalId: string; file: File }[];
+      },
+    ): Promise<boolean> => {
+      const pendingUploads = snapshot?.pendingUploads ?? [];
+      const dataPayload = {
+        agentSlug: agent.id,
+        teamId: teamId ?? undefined,
+        skills: snapshot?.skills,
+        workflowIds: snapshot?.workflowIds,
+        // Echo the externalIds of pending uploads so the server can pair
+        // each multipart File with the right WorkerAgentSkill row.
+        uploadIds: pendingUploads.map((u) => u.externalId),
+      };
+      try {
+        const fd = new FormData();
+        fd.append("data", JSON.stringify(dataPayload));
+        for (const u of pendingUploads) {
+          fd.append(`upload:${u.externalId}`, u.file, u.file.name);
+        }
+        const res = await fetchAPI(`/api/agent/hire`, {
+          method: "POST",
+          body: fd,
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(
+            data?.message ??
+              (data?.error === "upload_parse_failed"
+                ? `Couldn't parse upload "${data?.fileName ?? ""}". Modify and try again.`
+                : `Hire failed: ${res.status}`),
+          );
+        }
+        addToast({
+          title: `Hired ${agent.name}`,
+          description: teamId
+            ? `${agent.name} joined your team.`
+            : `${agent.name} is in your roster — add to a team from the Teams page.`,
+          color: "success",
+        });
+        return true;
+      } catch (err) {
+        addToast({
+          title: `Couldn't hire ${agent.name}`,
+          description: err instanceof Error ? err.message : "Unknown error",
+          color: "danger",
+        });
+        return false;
+      }
     },
-    [onSelectTemplate],
+    [],
   );
 
   const handleSearch = useCallback(
@@ -1029,7 +1080,981 @@ function getDetail(agent: Agent): AgentDetail {
   return { ...DEFAULT_DETAIL, ...(DETAIL_MAP[agent.id] || {}) };
 }
 
+// ── Agent Skills section ───────────────────────────────────────────────────
+//
+// Lists the SKILL.md-style prompt skills loaded into the agent's system
+// prompt. Skills are LLM-driven (instructions + reasoning per call), as
+// opposed to workflows (deterministic code).
+
+// `draft` — agent doesn't exist yet (custom-agent build modal). Edits stage
+//           in local state until the draft is saved/published.
+// `preHire` — existing agent, user hasn't hired. Edits stage in local state
+//           until hire; uploads/builds are disabled because they need
+//           server processing tied to a real (user, slug) pair.
+// `postHire` — existing agent, user has hired. Edits persist live; uploads
+//           and builds run server-side.
+export type DetailMode = "draft" | "preHire" | "postHire";
+
+export interface AgentSkill {
+  source: "anthropic" | "clawhub" | "upload";
+  externalId: string;
+  name: string;
+  description: string;
+  // Set on draft uploads (parsed client-side, not yet on the server).
+  // Carries the SKILL.md body so the publish step can persist it without
+  // re-parsing. Empty for skills that came from the registry or the server.
+  instructions?: string;
+  unresolved?: boolean;
+  registryUnavailable?: boolean;
+}
+
+export interface AgentWorkflow {
+  id: string;
+  name: string;
+  version: string;
+  description: string | null;
+}
+
+interface SkillBrowseResult {
+  id: string;
+  name: string;
+  description: string;
+}
+
+export function AgentSkillsSection({
+  agent,
+  mode,
+  skills,
+  isLoading = false,
+  onRemove,
+  onAdd,
+  onUpload,
+}: {
+  agent: Agent;
+  mode: DetailMode;
+  skills: AgentSkill[];
+  isLoading?: boolean;
+  onRemove: (skill: AgentSkill) => void;
+  onAdd: (skill: AgentSkill) => void;
+  onUpload: (file: File) => Promise<void>;
+}) {
+  const [addOpen, setAddOpen] = useState(false);
+  const stagingHint =
+    mode === "preHire" && skills.length > 0
+      ? `These defaults will be saved when you hire ${agent.name}; remove any you don't want.`
+      : mode === "draft" && skills.length > 0
+        ? "Edits stage locally and save when you publish the agent."
+        : null;
+  return (
+    <section className="border-t border-default-200 py-5 dark:border-white/8">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-default-800 dark:text-white/90">
+            Skills
+          </h2>
+          <p className="mt-0.5 text-[13px] text-default-400 dark:text-white/45">
+            Prompt-level know-how merged into {agent.name}&apos;s instructions.{" "}
+            <span className="text-default-500 dark:text-white/55">
+              The LLM reasons every call — flexible, uses tokens, not deterministic.
+            </span>
+            {stagingHint && (
+              <span className="ml-1 text-violet-600 dark:text-violet-400">
+                {stagingHint}
+              </span>
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="sm"
+            variant="flat"
+            onPress={() => setAddOpen(true)}
+            startContent={<Icon name="add" variant="round" className="text-base" />}
+          >
+            Add skill
+          </Button>
+        </div>
+      </div>
+
+      {isLoading ? (
+        <div className="flex items-center gap-2 rounded-xl border border-default-200 bg-default-50 px-3 py-2.5 text-sm text-default-400 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/40">
+          <Spinner size="sm" /> Loading skills…
+        </div>
+      ) : skills.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-default-200 bg-default-50 px-4 py-5 text-center text-sm text-default-400 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/40">
+          {mode === "postHire"
+            ? `No skills attached. ${agent.name} runs on the base persona only.`
+            : mode === "draft"
+              ? "No skills yet. Add from a registry or upload your own."
+              : `${agent.name} ships without preset skills.`}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {skills.map((s) => (
+            <div
+              key={`${s.source}:${s.externalId}`}
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl border border-default-200 bg-white px-3.5 py-3 dark:border-white/8 dark:bg-white/[0.03]"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
+                <Icon name="psychology" variant="round" className="text-base" />
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-[13.5px] font-semibold text-default-800 dark:text-white/90">
+                  {s.name}
+                </div>
+                <div className="mt-0.5 line-clamp-1 text-xs text-default-400 dark:text-white/45">
+                  {s.registryUnavailable
+                    ? `Registry "${s.source}" not configured on this server.`
+                    : s.unresolved
+                      ? `Couldn't fetch from ${s.source} registry.`
+                      : (s.description || `${s.source}/${s.externalId}`)}
+                </div>
+              </div>
+              <Button size="sm" variant="light" onPress={() => onRemove(s)}>
+                Remove
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {addOpen && (
+        <AddSkillModal
+          agentSlug={agent.id}
+          mode={mode}
+          existing={skills}
+          onClose={() => setAddOpen(false)}
+          onAdd={(skill) => {
+            onAdd(skill);
+            setAddOpen(false);
+          }}
+          onUpload={async (file) => {
+            await onUpload(file);
+            setAddOpen(false);
+          }}
+        />
+      )}
+    </section>
+  );
+}
+
+// Skill empty/non-empty copy is handled inline above. The empty state
+// message is mode-aware too: pre-hire/draft = "ships without preset skills";
+// post-hire = "no skills attached".
+
+function AddSkillModal({
+  agentSlug,
+  mode,
+  existing,
+  onClose,
+  onAdd,
+  onUpload,
+}: {
+  agentSlug: string;
+  mode: DetailMode;
+  existing: AgentSkill[];
+  onClose: () => void;
+  onAdd: (skill: AgentSkill) => void;
+  onUpload: (file: File) => Promise<void>;
+}) {
+  type Tab = "anthropic" | "clawhub" | "upload";
+  const [tab, setTab] = useState<Tab>("anthropic");
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SkillBrowseResult[]>([]);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [browseError, setBrowseError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const existingKeys = useMemo(
+    () => new Set(existing.map((s) => `${s.source}:${s.externalId}`)),
+    [existing],
+  );
+
+  // Reset + fetch first page when tab or query changes.
+  useEffect(() => {
+    if (tab === "upload") return;
+    let cancelled = false;
+    setLoading(true);
+    setBrowseError(null);
+    setResults([]);
+    setNextCursor(null);
+    fetchAPI(
+      `/api/agent/worker/${encodeURIComponent(agentSlug)}/skills/browse?source=${tab}` +
+        (query ? `&query=${encodeURIComponent(query)}` : ""),
+    )
+      .then(async (res) => {
+        if (cancelled) return;
+        if (res.status === 503) {
+          setBrowseError(
+            tab === "anthropic"
+              ? "Anthropic skills registry is unreachable right now."
+              : "ClawHub is unreachable right now.",
+          );
+          return;
+        }
+        if (!res.ok) {
+          setBrowseError(`Browse failed: ${res.status}`);
+          return;
+        }
+        const data = await res.json();
+        setResults(Array.isArray(data?.skills) ? data.skills : []);
+        setNextCursor(
+          typeof data?.nextCursor === "string" && data.nextCursor.length > 0
+            ? data.nextCursor
+            : null,
+        );
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        setBrowseError(err instanceof Error ? err.message : String(err));
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [tab, query, agentSlug]);
+
+  const loadMore = useCallback(async () => {
+    if (tab === "upload" || !nextCursor || loadingMore) return;
+    setLoadingMore(true);
+    try {
+      const res = await fetchAPI(
+        `/api/agent/worker/${encodeURIComponent(agentSlug)}/skills/browse?source=${tab}` +
+          (query ? `&query=${encodeURIComponent(query)}` : "") +
+          `&cursor=${encodeURIComponent(nextCursor)}`,
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      const more: SkillBrowseResult[] = Array.isArray(data?.skills)
+        ? data.skills
+        : [];
+      // Dedupe against existing results (the recommended set may overlap
+      // with the API page; the direct-slug merge can repeat too).
+      setResults((prev) => {
+        const seen = new Set(prev.map((s) => s.id));
+        const append = more.filter((s) => s.id && !seen.has(s.id));
+        return prev.concat(append);
+      });
+      setNextCursor(
+        typeof data?.nextCursor === "string" && data.nextCursor.length > 0
+          ? data.nextCursor
+          : null,
+      );
+    } finally {
+      setLoadingMore(false);
+    }
+  }, [tab, query, agentSlug, nextCursor, loadingMore]);
+
+  const handleUpload = useCallback(
+    async (file: File) => {
+      setUploading(true);
+      try {
+        await onUpload(file);
+      } finally {
+        setUploading(false);
+      }
+    },
+    [onUpload],
+  );
+
+  const tabClass = (active: boolean) =>
+    `flex-1 px-3 py-2 text-[13px] font-semibold border-b-2 transition-colors ${
+      active
+        ? "border-violet-500 text-default-800 dark:text-white/90"
+        : "border-transparent text-default-400 hover:text-default-600 dark:text-white/45 dark:hover:text-white/70"
+    }`;
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-6"
+      onClick={onClose}
+    >
+      <div
+        className="flex max-h-[640px] w-full max-w-[520px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#1a1a1d]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="border-b border-default-200 px-5 py-4 dark:border-white/8">
+          <div className="text-sm font-semibold text-default-800 dark:text-white/90">
+            Add skill
+          </div>
+          <p className="mt-0.5 text-xs text-default-400 dark:text-white/45">
+            Browse a registry or upload your own SKILL.md / ZIP.
+          </p>
+        </div>
+        <div className="flex border-b border-default-200 dark:border-white/8">
+          <button
+            type="button"
+            onClick={() => setTab("anthropic")}
+            className={tabClass(tab === "anthropic")}
+          >
+            Claude
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("clawhub")}
+            className={tabClass(tab === "clawhub")}
+          >
+            ClawHub
+          </button>
+          <button
+            type="button"
+            onClick={() => setTab("upload")}
+            className={tabClass(tab === "upload")}
+          >
+            Upload
+          </button>
+        </div>
+
+        {tab === "upload" ? (
+          <UploadSkillTab
+            mode={mode}
+            uploading={uploading}
+            onSelectFile={handleUpload}
+          />
+        ) : (
+          <BrowseSkillTab
+            tab={tab}
+            query={query}
+            setQuery={setQuery}
+            loading={loading}
+            loadingMore={loadingMore}
+            hasMore={!!nextCursor}
+            onLoadMore={loadMore}
+            results={results}
+            browseError={browseError}
+            existingKeys={existingKeys}
+            onPick={(s) =>
+              onAdd({
+                source: tab,
+                externalId: s.id,
+                name: s.name,
+                description: s.description,
+              })
+            }
+          />
+        )}
+
+        <div className="flex justify-end border-t border-default-200 px-3 py-2 dark:border-white/8">
+          <Button size="sm" variant="light" onPress={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function BrowseSkillTab({
+  tab,
+  query,
+  setQuery,
+  loading,
+  loadingMore,
+  hasMore,
+  onLoadMore,
+  results,
+  browseError,
+  existingKeys,
+  onPick,
+}: {
+  tab: "anthropic" | "clawhub";
+  query: string;
+  setQuery: (v: string) => void;
+  loading: boolean;
+  loadingMore: boolean;
+  hasMore: boolean;
+  onLoadMore: () => void;
+  results: SkillBrowseResult[];
+  browseError: string | null;
+  existingKeys: Set<string>;
+  onPick: (skill: SkillBrowseResult) => void;
+}) {
+  // External browse links open in a new tab so the user can read the full
+  // SKILL.md / metadata (the public APIs don't expose full content).
+  const externalUrl = (id: string) =>
+    tab === "anthropic"
+      ? `https://github.com/anthropics/skills/tree/main/skills/${id}`
+      : `https://clawhub.ai/skills/${id}`;
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="border-b border-default-200 px-5 py-3 dark:border-white/8">
+        <input
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder={
+            tab === "anthropic"
+              ? "Search Anthropic skills…"
+              : "Search by name or paste a slug…"
+          }
+          className="w-full rounded-lg border border-default-200 bg-default-50 px-3 py-2 text-sm outline-none focus:border-violet-300 dark:border-white/10 dark:bg-white/5"
+        />
+        {tab === "clawhub" && (
+          <p className="mt-2 text-[11.5px] leading-relaxed text-default-400 dark:text-white/40">
+            Browse the full catalog at{" "}
+            <a
+              href="https://clawhub.ai/skills"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-0.5 text-violet-600 hover:underline dark:text-violet-400"
+            >
+              clawhub.ai/skills
+              <Icon name="open_in_new" variant="round" className="text-[12px]" />
+            </a>{" "}
+            and paste any slug above to add it.
+          </p>
+        )}
+      </div>
+      <div
+        className="min-h-0 flex-1 overflow-y-auto px-3 py-2"
+        onScroll={(e) => {
+          // Trigger load-more when the user scrolls within ~80px of the
+          // bottom. Cheap, no IntersectionObserver — fits the bounded list.
+          const el = e.currentTarget;
+          if (
+            hasMore &&
+            !loadingMore &&
+            !loading &&
+            el.scrollHeight - el.scrollTop - el.clientHeight < 80
+          ) {
+            onLoadMore();
+          }
+        }}
+      >
+        {browseError ? (
+          <div className="px-3 py-6 text-center text-sm text-default-400 dark:text-white/40">
+            {browseError}
+          </div>
+        ) : loading ? (
+          <div className="flex items-center gap-2 px-3 py-6 text-sm text-default-400 dark:text-white/40">
+            <Spinner size="sm" /> Loading skills…
+          </div>
+        ) : results.length === 0 ? (
+          <div className="px-3 py-6 text-center text-sm text-default-400 dark:text-white/40">
+            No skills found.
+          </div>
+        ) : (
+          results.map((s) => {
+            const already = existingKeys.has(`${tab}:${s.id}`);
+            return (
+              <div
+                key={s.id}
+                className="grid grid-cols-[auto_1fr_auto_auto] items-center gap-2 rounded-lg px-3 py-2.5 transition-colors hover:bg-default-100 dark:hover:bg-white/8"
+              >
+                <Icon
+                  name="psychology"
+                  variant="round"
+                  className="text-base text-violet-500"
+                />
+                <button
+                  type="button"
+                  disabled={already}
+                  onClick={() => onPick(s)}
+                  className="min-w-0 text-left disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <div className="truncate text-[13.5px] font-semibold text-default-800 dark:text-white/90">
+                    {s.name}
+                  </div>
+                  <div className="line-clamp-1 text-xs text-default-400 dark:text-white/45">
+                    {s.description || `${tab}/${s.id}`}
+                  </div>
+                </button>
+                <a
+                  href={externalUrl(s.id)}
+                  target="_blank"
+                  rel="noreferrer"
+                  title="Open on registry"
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-default-400 transition-colors hover:bg-default-200 hover:text-default-700 dark:hover:bg-white/10 dark:hover:text-white/80"
+                >
+                  <Icon name="open_in_new" variant="round" className="text-base" />
+                </a>
+                <button
+                  type="button"
+                  disabled={already}
+                  onClick={() => onPick(s)}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-default-400 transition-colors hover:bg-default-200 hover:text-default-700 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-white/10 dark:hover:text-white/80"
+                  title={already ? "Already added" : "Add"}
+                >
+                  <Icon
+                    name={already ? "check" : "add"}
+                    variant="round"
+                    className="text-base"
+                  />
+                </button>
+              </div>
+            );
+          })
+        )}
+        {/* Pagination footer — visible only when there's at least one page
+            already rendered. Loading spinner appears while fetching the
+            next page; nothing is shown when the registry has no more
+            pages (the list just ends). */}
+        {results.length > 0 && loadingMore && (
+          <div className="flex items-center justify-center gap-2 px-3 py-3 text-xs text-default-400 dark:text-white/40">
+            <Spinner size="sm" /> Loading more…
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function UploadSkillTab({
+  mode,
+  uploading,
+  onSelectFile,
+}: {
+  mode: DetailMode;
+  uploading: boolean;
+  onSelectFile: (file: File) => Promise<void>;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  // Upload is allowed in every mode now:
+  //   - postHire → file goes to /skills/upload immediately, server parses + stores.
+  //   - preHire  → file is held client-side until hire; server parses at hire.
+  //                If parsing fails, the hire is aborted (no HiredAgent row).
+  //   - draft    → file is parsed client-side and staged in the draft.
+  const stagingHint =
+    mode === "preHire"
+      ? "ZIPs are kept in the browser until you hire. The server parses them then — if parsing fails, the hire is aborted and you'll be asked to fix it."
+      : mode === "draft"
+        ? "ZIPs are parsed in the browser and staged with the draft."
+        : null;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col items-stretch gap-3 px-5 py-6">
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".md,.markdown,.zip"
+        className="hidden"
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void onSelectFile(f);
+          // Reset so the same file can be chosen twice if needed.
+          e.target.value = "";
+        }}
+      />
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="flex w-full flex-col items-center gap-2 rounded-xl border-2 border-dashed border-default-200 bg-default-50 px-6 py-8 text-sm text-default-500 transition-colors hover:border-violet-300 hover:bg-violet-50/30 disabled:opacity-50 dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-violet-500/30 dark:hover:bg-violet-500/5"
+      >
+        {uploading ? (
+          <Spinner size="sm" />
+        ) : (
+          <Icon name="upload_file" variant="round" className="text-3xl text-default-400" />
+        )}
+        <div className="font-semibold text-default-700 dark:text-white/85">
+          {uploading ? "Uploading…" : "Choose a SKILL.md or ZIP"}
+        </div>
+        <div className="text-xs text-default-400 dark:text-white/45">
+          ZIPs must contain a SKILL.md at the root or a subfolder.
+        </div>
+      </button>
+      {stagingHint && (
+        <p className="text-center text-[11.5px] leading-relaxed text-default-400 dark:text-white/40">
+          {stagingHint}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ── Agent Workflows section ────────────────────────────────────────────────
+//
+// Lives inside the detail card (not the worker chat). Lists workflows the
+// user has attached to this agent and lets them attach an existing one or
+// kick off the workflow builder for a new one.
+
+interface UserWorkflow {
+  id: string;
+  name: string;
+  version: string;
+  description: string | null;
+}
+
+export function AgentWorkflowsSection({
+  agent,
+  mode,
+  workflows,
+  isLoading = false,
+  onAttach,
+  onDetach,
+  onBuildAttached,
+}: {
+  agent: Agent;
+  mode: DetailMode;
+  workflows: AgentWorkflow[];
+  isLoading?: boolean;
+  onAttach: (w: AgentWorkflow) => void;
+  onDetach: (workflowId: string) => void;
+  // Called once a post-hire build completes, so the modal can re-fetch state.
+  onBuildAttached: () => void;
+}) {
+  // Build new is post-hire-only: it kicks off an async server build that needs
+  // a persisted (user, slug) pair to attach the result to.
+  const buildEnabled = mode === "postHire";
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [buildOpen, setBuildOpen] = useState(false);
+  const [buildGoal, setBuildGoal] = useState("");
+  const [buildTaskId, setBuildTaskId] = useState<string | null>(null);
+  const [buildStatus, setBuildStatus] = useState<string | null>(null);
+
+  const startBuild = useCallback(async () => {
+    if (!buildGoal.trim()) return;
+    try {
+      const res = await fetchAPI(
+        `/api/agent/worker/${encodeURIComponent(agent.id)}/workflows/build`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ goal: buildGoal }),
+        },
+      );
+      if (!res.ok) throw new Error(`Build start failed: ${res.status}`);
+      const data = await res.json();
+      setBuildTaskId(data.taskId);
+      setBuildStatus("running");
+      addToast({
+        title: "Workflow build started",
+        description: "I'll attach it when it's ready.",
+        color: "primary",
+      });
+    } catch (err) {
+      addToast({
+        title: "Couldn't start build",
+        description: err instanceof Error ? err.message : "Unknown error",
+        color: "danger",
+      });
+    }
+  }, [agent.id, buildGoal]);
+
+  // Poll for build completion. The backend's build-complete callback
+  // auto-attaches the resulting workflow.
+  useEffect(() => {
+    if (!buildTaskId || buildStatus !== "running") return;
+    const handle = setInterval(async () => {
+      try {
+        const res = await fetchAPI(
+          `/api/workflow/run/status?taskId=${encodeURIComponent(buildTaskId)}`,
+        );
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.status === "completed" || data.status === "failed") {
+          setBuildStatus(data.status);
+          if (data.status === "completed") {
+            onBuildAttached();
+            setBuildOpen(false);
+            setBuildGoal("");
+            setBuildTaskId(null);
+          }
+        }
+      } catch {
+        // keep polling
+      }
+    }, 3000);
+    return () => clearInterval(handle);
+  }, [buildTaskId, buildStatus, onBuildAttached]);
+
+  return (
+    <section className="border-t border-default-200 py-5 dark:border-white/8">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-base font-semibold text-default-800 dark:text-white/90">
+            Workflows
+          </h2>
+          <p className="mt-0.5 text-[13px] text-default-400 dark:text-white/45">
+            Code or node-based automations {agent.name} can call.{" "}
+            <span className="text-default-500 dark:text-white/55">
+              Deterministic, fast, no LLM tokens used at run time.
+            </span>
+            {mode === "preHire" && (
+              <span className="ml-1 text-violet-600 dark:text-violet-400">
+                Edits stage locally and persist when you hire {agent.name}.
+              </span>
+            )}
+            {mode === "draft" && (
+              <span className="ml-1 text-violet-600 dark:text-violet-400">
+                Edits stage locally and save when you publish the agent.
+              </span>
+            )}
+          </p>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Button
+            size="sm"
+            variant="flat"
+            onPress={() => setPickerOpen(true)}
+            startContent={<Icon name="add" variant="round" className="text-base" />}
+          >
+            Add existing
+          </Button>
+          <Button
+            size="sm"
+            className="bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+            onPress={() => setBuildOpen(true)}
+            isDisabled={!buildEnabled}
+            startContent={<Icon name="auto_awesome" variant="round" className="text-base" />}
+          >
+            Build new
+          </Button>
+        </div>
+      </div>
+
+      {!buildEnabled && (
+        <p className="mb-2 text-[12px] text-default-400 dark:text-white/40">
+          {mode === "preHire"
+            ? "Build new is available after hiring — it kicks off a long-running server build that needs persisted state."
+            : "Build new is available after the agent is published."}
+        </p>
+      )}
+
+      {isLoading ? (
+        <div className="flex items-center gap-2 rounded-xl border border-default-200 bg-default-50 px-3 py-2.5 text-sm text-default-400 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/40">
+          <Spinner size="sm" /> Loading workflows…
+        </div>
+      ) : workflows.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-default-200 bg-default-50 px-4 py-5 text-center text-sm text-default-400 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/40">
+          No workflows attached yet.{" "}
+          {mode === "postHire"
+            ? `Add an existing one or build a new workflow tailored for ${agent.name}.`
+            : mode === "draft"
+              ? `Pick from your existing workflows — they'll save when you publish ${agent.name}.`
+              : `Add an existing one — it'll be saved when you hire ${agent.name}.`}
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {workflows.map((w) => (
+            <div
+              key={w.id}
+              className="grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-xl border border-default-200 bg-white px-3.5 py-3 dark:border-white/8 dark:bg-white/[0.03]"
+            >
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-default-100 text-default-500 dark:bg-white/8 dark:text-white/55">
+                <Icon name="account_tree" variant="round" className="text-base" />
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-[13.5px] font-semibold text-default-800 dark:text-white/90">
+                  {w.name}{" "}
+                  <span className="text-xs font-normal text-default-400 dark:text-white/40">
+                    v{w.version}
+                  </span>
+                </div>
+                {w.description && (
+                  <div className="mt-0.5 line-clamp-1 text-xs text-default-400 dark:text-white/45">
+                    {w.description}
+                  </div>
+                )}
+              </div>
+              <Button size="sm" variant="light" onPress={() => onDetach(w.id)}>
+                Detach
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {pickerOpen && (
+        <ExistingWorkflowPicker
+          excludeIds={workflows.map((w) => w.id)}
+          onClose={() => setPickerOpen(false)}
+          onPick={(w) => {
+            onAttach(w);
+            setPickerOpen(false);
+          }}
+        />
+      )}
+
+      {buildOpen && (
+        <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/60 p-4 dark:border-amber-500/20 dark:bg-amber-500/5">
+          <div className="mb-2 text-[13px] font-semibold text-default-800 dark:text-white/90">
+            Build a workflow for {agent.name}
+          </div>
+          <textarea
+            value={buildGoal}
+            onChange={(e) => setBuildGoal(e.target.value)}
+            placeholder="Describe what the workflow should do, e.g. 'When a new Stripe invoice is overdue by 7 days, draft a polite reminder and post a Slack alert.'"
+            rows={3}
+            disabled={buildStatus === "running"}
+            className="w-full resize-none rounded-lg border border-default-200 bg-white px-3 py-2 text-[13px] text-default-800 outline-none focus:border-amber-300 disabled:opacity-50 dark:border-white/10 dark:bg-white/5 dark:text-white/85"
+          />
+          <div className="mt-2 flex items-center justify-between gap-2">
+            <div className="text-xs text-default-400 dark:text-white/40">
+              {buildStatus === "running"
+                ? "Building… this can take a few minutes."
+                : buildStatus === "failed"
+                  ? "Build failed. Try again with a clearer goal."
+                  : "Palmos will design, generate, and attach this workflow."}
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Button
+                size="sm"
+                variant="light"
+                onPress={() => {
+                  setBuildOpen(false);
+                  setBuildGoal("");
+                  setBuildTaskId(null);
+                  setBuildStatus(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                className="bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                isDisabled={!buildGoal.trim() || buildStatus === "running"}
+                onPress={startBuild}
+                startContent={
+                  buildStatus === "running" ? (
+                    <Spinner size="sm" color="white" />
+                  ) : (
+                    <Icon name="auto_awesome" variant="round" className="text-base" />
+                  )
+                }
+              >
+                {buildStatus === "running" ? "Building…" : "Start build"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ExistingWorkflowPicker({
+  excludeIds,
+  onClose,
+  onPick,
+}: {
+  excludeIds: string[];
+  onClose: () => void;
+  onPick: (w: AgentWorkflow) => void;
+}) {
+  const [workflows, setWorkflows] = useState<UserWorkflow[]>([]);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchAPI("/api/workflow/list")
+      .then((res) => (res.ok ? res.json() : { workflows: [] }))
+      .then((data) => {
+        if (cancelled) return;
+        const list: UserWorkflow[] = Array.isArray(data?.workflows)
+          ? data.workflows
+          : Array.isArray(data)
+            ? data
+            : [];
+        setWorkflows(list);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const filtered = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const excluded = new Set(excludeIds);
+    return workflows
+      .filter((w) => !excluded.has(w.id))
+      .filter(
+        (w) =>
+          !q ||
+          w.name.toLowerCase().includes(q) ||
+          (w.description ?? "").toLowerCase().includes(q),
+      );
+  }, [workflows, query, excludeIds]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-6"
+      onClick={onClose}
+    >
+      <div
+        className="flex max-h-[560px] w-full max-w-[480px] flex-col overflow-hidden rounded-2xl bg-white shadow-2xl dark:bg-[#1a1a1d]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="border-b border-default-200 px-5 py-4 dark:border-white/8">
+          <div className="text-sm font-semibold text-default-800 dark:text-white/90">
+            Attach an existing workflow
+          </div>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Filter…"
+            className="mt-3 w-full rounded-lg border border-default-200 bg-default-50 px-3 py-2 text-sm outline-none focus:border-amber-300 dark:border-white/10 dark:bg-white/5"
+          />
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto px-3 py-2">
+          {loading ? (
+            <div className="flex items-center gap-2 px-3 py-6 text-sm text-default-400 dark:text-white/40">
+              <Spinner size="sm" /> Loading workflows…
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="px-3 py-6 text-center text-sm text-default-400 dark:text-white/40">
+              No workflows found.
+            </div>
+          ) : (
+            filtered.map((w) => (
+              <button
+                key={w.id}
+                type="button"
+                onClick={() =>
+                  onPick({
+                    id: w.id,
+                    name: w.name,
+                    version: w.version,
+                    description: w.description,
+                  })
+                }
+                className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-default-100 dark:hover:bg-white/8"
+              >
+                <Icon
+                  name="account_tree"
+                  variant="round"
+                  className="text-base text-default-400"
+                />
+                <div className="min-w-0">
+                  <div className="truncate text-[13.5px] font-semibold text-default-800 dark:text-white/90">
+                    {w.name}
+                  </div>
+                  <div className="truncate text-xs text-default-400 dark:text-white/45">
+                    v{w.version}
+                    {w.description ? ` · ${w.description}` : ""}
+                  </div>
+                </div>
+                <Icon
+                  name="add"
+                  variant="round"
+                  className="text-base text-default-400"
+                />
+              </button>
+            ))
+          )}
+        </div>
+        <div className="flex justify-end border-t border-default-200 px-3 py-2 dark:border-white/8">
+          <Button size="sm" variant="light" onPress={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Agent Detail Modal ──────────────────────────────────────────────────────
+
+interface TeamSummary {
+  id: string;
+  name: string;
+}
 
 function AgentDetailModal({
   agent,
@@ -1038,16 +2063,314 @@ function AgentDetailModal({
 }: {
   agent: Agent;
   onClose: () => void;
-  onHire: (agent: Agent) => void;
+  onHire: (
+    agent: Agent,
+    teamId: string | null,
+    snapshot: {
+      skills: { source: "anthropic" | "clawhub"; externalId: string }[];
+      workflowIds: string[];
+      // Files staged pre-hire; the parent uploads them via multipart and
+      // resolves to false if the server rejects any of them. The modal
+      // stays in pre-hire mode on false so the user can fix the upload.
+      pendingUploads: { externalId: string; file: File }[];
+    },
+  ) => Promise<boolean>;
 }) {
   const d = getDetail(agent);
   const category = CATEGORIES.find((c) => c.slug === agent.cat);
+
+  const [teams, setTeams] = useState<TeamSummary[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchAPI("/api/agent/teams")
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => {
+        if (cancelled || !Array.isArray(data)) return;
+        setTeams(
+          data.map((t: any) => ({ id: t.id as string, name: t.name as string })),
+        );
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [onClose]);
+
+  // ── Hire status + skills/workflows state ─────────────────────────────────
+  // Pre-hire: skills/workflows are seed presets; mutations stage in local state
+  //           and get persisted on hire.
+  // Post-hire: skills/workflows are persisted rows; mutations call the
+  //            attach/detach routes immediately.
+  const [hired, setHired] = useState(false);
+  const [stateLoaded, setStateLoaded] = useState(false);
+  const [skills, setSkills] = useState<AgentSkill[]>([]);
+  const [workflows, setWorkflows] = useState<AgentWorkflow[]>([]);
+
+  // Files uploaded pre-hire are held here keyed by externalId. They get
+  // posted as multipart along with the hire payload; the server parses + stores
+  // each. Removed from this map when the user removes the staged skill.
+  const pendingUploadsRef = useRef<Map<string, File>>(new Map());
+
+  const fetchState = useCallback(async () => {
+    try {
+      const res = await fetchAPI(
+        `/api/agent/worker/${encodeURIComponent(agent.id)}/state`,
+      );
+      if (!res.ok) return;
+      const data = await res.json();
+      setHired(!!data.hired);
+      setSkills(data.skills ?? []);
+      setWorkflows(data.workflows ?? []);
+    } catch {
+      // Best-effort; missing state means empty defaults.
+    } finally {
+      setStateLoaded(true);
+    }
+  }, [agent.id]);
+
+  useEffect(() => {
+    void fetchState();
+  }, [fetchState]);
+
+  // Mutation handlers — branch on `hired`. The handlers update local state
+  // optimistically; for post-hire, they also call the corresponding API.
+  // On API failure we re-fetch so the UI re-syncs with truth.
+  const handleSkillRemove = useCallback(
+    async (skill: AgentSkill) => {
+      setSkills((prev) =>
+        prev.filter(
+          (s) => !(s.source === skill.source && s.externalId === skill.externalId),
+        ),
+      );
+      // Drop any pending upload tied to this externalId.
+      if (skill.source === "upload") {
+        pendingUploadsRef.current.delete(skill.externalId);
+      }
+      if (!hired) return;
+      try {
+        const res = await fetchAPI(
+          `/api/agent/worker/${encodeURIComponent(agent.id)}/skills/detach`,
+          {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source: skill.source,
+              externalId: skill.externalId,
+            }),
+          },
+        );
+        if (!res.ok) throw new Error(`Detach failed: ${res.status}`);
+      } catch (err) {
+        addToast({
+          title: "Couldn't remove skill",
+          description: err instanceof Error ? err.message : "Unknown error",
+          color: "danger",
+        });
+        void fetchState();
+      }
+    },
+    [agent.id, hired, fetchState],
+  );
+
+  const handleSkillAdd = useCallback(
+    async (skill: AgentSkill) => {
+      // Avoid dupes.
+      if (
+        skills.some(
+          (s) => s.source === skill.source && s.externalId === skill.externalId,
+        )
+      ) {
+        return;
+      }
+      setSkills((prev) => [...prev, skill]);
+      if (!hired) return;
+      try {
+        const res = await fetchAPI(
+          `/api/agent/worker/${encodeURIComponent(agent.id)}/skills/attach`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source: skill.source,
+              externalId: skill.externalId,
+            }),
+          },
+        );
+        if (!res.ok) throw new Error(`Attach failed: ${res.status}`);
+      } catch (err) {
+        addToast({
+          title: "Couldn't add skill",
+          description: err instanceof Error ? err.message : "Unknown error",
+          color: "danger",
+        });
+        void fetchState();
+      }
+    },
+    [agent.id, hired, skills, fetchState],
+  );
+
+  const handleSkillUpload = useCallback(
+    async (file: File) => {
+      // Quick client-side guard so we don't stage clearly-invalid uploads
+      // even pre-hire. The full SKILL.md parse runs server-side at hire time.
+      const lower = file.name.toLowerCase();
+      const allowed =
+        lower.endsWith(".zip") ||
+        lower.endsWith(".md") ||
+        lower.endsWith(".markdown");
+      if (!allowed) {
+        addToast({
+          title: "Unsupported file",
+          description: "Upload a .zip with SKILL.md inside, or a .md file.",
+          color: "danger",
+        });
+        return;
+      }
+      const MAX_BYTES = 2 * 1024 * 1024;
+      if (file.size > MAX_BYTES) {
+        addToast({
+          title: "File too large",
+          description: `Max ${MAX_BYTES / 1024 / 1024} MB.`,
+          color: "danger",
+        });
+        return;
+      }
+
+      if (hired) {
+        // Post-hire: server parses + persists immediately.
+        try {
+          const fd = new FormData();
+          fd.append("file", file);
+          const res = await fetchAPI(
+            `/api/agent/worker/${encodeURIComponent(agent.id)}/skills/upload`,
+            { method: "POST", body: fd },
+          );
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data?.message ?? `Upload failed: ${res.status}`);
+          }
+          await fetchState();
+          addToast({ title: "Skill uploaded", color: "success" });
+        } catch (err) {
+          addToast({
+            title: "Upload failed",
+            description: err instanceof Error ? err.message : "Unknown error",
+            color: "danger",
+          });
+        }
+        return;
+      }
+
+      // Pre-hire: hold the file, stage a placeholder skill. Server parses
+      // at hire — if it fails, hire is aborted (handled by the hire flow).
+      const externalId = `upload-${
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : Math.random().toString(36).slice(2)
+      }`;
+      pendingUploadsRef.current.set(externalId, file);
+      setSkills((prev) => [
+        ...prev,
+        {
+          source: "upload",
+          externalId,
+          name: file.name,
+          description: "Pending upload — server parses on hire.",
+        },
+      ]);
+      addToast({ title: "Staged for hire", color: "primary" });
+    },
+    [agent.id, hired, fetchState],
+  );
+
+  const handleWorkflowAttach = useCallback(
+    async (w: AgentWorkflow) => {
+      if (workflows.some((x) => x.id === w.id)) return;
+      setWorkflows((prev) => [...prev, w]);
+      if (!hired) return;
+      try {
+        const res = await fetchAPI(
+          `/api/agent/worker/${encodeURIComponent(agent.id)}/workflows/attach`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ workflowId: w.id }),
+          },
+        );
+        if (!res.ok) throw new Error(`Attach failed: ${res.status}`);
+      } catch (err) {
+        addToast({
+          title: "Couldn't attach workflow",
+          description: err instanceof Error ? err.message : "Unknown error",
+          color: "danger",
+        });
+        void fetchState();
+      }
+    },
+    [agent.id, hired, workflows, fetchState],
+  );
+
+  const handleWorkflowDetach = useCallback(
+    async (workflowId: string) => {
+      setWorkflows((prev) => prev.filter((w) => w.id !== workflowId));
+      if (!hired) return;
+      try {
+        const res = await fetchAPI(
+          `/api/agent/worker/${encodeURIComponent(agent.id)}/workflows/detach`,
+          {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ workflowId }),
+          },
+        );
+        if (!res.ok) throw new Error(`Detach failed: ${res.status}`);
+      } catch (err) {
+        addToast({
+          title: "Couldn't detach workflow",
+          description: err instanceof Error ? err.message : "Unknown error",
+          color: "danger",
+        });
+        void fetchState();
+      }
+    },
+    [agent.id, hired, fetchState],
+  );
+
+  const hire = useCallback(
+    async (teamId: string | null) => {
+      const registrySkills = skills.flatMap((s) =>
+        s.source === "upload"
+          ? []
+          : [{ source: s.source, externalId: s.externalId }],
+      );
+      const pendingUploads: { externalId: string; file: File }[] = skills
+        .filter((s) => s.source === "upload")
+        .map((s) => ({
+          externalId: s.externalId,
+          file: pendingUploadsRef.current.get(s.externalId)!,
+        }))
+        .filter((u) => u.file instanceof File);
+
+      const ok = await onHire(agent, teamId, {
+        skills: registrySkills,
+        workflowIds: workflows.map((w) => w.id),
+        pendingUploads,
+      });
+      // Only refresh on success — failed hires keep the modal in pre-hire
+      // mode so the user can fix the bad upload.
+      if (ok) {
+        pendingUploadsRef.current.clear();
+        await fetchState();
+      }
+    },
+    [agent, onHire, skills, workflows, fetchState],
+  );
 
   return (
     <div
@@ -1112,13 +2435,61 @@ function AgentDetailModal({
               </div>
             </div>
             <div className="flex shrink-0 flex-col gap-1.5">
-              <Button
-                className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
-                onPress={() => onHire(agent)}
-                startContent={<Icon name="person_add" variant="round" className="text-lg" />}
-              >
-                Hire to a team
-              </Button>
+              {hired ? (
+                <Button
+                  variant="flat"
+                  isDisabled
+                  startContent={<Icon name="check_circle" variant="round" className="text-lg" />}
+                >
+                  Hired
+                </Button>
+              ) : teams.length === 0 ? (
+                <Button
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+                  onPress={() => hire(null)}
+                  startContent={<Icon name="person_add" variant="round" className="text-lg" />}
+                >
+                  Hire to a team
+                </Button>
+              ) : (
+                <Popover placement="bottom-end">
+                  <PopoverTrigger>
+                    <Button
+                      className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+                      startContent={<Icon name="person_add" variant="round" className="text-lg" />}
+                    >
+                      Hire to a team
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-1.5">
+                    <div className="flex w-56 flex-col gap-0.5">
+                      <div className="px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-default-400 dark:text-white/40">
+                        Add to team
+                      </div>
+                      {teams.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => hire(t.id)}
+                          className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-default-700 transition-colors hover:bg-default-100 dark:text-white/80 dark:hover:bg-white/8"
+                        >
+                          <Icon name="groups" variant="round" className="text-base text-default-400" />
+                          <span className="truncate">{t.name}</span>
+                        </button>
+                      ))}
+                      <div className="my-1 border-t border-default-200 dark:border-white/10" />
+                      <button
+                        type="button"
+                        onClick={() => hire(null)}
+                        className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-left text-sm text-default-600 transition-colors hover:bg-default-100 dark:text-white/70 dark:hover:bg-white/8"
+                      >
+                        <Icon name="person_add" variant="round" className="text-base text-default-400" />
+                        Hire without a team
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              )}
               <Button variant="light" size="sm" startContent={<Icon name="bookmark_border" variant="round" className="text-lg" />}>
                 Save
               </Button>
@@ -1158,6 +2529,29 @@ function AgentDetailModal({
                 ))}
               </div>
             </section>
+
+            {/* Skills — section chrome renders immediately; content waits
+                on /state. */}
+            <AgentSkillsSection
+              agent={agent}
+              mode={hired ? "postHire" : "preHire"}
+              skills={skills}
+              isLoading={!stateLoaded}
+              onRemove={handleSkillRemove}
+              onAdd={handleSkillAdd}
+              onUpload={handleSkillUpload}
+            />
+
+            {/* Workflows */}
+            <AgentWorkflowsSection
+              agent={agent}
+              mode={hired ? "postHire" : "preHire"}
+              workflows={workflows}
+              isLoading={!stateLoaded}
+              onAttach={handleWorkflowAttach}
+              onDetach={handleWorkflowDetach}
+              onBuildAttached={fetchState}
+            />
 
             {/* Previous work */}
             <PreviousWork agent={agent} />
@@ -1233,7 +2627,9 @@ function AgentDetailModal({
         </div>
 
         {/* ── Right: Chat panel ── */}
-        <DetailChatPanel agent={agent} />
+        <WorkerChatProvider agentSlug={agent.id}>
+          <DetailChatPanel agent={agent} />
+        </WorkerChatProvider>
       </div>
     </div>
   );
@@ -1242,31 +2638,27 @@ function AgentDetailModal({
 // ── Chat panel (try before you hire) — hooked to real agent chat ─────────
 
 export function DetailChatPanel({ agent }: { agent: Agent }) {
-  const { messages: chatMessages, isLoading, submit } = useChatContext();
+  const { messages: chatMessages, isLoading, submit } = useWorkerChatContext();
   const [draft, setDraft] = useState("");
-  const [hasSent, setHasSent] = useState(false);
   const threadRef = useRef<HTMLDivElement>(null);
 
   const quickPrompts = [
-    `Show me what ${agent.name} can do`,
+    `Show me what you can do`,
     `Run ${agent.role.toLowerCase()} on a sample task`,
-    `What tools does ${agent.name} use?`,
+    `What tools do you use?`,
   ];
 
   const send = useCallback(
     (text: string) => {
       if (!text.trim() || isLoading) return;
-      const agentContext = hasSent
-        ? text
-        : `[Agent: ${agent.name} — ${agent.role}]\n${agent.tagline}\nTools: ${agent.tools.join(", ")}\n\nUser request: ${text}`;
-      submit(agentContext);
+      submit(text);
       setDraft("");
-      setHasSent(true);
     },
-    [isLoading, submit, agent, hasSent],
+    [isLoading, submit],
   );
 
-  // Extract simple display messages from the chat context
+  // The worker agent's responses include a hidden suggestions block at the
+  // bottom (<!--suggestions:[...]--> ); strip those before displaying.
   const displayMessages = useMemo(() => {
     const msgs: { role: "agent" | "you"; text: string }[] = [];
     for (const m of chatMessages) {
@@ -1281,15 +2673,16 @@ export function DetailChatPanel({ agent }: { agent: Agent }) {
           : "";
       if (!content.trim()) continue;
       if (type === "human") {
-        // Strip the agent context prefix for display
-        const cleaned = content.replace(/^\[Agent:[\s\S]*?\nUser request: /, "");
-        msgs.push({ role: "you", text: cleaned });
+        msgs.push({ role: "you", text: content });
       } else if (type === "ai") {
-        msgs.push({ role: "agent", text: content });
+        const cleaned = content.replace(/<!--suggestions:.*?-->\s*$/, "").trim();
+        if (cleaned) msgs.push({ role: "agent", text: cleaned });
       }
     }
     return msgs;
   }, [chatMessages]);
+
+  const hasSent = displayMessages.some((m) => m.role === "you");
 
   useEffect(() => {
     threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
