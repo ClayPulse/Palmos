@@ -12,6 +12,9 @@ import {
   type Team,
   type Thread,
 } from "@/components/views/home/fallback-inbox";
+import { FALLBACK_AGENTS, type Agent } from "@/components/views/home/fallback-agents";
+import { TEAM_TEMPLATES, type TeamTemplate } from "@/components/views/home/team-templates";
+import { TeamTemplateRow } from "@/components/views/home/home-view";
 
 // ── Hooks to fetch from API with fallback ───────────────────────────────────
 
@@ -665,8 +668,36 @@ function DMContextPane({ thread }: { thread: Thread }) {
 
 // ── Teams grid ──────────────────────────────────────────────────────────────
 
-export function TeamsGrid({ onNew, onOpen }: { onNew: () => void; onOpen: (team: Team) => void }) {
-  const { teams: allTeams, agentById: lookupAgent } = useInboxData();
+export function TeamsGrid({
+  onNew,
+  onOpen,
+  busyTemplateSlug,
+  onCreateFromTemplate,
+}: {
+  onNew: () => void;
+  onOpen: (team: Team) => void;
+  busyTemplateSlug: string | null;
+  onCreateFromTemplate: (template: TeamTemplate) => void;
+}) {
+  const { teams: allTeams, agents: inboxAgents, agentById: lookupAgent } = useInboxData();
+  // Map any agent slug → minimal avatar fields. We try the inbox agent set
+  // first (these are the user's hired agents, so they have real avatars)
+  // and fall back to the marketplace fallback for slugs the user hasn't
+  // hired yet — that way templates always render even before any hires.
+  const inboxBySlug = useMemo(() => {
+    const m = new Map<string, InboxAgent>();
+    for (const a of inboxAgents) m.set(a.id, a);
+    return m;
+  }, [inboxAgents]);
+  const fallbackBySlug = useMemo(() => {
+    const m = new Map<string, Agent>();
+    for (const a of FALLBACK_AGENTS) m.set(a.id, a);
+    return m;
+  }, []);
+  const agentBySlug = useCallback(
+    (slug: string) => inboxBySlug.get(slug) ?? fallbackBySlug.get(slug),
+    [inboxBySlug, fallbackBySlug],
+  );
   return (
     // min-h-0 is required so this flex-1 child can actually shrink and let
     // overflow-y-auto take effect — otherwise the flex column treats it as
@@ -681,6 +712,29 @@ export function TeamsGrid({ onNew, onOpen }: { onNew: () => void; onOpen: (team:
           <Button className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white" onPress={onNew} startContent={<Icon name="add" variant="round" />}>
             New team
           </Button>
+        </div>
+
+        {/* Premade teams reminder — always visible above the user's teams.
+            Functions as the empty-state when allTeams is empty, and as a
+            "spin up another quickly" prompt otherwise. */}
+        <div className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-gradient-to-br from-amber-50/60 to-orange-50/30 p-4 dark:border-amber-500/20 dark:from-amber-500/5 dark:to-orange-500/3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <div className="text-[15px] font-bold text-default-800 dark:text-white/90">
+                {allTeams.length === 0 ? "Start with a premade team" : "Need another team?"}
+              </div>
+              <p className="mt-0.5 text-[12.5px] text-default-500 dark:text-white/55">
+                Curated rosters that ship with a goal, lead, and starting agents.
+              </p>
+            </div>
+          </div>
+          <TeamTemplateRow
+            templates={TEAM_TEMPLATES}
+            agentBySlug={agentBySlug}
+            busySlug={busyTemplateSlug}
+            onCreate={onCreateFromTemplate}
+            variant="row"
+          />
         </div>
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {allTeams.map((team) => {
@@ -987,10 +1041,47 @@ export default function InboxView() {
 }
 
 function InboxViewInner() {
-  const { teams: TEAMS, threads: THREADS } = useInboxData();
+  const { teams: TEAMS, threads: THREADS, refetchTeams } = useInboxData();
   const [tab, setTab] = useState<"inbox" | "teams" | "create">("inbox");
   const [active, setActive] = useState<Thread | null>(null);
   const [filter, setFilter] = useState("all");
+  const [busyTemplateSlug, setBusyTemplateSlug] = useState<string | null>(null);
+
+  const createTeamFromTemplate = useCallback(
+    async (template: TeamTemplate) => {
+      if (busyTemplateSlug) return;
+      setBusyTemplateSlug(template.slug);
+      try {
+        const res = await fetchAPI("/api/agent/teams", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: template.name,
+            goal: template.goal,
+            icon: template.icon,
+            hue: template.hue,
+            agents: template.agents,
+            lead: template.lead,
+          }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error ?? `Create failed: ${res.status}`);
+        }
+        addToast({ title: `Created team "${template.name}"`, color: "success" });
+        await refetchTeams();
+      } catch (err) {
+        addToast({
+          title: "Couldn't create team",
+          description: err instanceof Error ? err.message : "Unknown error",
+          color: "danger",
+        });
+      } finally {
+        setBusyTemplateSlug(null);
+      }
+    },
+    [busyTemplateSlug, refetchTeams],
+  );
 
   // Set initial active thread once threads load
   useEffect(() => {
@@ -1084,6 +1175,8 @@ function InboxViewInner() {
             const thread = THREADS.find((x) => x.teamId === t.id);
             if (thread) { setActive(thread); setTab("inbox"); }
           }}
+          busyTemplateSlug={busyTemplateSlug}
+          onCreateFromTemplate={createTeamFromTemplate}
         />
       )}
 

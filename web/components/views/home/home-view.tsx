@@ -29,6 +29,7 @@ import { useState, useMemo, useCallback, useContext, useEffect, useRef, lazy, Su
 const InboxView = lazy(() => import("@/components/views/home/inbox-view"));
 
 import { FALLBACK_AGENTS, type Agent } from "@/components/views/home/fallback-agents";
+import { TEAM_TEMPLATES, type TeamTemplate } from "@/components/views/home/team-templates";
 import { PreviousWork } from "@/components/views/home/previous-work";
 import { BuildCustomModal } from "@/components/views/home/build-custom-modal";
 
@@ -121,6 +122,120 @@ function AgentAvatar({ agent, size = 56 }: { agent: Agent; size?: number }) {
         loading="lazy"
       />
       <span className="absolute right-0 bottom-0 h-[28%] w-[28%] rounded-full border-2 border-white bg-emerald-500 dark:border-neutral-900" />
+    </div>
+  );
+}
+
+// ── Team templates row ──────────────────────────────────────────────────────
+//
+// Curated one-click teams. Same component is used on the Explore home page
+// and the My hires Teams tab, so it's controlled — the parent passes an
+// `onCreate(template)` handler that does the API call and any refresh.
+
+// Minimal agent shape needed to render an avatar inside a template card.
+// Both Agent (marketplace) and InboxAgent (home inbox) satisfy this, so
+// the row is reusable without adapting the data on the caller's side.
+export type TemplateAgent = {
+  id: string;
+  name: string;
+  hue: number;
+  avatar: string;
+};
+
+export function TeamTemplateRow({
+  templates,
+  agentBySlug,
+  busySlug,
+  onCreate,
+  variant = "row",
+}: {
+  templates: TeamTemplate[];
+  // For rendering avatars on each card. Returns undefined if the slug isn't
+  // in the user's loaded agent set.
+  agentBySlug: (slug: string) => TemplateAgent | undefined;
+  /** Slug of the template currently being created (shows a spinner). */
+  busySlug: string | null;
+  onCreate: (template: TeamTemplate) => void;
+  /** "row" (horizontal scroll) for Explore; "grid" for the Teams tab reminder. */
+  variant?: "row" | "grid";
+}) {
+  const containerCls =
+    variant === "row"
+      ? "flex gap-3 overflow-x-auto pb-2 [&::-webkit-scrollbar]:hidden"
+      : "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3";
+  const cardCls =
+    variant === "row"
+      ? "flex w-[300px] shrink-0 flex-col gap-3 rounded-2xl border border-default-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-amber-500/30"
+      : "flex flex-col gap-3 rounded-2xl border border-default-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-amber-500/30";
+
+  return (
+    <div className={containerCls}>
+      {templates.map((t) => {
+        const agents = t.agents
+          .map((s) => agentBySlug(s))
+          .filter(Boolean) as TemplateAgent[];
+        const busy = busySlug === t.slug;
+        return (
+          <div key={t.slug} className={cardCls}>
+            <div className="flex items-start gap-2.5">
+              <span
+                className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-[20px]"
+                style={{
+                  background: `linear-gradient(135deg, hsl(${t.hue} 80% 62%), hsl(${(t.hue + 30) % 360} 70% 45%))`,
+                }}
+              >
+                <Icon name={t.icon} variant="round" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="text-[14.5px] font-bold text-default-800 dark:text-white/90">
+                  {t.name}
+                </div>
+                <div className="mt-0.5 line-clamp-2 text-[12px] leading-snug text-default-500 dark:text-white/55">
+                  {t.goal}
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              {/* Stack of agent avatars; cap at 5 visible. */}
+              {agents.slice(0, 5).map((a, i) => (
+                <div
+                  key={a.id}
+                  className="relative inline-flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-full border-2 border-white shadow-sm dark:border-[#0d0d14]"
+                  style={{
+                    marginLeft: i === 0 ? 0 : -8,
+                    background: `linear-gradient(135deg, hsl(${a.hue} 80% 62%), hsl(${(a.hue + 30) % 360} 70% 45%))`,
+                  }}
+                  title={a.name}
+                >
+                  <img src={a.avatar} alt={a.name} className="h-full w-full object-cover" loading="lazy" />
+                </div>
+              ))}
+              {t.agents.length > 5 && (
+                <span className="ml-1 text-[11px] font-medium text-default-400 dark:text-white/40">
+                  +{t.agents.length - 5}
+                </span>
+              )}
+              <span className="ml-auto text-[11px] font-medium text-default-400 dark:text-white/40">
+                {t.agents.length} agents
+              </span>
+            </div>
+            <Button
+              size="sm"
+              className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+              onPress={() => onCreate(t)}
+              isDisabled={busy}
+              isLoading={busy}
+              startContent={
+                busy ? null : (
+                  <Icon name="rocket_launch" variant="round" className="text-base" />
+                )
+              }
+            >
+              {busy ? "Creating…" : "Create team"}
+            </Button>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -300,6 +415,56 @@ export default function HomeView({
   const { agents: allAgents, isLoading: isLoadingAgents } = useAgentListings();
   const [homeView, setHomeView] = useState<"explore" | "inbox">("explore");
   const [cat, setCat] = useState<string>("all");
+  const [creatingTemplateSlug, setCreatingTemplateSlug] = useState<string | null>(null);
+
+  // One-click team creation from a curated template. Posts to the same
+  // /api/agent/teams endpoint the wizard uses; on success we toast and
+  // bounce the user to the My hires Teams tab so they can see it.
+  const agentsBySlug = useMemo(() => {
+    const map = new Map<string, Agent>();
+    for (const a of allAgents) map.set(a.id, a);
+    return map;
+  }, [allAgents]);
+
+  const createTeamFromTemplate = useCallback(
+    async (template: TeamTemplate) => {
+      if (creatingTemplateSlug) return;
+      setCreatingTemplateSlug(template.slug);
+      try {
+        const res = await fetchAPI("/api/agent/teams", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: template.name,
+            goal: template.goal,
+            icon: template.icon,
+            hue: template.hue,
+            agents: template.agents,
+            lead: template.lead,
+          }),
+        });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data?.error ?? `Create failed: ${res.status}`);
+        }
+        addToast({
+          title: `Created team "${template.name}"`,
+          description: "See it in My hires.",
+          color: "success",
+        });
+        setHomeView("inbox");
+      } catch (err) {
+        addToast({
+          title: "Couldn't create team",
+          description: err instanceof Error ? err.message : "Unknown error",
+          color: "danger",
+        });
+      } finally {
+        setCreatingTemplateSlug(null);
+      }
+    },
+    [creatingTemplateSlug],
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [maxPrice, setMaxPrice] = useState(50);
   const [turnaround, setTurnaround] = useState("any");
@@ -322,8 +487,6 @@ export default function HomeView({
     }
     return list;
   }, [cat, maxPrice, turnaround, selectedTools, allAgents]);
-
-  const featured = allAgents.slice(0, 3);
 
   const [selectedAgent, setSelectedAgent] = useState<Agent | null>(null);
   const [buildCustom, setBuildCustom] = useState<{ seedTagline?: string } | null>(null);
@@ -732,6 +895,42 @@ export default function HomeView({
             </div>
           </div>
 
+          {/* ── Featured teams (hero-level callout — comes first under the
+              search/welcome block to give one-click setups maximum
+              visibility) ── */}
+          {cat === "all" && (
+            <section className="rounded-3xl border border-amber-200 bg-gradient-to-br from-amber-50 via-orange-50/60 to-rose-50/40 p-5 shadow-sm dark:border-amber-500/20 dark:from-amber-500/8 dark:via-orange-500/5 dark:to-rose-500/3">
+              <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
+                <div>
+                  <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-amber-300/60 bg-white/70 px-2.5 py-0.5 text-[10.5px] font-bold uppercase tracking-[0.1em] text-amber-700 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-300">
+                    <Icon name="rocket_launch" variant="round" className="text-[13px]" />
+                    Ship today
+                  </div>
+                  <h2 className="text-[22px] font-bold tracking-tight text-default-900 dark:text-white">
+                    Featured teams
+                  </h2>
+                  <p className="mt-0.5 text-[13.5px] text-default-500 dark:text-white/55">
+                    Curated rosters with goal, lead, and agents — one click and they&apos;re yours.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setHomeView("inbox")}
+                  className="text-[13px] font-medium text-amber-700 hover:underline dark:text-amber-300"
+                >
+                  See your teams →
+                </button>
+              </div>
+              <TeamTemplateRow
+                templates={TEAM_TEMPLATES}
+                agentBySlug={(s) => agentsBySlug.get(s)}
+                busySlug={creatingTemplateSlug}
+                onCreate={createTeamFromTemplate}
+                variant="row"
+              />
+            </section>
+          )}
+
           {/* ── Browse categories (tile grid — Variant A/C style) ── */}
           {cat === "all" && (
             <section className="flex flex-col gap-3">
@@ -749,21 +948,6 @@ export default function HomeView({
             </section>
           )}
 
-          {/* ── Featured ── */}
-          {cat === "all" && (
-            <section className="flex flex-col gap-3">
-              <SectionHeader
-                title="Featured"
-                subtitle="top-rated this week"
-                action="View all featured →"
-              />
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                {featured.map((a) => (
-                  <AgentCard key={a.id} agent={a} onHire={setSelectedAgent} featured />
-                ))}
-              </div>
-            </section>
-          )}
 
           {/* ── Team strip (recommended) ── */}
           {cat === "all" && (
