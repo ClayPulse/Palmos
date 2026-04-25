@@ -1245,9 +1245,30 @@ function InboxViewInner() {
       {tab === "teams" && (
         <TeamsGrid
           onNew={() => setTab("create")}
-          onOpen={(t) => {
-            const thread = THREADS.find((x) => x.teamId === t.id);
-            if (thread) { setActive(thread); setTab("inbox"); }
+          onOpen={async (t) => {
+            let thread = THREADS.find((x) => x.teamId === t.id);
+            if (!thread) {
+              const res = await fetchAPI("/api/agent/inbox/threads", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ kind: "team", title: t.name, teamId: t.id }),
+              });
+              if (res.ok) {
+                const created = await res.json();
+                thread = {
+                  id: created.id,
+                  kind: "team",
+                  teamId: t.id,
+                  title: t.name,
+                  preview: "",
+                  unread: 0,
+                  pinned: false,
+                  updated: "now",
+                  status: "active",
+                };
+              }
+            }
+            if (thread) { setFilter("all"); setActive(thread); setTab("inbox"); }
           }}
           busyTemplateSlug={busyTemplateSlug}
           onCreateFromTemplate={createTeamFromTemplate}
