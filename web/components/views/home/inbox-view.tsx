@@ -5,15 +5,18 @@ import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from "react";
 import {
+  FALLBACK_DELIVERIES,
   FALLBACK_INBOX_AGENTS,
   FALLBACK_TEAMS,
   FALLBACK_THREADS,
+  type Delivery,
   type InboxAgent,
   type Team,
   type Thread,
 } from "@/components/views/home/fallback-inbox";
 import { FALLBACK_AGENTS, type Agent } from "@/components/views/home/fallback-agents";
 import { TEAM_TEMPLATES, type TeamTemplate } from "@/components/views/home/team-templates";
+import { parseSuggestions } from "@/lib/utils/parse-suggestions";
 import { TeamTemplateRow } from "@/components/views/home/home-view";
 
 // ── Hooks to fetch from API with fallback ───────────────────────────────────
@@ -96,6 +99,7 @@ function useInboxThreads() {
             kind: t.kind,
             teamId: t.teamId ?? undefined,
             agentId: t.agentSlug ?? undefined,
+            sessionId: t.sessionId ?? undefined,
             title: t.title,
             preview: t.preview ?? "",
             unread: t.unread ?? 0,
@@ -482,16 +486,230 @@ function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: bo
   );
 }
 
+// ── Inbox chat hook ─────────────────────────────────────────────────────────
+
+type ChatMsg = { id: string; role: "human" | "ai" | "system"; content: string; ts: string };
+
+function useInboxChat(thread: Thread) {
+  const { teams } = useInboxData();
+  const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
+  const chatMsgsRef = useRef<ChatMsg[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [text, setText] = useState("");
+  const sessionIdRef = useRef<string | null>(thread.sessionId ?? null);
+  const abortRef = useRef<AbortController | null>(null);
+  const aiIdRef = useRef<string | null>(null);
+
+  const setMsgs = useCallback((updater: ChatMsg[] | ((prev: ChatMsg[]) => ChatMsg[])) => {
+    setChatMsgs((prev) => {
+      const next = typeof updater === "function" ? updater(prev) : updater;
+      chatMsgsRef.current = next;
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    setMsgs([]);
+    setText("");
+    sessionIdRef.current = thread.sessionId ?? null;
+    aiIdRef.current = null;
+    abortRef.current?.abort();
+
+    fetchAPI(`/api/agent/inbox/threads/${thread.id}`)
+      .then((r) => r.json())
+      .then((data: any) => {
+        if (data.sessionId) sessionIdRef.current = data.sessionId;
+        const msgs: any[] = data.session?.messages ?? [];
+        if (msgs.length > 0) {
+          setMsgs(msgs.map((m: any) => ({
+            id: m.id,
+            role: m.role === "human" ? "human" : m.role === "ai" ? "ai" : "system",
+            content: typeof m.content === "string" ? m.content : "",
+            ts: new Date(m.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+          })));
+        }
+      })
+      .catch(() => {});
+  }, [thread.id, setMsgs]);
+
+  const agentSlug =
+    thread.kind === "dm"
+      ? thread.agentId
+      : teams.find((t) => t.id === thread.teamId)?.lead;
+
+  const submit = useCallback(async () => {
+    const trimmed = text.trim();
+    if (!trimmed || !agentSlug || isLoading) return;
+
+    const userMsg: ChatMsg = { id: `u-${Date.now()}`, role: "human", content: trimmed, ts: "now" };
+    setMsgs((prev) => [...prev, userMsg]);
+    setText("");
+    setIsLoading(true);
+    aiIdRef.current = null;
+
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      const snapshot = [...chatMsgsRef.current];
+      const res = await fetchAPI(`/api/agent/worker/${encodeURIComponent(agentSlug)}/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: snapshot
+            .filter((m) => m.role !== "system")
+            .map((m) => ({ role: m.role === "human" ? "user" : "assistant", content: m.content })),
+          sessionId: sessionIdRef.current ?? undefined,
+        }),
+      });
+
+      if (!res.ok || !res.body) return;
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      outer: while (!controller.signal.aborted) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const parts = buffer.split("\n\n");
+        buffer = parts.pop() ?? "";
+
+        for (const part of parts) {
+          if (!part.trim()) continue;
+          let eventType = "";
+          let dataStr = "";
+          for (const line of part.split("\n")) {
+            if (line.startsWith("event: ")) eventType = line.slice(7).trim();
+            else if (line.startsWith("data: ")) dataStr += line.slice(6);
+          }
+          if (!eventType || !dataStr) continue;
+          if (eventType === "end") break outer;
+          if (eventType !== "messages") continue;
+
+          let parsed: unknown;
+          try { parsed = JSON.parse(dataStr); } catch { continue; }
+          if (!Array.isArray(parsed) || parsed.length === 0) continue;
+
+          // LangGraph messages format: [chunk] or ["lc", 1, [chunk]]
+          const chunk: any =
+            parsed.length >= 3 && typeof parsed[0] === "string" && Array.isArray(parsed[2])
+              ? parsed[2][0]
+              : parsed[0];
+          if (!chunk) continue;
+
+          const kwargs = chunk.kwargs ?? chunk;
+          const rawContent = kwargs.content ?? "";
+          const chunkText =
+            Array.isArray(rawContent)
+              ? rawContent.map((b: any) => (typeof b === "string" ? b : (b.text ?? ""))).join("")
+              : typeof rawContent === "string" ? rawContent : "";
+          if (!chunkText) continue;
+
+          const msgId: string = kwargs.id ?? chunk.id ?? `ai-${Date.now()}`;
+          if (!aiIdRef.current) {
+            aiIdRef.current = msgId;
+            setMsgs((prev) => [...prev, { id: msgId, role: "ai", content: chunkText, ts: "now" }]);
+          } else if (msgId === aiIdRef.current) {
+            setMsgs((prev) =>
+              prev.map((m) => (m.id === aiIdRef.current ? { ...m, content: m.content + chunkText } : m)),
+            );
+          }
+        }
+      }
+      reader.cancel();
+    } catch (err: any) {
+      if (err?.name !== "AbortError") console.warn("[inbox-chat] stream error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [text, agentSlug, isLoading, setMsgs]);
+
+  return { chatMsgs, isLoading, text, setText, submit };
+}
+
+// ── Simple chat message renderer (real API messages) ─────────────────────────
+
+function SimpleChatMessage({ m, thread, onSuggestionClick }: { m: ChatMsg; thread: Thread; onSuggestionClick?: (s: string) => void }) {
+  const { teams, agentById: lookupAgent } = useInboxData();
+  if (m.role === "system") {
+    return (
+      <div className="self-center rounded-full bg-default-100 px-3.5 py-1.5 text-center text-[11.5px] font-medium text-default-400 dark:bg-white/8 dark:text-white/40">
+        {m.content}
+      </div>
+    );
+  }
+  if (m.role === "human") {
+    return (
+      <div className="flex justify-end gap-2.5">
+        <div className="max-w-[78%]">
+          <div className="rounded-[14px] rounded-tr-sm bg-gradient-to-r from-amber-500 to-orange-500 px-3.5 py-2.5 text-[13.5px] leading-relaxed text-white">
+            {m.content}
+          </div>
+          <div className="mt-1 text-right text-[11px] text-default-400 dark:text-white/35">{m.ts}</div>
+        </div>
+      </div>
+    );
+  }
+  // AI message
+  const agentSlug =
+    thread.kind === "dm"
+      ? thread.agentId
+      : teams.find((t) => t.id === thread.teamId)?.lead;
+  const a = agentSlug ? lookupAgent(agentSlug) : undefined;
+  const isLead = thread.kind === "team";
+  const { text: displayContent, suggestions } = parseSuggestions(m.content);
+  return (
+    <div className="flex gap-2.5">
+      {a && <InAvatar agent={a} size={32} />}
+      <div className="max-w-[78%] min-w-0">
+        {a && (
+          <div className="mb-1 flex items-baseline gap-2">
+            <span className="text-[13px] font-semibold text-default-800 dark:text-white/90">
+              {a.name}
+              {isLead && (
+                <span className="ml-1.5 rounded bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.1em] text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                  Lead
+                </span>
+              )}
+            </span>
+            <span className="text-[11px] text-default-400 dark:text-white/35">· {m.ts}</span>
+          </div>
+        )}
+        <div className="rounded-[14px] rounded-tl-sm border border-default-200 bg-white px-3.5 py-2.5 text-[13.5px] leading-relaxed text-default-600 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/65 whitespace-pre-wrap">
+          {displayContent || <span className="text-default-300 dark:text-white/20 italic text-sm">Thinking…</span>}
+        </div>
+        {suggestions.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {suggestions.map((s) => (
+              <button
+                key={s}
+                type="button"
+                onClick={() => onSuggestionClick?.(s)}
+                className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[12px] font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/15"
+              >
+                {s}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Thread view ─────────────────────────────────────────────────────────────
 
 function ThreadView({ thread }: { thread: Thread }) {
   const { teams, agentById: lookupAgent } = useInboxData();
-  const messages = genMessages(thread, teams);
+  const fallbackMessages = genMessages(thread, teams);
+  const { chatMsgs, isLoading, text, setText, submit } = useInboxChat(thread);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [thread.id]);
+  }, [thread.id, chatMsgs.length]);
 
   // Header
   let header: React.ReactNode;
@@ -551,12 +769,45 @@ function ThreadView({ thread }: { thread: Thread }) {
     );
   }
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      void submit();
+    }
+  };
+
   return (
     <>
       {header}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-[900px] flex-col gap-4 px-8 py-6">
-          {messages.map((m) => <Message key={m.id} m={m} />)}
+          {chatMsgs.length > 0
+            ? chatMsgs.map((m, i) => (
+                <SimpleChatMessage
+                  key={m.id}
+                  m={m}
+                  thread={thread}
+                  onSuggestionClick={
+                    !isLoading && i === chatMsgs.length - 1 && m.role === "ai"
+                      ? (s) => { setText(s); void submit(); }
+                      : undefined
+                  }
+                />
+              ))
+            : fallbackMessages.map((m) => <Message key={m.id} m={m} />)}
+          {isLoading && chatMsgs[chatMsgs.length - 1]?.role !== "ai" && (
+            <div className="flex gap-2.5">
+              <div className="flex items-center gap-1 rounded-2xl border border-default-200 bg-white px-3.5 py-3 dark:border-white/8 dark:bg-white/[0.03]">
+                {[0, 1, 2].map((i) => (
+                  <span
+                    key={i}
+                    className="h-1.5 w-1.5 rounded-full bg-default-300 dark:bg-white/30"
+                    style={{ animation: `pulse 1.2s ${i * 0.2}s ease-in-out infinite` }}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
       {thread.kind !== "notif" && (
@@ -566,17 +817,29 @@ function ThreadView({ thread }: { thread: Thread }) {
               <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-default-400 hover:bg-default-100 dark:text-white/40 dark:hover:bg-white/10">
                 <Icon name="attach_file" variant="round" className="text-lg" />
               </button>
-              <textarea placeholder={placeholder} rows={1} className="max-h-[120px] min-w-0 flex-1 resize-none bg-transparent py-1.5 text-sm text-default-800 outline-none placeholder:text-default-400 dark:text-white/85 dark:placeholder:text-white/35" />
+              <textarea
+                placeholder={placeholder}
+                rows={1}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="max-h-[120px] min-w-0 flex-1 resize-none bg-transparent py-1.5 text-sm text-default-800 outline-none placeholder:text-default-400 dark:text-white/85 dark:placeholder:text-white/35"
+              />
               <button type="button" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-default-400 hover:bg-default-100 dark:text-white/40 dark:hover:bg-white/10">
                 <Icon name="alternate_email" variant="round" className="text-lg" />
               </button>
-              <button type="button" className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm">
+              <button
+                type="button"
+                onClick={() => void submit()}
+                disabled={isLoading || !text.trim()}
+                className="flex h-8.5 w-8.5 shrink-0 items-center justify-center rounded-[10px] bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm disabled:opacity-50"
+              >
                 <Icon name="arrow_upward" variant="round" className="text-lg" />
               </button>
             </div>
             <div className="mt-2 flex justify-between px-1 text-[11.5px] text-default-400 dark:text-white/35">
               <span>Enter to send · Shift+Enter for newline</span>
-              <span>Draft saved</span>
+              {isLoading && <span className="text-amber-500">Thinking…</span>}
             </div>
           </div>
         </div>
@@ -590,8 +853,29 @@ function ThreadView({ thread }: { thread: Thread }) {
 function TeamContextPane({ team }: { team: Team }) {
   const { agentById: lookupAgent } = useInboxData();
   const agents = team.agents.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
+  const [showDeliveries, setShowDeliveries] = useState(false);
+
+  if (showDeliveries) {
+    return (
+      <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
+        <DeliveriesPanel onBack={() => setShowDeliveries(false)} />
+      </aside>
+    );
+  }
+
   return (
     <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
+      <div className="border-b border-default-200 p-3 dark:border-white/8">
+        <Button
+          size="sm"
+          variant="flat"
+          className="w-full justify-start"
+          startContent={<Icon name="inventory_2" variant="round" className="text-sm" />}
+          onPress={() => setShowDeliveries(true)}
+        >
+          Deliveries
+        </Button>
+      </div>
       <div className="border-b border-default-200 p-4 dark:border-white/8">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">Goal</div>
         <p className="text-[13px] leading-relaxed text-default-600 dark:text-white/65">{team.goal}</p>
@@ -646,9 +930,30 @@ function TeamContextPane({ team }: { team: Team }) {
 function DMContextPane({ thread }: { thread: Thread }) {
   const { agentById: lookupAgent } = useInboxData();
   const a = lookupAgent(thread.agentId!);
+  const [showDeliveries, setShowDeliveries] = useState(false);
   if (!a) return null;
+
+  if (showDeliveries) {
+    return (
+      <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
+        <DeliveriesPanel agentId={a.id} onBack={() => setShowDeliveries(false)} />
+      </aside>
+    );
+  }
+
   return (
     <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
+      <div className="border-b border-default-200 p-3 dark:border-white/8">
+        <Button
+          size="sm"
+          variant="flat"
+          className="w-full justify-start"
+          startContent={<Icon name="inventory_2" variant="round" className="text-sm" />}
+          onPress={() => setShowDeliveries(true)}
+        >
+          Deliveries
+        </Button>
+      </div>
       <div className="p-4">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">About this thread</div>
         <div className="flex items-center gap-3">
@@ -663,6 +968,76 @@ function DMContextPane({ thread }: { thread: Thread }) {
         </Button>
       </div>
     </aside>
+  );
+}
+
+// ── Deliveries panel ────────────────────────────────────────────────────────
+
+const STATUS_META: Record<string, { label: string; cls: string; icon: string }> = {
+  awaiting:     { label: "Awaiting review",  cls: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",   icon: "schedule" },
+  "changes-req":{ label: "Changes requested",cls: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",       icon: "edit_note" },
+  approved:     { label: "Approved",         cls: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300", icon: "check_circle" },
+  sent:         { label: "Sent",             cls: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300", icon: "send" },
+  archived:     { label: "Archived",         cls: "bg-default-100 text-default-500 dark:bg-white/8 dark:text-white/40",   icon: "archive" },
+};
+
+function DeliveriesPanel({ agentId, onBack }: { agentId?: string; onBack: () => void }) {
+  const { agentById: lookupAgent } = useInboxData();
+  const deliveries = agentId
+    ? FALLBACK_DELIVERIES.filter((d) => d.agentId === agentId)
+    : FALLBACK_DELIVERIES;
+
+  return (
+    <div className="flex min-h-0 flex-col">
+      <div className="flex shrink-0 items-center gap-2 border-b border-default-200 p-3 dark:border-white/8">
+        <Button isIconOnly size="sm" variant="light" onPress={onBack}>
+          <Icon name="arrow_back" variant="round" className="text-sm" />
+        </Button>
+        <span className="text-[13px] font-semibold text-default-800 dark:text-white/90">Deliveries</span>
+        {deliveries.length > 0 && (
+          <span className="ml-auto inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+            {deliveries.filter((d) => d.status === "awaiting").length} awaiting
+          </span>
+        )}
+      </div>
+      <div className="flex-1 overflow-y-auto p-3">
+        {deliveries.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 py-8 text-center text-[13px] text-default-400 dark:text-white/40">
+            <Icon name="inbox" variant="round" className="text-3xl" />
+            <span>No deliveries yet</span>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {deliveries.map((d) => {
+              const meta = STATUS_META[d.status] ?? STATUS_META.archived;
+              const agent = lookupAgent(d.agentId);
+              return (
+                <div key={d.id} className="rounded-xl border border-default-200 bg-white p-3 dark:border-white/8 dark:bg-white/[0.03]">
+                  <div className="mb-1.5 flex items-start justify-between gap-2">
+                    <span className="text-[13px] font-semibold text-default-800 dark:text-white/90 leading-snug">{d.task}</span>
+                    <span className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${meta.cls}`}>
+                      <Icon name={meta.icon} variant="round" className="text-[12px]" />
+                      {d.itemCount}
+                    </span>
+                  </div>
+                  <p className="mb-2 line-clamp-2 text-[12px] leading-relaxed text-default-500 dark:text-white/50">{d.summary}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      {agent && <InAvatar agent={agent} size={16} online={false} />}
+                      <span className="text-[11px] text-default-400 dark:text-white/35">{d.when}</span>
+                    </div>
+                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${meta.cls}`}>
+                      <Icon name={meta.icon} variant="round" className="text-[11px]" />
+                      {meta.label}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
