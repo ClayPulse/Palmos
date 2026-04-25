@@ -2,7 +2,7 @@
 
 import Icon from "@/components/misc/icon";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { addToast, Button } from "@heroui/react";
+import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from "react";
 import {
   FALLBACK_INBOX_AGENTS,
@@ -679,7 +679,32 @@ export function TeamsGrid({
   busyTemplateSlug: string | null;
   onCreateFromTemplate: (template: TeamTemplate) => void;
 }) {
-  const { teams: allTeams, agents: inboxAgents, agentById: lookupAgent } = useInboxData();
+  const { teams: allTeams, agents: inboxAgents, agentById: lookupAgent, refetchTeams } = useInboxData();
+  const [pendingDelete, setPendingDelete] = useState<Team | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const requestDelete = useCallback((team: Team, e: React.MouseEvent | React.KeyboardEvent) => {
+    e.stopPropagation();
+    setPendingDelete(team);
+  }, []);
+  const confirmDelete = useCallback(async () => {
+    if (!pendingDelete) return;
+    const team = pendingDelete;
+    setDeletingId(team.id);
+    try {
+      const res = await fetchAPI(`/api/agent/teams/${team.id}`, { method: "DELETE" });
+      if (!res.ok && res.status !== 204) {
+        addToast({ title: "Couldn't delete team", description: `Status ${res.status}`, color: "danger" });
+        return;
+      }
+      addToast({ title: `Deleted "${team.name}"` });
+      await refetchTeams();
+      setPendingDelete(null);
+    } catch (err) {
+      addToast({ title: "Couldn't delete team", description: err instanceof Error ? err.message : "Unknown error", color: "danger" });
+    } finally {
+      setDeletingId(null);
+    }
+  }, [pendingDelete, refetchTeams]);
   // Map any agent slug → minimal avatar fields. We try the inbox agent set
   // first (these are the user's hired agents, so they have real avatars)
   // and fall back to the marketplace fallback for slugs the user hasn't
@@ -741,7 +766,22 @@ export function TeamsGrid({
             const agents = team.agents.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
             const lead = lookupAgent(team.lead);
             return (
-              <button key={team.id} type="button" onClick={() => onOpen(team)} className="flex flex-col gap-3.5 rounded-2xl border border-default-200 bg-white p-4.5 text-left transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-amber-500/30">
+              <button key={team.id} type="button" onClick={() => onOpen(team)} className="group relative flex flex-col gap-3.5 rounded-2xl border border-default-200 bg-white p-4.5 text-left transition-all hover:-translate-y-0.5 hover:border-amber-300 hover:shadow-md dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-amber-500/30">
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Delete team ${team.name}`}
+                  onClick={(e) => requestDelete(team, e)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      requestDelete(team, e);
+                    }
+                  }}
+                  className={`absolute right-2.5 top-2.5 z-10 inline-flex h-7 w-7 items-center justify-center rounded-lg text-default-400 opacity-0 transition-all hover:bg-red-50 hover:text-red-600 group-hover:opacity-100 dark:text-white/40 dark:hover:bg-red-500/10 dark:hover:text-red-400 ${deletingId === team.id ? "pointer-events-none opacity-100" : ""}`}
+                >
+                  <Icon name={deletingId === team.id ? "hourglass_empty" : "delete_outline"} variant="round" className="text-base" />
+                </span>
                 <div className="flex items-center gap-3">
                   <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl text-white text-[22px]" style={{ background: `linear-gradient(135deg, hsl(${team.hue} 80% 62%), hsl(${(team.hue + 30) % 360} 70% 45%))` }}>
                     <Icon name={team.icon} variant="round" />
@@ -775,6 +815,40 @@ export function TeamsGrid({
           </button>
         </div>
       </div>
+      <Modal
+        isOpen={pendingDelete !== null}
+        onClose={() => { if (deletingId === null) setPendingDelete(null); }}
+        size="sm"
+        backdrop="blur"
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex items-center gap-2">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-400">
+                  <Icon name="delete_outline" variant="round" className="text-lg" />
+                </span>
+                Delete team?
+              </ModalHeader>
+              <ModalBody>
+                <p className="text-sm text-default-600 dark:text-white/70">
+                  This will permanently delete{" "}
+                  <strong className="text-default-900 dark:text-white">{pendingDelete?.name}</strong>
+                  {" "}and remove all of its threads. This cannot be undone.
+                </p>
+              </ModalBody>
+              <ModalFooter>
+                <Button variant="light" onPress={onClose} isDisabled={deletingId !== null}>
+                  Cancel
+                </Button>
+                <Button color="danger" onPress={confirmDelete} isLoading={deletingId !== null}>
+                  Delete team
+                </Button>
+              </ModalFooter>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
@@ -1009,7 +1083,7 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
                 )
               }
             >
-              {submitting ? "Creating…" : "Create team"}
+              {submitting ? "Hiring…" : "Hire team"}
             </Button>
           )}
         </div>

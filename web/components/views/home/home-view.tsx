@@ -231,7 +231,7 @@ export function TeamTemplateRow({
                 )
               }
             >
-              {busy ? "Creating…" : "Create team"}
+              {busy ? "Hiring…" : "Hire team"}
             </Button>
           </div>
         );
@@ -576,13 +576,24 @@ export default function HomeView({
     <div className="flex h-full w-full flex-col bg-white dark:bg-[#0d0d14]">
       {/* ── Nav bar ── */}
       <div className="shrink-0 flex items-center gap-5 border-b border-default-200 bg-white px-7 py-3 dark:border-white/8 dark:bg-[#0d0d14]">
-        {/* Left — logo */}
-        <a href="/" className="flex shrink-0 items-center gap-2 no-underline">
+        {/* Left — logo. Acts as a "go to Explore home" shortcut, no
+            navigation: clears category filter, dismisses any open modal,
+            and switches the home view back to Explore. */}
+        <button
+          type="button"
+          onClick={() => {
+            setHomeView("explore");
+            setCat("all");
+            setSelectedAgent(null);
+            setBuildCustom(null);
+          }}
+          className="flex shrink-0 items-center gap-2 no-underline"
+        >
           <Image src="/assets/pulse-logo.svg" alt="Palmos" width={24} height={24} />
           <span className="hidden text-base font-bold tracking-wide bg-gradient-to-r from-amber-600 via-amber-400 to-amber-600 bg-clip-text text-transparent sm:inline dark:from-amber-500 dark:via-amber-200 dark:to-amber-500">
             PALMOS AI
           </span>
-        </a>
+        </button>
         {/* Center — search */}
         <div className="hidden flex-1 max-w-[640px] sm:block">
           <form
