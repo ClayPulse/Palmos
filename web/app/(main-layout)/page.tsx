@@ -16,18 +16,26 @@ export default function HomePage() {
   const appMode = editorContext?.editorStates.appMode ?? AppModeEnum.Home;
   const searchParams = useSearchParams();
   const { replace } = useRouter();
-  const { messages, handleSwitchSession, submit } = useChatContext();
+  const { messages, handleSwitchSession, submit, isLoadingSession } =
+    useChatContext();
   const importedRef = useRef(false);
+  const initialSwitchDoneRef = useRef(false);
 
-  // If there are existing messages, auto-switch to agent mode
+  // If the user returns to this page and a prior session already has
+  // messages, restore Agent view. Evaluate this ONCE — after the session
+  // finishes loading — so later message growth (e.g. from the detail-card
+  // "try before you hire" chat panel) doesn't yank the user out of Home.
   useEffect(() => {
+    if (initialSwitchDoneRef.current) return;
+    if (isLoadingSession) return;
+    initialSwitchDoneRef.current = true;
     if (messages.length > 0 && appMode === AppModeEnum.Home) {
       editorContext?.setEditorStates((prev) => ({
         ...prev,
         appMode: AppModeEnum.Agent,
       }));
     }
-  }, [messages.length, appMode, editorContext]);
+  }, [isLoadingSession, messages.length, appMode, editorContext]);
 
   useEffect(() => {
     const mode = searchParams.get("mode");
