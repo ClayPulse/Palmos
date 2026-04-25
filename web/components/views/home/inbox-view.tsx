@@ -2,7 +2,7 @@
 
 import Icon from "@/components/misc/icon";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { Button } from "@heroui/react";
+import { addToast, Button } from "@heroui/react";
 import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from "react";
 import {
   FALLBACK_INBOX_AGENTS,
@@ -38,32 +38,46 @@ function useInboxAgents() {
   return agents;
 }
 
-function useInboxTeams() {
+function useInboxTeams(): { teams: Team[]; refetch: () => Promise<void> } {
   const [teams, setTeams] = useState<Team[]>(FALLBACK_TEAMS);
 
-  useEffect(() => {
-    fetchAPI("/api/agent/teams")
-      .then((res) => res.json())
-      .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setTeams(data.map((t: any) => ({
+  const refetch = useCallback(async () => {
+    try {
+      const res = await fetchAPI("/api/agent/teams");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        setTeams(
+          data.map((t: any) => ({
             id: t.id,
             name: t.name,
             icon: t.icon,
             hue: t.hue,
             goal: t.goal ?? "",
-            lead: t.leadAgent ?? t.members?.find((m: any) => m.role === "lead")?.agentSlug ?? "",
+            lead:
+              t.leadAgent ??
+              t.members?.find((m: any) => m.role === "lead")?.agentSlug ??
+              "",
             agents: t.members?.map((m: any) => m.agentSlug) ?? [],
-            created: new Date(t.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            created: new Date(t.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "numeric",
+            }),
             runs: t.totalRuns ?? 0,
             success: t.successRate ?? 0,
-          })));
-        }
-      })
-      .catch(() => {});
+          })),
+        );
+      }
+    } catch {
+      // ignore — leaves the previous teams (or fallback) intact
+    }
   }, []);
 
-  return teams;
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
+
+  return { teams, refetch };
 }
 
 function useInboxThreads() {
@@ -101,11 +115,13 @@ const InboxDataCtx = createContext<{
   teams: Team[];
   threads: Thread[];
   agentById: (id: string) => InboxAgent | undefined;
+  refetchTeams: () => Promise<void>;
 }>({
   agents: FALLBACK_INBOX_AGENTS,
   teams: FALLBACK_TEAMS,
   threads: FALLBACK_THREADS,
   agentById: (id: string) => FALLBACK_INBOX_AGENTS.find((a) => a.id === id),
+  refetchTeams: async () => {},
 });
 
 function useInboxData() {
@@ -715,7 +731,7 @@ const ICON_OPTIONS = ["trending_up", "receipt_long", "support_agent", "palette",
 const HUE_OPTIONS = [30, 0, 310, 260, 210, 190, 160, 130];
 
 export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
-  const { agents: allAgents, agentById: lookupAgent } = useInboxData();
+  const { agents: allAgents, agentById: lookupAgent, refetchTeams } = useInboxData();
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
   const [goal, setGoal] = useState("");
@@ -723,10 +739,45 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
   const [hue, setHue] = useState(30);
   const [selected, setSelected] = useState<string[]>([]);
   const [lead, setLead] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const toggle = (id: string) => setSelected((s) => s.includes(id) ? s.filter((x) => x !== id) : [...s, id]);
   const agents = selected.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
   const steps = ["Basics", "Roster", "Lead", "Review"];
+
+  const submit = useCallback(async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    try {
+      const res = await fetchAPI("/api/agent/teams", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          goal: goal.trim() || undefined,
+          icon,
+          hue,
+          agents: selected,
+          lead: lead || selected[0],
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error ?? `Create team failed: ${res.status}`);
+      }
+      addToast({ title: `Created team "${name.trim()}"`, color: "success" });
+      await refetchTeams();
+      onDone();
+    } catch (err) {
+      addToast({
+        title: "Couldn't create team",
+        description: err instanceof Error ? err.message : "Unknown error",
+        color: "danger",
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  }, [submitting, name, goal, icon, hue, selected, lead, refetchTeams, onDone]);
 
   return (
     // min-h-0 lets this flex-1 child shrink so overflow-y-auto activates.
@@ -876,12 +927,35 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
             {step === 0 ? "Cancel" : "Back"}
           </Button>
           {step < 3 ? (
-            <Button className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white" isDisabled={step === 0 && !name.trim()} onPress={() => setStep((s) => s + 1)} endContent={<Icon name="arrow_forward" variant="round" className="text-sm" />}>
+            <Button
+              className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+              // Block Continue when the current step is incomplete:
+              //   step 0: name required
+              //   step 1: at least one agent selected
+              //   step 2: lead chosen
+              isDisabled={
+                (step === 0 && !name.trim()) ||
+                (step === 1 && selected.length === 0) ||
+                (step === 2 && !lead)
+              }
+              onPress={() => setStep((s) => s + 1)}
+              endContent={<Icon name="arrow_forward" variant="round" className="text-sm" />}
+            >
               Continue
             </Button>
           ) : (
-            <Button className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white" onPress={onDone} startContent={<Icon name="rocket_launch" variant="round" className="text-sm" />}>
-              Create team
+            <Button
+              className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+              isDisabled={submitting || !name.trim() || selected.length === 0}
+              isLoading={submitting}
+              onPress={submit}
+              startContent={
+                submitting ? null : (
+                  <Icon name="rocket_launch" variant="round" className="text-sm" />
+                )
+              }
+            >
+              {submitting ? "Creating…" : "Create team"}
             </Button>
           )}
         </div>
@@ -894,7 +968,7 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
 
 export default function InboxView() {
   const inboxAgents = useInboxAgents();
-  const inboxTeams = useInboxTeams();
+  const { teams: inboxTeams, refetch: refetchTeams } = useInboxTeams();
   const inboxThreads = useInboxThreads();
 
   const ctxValue = useMemo(() => ({
@@ -902,7 +976,8 @@ export default function InboxView() {
     teams: inboxTeams,
     threads: inboxThreads,
     agentById: (id: string) => inboxAgents.find((a) => a.id === id),
-  }), [inboxAgents, inboxTeams, inboxThreads]);
+    refetchTeams,
+  }), [inboxAgents, inboxTeams, inboxThreads, refetchTeams]);
 
   return (
     <InboxDataCtx.Provider value={ctxValue}>
