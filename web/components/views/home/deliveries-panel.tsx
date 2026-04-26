@@ -9,6 +9,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type DeliveryItem = {
   id: string;
   agentSlug: string;
+  teamId: string | null;
+  threadId: string | null;
   groupId: string | null;
   kind: string;
   title: string;
@@ -41,6 +43,44 @@ const KIND_ICONS: Record<string, string> = {
   slides: "slideshow",
   spreadsheet: "table_chart",
 };
+
+// Fire-and-forget worker stream call. Looks up the thread's sessionId via
+// the inbox-threads endpoint, then POSTs to the worker stream so the user
+// message persists and the agent runs to completion. The response stream is
+// drained in the background — no UI is wired to it here.
+async function fireWorkerStream(args: {
+  agentSlug: string;
+  inboxThreadId: string;
+  userContent: string;
+}) {
+  try {
+    const tRes = await fetchAPI(`/api/agent/inbox/threads/${args.inboxThreadId}`);
+    if (!tRes.ok) return;
+    const tData = await tRes.json();
+    const sessionId: string | undefined = tData?.sessionId;
+    if (!sessionId) return;
+
+    const res = await fetchAPI(`/api/agent/worker/${encodeURIComponent(args.agentSlug)}/stream`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        messages: [{ role: "user", content: args.userContent }],
+        sessionId,
+        inboxThreadId: args.inboxThreadId,
+        persistToSession: true,
+      }),
+    });
+    // Drain the SSE stream to completion so the server finishes persistence.
+    const reader = res.body?.getReader();
+    if (!reader) return;
+    while (true) {
+      const { done } = await reader.read();
+      if (done) break;
+    }
+  } catch (err) {
+    console.warn("[deliveries] background worker stream failed:", err);
+  }
+}
 
 function StatusPill({ status }: { status: string }) {
   const meta = STATUS_META[status] ?? STATUS_META.archived;
@@ -127,6 +167,42 @@ export function DeliveryDetailModal({
       });
       if (!res.ok) throw new Error(`Failed: ${res.status}`);
       addToast({ title: `Action: ${action}`, color: "success" });
+
+      // For change requests, push a user message into the delivery's chat
+      // thread and let the agent respond. Tries an in-app handoff first
+      // (live UI update if the user is sitting in that thread); falls back
+      // to firing the worker stream directly so the message + agent reply
+      // get persisted regardless.
+      if (action === "request-changes" && item.threadId) {
+        const marker = `[[delivery-change-request:${JSON.stringify({
+          deliveryId: item.id,
+          title: item.title,
+          kind: item.kind,
+          feedback: withComment ?? "",
+        })}]]`;
+        const content = `${marker}\nPlease revise the delivery "${item.title}". My feedback: ${withComment ?? "(no specifics provided)"}`;
+
+        let handledLocally = false;
+        try {
+          const ev = new CustomEvent("palmos:request-changes", {
+            detail: { threadId: item.threadId, content },
+          });
+          // Listeners can mark the event "handled" on its detail.
+          window.dispatchEvent(ev);
+          handledLocally = !!(ev as any).detail?.handled;
+        } catch {}
+
+        if (!handledLocally) {
+          // Background fire-and-forget worker stream so the agent runs even
+          // if the user isn't sitting in the relevant team chat.
+          void fireWorkerStream({
+            agentSlug: item.agentSlug,
+            inboxThreadId: item.threadId,
+            userContent: content,
+          });
+        }
+      }
+
       try { window.dispatchEvent(new CustomEvent("palmos:delivery-submitted")); } catch {}
       onClose();
     } catch (err) {
@@ -229,13 +305,13 @@ export function DeliveryDetailModal({
 
 export function RecentDeliveriesSection({
   onOpenAll,
+  agentSlug,
+  teamId,
   limit = 4,
 }: {
-  // Note: scope props (agentSlug/teamId) intentionally omitted — the inline
-  // section always shows the user's most recent deliveries across all
-  // threads so freshly-submitted items always appear, even if the tool
-  // couldn't resolve a teamId at submit time.
   onOpenAll: () => void;
+  agentSlug?: string;
+  teamId?: string;
   limit?: number;
 }) {
   const [openItem, setOpenItem] = useState<DeliveryItem | null>(null);
@@ -249,7 +325,11 @@ export function RecentDeliveriesSection({
   const load = useCallback(async () => {
     if (!hasLoadedOnce) setLoading(true);
     try {
-      const res = await fetchAPI(`/api/agent/deliveries`);
+      const params = new URLSearchParams();
+      if (agentSlug) params.set("agentSlug", agentSlug);
+      if (teamId) params.set("teamId", teamId);
+      const qs = params.toString();
+      const res = await fetchAPI(`/api/agent/deliveries${qs ? `?${qs}` : ""}`);
       if (res.ok) {
         const data = await res.json();
         const nextCounts = data.counts ?? {};
@@ -271,7 +351,7 @@ export function RecentDeliveriesSection({
       setLoading(false);
       setHasLoadedOnce(true);
     }
-  }, [limit, hasLoadedOnce]);
+  }, [limit, hasLoadedOnce, agentSlug, teamId]);
 
   useEffect(() => { void load(); }, [load]);
 
@@ -351,9 +431,13 @@ export function RecentDeliveriesSection({
 export function DeliveriesPanel({
   onBack,
   startId,
+  agentSlug,
+  teamId,
 }: {
   onBack: () => void;
   startId?: string;
+  agentSlug?: string;
+  teamId?: string;
 }) {
   const [items, setItems] = useState<DeliveryItem[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
@@ -367,7 +451,11 @@ export function DeliveriesPanel({
   const load = useCallback(async () => {
     if (!hasLoadedOnce) setLoading(true);
     try {
-      const res = await fetchAPI(`/api/agent/deliveries`);
+      const params = new URLSearchParams();
+      if (agentSlug) params.set("agentSlug", agentSlug);
+      if (teamId) params.set("teamId", teamId);
+      const qs = params.toString();
+      const res = await fetchAPI(`/api/agent/deliveries${qs ? `?${qs}` : ""}`);
       if (res.ok) {
         const data = await res.json();
         const all: DeliveryItem[] = data.items ?? [];
@@ -391,7 +479,7 @@ export function DeliveriesPanel({
       setLoading(false);
       setHasLoadedOnce(true);
     }
-  }, [hasLoadedOnce, startId]);
+  }, [hasLoadedOnce, startId, agentSlug, teamId]);
 
   useEffect(() => { void load(); }, [load]);
 

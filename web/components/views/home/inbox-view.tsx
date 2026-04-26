@@ -367,8 +367,8 @@ function useInboxChat(thread: Thread) {
       ? thread.agentId
       : teams.find((t) => t.id === thread.teamId)?.lead;
 
-  const submit = useCallback(async () => {
-    const trimmed = text.trim();
+  const sendMessage = useCallback(async (content: string) => {
+    const trimmed = content.trim();
     if (!trimmed || !agentSlug || isLoading) return;
     const sid = sessionIdRef.current;
     if (!sid) {
@@ -493,14 +493,40 @@ function useInboxChat(thread: Thread) {
       try { window.dispatchEvent(new CustomEvent("palmos:delivery-submitted")); } catch {}
       // Persistence happens server-side (via persistToSession in the request).
     }
-  }, [text, agentSlug, isLoading, setMsgs]);
+  }, [agentSlug, isLoading, setMsgs, thread.id]);
 
-  return { chatMsgs, isLoading, isLoadingHistory, text, setText, submit };
+  const submit = useCallback(async () => {
+    await sendMessage(text);
+  }, [sendMessage, text]);
+
+  return { chatMsgs, isLoading, isLoadingHistory, text, setText, submit, sendMessage };
+}
+
+// Parse the `[[delivery-change-request:{...}]]` marker that the deliveries
+// action route prepends when the user requests changes from the modal. The
+// marker is always the first line of the message.
+function parseChangeRequestMarker(content: string): { deliveryId: string; title: string; kind: string; feedback: string } | null {
+  if (!content?.startsWith("[[delivery-change-request:")) return null;
+  const end = content.indexOf("]]", "[[delivery-change-request:".length);
+  if (end < 0) return null;
+  const json = content.slice("[[delivery-change-request:".length, end);
+  try {
+    const parsed = JSON.parse(json);
+    if (typeof parsed?.deliveryId !== "string") return null;
+    return {
+      deliveryId: parsed.deliveryId,
+      title: parsed.title ?? "",
+      kind: parsed.kind ?? "delivery",
+      feedback: parsed.feedback ?? "",
+    };
+  } catch {
+    return null;
+  }
 }
 
 // ── Simple chat message renderer (real API messages) ─────────────────────────
 
-function SimpleChatMessage({ m, thread, isStreaming, onSuggestionClick }: { m: ChatMsg; thread: Thread; isStreaming?: boolean; onSuggestionClick?: (s: string) => void }) {
+function SimpleChatMessage({ m, thread, isStreaming, onSuggestionSend, onSuggestionEdit }: { m: ChatMsg; thread: Thread; isStreaming?: boolean; onSuggestionSend?: (s: string) => void; onSuggestionEdit?: (s: string) => void }) {
   const { teams, agentById: lookupAgent } = useInboxData();
   if (m.role === "system") {
     return (
@@ -510,6 +536,31 @@ function SimpleChatMessage({ m, thread, isStreaming, onSuggestionClick }: { m: C
     );
   }
   if (m.role === "human") {
+    const changeReq = parseChangeRequestMarker(m.content);
+    if (changeReq) {
+      return (
+        <div className="flex justify-end gap-2.5">
+          <div className="max-w-[82%]">
+            <div className="overflow-hidden rounded-2xl rounded-tr-sm border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 shadow-sm dark:border-amber-500/25 dark:from-amber-500/10 dark:to-orange-500/10">
+              <div className="flex items-center gap-2 border-b border-amber-200/60 bg-amber-100/50 px-3 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.08em] text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/15 dark:text-amber-300">
+                <Icon name="edit_note" variant="round" className="text-sm" />
+                Change request
+                <span className="ml-auto rounded-full bg-amber-200/70 px-1.5 py-0.5 text-[9px] font-bold uppercase text-amber-800 dark:bg-amber-500/30 dark:text-amber-100">{changeReq.kind}</span>
+              </div>
+              <div className="px-3.5 py-2.5">
+                <div className="text-[12.5px] font-semibold text-default-800 dark:text-white/90">{changeReq.title}</div>
+                {changeReq.feedback ? (
+                  <div className="mt-1 text-[13px] leading-relaxed text-default-700 dark:text-white/75">{changeReq.feedback}</div>
+                ) : (
+                  <div className="mt-1 text-[12px] italic text-default-400">No specific feedback — agent should propose revisions.</div>
+                )}
+              </div>
+            </div>
+            <div className="mt-1 text-right text-[11px] text-default-400 dark:text-white/35">{m.ts}</div>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="flex justify-end gap-2.5">
         <div className="max-w-[78%]">
@@ -559,14 +610,27 @@ function SimpleChatMessage({ m, thread, isStreaming, onSuggestionClick }: { m: C
         {suggestions.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {suggestions.map((s) => (
-              <button
+              <span
                 key={s}
-                type="button"
-                onClick={() => onSuggestionClick?.(s)}
-                className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[12px] font-medium text-amber-700 transition-colors hover:bg-amber-100 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300 dark:hover:bg-amber-500/15"
+                className="group relative inline-flex items-stretch overflow-hidden rounded-full border border-amber-200 bg-amber-50 transition-colors hover:bg-amber-100 dark:border-amber-500/25 dark:bg-amber-500/10 dark:hover:bg-amber-500/15"
               >
-                {s}
-              </button>
+                <button
+                  type="button"
+                  onClick={() => onSuggestionSend?.(s)}
+                  className="px-3 py-1 text-[12px] font-medium text-amber-700 dark:text-amber-300"
+                >
+                  {s}
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); onSuggestionEdit?.(s); }}
+                  title="Edit before sending"
+                  aria-label="Edit before sending"
+                  className="hidden items-center justify-center border-l border-amber-200/70 px-1.5 text-amber-700 hover:bg-amber-200/60 group-hover:flex dark:border-amber-500/25 dark:text-amber-300 dark:hover:bg-amber-500/20"
+                >
+                  <Icon name="edit" variant="round" className="text-[14px]" />
+                </button>
+              </span>
             ))}
           </div>
         )}
@@ -579,14 +643,31 @@ function SimpleChatMessage({ m, thread, isStreaming, onSuggestionClick }: { m: C
 
 function ThreadView({ thread, onTeamChanged }: { thread: Thread; onTeamChanged?: () => void }) {
   const { teams, agentById: lookupAgent } = useInboxData();
-  const { chatMsgs, isLoading, isLoadingHistory, text, setText, submit } = useInboxChat(thread);
+  const { chatMsgs, isLoading, isLoadingHistory, text, setText, submit, sendMessage } = useInboxChat(thread);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const composerRef = useRef<HTMLTextAreaElement>(null);
   const [editTeamOpen, setEditTeamOpen] = useState(false);
   const [shareTeamOpen, setShareTeamOpen] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [thread.id, chatMsgs.length]);
+
+  // Listen for delivery change-request handoffs from the deliveries modal.
+  // If the event targets *this* thread, send the message via the same chat
+  // pipeline and mark the event handled so the modal's fallback skips its
+  // background stream (avoids double agent runs).
+  useEffect(() => {
+    const onChangeRequest = (e: Event) => {
+      const ev = e as CustomEvent<{ threadId: string; content: string }>;
+      const detail = ev.detail;
+      if (!detail || detail.threadId !== thread.id) return;
+      (ev as any).detail.handled = true;
+      void sendMessage(detail.content);
+    };
+    window.addEventListener("palmos:request-changes", onChangeRequest);
+    return () => window.removeEventListener("palmos:request-changes", onChangeRequest);
+  }, [thread.id, sendMessage]);
 
   // Header
   let header: React.ReactNode;
@@ -692,9 +773,25 @@ function ThreadView({ thread, onTeamChanged }: { thread: Thread; onTeamChanged?:
                 m={m}
                 thread={thread}
                 isStreaming={isLoading && isLast && m.role === "ai"}
-                onSuggestionClick={
+                onSuggestionSend={
                   !isLoading && isLast && m.role === "ai"
-                    ? (s) => { setText(s); void submit(); }
+                    ? (s) => { void sendMessage(s); }
+                    : undefined
+                }
+                onSuggestionEdit={
+                  m.role === "ai"
+                    ? (s) => {
+                        setText(s);
+                        // Defer focus until React paints the new value.
+                        setTimeout(() => {
+                          const ta = composerRef.current;
+                          if (ta) {
+                            ta.focus();
+                            const len = ta.value.length;
+                            ta.setSelectionRange(len, len);
+                          }
+                        }, 0);
+                      }
                     : undefined
                 }
               />
@@ -723,6 +820,7 @@ function ThreadView({ thread, onTeamChanged }: { thread: Thread; onTeamChanged?:
                 <Icon name="attach_file" variant="round" className="text-lg" />
               </button>
               <textarea
+                ref={composerRef}
                 placeholder={placeholder}
                 rows={1}
                 value={text}
@@ -781,14 +879,14 @@ function TeamContextPane({ team }: { team: Team }) {
   if (showDeliveries) {
     return (
       <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-        <ExpandableDeliveriesPanel onBack={() => setShowDeliveries(false)} />
+        <ExpandableDeliveriesPanel teamId={team.id} onBack={() => setShowDeliveries(false)} />
       </aside>
     );
   }
 
   return (
     <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-      <RecentDeliveriesSection onOpenAll={() => setShowDeliveries(true)} />
+      <RecentDeliveriesSection teamId={team.id} onOpenAll={() => setShowDeliveries(true)} />
       <div className="border-b border-default-200 p-4 dark:border-white/8">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">Goal</div>
         <p className="text-[13px] leading-relaxed text-default-600 dark:text-white/65">{team.goal}</p>
@@ -882,14 +980,14 @@ function DMContextPane({ thread }: { thread: Thread }) {
   if (showDeliveries) {
     return (
       <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-        <ExpandableDeliveriesPanel onBack={() => setShowDeliveries(false)} />
+        <ExpandableDeliveriesPanel agentSlug={a.id} onBack={() => setShowDeliveries(false)} />
       </aside>
     );
   }
 
   return (
     <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-      <RecentDeliveriesSection onOpenAll={() => setShowDeliveries(true)} />
+      <RecentDeliveriesSection agentSlug={a.id} onOpenAll={() => setShowDeliveries(true)} />
       <div className="p-4">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">About this thread</div>
         <div className="flex items-center gap-3">
@@ -1389,7 +1487,28 @@ async function ensureRealThread(thread: Thread): Promise<Thread | null> {
 }
 
 function InboxViewInner() {
-  const { teams: TEAMS, threads: THREADS, threadsLoading, threadsLoaded, teamsLoading, teamsLoaded, refetchTeams, refetchThreads } = useInboxData();
+  const { teams: TEAMS, threads: DB_THREADS, threadsLoading, threadsLoaded, teamsLoading, teamsLoaded, refetchTeams, refetchThreads } = useInboxData();
+  // Synthesize a placeholder thread for any team that doesn't yet have a
+  // backing InboxThread row, so every team is reachable from the inbox list.
+  // ensureRealThread() on click upgrades the placeholder into a real row.
+  const THREADS = useMemo<Thread[]>(() => {
+    const teamIdsWithRealThread = new Set(
+      DB_THREADS.filter((t) => t.kind === "team" && t.teamId).map((t) => t.teamId!),
+    );
+    const placeholders: Thread[] = TEAMS.filter((t) => !teamIdsWithRealThread.has(t.id)).map((t) => ({
+      id: `pending-team-${t.id}`,
+      kind: "team",
+      teamId: t.id,
+      sessionId: undefined,
+      title: t.name,
+      preview: t.goal ?? "Tap to start a conversation",
+      unread: 0,
+      pinned: false,
+      updated: "",
+      status: "active",
+    }));
+    return [...DB_THREADS, ...placeholders];
+  }, [DB_THREADS, TEAMS]);
   const [tab, setTab] = useState<"inbox" | "teams" | "create">("inbox");
   const [active, setActive] = useState<Thread | null>(null);
   const [filter, setFilter] = useState("all");
@@ -1601,9 +1720,9 @@ function InboxViewInner() {
 
           {/* Context pane */}
           {team ? (
-            <TeamContextPane team={team} />
+            <TeamContextPane key={team.id} team={team} />
           ) : active?.kind === "dm" ? (
-            <DMContextPane thread={active} />
+            <DMContextPane key={active.id} thread={active} />
           ) : (
             <aside className="flex min-h-0 min-w-0 flex-col border-l border-default-200 bg-default-50 p-4 dark:border-white/8 dark:bg-white/[0.02]">
               <div className="text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">About this thread</div>
