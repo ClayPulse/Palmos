@@ -15,24 +15,23 @@ export type InboxAgent = {
 };
 
 // Animated avatars are served by the website backend at
-// /api/agent/avatar/<slug> with CORS headers (see pulse-editor-website).
-// The listings API returns the full URL on each agent — this fallback
-// mirrors that shape using the configured backend URL.
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
-const lottieUrl = (slug: string) => `${BACKEND}/api/agent/avatar/${slug}.lottie?v=4`;
+// /api/agent/avatar/<category>/<name>.lottie. Each agent's `avatarPath` is
+// stored in agent-listings.ts on the server; the listings API enriches
+// rows with a full `lottie` URL. The fallback below leaves `lottie` unset
+// so LottieAvatar shows its built-in placeholder until the API replies.
 
 export const FALLBACK_INBOX_AGENTS: InboxAgent[] = [
-  { id: "iris",  name: "Iris",  role: "Email triage",      hue: 240, lottie: lottieUrl("iris") },
-  { id: "kai",   name: "Kai",   role: "Invoice & AR",      hue: 30,  lottie: lottieUrl("kai") },
-  { id: "nova",  name: "Nova",  role: "Brand imagery",     hue: 310, lottie: lottieUrl("nova") },
-  { id: "lyra",  name: "Lyra",  role: "Long-form writer",  hue: 160, lottie: lottieUrl("lyra") },
-  { id: "ember", name: "Ember", role: "Ad campaigns",      hue: 0,   lottie: lottieUrl("ember") },
-  { id: "atlas", name: "Atlas", role: "Deep researcher",   hue: 210, lottie: lottieUrl("atlas") },
-  { id: "orbit", name: "Orbit", role: "Dashboard builder", hue: 190, lottie: lottieUrl("orbit") },
-  { id: "reed",  name: "Reed",  role: "Tier-1 support",    hue: 130, lottie: lottieUrl("reed") },
-  { id: "vale",  name: "Vale",  role: "Outbound SDR",      hue: 290, lottie: lottieUrl("vale") },
-  { id: "axon",  name: "Axon",  role: "Full-stack coder",  hue: 260, lottie: lottieUrl("axon") },
-  { id: "mira",  name: "Mira",  role: "UI/brand design",   hue: 340, lottie: lottieUrl("mira") },
+  { id: "iris",  name: "Iris",  role: "Email triage",      hue: 240 },
+  { id: "kai",   name: "Kai",   role: "Invoice & AR",      hue: 30 },
+  { id: "nova",  name: "Nova",  role: "Brand imagery",     hue: 310 },
+  { id: "lyra",  name: "Lyra",  role: "Long-form writer",  hue: 160 },
+  { id: "ember", name: "Ember", role: "Ad campaigns",      hue: 0 },
+  { id: "atlas", name: "Atlas", role: "Deep researcher",   hue: 210 },
+  { id: "orbit", name: "Orbit", role: "Dashboard builder", hue: 190 },
+  { id: "reed",  name: "Reed",  role: "Tier-1 support",    hue: 130 },
+  { id: "vale",  name: "Vale",  role: "Outbound SDR",      hue: 290 },
+  { id: "axon",  name: "Axon",  role: "Full-stack coder",  hue: 260 },
+  { id: "mira",  name: "Mira",  role: "UI/brand design",   hue: 340 },
 ];
 
 export type Team = {

@@ -63,9 +63,10 @@ function mapListingToAgent(listing: any): Agent {
     tools: listing.tools,
     tagline: listing.tagline,
     hue: listing.hue,
-    lottie:
-      listing.lottie ??
-      `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}/api/agent/avatar/${listing.slug}.lottie?v=4`,
+    // Trust the URL the listings API supplies (it's resolved from the
+    // agent's `avatarPath`). If the API didn't include one, leave it
+    // unset and LottieAvatar will keep showing its placeholder.
+    lottie: listing.lottie ?? undefined,
   };
 }
 
@@ -106,7 +107,7 @@ const TOOL_COUNTS: [string, number][] = [
 
 // ── Subcomponents ───────────────────────────────────────────────────────────
 
-function AgentAvatar({ agent, size = 56 }: { agent: Agent; size?: number }) {
+function AgentAvatar({ agent, size = 56, lottieOverride }: { agent: Agent; size?: number; lottieOverride?: string }) {
   const h = agent.hue;
   return (
     <div
@@ -119,7 +120,7 @@ function AgentAvatar({ agent, size = 56 }: { agent: Agent; size?: number }) {
       }}
     >
       <LottieAvatar
-        src={agent.lottie}
+        src={lottieOverride ?? agent.lottie}
         alt={agent.name}
         size={size - 4}
         hue={agent.hue}
@@ -127,6 +128,134 @@ function AgentAvatar({ agent, size = 56 }: { agent: Agent; size?: number }) {
       />
       <span className="absolute right-0 bottom-0 h-[28%] w-[28%] rounded-full border-2 border-white bg-emerald-500 dark:border-neutral-900" />
     </div>
+  );
+}
+
+// ── Avatar picker (pre-hire) ────────────────────────────────────────────────
+
+interface AvatarCatalogEntry {
+  path: string; // "<category>/<name>"
+  name: string;
+  category: "emoji" | "character" | "cartoon";
+  lottie: string;
+}
+type AvatarCatalog = Record<"emoji" | "character" | "cartoon", AvatarCatalogEntry[]>;
+
+const AVATAR_TABS: { key: "emoji" | "character" | "cartoon"; label: string }[] = [
+  { key: "emoji",     label: "Emoji" },
+  { key: "character", label: "Character" },
+  { key: "cartoon",   label: "Cartoon" },
+];
+
+function AvatarPicker({
+  selectedPath,
+  onSelect,
+}: {
+  selectedPath: string | null;
+  onSelect: (path: string | null, lottie: string | null) => void;
+}) {
+  const [catalog, setCatalog] = useState<AvatarCatalog | null>(null);
+  const [tab, setTab] = useState<"emoji" | "character" | "cartoon">("character");
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen || catalog) return;
+    let cancelled = false;
+    fetchAPI("/api/agent/avatar/catalog")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        setCatalog(data);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [isOpen, catalog]);
+
+  const items = catalog?.[tab] ?? [];
+
+  return (
+    <Popover placement="bottom" isOpen={isOpen} onOpenChange={setIsOpen}>
+      <PopoverTrigger>
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 rounded-full border border-default-200 bg-white/70 px-2.5 py-0.5 text-[11px] font-medium text-default-600 backdrop-blur-sm transition-colors hover:bg-white dark:border-white/10 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10"
+        >
+          <Icon name="palette" variant="round" className="text-sm" />
+          {selectedPath ? "Change avatar" : "Choose avatar"}
+        </button>
+      </PopoverTrigger>
+      <PopoverContent className="p-2">
+        <div className="flex w-[360px] flex-col gap-2">
+          <div className="flex items-center gap-1 rounded-lg bg-default-100 p-1 dark:bg-white/5">
+            {AVATAR_TABS.map((t) => (
+              <button
+                key={t.key}
+                type="button"
+                onClick={() => setTab(t.key)}
+                className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                  tab === t.key
+                    ? "bg-white text-default-800 shadow-sm dark:bg-white/15 dark:text-white"
+                    : "text-default-500 hover:text-default-700 dark:text-white/55 dark:hover:text-white/85"
+                }`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <div className="grid max-h-[280px] grid-cols-5 gap-1.5 overflow-y-auto p-1">
+            <button
+              type="button"
+              onClick={() => {
+                onSelect(null, null);
+                setIsOpen(false);
+              }}
+              title="Use default"
+              className={`flex h-14 w-14 items-center justify-center rounded-lg border text-[10px] font-medium transition-colors ${
+                selectedPath === null
+                  ? "border-amber-400 bg-amber-50 text-amber-700 dark:border-amber-500/40 dark:bg-amber-500/10 dark:text-amber-300"
+                  : "border-default-200 bg-white text-default-500 hover:border-default-300 dark:border-white/10 dark:bg-white/5 dark:text-white/55"
+              }`}
+            >
+              Default
+            </button>
+            {!catalog && (
+              <div className="col-span-4 flex h-14 items-center justify-center text-xs text-default-400">
+                <Spinner size="sm" />
+              </div>
+            )}
+            {items.map((entry) => {
+              const active = selectedPath === entry.path;
+              return (
+                <button
+                  key={entry.path}
+                  type="button"
+                  onClick={() => {
+                    onSelect(entry.path, entry.lottie);
+                    setIsOpen(false);
+                  }}
+                  title={entry.name}
+                  className={`flex h-14 w-14 items-center justify-center rounded-lg border p-1 transition-colors ${
+                    active
+                      ? "border-amber-400 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10"
+                      : "border-default-200 bg-white hover:border-default-300 dark:border-white/10 dark:bg-white/5"
+                  }`}
+                >
+                  <LottieAvatar
+                    src={entry.lottie}
+                    alt={entry.name}
+                    size={44}
+                    hue={210}
+                    initial={entry.name.slice(0, 1).toUpperCase()}
+                  />
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 }
 
@@ -515,6 +644,7 @@ export default function HomeView({
         skills: { source: "anthropic" | "clawhub"; externalId: string }[];
         workflowIds: string[];
         pendingUploads?: { externalId: string; file: File }[];
+        customAvatarPath?: string | null;
       },
     ): Promise<boolean> => {
       const pendingUploads = snapshot?.pendingUploads ?? [];
@@ -523,6 +653,7 @@ export default function HomeView({
         teamId: teamId ?? undefined,
         skills: snapshot?.skills,
         workflowIds: snapshot?.workflowIds,
+        customAvatarPath: snapshot?.customAvatarPath,
         // Echo the externalIds of pending uploads so the server can pair
         // each multipart File with the right WorkerAgentSkill row.
         uploadIds: pendingUploads.map((u) => u.externalId),
@@ -2281,6 +2412,8 @@ export function AgentDetailModal({
       // resolves to false if the server rejects any of them. The modal
       // stays in pre-hire mode on false so the user can fix the upload.
       pendingUploads: { externalId: string; file: File }[];
+      // Optional avatar override picked pre-hire ("emoji/1f9d0" etc.).
+      customAvatarPath?: string | null;
     },
   ) => Promise<boolean>;
 }) {
@@ -2319,6 +2452,11 @@ export function AgentDetailModal({
   const [stateLoaded, setStateLoaded] = useState(false);
   const [skills, setSkills] = useState<AgentSkill[]>([]);
   const [workflows, setWorkflows] = useState<AgentWorkflow[]>([]);
+
+  // Avatar picker: pre-hire override of the agent's default avatarPath.
+  // null = use the seed avatar (whatever agent.lottie already points to).
+  const [customAvatarPath, setCustomAvatarPath] = useState<string | null>(null);
+  const [customAvatarLottie, setCustomAvatarLottie] = useState<string | null>(null);
 
   // Files uploaded pre-hire are held here keyed by externalId. They get
   // posted as multipart along with the hire payload; the server parses + stores
@@ -2569,6 +2707,7 @@ export function AgentDetailModal({
         skills: registrySkills,
         workflowIds: workflows.map((w) => w.id),
         pendingUploads,
+        customAvatarPath,
       });
       // Only refresh on success — failed hires keep the modal in pre-hire
       // mode so the user can fix the bad upload.
@@ -2577,7 +2716,7 @@ export function AgentDetailModal({
         await fetchState();
       }
     },
-    [agent, onHire, skills, workflows, fetchState],
+    [agent, onHire, skills, workflows, fetchState, customAvatarPath],
   );
 
   return (
@@ -2605,7 +2744,22 @@ export function AgentDetailModal({
             className="grid shrink-0 grid-cols-[auto_1fr_auto] items-center gap-5 border-b border-default-200 px-8 py-7 dark:border-white/8"
             style={{ background: `linear-gradient(135deg, hsl(${agent.hue} 55% 96%), hsl(${(agent.hue + 30) % 360} 55% 92%) 60%, transparent 100%)` }}
           >
-            <AgentAvatar agent={agent} size={88} />
+            <div className="flex flex-col items-center gap-1.5">
+              <AgentAvatar
+                agent={agent}
+                size={88}
+                lottieOverride={customAvatarLottie ?? undefined}
+              />
+              {!hired && (
+                <AvatarPicker
+                  selectedPath={customAvatarPath}
+                  onSelect={(path, lottie) => {
+                    setCustomAvatarPath(path);
+                    setCustomAvatarLottie(lottie);
+                  }}
+                />
+              )}
+            </div>
             <div className="flex min-w-0 flex-col gap-1">
               <div className="flex items-center gap-2.5">
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 dark:border-amber-500/20 dark:bg-amber-500/10 dark:text-amber-300">

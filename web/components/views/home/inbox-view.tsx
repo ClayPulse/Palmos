@@ -31,16 +31,14 @@ function useInboxAgents() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
-          const backend = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
           setAgents(data.map((a: any) => ({
             id: a.slug,
             name: a.name,
             role: a.role,
             hue: a.hue,
-            // Prefer the URL from the API; fall back to constructing it
-            // client-side so older website builds (without lottie enrichment)
-            // still get animated avatars.
-            lottie: a.lottie ?? `${backend}/api/agent/avatar/${a.slug}.lottie?v=4`,
+            // The listings API resolves the avatar's lottie URL from the
+            // agent's `avatarPath`. Trust it; no client-side fabrication.
+            lottie: a.lottie ?? undefined,
           })));
         }
       })
