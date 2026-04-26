@@ -377,7 +377,7 @@ export function TeamTemplateRow({
           ? `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}/api/agent/avatar/${t.previewPath
               .split("/")
               .map(encodeURIComponent)
-              .join("/")}.lottie?v=6`
+              .join("/")}.lottie?v=7`
           : null;
         return (
           <div key={t.slug} className={`${cardCls} relative overflow-hidden`}>
@@ -483,7 +483,7 @@ function AgentCard({
     >
       {/* Thumb */}
       <div
-        className={`relative flex items-center justify-center ${featured ? "aspect-[5/3]" : "aspect-[16/10]"}`}
+        className={`relative ${featured ? "aspect-[5/3]" : "aspect-[16/10]"}`}
         style={{
           background: `linear-gradient(135deg, hsl(${h} 60% 94%), hsl(${(h + 40) % 360} 60% 88%))`,
         }}
@@ -491,8 +491,8 @@ function AgentCard({
         {agent.previewLottie && (
           <PreviewBackdrop src={agent.previewLottie} alt="" />
         )}
-        <div className="relative z-10">
-          <AgentAvatar agent={agent} size={featured ? 72 : 64} />
+        <div className="absolute top-2.5 right-2.5 z-10">
+          <AgentAvatar agent={agent} size={featured ? 56 : 48} />
         </div>
         {category && (
           <span className="absolute top-2.5 left-2.5 z-10 rounded-full border border-default-200/60 bg-white/80 px-2 py-0.5 text-[11px] font-medium text-default-600 backdrop-blur-sm dark:border-white/10 dark:bg-black/40 dark:text-white/70">
