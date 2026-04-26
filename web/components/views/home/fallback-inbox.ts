@@ -1,19 +1,38 @@
 // Fallback data for inbox view — used when API is unavailable or not seeded.
 
-export type InboxAgent = { id: string; name: string; role: string; hue: number; avatar: string };
+export type InboxAgent = {
+  id: string;
+  name: string;
+  role: string;
+  hue: number;
+  // Avatar image URL — optional. The frontend doesn't fabricate per-agent
+  // avatar URLs; real ones come from the listings API.
+  avatar?: string;
+  // Optional Lottie animation URL (.lottie or .json). When present, renders
+  // an animated avatar; otherwise falls back to the `avatar` image, then to
+  // a colored disc with the agent's initial.
+  lottie?: string;
+};
+
+// Animated avatars are served by the website backend at
+// /api/agent/avatar/<slug> with CORS headers (see pulse-editor-website).
+// The listings API returns the full URL on each agent — this fallback
+// mirrors that shape using the configured backend URL.
+const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
+const lottieUrl = (slug: string) => `${BACKEND}/api/agent/avatar/${slug}.lottie?v=2`;
 
 export const FALLBACK_INBOX_AGENTS: InboxAgent[] = [
-  { id: "iris", name: "Iris", role: "Email triage", hue: 240, avatar: "https://mockmind-api.uifaces.co/content/human/49.jpg" },
-  { id: "kai", name: "Kai", role: "Invoice & AR", hue: 30, avatar: "https://mockmind-api.uifaces.co/content/human/103.jpg" },
-  { id: "nova", name: "Nova", role: "Brand imagery", hue: 310, avatar: "https://mockmind-api.uifaces.co/content/human/68.jpg" },
-  { id: "lyra", name: "Lyra", role: "Long-form writer", hue: 160, avatar: "https://mockmind-api.uifaces.co/content/human/181.jpg" },
-  { id: "ember", name: "Ember", role: "Ad campaigns", hue: 0, avatar: "https://mockmind-api.uifaces.co/content/human/156.jpg" },
-  { id: "atlas", name: "Atlas", role: "Deep researcher", hue: 210, avatar: "https://mockmind-api.uifaces.co/content/human/87.jpg" },
-  { id: "orbit", name: "Orbit", role: "Dashboard builder", hue: 190, avatar: "https://mockmind-api.uifaces.co/content/human/200.jpg" },
-  { id: "reed", name: "Reed", role: "Tier-1 support", hue: 130, avatar: "https://mockmind-api.uifaces.co/content/human/134.jpg" },
-  { id: "vale", name: "Vale", role: "Outbound SDR", hue: 290, avatar: "https://mockmind-api.uifaces.co/content/human/42.jpg" },
-  { id: "axon", name: "Axon", role: "Full-stack coder", hue: 260, avatar: "https://mockmind-api.uifaces.co/content/human/217.jpg" },
-  { id: "mira", name: "Mira", role: "UI/brand design", hue: 340, avatar: "https://mockmind-api.uifaces.co/content/human/29.jpg" },
+  { id: "iris",  name: "Iris",  role: "Email triage",      hue: 240, lottie: lottieUrl("iris") },
+  { id: "kai",   name: "Kai",   role: "Invoice & AR",      hue: 30,  lottie: lottieUrl("kai") },
+  { id: "nova",  name: "Nova",  role: "Brand imagery",     hue: 310, lottie: lottieUrl("nova") },
+  { id: "lyra",  name: "Lyra",  role: "Long-form writer",  hue: 160, lottie: lottieUrl("lyra") },
+  { id: "ember", name: "Ember", role: "Ad campaigns",      hue: 0,   lottie: lottieUrl("ember") },
+  { id: "atlas", name: "Atlas", role: "Deep researcher",   hue: 210, lottie: lottieUrl("atlas") },
+  { id: "orbit", name: "Orbit", role: "Dashboard builder", hue: 190, lottie: lottieUrl("orbit") },
+  { id: "reed",  name: "Reed",  role: "Tier-1 support",    hue: 130, lottie: lottieUrl("reed") },
+  { id: "vale",  name: "Vale",  role: "Outbound SDR",      hue: 290, lottie: lottieUrl("vale") },
+  { id: "axon",  name: "Axon",  role: "Full-stack coder",  hue: 260, lottie: lottieUrl("axon") },
+  { id: "mira",  name: "Mira",  role: "UI/brand design",   hue: 340, lottie: lottieUrl("mira") },
 ];
 
 export type Team = {

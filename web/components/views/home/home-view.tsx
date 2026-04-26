@@ -3,6 +3,7 @@
 import { useInbox } from "@/components/agent-chat/panels/inbox-panel";
 import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
+import { LottieAvatar } from "@/components/views/home/lottie-avatar";
 import WorkerChatProvider, {
   useWorkerChatContext,
 } from "@/components/providers/worker-chat-provider";
@@ -62,7 +63,9 @@ function mapListingToAgent(listing: any): Agent {
     tools: listing.tools,
     tagline: listing.tagline,
     hue: listing.hue,
-    avatar: listing.avatar,
+    lottie:
+      listing.lottie ??
+      `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}/api/agent/avatar/${listing.slug}.lottie?v=2`,
   };
 }
 
@@ -115,11 +118,12 @@ function AgentAvatar({ agent, size = 56 }: { agent: Agent; size?: number }) {
         padding: 2,
       }}
     >
-      <img
-        src={agent.avatar}
+      <LottieAvatar
+        src={agent.lottie}
         alt={agent.name}
-        className="h-full w-full rounded-full object-cover"
-        loading="lazy"
+        size={size - 4}
+        hue={agent.hue}
+        initial={agent.name}
       />
       <span className="absolute right-0 bottom-0 h-[28%] w-[28%] rounded-full border-2 border-white bg-emerald-500 dark:border-neutral-900" />
     </div>
@@ -139,7 +143,7 @@ export type TemplateAgent = {
   id: string;
   name: string;
   hue: number;
-  avatar: string;
+  lottie?: string;
 };
 
 export function TeamTemplateRow({
@@ -207,7 +211,13 @@ export function TeamTemplateRow({
                   }}
                   title={a.name}
                 >
-                  <img src={a.avatar} alt={a.name} className="h-full w-full object-cover" loading="lazy" />
+                  <LottieAvatar
+                    src={a.lottie}
+                    alt={a.name}
+                    size={28}
+                    hue={a.hue}
+                    initial={a.name}
+                  />
                 </div>
               ))}
               {t.agents.length > 5 && (
@@ -449,7 +459,7 @@ export default function HomeView({
         }
         addToast({
           title: `Created team "${template.name}"`,
-          description: "See it in My hires.",
+          description: "See it in My agents.",
           color: "success",
         });
         setHomeView("inbox");
@@ -619,7 +629,7 @@ export default function HomeView({
             onClick={() => setHomeView("inbox")}
             className={`hidden rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors sm:block ${homeView === "inbox" ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300" : "text-default-600 hover:bg-default-100 dark:text-white/60 dark:hover:bg-white/8"}`}
           >
-            My hires
+            My agents
           </button>
           {homeView === "inbox" && (
             <button
@@ -879,12 +889,15 @@ export default function HomeView({
                   key={a.id}
                   className="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-[14px] shadow-sm"
                 >
-                  <img
-                    src={a.avatar}
-                    alt={a.name}
-                    className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                    loading="lazy"
-                  />
+                  <div className="absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+                    <LottieAvatar
+                      src={a.lottie}
+                      alt={a.name}
+                      size={160}
+                      hue={a.hue}
+                      initial={a.name}
+                    />
+                  </div>
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                   {/* Verified badge */}
                   <div className="absolute top-1.5 right-1.5 z-10">

@@ -19,6 +19,7 @@ import { TeamTemplateRow, AgentDetailModal } from "@/components/views/home/home-
 import { EditTeamModal } from "@/components/modals/edit-team-modal";
 import { ShareTeamModal } from "@/components/modals/share-team-modal";
 import { DeliveriesPanel as ExpandableDeliveriesPanel, RecentDeliveriesSection } from "@/components/views/home/deliveries-panel";
+import { LottieAvatar } from "@/components/views/home/lottie-avatar";
 
 // ── Hooks to fetch from API with fallback ───────────────────────────────────
 
@@ -30,12 +31,16 @@ function useInboxAgents() {
       .then((res) => res.json())
       .then((data) => {
         if (Array.isArray(data) && data.length > 0) {
+          const backend = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
           setAgents(data.map((a: any) => ({
             id: a.slug,
             name: a.name,
             role: a.role,
             hue: a.hue,
-            avatar: a.avatar,
+            // Prefer the URL from the API; fall back to constructing it
+            // client-side so older website builds (without lottie enrichment)
+            // still get animated avatars.
+            lottie: a.lottie ?? `${backend}/api/agent/avatar/${a.slug}.lottie?v=2`,
           })));
         }
       })
@@ -175,7 +180,13 @@ function InAvatar({ agent, size = 36, online = true }: { agent: InboxAgent; size
       className="relative inline-flex shrink-0 items-center justify-center overflow-hidden rounded-full shadow-sm"
       style={{ width: size, height: size, background: `linear-gradient(135deg, hsl(${h} 80% 60%), hsl(${(h + 30) % 360} 70% 45%))`, padding: size >= 28 ? 1.5 : 1 }}
     >
-      <img src={agent.avatar} alt={agent.name} className="h-full w-full rounded-full object-cover" loading="lazy" />
+      <LottieAvatar
+        src={agent.lottie}
+        alt={agent.name}
+        size={size - (size >= 28 ? 3 : 2)}
+        hue={h}
+        initial={agent.name}
+      />
       {online && size >= 28 && <span className="absolute right-0 bottom-0 h-[28%] w-[28%] rounded-full border-2 border-white bg-emerald-500 dark:border-neutral-900" />}
     </span>
   );
@@ -955,7 +966,7 @@ function TeamContextPane({ team }: { team: Team }) {
             tools: [],
             tagline: rosterAgent.role,
             hue: rosterAgent.hue,
-            avatar: rosterAgent.avatar,
+            lottie: rosterAgent.lottie,
           } as Agent);
         return (
           <AgentDetailModal

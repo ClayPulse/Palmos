@@ -138,7 +138,7 @@ export function HomeNavRight({
         variant="light"
         className="hidden font-medium text-default-600 sm:flex dark:text-white/60"
       >
-        My hires
+        My agents
       </Button>
       <Button
         size="sm"
