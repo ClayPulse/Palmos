@@ -2251,7 +2251,7 @@ interface TeamSummary {
   name: string;
 }
 
-function AgentDetailModal({
+export function AgentDetailModal({
   agent,
   onClose,
   onHire,

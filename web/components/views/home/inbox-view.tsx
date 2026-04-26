@@ -7,7 +7,6 @@ import { useState, useEffect, useRef, useCallback, useMemo, createContext, useCo
 import {
   FALLBACK_INBOX_AGENTS,
   FALLBACK_TEAMS,
-  type Delivery,
   type InboxAgent,
   type Team,
   type Thread,
@@ -15,7 +14,10 @@ import {
 import { FALLBACK_AGENTS, type Agent } from "@/components/views/home/fallback-agents";
 import { TEAM_TEMPLATES, type TeamTemplate } from "@/components/views/home/team-templates";
 import { parseSuggestions } from "@/lib/utils/parse-suggestions";
-import { TeamTemplateRow } from "@/components/views/home/home-view";
+import { TeamTemplateRow, AgentDetailModal } from "@/components/views/home/home-view";
+import { EditTeamModal } from "@/components/modals/edit-team-modal";
+import { ShareTeamModal } from "@/components/modals/share-team-modal";
+import { DeliveriesPanel as ExpandableDeliveriesPanel } from "@/components/views/home/deliveries-panel";
 
 // ── Hooks to fetch from API with fallback ───────────────────────────────────
 
@@ -549,10 +551,12 @@ function SimpleChatMessage({ m, thread, isStreaming, onSuggestionClick }: { m: C
 
 // ── Thread view ─────────────────────────────────────────────────────────────
 
-function ThreadView({ thread }: { thread: Thread }) {
+function ThreadView({ thread, onTeamChanged }: { thread: Thread; onTeamChanged?: () => void }) {
   const { teams, agentById: lookupAgent } = useInboxData();
   const { chatMsgs, isLoading, isLoadingHistory, text, setText, submit } = useInboxChat(thread);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [editTeamOpen, setEditTeamOpen] = useState(false);
+  const [shareTeamOpen, setShareTeamOpen] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -598,8 +602,22 @@ function ThreadView({ thread }: { thread: Thread }) {
             Team: <strong className="text-default-600 dark:text-white/65">{team?.name}</strong> · {team?.agents.length} agents · Lead: <strong className="text-default-600 dark:text-white/65">{lead?.name}</strong>
           </div>
         </div>
-        <Button isIconOnly size="sm" variant="light"><Icon name="person_add" variant="round" /></Button>
-        <Button isIconOnly size="sm" variant="light"><Icon name="more_horiz" variant="round" /></Button>
+        <Button
+          size="sm"
+          variant="light"
+          startContent={<Icon name="person_add" variant="round" className="text-sm" />}
+          onPress={() => setShareTeamOpen(true)}
+        >
+          Share
+        </Button>
+        <Button
+          size="sm"
+          variant="flat"
+          startContent={<Icon name="settings" variant="round" className="text-sm" />}
+          onPress={() => setEditTeamOpen(true)}
+        >
+          Manage
+        </Button>
       </div>
     );
   } else {
@@ -705,6 +723,23 @@ function ThreadView({ thread }: { thread: Thread }) {
           </div>
         </div>
       )}
+      {thread.kind === "team" && (
+        <>
+          <EditTeamModal
+            team={teams.find((t) => t.id === thread.teamId) ?? null}
+            isOpen={editTeamOpen}
+            onClose={() => setEditTeamOpen(false)}
+            onSaved={onTeamChanged}
+            onDeleted={onTeamChanged}
+            onOpenShare={() => { setEditTeamOpen(false); setShareTeamOpen(true); }}
+          />
+          <ShareTeamModal
+            team={teams.find((t) => t.id === thread.teamId) ?? null}
+            isOpen={shareTeamOpen}
+            onClose={() => setShareTeamOpen(false)}
+          />
+        </>
+      )}
     </>
   );
 }
@@ -715,11 +750,12 @@ function TeamContextPane({ team }: { team: Team }) {
   const { agentById: lookupAgent } = useInboxData();
   const agents = team.agents.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
   const [showDeliveries, setShowDeliveries] = useState(false);
+  const [rosterAgent, setRosterAgent] = useState<InboxAgent | null>(null);
 
   if (showDeliveries) {
     return (
       <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-        <DeliveriesPanel onBack={() => setShowDeliveries(false)} />
+        <ExpandableDeliveriesPanel teamId={team.id} onBack={() => setShowDeliveries(false)} />
       </aside>
     );
   }
@@ -756,7 +792,12 @@ function TeamContextPane({ team }: { team: Team }) {
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">Roster</div>
         <div className="flex flex-col gap-2.5">
           {agents.map((a) => (
-            <div key={a.id} className="flex items-center gap-2.5">
+            <button
+              key={a.id}
+              type="button"
+              onClick={() => setRosterAgent(a)}
+              className="flex w-full items-center gap-2.5 rounded-lg px-1 py-1 -mx-1 text-left transition-colors hover:bg-default-100 dark:hover:bg-white/5"
+            >
               <InAvatar agent={a} size={34} />
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 text-[13px] font-semibold text-default-800 dark:text-white/90">
@@ -767,8 +808,10 @@ function TeamContextPane({ team }: { team: Team }) {
                 </div>
                 <div className="text-xs text-default-400 dark:text-white/40">{a.role}</div>
               </div>
-              <Button isIconOnly size="sm" variant="light"><Icon name="chat" variant="round" className="text-sm" /></Button>
-            </div>
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-md text-default-400 hover:bg-default-200 dark:text-white/40 dark:hover:bg-white/10">
+                <Icon name="chat" variant="round" className="text-sm" />
+              </span>
+            </button>
           ))}
         </div>
       </div>
@@ -782,6 +825,32 @@ function TeamContextPane({ team }: { team: Team }) {
           ))}
         </div>
       </div>
+      {rosterAgent && (() => {
+        const marketAgent =
+          FALLBACK_AGENTS.find((x) => x.id === rosterAgent.id) ??
+          ({
+            id: rosterAgent.id,
+            name: rosterAgent.name,
+            role: rosterAgent.role,
+            cat: "automation",
+            rating: 0,
+            reviews: 0,
+            price: 0,
+            turnaround: "—",
+            used: "—",
+            tools: [],
+            tagline: rosterAgent.role,
+            hue: rosterAgent.hue,
+            avatar: rosterAgent.avatar,
+          } as Agent);
+        return (
+          <AgentDetailModal
+            agent={marketAgent}
+            onClose={() => setRosterAgent(null)}
+            onHire={async () => true}
+          />
+        );
+      })()}
     </aside>
   );
 }
@@ -797,7 +866,7 @@ function DMContextPane({ thread }: { thread: Thread }) {
   if (showDeliveries) {
     return (
       <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-        <DeliveriesPanel agentId={a.id} onBack={() => setShowDeliveries(false)} />
+        <ExpandableDeliveriesPanel agentSlug={a.id} onBack={() => setShowDeliveries(false)} />
       </aside>
     );
   }
@@ -829,75 +898,6 @@ function DMContextPane({ thread }: { thread: Thread }) {
         </Button>
       </div>
     </aside>
-  );
-}
-
-// ── Deliveries panel ────────────────────────────────────────────────────────
-
-const STATUS_META: Record<string, { label: string; cls: string; icon: string }> = {
-  awaiting:     { label: "Awaiting review",  cls: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",   icon: "schedule" },
-  "changes-req":{ label: "Changes requested",cls: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300",       icon: "edit_note" },
-  approved:     { label: "Approved",         cls: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300", icon: "check_circle" },
-  sent:         { label: "Sent",             cls: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300", icon: "send" },
-  archived:     { label: "Archived",         cls: "bg-default-100 text-default-500 dark:bg-white/8 dark:text-white/40",   icon: "archive" },
-};
-
-function DeliveriesPanel({ agentId, onBack }: { agentId?: string; onBack: () => void }) {
-  const { agentById: lookupAgent } = useInboxData();
-  const deliveries: Delivery[] = [];
-  void agentId;
-
-  return (
-    <div className="flex min-h-0 flex-col">
-      <div className="flex shrink-0 items-center gap-2 border-b border-default-200 p-3 dark:border-white/8">
-        <Button isIconOnly size="sm" variant="light" onPress={onBack}>
-          <Icon name="arrow_back" variant="round" className="text-sm" />
-        </Button>
-        <span className="text-[13px] font-semibold text-default-800 dark:text-white/90">Deliveries</span>
-        {deliveries.length > 0 && (
-          <span className="ml-auto inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-            {deliveries.filter((d) => d.status === "awaiting").length} awaiting
-          </span>
-        )}
-      </div>
-      <div className="flex-1 overflow-y-auto p-3">
-        {deliveries.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-8 text-center text-[13px] text-default-400 dark:text-white/40">
-            <Icon name="inbox" variant="round" className="text-3xl" />
-            <span>No deliveries yet</span>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {deliveries.map((d) => {
-              const meta = STATUS_META[d.status] ?? STATUS_META.archived;
-              const agent = lookupAgent(d.agentId);
-              return (
-                <div key={d.id} className="rounded-xl border border-default-200 bg-white p-3 dark:border-white/8 dark:bg-white/[0.03]">
-                  <div className="mb-1.5 flex items-start justify-between gap-2">
-                    <span className="text-[13px] font-semibold text-default-800 dark:text-white/90 leading-snug">{d.task}</span>
-                    <span className={`shrink-0 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${meta.cls}`}>
-                      <Icon name={meta.icon} variant="round" className="text-[12px]" />
-                      {d.itemCount}
-                    </span>
-                  </div>
-                  <p className="mb-2 line-clamp-2 text-[12px] leading-relaxed text-default-500 dark:text-white/50">{d.summary}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      {agent && <InAvatar agent={agent} size={16} online={false} />}
-                      <span className="text-[11px] text-default-400 dark:text-white/35">{d.when}</span>
-                    </div>
-                    <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${meta.cls}`}>
-                      <Icon name={meta.icon} variant="round" className="text-[11px]" />
-                      {meta.label}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-    </div>
   );
 }
 
@@ -1388,6 +1388,31 @@ function InboxViewInner() {
   const [active, setActive] = useState<Thread | null>(null);
   const [filter, setFilter] = useState("all");
   const [busyTemplateSlug, setBusyTemplateSlug] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Array<{ threadId: string; title: string; snippet: string; matchedIn: string }> | null>(null);
+  const [searching, setSearching] = useState(false);
+
+  useEffect(() => {
+    const q = searchQuery.trim();
+    if (q.length < 2) { setSearchResults(null); return; }
+    setSearching(true);
+    const handle = setTimeout(async () => {
+      try {
+        const res = await fetchAPI(`/api/agent/inbox/search?q=${encodeURIComponent(q)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchResults(Array.isArray(data?.results) ? data.results : []);
+        } else {
+          setSearchResults([]);
+        }
+      } catch {
+        setSearchResults([]);
+      } finally {
+        setSearching(false);
+      }
+    }, 200);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
 
   // Ensures the thread has a real DB sessionId (lazy-creating one if it's a
   // fallback thread), then activates it. Without this, fallback threads fail
@@ -1482,10 +1507,6 @@ function InboxViewInner() {
             New team
           </button>
         </div>
-        <div className="ml-auto flex items-center gap-2">
-          <Button isIconOnly size="sm" variant="light"><Icon name="search" variant="round" /></Button>
-          <Button isIconOnly size="sm" variant="light"><Icon name="settings" variant="round" /></Button>
-        </div>
       </div>
 
       {/* Content */}
@@ -1499,15 +1520,56 @@ function InboxViewInner() {
               <h2 className="text-base font-bold text-default-800 dark:text-white/90">Inbox</h2>
               <Button isIconOnly size="sm" variant="light"><Icon name="filter_list" variant="round" /></Button>
             </div>
-            <div className="flex shrink-0 gap-1 overflow-x-auto border-b border-default-200 px-4 py-2.5 dark:border-white/8 [&::-webkit-scrollbar]:hidden">
-              {[["all", "All"], ["unread", "Unread"], ["dm", "DMs"], ["team", "Teams"], ["notif", "System"]].map(([k, l]) => (
-                <button key={k} type="button" onClick={() => setFilter(k)} className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filter === k ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300" : "border-default-200 bg-white text-default-500 hover:border-amber-200 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50"}`}>
-                  {l}
-                </button>
-              ))}
+            <div className="shrink-0 border-b border-default-200 px-3 py-2 dark:border-white/8">
+              <div className="flex items-center gap-2 rounded-lg border border-default-200 bg-default-50 px-2.5 py-1.5 focus-within:border-amber-300 focus-within:bg-white dark:border-white/10 dark:bg-white/[0.03] dark:focus-within:border-amber-500/30">
+                <Icon name="search" variant="round" className="text-base text-default-400" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search all chats…"
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-default-400 dark:text-white/85 dark:placeholder:text-white/35"
+                />
+                {searchQuery && (
+                  <button type="button" onClick={() => setSearchQuery("")} className="text-default-400 hover:text-default-600">
+                    <Icon name="close" variant="round" className="text-sm" />
+                  </button>
+                )}
+              </div>
             </div>
+            {searchResults === null && (
+              <div className="flex shrink-0 gap-1 overflow-x-auto border-b border-default-200 px-4 py-2.5 dark:border-white/8 [&::-webkit-scrollbar]:hidden">
+                {[["all", "All"], ["unread", "Unread"], ["dm", "DMs"], ["team", "Teams"], ["notif", "System"]].map(([k, l]) => (
+                  <button key={k} type="button" onClick={() => setFilter(k)} className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filter === k ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300" : "border-default-200 bg-white text-default-500 hover:border-amber-200 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50"}`}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex-1 overflow-y-auto p-2">
-              {threadsLoading && THREADS.length === 0 ? (
+              {searchResults !== null ? (
+                searching ? (
+                  <div className="py-8 text-center text-[12.5px] text-default-400">Searching…</div>
+                ) : searchResults.length === 0 ? (
+                  <div className="py-8 text-center text-[12.5px] text-default-400">No matches for "{searchQuery}"</div>
+                ) : (
+                  searchResults.map((r) => {
+                    const t = THREADS.find((x) => x.id === r.threadId);
+                    return (
+                      <button
+                        key={r.threadId}
+                        type="button"
+                        onClick={() => { if (t) { void openThread(t); setSearchQuery(""); } }}
+                        className="block w-full rounded-lg px-3 py-2 text-left transition-colors hover:bg-default-100 dark:hover:bg-white/5"
+                      >
+                        <div className="truncate text-[13px] font-semibold text-default-800 dark:text-white/90">{r.title}</div>
+                        <div className="mt-0.5 line-clamp-2 text-[11.5px] text-default-500 dark:text-white/50">{r.snippet}</div>
+                        <div className="mt-1 text-[10px] uppercase tracking-[0.08em] text-default-400">in {r.matchedIn}</div>
+                      </button>
+                    );
+                  })
+                )
+              ) : threadsLoading && THREADS.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 py-12">
                   <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />
                   <span className="text-[12.5px] text-default-400 dark:text-white/40">Loading inbox…</span>
@@ -1528,7 +1590,7 @@ function InboxViewInner() {
           {/* Thread view — min-h-0 lets the inner messages list scroll and
               the composer stays anchored to the bottom. */}
           <main className="flex min-h-0 min-w-0 flex-col">
-            {active && <ThreadView thread={active} />}
+            {active && <ThreadView thread={active} onTeamChanged={() => void refetchTeams()} />}
           </main>
 
           {/* Context pane */}
