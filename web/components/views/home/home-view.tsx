@@ -4,6 +4,7 @@ import { useInbox } from "@/components/agent-chat/panels/inbox-panel";
 import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
 import { LottieAvatar } from "@/components/views/home/lottie-avatar";
+import { PreviewBackdrop } from "@/components/views/home/preview-backdrop";
 import WorkerChatProvider, {
   useWorkerChatContext,
 } from "@/components/providers/worker-chat-provider";
@@ -67,6 +68,7 @@ function mapListingToAgent(listing: any): Agent {
     // agent's `avatarPath`). If the API didn't include one, leave it
     // unset and LottieAvatar will keep showing its placeholder.
     lottie: listing.lottie ?? undefined,
+    previewLottie: listing.previewLottie ?? undefined,
   };
 }
 
@@ -371,9 +373,16 @@ export function TeamTemplateRow({
           .map((s) => agentBySlug(s))
           .filter(Boolean) as TemplateAgent[];
         const busy = busySlug === t.slug;
+        const previewSrc = t.previewPath
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}/api/agent/avatar/${t.previewPath
+              .split("/")
+              .map(encodeURIComponent)
+              .join("/")}.lottie?v=6`
+          : null;
         return (
-          <div key={t.slug} className={cardCls}>
-            <div className="flex items-start gap-2.5">
+          <div key={t.slug} className={`${cardCls} relative overflow-hidden`}>
+            {previewSrc && <PreviewBackdrop src={previewSrc} alt="" opacity={0.18} />}
+            <div className="relative z-10 flex items-start gap-2.5">
               <span
                 className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-white text-[20px]"
                 style={{
@@ -391,7 +400,7 @@ export function TeamTemplateRow({
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="relative z-10 flex items-center gap-1">
               {/* Stack of agent avatars; cap at 5 visible. */}
               {agents.slice(0, 5).map((a, i) => (
                 <div
@@ -423,7 +432,7 @@ export function TeamTemplateRow({
             </div>
             <Button
               size="sm"
-              className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+              className="relative z-10 bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
               onPress={() => onCreate(t)}
               isDisabled={busy}
               isLoading={busy}
@@ -479,9 +488,14 @@ function AgentCard({
           background: `linear-gradient(135deg, hsl(${h} 60% 94%), hsl(${(h + 40) % 360} 60% 88%))`,
         }}
       >
-        <AgentAvatar agent={agent} size={featured ? 72 : 64} />
+        {agent.previewLottie && (
+          <PreviewBackdrop src={agent.previewLottie} alt="" />
+        )}
+        <div className="relative z-10">
+          <AgentAvatar agent={agent} size={featured ? 72 : 64} />
+        </div>
         {category && (
-          <span className="absolute top-2.5 left-2.5 rounded-full border border-default-200/60 bg-white/80 px-2 py-0.5 text-[11px] font-medium text-default-600 backdrop-blur-sm dark:border-white/10 dark:bg-black/40 dark:text-white/70">
+          <span className="absolute top-2.5 left-2.5 z-10 rounded-full border border-default-200/60 bg-white/80 px-2 py-0.5 text-[11px] font-medium text-default-600 backdrop-blur-sm dark:border-white/10 dark:bg-black/40 dark:text-white/70">
             {category.name}
           </span>
         )}

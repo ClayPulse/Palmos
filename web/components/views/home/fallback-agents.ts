@@ -25,6 +25,10 @@ export type Agent = {
   avatar?: string;
   // Optional Lottie animation URL — same shape as InboxAgent.lottie.
   lottie?: string;
+  // Optional ambient business-themed Lottie rendered as the card thumb
+  // background, behind the avatar. Resolved per-category by the listings
+  // API; falls back to undefined when no preview is mapped.
+  previewLottie?: string;
   // Persona-focused system prompt for the worker agent backend. Optional on
   // the frontend type — the actual content lives in the backend's
   // AgentListing.systemPrompt, which the worker stream route reads. This

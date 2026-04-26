@@ -12,6 +12,12 @@ export interface TeamTemplate {
   agents: string[];
   /** Slug of the agent that gets the "lead" role on creation. */
   lead: string;
+  /**
+   * Path under public/avatars/ (no extension) of an ambient business-themed
+   * Lottie shown as the card thumb background. Resolved through the website
+   * backend's avatar route at render time.
+   */
+  previewPath?: string;
 }
 
 export const TEAM_TEMPLATES: TeamTemplate[] = [
@@ -23,6 +29,7 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     hue: 240,
     agents: ["iris", "theo", "zara"],
     lead: "iris",
+    previewPath: "business/automation",
   },
   {
     slug: "growth-ops",
@@ -32,6 +39,7 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     hue: 30,
     agents: ["vale", "neon", "ember", "flux"],
     lead: "vale",
+    previewPath: "business/marketing",
   },
   {
     slug: "content-engine",
@@ -41,6 +49,7 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     hue: 160,
     agents: ["lyra", "sage", "quinn", "juno"],
     lead: "lyra",
+    previewPath: "business/content",
   },
   {
     slug: "customer-care",
@@ -50,6 +59,7 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     hue: 130,
     agents: ["reed", "cleo", "dash"],
     lead: "reed",
+    previewPath: "business/support",
   },
   {
     slug: "sales-pipeline",
@@ -59,6 +69,7 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     hue: 290,
     agents: ["vale", "raven", "slate", "finn"],
     lead: "vale",
+    previewPath: "business/sales",
   },
   {
     slug: "engineering",
@@ -68,6 +79,7 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     hue: 260,
     agents: ["axon", "rust", "bug", "hex"],
     lead: "axon",
+    previewPath: "business/coding",
   },
   {
     slug: "brand-and-design",
@@ -77,6 +89,7 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     hue: 340,
     agents: ["mira", "frame", "tint", "halo"],
     lead: "mira",
+    previewPath: "business/design",
   },
   {
     slug: "data-team",
@@ -86,5 +99,6 @@ export const TEAM_TEMPLATES: TeamTemplate[] = [
     hue: 215,
     agents: ["sigma", "orbit", "prism"],
     lead: "sigma",
+    previewPath: "business/data",
   },
 ];
