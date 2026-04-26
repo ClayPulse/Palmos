@@ -2,8 +2,9 @@
 
 import Icon from "@/components/misc/icon";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
-import { addToast, Button } from "@heroui/react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { playDeliveryChime } from "@/lib/utils/notification-sound";
+import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 type DeliveryItem = {
   id: string;
@@ -15,14 +16,6 @@ type DeliveryItem = {
   payload: any;
   status: "awaiting" | "changes-req" | "approved" | "sent" | "archived";
   confidence: number;
-  createdAt: string;
-};
-
-type Group = {
-  id: string;
-  agentSlug: string;
-  label: string;
-  status: string;
   createdAt: string;
 };
 
@@ -48,15 +41,6 @@ const KIND_ICONS: Record<string, string> = {
   slides: "slideshow",
   spreadsheet: "table_chart",
 };
-
-const FILTER_TABS = [
-  { id: "all",         label: "All" },
-  { id: "awaiting",    label: "Awaiting" },
-  { id: "changes-req", label: "Changes" },
-  { id: "approved",    label: "Approved" },
-  { id: "sent",        label: "Sent" },
-  { id: "archived",    label: "Archived" },
-] as const;
 
 function StatusPill({ status }: { status: string }) {
   const meta = STATUS_META[status] ?? STATUS_META.archived;
@@ -110,125 +94,349 @@ function ItemPreview({ item }: { item: DeliveryItem }) {
   );
 }
 
-function ItemActions({
+export function DeliveryDetailModal({
   item,
-  onAction,
+  isOpen,
+  onClose,
 }: {
-  item: DeliveryItem;
-  onAction: (action: string, comment?: string) => void;
+  item: DeliveryItem | null;
+  isOpen: boolean;
+  onClose: () => void;
 }) {
   const [comment, setComment] = useState("");
   const [showComment, setShowComment] = useState(false);
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setComment("");
+      setShowComment(false);
+      setBusy(false);
+    }
+  }, [isOpen]);
+
+  if (!item) return null;
+
+  const act = async (action: string, withComment?: string) => {
+    setBusy(true);
+    try {
+      const res = await fetchAPI(`/api/agent/deliveries/${item.id}/action`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, comment: withComment }),
+      });
+      if (!res.ok) throw new Error(`Failed: ${res.status}`);
+      addToast({ title: `Action: ${action}`, color: "success" });
+      try { window.dispatchEvent(new CustomEvent("palmos:delivery-submitted")); } catch {}
+      onClose();
+    } catch (err) {
+      addToast({
+        title: "Action failed",
+        description: err instanceof Error ? err.message : "Unknown error",
+        color: "danger",
+      });
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col gap-2">
-      <div className="flex flex-wrap gap-1.5">
-        <Button size="sm" color="primary" startContent={<Icon name="check" variant="round" className="text-sm" />} onPress={() => onAction("approve")}>
-          Approve
-        </Button>
-        {item.kind === "email" && (
-          <Button size="sm" color="primary" variant="flat" startContent={<Icon name="send" variant="round" className="text-sm" />} onPress={() => onAction("send")}>
-            Approve &amp; send
+    <Modal isOpen={isOpen} onClose={onClose} size="2xl" backdrop="blur" scrollBehavior="inside">
+      <ModalContent>
+        <ModalHeader className="flex items-start gap-3">
+          <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-default-100 text-default-600 dark:bg-white/8 dark:text-white/65">
+            <Icon name={KIND_ICONS[item.kind] ?? "inventory_2"} variant="round" className="text-lg" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-default-400">
+              {item.agentSlug} · {new Date(item.createdAt).toLocaleString()}
+            </div>
+            <div className="truncate text-base font-semibold text-default-900 dark:text-white">{item.title}</div>
+          </div>
+          <StatusPill status={item.status} />
+        </ModalHeader>
+        <ModalBody className="gap-4">
+          {item.summary && (
+            <div className="flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50/50 p-3 text-[13px] leading-relaxed text-default-700 dark:border-amber-500/15 dark:bg-amber-500/5 dark:text-white/70">
+              <Icon name="format_quote" variant="round" className="mt-0.5 text-base text-amber-500" />
+              <span>{item.summary}</span>
+            </div>
+          )}
+          <ItemPreview item={item} />
+          <div className="flex items-center justify-between text-[11px] text-default-400">
+            <Confidence value={item.confidence} />
+            <span>Delivery ID: <span className="font-mono">{item.id.slice(0, 8)}</span></span>
+          </div>
+          {showComment && (
+            <div className="rounded-xl border border-default-200 bg-default-50 p-2.5 dark:border-white/10 dark:bg-white/[0.02]">
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder="What should the agent change?"
+                rows={3}
+                className="w-full resize-none bg-transparent text-[13px] outline-none placeholder:text-default-400 dark:text-white/85"
+                autoFocus
+              />
+              <div className="mt-1 flex justify-end gap-1.5">
+                <Button size="sm" variant="light" onPress={() => { setShowComment(false); setComment(""); }} isDisabled={busy}>
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  color="primary"
+                  isDisabled={!comment.trim() || busy}
+                  onPress={() => act("request-changes", comment)}
+                >
+                  Send feedback
+                </Button>
+              </div>
+            </div>
+          )}
+        </ModalBody>
+        <ModalFooter className="justify-between">
+          <Button
+            variant="light"
+            color="danger"
+            onPress={() => act("reject")}
+            isDisabled={busy}
+            startContent={<Icon name="close" variant="round" className="text-sm" />}
+          >
+            Reject
           </Button>
-        )}
-        <Button size="sm" variant="light" startContent={<Icon name="chat_bubble_outline" variant="round" className="text-sm" />} onPress={() => setShowComment((v) => !v)}>
-          Request changes
-        </Button>
-        <Button size="sm" variant="light" color="danger" startContent={<Icon name="close" variant="round" className="text-sm" />} onPress={() => onAction("reject")}>
-          Reject
-        </Button>
-      </div>
-      {showComment && (
-        <div className="rounded-lg border border-default-200 bg-default-50 p-2 dark:border-white/10 dark:bg-white/[0.02]">
-          <textarea
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="What should the agent change?"
-            rows={2}
-            className="w-full resize-none bg-transparent text-xs outline-none placeholder:text-default-400 dark:text-white/85"
-          />
-          <div className="mt-1 flex justify-end">
+          <div className="flex gap-1.5">
             <Button
-              size="sm"
-              color="primary"
-              isDisabled={!comment.trim()}
-              onPress={() => { onAction("request-changes", comment); setComment(""); setShowComment(false); }}
+              variant="light"
+              onPress={() => setShowComment((v) => !v)}
+              isDisabled={busy}
+              startContent={<Icon name="chat_bubble_outline" variant="round" className="text-sm" />}
             >
-              Send feedback
+              Request changes
+            </Button>
+            <Button
+              color="primary"
+              onPress={() => act("approve")}
+              isLoading={busy}
+              startContent={<Icon name="check" variant="round" className="text-sm" />}
+            >
+              Approve
             </Button>
           </div>
+        </ModalFooter>
+      </ModalContent>
+    </Modal>
+  );
+}
+
+export function RecentDeliveriesSection({
+  onOpenAll,
+  limit = 4,
+}: {
+  // Note: scope props (agentSlug/teamId) intentionally omitted — the inline
+  // section always shows the user's most recent deliveries across all
+  // threads so freshly-submitted items always appear, even if the tool
+  // couldn't resolve a teamId at submit time.
+  onOpenAll: () => void;
+  limit?: number;
+}) {
+  const [openItem, setOpenItem] = useState<DeliveryItem | null>(null);
+  const [items, setItems] = useState<DeliveryItem[]>([]);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const totalRef = useRef<number | null>(null);
+  const initialLoadRef = useRef(true);
+
+  const load = useCallback(async () => {
+    if (!hasLoadedOnce) setLoading(true);
+    try {
+      const res = await fetchAPI(`/api/agent/deliveries`);
+      if (res.ok) {
+        const data = await res.json();
+        const nextCounts = data.counts ?? {};
+        const nextTotal = nextCounts.all ?? (data.items?.length ?? 0);
+        // Ring the chime when new deliveries arrive after the first load.
+        if (
+          !initialLoadRef.current &&
+          totalRef.current != null &&
+          nextTotal > totalRef.current
+        ) {
+          playDeliveryChime();
+        }
+        totalRef.current = nextTotal;
+        initialLoadRef.current = false;
+        setItems((data.items ?? []).slice(0, limit));
+        setCounts(nextCounts);
+      }
+    } finally {
+      setLoading(false);
+      setHasLoadedOnce(true);
+    }
+  }, [limit, hasLoadedOnce]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  useEffect(() => {
+    const onSubmitted = () => { void load(); };
+    window.addEventListener("palmos:delivery-submitted", onSubmitted);
+    // Fallback poll so we don't miss deliveries if the stream-chunk
+    // detection misses a tool call shape we don't recognize.
+    const interval = setInterval(() => { void load(); }, 8000);
+    return () => {
+      window.removeEventListener("palmos:delivery-submitted", onSubmitted);
+      clearInterval(interval);
+    };
+  }, [load]);
+
+  const awaiting = counts.awaiting ?? 0;
+  const total = counts.all ?? items.length;
+
+  return (
+    <div className="border-b border-default-200 p-4 dark:border-white/8">
+      <div className="mb-2.5 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">
+          <Icon name="inventory_2" variant="round" className="text-sm" />
+          Deliveries
+          {awaiting > 0 && (
+            <span className="inline-flex items-center rounded-full bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+              {awaiting}
+            </span>
+          )}
+        </div>
+        <button
+          type="button"
+          onClick={onOpenAll}
+          className="text-[11.5px] font-medium text-amber-700 hover:underline dark:text-amber-400"
+        >
+          View all{total > items.length ? ` (${total})` : ""}
+        </button>
+      </div>
+      {loading && !hasLoadedOnce ? (
+        <div className="py-3 text-center text-[11.5px] text-default-400">Loading…</div>
+      ) : items.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-default-200 px-3 py-4 text-center text-[11.5px] text-default-400 dark:border-white/10">
+          No deliveries yet
+        </div>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {items.map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => setOpenItem(item)}
+              className="flex items-center gap-2 rounded-lg border border-default-200 bg-white px-2 py-1.5 text-left transition-colors hover:border-amber-200 hover:bg-amber-50/30 dark:border-white/8 dark:bg-white/[0.03] dark:hover:border-amber-500/30"
+            >
+              <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-default-100 text-default-600 dark:bg-white/8 dark:text-white/65">
+                <Icon name={KIND_ICONS[item.kind] ?? "inventory_2"} variant="round" className="text-[13px]" />
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[12px] font-semibold text-default-800 dark:text-white/90">{item.title}</div>
+                {item.summary && (
+                  <div className="truncate text-[10.5px] text-default-500 dark:text-white/45">{item.summary}</div>
+                )}
+              </div>
+              <StatusPill status={item.status} />
+            </button>
+          ))}
         </div>
       )}
+      <DeliveryDetailModal
+        item={openItem}
+        isOpen={!!openItem}
+        onClose={() => setOpenItem(null)}
+      />
     </div>
   );
 }
 
 export function DeliveriesPanel({
-  agentSlug,
-  teamId,
   onBack,
+  startId,
 }: {
-  agentSlug?: string;
-  teamId?: string;
   onBack: () => void;
+  startId?: string;
 }) {
-  const [filter, setFilter] = useState<string>("all");
   const [items, setItems] = useState<DeliveryItem[]>([]);
-  const [groups, setGroups] = useState<Group[]>([]);
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [idx, setIdx] = useState(0);
+  const [comment, setComment] = useState("");
+  const [showComment, setShowComment] = useState(false);
+  const startIdConsumedRef = useRef(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    if (!hasLoadedOnce) setLoading(true);
     try {
-      const params = new URLSearchParams();
-      if (filter !== "all") params.set("status", filter);
-      if (agentSlug) params.set("agentSlug", agentSlug);
-      if (teamId) params.set("teamId", teamId);
-      const res = await fetchAPI(`/api/agent/deliveries?${params.toString()}`);
+      const res = await fetchAPI(`/api/agent/deliveries`);
       if (res.ok) {
         const data = await res.json();
-        setItems(data.items ?? []);
-        setGroups(data.groups ?? []);
+        const all: DeliveryItem[] = data.items ?? [];
+        // Awaiting items first; everything else after — so the queue prioritises
+        // what needs review but you can still flip through history.
+        const sorted = [...all].sort((a, b) => {
+          if (a.status === "awaiting" && b.status !== "awaiting") return -1;
+          if (b.status === "awaiting" && a.status !== "awaiting") return 1;
+          return 0;
+        });
+        setItems(sorted);
         setCounts(data.counts ?? {});
+        // Jump to the requested startId on first load.
+        if (!startIdConsumedRef.current && startId) {
+          const i = sorted.findIndex((x) => x.id === startId);
+          if (i >= 0) setIdx(i);
+          startIdConsumedRef.current = true;
+        }
       }
     } finally {
       setLoading(false);
+      setHasLoadedOnce(true);
     }
-  }, [filter, agentSlug, teamId]);
+  }, [hasLoadedOnce, startId]);
 
   useEffect(() => { void load(); }, [load]);
 
-  const ungrouped = useMemo(() => items.filter((i) => !i.groupId), [items]);
-  const itemsByGroup = useMemo(() => {
-    const map = new Map<string, DeliveryItem[]>();
-    for (const i of items) {
-      if (!i.groupId) continue;
-      const arr = map.get(i.groupId) ?? [];
-      arr.push(i);
-      map.set(i.groupId, arr);
-    }
-    return map;
-  }, [items]);
+  useEffect(() => {
+    const onSubmitted = () => { void load(); };
+    window.addEventListener("palmos:delivery-submitted", onSubmitted);
+    const interval = setInterval(() => { void load(); }, 8000);
+    return () => {
+      window.removeEventListener("palmos:delivery-submitted", onSubmitted);
+      clearInterval(interval);
+    };
+  }, [load]);
 
-  const toggle = (set: Set<string>, setSet: (s: Set<string>) => void, id: string) => {
-    const next = new Set(set);
-    if (next.has(id)) next.delete(id); else next.add(id);
-    setSet(next);
+  const total = items.length;
+  const safeIdx = total === 0 ? 0 : Math.min(idx, total - 1);
+  const current = total > 0 ? items[safeIdx] : null;
+  const awaiting = counts.awaiting ?? 0;
+
+  const goNext = () => {
+    setShowComment(false);
+    setComment("");
+    setIdx((i) => Math.min(total - 1, i + 1));
+  };
+  const goPrev = () => {
+    setShowComment(false);
+    setComment("");
+    setIdx((i) => Math.max(0, i - 1));
   };
 
-  const itemAction = async (id: string, action: string, comment?: string) => {
+  const act = async (action: string, withComment?: string) => {
+    if (!current) return;
     try {
-      const res = await fetchAPI(`/api/agent/deliveries/${id}/action`, {
+      const res = await fetchAPI(`/api/agent/deliveries/${current.id}/action`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action, comment }),
+        body: JSON.stringify({ action, comment: withComment }),
       });
       if (!res.ok) throw new Error(`Failed: ${res.status}`);
       addToast({ title: `Action: ${action}`, color: "success" });
+      setShowComment(false);
+      setComment("");
+      // Optimistically move on to keep the queue flowing.
+      const wasLast = safeIdx >= total - 1;
       void load();
+      if (!wasLast) setIdx(safeIdx); // stay at same index — the next item shifts in
     } catch (err) {
       addToast({
         title: "Action failed",
@@ -238,71 +446,6 @@ export function DeliveriesPanel({
     }
   };
 
-  const bulkAction = async (action: string) => {
-    if (selected.size === 0) return;
-    try {
-      const res = await fetchAPI(`/api/agent/deliveries/bulk-action`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ids: Array.from(selected), action }),
-      });
-      if (!res.ok) throw new Error(`Failed: ${res.status}`);
-      const data = await res.json();
-      addToast({ title: `${data.updated} updated`, color: "success" });
-      setSelected(new Set());
-      void load();
-    } catch (err) {
-      addToast({
-        title: "Bulk action failed",
-        description: err instanceof Error ? err.message : "Unknown error",
-        color: "danger",
-      });
-    }
-  };
-
-  const renderItem = (item: DeliveryItem) => {
-    const isOpen = expandedItems.has(item.id);
-    const isSelected = selected.has(item.id);
-    return (
-      <div key={item.id} className={`rounded-lg border ${isSelected ? "border-amber-300 dark:border-amber-500/40" : "border-default-200 dark:border-white/8"} bg-white dark:bg-white/[0.02]`}>
-        <div className="flex items-start gap-2 p-2.5">
-          <input
-            type="checkbox"
-            checked={isSelected}
-            onChange={(e) => { e.stopPropagation(); toggle(selected, setSelected, item.id); }}
-            className="mt-1"
-          />
-          <button
-            type="button"
-            onClick={() => toggle(expandedItems, setExpandedItems, item.id)}
-            className="flex flex-1 items-start gap-2 text-left min-w-0"
-          >
-            <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-default-100 text-default-600 dark:bg-white/8 dark:text-white/65">
-              <Icon name={KIND_ICONS[item.kind] ?? "inventory_2"} variant="round" className="text-sm" />
-            </span>
-            <div className="flex-1 min-w-0">
-              <div className="truncate text-[13px] font-semibold text-default-800 dark:text-white/90">{item.title}</div>
-              {item.summary && <div className="line-clamp-1 text-[11.5px] text-default-500 dark:text-white/45">{item.summary}</div>}
-            </div>
-            <div className="flex shrink-0 flex-col items-end gap-1">
-              <Confidence value={item.confidence} />
-              <StatusPill status={item.status} />
-            </div>
-            <Icon name={isOpen ? "expand_less" : "expand_more"} variant="round" className="text-default-400" />
-          </button>
-        </div>
-        {isOpen && (
-          <div className="border-t border-default-200 px-3 py-3 dark:border-white/8">
-            <ItemPreview item={item} />
-            <div className="mt-3">
-              <ItemActions item={item} onAction={(action, comment) => itemAction(item.id, action, comment)} />
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
   return (
     <div className="flex min-h-0 flex-col">
       <div className="flex shrink-0 items-center gap-2 border-b border-default-200 p-3 dark:border-white/8">
@@ -310,87 +453,144 @@ export function DeliveriesPanel({
           <Icon name="arrow_back" variant="round" className="text-sm" />
         </Button>
         <span className="text-[13px] font-semibold text-default-800 dark:text-white/90">Deliveries</span>
-        <span className="ml-auto inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
-          {counts.awaiting ?? 0} awaiting
-        </span>
-      </div>
-      <div className="flex shrink-0 gap-1 overflow-x-auto border-b border-default-200 px-3 py-2 dark:border-white/8 [&::-webkit-scrollbar]:hidden">
-        {FILTER_TABS.map((t) => (
-          <button
-            key={t.id}
-            type="button"
-            onClick={() => setFilter(t.id)}
-            className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filter === t.id ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300" : "border-default-200 bg-white text-default-500 hover:border-amber-200 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50"}`}
-          >
-            {t.label}
-            {counts[t.id] != null && counts[t.id] > 0 && (
-              <span className="ml-1 text-[10px] font-semibold text-default-400">{counts[t.id]}</span>
-            )}
-          </button>
-        ))}
-      </div>
-      <div className="flex-1 overflow-y-auto p-3">
-        {loading && items.length === 0 ? (
-          <div className="py-8 text-center text-[12.5px] text-default-400">Loading…</div>
-        ) : items.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 py-8 text-center text-[13px] text-default-400 dark:text-white/40">
-            <Icon name="inbox" variant="round" className="text-3xl" />
-            <span>No deliveries{filter === "all" ? " yet" : ` in "${filter}"`}</span>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-3">
-            {groups.map((g) => {
-              const groupItems = itemsByGroup.get(g.id) ?? [];
-              if (groupItems.length === 0) return null;
-              const expanded = expandedGroups.has(g.id);
-              return (
-                <div key={g.id} className="overflow-hidden rounded-xl border border-default-200 dark:border-white/8">
-                  <button
-                    type="button"
-                    onClick={() => toggle(expandedGroups, setExpandedGroups, g.id)}
-                    className="flex w-full items-center gap-2 bg-default-50 px-3 py-2 text-left dark:bg-white/[0.02]"
-                  >
-                    <Icon name={expanded ? "expand_less" : "expand_more"} variant="round" className="text-default-500" />
-                    <span className="text-[13px] font-semibold text-default-800 dark:text-white/90">{g.label}</span>
-                    <span className="text-[11px] text-default-400">{groupItems.length} items</span>
-                    <StatusPill status={g.status} />
-                  </button>
-                  {expanded && (
-                    <div className="flex flex-col gap-2 p-2">
-                      {groupItems.map(renderItem)}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-            {ungrouped.length > 0 && (
-              <div className="flex flex-col gap-2">
-                {ungrouped.map(renderItem)}
-              </div>
-            )}
-          </div>
+        {awaiting > 0 && (
+          <span className="ml-auto inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+            {awaiting} awaiting
+          </span>
         )}
       </div>
-      {selected.size > 0 && (
-        <div className="flex shrink-0 items-center gap-2 border-t border-default-200 bg-white px-3 py-2 dark:border-white/8 dark:bg-white/[0.05]">
-          <span className="text-[12px] font-semibold text-default-700 dark:text-white/80">
-            {selected.size} selected
-          </span>
-          <div className="ml-auto flex gap-1.5">
-            <Button size="sm" color="primary" startContent={<Icon name="check" variant="round" className="text-sm" />} onPress={() => bulkAction("approve")}>
-              Approve all
-            </Button>
-            <Button size="sm" variant="light" color="danger" startContent={<Icon name="close" variant="round" className="text-sm" />} onPress={() => bulkAction("reject")}>
-              Reject all
-            </Button>
-            <Button size="sm" variant="light" startContent={<Icon name="archive" variant="round" className="text-sm" />} onPress={() => bulkAction("archive")}>
-              Archive
-            </Button>
-            <Button isIconOnly size="sm" variant="light" onPress={() => setSelected(new Set())}>
-              <Icon name="close" variant="round" className="text-sm" />
-            </Button>
-          </div>
+
+      {loading && !hasLoadedOnce ? (
+        <div className="flex flex-1 items-center justify-center text-[12.5px] text-default-400">Loading…</div>
+      ) : total === 0 || !current ? (
+        <div className="flex flex-1 flex-col items-center justify-center gap-2 p-6 text-center text-[13px] text-default-400 dark:text-white/40">
+          <Icon name="inbox" variant="round" className="text-3xl" />
+          <span>No deliveries to review</span>
         </div>
+      ) : (
+        <>
+          <div className="shrink-0 px-4 pt-3 pb-2">
+            <div className="mb-1.5 flex items-center justify-between text-[11.5px] text-default-500 dark:text-white/50">
+              <span>Reviewing <strong className="text-default-800 dark:text-white/90">{safeIdx + 1}</strong> of {total}</span>
+              <span className="text-[10.5px] text-default-400">{awaiting} awaiting overall</span>
+            </div>
+            <div className="h-1 w-full overflow-hidden rounded-full bg-default-200 dark:bg-white/8">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 to-orange-500 transition-all"
+                style={{ width: `${((safeIdx + 1) / total) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="mx-auto flex max-w-[640px] flex-col gap-4 rounded-2xl border border-default-200 bg-white p-5 shadow-sm dark:border-white/8 dark:bg-white/[0.02]">
+              <div className="flex items-start gap-3">
+                <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-default-100 text-default-600 dark:bg-white/8 dark:text-white/65">
+                  <Icon name={KIND_ICONS[current.kind] ?? "inventory_2"} variant="round" className="text-lg" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.08em] text-default-400">
+                    {current.agentSlug}
+                  </div>
+                  <div className="text-[15px] font-semibold text-default-900 dark:text-white">{current.title}</div>
+                </div>
+                <StatusPill status={current.status} />
+              </div>
+
+              {current.summary && (
+                <div className="flex items-start gap-2 rounded-xl border border-amber-100 bg-amber-50/50 p-3 text-[12.5px] leading-relaxed text-default-700 dark:border-amber-500/15 dark:bg-amber-500/5 dark:text-white/70">
+                  <Icon name="format_quote" variant="round" className="mt-0.5 text-base text-amber-500" />
+                  <span>{current.summary}</span>
+                </div>
+              )}
+
+              <div>
+                <ItemPreview item={current} />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Confidence value={current.confidence} />
+                <span className="text-[11px] text-default-400">
+                  {new Date(current.createdAt).toLocaleString()}
+                </span>
+              </div>
+
+              {showComment && (
+                <div className="rounded-xl border border-default-200 bg-default-50 p-2.5 dark:border-white/10 dark:bg-white/[0.02]">
+                  <textarea
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    placeholder="What should the agent change?"
+                    rows={2}
+                    className="w-full resize-none bg-transparent text-[13px] outline-none placeholder:text-default-400 dark:text-white/85"
+                    autoFocus
+                  />
+                  <div className="mt-1 flex justify-end gap-1.5">
+                    <Button size="sm" variant="light" onPress={() => { setShowComment(false); setComment(""); }}>
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      color="primary"
+                      isDisabled={!comment.trim()}
+                      onPress={() => act("request-changes", comment)}
+                    >
+                      Send feedback &amp; next
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-1.5 border-t border-default-200 bg-white px-3 py-2.5 dark:border-white/8 dark:bg-white/[0.03]">
+            <Button
+              size="sm"
+              variant="light"
+              isDisabled={safeIdx === 0}
+              onPress={goPrev}
+              startContent={<Icon name="arrow_back" variant="round" className="text-sm" />}
+            >
+              Previous
+            </Button>
+            <Button
+              size="sm"
+              variant="light"
+              color="danger"
+              onPress={() => act("reject")}
+              startContent={<Icon name="close" variant="round" className="text-sm" />}
+            >
+              Reject
+            </Button>
+            <Button
+              size="sm"
+              variant="light"
+              onPress={() => setShowComment((v) => !v)}
+              startContent={<Icon name="chat_bubble_outline" variant="round" className="text-sm" />}
+            >
+              Request changes
+            </Button>
+            <div className="ml-auto flex gap-1.5">
+              <Button
+                size="sm"
+                variant="flat"
+                isDisabled={safeIdx >= total - 1}
+                onPress={goNext}
+                endContent={<Icon name="arrow_forward" variant="round" className="text-sm" />}
+              >
+                Skip
+              </Button>
+              <Button
+                size="sm"
+                color="primary"
+                onPress={() => act("approve")}
+                startContent={<Icon name="check" variant="round" className="text-sm" />}
+              >
+                Approve &amp; next
+              </Button>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

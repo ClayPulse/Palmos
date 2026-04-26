@@ -14,10 +14,11 @@ import {
 import { FALLBACK_AGENTS, type Agent } from "@/components/views/home/fallback-agents";
 import { TEAM_TEMPLATES, type TeamTemplate } from "@/components/views/home/team-templates";
 import { parseSuggestions } from "@/lib/utils/parse-suggestions";
+import { playDeliveryChime } from "@/lib/utils/notification-sound";
 import { TeamTemplateRow, AgentDetailModal } from "@/components/views/home/home-view";
 import { EditTeamModal } from "@/components/modals/edit-team-modal";
 import { ShareTeamModal } from "@/components/modals/share-team-modal";
-import { DeliveriesPanel as ExpandableDeliveriesPanel } from "@/components/views/home/deliveries-panel";
+import { DeliveriesPanel as ExpandableDeliveriesPanel, RecentDeliveriesSection } from "@/components/views/home/deliveries-panel";
 
 // ── Hooks to fetch from API with fallback ───────────────────────────────────
 
@@ -395,6 +396,7 @@ function useInboxChat(thread: Thread) {
             .filter((m) => m.role !== "system")
             .map((m) => ({ role: m.role === "human" ? "user" : "assistant", content: m.content })),
           sessionId: sid,
+          inboxThreadId: thread.id && !thread.id.startsWith("pending-") ? thread.id : undefined,
           persistToSession: true,
         }),
       });
@@ -403,6 +405,7 @@ function useInboxChat(thread: Thread) {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let deliveryChimedThisStream = false;
 
       outer: while (!controller.signal.aborted) {
         const { done, value } = await reader.read();
@@ -435,6 +438,25 @@ function useInboxChat(thread: Thread) {
           if (!chunk) continue;
 
           const kwargs = chunk.kwargs ?? chunk;
+
+          // Detect submit_delivery tool calls anywhere in the stream and ring
+          // a chime + broadcast a refresh signal so an open Deliveries panel
+          // can reload. Tool-call signal arrives via tool_calls or
+          // tool_call_chunks on AI message chunks (LangGraph) or as a
+          // ToolMessage with name "submit_delivery".
+          const additionalToolCalls = (kwargs.additional_kwargs?.tool_calls ?? []) as any[];
+          const toolCallNames: string[] = [
+            ...((kwargs.tool_calls ?? []) as any[]).map((tc) => tc?.name ?? tc?.function?.name).filter(Boolean),
+            ...((kwargs.tool_call_chunks ?? []) as any[]).map((tc) => tc?.name).filter(Boolean),
+            ...additionalToolCalls.map((tc) => tc?.name ?? tc?.function?.name).filter(Boolean),
+            kwargs.name,
+          ].filter(Boolean) as string[];
+          if (!deliveryChimedThisStream && toolCallNames.includes("submit_delivery")) {
+            deliveryChimedThisStream = true;
+            playDeliveryChime();
+            try { window.dispatchEvent(new CustomEvent("palmos:delivery-submitted")); } catch {}
+          }
+
           // Skip non-AI message chunks (tool calls/results, system) — only the
           // assistant's text should land in the visible chat bubble.
           const lcId = Array.isArray(chunk.id) ? chunk.id : [];
@@ -465,6 +487,10 @@ function useInboxChat(thread: Thread) {
       if (err?.name !== "AbortError") console.warn("[inbox-chat] stream error:", err);
     } finally {
       setIsLoading(false);
+      // Always nudge the deliveries panel to refetch once a turn completes —
+      // the agent may have called submit_delivery without us catching the
+      // chunk shape, and a refresh is cheap.
+      try { window.dispatchEvent(new CustomEvent("palmos:delivery-submitted")); } catch {}
       // Persistence happens server-side (via persistToSession in the request).
     }
   }, [text, agentSlug, isLoading, setMsgs]);
@@ -755,24 +781,14 @@ function TeamContextPane({ team }: { team: Team }) {
   if (showDeliveries) {
     return (
       <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-        <ExpandableDeliveriesPanel teamId={team.id} onBack={() => setShowDeliveries(false)} />
+        <ExpandableDeliveriesPanel onBack={() => setShowDeliveries(false)} />
       </aside>
     );
   }
 
   return (
     <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-      <div className="border-b border-default-200 p-3 dark:border-white/8">
-        <Button
-          size="sm"
-          variant="flat"
-          className="w-full justify-start"
-          startContent={<Icon name="inventory_2" variant="round" className="text-sm" />}
-          onPress={() => setShowDeliveries(true)}
-        >
-          Deliveries
-        </Button>
-      </div>
+      <RecentDeliveriesSection onOpenAll={() => setShowDeliveries(true)} />
       <div className="border-b border-default-200 p-4 dark:border-white/8">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">Goal</div>
         <p className="text-[13px] leading-relaxed text-default-600 dark:text-white/65">{team.goal}</p>
@@ -866,24 +882,14 @@ function DMContextPane({ thread }: { thread: Thread }) {
   if (showDeliveries) {
     return (
       <aside className="flex min-h-0 min-w-0 flex-col overflow-hidden border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-        <ExpandableDeliveriesPanel agentSlug={a.id} onBack={() => setShowDeliveries(false)} />
+        <ExpandableDeliveriesPanel onBack={() => setShowDeliveries(false)} />
       </aside>
     );
   }
 
   return (
     <aside className="flex min-h-0 min-w-0 flex-col overflow-y-auto border-l border-default-200 bg-default-50 dark:border-white/8 dark:bg-white/[0.02]">
-      <div className="border-b border-default-200 p-3 dark:border-white/8">
-        <Button
-          size="sm"
-          variant="flat"
-          className="w-full justify-start"
-          startContent={<Icon name="inventory_2" variant="round" className="text-sm" />}
-          onPress={() => setShowDeliveries(true)}
-        >
-          Deliveries
-        </Button>
-      </div>
+      <RecentDeliveriesSection onOpenAll={() => setShowDeliveries(true)} />
       <div className="p-4">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">About this thread</div>
         <div className="flex items-center gap-3">
