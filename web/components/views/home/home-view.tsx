@@ -1096,16 +1096,15 @@ export default function HomeView({
                 <div
                   key={a.id}
                   className="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-[14px] shadow-sm"
+                  style={{
+                    background: `linear-gradient(135deg, hsl(${a.hue} 60% 92%), hsl(${(a.hue + 30) % 360} 60% 86%))`,
+                  }}
                 >
-                  <div className="absolute inset-0 flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
-                    <LottieAvatar
-                      src={a.lottie}
-                      alt={a.name}
-                      size={160}
-                      hue={a.hue}
-                      initial={a.name}
-                    />
-                  </div>
+                  {a.lottie && (
+                    <div className="absolute inset-0 transition-transform duration-300 group-hover:scale-105">
+                      <PreviewBackdrop src={a.lottie} alt={a.name} opacity={1} />
+                    </div>
+                  )}
                   <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
                   {/* Verified badge */}
                   <div className="absolute top-1.5 right-1.5 z-10">
