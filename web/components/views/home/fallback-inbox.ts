@@ -60,26 +60,3 @@ export type Delivery = {
   itemCount: number;
 };
 
-export const FALLBACK_DELIVERIES: Delivery[] = [
-  {
-    id: "d1", agentId: "iris", task: "Draft replies to wholesale inquiries",
-    summary: "I went through 5 wholesale inquiries and drafted replies. Three are warm leads worth a same-day response — flagged those. Wasn't sure about tone on the Mercato one so I kept it formal.",
-    when: "8 min ago", status: "awaiting", itemCount: 5,
-  },
-  {
-    id: "d2", agentId: "nova", task: "Spring launch hero — 6 variants",
-    summary: "Six hero images for the spring launch. Three warm amber, three cooler. My pick is v3 — reads well at all viewports.",
-    when: "1 hr ago", status: "awaiting", itemCount: 6,
-  },
-  {
-    id: "d3", agentId: "atlas", task: "Single-origin sourcing playbook",
-    summary: "Drafted the 2025 sourcing playbook — 2,140 words. Pulled quotes from your Ethiopia trip notes. Ready for review.",
-    when: "3 hr ago", status: "awaiting", itemCount: 1,
-  },
-  {
-    id: "d4", agentId: "lyra", task: "Competitive landscape — specialty subscriptions",
-    summary: "23 sources, 8 competitors analyzed. Only 3 of 18 offer lot-level traceability — that's the wedge.",
-    when: "Yesterday", status: "approved", itemCount: 1,
-  },
-];
-

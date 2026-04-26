@@ -5,7 +5,6 @@ import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from "react";
 import {
-  FALLBACK_DELIVERIES,
   FALLBACK_INBOX_AGENTS,
   FALLBACK_TEAMS,
   type Delivery,
@@ -43,10 +42,13 @@ function useInboxAgents() {
   return agents;
 }
 
-function useInboxTeams(): { teams: Team[]; refetch: () => Promise<void> } {
+function useInboxTeams(): { teams: Team[]; isLoading: boolean; hasLoaded: boolean; refetch: () => Promise<void> } {
   const [teams, setTeams] = useState<Team[]>(FALLBACK_TEAMS);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const refetch = useCallback(async () => {
+    setIsLoading(true);
     try {
       const res = await fetchAPI("/api/agent/teams");
       if (!res.ok) return;
@@ -75,6 +77,9 @@ function useInboxTeams(): { teams: Team[]; refetch: () => Promise<void> } {
       }
     } catch {
       // ignore — leaves the previous teams (or fallback) intact
+    } finally {
+      setIsLoading(false);
+      setHasLoaded(true);
     }
   }, []);
 
@@ -82,13 +87,16 @@ function useInboxTeams(): { teams: Team[]; refetch: () => Promise<void> } {
     void refetch();
   }, [refetch]);
 
-  return { teams, refetch };
+  return { teams, isLoading, hasLoaded, refetch };
 }
 
-function useInboxThreads(): { threads: Thread[]; refetch: () => Promise<void> } {
+function useInboxThreads(): { threads: Thread[]; isLoading: boolean; hasLoaded: boolean; refetch: () => Promise<void> } {
   const [threads, setThreads] = useState<Thread[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
 
   const refetch = useCallback(async () => {
+    setIsLoading(true);
     try {
       const res = await fetchAPI("/api/agent/inbox/threads");
       if (!res.ok) return;
@@ -112,6 +120,9 @@ function useInboxThreads(): { threads: Thread[]; refetch: () => Promise<void> } 
       }
     } catch {
       // ignore — leave previous threads intact
+    } finally {
+      setIsLoading(false);
+      setHasLoaded(true);
     }
   }, []);
 
@@ -119,7 +130,7 @@ function useInboxThreads(): { threads: Thread[]; refetch: () => Promise<void> } 
     void refetch();
   }, [refetch]);
 
-  return { threads, refetch };
+  return { threads, isLoading, hasLoaded, refetch };
 }
 
 // ── Inbox context — provides agents/teams lookup to all subcomponents ───────
@@ -128,6 +139,10 @@ const InboxDataCtx = createContext<{
   agents: InboxAgent[];
   teams: Team[];
   threads: Thread[];
+  threadsLoading: boolean;
+  threadsLoaded: boolean;
+  teamsLoading: boolean;
+  teamsLoaded: boolean;
   agentById: (id: string) => InboxAgent | undefined;
   refetchTeams: () => Promise<void>;
   refetchThreads: () => Promise<void>;
@@ -135,6 +150,10 @@ const InboxDataCtx = createContext<{
   agents: FALLBACK_INBOX_AGENTS,
   teams: FALLBACK_TEAMS,
   threads: [],
+  threadsLoading: false,
+  threadsLoaded: false,
+  teamsLoading: false,
+  teamsLoaded: false,
   agentById: (id: string) => FALLBACK_INBOX_AGENTS.find((a) => a.id === id),
   refetchTeams: async () => {},
   refetchThreads: async () => {},
@@ -281,17 +300,20 @@ function useInboxChat(thread: Thread) {
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
   const chatMsgsRef = useRef<ChatMsg[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [text, setText] = useState("");
   const sessionIdRef = useRef<string | null>(thread.sessionId ?? null);
   const abortRef = useRef<AbortController | null>(null);
   const aiIdRef = useRef<string | null>(null);
 
+  // Always updates the ref synchronously before queueing the React state
+  // update — otherwise reads of chatMsgsRef.current right after a setMsgs
+  // call (e.g., inside the same async function) would see stale data.
   const setMsgs = useCallback((updater: ChatMsg[] | ((prev: ChatMsg[]) => ChatMsg[])) => {
-    setChatMsgs((prev) => {
-      const next = typeof updater === "function" ? updater(prev) : updater;
-      chatMsgsRef.current = next;
-      return next;
-    });
+    const next =
+      typeof updater === "function" ? updater(chatMsgsRef.current) : updater;
+    chatMsgsRef.current = next;
+    setChatMsgs(next);
   }, []);
 
   useEffect(() => {
@@ -301,26 +323,40 @@ function useInboxChat(thread: Thread) {
     aiIdRef.current = null;
     abortRef.current?.abort();
 
+    if (!thread.id || thread.id.startsWith("pending-")) {
+      setIsLoadingHistory(false);
+      return;
+    }
+
+    setIsLoadingHistory(true);
+    let cancelled = false;
     fetchAPI(`/api/agent/inbox/threads/${thread.id}`)
-      .then((r) => r.json())
+      .then((r) => (r.ok ? r.json() : null))
       .then((data: any) => {
+        if (cancelled || !data) return;
         if (data.sessionId) sessionIdRef.current = data.sessionId;
         const msgs: any[] = data.session?.messages ?? [];
-        if (msgs.length > 0) {
-          setMsgs(
-            msgs
-              .filter((m: any) => m.role === "human" || m.role === "ai")
-              .map((m: any) => ({
-                id: m.id,
-                role: m.role as "human" | "ai",
-                content: extractTextContent(m.content),
-                ts: new Date(m.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
-              }))
-              .filter((m) => m.content !== ""),
-          );
-        }
+        const mapped = msgs
+          .filter((m: any) => m.role === "human" || m.role === "ai")
+          .map((m: any) => ({
+            id: m.id,
+            role: m.role as "human" | "ai",
+            content: extractTextContent(m.content),
+            ts: new Date(m.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+          }))
+          .filter((m) => m.content !== "");
+        if (mapped.length > 0) setMsgs(mapped);
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (!cancelled) console.warn("[inbox-chat] failed to load history:", err);
+      })
+      .finally(() => {
+        if (!cancelled) setIsLoadingHistory(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [thread.id, setMsgs]);
 
   const agentSlug =
@@ -331,6 +367,11 @@ function useInboxChat(thread: Thread) {
   const submit = useCallback(async () => {
     const trimmed = text.trim();
     if (!trimmed || !agentSlug || isLoading) return;
+    const sid = sessionIdRef.current;
+    if (!sid) {
+      console.warn("[inbox-chat] cannot send — thread has no sessionId");
+      return;
+    }
 
     const userMsg: ChatMsg = { id: `u-${Date.now()}`, role: "human", content: trimmed, ts: "now" };
     setMsgs((prev) => [...prev, userMsg]);
@@ -351,7 +392,8 @@ function useInboxChat(thread: Thread) {
           messages: snapshot
             .filter((m) => m.role !== "system")
             .map((m) => ({ role: m.role === "human" ? "user" : "assistant", content: m.content })),
-          sessionId: sessionIdRef.current ?? undefined,
+          sessionId: sid,
+          persistToSession: true,
         }),
       });
 
@@ -421,26 +463,11 @@ function useInboxChat(thread: Thread) {
       if (err?.name !== "AbortError") console.warn("[inbox-chat] stream error:", err);
     } finally {
       setIsLoading(false);
-      // Persist messages so history survives reload — runs whether the stream
-      // succeeded or errored, so the user's message is at least preserved.
-      const sid = sessionIdRef.current;
-      if (sid && chatMsgsRef.current.length > 0) {
-        fetchAPI(`/api/chat/sessions/${sid}/update`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            messages: chatMsgsRef.current
-              .filter((m) => m.role !== "system" && m.content.trim() !== "")
-              .map((m) => ({ role: m.role, content: m.content })),
-          }),
-        }).catch((err) => console.warn("[inbox-chat] persist failed:", err));
-      } else if (!sid) {
-        console.warn("[inbox-chat] no sessionId — messages not persisted");
-      }
+      // Persistence happens server-side (via persistToSession in the request).
     }
   }, [text, agentSlug, isLoading, setMsgs]);
 
-  return { chatMsgs, isLoading, text, setText, submit };
+  return { chatMsgs, isLoading, isLoadingHistory, text, setText, submit };
 }
 
 // ── Simple chat message renderer (real API messages) ─────────────────────────
@@ -524,7 +551,7 @@ function SimpleChatMessage({ m, thread, isStreaming, onSuggestionClick }: { m: C
 
 function ThreadView({ thread }: { thread: Thread }) {
   const { teams, agentById: lookupAgent } = useInboxData();
-  const { chatMsgs, isLoading, text, setText, submit } = useInboxChat(thread);
+  const { chatMsgs, isLoading, isLoadingHistory, text, setText, submit } = useInboxChat(thread);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -601,7 +628,13 @@ function ThreadView({ thread }: { thread: Thread }) {
       {header}
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <div className="mx-auto flex max-w-[900px] flex-col gap-4 px-8 py-6">
-          {chatMsgs.length === 0 && !isLoading && (
+          {isLoadingHistory && chatMsgs.length === 0 && (
+            <div className="flex flex-col items-center gap-3 py-12">
+              <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />
+              <span className="text-[12.5px] text-default-400 dark:text-white/40">Loading conversation…</span>
+            </div>
+          )}
+          {!isLoadingHistory && chatMsgs.length === 0 && !isLoading && (
             <div className="flex flex-col items-center gap-2 py-12 text-center text-[13px] text-default-400 dark:text-white/40">
               <Icon name="chat" variant="round" className="text-3xl" />
               <span>No messages yet — say hi to get started.</span>
@@ -811,9 +844,8 @@ const STATUS_META: Record<string, { label: string; cls: string; icon: string }> 
 
 function DeliveriesPanel({ agentId, onBack }: { agentId?: string; onBack: () => void }) {
   const { agentById: lookupAgent } = useInboxData();
-  const deliveries = agentId
-    ? FALLBACK_DELIVERIES.filter((d) => d.agentId === agentId)
-    : FALLBACK_DELIVERIES;
+  const deliveries: Delivery[] = [];
+  void agentId;
 
   return (
     <div className="flex min-h-0 flex-col">
@@ -882,7 +914,7 @@ export function TeamsGrid({
   busyTemplateSlug: string | null;
   onCreateFromTemplate: (template: TeamTemplate) => void;
 }) {
-  const { teams: allTeams, agents: inboxAgents, agentById: lookupAgent, refetchTeams } = useInboxData();
+  const { teams: allTeams, agents: inboxAgents, teamsLoading, teamsLoaded, agentById: lookupAgent, refetchTeams } = useInboxData();
   const [pendingDelete, setPendingDelete] = useState<Team | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const requestDelete = useCallback((team: Team, e: React.MouseEvent | React.KeyboardEvent) => {
@@ -964,6 +996,12 @@ export function TeamsGrid({
             variant="row"
           />
         </div>
+        {teamsLoading && !teamsLoaded ? (
+          <div className="flex flex-col items-center gap-3 py-16">
+            <span className="inline-block h-7 w-7 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />
+            <span className="text-[13px] text-default-400 dark:text-white/40">Loading your teams…</span>
+          </div>
+        ) : (
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
           {allTeams.map((team) => {
             const agents = team.agents.map((id) => lookupAgent(id)).filter(Boolean) as InboxAgent[];
@@ -1017,6 +1055,7 @@ export function TeamsGrid({
             <div className="max-w-[200px] text-center text-xs text-default-400 dark:text-white/40">Pick agents, assign a lead, set a goal. Ready in 2 minutes.</div>
           </button>
         </div>
+        )}
       </div>
       <Modal
         isOpen={pendingDelete !== null}
@@ -1299,17 +1338,21 @@ export function CreateTeamWizard({ onDone }: { onDone: () => void }) {
 
 export default function InboxView() {
   const inboxAgents = useInboxAgents();
-  const { teams: inboxTeams, refetch: refetchTeams } = useInboxTeams();
-  const { threads: inboxThreads, refetch: refetchThreads } = useInboxThreads();
+  const { teams: inboxTeams, isLoading: teamsLoading, hasLoaded: teamsLoaded, refetch: refetchTeams } = useInboxTeams();
+  const { threads: inboxThreads, isLoading: threadsLoading, hasLoaded: threadsLoaded, refetch: refetchThreads } = useInboxThreads();
 
   const ctxValue = useMemo(() => ({
     agents: inboxAgents,
     teams: inboxTeams,
     threads: inboxThreads,
+    threadsLoading,
+    threadsLoaded,
+    teamsLoading,
+    teamsLoaded,
     agentById: (id: string) => inboxAgents.find((a) => a.id === id),
     refetchTeams,
     refetchThreads,
-  }), [inboxAgents, inboxTeams, inboxThreads, refetchTeams, refetchThreads]);
+  }), [inboxAgents, inboxTeams, inboxThreads, threadsLoading, threadsLoaded, teamsLoading, teamsLoaded, refetchTeams, refetchThreads]);
 
   return (
     <InboxDataCtx.Provider value={ctxValue}>
@@ -1340,7 +1383,7 @@ async function ensureRealThread(thread: Thread): Promise<Thread | null> {
 }
 
 function InboxViewInner() {
-  const { teams: TEAMS, threads: THREADS, refetchTeams, refetchThreads } = useInboxData();
+  const { teams: TEAMS, threads: THREADS, threadsLoading, threadsLoaded, teamsLoading, teamsLoaded, refetchTeams, refetchThreads } = useInboxData();
   const [tab, setTab] = useState<"inbox" | "teams" | "create">("inbox");
   const [active, setActive] = useState<Thread | null>(null);
   const [filter, setFilter] = useState("all");
@@ -1464,9 +1507,21 @@ function InboxViewInner() {
               ))}
             </div>
             <div className="flex-1 overflow-y-auto p-2">
-              {filtered.map((t) => (
-                <ThreadListItem key={t.id} thread={t} active={active?.id === t.id} onPick={openThread} />
-              ))}
+              {threadsLoading && THREADS.length === 0 ? (
+                <div className="flex flex-col items-center gap-3 py-12">
+                  <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-amber-300 border-t-transparent" />
+                  <span className="text-[12.5px] text-default-400 dark:text-white/40">Loading inbox…</span>
+                </div>
+              ) : threadsLoaded && filtered.length === 0 ? (
+                <div className="flex flex-col items-center gap-2 py-12 text-center text-[12.5px] text-default-400 dark:text-white/40">
+                  <Icon name="inbox" variant="round" className="text-2xl" />
+                  <span>No conversations yet</span>
+                </div>
+              ) : (
+                filtered.map((t) => (
+                  <ThreadListItem key={t.id} thread={t} active={active?.id === t.id} onPick={openThread} />
+                ))
+              )}
             </div>
           </aside>
 
