@@ -65,7 +65,7 @@ function mapListingToAgent(listing: any): Agent {
     hue: listing.hue,
     lottie:
       listing.lottie ??
-      `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}/api/agent/avatar/${listing.slug}.lottie?v=2`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL ?? ""}/api/agent/avatar/${listing.slug}.lottie?v=4`,
   };
 }
 

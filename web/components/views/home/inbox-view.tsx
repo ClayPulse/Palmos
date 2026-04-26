@@ -40,7 +40,7 @@ function useInboxAgents() {
             // Prefer the URL from the API; fall back to constructing it
             // client-side so older website builds (without lottie enrichment)
             // still get animated avatars.
-            lottie: a.lottie ?? `${backend}/api/agent/avatar/${a.slug}.lottie?v=2`,
+            lottie: a.lottie ?? `${backend}/api/agent/avatar/${a.slug}.lottie?v=4`,
           })));
         }
       })

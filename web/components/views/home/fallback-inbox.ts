@@ -19,7 +19,7 @@ export type InboxAgent = {
 // The listings API returns the full URL on each agent — this fallback
 // mirrors that shape using the configured backend URL.
 const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
-const lottieUrl = (slug: string) => `${BACKEND}/api/agent/avatar/${slug}.lottie?v=2`;
+const lottieUrl = (slug: string) => `${BACKEND}/api/agent/avatar/${slug}.lottie?v=4`;
 
 export const FALLBACK_INBOX_AGENTS: InboxAgent[] = [
   { id: "iris",  name: "Iris",  role: "Email triage",      hue: 240, lottie: lottieUrl("iris") },
