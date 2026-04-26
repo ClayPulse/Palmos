@@ -147,6 +147,69 @@ const AVATAR_TABS: { key: "emoji" | "character" | "cartoon"; label: string }[] =
   { key: "cartoon",   label: "Cartoon" },
 ];
 
+// Renders a cheap static skeleton (no network fetch) until scrolled into
+// view, then mounts the real Lottie. Once visible, stays mounted so
+// scrolling back up doesn't refetch.
+function LazyAvatarTile({
+  entry,
+  active,
+  scrollRoot,
+  onClick,
+}: {
+  entry: AvatarCatalogEntry;
+  active: boolean;
+  scrollRoot: HTMLElement | null;
+  onClick: () => void;
+}) {
+  const [visible, setVisible] = useState(false);
+  const ref = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    if (visible || !ref.current) return;
+    const el = ref.current;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) {
+            setVisible(true);
+            io.disconnect();
+            break;
+          }
+        }
+      },
+      { root: scrollRoot, rootMargin: "120px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [visible, scrollRoot]);
+
+  return (
+    <button
+      ref={ref}
+      type="button"
+      onClick={onClick}
+      title={entry.name}
+      className={`flex h-14 w-14 items-center justify-center rounded-lg border p-1 transition-colors ${
+        active
+          ? "border-amber-400 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10"
+          : "border-default-200 bg-white hover:border-default-300 dark:border-white/10 dark:bg-white/5"
+      }`}
+    >
+      {visible ? (
+        <LottieAvatar
+          src={entry.lottie}
+          alt={entry.name}
+          size={44}
+          hue={210}
+          initial={entry.name.slice(0, 1).toUpperCase()}
+        />
+      ) : (
+        <div className="h-11 w-11 animate-pulse rounded-full bg-default-200 dark:bg-white/10" />
+      )}
+    </button>
+  );
+}
+
 function AvatarPicker({
   selectedPath,
   onSelect,
@@ -155,7 +218,7 @@ function AvatarPicker({
   onSelect: (path: string | null, lottie: string | null) => void;
 }) {
   const [catalog, setCatalog] = useState<AvatarCatalog | null>(null);
-  const [tab, setTab] = useState<"emoji" | "character" | "cartoon">("character");
+  const [tab, setTab] = useState<"emoji" | "character" | "cartoon">("emoji");
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -174,6 +237,10 @@ function AvatarPicker({
   }, [isOpen, catalog]);
 
   const items = catalog?.[tab] ?? [];
+  const totalCounts = catalog
+    ? { emoji: catalog.emoji.length, character: catalog.character.length, cartoon: catalog.cartoon.length }
+    : null;
+  const [scrollRoot, setScrollRoot] = useState<HTMLDivElement | null>(null);
 
   return (
     <Popover placement="bottom" isOpen={isOpen} onOpenChange={setIsOpen}>
@@ -194,17 +261,28 @@ function AvatarPicker({
                 key={t.key}
                 type="button"
                 onClick={() => setTab(t.key)}
-                className={`flex-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                className={`flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
                   tab === t.key
                     ? "bg-white text-default-800 shadow-sm dark:bg-white/15 dark:text-white"
                     : "text-default-500 hover:text-default-700 dark:text-white/55 dark:hover:text-white/85"
                 }`}
               >
                 {t.label}
+                {totalCounts && (
+                  <span className="text-[10px] font-normal text-default-400 dark:text-white/40">
+                    {totalCounts[t.key]}
+                  </span>
+                )}
               </button>
             ))}
           </div>
-          <div className="grid max-h-[280px] grid-cols-5 gap-1.5 overflow-y-auto p-1">
+          <div
+            ref={setScrollRoot}
+            // Re-mount the scroll container on tab change so the IntersectionObserver
+            // re-evaluates which tiles are visible from the top of the new list.
+            key={tab}
+            className="grid max-h-[280px] grid-cols-5 gap-1.5 overflow-y-auto p-1"
+          >
             <button
               type="button"
               onClick={() => {
@@ -225,33 +303,18 @@ function AvatarPicker({
                 <Spinner size="sm" />
               </div>
             )}
-            {items.map((entry) => {
-              const active = selectedPath === entry.path;
-              return (
-                <button
-                  key={entry.path}
-                  type="button"
-                  onClick={() => {
-                    onSelect(entry.path, entry.lottie);
-                    setIsOpen(false);
-                  }}
-                  title={entry.name}
-                  className={`flex h-14 w-14 items-center justify-center rounded-lg border p-1 transition-colors ${
-                    active
-                      ? "border-amber-400 bg-amber-50 dark:border-amber-500/40 dark:bg-amber-500/10"
-                      : "border-default-200 bg-white hover:border-default-300 dark:border-white/10 dark:bg-white/5"
-                  }`}
-                >
-                  <LottieAvatar
-                    src={entry.lottie}
-                    alt={entry.name}
-                    size={44}
-                    hue={210}
-                    initial={entry.name.slice(0, 1).toUpperCase()}
-                  />
-                </button>
-              );
-            })}
+            {items.map((entry) => (
+              <LazyAvatarTile
+                key={entry.path}
+                entry={entry}
+                active={selectedPath === entry.path}
+                scrollRoot={scrollRoot}
+                onClick={() => {
+                  onSelect(entry.path, entry.lottie);
+                  setIsOpen(false);
+                }}
+              />
+            ))}
           </div>
         </div>
       </PopoverContent>
