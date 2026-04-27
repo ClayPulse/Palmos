@@ -4,7 +4,15 @@ import Icon from "@/components/misc/icon";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { playDeliveryChime } from "@/lib/utils/notification-sound";
 import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
+
+type DeliveryAsset = {
+  id: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+};
 
 type DeliveryItem = {
   id: string;
@@ -19,7 +27,85 @@ type DeliveryItem = {
   status: "awaiting" | "changes-req" | "approved" | "sent" | "archived";
   confidence: number;
   createdAt: string;
+  assets?: DeliveryAsset[];
 };
+
+function formatBytes(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  let i = 0;
+  let v = n;
+  while (v >= 1024 && i < units.length - 1) {
+    v /= 1024;
+    i += 1;
+  }
+  const fixed = i === 0 ? 0 : v >= 10 ? 0 : 1;
+  return `${v.toFixed(fixed)} ${units[i]}`;
+}
+
+function assetIconName(mimeType: string): string {
+  if (mimeType.startsWith("image/")) return "image";
+  if (mimeType === "application/pdf") return "picture_as_pdf";
+  if (mimeType.includes("spreadsheet") || mimeType.includes("excel")) return "table_chart";
+  if (mimeType.includes("presentation") || mimeType.includes("powerpoint")) return "slideshow";
+  if (mimeType.includes("word") || mimeType.includes("document")) return "description";
+  if (mimeType === "application/zip") return "folder_zip";
+  if (mimeType.startsWith("text/")) return "notes";
+  return "draft";
+}
+
+function AssetList({ assets }: { assets: DeliveryAsset[] }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="text-[10.5px] font-semibold uppercase tracking-wide text-default-400 dark:text-white/40">
+        Attached files
+      </div>
+      {assets.map((a) => {
+        const isImage = a.mimeType.startsWith("image/");
+        const href = `/api/agent/deliveries/assets/${encodeURIComponent(a.id)}`;
+        return (
+          <div
+            key={a.id}
+            className="flex flex-col gap-2 rounded-lg border border-default-200 bg-default-50 p-2.5 dark:border-white/10 dark:bg-white/[0.02]"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                <Icon name={assetIconName(a.mimeType)} variant="round" className="text-base" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-[13px] font-medium text-default-800 dark:text-white/85">
+                  {a.filename}
+                </div>
+                <div className="text-[11px] text-default-400 dark:text-white/40">
+                  {a.mimeType} · {formatBytes(a.sizeBytes)}
+                </div>
+              </div>
+              <a
+                href={href}
+                download={a.filename}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex shrink-0 items-center gap-1 rounded-md bg-amber-500 px-2.5 py-1 text-[12px] font-semibold text-white hover:bg-amber-600"
+                title={`Download ${a.filename}`}
+              >
+                <Icon name="download" variant="round" className="text-sm" />
+                Download
+              </a>
+            </div>
+            {isImage && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={href}
+                alt={a.filename}
+                className="block max-h-[320px] w-full rounded-md object-contain"
+              />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 const STATUS_META: Record<string, { label: string; cls: string; icon: string }> = {
   awaiting:      { label: "Awaiting review",   cls: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300",       icon: "schedule" },
@@ -111,20 +197,33 @@ function Confidence({ value }: { value: number }) {
 
 function ItemPreview({ item }: { item: DeliveryItem }) {
   const p = item.payload ?? {};
+  const hasAssets = (item.assets?.length ?? 0) > 0;
+  // Real attached files always render first — that's the deliverable. The
+  // payload-driven preview below is supplementary context.
+  const assetsBlock = hasAssets ? (
+    <AssetList assets={item.assets!} />
+  ) : null;
+  const wrap = (node: ReactNode) => (
+    <div className="flex flex-col gap-2.5">
+      {assetsBlock}
+      {node}
+    </div>
+  );
+
   if (item.kind === "email") {
-    return (
+    return wrap(
       <div className="rounded-lg border border-default-200 bg-default-50 p-3 text-xs dark:border-white/10 dark:bg-white/[0.02]">
         {p.to && <div><span className="text-default-400">To: </span>{p.to}</div>}
         {p.subject && <div><span className="text-default-400">Subject: </span><strong>{p.subject}</strong></div>}
         {p.body && <div className="mt-2 whitespace-pre-wrap text-default-600 dark:text-white/65">{p.body}</div>}
-      </div>
+      </div>,
     );
   }
   if (item.kind === "code") {
-    return (
+    return wrap(
       <div className="rounded-lg border border-default-200 bg-default-900 p-3 font-mono text-[11.5px] text-default-100 dark:border-white/10">
         {p.diff ?? p.summary ?? item.summary ?? "(no preview)"}
-      </div>
+      </div>,
     );
   }
   if (item.kind === "slides") {
@@ -134,7 +233,7 @@ function ItemPreview({ item }: { item: DeliveryItem }) {
         ? p.deck
         : [];
     if (slides.length > 0) {
-      return (
+      return wrap(
         <div className="flex flex-col gap-2">
           {slides.map((s, i) => {
             const title = s?.title ?? s?.heading ?? `Slide ${i + 1}`;
@@ -177,7 +276,7 @@ function ItemPreview({ item }: { item: DeliveryItem }) {
               </div>
             );
           })}
-        </div>
+        </div>,
       );
     }
     // Fallback: agent only supplied an outline / body string.
@@ -188,25 +287,25 @@ function ItemPreview({ item }: { item: DeliveryItem }) {
           ? p.body
           : "";
     if (outline) {
-      return (
+      return wrap(
         <div className="rounded-lg border border-default-200 bg-default-50 p-3 text-[13px] whitespace-pre-wrap text-default-600 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/65">
           {outline}
-        </div>
+        </div>,
       );
     }
   }
   if (item.kind === "doc" || item.kind === "note" || item.kind === "text") {
     const body = typeof p.body === "string" ? p.body : typeof p === "string" ? p : "";
     if (body) {
-      return (
+      return wrap(
         <div className="rounded-lg border border-default-200 bg-default-50 p-3 text-[13px] whitespace-pre-wrap text-default-600 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/65">
           {body}
-        </div>
+        </div>,
       );
     }
   }
   if (item.kind === "image" && typeof p.url === "string") {
-    return (
+    return wrap(
       <div className="overflow-hidden rounded-lg border border-default-200 dark:border-white/10">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={p.url} alt={item.title} className="block max-h-[420px] w-full object-contain" />
@@ -215,13 +314,15 @@ function ItemPreview({ item }: { item: DeliveryItem }) {
             {p.brief}
           </div>
         )}
-      </div>
+      </div>,
     );
   }
   // Generic fallback — show the full payload as JSON so the user can always
-  // see what was actually delivered (no silent truncation).
+  // see what was actually delivered (no silent truncation). When assets are
+  // present and the payload is empty, the AssetList alone is enough.
   const hasPayload = p && Object.keys(p).length > 0;
-  return (
+  if (!hasPayload && hasAssets) return wrap(null);
+  return wrap(
     <div className="rounded-lg border border-default-200 bg-default-50 p-3 text-xs text-default-600 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/65">
       {hasPayload ? (
         <pre className="max-h-[360px] overflow-auto whitespace-pre-wrap font-mono text-[11.5px] leading-relaxed">
@@ -230,7 +331,7 @@ function ItemPreview({ item }: { item: DeliveryItem }) {
       ) : (
         item.summary || "(no preview content was attached to this delivery)"
       )}
-    </div>
+    </div>,
   );
 }
 
