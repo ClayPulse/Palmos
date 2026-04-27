@@ -2466,6 +2466,49 @@ function ExistingWorkflowPicker({
 
 // ── Agent Detail Modal ──────────────────────────────────────────────────────
 
+// Pre-hire skill removals are persisted to localStorage so the edit survives
+// closing/reopening the detail card and full page reloads. Cleared on
+// successful hire. Each entry is a Set<"source:externalId">. Uploads are
+// excluded (the File can't be re-staged after reload).
+const PRE_HIRE_REMOVED_KEY = (slug: string) =>
+  `pe:preHireRemovedSkills:${slug}`;
+
+function loadPreHireRemoved(slug: string): Set<string> {
+  if (typeof window === "undefined") return new Set();
+  try {
+    const raw = window.localStorage.getItem(PRE_HIRE_REMOVED_KEY(slug));
+    if (!raw) return new Set();
+    const arr = JSON.parse(raw);
+    return new Set(Array.isArray(arr) ? arr : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function savePreHireRemoved(slug: string, set: Set<string>): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (set.size === 0) {
+      window.localStorage.removeItem(PRE_HIRE_REMOVED_KEY(slug));
+    } else {
+      window.localStorage.setItem(
+        PRE_HIRE_REMOVED_KEY(slug),
+        JSON.stringify([...set]),
+      );
+    }
+  } catch {
+    // Storage quota or disabled — pre-hire edits will then only persist
+    // for the lifetime of the component, which is the prior behavior.
+  }
+}
+
+function clearPreHireRemoved(slug: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(PRE_HIRE_REMOVED_KEY(slug));
+  } catch {}
+}
+
 interface TeamSummary {
   id: string;
   name: string;
@@ -2547,7 +2590,20 @@ export function AgentDetailModal({
       if (!res.ok) return;
       const data = await res.json();
       setHired(!!data.hired);
-      setSkills(data.skills ?? []);
+      // Pre-hire: re-apply any skills the user has staged for removal so the
+      // edit persists across modal close/reopen and across reloads. Cleared
+      // on successful hire.
+      const incoming: AgentSkill[] = data.skills ?? [];
+      if (!data.hired) {
+        const removed = loadPreHireRemoved(agent.id);
+        setSkills(
+          incoming.filter(
+            (s) => !removed.has(`${s.source}:${s.externalId}`),
+          ),
+        );
+      } else {
+        setSkills(incoming);
+      }
       setWorkflows(data.workflows ?? []);
     } catch {
       // Best-effort; missing state means empty defaults.
@@ -2574,7 +2630,17 @@ export function AgentDetailModal({
       if (skill.source === "upload") {
         pendingUploadsRef.current.delete(skill.externalId);
       }
-      if (!hired) return;
+      if (!hired) {
+        // Persist pre-hire removal so it survives close/reopen + reload.
+        // Uploads are session-only (the File can't be re-staged), so don't
+        // persist those — they'd dangle.
+        if (skill.source !== "upload") {
+          const removed = loadPreHireRemoved(agent.id);
+          removed.add(`${skill.source}:${skill.externalId}`);
+          savePreHireRemoved(agent.id, removed);
+        }
+        return;
+      }
       try {
         const res = await fetchAPI(
           `/api/agent/worker/${encodeURIComponent(agent.id)}/skills/detach`,
@@ -2611,7 +2677,17 @@ export function AgentDetailModal({
         return;
       }
       setSkills((prev) => [...prev, skill]);
-      if (!hired) return;
+      if (!hired) {
+        // If the user is re-adding a previously staged-removed default,
+        // clear it from the persisted removal set.
+        if (skill.source !== "upload") {
+          const removed = loadPreHireRemoved(agent.id);
+          if (removed.delete(`${skill.source}:${skill.externalId}`)) {
+            savePreHireRemoved(agent.id, removed);
+          }
+        }
+        return;
+      }
       try {
         const res = await fetchAPI(
           `/api/agent/worker/${encodeURIComponent(agent.id)}/skills/attach`,
@@ -2789,6 +2865,7 @@ export function AgentDetailModal({
       // mode so the user can fix the bad upload.
       if (ok) {
         pendingUploadsRef.current.clear();
+        clearPreHireRemoved(agent.id);
         await fetchState();
       }
     },
