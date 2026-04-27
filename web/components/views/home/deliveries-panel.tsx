@@ -127,9 +127,109 @@ function ItemPreview({ item }: { item: DeliveryItem }) {
       </div>
     );
   }
+  if (item.kind === "slides") {
+    const slides: any[] = Array.isArray(p.slides)
+      ? p.slides
+      : Array.isArray(p.deck)
+        ? p.deck
+        : [];
+    if (slides.length > 0) {
+      return (
+        <div className="flex flex-col gap-2">
+          {slides.map((s, i) => {
+            const title = s?.title ?? s?.heading ?? `Slide ${i + 1}`;
+            const body = s?.body ?? s?.content ?? s?.text ?? "";
+            const bullets: string[] = Array.isArray(s?.bullets)
+              ? s.bullets
+              : Array.isArray(s?.points)
+                ? s.points
+                : [];
+            const notes = s?.notes ?? s?.speaker_notes;
+            return (
+              <div
+                key={i}
+                className="rounded-lg border border-default-200 bg-default-50 p-3 text-[13px] dark:border-white/10 dark:bg-white/[0.02]"
+              >
+                <div className="mb-1 flex items-center gap-1.5 text-[10.5px] font-semibold uppercase tracking-wide text-default-400 dark:text-white/40">
+                  <Icon name="slideshow" variant="round" className="text-xs" />
+                  Slide {i + 1}
+                </div>
+                <div className="font-semibold text-default-800 dark:text-white/90">
+                  {title}
+                </div>
+                {body && (
+                  <div className="mt-1 whitespace-pre-wrap text-default-600 dark:text-white/65">
+                    {body}
+                  </div>
+                )}
+                {bullets.length > 0 && (
+                  <ul className="mt-1 list-disc pl-5 text-default-600 dark:text-white/65">
+                    {bullets.map((b, j) => (
+                      <li key={j}>{b}</li>
+                    ))}
+                  </ul>
+                )}
+                {notes && (
+                  <div className="mt-2 border-t border-default-200 pt-1.5 text-[11.5px] italic text-default-400 dark:border-white/10 dark:text-white/40">
+                    Notes: {notes}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+    // Fallback: agent only supplied an outline / body string.
+    const outline =
+      typeof p.outline === "string"
+        ? p.outline
+        : typeof p.body === "string"
+          ? p.body
+          : "";
+    if (outline) {
+      return (
+        <div className="rounded-lg border border-default-200 bg-default-50 p-3 text-[13px] whitespace-pre-wrap text-default-600 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/65">
+          {outline}
+        </div>
+      );
+    }
+  }
+  if (item.kind === "doc" || item.kind === "note" || item.kind === "text") {
+    const body = typeof p.body === "string" ? p.body : typeof p === "string" ? p : "";
+    if (body) {
+      return (
+        <div className="rounded-lg border border-default-200 bg-default-50 p-3 text-[13px] whitespace-pre-wrap text-default-600 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/65">
+          {body}
+        </div>
+      );
+    }
+  }
+  if (item.kind === "image" && typeof p.url === "string") {
+    return (
+      <div className="overflow-hidden rounded-lg border border-default-200 dark:border-white/10">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={p.url} alt={item.title} className="block max-h-[420px] w-full object-contain" />
+        {p.brief && (
+          <div className="border-t border-default-200 bg-default-50 p-2 text-[11.5px] text-default-500 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/55">
+            {p.brief}
+          </div>
+        )}
+      </div>
+    );
+  }
+  // Generic fallback — show the full payload as JSON so the user can always
+  // see what was actually delivered (no silent truncation).
+  const hasPayload = p && Object.keys(p).length > 0;
   return (
     <div className="rounded-lg border border-default-200 bg-default-50 p-3 text-xs text-default-600 dark:border-white/10 dark:bg-white/[0.02] dark:text-white/65">
-      {item.summary || JSON.stringify(p, null, 2).slice(0, 400)}
+      {hasPayload ? (
+        <pre className="max-h-[360px] overflow-auto whitespace-pre-wrap font-mono text-[11.5px] leading-relaxed">
+          {JSON.stringify(p, null, 2)}
+        </pre>
+      ) : (
+        item.summary || "(no preview content was attached to this delivery)"
+      )}
     </div>
   );
 }

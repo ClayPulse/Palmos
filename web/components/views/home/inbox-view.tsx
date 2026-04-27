@@ -773,6 +773,7 @@ function ThreadView({ thread, onTeamChanged }: { thread: Thread; onTeamChanged?:
   const composerRef = useRef<HTMLTextAreaElement>(null);
   const [editTeamOpen, setEditTeamOpen] = useState(false);
   const [shareTeamOpen, setShareTeamOpen] = useState(false);
+  const [dmDetailOpen, setDmDetailOpen] = useState(false);
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -803,13 +804,19 @@ function ThreadView({ thread, onTeamChanged }: { thread: Thread; onTeamChanged?:
     placeholder = `Message ${a?.name}…`;
     header = (
       <div className="flex shrink-0 items-center gap-3 border-b border-default-200 bg-white px-6 py-3.5 dark:border-white/8 dark:bg-white/[0.03]">
-        {a && <InAvatar agent={a} size={36} />}
-        <div className="flex-1 min-w-0">
-          <div className="text-[15px] font-semibold text-default-800 dark:text-white/90">{a?.name}</div>
-          <div className="mt-0.5 text-xs text-default-400 dark:text-white/45">
-            {a?.role} · <span className="text-emerald-600 dark:text-emerald-400">● Online</span>
+        <button
+          type="button"
+          onClick={() => a && setDmDetailOpen(true)}
+          className="flex flex-1 min-w-0 items-center gap-3 rounded-lg px-1 py-1 -mx-1 text-left transition-colors hover:bg-default-100 dark:hover:bg-white/5"
+        >
+          {a && <InAvatar agent={a} size={36} />}
+          <div className="flex-1 min-w-0">
+            <div className="text-[15px] font-semibold text-default-800 dark:text-white/90">{a?.name}</div>
+            <div className="mt-0.5 text-xs text-default-400 dark:text-white/45">
+              {a?.role} · <span className="text-emerald-600 dark:text-emerald-400">● Online</span>
+            </div>
           </div>
-        </div>
+        </button>
         <Button isIconOnly size="sm" variant="light"><Icon name="push_pin" variant="round" /></Button>
         <Button isIconOnly size="sm" variant="light"><Icon name="more_horiz" variant="round" /></Button>
       </div>
@@ -989,6 +996,34 @@ function ThreadView({ thread, onTeamChanged }: { thread: Thread; onTeamChanged?:
           />
         </>
       )}
+      {thread.kind === "dm" && dmDetailOpen && (() => {
+        const a = lookupAgent(thread.agentId!);
+        if (!a) return null;
+        const marketAgent =
+          FALLBACK_AGENTS.find((x) => x.id === a.id) ??
+          ({
+            id: a.id,
+            name: a.name,
+            role: a.role,
+            cat: "automation",
+            rating: 0,
+            reviews: 0,
+            price: 0,
+            turnaround: "—",
+            used: "—",
+            tools: [],
+            tagline: a.role,
+            hue: a.hue,
+            lottie: a.lottie,
+          } as Agent);
+        return (
+          <AgentDetailModal
+            agent={marketAgent}
+            onClose={() => setDmDetailOpen(false)}
+            onHire={async () => true}
+          />
+        );
+      })()}
     </>
   );
 }
@@ -1100,7 +1135,25 @@ function DMContextPane({ thread }: { thread: Thread }) {
   const { agentById: lookupAgent } = useInboxData();
   const a = lookupAgent(thread.agentId!);
   const [showDeliveries, setShowDeliveries] = useState(false);
+  const [detailOpen, setDetailOpen] = useState(false);
   if (!a) return null;
+  const marketAgent =
+    FALLBACK_AGENTS.find((x) => x.id === a.id) ??
+    ({
+      id: a.id,
+      name: a.name,
+      role: a.role,
+      cat: "automation",
+      rating: 0,
+      reviews: 0,
+      price: 0,
+      turnaround: "—",
+      used: "—",
+      tools: [],
+      tagline: a.role,
+      hue: a.hue,
+      lottie: a.lottie,
+    } as Agent);
 
   if (showDeliveries) {
     return (
@@ -1115,17 +1168,28 @@ function DMContextPane({ thread }: { thread: Thread }) {
       <RecentDeliveriesSection agentSlug={a.id} onOpenAll={() => setShowDeliveries(true)} />
       <div className="p-4">
         <div className="mb-2.5 text-[11.5px] font-semibold uppercase tracking-[0.1em] text-default-400 dark:text-white/40">About this thread</div>
-        <div className="flex items-center gap-3">
+        <button
+          type="button"
+          onClick={() => setDetailOpen(true)}
+          className="flex w-full items-center gap-3 rounded-lg px-1 py-1 -mx-1 text-left transition-colors hover:bg-default-100 dark:hover:bg-white/5"
+        >
           <InAvatar agent={a} size={44} />
           <div>
             <div className="text-sm font-semibold text-default-800 dark:text-white/90">{a.name}</div>
             <div className="mt-0.5 text-xs text-default-400 dark:text-white/45">{a.role}</div>
           </div>
-        </div>
+        </button>
         <Button size="sm" variant="flat" className="mt-3 w-full" startContent={<Icon name="person_add" variant="round" className="text-sm" />}>
           Add to a team
         </Button>
       </div>
+      {detailOpen && (
+        <AgentDetailModal
+          agent={marketAgent}
+          onClose={() => setDetailOpen(false)}
+          onHire={async () => true}
+        />
+      )}
     </aside>
   );
 }
