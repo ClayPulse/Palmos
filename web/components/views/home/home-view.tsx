@@ -1104,9 +1104,12 @@ export default function HomeView({
             {/* Avatar mosaic */}
             <div className="hidden grid-cols-4 gap-2 sm:grid">
               {allAgents.slice(0, 8).map((a) => (
-                <div
+                <button
                   key={a.id}
-                  className="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-[14px] shadow-sm"
+                  type="button"
+                  onClick={() => setSelectedAgent(a)}
+                  aria-label={`Open ${a.name}'s details`}
+                  className="group relative flex aspect-square flex-col justify-end overflow-hidden rounded-[14px] text-left shadow-sm transition-transform hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                   style={{
                     background: `linear-gradient(135deg, hsl(${a.hue} 60% 92%), hsl(${(a.hue + 30) % 360} 60% 86%))`,
                   }}
@@ -1132,7 +1135,7 @@ export default function HomeView({
                       {a.role}
                     </span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
