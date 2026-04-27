@@ -3,6 +3,7 @@
 import { useInbox } from "@/components/agent-chat/panels/inbox-panel";
 import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
+import MarkdownRender from "@/components/misc/markdown-render";
 import { LottieAvatar } from "@/components/views/home/lottie-avatar";
 import { PreviewBackdrop } from "@/components/views/home/preview-backdrop";
 import WorkerChatProvider, {
@@ -1604,7 +1605,7 @@ export function AgentSkillsSection({
               : `${agent.name} ships without preset skills.`}
         </div>
       ) : (
-        <div className="flex flex-col gap-1.5">
+        <div className="flex max-h-[320px] flex-col gap-1.5 overflow-y-auto pr-1">
           {skills.map((s) => (
             <div
               key={`${s.source}:${s.externalId}`}
@@ -1643,6 +1644,10 @@ export function AgentSkillsSection({
             onAdd(skill);
             setAddOpen(false);
           }}
+          onRemove={(skill) => {
+            // Stay in the modal so the user can keep toggling skills.
+            onRemove(skill);
+          }}
           onUpload={async (file) => {
             await onUpload(file);
             setAddOpen(false);
@@ -1663,6 +1668,7 @@ function AddSkillModal({
   existing,
   onClose,
   onAdd,
+  onRemove,
   onUpload,
 }: {
   agentSlug: string;
@@ -1670,6 +1676,7 @@ function AddSkillModal({
   existing: AgentSkill[];
   onClose: () => void;
   onAdd: (skill: AgentSkill) => void;
+  onRemove: (skill: AgentSkill) => void;
   onUpload: (file: File) => Promise<void>;
 }) {
   type Tab = "anthropic" | "clawhub" | "upload";
@@ -1850,6 +1857,14 @@ function AddSkillModal({
                 description: s.description,
               })
             }
+            onRemove={(s) =>
+              onRemove({
+                source: tab,
+                externalId: s.id,
+                name: s.name,
+                description: s.description,
+              })
+            }
           />
         )}
 
@@ -1875,6 +1890,7 @@ function BrowseSkillTab({
   browseError,
   existingKeys,
   onPick,
+  onRemove,
 }: {
   tab: "anthropic" | "clawhub";
   query: string;
@@ -1887,6 +1903,7 @@ function BrowseSkillTab({
   browseError: string | null;
   existingKeys: Set<string>;
   onPick: (skill: SkillBrowseResult) => void;
+  onRemove: (skill: SkillBrowseResult) => void;
 }) {
   // External browse links open in a new tab so the user can read the full
   // SKILL.md / metadata (the public APIs don't expose full content).
@@ -1967,9 +1984,8 @@ function BrowseSkillTab({
                 />
                 <button
                   type="button"
-                  disabled={already}
-                  onClick={() => onPick(s)}
-                  className="min-w-0 text-left disabled:cursor-not-allowed disabled:opacity-40"
+                  onClick={() => (already ? onRemove(s) : onPick(s))}
+                  className="min-w-0 text-left"
                 >
                   <div className="truncate text-[13.5px] font-semibold text-default-800 dark:text-white/90">
                     {s.name}
@@ -1989,13 +2005,12 @@ function BrowseSkillTab({
                 </a>
                 <button
                   type="button"
-                  disabled={already}
-                  onClick={() => onPick(s)}
-                  className="flex h-7 w-7 items-center justify-center rounded-md text-default-400 transition-colors hover:bg-default-200 hover:text-default-700 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-white/10 dark:hover:text-white/80"
-                  title={already ? "Already added" : "Add"}
+                  onClick={() => (already ? onRemove(s) : onPick(s))}
+                  className="flex h-7 w-7 items-center justify-center rounded-md text-default-400 transition-colors hover:bg-default-200 hover:text-default-700 dark:hover:bg-white/10 dark:hover:text-white/80"
+                  title={already ? "Remove" : "Add"}
                 >
                   <Icon
-                    name={already ? "check" : "add"}
+                    name={already ? "close" : "add"}
                     variant="round"
                     className="text-base"
                   />
@@ -3199,9 +3214,24 @@ export function DetailChatPanel({ agent }: { agent: Agent }) {
 
   const hasSent = displayMessages.some((m) => m.role === "you");
 
+  // Stick to bottom while streaming, but don't yank the user back down if
+  // they've scrolled up to read earlier messages. Smooth-scroll on every
+  // token causes jumpy behavior because each new animation interrupts the
+  // last; pin instantly instead. We re-arm "stick" whenever the user
+  // scrolls back to within 80px of the bottom.
+  const stickToBottomRef = useRef(true);
   useEffect(() => {
-    threadRef.current?.scrollTo({ top: threadRef.current.scrollHeight, behavior: "smooth" });
+    const el = threadRef.current;
+    if (!el || !stickToBottomRef.current) return;
+    el.scrollTop = el.scrollHeight;
   }, [displayMessages, isLoading]);
+
+  const handleThreadScroll = useCallback(() => {
+    const el = threadRef.current;
+    if (!el) return;
+    const distFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+    stickToBottomRef.current = distFromBottom < 80;
+  }, []);
 
   return (
     <aside className="flex min-h-0 flex-col bg-default-50 dark:bg-white/[0.02]">
@@ -3220,7 +3250,7 @@ export function DetailChatPanel({ agent }: { agent: Agent }) {
       </div>
 
       {/* Body */}
-      <div ref={threadRef} className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-3.5">
+      <div ref={threadRef} onScroll={handleThreadScroll} className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-3.5">
         {/* Try-before-you-hire banner */}
         <div className="rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50/50 p-3 dark:border-amber-500/15 dark:from-amber-500/5 dark:to-orange-500/3">
           <span className="mb-1 block text-[10.5px] font-bold uppercase tracking-[0.1em] text-amber-700 dark:text-amber-400">
@@ -3246,13 +3276,13 @@ export function DetailChatPanel({ agent }: { agent: Agent }) {
           <div key={i} className={`flex gap-2 ${m.role === "you" ? "justify-end" : ""}`}>
             {m.role === "agent" && <AgentAvatar agent={agent} size={28} />}
             <div
-              className={`max-w-[82%] rounded-[14px] px-3 py-2.5 text-[13px] leading-relaxed whitespace-pre-wrap ${
+              className={`max-w-[82%] rounded-[14px] px-3 py-2.5 text-[13px] leading-relaxed ${
                 m.role === "agent"
                   ? "rounded-tl-sm border border-default-200 bg-white text-default-600 dark:border-white/8 dark:bg-white/[0.05] dark:text-white/65"
-                  : "rounded-tr-sm bg-gradient-to-r from-amber-500 to-orange-500 text-white"
+                  : "rounded-tr-sm whitespace-pre-wrap bg-gradient-to-r from-amber-500 to-orange-500 text-white"
               }`}
             >
-              {m.text}
+              {m.role === "agent" ? <MarkdownRender content={m.text} /> : m.text}
             </div>
           </div>
         ))}
