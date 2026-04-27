@@ -631,6 +631,16 @@ export default function HomeView({
 }) {
   const { agents: allAgents, isLoading: isLoadingAgents } = useAgentListings();
   const [homeView, setHomeView] = useState<"explore" | "inbox">("explore");
+
+  // The agent detail modal dispatches `palmos:open-inbox-dm` after hire so
+  // the user lands directly in the inbox with that agent's chat open.
+  // InboxView listens for the same event to focus the thread.
+  useEffect(() => {
+    const onOpenInboxDm = () => setHomeView("inbox");
+    window.addEventListener("palmos:open-inbox-dm", onOpenInboxDm);
+    return () =>
+      window.removeEventListener("palmos:open-inbox-dm", onOpenInboxDm);
+  }, []);
   const [cat, setCat] = useState<string>("all");
   const [creatingTemplateSlug, setCreatingTemplateSlug] = useState<string | null>(null);
 
@@ -2967,11 +2977,31 @@ export function AgentDetailModal({
             <div className="flex shrink-0 flex-col gap-1.5">
               {hired ? (
                 <Button
-                  variant="flat"
-                  isDisabled
-                  startContent={<Icon name="check_circle" variant="round" className="text-lg" />}
+                  className="bg-gradient-to-r from-amber-500 to-orange-500 font-semibold text-white"
+                  onPress={() => {
+                    // Stash the requested DM target where InboxView will
+                    // pick it up on mount (it's lazy-loaded, so a same-tick
+                    // event listener wouldn't fire). The event is still
+                    // dispatched so HomeView can switch sections AND so an
+                    // already-mounted InboxView reacts immediately.
+                    try {
+                      window.sessionStorage.setItem(
+                        "palmos:pendingInboxDm",
+                        agent.id,
+                      );
+                    } catch {}
+                    try {
+                      window.dispatchEvent(
+                        new CustomEvent("palmos:open-inbox-dm", {
+                          detail: { agentSlug: agent.id },
+                        }),
+                      );
+                    } catch {}
+                    onClose();
+                  }}
+                  startContent={<Icon name="forum" variant="round" className="text-lg" />}
                 >
-                  Hired
+                  Chat in inbox
                 </Button>
               ) : teams.length === 0 ? (
                 <Button

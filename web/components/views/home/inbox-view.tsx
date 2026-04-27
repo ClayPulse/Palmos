@@ -1742,11 +1742,86 @@ function InboxViewInner() {
     [busyTemplateSlug, refetchTeams],
   );
 
+  // "Open the DM thread for this agent" requests come from elsewhere
+  // (currently the AgentDetailModal's "Chat in inbox" button after hire).
+  // Two delivery paths cover both cold mount and live event:
+  //   1. sessionStorage — set by the caller before dispatch. We consume it
+  //      once threads have loaded so we can prefer an existing real thread
+  //      over creating a duplicate placeholder.
+  //   2. CustomEvent — handles the case where InboxView is already mounted.
+  // Both funnel through the same opener helper.
+  const openDmForAgent = useCallback(
+    (slug: string) => {
+      setTab("inbox");
+      setKindFilter("all");
+      setReadFilter("all");
+      const real = THREADS.find(
+        (t) => t.kind === "dm" && t.agentId === slug && t.sessionId,
+      );
+      if (real) {
+        setActive(real);
+        return;
+      }
+      const a = agentById(slug);
+      const placeholder: Thread = {
+        id: `pending-dm-${slug}`,
+        kind: "dm",
+        agentId: slug,
+        sessionId: undefined,
+        title: a?.name ?? slug,
+        preview: a?.role ?? "Tap to start a conversation",
+        unread: 0,
+        pinned: false,
+        updated: "",
+        status: "active",
+      };
+      void openThread(placeholder);
+    },
+    [THREADS, agentById, openThread],
+  );
+
+  useEffect(() => {
+    const onOpenDm = (e: Event) => {
+      const slug = (e as CustomEvent<{ agentSlug?: string }>).detail?.agentSlug;
+      if (slug) openDmForAgent(slug);
+    };
+    window.addEventListener("palmos:open-inbox-dm", onOpenDm);
+    return () =>
+      window.removeEventListener("palmos:open-inbox-dm", onOpenDm);
+  }, [openDmForAgent]);
+
+  // Consume any pending DM target once threads have finished loading. We
+  // wait so a real existing thread is preferred over a fresh placeholder.
+  // The ref also blocks the auto-pick-first-thread effect below, since
+  // sibling effects in the same render see a stale `active` state and
+  // would otherwise race-clobber our setActive call.
+  const pendingDmHandledRef = useRef(false);
+  useEffect(() => {
+    if (!threadsLoaded || pendingDmHandledRef.current) return;
+    let slug: string | null = null;
+    try {
+      slug = window.sessionStorage.getItem("palmos:pendingInboxDm");
+    } catch {}
+    if (!slug) return;
+    pendingDmHandledRef.current = true;
+    try {
+      window.sessionStorage.removeItem("palmos:pendingInboxDm");
+    } catch {}
+    openDmForAgent(slug);
+  }, [threadsLoaded, openDmForAgent]);
+
   // Set initial active thread once threads load — but only auto-pick threads
   // that already have a real DB sessionId, so we don't spam-create empty
   // threads on every mount.
   useEffect(() => {
     if (active) return;
+    // Skip the auto-pick when a pending DM target was queued — its effect
+    // already called setActive synchronously this same render; without
+    // this guard we'd race-clobber it with the first real thread.
+    if (pendingDmHandledRef.current) return;
+    try {
+      if (window.sessionStorage.getItem("palmos:pendingInboxDm")) return;
+    } catch {}
     const realThread = THREADS.find((t) => t.sessionId);
     if (realThread) setActive(realThread);
   }, [THREADS, active]);
