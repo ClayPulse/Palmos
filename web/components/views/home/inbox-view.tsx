@@ -96,6 +96,37 @@ function useInboxTeams(): { teams: Team[]; isLoading: boolean; hasLoaded: boolea
   return { teams, isLoading, hasLoaded, refetch };
 }
 
+function useInboxHires(): { hires: string[]; refetch: () => Promise<void> } {
+  // The user's hired agents — surfaced as DM placeholder threads so each one
+  // is reachable from the inbox list even before any conversation exists.
+  // ensureRealThread() upgrades the placeholder into a real InboxThread on
+  // first click.
+  const [hires, setHires] = useState<string[]>([]);
+
+  const refetch = useCallback(async () => {
+    try {
+      const res = await fetchAPI("/api/agent/hire");
+      if (!res.ok) return;
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setHires(
+          data
+            .map((h: any) => (typeof h?.agentSlug === "string" ? h.agentSlug : null))
+            .filter((s): s is string => !!s),
+        );
+      }
+    } catch {
+      // ignore — leave previous hires intact
+    }
+  }, []);
+
+  useEffect(() => {
+    void refetch();
+  }, [refetch]);
+
+  return { hires, refetch };
+}
+
 function useInboxThreads(): { threads: Thread[]; isLoading: boolean; hasLoaded: boolean; refetch: () => Promise<void> } {
   const [threads, setThreads] = useState<Thread[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -145,6 +176,7 @@ const InboxDataCtx = createContext<{
   agents: InboxAgent[];
   teams: Team[];
   threads: Thread[];
+  hires: string[];
   threadsLoading: boolean;
   threadsLoaded: boolean;
   teamsLoading: boolean;
@@ -156,6 +188,7 @@ const InboxDataCtx = createContext<{
   agents: FALLBACK_INBOX_AGENTS,
   teams: FALLBACK_TEAMS,
   threads: [],
+  hires: [],
   threadsLoading: false,
   threadsLoaded: false,
   teamsLoading: false,
@@ -215,7 +248,30 @@ function InAvStack({ agents, size = 28, max = 4 }: { agents: InboxAgent[]; size?
 // ── Thread list item ────────────────────────────────────────────────────────
 
 function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: boolean; onPick: (t: Thread) => void }) {
-  const { teams, agentById: lookupAgent } = useInboxData();
+  const { teams, agentById: lookupAgent, refetchThreads } = useInboxData();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const isPlaceholder = thread.id.startsWith("pending-");
+  const setUnread = useCallback(
+    async (unread: boolean) => {
+      setMenuOpen(false);
+      if (isPlaceholder) return;
+      try {
+        await fetchAPI(
+          `/api/agent/inbox/threads/${encodeURIComponent(thread.id)}`,
+          {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ unread }),
+          },
+        );
+        void refetchThreads();
+      } catch {
+        // best-effort
+      }
+    },
+    [thread.id, isPlaceholder, refetchThreads],
+  );
   const kindIcon = { dm: "person", team: "groups", notif: "notifications" }[thread.kind];
   let av: React.ReactNode;
   let kindLabel: string;
@@ -248,7 +304,7 @@ function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: bo
   return (
     <div
       onClick={() => onPick(thread)}
-      className={`grid cursor-pointer grid-cols-[auto_1fr_auto] gap-2.5 rounded-xl border px-3.5 py-3 transition-colors ${
+      className={`group grid cursor-pointer grid-cols-[auto_1fr_auto] gap-2.5 rounded-xl border px-3.5 py-3 transition-colors ${
         active
           ? "border-amber-300 bg-amber-50 dark:border-amber-500/25 dark:bg-amber-500/8"
           : "border-transparent hover:bg-default-50 dark:hover:bg-white/[0.03]"
@@ -265,12 +321,60 @@ function ThreadListItem({ thread, active, onPick }: { thread: Thread; active: bo
         </div>
         <div className="line-clamp-2 text-xs leading-snug text-default-400 dark:text-white/45">{thread.preview}</div>
       </div>
-      <div className="flex flex-col items-end gap-1">
+      <div className="relative flex flex-col items-end gap-1">
         {thread.pinned && <Icon name="push_pin" variant="round" className="text-sm text-amber-500" />}
         {thread.unread > 0 && (
           <span className="min-w-[16px] rounded-full bg-amber-500 px-1.5 py-0.5 text-center text-[10.5px] font-bold text-white">{thread.unread}</span>
         )}
         <span className={`h-1.5 w-1.5 rounded-full ${statusColor}`} />
+        {!isPlaceholder && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              setMenuOpen((v) => !v);
+            }}
+            className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-md text-default-400 opacity-0 transition-opacity hover:bg-default-100 hover:text-default-700 focus:opacity-100 group-hover:opacity-100 dark:hover:bg-white/10 dark:hover:text-white/80"
+            aria-label="Thread actions"
+          >
+            <Icon name="more_vert" variant="round" className="text-base" />
+          </button>
+        )}
+        {menuOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-40"
+              onClick={(e) => {
+                e.stopPropagation();
+                setMenuOpen(false);
+              }}
+            />
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="absolute right-0 top-6 z-50 min-w-[160px] overflow-hidden rounded-lg border border-default-200 bg-white py-1 text-[13px] shadow-lg dark:border-white/10 dark:bg-[#1a1a1d]"
+            >
+              {thread.unread > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => void setUnread(false)}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-default-700 hover:bg-default-100 dark:text-white/80 dark:hover:bg-white/10"
+                >
+                  <Icon name="mark_email_read" variant="round" className="text-base" />
+                  Mark as read
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void setUnread(true)}
+                  className="flex w-full items-center gap-2 px-3 py-1.5 text-left text-default-700 hover:bg-default-100 dark:text-white/80 dark:hover:bg-white/10"
+                >
+                  <Icon name="mark_email_unread" variant="round" className="text-base" />
+                  Mark as unread
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -308,7 +412,7 @@ function extractTextContent(raw: unknown): string {
 }
 
 function useInboxChat(thread: Thread) {
-  const { teams } = useInboxData();
+  const { teams, refetchThreads } = useInboxData();
   const [chatMsgs, setChatMsgs] = useState<ChatMsg[]>([]);
   const chatMsgsRef = useRef<ChatMsg[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -501,8 +605,20 @@ function useInboxChat(thread: Thread) {
       // chunk shape, and a refresh is cheap.
       try { window.dispatchEvent(new CustomEvent("palmos:delivery-submitted")); } catch {}
       // Persistence happens server-side (via persistToSession in the request).
+      // The server bumps `unread` on the InboxThread when persisting the AI
+      // reply. Since the user is actively viewing this thread, mark it read
+      // immediately (GET /threads/:id resets unread to 0), then refresh the
+      // sidebar so the badge counts stay accurate.
+      if (thread.id && !thread.id.startsWith("pending-")) {
+        try {
+          await fetchAPI(
+            `/api/agent/inbox/threads/${encodeURIComponent(thread.id)}`,
+          );
+        } catch {}
+      }
+      void refetchThreads();
     }
-  }, [agentSlug, isLoading, setMsgs, thread.id]);
+  }, [agentSlug, isLoading, setMsgs, thread.id, refetchThreads]);
 
   const submit = useCallback(async () => {
     await sendMessage(text);
@@ -1453,11 +1569,13 @@ export default function InboxView() {
   const inboxAgents = useInboxAgents();
   const { teams: inboxTeams, isLoading: teamsLoading, hasLoaded: teamsLoaded, refetch: refetchTeams } = useInboxTeams();
   const { threads: inboxThreads, isLoading: threadsLoading, hasLoaded: threadsLoaded, refetch: refetchThreads } = useInboxThreads();
+  const { hires: inboxHires } = useInboxHires();
 
   const ctxValue = useMemo(() => ({
     agents: inboxAgents,
     teams: inboxTeams,
     threads: inboxThreads,
+    hires: inboxHires,
     threadsLoading,
     threadsLoaded,
     teamsLoading,
@@ -1465,7 +1583,7 @@ export default function InboxView() {
     agentById: (id: string) => inboxAgents.find((a) => a.id === id),
     refetchTeams,
     refetchThreads,
-  }), [inboxAgents, inboxTeams, inboxThreads, threadsLoading, threadsLoaded, teamsLoading, teamsLoaded, refetchTeams, refetchThreads]);
+  }), [inboxAgents, inboxTeams, inboxThreads, inboxHires, threadsLoading, threadsLoaded, teamsLoading, teamsLoaded, refetchTeams, refetchThreads]);
 
   return (
     <InboxDataCtx.Provider value={ctxValue}>
@@ -1496,15 +1614,15 @@ async function ensureRealThread(thread: Thread): Promise<Thread | null> {
 }
 
 function InboxViewInner() {
-  const { teams: TEAMS, threads: DB_THREADS, threadsLoading, threadsLoaded, teamsLoading, teamsLoaded, refetchTeams, refetchThreads } = useInboxData();
-  // Synthesize a placeholder thread for any team that doesn't yet have a
-  // backing InboxThread row, so every team is reachable from the inbox list.
-  // ensureRealThread() on click upgrades the placeholder into a real row.
+  const { teams: TEAMS, threads: DB_THREADS, hires: HIRES, agentById, threadsLoading, threadsLoaded, teamsLoading, teamsLoaded, refetchTeams, refetchThreads } = useInboxData();
+  // Synthesize placeholder threads so every team AND every hired agent is
+  // reachable from the inbox list, even before any conversation exists.
+  // ensureRealThread() on click upgrades a placeholder into a real row.
   const THREADS = useMemo<Thread[]>(() => {
     const teamIdsWithRealThread = new Set(
       DB_THREADS.filter((t) => t.kind === "team" && t.teamId).map((t) => t.teamId!),
     );
-    const placeholders: Thread[] = TEAMS.filter((t) => !teamIdsWithRealThread.has(t.id)).map((t) => ({
+    const teamPlaceholders: Thread[] = TEAMS.filter((t) => !teamIdsWithRealThread.has(t.id)).map((t) => ({
       id: `pending-team-${t.id}`,
       kind: "team",
       teamId: t.id,
@@ -1516,11 +1634,32 @@ function InboxViewInner() {
       updated: "",
       status: "active",
     }));
-    return [...DB_THREADS, ...placeholders];
-  }, [DB_THREADS, TEAMS]);
+    const dmAgentSlugsWithRealThread = new Set(
+      DB_THREADS.filter((t) => t.kind === "dm" && t.agentId).map((t) => t.agentId!),
+    );
+    const dmPlaceholders: Thread[] = HIRES.filter((slug) => !dmAgentSlugsWithRealThread.has(slug)).map((slug) => {
+      const a = agentById(slug);
+      return {
+        id: `pending-dm-${slug}`,
+        kind: "dm",
+        agentId: slug,
+        sessionId: undefined,
+        title: a?.name ?? slug,
+        preview: a?.role ?? "Tap to start a conversation",
+        unread: 0,
+        pinned: false,
+        updated: "",
+        status: "active",
+      };
+    });
+    return [...DB_THREADS, ...teamPlaceholders, ...dmPlaceholders];
+  }, [DB_THREADS, TEAMS, HIRES, agentById]);
   const [tab, setTab] = useState<"inbox" | "teams" | "create">("inbox");
   const [active, setActive] = useState<Thread | null>(null);
-  const [filter, setFilter] = useState("all");
+  // `kindFilter` narrows by thread kind (All / DMs / Teams); `readFilter`
+  // narrows by read state (All / Unread / Read). Both apply together.
+  const [kindFilter, setKindFilter] = useState<"all" | "dm" | "team">("all");
+  const [readFilter, setReadFilter] = useState<"all" | "unread" | "read">("all");
   const [busyTemplateSlug, setBusyTemplateSlug] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Array<{ threadId: string; title: string; snippet: string; matchedIn: string }> | null>(null);
@@ -1613,9 +1752,16 @@ function InboxViewInner() {
   }, [THREADS, active]);
 
   const unread = THREADS.reduce((n, t) => n + (t.unread || 0), 0);
-  const filtered = THREADS.filter((t) =>
-    filter === "all" ? true : filter === "unread" ? t.unread > 0 : filter === t.kind,
-  );
+  const filtered = THREADS.filter((t) => {
+    const kindOk = kindFilter === "all" ? true : t.kind === kindFilter;
+    const readOk =
+      readFilter === "all"
+        ? true
+        : readFilter === "unread"
+          ? t.unread > 0
+          : t.unread === 0;
+    return kindOk && readOk;
+  });
   const team = active?.kind === "team" ? TEAMS.find((t) => t.id === active.teamId) : null;
 
   return (
@@ -1672,12 +1818,31 @@ function InboxViewInner() {
               </div>
             </div>
             {searchResults === null && (
-              <div className="flex shrink-0 gap-1 overflow-x-auto border-b border-default-200 px-4 py-2.5 dark:border-white/8 [&::-webkit-scrollbar]:hidden">
-                {[["all", "All"], ["unread", "Unread"], ["dm", "DMs"], ["team", "Teams"], ["notif", "System"]].map(([k, l]) => (
-                  <button key={k} type="button" onClick={() => setFilter(k)} className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${filter === k ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300" : "border-default-200 bg-white text-default-500 hover:border-amber-200 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50"}`}>
-                    {l}
-                  </button>
-                ))}
+              <div className="flex shrink-0 items-center gap-2 border-b border-default-200 px-4 py-2.5 dark:border-white/8">
+                <div className="flex min-w-0 flex-1 gap-1 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+                  {([["all", "All"], ["dm", "DMs"], ["team", "Teams"]] as const).map(([k, l]) => (
+                    <button
+                      key={k}
+                      type="button"
+                      onClick={() => setKindFilter(k)}
+                      className={`shrink-0 rounded-full border px-2.5 py-1 text-xs font-medium transition-colors ${kindFilter === k ? "border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-300" : "border-default-200 bg-white text-default-500 hover:border-amber-200 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/50"}`}
+                    >
+                      {l}
+                    </button>
+                  ))}
+                </div>
+                <select
+                  value={readFilter}
+                  onChange={(e) =>
+                    setReadFilter(e.target.value as "all" | "unread" | "read")
+                  }
+                  className="shrink-0 rounded-full border border-default-200 bg-white px-2 py-1 text-xs font-medium text-default-600 outline-none focus:border-amber-300 dark:border-white/10 dark:bg-white/[0.03] dark:text-white/70 dark:focus:border-amber-500/30"
+                  aria-label="Filter by read status"
+                >
+                  <option value="all">All</option>
+                  <option value="unread">Unread</option>
+                  <option value="read">Read</option>
+                </select>
               </div>
             )}
             <div className="flex-1 overflow-y-auto p-2">
@@ -1758,7 +1923,8 @@ function InboxViewInner() {
               updated: "now",
               status: "active",
             };
-            setFilter("all");
+            setKindFilter("all");
+            setReadFilter("all");
             setTab("inbox");
             await openThread(placeholder);
           }}
