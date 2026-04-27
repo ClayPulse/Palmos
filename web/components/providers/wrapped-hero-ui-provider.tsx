@@ -9,7 +9,7 @@ export default function WrappedHeroUIProvider({
   children: React.ReactNode;
 }) {
   return (
-    <ThemeProvider attribute={["class", "data-theme"]}>
+    <ThemeProvider attribute={["class", "data-theme"]} defaultTheme="light">
       <HeroUIProvider className="h-full w-full overflow-hidden">
         <div className="h-full w-full overflow-hidden bg-white dark:bg-black">
           {children}

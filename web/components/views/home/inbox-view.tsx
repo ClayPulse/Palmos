@@ -1,6 +1,7 @@
 "use client";
 
 import Icon from "@/components/misc/icon";
+import MarkdownRender from "@/components/misc/markdown-render";
 import { fetchAPI } from "@/lib/pulse-editor-website/backend";
 import { addToast, Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from "@heroui/react";
 import { useState, useEffect, useRef, useCallback, useMemo, createContext, useContext } from "react";
@@ -728,8 +729,12 @@ function SimpleChatMessage({ m, thread, isStreaming, onSuggestionSend, onSuggest
           </div>
         )}
         {(displayContent || isStreaming) && (
-          <div className="rounded-[14px] rounded-tl-sm border border-default-200 bg-white px-3.5 py-2.5 text-[13.5px] leading-relaxed text-default-600 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/65 whitespace-pre-wrap">
-            {displayContent || <span className="text-default-300 dark:text-white/20 italic text-sm">Thinking…</span>}
+          <div className="rounded-[14px] rounded-tl-sm border border-default-200 bg-white px-3.5 py-2.5 text-[13.5px] leading-relaxed text-default-600 dark:border-white/8 dark:bg-white/[0.03] dark:text-white/65">
+            {displayContent ? (
+              <MarkdownRender content={displayContent} />
+            ) : (
+              <span className="text-default-300 dark:text-white/20 italic text-sm">Thinking…</span>
+            )}
           </div>
         )}
         {suggestions.length > 0 && (

@@ -4,6 +4,7 @@ import { useInbox } from "@/components/agent-chat/panels/inbox-panel";
 import { formatRelativeTime } from "@/components/agent-chat/helpers";
 import Icon from "@/components/misc/icon";
 import MarkdownRender from "@/components/misc/markdown-render";
+import { useTheme } from "next-themes";
 import { LottieAvatar } from "@/components/views/home/lottie-avatar";
 import { PreviewBackdrop } from "@/components/views/home/preview-backdrop";
 import WorkerChatProvider, {
@@ -50,6 +51,31 @@ export const CATEGORIES = [
   { slug: "coding", name: "Coding", icon: "code", count: 1534 },
   { slug: "design", name: "Design", icon: "palette", count: 421 },
 ] as const;
+
+// Light/dark theme toggle for the home top bar. Uses next-themes (mounted
+// in WrappedHeroUIProvider). Renders a placeholder until mounted to avoid
+// SSR/CSR mismatches on the icon.
+function ThemeToggle() {
+  const { resolvedTheme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const isDark = mounted && resolvedTheme === "dark";
+  return (
+    <button
+      type="button"
+      onClick={() => setTheme(isDark ? "light" : "dark")}
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      className="flex h-8 w-8 items-center justify-center rounded-lg text-default-500 transition-colors hover:bg-default-100 dark:text-white/60 dark:hover:bg-white/10"
+    >
+      <Icon
+        name={mounted ? (isDark ? "light_mode" : "dark_mode") : "dark_mode"}
+        variant="round"
+        className="text-xl"
+      />
+    </button>
+  );
+}
 
 function mapListingToAgent(listing: any): Agent {
   return {
@@ -867,6 +893,7 @@ export default function HomeView({
             Build custom
           </Button>
 
+          <ThemeToggle />
           {/* Inbox */}
           {session && (
             <Popover placement="bottom-end" onOpenChange={(open) => { if (open) markAllRead(); }}>
@@ -2922,8 +2949,14 @@ export function AgentDetailModal({
         <div className="flex min-h-0 flex-col border-r border-default-200 dark:border-white/8">
           {/* Hero */}
           <div
-            className="grid shrink-0 grid-cols-[auto_1fr_auto] items-center gap-5 border-b border-default-200 px-8 py-7 dark:border-white/8"
-            style={{ background: `linear-gradient(135deg, hsl(${agent.hue} 55% 96%), hsl(${(agent.hue + 30) % 360} 55% 92%) 60%, transparent 100%)` }}
+            className="grid shrink-0 grid-cols-[auto_1fr_auto] items-center gap-5 border-b border-default-200 px-8 py-7 bg-[image:var(--banner-light)] dark:border-white/8 dark:bg-[image:var(--banner-dark)]"
+            style={{
+              // Light gradient mirrors the original soft pastel; dark
+              // gradient uses a deeper, lower-lightness variant so white
+              // text on top stays readable in dark mode.
+              ["--banner-light" as any]: `linear-gradient(135deg, hsl(${agent.hue} 55% 96%), hsl(${(agent.hue + 30) % 360} 55% 92%) 60%, transparent 100%)`,
+              ["--banner-dark" as any]: `linear-gradient(135deg, hsl(${agent.hue} 35% 18%), hsl(${(agent.hue + 30) % 360} 35% 14%) 60%, transparent 100%)`,
+            }}
           >
             <div className="flex flex-col items-center gap-1.5">
               <AgentAvatar
